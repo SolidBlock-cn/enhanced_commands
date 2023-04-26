@@ -3,7 +3,7 @@ package pers.solid.mod.util;
 import org.apache.commons.lang3.function.TriFunction;
 
 @FunctionalInterface
-public interface ToIntTriFunction<T,U,V> extends TriFunction<T,U,V,Integer> {
+public interface ToIntTriFunction<T, U, V> extends TriFunction<T, U, V, Integer> {
   int applyAsInt(T t, U u, V v);
 
   @Override

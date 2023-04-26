@@ -8,13 +8,13 @@ import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
 import pers.solid.mod.command.TestResult;
 
-public record ProbabilityBlockPredicate(float value) implements BlockPredicate {
+public record RandBlockPredicate(float value) implements BlockPredicate {
   @Override
   public String asString() {
-    return "probability(" + value + ")";
+    return "rand(" + value + ")";
   }
 
   @Override
@@ -36,15 +36,15 @@ public record ProbabilityBlockPredicate(float value) implements BlockPredicate {
 
   @Override
   public BlockPredicateType<?> getType() {
-    return BlockPredicateTypes.PROBABILITY;
+    return BlockPredicateTypes.RAND;
   }
 
-  public static final class Parser implements FunctionLikeParser<ProbabilityBlockPredicate> {
+  public static final class Parser implements FunctionLikeParser<RandBlockPredicate> {
     private float value;
 
     @Override
     public String functionName() {
-      return "probability";
+      return "rand";
     }
 
     @Override
@@ -53,8 +53,8 @@ public record ProbabilityBlockPredicate(float value) implements BlockPredicate {
     }
 
     @Override
-    public ProbabilityBlockPredicate getParseResult() {
-      return new ProbabilityBlockPredicate(value);
+    public RandBlockPredicate getParseResult() {
+      return new RandBlockPredicate(value);
     }
 
     @Override
@@ -67,7 +67,7 @@ public record ProbabilityBlockPredicate(float value) implements BlockPredicate {
     }
 
     @Override
-    public void parseParameter(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
+    public void parseParameter(ArgumentParser parser) throws CommandSyntaxException {
       value = parser.reader.readFloat();
       if (value > 1) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooHigh().createWithContext(parser.reader, value, 1);
@@ -78,11 +78,11 @@ public record ProbabilityBlockPredicate(float value) implements BlockPredicate {
     }
   }
 
-  public enum Type implements BlockPredicateType<ProbabilityBlockPredicate> {
+  public enum Type implements BlockPredicateType<RandBlockPredicate> {
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
       return new Parser().parse(parser);
     }
   }

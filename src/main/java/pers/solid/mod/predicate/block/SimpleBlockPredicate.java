@@ -16,7 +16,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SimpleBlockPredicateArgumentParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.property.PropertyEntry;
 
@@ -82,7 +83,8 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyEntry<?>> pro
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(ArgumentParser parser0) throws CommandSyntaxException {
+      SimpleBlockPredicateArgumentParser parser = new SimpleBlockPredicateArgumentParser(parser0);
       parser.suggestions.add(suggestionsBuilder -> CommandSource.forEachMatching(parser.registryWrapper.streamKeys().map(RegistryKey::getValue)::iterator, suggestionsBuilder.getRemaining().toLowerCase(), id -> id, id -> suggestionsBuilder.suggest(id.toString())));
       if (parser.reader.canRead() && Identifier.isCharValid(parser.reader.peek())) {
         parser.parseBlockId();

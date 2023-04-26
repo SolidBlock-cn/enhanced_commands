@@ -5,7 +5,7 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
 import pers.solid.mod.command.TestResult;
 
 import java.util.List;
@@ -25,9 +25,10 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final TestResult testResult1 = blockPredicate1.testAndDescribe(cachedBlockPosition);
     final TestResult testResult2 = blockPredicate2.testAndDescribe(cachedBlockPosition);
-    final boolean result = (testResult1.successes() == testResult2.successes()) == same;
-    final String passOfFail = result ? "success" : "fail";
-    final String sameOrDiff = same ? "same" : "diff";
+    final boolean actual = testResult1.successes() == testResult2.successes();
+    final boolean result = actual == same;
+    final String passOfFail = result ? "pass" : "fail";
+    final String sameOrDiff = actual ? "same" : "diff";
     return new TestResult(result, List.of(Text.translatable("blockPredicate.bi_predicate_" + sameOrDiff + "_" + passOfFail).formatted(result ? Formatting.GREEN : Formatting.RED)), List.of(testResult1, testResult2));
   }
 
@@ -65,7 +66,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public void parseParameter(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
+    public void parseParameter(ArgumentParser parser) throws CommandSyntaxException {
       final BlockPredicate parse = BlockPredicate.parse(parser);
       if (value1 == null) {
         value1 = parse;
@@ -91,7 +92,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
       CommandSyntaxException exception = null;
       try {
         final BiPredicateBlockPredicate parse1 = new Parser("same", Text.translatable("blockPredicate.bi_predicate_same"), true).parse(parser);

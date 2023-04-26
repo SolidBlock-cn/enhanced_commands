@@ -6,8 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
 import pers.solid.mod.command.TestResult;
 
 import java.util.List;
@@ -27,9 +26,9 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition);
     if (testResult.successes()) {
-      return new TestResult(false, List.of(Text.translatable("blockPredicate.negation.fail", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(Formatting.RED)), List.of(testResult));
+      return new TestResult(false, List.of(Text.translatable("blockPredicate.negation.fail").formatted(Formatting.RED)), List.of(testResult));
     } else {
-      return new TestResult(true, List.of(Text.translatable("blockPredicate.test_success_negation", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(Formatting.GREEN)), List.of(testResult));
+      return new TestResult(true, List.of(Text.translatable("blockPredicate.negation.pass").formatted(Formatting.GREEN)), List.of(testResult));
     }
   }
 
@@ -52,12 +51,8 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
-      parser.suggestions.add(suggestionsBuilder -> {
-        if (suggestionsBuilder.getRemaining().isEmpty()) {
-          suggestionsBuilder.suggest("!", Text.translatable("blockPredicate.negation"));
-        }
-      });
+    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
+      if (parser.reader.getRemaining().isEmpty()) parser.suggestions.add(suggestionsBuilder -> suggestionsBuilder.suggest("!", Text.translatable("blockPredicate.negation")));
       boolean negates = false;
       boolean suffixed = false;
       while (parser.reader.canRead() && parser.reader.peek() == '!') {
@@ -67,7 +62,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
       }
       if (negates) {
         return new NegatingBlockPredicate(BlockPredicate.parse(parser));
-      } else if (suffixed){
+      } else if (suffixed) {
         return BlockPredicate.parse(parser);
       }
       return null;

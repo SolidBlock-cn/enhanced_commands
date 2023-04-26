@@ -21,7 +21,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<UnionBlockPredicate> UNION = register(UnionBlockPredicate.Type.INSTANCE, "union");
   public static final BlockPredicateType<IntersectBlockPredicate> INTERSECT = register(IntersectBlockPredicate.Type.INSTANCE, "intersect");
 
-  public static final BlockPredicateType<ProbabilityBlockPredicate> PROBABILITY = register(ProbabilityBlockPredicate.Type.INSTANCE, "probability");
+  public static final BlockPredicateType<RandBlockPredicate> RAND = register(RandBlockPredicate.Type.INSTANCE, "rand");
 
   public static final BlockPredicateType<BiPredicateBlockPredicate> BI_PREDICATE = register(BiPredicateBlockPredicate.Type.INSTANCE, "bi_predicate");
 

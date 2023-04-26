@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * @see net.minecraft.command.argument.BlockArgumentParser
  */
-public class BlockPredicateArgumentParser extends Parser {
+public class SimpleBlockPredicateArgumentParser extends ArgumentParser {
   public final RegistryWrapper<Block> registryWrapper;
   public Block block;
   public Identifier blockId;
@@ -47,9 +47,14 @@ public class BlockPredicateArgumentParser extends Parser {
   public RegistryEntryList.Named<Block> tagId;
   public List<PropertyNameEntry> propertyNameEntries = new ArrayList<>();
 
-  public BlockPredicateArgumentParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
+  public SimpleBlockPredicateArgumentParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
     super(commandRegistryAccess, reader);
     this.registryWrapper = commandRegistryAccess.createWrapper(RegistryKeys.BLOCK);
+  }
+
+  public SimpleBlockPredicateArgumentParser(ArgumentParser parser) {
+    this(parser.commandRegistryAccess, parser.reader);
+    this.suggestions = parser.suggestions;
   }
 
   public void parseBlockId() throws CommandSyntaxException {
@@ -353,7 +358,7 @@ public class BlockPredicateArgumentParser extends Parser {
     final int cursorBeforeValue = reader.getCursor();
     final String valueName = this.reader.readString();
     addTagPropertiesValueSuggestions(propertyName);
-    final boolean expectEndOfValue = tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream().filter(property -> property.getName().equals(propertyName))).flatMap(BlockPredicateArgumentParser::getPropertyValueNameStream).noneMatch(value -> value.startsWith(valueName) && !value.equals(valueName));
+    final boolean expectEndOfValue = tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream().filter(property -> property.getName().equals(propertyName))).flatMap(SimpleBlockPredicateArgumentParser::getPropertyValueNameStream).noneMatch(value -> value.startsWith(valueName) && !value.equals(valueName));
     if (expectEndOfValue) {
       suggestions.clear();
     }

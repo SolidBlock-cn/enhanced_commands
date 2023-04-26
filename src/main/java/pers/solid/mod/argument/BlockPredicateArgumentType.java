@@ -12,17 +12,28 @@ import pers.solid.mod.predicate.block.BlockPredicate;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+/**
+ * @see net.minecraft.command.argument.BlockPredicateArgumentType
+ */
 public record BlockPredicateArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<BlockPredicate> {
+  public static BlockPredicateArgumentType blockPredicate(CommandRegistryAccess commandRegistryAccess) {
+    return new BlockPredicateArgumentType(commandRegistryAccess);
+  }
+
+  public static BlockPredicate getBlockPredicate(CommandContext<?> context, String name) {
+    return context.getArgument(name, BlockPredicate.class);
+  }
+
   @Override
   public BlockPredicate parse(StringReader reader) throws CommandSyntaxException {
-    return BlockPredicate.parse(new BlockPredicateArgumentParser(commandRegistryAccess, reader));
+    return BlockPredicate.parse(new ArgumentParser(commandRegistryAccess, reader));
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final BlockPredicateArgumentParser parser = new BlockPredicateArgumentParser(commandRegistryAccess, stringReader);
+    final ArgumentParser parser = new ArgumentParser(commandRegistryAccess, stringReader);
     try {
       BlockPredicate.parse(parser);
     } catch (CommandSyntaxException ignore) {

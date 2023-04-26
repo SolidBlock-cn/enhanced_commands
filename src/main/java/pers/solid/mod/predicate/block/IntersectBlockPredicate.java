@@ -7,7 +7,7 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.SerializablePredicate;
 
@@ -65,7 +65,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
 
     @Override
-    public void parseParameter(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
+    public void parseParameter(ArgumentParser parser) throws CommandSyntaxException {
       blockPredicates.add(BlockPredicate.parse(parser));
     }
   }
@@ -74,7 +74,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
       return new Parser(new ImmutableList.Builder<>()).parse(parser);
     }
   }

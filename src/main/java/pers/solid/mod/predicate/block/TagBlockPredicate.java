@@ -11,7 +11,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SimpleBlockPredicateArgumentParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.SerializablePredicate;
 import pers.solid.mod.predicate.property.PropertyNameEntry;
@@ -77,7 +78,8 @@ public record TagBlockPredicate(TagKey<Block> blockTag, Collection<PropertyNameE
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(ArgumentParser parser0) throws CommandSyntaxException {
+      SimpleBlockPredicateArgumentParser parser = new SimpleBlockPredicateArgumentParser(parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         return new TagBlockPredicate(parser.tagId.getTag(), parser.propertyNameEntries);

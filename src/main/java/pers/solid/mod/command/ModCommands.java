@@ -14,6 +14,7 @@ public final class ModCommands implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     GameModeAliasCommand.register(dispatcher);
+    RandCommand.register(dispatcher);
     SeparatedExecuteCommand.register(dispatcher, registryAccess);
     TestForCommand.register(dispatcher, registryAccess);
   }

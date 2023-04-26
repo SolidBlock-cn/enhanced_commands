@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
 import pers.solid.mod.command.TestResult;
 
 import java.util.List;
@@ -71,13 +71,13 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
-      parser.suggestions.add(suggestionsBuilder -> {
-        if (suggestionsBuilder.getRemaining().isEmpty()) {
+    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
+      if (parser.reader.getRemaining().isEmpty()) {
+        parser.suggestions.add(suggestionsBuilder -> {
           suggestionsBuilder.suggest("<", BENEATH_BLOCK);
           suggestionsBuilder.suggest(">", ABOVE_BLOCK);
-        }
-      });
+        });
+      }
       int offset = 0;
       boolean prefixed = false;
       final StringReader reader = parser.reader;

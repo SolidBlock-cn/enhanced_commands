@@ -6,6 +6,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.ResultConsumer;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -47,6 +48,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import net.minecraft.world.chunk.WorldChunk;
+import org.apache.commons.lang3.RandomUtils;
+import pers.solid.mod.argument.BlockPredicateArgumentType;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -55,6 +58,8 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 import static pers.solid.mod.command.ModCommands.REQUIRES_PERMISSION_2;
 
 /**
@@ -73,21 +78,21 @@ public final class SeparatedExecuteCommand {
     return CommandSource.suggestIdentifiers(lootConditionManager.getIds(), builder);
   };
 
-  private static LiteralArgumentBuilder<ServerCommandSource> literal(String literal) {
-    return CommandManager.literal(literal).requires(REQUIRES_PERMISSION_2);
+  private static LiteralArgumentBuilder<ServerCommandSource> literalR2(String literal) {
+    return literal(literal).requires(REQUIRES_PERMISSION_2);
   }
 
   public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
     RootCommandNode<ServerCommandSource> literalCommandNode = dispatcher.getRoot();
-    dispatcher.register(CommandManager.literal("execute")
+    dispatcher.register(literal("execute")
         .redirect(dispatcher.getRoot()));
-    dispatcher.register(literal("run")
+    dispatcher.register(literalR2("run")
         .redirect(dispatcher.getRoot()));
 
-    dispatcher.register(addConditionArguments(literalCommandNode, literal("if"), true, commandRegistryAccess));
-    dispatcher.register(addConditionArguments(literalCommandNode, literal("unless"), false, commandRegistryAccess));
-    dispatcher.register(literal("as")
-        .then(CommandManager.argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
+    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("if"), true, commandRegistryAccess));
+    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("unless"), false, commandRegistryAccess));
+    dispatcher.register(literalR2("as")
+        .then(argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
           List<ServerCommandSource> list = Lists.newArrayList();
 
           for (Entity entity : EntityArgumentType.getOptionalEntities(context, "targets")) {
@@ -96,8 +101,8 @@ public final class SeparatedExecuteCommand {
 
           return list;
         })));
-    dispatcher.register(literal("at")
-        .then(CommandManager.argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
+    dispatcher.register(literalR2("at")
+        .then(argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
           List<ServerCommandSource> list = Lists.newArrayList();
 
           for (Entity entity : EntityArgumentType.getOptionalEntities(context, "targets")) {
@@ -106,13 +111,13 @@ public final class SeparatedExecuteCommand {
 
           return list;
         })));
-    dispatcher.register(literal("store")
-        .then(addStoreArguments(literalCommandNode, CommandManager.literal("result"), true))
-        .then(addStoreArguments(literalCommandNode, CommandManager.literal("success"), false)));
-    dispatcher.register(literal("positioned")
-        .then(CommandManager.argument("pos", Vec3ArgumentType.vec3()).redirect(literalCommandNode, context -> context.getSource().withPosition(Vec3ArgumentType.getVec3(context, "pos")).withEntityAnchor(EntityAnchorArgumentType.EntityAnchor.FEET)))
-        .then(CommandManager.literal("as")
-            .then(CommandManager.argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
+    dispatcher.register(literalR2("store")
+        .then(addStoreArguments(literalCommandNode, literal("result"), true))
+        .then(addStoreArguments(literalCommandNode, literal("success"), false)));
+    dispatcher.register(literalR2("positioned")
+        .then(argument("pos", Vec3ArgumentType.vec3()).redirect(literalCommandNode, context -> context.getSource().withPosition(Vec3ArgumentType.getVec3(context, "pos")).withEntityAnchor(EntityAnchorArgumentType.EntityAnchor.FEET)))
+        .then(literal("as")
+            .then(argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
               List<ServerCommandSource> list = Lists.newArrayList();
 
               for (Entity entity : EntityArgumentType.getOptionalEntities(context, "targets")) {
@@ -121,8 +126,8 @@ public final class SeparatedExecuteCommand {
 
               return list;
             })))
-        .then(CommandManager.literal("over")
-            .then(CommandManager.argument("heightmap", HeightmapArgumentType.heightmap()).redirect(literalCommandNode, context -> {
+        .then(literal("over")
+            .then(argument("heightmap", HeightmapArgumentType.heightmap()).redirect(literalCommandNode, context -> {
               Vec3d vec3d = context.getSource().getPosition();
               ServerWorld serverWorld = context.getSource().getWorld();
               double d = vec3d.getX();
@@ -134,10 +139,10 @@ public final class SeparatedExecuteCommand {
                 return context.getSource().withPosition(new Vec3d(d, i, e));
               }
             }))));
-    dispatcher.register(literal("rotated")
-        .then(CommandManager.argument("rot", RotationArgumentType.rotation()).redirect(literalCommandNode, context -> context.getSource().withRotation(RotationArgumentType.getRotation(context, "rot").toAbsoluteRotation(context.getSource()))))
-        .then(CommandManager.literal("as")
-            .then(CommandManager.argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
+    dispatcher.register(literalR2("rotated")
+        .then(argument("rot", RotationArgumentType.rotation()).redirect(literalCommandNode, context -> context.getSource().withRotation(RotationArgumentType.getRotation(context, "rot").toAbsoluteRotation(context.getSource()))))
+        .then(literal("as")
+            .then(argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
               List<ServerCommandSource> list = Lists.newArrayList();
 
               for (Entity entity : EntityArgumentType.getOptionalEntities(context, "targets")) {
@@ -146,10 +151,10 @@ public final class SeparatedExecuteCommand {
 
               return list;
             }))));
-    dispatcher.register(literal("facing")
-        .then(CommandManager.literal("entity")
-            .then(CommandManager.argument("targets", EntityArgumentType.entities())
-                .then(CommandManager.argument("anchor", EntityAnchorArgumentType.entityAnchor()).fork(literalCommandNode, context -> {
+    dispatcher.register(literalR2("facing")
+        .then(literal("entity")
+            .then(argument("targets", EntityArgumentType.entities())
+                .then(argument("anchor", EntityAnchorArgumentType.entityAnchor()).fork(literalCommandNode, context -> {
                   List<ServerCommandSource> list = Lists.newArrayList();
                   EntityAnchorArgumentType.EntityAnchor entityAnchor = EntityAnchorArgumentType.getEntityAnchor(context, "anchor");
 
@@ -159,42 +164,42 @@ public final class SeparatedExecuteCommand {
 
                   return list;
                 }))))
-        .then(CommandManager.argument("pos", Vec3ArgumentType.vec3()).redirect(literalCommandNode, context -> context.getSource().withLookingAt(Vec3ArgumentType.getVec3(context, "pos")))));
-    dispatcher.register(literal("align")
-        .then(CommandManager.argument("axes", SwizzleArgumentType.swizzle()).redirect(literalCommandNode, context -> context.getSource().withPosition(context.getSource().getPosition().floorAlongAxes(SwizzleArgumentType.getSwizzle(context, "axes"))))));
-    dispatcher.register(literal("anchored")
-        .then(CommandManager.argument("anchor", EntityAnchorArgumentType.entityAnchor()).redirect(literalCommandNode, context -> context.getSource().withEntityAnchor(EntityAnchorArgumentType.getEntityAnchor(context, "anchor")))));
-    dispatcher.register(literal("in")
-        .then(CommandManager.argument("dimension", DimensionArgumentType.dimension()).redirect(literalCommandNode, context -> context.getSource().withWorld(DimensionArgumentType.getDimensionArgument(context, "dimension")))));
-    dispatcher.register(literal("summon")
-        .then(CommandManager.argument("entity", RegistryEntryArgumentType.registryEntry(commandRegistryAccess, RegistryKeys.ENTITY_TYPE)).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).redirect(literalCommandNode, context -> summon(context.getSource(), RegistryEntryArgumentType.getSummonableEntityType(context, "entity")))));
-    dispatcher.register(addOnArguments(literalCommandNode, literal("on")));
+        .then(argument("pos", Vec3ArgumentType.vec3()).redirect(literalCommandNode, context -> context.getSource().withLookingAt(Vec3ArgumentType.getVec3(context, "pos")))));
+    dispatcher.register(literalR2("align")
+        .then(argument("axes", SwizzleArgumentType.swizzle()).redirect(literalCommandNode, context -> context.getSource().withPosition(context.getSource().getPosition().floorAlongAxes(SwizzleArgumentType.getSwizzle(context, "axes"))))));
+    dispatcher.register(literalR2("anchored")
+        .then(argument("anchor", EntityAnchorArgumentType.entityAnchor()).redirect(literalCommandNode, context -> context.getSource().withEntityAnchor(EntityAnchorArgumentType.getEntityAnchor(context, "anchor")))));
+    dispatcher.register(literalR2("in")
+        .then(argument("dimension", DimensionArgumentType.dimension()).redirect(literalCommandNode, context -> context.getSource().withWorld(DimensionArgumentType.getDimensionArgument(context, "dimension")))));
+    dispatcher.register(literalR2("summon")
+        .then(argument("entity", RegistryEntryArgumentType.registryEntry(commandRegistryAccess, RegistryKeys.ENTITY_TYPE)).suggests(SuggestionProviders.SUMMONABLE_ENTITIES).redirect(literalCommandNode, context -> summon(context.getSource(), RegistryEntryArgumentType.getSummonableEntityType(context, "entity")))));
+    dispatcher.register(addOnArguments(literalCommandNode, literalR2("on")));
   }
 
   private static ArgumentBuilder<ServerCommandSource, ?> addStoreArguments(RootCommandNode<ServerCommandSource> node, LiteralArgumentBuilder<ServerCommandSource> builder, boolean requestResult) {
-    builder.then(CommandManager.literal("score")
-        .then(CommandManager.argument("targets", ScoreHolderArgumentType.scoreHolders()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
-            .then(CommandManager.argument("objective", ScoreboardObjectiveArgumentType.scoreboardObjective()).redirect(node, context -> executeStoreScore(context.getSource(), ScoreHolderArgumentType.getScoreboardScoreHolders(context, "targets"), ScoreboardObjectiveArgumentType.getObjective(context, "objective"), requestResult)))));
-    builder.then(CommandManager.literal("bossbar")
-        .then(CommandManager.argument("id", IdentifierArgumentType.identifier()).suggests(BossBarCommand.SUGGESTION_PROVIDER)
-            .then(CommandManager.literal("value").redirect(node, context -> executeStoreBossbar(context.getSource(), BossBarCommand.getBossBar(context), true, requestResult)))
-            .then(CommandManager.literal("max").redirect(node, context -> executeStoreBossbar(context.getSource(), BossBarCommand.getBossBar(context), false, requestResult)))));
+    builder.then(literal("score")
+        .then(argument("targets", ScoreHolderArgumentType.scoreHolders()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+            .then(argument("objective", ScoreboardObjectiveArgumentType.scoreboardObjective()).redirect(node, context -> executeStoreScore(context.getSource(), ScoreHolderArgumentType.getScoreboardScoreHolders(context, "targets"), ScoreboardObjectiveArgumentType.getObjective(context, "objective"), requestResult)))));
+    builder.then(literal("bossbar")
+        .then(argument("id", IdentifierArgumentType.identifier()).suggests(BossBarCommand.SUGGESTION_PROVIDER)
+            .then(literal("value").redirect(node, context -> executeStoreBossbar(context.getSource(), BossBarCommand.getBossBar(context), true, requestResult)))
+            .then(literal("max").redirect(node, context -> executeStoreBossbar(context.getSource(), BossBarCommand.getBossBar(context), false, requestResult)))));
 
     for (DataCommand.ObjectType objectType : DataCommand.TARGET_OBJECT_TYPES) {
       objectType.addArgumentsToBuilder(builder, builderx -> builderx
-          .then(CommandManager.argument("path", NbtPathArgumentType.nbtPath())
-              .then(CommandManager.literal("int")
-                  .then(CommandManager.argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtInt.of((int) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))
-              .then(CommandManager.literal("float")
-                  .then(CommandManager.argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtFloat.of((float) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))
-              .then(CommandManager.literal("short")
-                  .then(CommandManager.argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtShort.of((short) (int) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))
-              .then(CommandManager.literal("long")
-                  .then(CommandManager.argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtLong.of((long) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))
-              .then(CommandManager.literal("double")
-                  .then(CommandManager.argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtDouble.of((double) result * DoubleArgumentType.getDouble(context, "scale")), requestResult))))
-              .then(CommandManager.literal("byte")
-                  .then(CommandManager.argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtByte.of((byte) (int) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))));
+          .then(argument("path", NbtPathArgumentType.nbtPath())
+              .then(literal("int")
+                  .then(argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtInt.of((int) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))
+              .then(literal("float")
+                  .then(argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtFloat.of((float) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))
+              .then(literal("short")
+                  .then(argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtShort.of((short) (int) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))
+              .then(literal("long")
+                  .then(argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtLong.of((long) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))
+              .then(literal("double")
+                  .then(argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtDouble.of((double) result * DoubleArgumentType.getDouble(context, "scale")), requestResult))))
+              .then(literal("byte")
+                  .then(argument("scale", DoubleArgumentType.doubleArg()).redirect(node, context -> executeStoreData(context.getSource(), objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path"), result -> NbtByte.of((byte) (int) ((double) result * DoubleArgumentType.getDouble(context, "scale"))), requestResult))))));
     }
 
     return builder;
@@ -247,58 +252,67 @@ public final class SeparatedExecuteCommand {
 
   private static LiteralArgumentBuilder<ServerCommandSource> addConditionArguments(CommandNode<ServerCommandSource> root, LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
     argumentBuilder
-        .then(CommandManager.literal("block")
-            .then(CommandManager.argument("pos", BlockPosArgumentType.blockPos())
-                .then(addConditionLogic(root, CommandManager.argument("block", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess)), positive, context -> BlockPredicateArgumentType.getBlockPredicate(context, "block").test(new CachedBlockPosition(context.getSource().getWorld(), BlockPosArgumentType.getLoadedBlockPos(context, "pos"), true))))))
-        .then(CommandManager.literal("biome")
-            .then(CommandManager.argument("pos", BlockPosArgumentType.blockPos())
-                .then(addConditionLogic(root, CommandManager.argument("biome", RegistryEntryPredicateArgumentType.registryEntryPredicate(commandRegistryAccess, RegistryKeys.BIOME)), positive, context -> RegistryEntryPredicateArgumentType.getRegistryEntryPredicate(context, "biome", RegistryKeys.BIOME).test(context.getSource().getWorld().getBiome(BlockPosArgumentType.getLoadedBlockPos(context, "pos")))))))
-        .then(CommandManager.literal("loaded")
-            .then(addConditionLogic(root, CommandManager.argument("pos", BlockPosArgumentType.blockPos()), positive, commandContext -> isLoaded(commandContext.getSource().getWorld(), BlockPosArgumentType.getBlockPos(commandContext, "pos")))))
-        .then(CommandManager.literal("dimension")
-            .then(addConditionLogic(root, CommandManager.argument("dimension", DimensionArgumentType.dimension()), positive, context -> DimensionArgumentType.getDimensionArgument(context, "dimension") == context.getSource().getWorld())))
-        .then(CommandManager.literal("score")
-            .then(CommandManager.argument("target", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+        .then(literal("block")
+            .then(argument("pos", BlockPosArgumentType.blockPos())
+                // note the block predicate type is in this mod
+                .then(addConditionLogic(root, argument("block", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess)), positive, context -> BlockPredicateArgumentType.getBlockPredicate(context, "block").test(new CachedBlockPosition(context.getSource().getWorld(), BlockPosArgumentType.getLoadedBlockPos(context, "pos"), true))))))
+        .then(literal("biome")
+            .then(argument("pos", BlockPosArgumentType.blockPos())
+                .then(addConditionLogic(root, argument("biome", RegistryEntryPredicateArgumentType.registryEntryPredicate(commandRegistryAccess, RegistryKeys.BIOME)), positive, context -> RegistryEntryPredicateArgumentType.getRegistryEntryPredicate(context, "biome", RegistryKeys.BIOME).test(context.getSource().getWorld().getBiome(BlockPosArgumentType.getLoadedBlockPos(context, "pos")))))))
+        .then(literal("loaded")
+            .then(addConditionLogic(root, argument("pos", BlockPosArgumentType.blockPos()), positive, commandContext -> isLoaded(commandContext.getSource().getWorld(), BlockPosArgumentType.getBlockPos(commandContext, "pos")))))
+        .then(literal("dimension")
+            .then(addConditionLogic(root, argument("dimension", DimensionArgumentType.dimension()), positive, context -> DimensionArgumentType.getDimensionArgument(context, "dimension") == context.getSource().getWorld())))
+        .then(literal("score")
+            .then(argument("target", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
                 .then(getScoreTargetObjectiveArgument(root, positive))))
-        .then(CommandManager.literal("blocks")
-            .then(CommandManager.argument("start", BlockPosArgumentType.blockPos())
-                .then(CommandManager.argument("end", BlockPosArgumentType.blockPos())
-                    .then(CommandManager.argument("destination", BlockPosArgumentType.blockPos())
-                        .then(addBlocksConditionLogic(root, CommandManager.literal("all"), positive, false))
-                        .then(addBlocksConditionLogic(root, CommandManager.literal("masked"), positive, true))))))
-        .then(CommandManager.literal("entity")
-            .then(CommandManager.argument("entities", EntityArgumentType.entities()).fork(root, context -> getSourceOrEmptyForConditionFork(context, positive, !EntityArgumentType.getOptionalEntities(context, "entities").isEmpty())).executes(getExistsConditionExecute(positive, context -> EntityArgumentType.getOptionalEntities(context, "entities").size()))))
-        .then(CommandManager.literal("predicate")
-            .then(addConditionLogic(root, CommandManager.argument("predicate", IdentifierArgumentType.identifier()).suggests(LOOT_CONDITIONS), positive, context -> testLootCondition(context.getSource(), IdentifierArgumentType.getPredicateArgument(context, "predicate")))));
+        .then(literal("blocks")
+            .then(argument("start", BlockPosArgumentType.blockPos())
+                .then(argument("end", BlockPosArgumentType.blockPos())
+                    .then(argument("destination", BlockPosArgumentType.blockPos())
+                        .then(addBlocksConditionLogic(root, literal("all"), positive, false))
+                        .then(addBlocksConditionLogic(root, literal("masked"), positive, true))))))
+        .then(literal("entity")
+            .then(argument("entities", EntityArgumentType.entities()).fork(root, context -> getSourceOrEmptyForConditionFork(context, positive, !EntityArgumentType.getOptionalEntities(context, "entities").isEmpty())).executes(getExistsConditionExecute(positive, context -> EntityArgumentType.getOptionalEntities(context, "entities").size()))))
+        .then(literal("predicate")
+            .then(addConditionLogic(root, argument("predicate", IdentifierArgumentType.identifier()).suggests(LOOT_CONDITIONS), positive, context -> testLootCondition(context.getSource(), IdentifierArgumentType.getPredicateArgument(context, "predicate")))));
 
     for (DataCommand.ObjectType objectType : DataCommand.SOURCE_OBJECT_TYPES) {
       argumentBuilder
-          .then(objectType.addArgumentsToBuilder(CommandManager.literal("data"), builder -> builder
-              .then(CommandManager.argument("path", NbtPathArgumentType.nbtPath()).fork(root, context -> getSourceOrEmptyForConditionFork(context, positive, countPathMatches(objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path")) > 0)).executes(getExistsConditionExecute(positive, context -> countPathMatches(objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path")))))));
+          .then(objectType.addArgumentsToBuilder(literal("data"), builder -> builder
+              .then(argument("path", NbtPathArgumentType.nbtPath()).fork(root, context -> getSourceOrEmptyForConditionFork(context, positive, countPathMatches(objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path")) > 0)).executes(getExistsConditionExecute(positive, context -> countPathMatches(objectType.getObject(context), NbtPathArgumentType.getNbtPath(context, "path")))))));
     }
+    addExtraConditionArguments(root, argumentBuilder, positive, commandRegistryAccess);
 
     return argumentBuilder;
   }
 
+
+  public static LiteralArgumentBuilder<ServerCommandSource> addExtraConditionArguments(CommandNode<ServerCommandSource> root, LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
+    return argumentBuilder
+        .then(literal("rand")
+            .then(addConditionLogic(root, argument("probability", FloatArgumentType.floatArg(0, 1)), positive, context -> RandomUtils.nextFloat(0, 1) < FloatArgumentType.getFloat(context, "probability"))));
+  }
+
   private static RequiredArgumentBuilder<ServerCommandSource, String> getScoreTargetObjectiveArgument(CommandNode<ServerCommandSource> root, boolean positive) {
-    return CommandManager.argument("targetObjective", ScoreboardObjectiveArgumentType.scoreboardObjective())
-        .then(CommandManager.literal("=")
-            .then(CommandManager.argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
-                .then(addConditionLogic(root, CommandManager.argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, Integer::equals)))))
-        .then(CommandManager.literal("<")
-            .then(CommandManager.argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
-                .then(addConditionLogic(root, CommandManager.argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, (a, b) -> a < b)))))
-        .then(CommandManager.literal("<=")
-            .then(CommandManager.argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
-                .then(addConditionLogic(root, CommandManager.argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, (a, b) -> a <= b)))))
-        .then(CommandManager.literal(">")
-            .then(CommandManager.argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
-                .then(addConditionLogic(root, CommandManager.argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, (a, b) -> a > b)))))
-        .then(CommandManager.literal(">=")
-            .then(CommandManager.argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
-                .then(addConditionLogic(root, CommandManager.argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, (a, b) -> a >= b)))))
-        .then(CommandManager.literal("matches")
-            .then(addConditionLogic(root, CommandManager.argument("range", NumberRangeArgumentType.intRange()), positive, context -> testScoreMatch(context, NumberRangeArgumentType.IntRangeArgumentType.getRangeArgument(context, "range")))));
+    return argument("targetObjective", ScoreboardObjectiveArgumentType.scoreboardObjective())
+        .then(literal("=")
+            .then(argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+                .then(addConditionLogic(root, argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, Integer::equals)))))
+        .then(literal("<")
+            .then(argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+                .then(addConditionLogic(root, argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, (a, b) -> a < b)))))
+        .then(literal("<=")
+            .then(argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+                .then(addConditionLogic(root, argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, (a, b) -> a <= b)))))
+        .then(literal(">")
+            .then(argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+                .then(addConditionLogic(root, argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, (a, b) -> a > b)))))
+        .then(literal(">=")
+            .then(argument("source", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
+                .then(addConditionLogic(root, argument("sourceObjective", ScoreboardObjectiveArgumentType.scoreboardObjective()), positive, context -> testScoreCondition(context, (a, b) -> a >= b)))))
+        .then(literal("matches")
+            .then(addConditionLogic(root, argument("range", NumberRangeArgumentType.intRange()), positive, context -> testScoreMatch(context, NumberRangeArgumentType.IntRangeArgumentType.getRangeArgument(context, "range")))));
   }
 
   private static Command<ServerCommandSource> getExistsConditionExecute(boolean positive, ExistsCondition condition) {
@@ -463,14 +477,14 @@ public final class SeparatedExecuteCommand {
 
   private static LiteralArgumentBuilder<ServerCommandSource> addOnArguments(CommandNode<ServerCommandSource> node, LiteralArgumentBuilder<ServerCommandSource> builder) {
     return builder
-        .then(CommandManager.literal("owner").fork(node, createEntityModifier(entity -> entity instanceof Tameable tameable ? Optional.ofNullable(tameable.getOwner()) : Optional.empty())))
-        .then(CommandManager.literal("leasher").fork(node, createEntityModifier(entity -> entity instanceof MobEntity mobEntity ? Optional.ofNullable(mobEntity.getHoldingEntity()) : Optional.empty())))
-        .then(CommandManager.literal("target").fork(node, createEntityModifier(entity -> entity instanceof Targeter targeter ? Optional.ofNullable(targeter.getTarget()) : Optional.empty())))
-        .then(CommandManager.literal("attacker").fork(node, createEntityModifier(entity -> entity instanceof Attackable attackable ? Optional.ofNullable(attackable.getLastAttacker()) : Optional.empty())))
-        .then(CommandManager.literal("vehicle").fork(node, createEntityModifier(entity -> Optional.ofNullable(entity.getVehicle()))))
-        .then(CommandManager.literal("controller").fork(node, createEntityModifier(entity -> Optional.ofNullable(entity.getControllingPassenger()))))
-        .then(CommandManager.literal("origin").fork(node, createEntityModifier(entity -> entity instanceof Ownable ownable ? Optional.ofNullable(ownable.getOwner()) : Optional.empty())))
-        .then(CommandManager.literal("passengers").fork(node, createMultiEntityModifier(entity -> entity.getPassengerList().stream())));
+        .then(literal("owner").fork(node, createEntityModifier(entity -> entity instanceof Tameable tameable ? Optional.ofNullable(tameable.getOwner()) : Optional.empty())))
+        .then(literal("leasher").fork(node, createEntityModifier(entity -> entity instanceof MobEntity mobEntity ? Optional.ofNullable(mobEntity.getHoldingEntity()) : Optional.empty())))
+        .then(literal("target").fork(node, createEntityModifier(entity -> entity instanceof Targeter targeter ? Optional.ofNullable(targeter.getTarget()) : Optional.empty())))
+        .then(literal("attacker").fork(node, createEntityModifier(entity -> entity instanceof Attackable attackable ? Optional.ofNullable(attackable.getLastAttacker()) : Optional.empty())))
+        .then(literal("vehicle").fork(node, createEntityModifier(entity -> Optional.ofNullable(entity.getVehicle()))))
+        .then(literal("controller").fork(node, createEntityModifier(entity -> Optional.ofNullable(entity.getControllingPassenger()))))
+        .then(literal("origin").fork(node, createEntityModifier(entity -> entity instanceof Ownable ownable ? Optional.ofNullable(ownable.getOwner()) : Optional.empty())))
+        .then(literal("passengers").fork(node, createMultiEntityModifier(entity -> entity.getPassengerList().stream())));
   }
 
   private static ServerCommandSource summon(ServerCommandSource source, RegistryEntry.Reference<EntityType<?>> entityType) throws CommandSyntaxException {

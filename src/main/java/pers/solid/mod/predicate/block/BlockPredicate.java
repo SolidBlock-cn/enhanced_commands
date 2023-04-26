@@ -10,7 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.SerializablePredicate;
 
@@ -18,19 +18,25 @@ public interface BlockPredicate extends SerializablePredicate {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("argument.ecBlockStatePredicate.cannotParse"));
 
   @NotNull
-  static BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
-    final int cursorBeforeRead = parser.reader.getCursor();
+  static BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
     CommandSyntaxException exception = null;
+    final int cursorOnStart = parser.reader.getCursor();
+    int cursorOnEnd = cursorOnStart;
     for (BlockPredicateType<?> type : BlockPredicateType.REGISTRY) {
       try {
+        parser.reader.setCursor(cursorOnStart);
         final BlockPredicate parse = type.parse(parser);
         if (parse != null) {
+          // keep the current position of the cursor
           return parse;
         }
+
       } catch (CommandSyntaxException exception1) {
+        cursorOnEnd = parser.reader.getCursor();
         exception = exception1;
       }
     }
+    parser.reader.setCursor(cursorOnEnd);
     if (exception != null) throw exception;
     throw CANNOT_PARSE.createWithContext(parser.reader);
   }

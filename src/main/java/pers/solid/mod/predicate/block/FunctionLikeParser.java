@@ -4,7 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
 
 public interface FunctionLikeParser<T> {
   Dynamic2CommandExceptionType PARAMS_TOO_FEW = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.paramTooFew", a, b));
@@ -26,12 +26,11 @@ public interface FunctionLikeParser<T> {
   @Contract(pure = true)
   Text tooltip();
 
-  default T parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException {
-    // TODO: 2023/4/25, 025 check its suggestion does not popup when writing property names
+  default T parse(ArgumentParser parser) throws CommandSyntaxException {
     final String name = functionName();
-    parser.suggestions.add(suggestionsBuilder -> {
-      if (name.startsWith(suggestionsBuilder.getRemaining())) suggestionsBuilder.suggest(name + "(", tooltip());
-    });
+    if (name.startsWith(parser.reader.getRemaining().toLowerCase())) {
+      parser.suggestions.add(suggestionsBuilder -> suggestionsBuilder.suggest(name + "(", tooltip()));
+    }
     final int cursorBeforeUnion = parser.reader.getCursor();
     final String s = parser.reader.readUnquotedString();
     if (!(s.equals(name) && parser.reader.canRead() && parser.reader.peek() == '(')) {
@@ -103,5 +102,5 @@ public interface FunctionLikeParser<T> {
 
   T getParseResult();
 
-  void parseParameter(BlockPredicateArgumentParser parser) throws CommandSyntaxException;
+  void parseParameter(ArgumentParser parser) throws CommandSyntaxException;
 }

@@ -8,7 +8,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.BlockPredicateArgumentParser;
+import pers.solid.mod.argument.ArgumentParser;
 
 public interface BlockPredicateType<T extends BlockPredicate> {
   RegistryKey<Registry<BlockPredicateType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(new Identifier(EnhancedCommands.MOD_ID, "block_predicate_type"));
@@ -20,5 +20,5 @@ public interface BlockPredicateType<T extends BlockPredicate> {
     return null;
   }
 
-  @Nullable BlockPredicate parse(BlockPredicateArgumentParser parser) throws CommandSyntaxException;
+  @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException;
 }
