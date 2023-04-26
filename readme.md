@@ -58,4 +58,4 @@
 上面各种格式可以复合，例如：
 - `>any(stone, #slabs[waterlogged=false], !<air)`
 - `!>>diff(rand(0.2), wooden_stairs)`
-- `any(all(#weather_immune, #stairs), #infiniburn_end, stone)`
+- `any(all(#wither_immune, #stairs), #infiniburn_end, stone)`
