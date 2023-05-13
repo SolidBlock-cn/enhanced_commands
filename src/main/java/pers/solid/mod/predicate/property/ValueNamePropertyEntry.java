@@ -14,7 +14,7 @@ import pers.solid.mod.command.TestResult;
 
 public record ValueNamePropertyEntry(String propertyName, Comparator comparator, String valueName) implements PropertyNameEntry {
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return propertyName + comparator.asString() + valueName;
   }
 

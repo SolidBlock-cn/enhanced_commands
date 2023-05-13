@@ -6,8 +6,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SuggestedParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.SerializablePredicate;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return "any(" + String.join(", ", Collections2.transform(blockPredicates, SerializablePredicate::asString)) + ")";
   }
 
@@ -43,14 +44,14 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
   }
 
   @Override
-  public BlockPredicateType<?> getType() {
+  public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.UNION;
   }
 
   public record Parser(ImmutableList.Builder<BlockPredicate> blockPredicates) implements FunctionLikeParser<UnionBlockPredicate> {
 
     @Override
-    public String functionName() {
+    public @NotNull String functionName() {
       return "any";
     }
 
@@ -60,7 +61,7 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     }
 
     @Override
-    public void parseParameter(ArgumentParser parser) throws CommandSyntaxException {
+    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
       final BlockPredicate parse = BlockPredicate.parse(parser);
       blockPredicates.add(parse);
     }
@@ -75,7 +76,7 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
       return new Parser(new ImmutableList.Builder<>()).parse(parser);
     }
   }

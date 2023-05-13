@@ -83,10 +83,10 @@ public final class TestForCommand {
             .then(CommandManager.literal("luminance")
                 .executes(TestForCommand::executeGetLuminance))
             .then(CommandManager.literal("strong_redstone_power")
-                .then(CommandManager.argument("direction", DirectionArgumentType.create())
+                .then(CommandManager.argument("directions", DirectionArgumentType.create())
                     .executes(TestForCommand::executeGetStrongRedstonePower)))
             .then(CommandManager.literal("weak_redstone_power")
-                .then(CommandManager.argument("direction", DirectionArgumentType.create())
+                .then(CommandManager.argument("directions", DirectionArgumentType.create())
                     .executes(TestForCommand::executeGetWeakRedstonePower)))
             .then(CommandManager.literal("light")
                 .executes(context -> executeGetLight(context, null)))
@@ -125,7 +125,7 @@ public final class TestForCommand {
     final BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
-    final Direction direction = DirectionArgumentType.getDirection(context, "direction");
+    final Direction direction = DirectionArgumentType.getDirection(context, "directions");
     final int value = function.applyAsInt(blockState, world, pos, direction);
     source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), EnhancedCommands.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(EnhancedCommands.STYLE_FOR_ACTUAL), EnhancedCommands.wrapDirection(direction).styled(EnhancedCommands.STYLE_FOR_TARGET)), true);
     return value;

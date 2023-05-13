@@ -14,10 +14,11 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.ArgumentParser;
-import pers.solid.mod.argument.SimpleBlockPredicateArgumentParser;
+import pers.solid.mod.argument.SimpleBlockPredicateSuggestedParser;
+import pers.solid.mod.argument.SuggestedParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.property.PropertyEntry;
 
@@ -25,7 +26,7 @@ import java.util.Collection;
 
 public record SimpleBlockPredicate(Block block, Collection<PropertyEntry<?>> propertyEntries) implements BlockPredicate {
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return Registries.BLOCK.getId(block).toString();
   }
 
@@ -70,7 +71,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyEntry<?>> pro
   }
 
   @Override
-  public BlockPredicateType<?> getType() {
+  public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.SIMPLE;
   }
 
@@ -83,8 +84,8 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyEntry<?>> pro
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(ArgumentParser parser0) throws CommandSyntaxException {
-      SimpleBlockPredicateArgumentParser parser = new SimpleBlockPredicateArgumentParser(parser0);
+    public @Nullable BlockPredicate parse(SuggestedParser parser0) throws CommandSyntaxException {
+      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(parser0);
       parser.suggestions.add(suggestionsBuilder -> CommandSource.forEachMatching(parser.registryWrapper.streamKeys().map(RegistryKey::getValue)::iterator, suggestionsBuilder.getRemaining().toLowerCase(), id -> id, id -> suggestionsBuilder.suggest(id.toString())));
       if (parser.reader.canRead() && Identifier.isCharValid(parser.reader.peek())) {
         parser.parseBlockId();

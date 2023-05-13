@@ -4,12 +4,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.mod.EnhancedCommands;
 import pers.solid.mod.command.TestResult;
 
 public record NameExistencePropertyEntry(String propertyName, boolean exists) implements PropertyNameEntry {
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return propertyName + (exists ? "=*" : "!=*");
   }
 

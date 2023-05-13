@@ -5,9 +5,9 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Position;
+import net.minecraft.util.math.Vec3i;
 import pers.solid.mod.argument.ModArgumentTypes;
 import pers.solid.mod.command.ModCommands;
 
@@ -26,7 +26,7 @@ public class EnhancedCommands implements ModInitializer {
     CommandRegistrationCallback.EVENT.register(new ModCommands());
   }
 
-  public static MutableText wrapBlockPos(BlockPos blockPos) {
+  public static MutableText wrapBlockPos(Vec3i blockPos) {
     return Text.translatable("enhancedCommands.blockPos", blockPos.getX(), blockPos.getY(), blockPos.getZ());
   }
 

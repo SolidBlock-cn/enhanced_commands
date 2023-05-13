@@ -6,8 +6,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SuggestedParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.SerializablePredicate;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return "all(" + String.join(", ", Collections2.transform(blockPredicates, SerializablePredicate::asString) + ")");
   }
 
@@ -43,14 +44,14 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
   }
 
   @Override
-  public BlockPredicateType<?> getType() {
+  public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.INTERSECT;
   }
 
   public record Parser(ImmutableList.Builder<BlockPredicate> blockPredicates) implements FunctionLikeParser<BlockPredicate> {
 
     @Override
-    public String functionName() {
+    public @NotNull String functionName() {
       return "all";
     }
 
@@ -65,7 +66,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
 
     @Override
-    public void parseParameter(ArgumentParser parser) throws CommandSyntaxException {
+    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
       blockPredicates.add(BlockPredicate.parse(parser));
     }
   }
@@ -74,7 +75,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
       return new Parser(new ImmutableList.Builder<>()).parse(parser);
     }
   }

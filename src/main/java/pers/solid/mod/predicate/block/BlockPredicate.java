@@ -10,7 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SuggestedParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.SerializablePredicate;
 
@@ -18,7 +18,7 @@ public interface BlockPredicate extends SerializablePredicate {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("argument.ecBlockStatePredicate.cannotParse"));
 
   @NotNull
-  static BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
+  static BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
     CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
     int cursorOnEnd = cursorOnStart;
@@ -48,11 +48,11 @@ public interface BlockPredicate extends SerializablePredicate {
     return TestResult.successOrFail(test, cachedBlockPosition.getBlockPos());
   }
 
-  BlockPredicateType<?> getType();
+  @NotNull BlockPredicateType<?> getType();
 
   @Contract(mutates = "param1")
   default void writeNbt(NbtCompound nbtCompound) {
-    // TODO: 2023/4/24, 024 pending use
+    // TODO: 2023/4/24, 024 nbt
   }
 
   @Override

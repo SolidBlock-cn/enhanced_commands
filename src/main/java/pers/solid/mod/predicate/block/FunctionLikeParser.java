@@ -4,13 +4,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
-import pers.solid.mod.argument.ArgumentParser;
+import org.jetbrains.annotations.NotNull;
+import pers.solid.mod.argument.SuggestedParser;
 
 public interface FunctionLikeParser<T> {
   Dynamic2CommandExceptionType PARAMS_TOO_FEW = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.paramTooFew", a, b));
   Dynamic2CommandExceptionType PARAMS_TOO_MANY = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.paramTooMany", a, b));
 
   @Contract(pure = true)
+  @NotNull
   String functionName();
 
   @Contract(pure = true)
@@ -26,7 +28,7 @@ public interface FunctionLikeParser<T> {
   @Contract(pure = true)
   Text tooltip();
 
-  default T parse(ArgumentParser parser) throws CommandSyntaxException {
+  default T parse(SuggestedParser parser) throws CommandSyntaxException {
     final String name = functionName();
     if (name.startsWith(parser.reader.getRemaining().toLowerCase())) {
       parser.suggestions.add(suggestionsBuilder -> suggestionsBuilder.suggest(name + "(", tooltip()));
@@ -61,7 +63,7 @@ public interface FunctionLikeParser<T> {
       }
     }
     while (true) {
-      parseParameter(parser);
+      parseParameter(parser, paramsCount);
       paramsCount ++;
       parser.reader.skipWhitespace();
       parser.suggestions.clear();
@@ -102,5 +104,5 @@ public interface FunctionLikeParser<T> {
 
   T getParseResult();
 
-  void parseParameter(ArgumentParser parser) throws CommandSyntaxException;
+  void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException;
 }

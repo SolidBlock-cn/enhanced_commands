@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 /**
  * @see net.minecraft.command.argument.BlockArgumentParser
  */
-public class SimpleBlockPredicateArgumentParser extends ArgumentParser {
+public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
   public final RegistryWrapper<Block> registryWrapper;
   public Block block;
   public Identifier blockId;
@@ -47,12 +47,12 @@ public class SimpleBlockPredicateArgumentParser extends ArgumentParser {
   public RegistryEntryList.Named<Block> tagId;
   public List<PropertyNameEntry> propertyNameEntries = new ArrayList<>();
 
-  public SimpleBlockPredicateArgumentParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
+  public SimpleBlockPredicateSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
     super(commandRegistryAccess, reader);
     this.registryWrapper = commandRegistryAccess.createWrapper(RegistryKeys.BLOCK);
   }
 
-  public SimpleBlockPredicateArgumentParser(ArgumentParser parser) {
+  public SimpleBlockPredicateSuggestedParser(SuggestedParser parser) {
     this(parser.commandRegistryAccess, parser.reader);
     this.suggestions = parser.suggestions;
   }
@@ -358,7 +358,7 @@ public class SimpleBlockPredicateArgumentParser extends ArgumentParser {
     final int cursorBeforeValue = reader.getCursor();
     final String valueName = this.reader.readString();
     addTagPropertiesValueSuggestions(propertyName);
-    final boolean expectEndOfValue = tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream().filter(property -> property.getName().equals(propertyName))).flatMap(SimpleBlockPredicateArgumentParser::getPropertyValueNameStream).noneMatch(value -> value.startsWith(valueName) && !value.equals(valueName));
+    final boolean expectEndOfValue = tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream().filter(property -> property.getName().equals(propertyName))).flatMap(SimpleBlockPredicateSuggestedParser::getPropertyValueNameStream).noneMatch(value -> value.startsWith(valueName) && !value.equals(valueName));
     if (expectEndOfValue) {
       suggestions.clear();
     }

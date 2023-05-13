@@ -6,14 +6,15 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.RandomUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SuggestedParser;
 import pers.solid.mod.command.TestResult;
 
 public record RandBlockPredicate(float value) implements BlockPredicate {
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return "rand(" + value + ")";
   }
 
@@ -35,7 +36,7 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
   }
 
   @Override
-  public BlockPredicateType<?> getType() {
+  public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.RAND;
   }
 
@@ -43,7 +44,7 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
     private float value;
 
     @Override
-    public String functionName() {
+    public @NotNull String functionName() {
       return "rand";
     }
 
@@ -67,7 +68,7 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
     }
 
     @Override
-    public void parseParameter(ArgumentParser parser) throws CommandSyntaxException {
+    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
       value = parser.reader.readFloat();
       if (value > 1) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooHigh().createWithContext(parser.reader, value, 1);
@@ -82,7 +83,7 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
       return new Parser().parse(parser);
     }
   }

@@ -24,6 +24,8 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<RandBlockPredicate> RAND = register(RandBlockPredicate.Type.INSTANCE, "rand");
 
   public static final BlockPredicateType<BiPredicateBlockPredicate> BI_PREDICATE = register(BiPredicateBlockPredicate.Type.INSTANCE, "bi_predicate");
+  public static final BlockPredicateType<RelBlockPredicate> REL = register(RelBlockPredicate.Type.INSTANCE, "rel");
+  public static final BlockPredicateType<ExposeBlockPredicate> EXPOSE = register(ExposeBlockPredicate.Type.INSTANCE, "expose");
 
   public static void init() {
     Preconditions.checkState(BlockPredicateType.REGISTRY.size() != 0);

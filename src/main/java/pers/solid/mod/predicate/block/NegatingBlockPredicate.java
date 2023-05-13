@@ -5,15 +5,16 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SuggestedParser;
 import pers.solid.mod.command.TestResult;
 
 import java.util.List;
 
 public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements BlockPredicate {
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return "!" + blockPredicate.asString();
   }
 
@@ -33,7 +34,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
   }
 
   @Override
-  public BlockPredicateType<?> getType() {
+  public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.NOT;
   }
 
@@ -51,7 +52,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
       if (parser.reader.getRemaining().isEmpty()) parser.suggestions.add(suggestionsBuilder -> suggestionsBuilder.suggest("!", Text.translatable("blockPredicate.negation")));
       boolean negates = false;
       boolean suffixed = false;

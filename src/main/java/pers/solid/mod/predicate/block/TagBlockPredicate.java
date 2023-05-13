@@ -9,10 +9,12 @@ import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.ArgumentParser;
-import pers.solid.mod.argument.SimpleBlockPredicateArgumentParser;
+import pers.solid.mod.argument.SimpleBlockPredicateSuggestedParser;
+import pers.solid.mod.argument.SuggestedParser;
 import pers.solid.mod.command.TestResult;
 import pers.solid.mod.predicate.SerializablePredicate;
 import pers.solid.mod.predicate.property.PropertyNameEntry;
@@ -23,9 +25,9 @@ import java.util.stream.Collectors;
 /**
  * @see BlockArgumentParser#parseTagId()
  */
-public record TagBlockPredicate(TagKey<Block> blockTag, Collection<PropertyNameEntry> propertyNameEntries) implements BlockPredicate {
+public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull@UnmodifiableView Collection<PropertyNameEntry> propertyNameEntries) implements BlockPredicate {
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     if (propertyNameEntries.isEmpty()) {
       return "#" + blockTag.id().toString();
     } else {
@@ -70,7 +72,7 @@ public record TagBlockPredicate(TagKey<Block> blockTag, Collection<PropertyNameE
   }
 
   @Override
-  public BlockPredicateType<?> getType() {
+  public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.TAG;
   }
 
@@ -78,8 +80,8 @@ public record TagBlockPredicate(TagKey<Block> blockTag, Collection<PropertyNameE
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(ArgumentParser parser0) throws CommandSyntaxException {
-      SimpleBlockPredicateArgumentParser parser = new SimpleBlockPredicateArgumentParser(parser0);
+    public @Nullable BlockPredicate parse(SuggestedParser parser0) throws CommandSyntaxException {
+      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         return new TagBlockPredicate(parser.tagId.getTag(), parser.propertyNameEntries);

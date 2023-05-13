@@ -7,9 +7,10 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SuggestedParser;
 import pers.solid.mod.command.TestResult;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   public static final Text BENEATH_BLOCK = Text.translatable("argument.ecBlockStatePredicate.beneath_block");
 
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     if (offset > 0) {
       return Strings.repeat('>', offset) + blockPredicate.asString();
     } else if (offset < 0) {
@@ -51,7 +52,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public BlockPredicateType<?> getType() {
+  public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.HORIZONTAL_OFFSET;
   }
 
@@ -71,7 +72,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
       if (parser.reader.getRemaining().isEmpty()) {
         parser.suggestions.add(suggestionsBuilder -> {
           suggestionsBuilder.suggest("<", BENEATH_BLOCK);

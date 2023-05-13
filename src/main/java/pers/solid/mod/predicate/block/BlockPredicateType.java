@@ -8,7 +8,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.mod.EnhancedCommands;
-import pers.solid.mod.argument.ArgumentParser;
+import pers.solid.mod.argument.SuggestedParser;
 
 public interface BlockPredicateType<T extends BlockPredicate> {
   RegistryKey<Registry<BlockPredicateType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(new Identifier(EnhancedCommands.MOD_ID, "block_predicate_type"));
@@ -16,9 +16,9 @@ public interface BlockPredicateType<T extends BlockPredicate> {
 
 
   default T fromNbt(NbtCompound nbtCompound) {
-    // TODO: 2023/4/23, 023
+    // TODO: 2023/4/23, 023 nbt
     return null;
   }
 
-  @Nullable BlockPredicate parse(ArgumentParser parser) throws CommandSyntaxException;
+  @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException;
 }
