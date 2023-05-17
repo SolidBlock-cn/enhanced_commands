@@ -14,10 +14,10 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "pers.solid.mod.EnhancedCommandsClient"
+      "pers.solid.ecmd.EnhancedCommandsClient"
     ],
     "main": [
-      "pers.solid.mod.EnhancedCommands"
+      "pers.solid.ecmd.EnhancedCommands"
     ]
   },
 
