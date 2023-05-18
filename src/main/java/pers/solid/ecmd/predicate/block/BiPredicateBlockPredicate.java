@@ -67,8 +67,8 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
-      final BlockPredicate parse = BlockPredicate.parse(parser);
+    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      final BlockPredicate parse = BlockPredicate.parse(parser, suggestionsOnly);
       if (value1 == null) {
         value1 = parse;
       } else if (value2 == null) {
@@ -93,17 +93,17 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       CommandSyntaxException exception = null;
       try {
-        final BiPredicateBlockPredicate parse1 = new Parser("same", Text.translatable("blockPredicate.bi_predicate_same"), true).parse(parser);
+        final BiPredicateBlockPredicate parse1 = new Parser("same", Text.translatable("blockPredicate.bi_predicate_same"), true).parse(parser, suggestionsOnly);
         if (parse1 != null) {
           return parse1;
         }
       } catch (CommandSyntaxException exception1) {
         exception = exception1;
       }
-      final BiPredicateBlockPredicate parse2 = new Parser("diff", Text.translatable("blockPredicate.bi_predicate_diff"), false).parse(parser);
+      final BiPredicateBlockPredicate parse2 = new Parser("diff", Text.translatable("blockPredicate.bi_predicate_diff"), false).parse(parser, suggestionsOnly);
       if (parse2 != null) {
         return parse2;
       } else if (exception != null) {

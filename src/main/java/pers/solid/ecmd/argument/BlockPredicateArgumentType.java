@@ -10,7 +10,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 /**
  * @see net.minecraft.command.argument.BlockPredicateArgumentType
@@ -26,7 +25,7 @@ public record BlockPredicateArgumentType(CommandRegistryAccess commandRegistryAc
 
   @Override
   public BlockPredicate parse(StringReader reader) throws CommandSyntaxException {
-    return BlockPredicate.parse(new SuggestedParser(commandRegistryAccess, reader));
+    return BlockPredicate.parse(new SuggestedParser(commandRegistryAccess, reader), false);
   }
 
   @Override
@@ -35,13 +34,10 @@ public record BlockPredicateArgumentType(CommandRegistryAccess commandRegistryAc
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(commandRegistryAccess, stringReader);
     try {
-      BlockPredicate.parse(parser);
+      BlockPredicate.parse(parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
-    for (BiConsumer<SuggestionsBuilder, CommandContext<?>> suggestion : parser.suggestions) {
-      suggestion.accept(builderOffset, context);
-    }
-    return builderOffset.buildFuture();
+    return parser.buildSuggestions(context, builderOffset);
   }
 }

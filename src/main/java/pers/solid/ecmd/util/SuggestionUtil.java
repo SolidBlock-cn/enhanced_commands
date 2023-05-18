@@ -3,12 +3,15 @@ package pers.solid.ecmd.util;
 import com.google.common.base.Functions;
 import com.google.common.base.Suppliers;
 import com.mojang.brigadier.Message;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.argument.SuggestedParser;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -58,5 +61,21 @@ public final class SuggestionUtil {
 
   public static void suggestString(String candidate, Message tooltip, SuggestionsBuilder builder) {
     suggestString(candidate, Suppliers.ofInstance(tooltip), builder);
+  }
+
+  /**
+   * Parse and provide suggestions from an {@link ArgumentType}, and make sure all suggestions are provided correctly at a correct place.
+   * <hr>
+   * 说明：如果采用传统的方式，可能存在以下的问题，如：<br>
+   * ~ ~ <-[建议：~ ~ ~]   预期：~ ~ <-[建议：~]<br>
+   * 在运行 {@code listSuggestions} 时，{@code suggestionBuilder.getRemaining()} 为空。
+   */
+  public static <T> T suggestParserFromType(ArgumentType<T> argumentType, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    final int cursorBeforeParse = parser.reader.getCursor();
+    parser.suggestions.add(SuggestionProvider.modifying((context, builder) -> {
+      final SuggestionsBuilder builderOffset = builder.createOffset(cursorBeforeParse);
+      return argumentType.listSuggestions(context, builderOffset);
+    }));
+    return argumentType.parse(parser.reader);
   }
 }

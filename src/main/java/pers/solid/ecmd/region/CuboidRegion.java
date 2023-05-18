@@ -2,7 +2,6 @@ package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -11,16 +10,34 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.block.FunctionLikeParser;
+import pers.solid.ecmd.util.SuggestionUtil;
 
+import java.util.Collections;
 import java.util.Iterator;
 
+/**
+ * <p>A <b>cuboid region</b> is a region representing a cuboid, which is defined by two positions. The positions are accurate positions, instead of block positions. The coordinates can be decimal, even if blocks only support non-decimal coordinates.
+ * <p><b>Syntax:</b> {@code cuboid(<begin pos>, <end pos>)}
+ * <p>As the positions are accurate positions, the two points must have some distance in several coordinates. For example, {@code cuboid(0.0 0.0 0.0, 0.0 0.0 0.0)} does not contain any area. Instead, {@code cuboid(0.0 0.0 0.0, 1.0 1.0 1.0)} is a region contain a <em>block pos</em> {@code 0 0 0}. It is identical to <em>block cuboid region</em> {@code cuboid(0 0 0, 0 0 0)}.
+ * <p>Whether a block position is in the cuboid regions is determined by whether the accurate center position of the block pos is in the cuboid region. For example, {@code cuboid(0.4 0.4 0.4, 1.2 1.2 1.2)} contains block pos {@code (0 0 0)} (whose center pos is {@code (0.5 0.5 0.5)}), but does not contain {@code (1 1 1)} (whose center pos is {@code (1.5 1.5 1.5)}).
+ *
+ * @param box
+ */
 public record CuboidRegion(Box box) implements Region {
+  /**
+   * Create a cuboid region from several coordinates. The comparison is not required because it will be compared in implementation.
+   */
   public CuboidRegion(double x1, double y1, double z1, double x2, double y2, double z2) {
     this(new Box(x1, y1, z1, x2, y2, z2));
   }
 
+  /**
+   * Create a cuboid region from two positions. The relative relation is not required because the coordinates will be compared in implementation.
+   */
   public CuboidRegion(Vec3d fromPos, Vec3d toPos) {
     this(new Box(fromPos, toPos));
   }
@@ -32,11 +49,24 @@ public record CuboidRegion(Box box) implements Region {
 
   @Override
   public @NotNull Iterator<BlockPos> iterator() {
-    return round().iterator();
+    final BlockCuboidRegion round = round();
+    return round == null ? Collections.emptyIterator() : round.iterator();
   }
 
-  public BlockCuboidRegion round() {
-    return new BlockCuboidRegion((int) Math.round(box.minX), (int) Math.round(box.minY), (int) Math.round(box.minZ), (int) Math.round(box.maxX), (int) Math.round(box.maxY), (int) Math.round(box.maxZ));
+  /**
+   * Round the cuboid region into a block cuboid region, in which each block position's center position is in this cuboid region. It may be {@code null} if the region does not contain any block.
+   */
+  public @Nullable BlockCuboidRegion round() {
+    final int minX = (int) Math.round(box.minX);
+    final int minY = (int) Math.round(box.minY);
+    final int minZ = (int) Math.round(box.minZ);
+    final int maxX = (int) Math.round(box.maxX);
+    final int maxY = (int) Math.round(box.maxY);
+    final int maxZ = (int) Math.round(box.maxZ);
+    if (minX == maxX || minY == maxX || minZ == maxX) {
+      return null;
+    }
+    return new BlockCuboidRegion(minX, minY, minZ, maxX - 1, maxY - 1, maxZ - 1);
   }
 
   @Override
@@ -66,7 +96,8 @@ public record CuboidRegion(Box box) implements Region {
 
   @Override
   public long numberOfBlocksAffected() {
-    return round().numberOfBlocksAffected();
+    final BlockCuboidRegion round = round();
+    return round == null ? 0 : round.numberOfBlocksAffected();
   }
 
   @Override
@@ -78,12 +109,12 @@ public record CuboidRegion(Box box) implements Region {
     INSTANCE;
 
     @Override
-    public @Nullable RegionArgument<CuboidRegion> parse(SuggestedParser parser) throws CommandSyntaxException {
-      return new Parser().parse(parser);
+    public @Nullable RegionArgument<Region> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(parser, suggestionsOnly);
     }
   }
 
-  public static final class Parser implements FunctionLikeParser<RegionArgument<CuboidRegion>> {
+  public static final class Parser implements FunctionLikeParser<RegionArgument<Region>> {
     private PosArgument from;
     private PosArgument to;
 
@@ -94,21 +125,24 @@ public record CuboidRegion(Box box) implements Region {
 
     @Override
     public Text tooltip() {
-      return null; // TODO: 2023/5/13, 013 tooltip
+      return Text.translatable("enhancedCommands.argument.region.cuboid");
     }
 
     @Override
-    public RegionArgument<CuboidRegion> getParseResult() {
+    public RegionArgument<Region> getParseResult() {
+      if (EnhancedPosArgument.isInt(from) && EnhancedPosArgument.isInt(to)) {
+        return source -> new BlockCuboidRegion(from.toAbsoluteBlockPos(source), to.toAbsoluteBlockPos(source));
+      }
       return source -> new CuboidRegion(from.toAbsolutePos(source), to.toAbsolutePos(source));
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
-      parser.suggestions.add((builder, context) -> Vec3ArgumentType.vec3().listSuggestions(context, builder));
+    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
       if (paramIndex == 0) {
-        from = Vec3ArgumentType.vec3().parse(parser.reader);
+        from = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
       } else if (paramIndex == 1) {
-        to = Vec3ArgumentType.vec3().parse(parser.reader);
+        to = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
       }
     }
 

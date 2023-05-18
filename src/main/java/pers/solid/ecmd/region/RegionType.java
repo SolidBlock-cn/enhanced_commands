@@ -13,5 +13,5 @@ public interface RegionType<R extends Region> {
   RegistryKey<Registry<RegionType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(new Identifier(EnhancedCommands.MOD_ID, "region_type"));
   Registry<RegionType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
 
-  @Nullable RegionArgument<?> parse(SuggestedParser parser) throws CommandSyntaxException;
+  @Nullable RegionArgument<?> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
 }

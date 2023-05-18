@@ -61,8 +61,8 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
-      final BlockPredicate parse = BlockPredicate.parse(parser);
+    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      final BlockPredicate parse = BlockPredicate.parse(parser, suggestionsOnly);
       blockPredicates.add(parse);
     }
 
@@ -76,8 +76,8 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
-      return new Parser(new ImmutableList.Builder<>()).parse(parser);
+    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser(new ImmutableList.Builder<>()).parse(parser, suggestionsOnly);
     }
   }
 }

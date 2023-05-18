@@ -72,9 +72,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       if (parser.reader.getRemaining().isEmpty()) {
-        parser.suggestions.add((suggestionsBuilder, context) -> {
+        parser.suggestions.add((context, suggestionsBuilder) -> {
           suggestionsBuilder.suggest("<", BENEATH_BLOCK);
           suggestionsBuilder.suggest(">", ABOVE_BLOCK);
         });
@@ -97,9 +97,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
         }
       }
       if (offset != 0) {
-        return new HorizontalOffsetBlockPredicate(offset, BlockPredicate.parse(parser));
+        return new HorizontalOffsetBlockPredicate(offset, BlockPredicate.parse(parser, suggestionsOnly));
       } else if (prefixed) {
-        return BlockPredicate.parse(parser);
+        return BlockPredicate.parse(parser, suggestionsOnly);
       }
       return null;
     }

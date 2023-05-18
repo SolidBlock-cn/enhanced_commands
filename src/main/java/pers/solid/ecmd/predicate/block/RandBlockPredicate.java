@@ -68,7 +68,7 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
+    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       value = parser.reader.readFloat();
       if (value > 1) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooHigh().createWithContext(parser.reader, value, 1);
@@ -83,8 +83,8 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
-      return new Parser().parse(parser);
+    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(parser, suggestionsOnly);
     }
   }
 }

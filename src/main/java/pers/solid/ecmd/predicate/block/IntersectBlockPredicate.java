@@ -66,8 +66,8 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
-      blockPredicates.add(BlockPredicate.parse(parser));
+    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      blockPredicates.add(BlockPredicate.parse(parser, suggestionsOnly));
     }
   }
 
@@ -75,8 +75,8 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
-      return new Parser(new ImmutableList.Builder<>()).parse(parser);
+    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser(new ImmutableList.Builder<>()).parse(parser, suggestionsOnly);
     }
   }
 }

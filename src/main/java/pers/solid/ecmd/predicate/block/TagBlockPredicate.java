@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * @see BlockArgumentParser#parseTagId()
  */
-public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull@UnmodifiableView Collection<PropertyNameEntry> propertyNameEntries) implements BlockPredicate {
+public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @UnmodifiableView Collection<PropertyNameEntry> propertyNameEntries) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     if (propertyNameEntries.isEmpty()) {
@@ -80,7 +80,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull@Unmodi
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser0) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
       SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {

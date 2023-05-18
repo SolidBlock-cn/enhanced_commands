@@ -12,11 +12,11 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import pers.solid.ecmd.util.SuggestionProvider;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
   public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.keyword_args.unknown_argument_name", o));
@@ -59,13 +59,13 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
     } catch (CommandSyntaxException ignored) {
     }
     final var builder2 = builder.createOffset(suggestedParser.reader.getCursor());
-    suggestedParser.suggestions.forEach(consumer -> consumer.accept(builder2, context));
+    suggestedParser.suggestions.forEach(consumer -> consumer.accept(context, builder2));
     return builder2.buildFuture();
   }
 
   private KeywordArgs parseAndSuggest(SuggestedParser parser, boolean hasSuggestions) throws CommandSyntaxException {
     final Map<String, Object> values = new HashMap<>();
-    final BiConsumer<SuggestionsBuilder, CommandContext<?>> nameSuggestion = (builder, context) -> CommandSource.suggestMatching(arguments.keySet().stream().filter(s -> !values.containsKey(s)), builder);
+    final SuggestionProvider nameSuggestion = (context, builder) -> CommandSource.suggestMatching(arguments.keySet().stream().filter(s -> !values.containsKey(s)), builder);
     if (hasSuggestions) {
       parser.suggestions.clear();
       parser.suggestions.add(nameSuggestion);
@@ -85,7 +85,7 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
       parser.reader.skipWhitespace();
       if (hasSuggestions) {
         parser.suggestions.clear();
-        parser.suggestions.add((builder, context) -> builder.suggest("="));
+        parser.suggestions.add((context, builder) -> builder.suggest("="));
       }
       parser.reader.expect('=');
       parser.reader.skipWhitespace();
@@ -93,7 +93,7 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
       final ArgumentType<?> argumentType = arguments.get(name);
       if (hasSuggestions) {
         parser.suggestions.clear();
-        parser.suggestions.add((builder, context) -> argumentType.listSuggestions(context, builder));
+        parser.suggestions.add((context, builder) -> argumentType.listSuggestions(context, builder));
       }
       final Object parse = argumentType.parse(parser.reader);
 

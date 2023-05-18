@@ -3,15 +3,21 @@ package pers.solid.ecmd.predicate.block;
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.argument.PosArgument;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.List;
 
@@ -72,18 +78,13 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
+    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        parser.suggestions.clear();
-        final int x, y, z;
-        x = parser.reader.readInt();
-        parser.reader.skipWhitespace();
-        y = parser.reader.readInt();
-        parser.reader.skipWhitespace();
-        z = parser.reader.readInt();
-        relPos = new BlockPos(x, y, z);
+        final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, true);
+        final PosArgument argument = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        relPos = argument.toAbsoluteBlockPos(new ServerCommandSource(null, Vec3d.ZERO, Vec2f.ZERO, null, 0, null, null, null, null));
       } else if (paramIndex == 1) {
-        blockPredicate = BlockPredicate.parse(parser);
+        blockPredicate = BlockPredicate.parse(parser, suggestionsOnly);
       }
     }
   }
@@ -92,8 +93,8 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
-      return new Parser().parse(parser);
+    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(parser, suggestionsOnly);
     }
   }
 }

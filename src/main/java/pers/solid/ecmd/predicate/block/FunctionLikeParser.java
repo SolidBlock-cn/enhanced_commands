@@ -28,10 +28,10 @@ public interface FunctionLikeParser<T> {
   @Contract(pure = true)
   Text tooltip();
 
-  default T parse(SuggestedParser parser) throws CommandSyntaxException {
+  default T parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final String name = functionName();
     if (name.startsWith(parser.reader.getRemaining().toLowerCase())) {
-      parser.suggestions.add((suggestionsBuilder, context) -> suggestionsBuilder.suggest(name + "(", tooltip()));
+      parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest(name + "(", tooltip()));
     }
     final int cursorBeforeUnion = parser.reader.getCursor();
     final String s = parser.reader.readUnquotedString();
@@ -46,7 +46,7 @@ public interface FunctionLikeParser<T> {
 
     // when allows zero params, deal with empty
     if (paramsCount >= minParamsCount()) {
-      parser.suggestions.add((suggestionsBuilder, context) -> {
+      parser.suggestions.add((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           suggestionsBuilder.suggest(")");
         }
@@ -63,12 +63,12 @@ public interface FunctionLikeParser<T> {
       }
     }
     while (true) {
-      parseParameter(parser, paramsCount);
-      paramsCount ++;
+      parseParameter(parser, paramsCount, suggestionsOnly);
+      paramsCount++;
       parser.reader.skipWhitespace();
       parser.suggestions.clear();
       final int finalParamsCount = paramsCount;
-      parser.suggestions.add((suggestionsBuilder, context) -> {
+      parser.suggestions.add((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           if (finalParamsCount < maxParamsCount()) {
             suggestionsBuilder.suggest(",");
@@ -104,5 +104,5 @@ public interface FunctionLikeParser<T> {
 
   T getParseResult();
 
-  void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException;
+  void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
 }

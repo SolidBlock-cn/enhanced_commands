@@ -48,8 +48,8 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
-      if (parser.reader.getRemaining().isEmpty()) parser.suggestions.add((suggestionsBuilder, context) -> suggestionsBuilder.suggest("!", Text.translatable("blockPredicate.negation")));
+    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      if (parser.reader.getRemaining().isEmpty()) parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("!", Text.translatable("blockPredicate.negation")));
       boolean negates = false;
       boolean suffixed = false;
       while (parser.reader.canRead() && parser.reader.peek() == '!') {
@@ -58,9 +58,9 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
         suffixed = true;
       }
       if (negates) {
-        return new NegatingBlockPredicate(BlockPredicate.parse(parser));
+        return new NegatingBlockPredicate(BlockPredicate.parse(parser, suggestionsOnly));
       } else if (suffixed) {
-        return BlockPredicate.parse(parser);
+        return BlockPredicate.parse(parser, suggestionsOnly);
       }
       return null;
     }

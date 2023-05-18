@@ -64,12 +64,12 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
       this.reader.setCursor(cursorBeforeParsing);
       return BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(this.reader, this.blockId.toString());
     }).value();
-    suggestions.add((suggestionsBuilder, context) -> suggestionsBuilder.suggest("[", START_OF_PROPERTIES));
+    suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("[", START_OF_PROPERTIES));
   }
 
   public void parseProperties() throws CommandSyntaxException {
     suggestions.clear();
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("[", START_OF_PROPERTIES);
       }
@@ -82,7 +82,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
       return;
     }
     addPropertyNameSuggestions();
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
       }
@@ -167,7 +167,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
   }
 
   private void addPropertiesFinishedSuggestions() {
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest(",", NEXT_PROPERTY);
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
@@ -176,7 +176,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
   }
 
   private void addComparatorTypeSuggestions() {
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       for (Comparator value : Comparator.values()) {
         if (value.asString().startsWith(suggestionsBuilder.getRemaining())) {
           suggestionsBuilder.suggest(value.asString());
@@ -186,7 +186,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
   }
 
   private void addPropertyNameSuggestions() {
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       for (Property<?> property : block.getStateManager().getProperties()) {
         if (property.getName().startsWith(suggestionsBuilder.getRemainingLowerCase())) {
           suggestionsBuilder.suggest(property.getName());
@@ -200,7 +200,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
     if (comparator == Comparator.EQ || comparator == Comparator.NE) {
       addSpecialPropertyValueSuggestions();
     }
-    suggestions.add((suggestionsBuilder, context) -> suggestValuesForProperty(property, suggestionsBuilder));
+    suggestions.add((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder));
     if (reader.canRead()) {
       if (comparator == Comparator.EQ || comparator == Comparator.NE) {
         if (reader.peek() == '*') {
@@ -224,7 +224,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
   }
 
   private void addSpecialPropertyValueSuggestions() {
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         if (suggestionsBuilder.getInput().endsWith("!=")) {
           suggestionsBuilder.suggest("*", MATCH_NONE_VALUE);
@@ -257,7 +257,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
       reader.skip();
 
       // start parsing tag id, after the hash symbol
-      suggestions.add((suggestionsBuilder, context) -> CommandSource.suggestIdentifiers(this.registryWrapper.streamTagKeys().map(TagKey::id), suggestionsBuilder, "#"));
+      suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestIdentifiers(this.registryWrapper.streamTagKeys().map(TagKey::id), suggestionsBuilder, "#"));
       Identifier identifier = Identifier.fromCommandInput(this.reader);
       this.tagId = this.registryWrapper.getOptional(TagKey.of(RegistryKeys.BLOCK, identifier)).orElseThrow(() -> {
         this.reader.setCursor(cursorBeforeHash);
@@ -268,7 +268,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
 
   public void parsePropertyName() throws CommandSyntaxException {
     suggestions.clear();
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("[", START_OF_PROPERTIES);
       }
@@ -281,7 +281,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
       return;
     }
     addTagPropertiesNameSuggestions();
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
       }
@@ -373,7 +373,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
   }
 
   private void addTagPropertiesNameSuggestions() {
-    suggestions.add((suggestionsBuilder, context) -> {
+    suggestions.add((context, suggestionsBuilder) -> {
       String string = suggestionsBuilder.getRemainingLowerCase();
       if (this.tagId != null) {
         for (RegistryEntry<Block> registryEntry : this.tagId) {
@@ -389,7 +389,7 @@ public class SimpleBlockPredicateSuggestedParser extends SuggestedParser {
 
   private void addTagPropertiesValueSuggestions(String propertyName) {
     if (this.tagId != null) {
-      suggestions.add((suggestionsBuilder, context) -> {
+      suggestions.add((context, suggestionsBuilder) -> {
         for (RegistryEntry<Block> registryEntry : this.tagId) {
           Block block = registryEntry.value();
           Property<?> property = block.getStateManager().getProperty(propertyName);

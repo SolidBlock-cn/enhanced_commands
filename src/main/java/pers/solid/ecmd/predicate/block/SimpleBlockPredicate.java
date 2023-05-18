@@ -67,7 +67,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyEntry<?>> pro
   }
 
   private <T extends Comparable<T>> MutableText expressPropertyValue(BlockState blockState, Property<T> property) {
-    return Text.literal(property.getName() + "=" +( blockState.contains(property) ? property.name(blockState.get(property)) : "!"));
+    return Text.literal(property.getName() + "=" + (blockState.contains(property) ? property.name(blockState.get(property)) : "!"));
   }
 
   @Override
@@ -84,9 +84,9 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyEntry<?>> pro
     INSTANCE;
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser0) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
       SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(parser0);
-      parser.suggestions.add((suggestionsBuilder, context) -> CommandSource.forEachMatching(parser.registryWrapper.streamKeys().map(RegistryKey::getValue)::iterator, suggestionsBuilder.getRemaining().toLowerCase(), id -> id, id -> suggestionsBuilder.suggest(id.toString())));
+      parser.suggestions.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(parser.registryWrapper.streamKeys().map(RegistryKey::getValue)::iterator, suggestionsBuilder.getRemaining().toLowerCase(), id -> id, id -> suggestionsBuilder.suggest(id.toString())));
       if (parser.reader.canRead() && Identifier.isCharValid(parser.reader.peek())) {
         parser.parseBlockId();
         parser.parseProperties();

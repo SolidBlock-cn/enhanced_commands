@@ -10,14 +10,14 @@ import pers.solid.ecmd.argument.SuggestedParser;
  */
 public interface RegionArgument<T extends Region> {
   @NotNull
-  static RegionArgument<?> parse(SuggestedParser parser) throws CommandSyntaxException {
+  static RegionArgument<?> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
     int cursorOnEnd = cursorOnStart;
     for (RegionType<?> type : RegionType.REGISTRY) {
       try {
         parser.reader.setCursor(cursorOnStart);
-        final RegionArgument<?> parse = type.parse(parser);
+        final RegionArgument<?> parse = type.parse(parser, suggestionsOnly);
         if (parse != null) {
           // keep the current position of the cursor
           return parse;

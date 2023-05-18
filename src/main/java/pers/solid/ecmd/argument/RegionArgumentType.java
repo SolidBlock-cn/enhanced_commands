@@ -14,7 +14,6 @@ import pers.solid.ecmd.region.RegionArgument;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 
 public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<RegionArgument<?>> {
   public static RegionArgumentType region(CommandRegistryAccess commandRegistryAccess) {
@@ -30,7 +29,7 @@ public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) im
 
   @Override
   public RegionArgument<?> parse(StringReader reader) throws CommandSyntaxException {
-    return RegionArgument.parse(new SuggestedParser(commandRegistryAccess, reader));
+    return RegionArgument.parse(new SuggestedParser(commandRegistryAccess, reader), false);
   }
 
   @Override
@@ -39,14 +38,11 @@ public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) im
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(commandRegistryAccess, stringReader);
     try {
-      RegionArgument.parse(parser);
+      RegionArgument.parse(parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
-    for (BiConsumer<SuggestionsBuilder, CommandContext<?>> suggestion : parser.suggestions) {
-      suggestion.accept(builderOffset, context);
-    }
-    return builderOffset.buildFuture();
+    return parser.buildSuggestions(context, builderOffset);
   }
 
   @Override

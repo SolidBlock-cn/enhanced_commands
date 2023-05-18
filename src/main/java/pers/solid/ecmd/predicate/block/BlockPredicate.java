@@ -18,14 +18,14 @@ public interface BlockPredicate extends SerializablePredicate {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_state_predicate.cannotParse"));
 
   @NotNull
-  static BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
+  static BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
     int cursorOnEnd = cursorOnStart;
     for (BlockPredicateType<?> type : BlockPredicateType.REGISTRY) {
       try {
         parser.reader.setCursor(cursorOnStart);
-        final BlockPredicate parse = type.parse(parser);
+        final BlockPredicate parse = type.parse(parser, suggestionsOnly);
         if (parse != null) {
           // keep the current position of the cursor
           return parse;

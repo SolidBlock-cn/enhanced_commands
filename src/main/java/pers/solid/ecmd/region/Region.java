@@ -33,12 +33,15 @@ public interface Region extends Iterable<BlockPos>, StringIdentifiable {
   @Contract(pure = true)
   boolean contains(@NotNull Vec3d vec3d);
 
+  /**
+   * Returns an iterator of the block pos. <strong>Important note: </strong>The returned {@link BlockPos} may be {@linkplain BlockPos.Mutable mutable}. The returned value may be a <em>same</em> object, but may have different in each iteration. If you'd like to store the positions in a collection, or use them for other intentions, please call {@link BlockPos.Mutable#toImmutable()} to avoid potential issues.
+   */
   @NotNull
   @Override
   Iterator<BlockPos> iterator();
 
   /**
-   * Generates a stream from its iteration using {@link Streams#stream(Iterable)}.
+   * Creates a stream from its iteration using {@link Streams#stream(Iterable)}. <strong>Important note: </strong>The {@link BlockPos} in the stream may be {@linkplain BlockPos.Mutable mutable}. See {@link #iterator()} for more information.
    */
   default Stream<BlockPos> stream() {
     return Streams.stream(this);
@@ -73,12 +76,14 @@ public interface Region extends Iterable<BlockPos>, StringIdentifiable {
   /**
    * @return The total accurate volume of the region.
    */
-  @Contract(pure = true) double volume();
+  @Contract(pure = true)
+  double volume();
 
   /**
    * @return The <em>estimated</em> number that will be affected. It will be used to determine how should a multi-block operation be executed.
    */
-  @Contract(pure = true) default long numberOfBlocksAffected() {
+  @Contract(pure = true)
+  default long numberOfBlocksAffected() {
     return Math.round(volume());
   }
 

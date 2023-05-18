@@ -20,5 +20,5 @@ public interface BlockPredicateType<T extends BlockPredicate> {
     return null;
   }
 
-  @Nullable BlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException;
+  @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
 }

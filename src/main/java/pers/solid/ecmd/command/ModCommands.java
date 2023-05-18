@@ -19,5 +19,6 @@ public final class ModCommands implements CommandRegistrationCallback {
     SetBlocksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TasksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestForCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    TestPosCommand.INSTANCE.register(dispatcher, registryAccess, environment);
   }
 }

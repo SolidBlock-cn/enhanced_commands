@@ -46,7 +46,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     for (Direction direction : directions) {
       var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
       final boolean test = exposureType.test(offsetCachedBlockPosition, direction);
-      testResults.add(new TestResult(test, Text.translatable("blockPredicate.expose.side." + (test ? "pass":"fail"), EnhancedCommands.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
+      testResults.add(new TestResult(test, Text.translatable("blockPredicate.expose.side." + (test ? "pass" : "fail"), EnhancedCommands.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
       if (test) {
         result = true;
       }
@@ -152,10 +152,10 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex) throws CommandSyntaxException {
+    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         parser.suggestions.clear();
-        parser.suggestions.add((suggestionsBuilder, context) -> SuggestionUtil.suggestMatchingEnumWithTooltip(Arrays.asList(ExposureType.values()), ExposureType::getDisplayName, suggestionsBuilder));
+        parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestMatchingEnumWithTooltip(Arrays.asList(ExposureType.values()), ExposureType::getDisplayName, suggestionsBuilder));
         final int cursorBeforeReadString = parser.reader.getCursor();
         final String id = parser.reader.readString();
         exposureType = ExposureType.CODEC.byId(id);
@@ -168,13 +168,13 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
           parser.suggestions.clear();
           parser.reader.skipWhitespace();
           if (directions.isEmpty()) {
-            parser.suggestions.add((suggestionsBuilder, context) -> {
+            parser.suggestions.add((context, suggestionsBuilder) -> {
               SuggestionUtil.suggestString("all", Text.translatable("enhancedCommands.direction.all"), suggestionsBuilder);
               SuggestionUtil.suggestString("horizontal", Text.translatable("enhancedCommands.direction.horizontal"), suggestionsBuilder);
               SuggestionUtil.suggestString("vertical", Text.translatable("enhancedCommands.direction.vertical"), suggestionsBuilder);
             });
           }
-          parser.suggestions.add((builder, context) -> SuggestionUtil.suggestDirections(builder));
+          parser.suggestions.add((context, builder) -> SuggestionUtil.suggestDirections(builder));
           final int cursorBeforeReadString = parser.reader.getCursor();
           final String id = parser.reader.readString();
           if (id.isEmpty()) break;
@@ -212,8 +212,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     INSTANCE;
 
     @Override
-    public @NotNull ExposeBlockPredicate parse(SuggestedParser parser) throws CommandSyntaxException {
-      return new Parser().parse(parser);
+    public @NotNull ExposeBlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(parser, suggestionsOnly);
     }
   }
 }
