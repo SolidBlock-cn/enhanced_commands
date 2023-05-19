@@ -71,6 +71,21 @@ public interface Region extends Iterable<BlockPos>, StringIdentifiable {
   @NotNull
   Region mirrored(@NotNull Vec3d center, @NotNull Direction.Axis axis);
 
+  @NotNull
+  default Region expanded(double offset) {
+    throw new UnsupportedOperationException();
+  }
+
+  @NotNull
+  default Region expanded(double offset, Direction.Axis axis) {
+    throw new UnsupportedOperationException();
+  }
+
+  @NotNull
+  default Region expanded(double offset, Direction direction) {
+    throw new UnsupportedOperationException();
+  }
+
   @NotNull RegionType<?> getType();
 
   /**
@@ -88,5 +103,5 @@ public interface Region extends Iterable<BlockPos>, StringIdentifiable {
   }
 
   @Override
-  String asString();
+  @NotNull String asString();
 }

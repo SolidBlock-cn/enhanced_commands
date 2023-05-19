@@ -84,6 +84,53 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
+  public @NotNull Region expanded(double offset) {
+    if (offset % 1 == 0) {
+      return expanded((int) offset);
+    } else {
+      return asCuboidRegion().expanded(offset);
+    }
+  }
+
+  public @NotNull BlockCuboidRegion expanded(int offset) {
+    return new BlockCuboidRegion(blockBox().expand(offset));
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset, Direction.Axis axis) {
+    if (offset % 1 == 0) {
+      return expanded((int) offset, axis);
+    } else {
+      return asCuboidRegion().expanded(offset, axis);
+    }
+  }
+
+  public @NotNull BlockCuboidRegion expanded(int offset, Direction.Axis axis) {
+    var x = axis.choose(offset, 0, 0);
+    var y = axis.choose(0, offset, 0);
+    var z = axis.choose(0, 0, offset);
+    return new BlockCuboidRegion(minX - x, minY - y, minZ - z, maxX + x, maxX + y, maxZ + z);
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset, Direction direction) {
+    if (offset % 1 == 0) {
+      return expanded((int) offset, direction);
+    } else {
+      return asCuboidRegion().expanded(offset, direction);
+    }
+  }
+
+  public @NotNull BlockCuboidRegion expanded(int offset, Direction direction) {
+    var vector = direction.getVector().multiply(offset);
+    if (direction.getOffsetX() + direction.getOffsetY() + direction.getOffsetZ() > 0) {
+      return new BlockCuboidRegion(minX, minY, minZ, maxX + vector.getX(), maxY + vector.getY(), maxZ + vector.getZ());
+    } else {
+      return new BlockCuboidRegion(minX + vector.getX(), minY + vector.getY(), minZ + vector.getZ(), maxX, maxY, maxZ);
+    }
+  }
+
+  @Override
   public @NotNull RegionType<?> getType() {
     return RegionTypes.CUBOID;
   }
@@ -99,7 +146,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return "cuboid(%s %s %s, %s %s %s)".formatted(Integer.toString(minX), Integer.toString(minY), Integer.toString(minZ), Integer.toString(maxX), Integer.toString(maxY), Integer.toString(maxZ));
   }
 

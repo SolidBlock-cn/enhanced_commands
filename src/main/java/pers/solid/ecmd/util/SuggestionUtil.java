@@ -65,10 +65,6 @@ public final class SuggestionUtil {
 
   /**
    * Parse and provide suggestions from an {@link ArgumentType}, and make sure all suggestions are provided correctly at a correct place.
-   * <hr>
-   * 说明：如果采用传统的方式，可能存在以下的问题，如：<br>
-   * ~ ~ <-[建议：~ ~ ~]   预期：~ ~ <-[建议：~]<br>
-   * 在运行 {@code listSuggestions} 时，{@code suggestionBuilder.getRemaining()} 为空。
    */
   public static <T> T suggestParserFromType(ArgumentType<T> argumentType, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final int cursorBeforeParse = parser.reader.getCursor();

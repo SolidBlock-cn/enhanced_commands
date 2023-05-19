@@ -12,15 +12,35 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 
-public record RandBlockPredicate(float value) implements BlockPredicate {
+import java.util.Random;
+
+/**
+ * <p>The predicate that passes only a probability test is passed.</p>
+ * <h2>Syntax</h2>
+ * <ul>
+ *   <li>{@code rand(<value>)} - passes under a specified probability.</li>
+ *   <li>{@code rand(<value>, <predicate>)} - passes when both probability test and another block predicate passes. Identical to {@code all(rand(value), <predicate>)}.</li>
+ *   </ul>
+ */
+public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate) implements BlockPredicate {
+  private static final Random RANDOM = new Random();
+
   @Override
   public @NotNull String asString() {
-    return "rand(" + value + ")";
+    if (predicate == null) {
+      return "rand(" + value + ")";
+    } else {
+      return "rand(" + value + ", " + predicate.asString() + ")";
+    }
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return RandomUtils.nextFloat(0, 1) < value;
+    if (predicate == null) {
+      return RANDOM.nextFloat() < value;
+    } else {
+      return RANDOM.nextFloat() < value && predicate.test(cachedBlockPosition);
+    }
   }
 
   @Override
@@ -42,6 +62,7 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
 
   public static final class Parser implements FunctionLikeParser<RandBlockPredicate> {
     private float value;
+    private @Nullable BlockPredicate predicate;
 
     @Override
     public @NotNull String functionName() {
@@ -55,7 +76,7 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
 
     @Override
     public RandBlockPredicate getParseResult() {
-      return new RandBlockPredicate(value);
+      return new RandBlockPredicate(value, predicate);
     }
 
     @Override
@@ -64,17 +85,21 @@ public record RandBlockPredicate(float value) implements BlockPredicate {
     }
 
     public int maxParamsCount() {
-      return 1;
+      return 2;
     }
 
     @Override
     public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      value = parser.reader.readFloat();
-      if (value > 1) {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooHigh().createWithContext(parser.reader, value, 1);
-      }
-      if (value < 0) {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooLow().createWithContext(parser.reader, value, 0);
+      if (paramIndex == 0) {
+        value = parser.reader.readFloat();
+        if (value > 1) {
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooHigh().createWithContext(parser.reader, value, 1);
+        }
+        if (value < 0) {
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooLow().createWithContext(parser.reader, value, 0);
+        }
+      } else if (paramIndex == 1) {
+        predicate = BlockPredicate.parse(parser, suggestionsOnly);
       }
     }
   }

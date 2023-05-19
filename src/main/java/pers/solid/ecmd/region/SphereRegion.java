@@ -54,12 +54,12 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   }
 
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return "sphere(%s %s %s, %s)".formatted(center.x, center.y, center.z, radius);
   }
 
   public enum Type implements RegionType<SphereRegion> {
-    INSTANCE;
+    SPHERE_TYPE;
 
     @Override
     public @Nullable RegionArgument<SphereRegion> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
@@ -68,7 +68,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   }
 
   public static final class Parser implements FunctionLikeParser<RegionArgument<SphereRegion>> {
-    private PosArgument centerPos = EnhancedPosArgumentType.HERE_DOUBLE;
+    private PosArgument centerPos = EnhancedPosArgumentType.HERE_INT;
     private double radius;
 
     @Override

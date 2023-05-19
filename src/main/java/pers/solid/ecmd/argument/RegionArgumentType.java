@@ -23,8 +23,16 @@ public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) im
   /**
    * @see net.minecraft.command.argument.Vec3ArgumentType#getVec3(CommandContext, String)
    */
-  public static Region getRegion(CommandContext<ServerCommandSource> context, String name) {
-    return context.getArgument(name, RegionArgument.class).toAbsoluteRegion(context.getSource());
+  public static Region getRegion(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    try {
+      return context.getArgument(name, RegionArgument.class).toAbsoluteRegion(context.getSource());
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
+        throw commandSyntaxException;
+      } else {
+        throw e;
+      }
+    }
   }
 
   @Override

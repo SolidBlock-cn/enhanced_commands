@@ -16,7 +16,10 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.SuggestionUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * To test which a block is exposed in the specified directions and the specified type.
@@ -155,14 +158,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         parser.suggestions.clear();
-        parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestMatchingEnumWithTooltip(Arrays.asList(ExposureType.values()), ExposureType::getDisplayName, suggestionsBuilder));
-        final int cursorBeforeReadString = parser.reader.getCursor();
-        final String id = parser.reader.readString();
-        exposureType = ExposureType.CODEC.byId(id);
-        if (exposureType == null) {
-          parser.reader.setCursor(cursorBeforeReadString);
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
-        }
+        exposureType = parser.readAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
       } else if (paramIndex == 1) {
         do {
           parser.suggestions.clear();

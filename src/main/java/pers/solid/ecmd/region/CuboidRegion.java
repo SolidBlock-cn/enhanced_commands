@@ -85,6 +85,31 @@ public record CuboidRegion(Box box) implements Region {
   }
 
   @Override
+  public @NotNull Region expanded(double offset) {
+    return new CuboidRegion(box.expand(offset));
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset, Direction.Axis axis) {
+    var x = axis.choose(offset, 0, 0);
+    var y = axis.choose(0, offset, 0);
+    var z = axis.choose(0, 0, offset);
+    return new CuboidRegion(box.expand(x, y, z));
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset, Direction direction) {
+    if (offset > 0) {
+      return new CuboidRegion(box.stretch(Vec3d.of(direction.getVector()).multiply(offset)));
+    } else if (offset < 0) {
+      var vec = Vec3d.of(direction.getVector()).multiply(offset);
+      return new CuboidRegion(box.shrink(vec.x, vec.y, vec.z));
+    } else {
+      return this;
+    }
+  }
+
+  @Override
   public @NotNull RegionType<?> getType() {
     return RegionTypes.CUBOID;
   }
@@ -101,12 +126,12 @@ public record CuboidRegion(Box box) implements Region {
   }
 
   @Override
-  public String asString() {
+  public @NotNull String asString() {
     return "cuboid(%s %s %s, %s %s %s)".formatted(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
   }
 
   public enum Type implements RegionType<CuboidRegion> {
-    INSTANCE;
+    CUBOID_TYPE;
 
     @Override
     public @Nullable RegionArgument<Region> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
