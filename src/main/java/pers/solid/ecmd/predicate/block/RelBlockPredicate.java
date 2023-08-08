@@ -17,6 +17,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.List;

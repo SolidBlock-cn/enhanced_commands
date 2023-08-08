@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.ArrayList;
@@ -37,7 +38,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     for (Direction direction : directions) {
       var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
-      if (exposureType.test(offsetCachedBlockPosition, direction)) return true;
+      if (exposureType.test(offsetCachedBlockPosition, direction))
+        return true;
     }
     return false;
   }
@@ -160,7 +162,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
         parser.suggestions.clear();
         exposureType = parser.readAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
       } else if (paramIndex == 1) {
-        do {
+        do
+        {
           parser.suggestions.clear();
           parser.reader.skipWhitespace();
           if (directions.isEmpty()) {
@@ -173,7 +176,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
           parser.suggestions.add((context, builder) -> SuggestionUtil.suggestDirections(builder));
           final int cursorBeforeReadString = parser.reader.getCursor();
           final String id = parser.reader.readString();
-          if (id.isEmpty()) break;
+          if (id.isEmpty())
+            break;
           if (directions.isEmpty()) {
             switch (id) {
               case "all" -> {

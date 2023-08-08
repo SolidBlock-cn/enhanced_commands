@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.predicate.block.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.Collections;

@@ -12,7 +12,7 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.predicate.block.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionLikeParser;
 
 import java.util.Iterator;
 import java.util.function.Predicate;

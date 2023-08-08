@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.predicate.block.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.ArrayList;
@@ -53,9 +53,12 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
   public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineRegion.OutlineTypes outlineType, BlockPos testPos) {
     outlineType = switch (outlineType) {
-      case EXPOSE -> OutlineRegion.OutlineTypes.HORIZONTALLY_EXPOSE;
-      case NEARLY_EXPOSE -> OutlineRegion.OutlineTypes.HORIZONTALLY_NEARLY_EXPOSE;
-      default -> outlineType;
+      case EXPOSE ->
+          OutlineRegion.OutlineTypes.HORIZONTALLY_EXPOSE;
+      case NEARLY_EXPOSE ->
+          OutlineRegion.OutlineTypes.HORIZONTALLY_NEARLY_EXPOSE;
+      default ->
+          outlineType;
     };
     return outlineType.modifiedTest(blockPos -> {
       final Vec3d centerPos = blockPos.toCenterPos();
@@ -130,9 +133,12 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
     var roundSurface = Math.PI * MathHelper.square(cylinderRegion.radius());
     var roundWallSurface = roundSurface - Math.PI * MathHelper.square(cylinderRegion.radius() - 1);
     return switch (outlineType) {
-      case EXPOSE, NEARLY_EXPOSE -> 2 * roundSurface + (cylinderRegion.height() - 2) * roundWallSurface;
-      case HORIZONTALLY_EXPOSE, HORIZONTALLY_NEARLY_EXPOSE -> cylinderRegion.height() * roundWallSurface;
-      case VERTICALLY_EXPOSE -> 2 * roundSurface;
+      case EXPOSE, NEARLY_EXPOSE ->
+          2 * roundSurface + (cylinderRegion.height() - 2) * roundWallSurface;
+      case HORIZONTALLY_EXPOSE, HORIZONTALLY_NEARLY_EXPOSE ->
+          cylinderRegion.height() * roundWallSurface;
+      case VERTICALLY_EXPOSE ->
+          2 * roundSurface;
     };
   }
 

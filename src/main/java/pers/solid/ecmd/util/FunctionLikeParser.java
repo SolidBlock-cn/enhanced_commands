@@ -1,4 +1,4 @@
-package pers.solid.ecmd.predicate.block;
+package pers.solid.ecmd.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;

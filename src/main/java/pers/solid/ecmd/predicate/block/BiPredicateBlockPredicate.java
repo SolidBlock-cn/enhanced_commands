@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.FunctionLikeParser;
 
 import java.util.List;
 
@@ -100,7 +101,8 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
         if (parse1 != null) {
           return parse1;
         }
-      } catch (CommandSyntaxException exception1) {
+      } catch (
+          CommandSyntaxException exception1) {
         exception = exception1;
       }
       final BiPredicateBlockPredicate parse2 = new Parser("diff", Text.translatable("blockPredicate.bi_predicate_diff"), false).parse(parser, suggestionsOnly);

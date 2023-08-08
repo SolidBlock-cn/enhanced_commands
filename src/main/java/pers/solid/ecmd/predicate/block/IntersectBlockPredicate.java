@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.SerializablePredicate;
+import pers.solid.ecmd.util.FunctionLikeParser;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +34,8 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     for (BlockPredicate blockPredicate : blockPredicates) {
       TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition);
       results.add(testResult);
-      if (testResult.successes()) successes++;
+      if (testResult.successes())
+        successes++;
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes < build.size()) {
