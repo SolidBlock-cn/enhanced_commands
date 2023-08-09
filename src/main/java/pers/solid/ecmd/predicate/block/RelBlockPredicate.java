@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.argument.PosArgument;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -45,6 +46,12 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
   @Override
   public @NotNull String asString() {
     return "rel(%s %s %s, %s)".formatted(relPos.getX(), relPos.getY(), relPos.getZ(), predicate.asString());
+  }
+
+  @Override
+  public void writeNbt(NbtCompound nbtCompound) {
+    nbtCompound.putIntArray("pos", new int[]{relPos.getX(), relPos.getY(), relPos.getZ()});
+    nbtCompound.put("predicate", predicate.createNbt());
   }
 
   public static final class Parser implements FunctionLikeParser<RelBlockPredicate> {
@@ -92,6 +99,16 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
 
   public enum Type implements BlockPredicateType<RelBlockPredicate> {
     INSTANCE;
+
+    @Override
+    public @NotNull RelBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+      final int[] intArray = nbtCompound.getIntArray("pos");
+      if (intArray.length != 3) {
+        throw new IllegalArgumentException("The length of integer array 'pos' must be 3.");
+      } else {
+        return new RelBlockPredicate(new Vec3i(intArray[0], intArray[1], intArray[2]), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
+      }
+    }
 
     @Override
     public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {

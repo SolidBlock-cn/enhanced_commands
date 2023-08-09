@@ -4,6 +4,9 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +53,13 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     return BlockPredicateTypes.UNION;
   }
 
+  @Override
+  public void writeNbt(NbtCompound nbtCompound) {
+    final NbtList nbtList = new NbtList();
+    nbtCompound.put("predicates", nbtList);
+    nbtList.addAll(Collections2.transform(blockPredicates, BlockPredicate::createNbt));
+  }
+
   public record Parser(ImmutableList.Builder<BlockPredicate> blockPredicates) implements FunctionLikeParser<UnionBlockPredicate> {
 
     @Override
@@ -76,6 +86,11 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
 
   public enum Type implements BlockPredicateType<UnionBlockPredicate> {
     INSTANCE;
+
+    @Override
+    public @NotNull UnionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+      return new UnionBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement)).toList());
+    }
 
     @Override
     public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {

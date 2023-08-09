@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +38,13 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   @Override
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.BI_PREDICATE;
+  }
+
+  @Override
+  public void writeNbt(NbtCompound nbtCompound) {
+    nbtCompound.putBoolean("same", same);
+    nbtCompound.put("predicate1", blockPredicate1.createNbt());
+    nbtCompound.put("predicate2", blockPredicate2.createNbt());
   }
 
   public static final class Parser implements FunctionLikeParser<BiPredicateBlockPredicate> {
@@ -92,6 +100,14 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
 
   public enum Type implements BlockPredicateType<BiPredicateBlockPredicate> {
     INSTANCE;
+
+    @Override
+    public @NotNull BiPredicateBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+      final boolean same = nbtCompound.getBoolean("same");
+      final BlockPredicate predicate1 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate1"));
+      final BlockPredicate predicate2 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate2"));
+      return new BiPredicateBlockPredicate(predicate1, predicate2, same);
+    }
 
     @Override
     public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {

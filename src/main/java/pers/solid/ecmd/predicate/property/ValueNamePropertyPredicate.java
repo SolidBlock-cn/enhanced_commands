@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.property;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.command.TestResult;
 
-public record ValueNamePropertyEntry(String propertyName, Comparator comparator, String valueName) implements PropertyNameEntry {
+public record ValueNamePropertyPredicate(String propertyName, Comparator comparator, String valueName) implements PropertyNamePredicate {
   @Override
   public @NotNull String asString() {
     return propertyName + comparator.asString() + valueName;
@@ -22,7 +23,8 @@ public record ValueNamePropertyEntry(String propertyName, Comparator comparator,
   public boolean test(BlockState blockState) {
     final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
     final Property<?> property = stateManager.getProperty(propertyName);
-    if (property == null) return false;
+    if (property == null)
+      return false;
     return comparator.parseAndTest(blockState, property, valueName);
   }
 
@@ -47,5 +49,12 @@ public record ValueNamePropertyEntry(String propertyName, Comparator comparator,
   @NotNull
   private static <T extends Comparable<T>> MutableText propertyAndValue(BlockState blockState, Property<T> property) {
     return Text.literal(property.getName() + "=" + property.name(blockState.get(property)));
+  }
+
+  @Override
+  public void writeNbt(NbtCompound nbtCompound) {
+    nbtCompound.putString("property", propertyName);
+    nbtCompound.putString("comparator", comparator.asString());
+    nbtCompound.putString("value", valueName);
   }
 }

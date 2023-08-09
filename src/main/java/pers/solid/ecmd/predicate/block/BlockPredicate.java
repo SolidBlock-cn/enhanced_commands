@@ -5,17 +5,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.SerializablePredicate;
+import pers.solid.ecmd.util.NbtConvertible;
 
-public interface BlockPredicate extends SerializablePredicate {
-  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_state_predicate.cannotParse"));
+public interface BlockPredicate extends SerializablePredicate, NbtConvertible {
+  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
 
   @NotNull
   static BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
@@ -31,13 +30,15 @@ public interface BlockPredicate extends SerializablePredicate {
           return parse;
         }
 
-      } catch (CommandSyntaxException exception1) {
+      } catch (
+          CommandSyntaxException exception1) {
         cursorOnEnd = parser.reader.getCursor();
         exception = exception1;
       }
     }
     parser.reader.setCursor(cursorOnEnd);
-    if (exception != null) throw exception;
+    if (exception != null)
+      throw exception;
     throw CANNOT_PARSE.createWithContext(parser.reader);
   }
 
@@ -50,24 +51,18 @@ public interface BlockPredicate extends SerializablePredicate {
 
   @NotNull BlockPredicateType<?> getType();
 
-  @Contract(mutates = "param1")
-  default void writeNbt(NbtCompound nbtCompound) {
-    // TODO: 2023/4/24, 024 nbt
-  }
-
   @Override
-  default NbtElement asNbt() {
-    NbtCompound nbtCompound = new NbtCompound();
+  default NbtCompound createNbt() {
+    final NbtCompound nbt = NbtConvertible.super.createNbt();
     final BlockPredicateType<?> type = getType();
     final Identifier id = BlockPredicateType.REGISTRY.getId(type);
-    nbtCompound.putString("type", Preconditions.checkNotNull(id, "Unknown block state predicate type: %s", type).toString());
-    writeNbt(nbtCompound);
-    return nbtCompound;
+    nbt.putString("type", Preconditions.checkNotNull(id, "Unknown block predicate type: %s", type).toString());
+    return nbt;
   }
 
   static BlockPredicate fromNbt(NbtCompound nbtCompound) {
     final BlockPredicateType<?> type = BlockPredicateType.REGISTRY.get(new Identifier(nbtCompound.getString("type")));
-    Preconditions.checkNotNull(type, "Unknown type: %s", type);
+    Preconditions.checkNotNull(type, "Unknown block predicate type: %s", type);
     return type.fromNbt(nbtCompound);
   }
 }

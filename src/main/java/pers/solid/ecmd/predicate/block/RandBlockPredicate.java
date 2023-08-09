@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -61,6 +63,16 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     return BlockPredicateTypes.RAND;
   }
 
+  @Override
+  public void writeNbt(NbtCompound nbtCompound) {
+    nbtCompound.putFloat("value", value);
+    if (predicate != null) {
+      nbtCompound.put("predicate", predicate.createNbt());
+    } else {
+      nbtCompound.remove("predicate");
+    }
+  }
+
   public static final class Parser implements FunctionLikeParser<RandBlockPredicate> {
     private float value;
     private @Nullable BlockPredicate predicate;
@@ -107,6 +119,15 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
 
   public enum Type implements BlockPredicateType<RandBlockPredicate> {
     INSTANCE;
+
+    @Override
+    public @NotNull RandBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+      if (nbtCompound.contains("predicate", NbtElement.COMPOUND_TYPE)) {
+        return new RandBlockPredicate(nbtCompound.getFloat("value"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
+      } else {
+        return new RandBlockPredicate(nbtCompound.getFloat("value"), null);
+      }
+    }
 
     @Override
     public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {

@@ -40,7 +40,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
 
   @Override
   public void writeNbt(NbtCompound nbtCompound) {
-    nbtCompound.put("predicate", blockPredicate.asNbt());
+    nbtCompound.put("predicate", blockPredicate.createNbt());
   }
 
 
@@ -48,8 +48,14 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
     INSTANCE;
 
     @Override
+    public @NotNull NegatingBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+      return new NegatingBlockPredicate(BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
+    }
+
+    @Override
     public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      if (parser.reader.getRemaining().isEmpty()) parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("!", Text.translatable("blockPredicate.negation")));
+      if (parser.reader.getRemaining().isEmpty())
+        parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("!", Text.translatable("blockPredicate.negation")));
       boolean negates = false;
       boolean suffixed = false;
       while (parser.reader.canRead() && parser.reader.peek() == '!') {

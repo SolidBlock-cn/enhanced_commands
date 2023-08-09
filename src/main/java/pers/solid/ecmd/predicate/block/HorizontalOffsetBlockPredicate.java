@@ -16,8 +16,8 @@ import pers.solid.ecmd.command.TestResult;
 import java.util.List;
 
 public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPredicate) implements BlockPredicate {
-  public static final Text ABOVE_BLOCK = Text.translatable("enhancedCommands.argument.block_state_predicate.above_block");
-  public static final Text BENEATH_BLOCK = Text.translatable("enhancedCommands.argument.block_state_predicate.beneath_block");
+  public static final Text ABOVE_BLOCK = Text.translatable("enhancedCommands.argument.block_predicate.above_block");
+  public static final Text BENEATH_BLOCK = Text.translatable("enhancedCommands.argument.block_predicate.beneath_block");
 
   @Override
   public @NotNull String asString() {
@@ -59,17 +59,18 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   @Override
   public void writeNbt(NbtCompound nbtCompound) {
     nbtCompound.putInt("offset", offset);
-    nbtCompound.put("predicate", blockPredicate.asNbt());
-  }
-
-  public static HorizontalOffsetBlockPredicate fromNbt(NbtCompound nbtCompound) {
-    final int offset = nbtCompound.getInt("offset");
-    final BlockPredicate predicate = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"));
-    return new HorizontalOffsetBlockPredicate(offset, predicate);
+    nbtCompound.put("predicate", blockPredicate.createNbt());
   }
 
   public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate> {
     INSTANCE;
+
+    @Override
+    public @NotNull HorizontalOffsetBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+      final int offset = nbtCompound.getInt("offset");
+      final BlockPredicate predicate = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"));
+      return new HorizontalOffsetBlockPredicate(offset, predicate);
+    }
 
     @Override
     public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
@@ -82,7 +83,8 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
       int offset = 0;
       boolean prefixed = false;
       final StringReader reader = parser.reader;
-      if (!reader.canRead()) return null;
+      if (!reader.canRead())
+        return null;
       while (reader.canRead()) {
         if (reader.peek() == '>') {
           offset -= 1;

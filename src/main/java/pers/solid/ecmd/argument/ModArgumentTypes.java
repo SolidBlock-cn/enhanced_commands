@@ -6,6 +6,7 @@ import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.util.Identifier;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.function.block.BlockFunctionTypes;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
 import pers.solid.ecmd.region.RegionTypes;
 
@@ -15,7 +16,9 @@ import pers.solid.ecmd.region.RegionTypes;
 public class ModArgumentTypes {
   public static void init() {
     BlockPredicateTypes.init();
+    BlockFunctionTypes.init();
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
+    register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
     register("directions", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::create));
     register("keyword_args", KeywordArgsArgumentType.class, new KeywordArgsArgumentSerializer());
     register("pos", EnhancedPosArgumentType.class, new EnhancedPosArgumentType.Serializer());

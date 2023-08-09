@@ -6,6 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -15,10 +16,7 @@ public interface BlockPredicateType<T extends BlockPredicate> {
   Registry<BlockPredicateType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
 
 
-  default T fromNbt(NbtCompound nbtCompound) {
-    // TODO: 2023/4/23, 023 nbt
-    return null;
-  }
+  @NotNull T fromNbt(@NotNull NbtCompound nbtCompound);
 
   @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
 }

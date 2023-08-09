@@ -1,8 +1,14 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -17,10 +23,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.SuggestionUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * To test which a block is exposed in the specified directions and the specified type.
@@ -28,7 +31,7 @@ import java.util.TreeSet;
  * @param exposureType The exposure type. By default, it is exposed to empty collision.
  * @param directions   The directions to test exposure.
  */
-public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull Iterable<Direction> directions) implements BlockPredicate {
+public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull Iterable<@NotNull Direction> directions) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     return "expose(" + exposureType.asString() + ", " + String.join(" ", Iterables.transform(directions, Direction::asString)) + ")";
@@ -66,6 +69,22 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   @Override
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.EXPOSE;
+  }
+
+  @Override
+  public void writeNbt(NbtCompound nbtCompound) {
+    nbtCompound.putString("type", exposureType.asString());
+    final NbtList nbtList = new NbtList();
+    nbtCompound.put("directions", nbtList);
+    for (Direction direction : directions) {
+      nbtList.add(NbtString.of(direction.asString()));
+    }
+
+    // 如果只有一个元素，那么没有必须存储为列表。
+    if (nbtList.size() == 1) {
+      nbtCompound.remove("directions");
+      nbtCompound.put("directions", nbtList.get(0));
+    }
   }
 
   /**
@@ -210,6 +229,20 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
 
   public enum Type implements BlockPredicateType<ExposeBlockPredicate> {
     INSTANCE;
+
+    @Override
+    public @NotNull ExposeBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+      final String typeName = nbtCompound.getString("type");
+      final ExposureType type = ExposureType.CODEC.byId(typeName);
+      Preconditions.checkNotNull(type, "Unknown exposure type: %", typeName);
+      final List<Direction> directions;
+      if (nbtCompound.contains("directions", NbtElement.STRING_TYPE)) {
+        directions = Collections.singletonList(Direction.byName(nbtCompound.getString("directions")));
+      } else {
+        directions = nbtCompound.getList("directions", NbtElement.STRING_TYPE).stream().map(nbtElement -> Direction.byName(nbtElement.asString())).filter(Predicates.notNull()).toList();
+      }
+      return new ExposeBlockPredicate(type, directions);
+    }
 
     @Override
     public @NotNull ExposeBlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
