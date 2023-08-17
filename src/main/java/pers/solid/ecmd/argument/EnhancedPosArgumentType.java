@@ -127,8 +127,8 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
           final int cursorBeforeReadDouble = reader.getCursor();
           double num = 0;
           if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
-            // if there is a tilde, it may not be performed, in order to avoid exceptions, if there is an empty number
-            // however, is there is no tilde, the row must be read, resulting exceptions if there is no number
+            // if there is a tilde, it may not be performed, in order to avoid exceptions, if there is an empty expected
+            // however, is there is no tilde, the row must be read, resulting exceptions if there is no expected
             num = reader.readDouble();
           } else {
             omitsNumber[i] = true;
@@ -148,7 +148,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
         }
       }
 
-      // If there omits number (such as "~ ~ ~"), it should be seen as a double pos.
+      // If there omits expected (such as "~ ~ ~"), it should be seen as a double pos.
       if (omitsNumber[0] && omitsNumber[1] && omitsNumber[2]) {
         isDoublePos = behavior.doubleOnly() || !behavior.preferInt();
       }

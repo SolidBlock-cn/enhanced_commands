@@ -4,6 +4,7 @@ import com.google.common.collect.Iterators;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
@@ -108,8 +109,8 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
     CUBOID_OUTLINE_TYPE;
 
     @Override
-    public @Nullable RegionArgument<CuboidOutlineRegion> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(parser, suggestionsOnly);
+    public @Nullable RegionArgument<CuboidOutlineRegion> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
@@ -119,7 +120,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
 
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         fromPos = SuggestionUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
       } else if (paramIndex == 1) {

@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -109,8 +110,8 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     }
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(parser0);
+    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
+      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         return new TagBlockPredicate(parser.tagId.getTag(), parser.propertyNamePredicates);

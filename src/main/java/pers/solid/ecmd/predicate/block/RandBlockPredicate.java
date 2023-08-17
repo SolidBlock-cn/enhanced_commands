@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.MutableText;
@@ -102,7 +103,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         value = parser.reader.readFloat();
         if (value > 1) {
@@ -112,7 +113,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooLow().createWithContext(parser.reader, value, 0);
         }
       } else if (paramIndex == 1) {
-        predicate = BlockPredicate.parse(parser, suggestionsOnly);
+        predicate = BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
     }
   }
@@ -130,8 +131,8 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(parser, suggestionsOnly);
+    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

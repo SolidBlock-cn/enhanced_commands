@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -82,8 +83,8 @@ public record UnionRegion(Collection<Region> regions) implements Region {
     UNION_TYPE;
 
     @Override
-    public @Nullable RegionArgument<?> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(parser, suggestionsOnly);
+    public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
@@ -106,8 +107,8 @@ public record UnionRegion(Collection<Region> regions) implements Region {
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      regions.add(RegionArgument.parse(parser, suggestionsOnly));
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      regions.add(RegionArgument.parse(commandRegistryAccess, parser, suggestionsOnly));
     }
   }
 }

@@ -2,6 +2,7 @@ package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -17,5 +18,5 @@ public interface BlockFunctionType<T extends BlockFunction> {
 
   T fromNbt(NbtCompound nbtCompound);
 
-  @Nullable BlockFunction parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
+  @Nullable BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
 }

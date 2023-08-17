@@ -18,7 +18,19 @@ public interface SuggestionProvider extends BiConsumer<CommandContext<?>, Sugges
     }
   }
 
+  @FunctionalInterface
+  interface Offset extends SuggestionProvider, BiFunction<CommandContext<?>, SuggestionsBuilder, SuggestionsBuilder> {
+    @Override
+    default void accept(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder) {
+      apply(context, suggestionsBuilder);
+    }
+  }
+
   static Modifying modifying(Modifying value) {
+    return value;
+  }
+
+  static Offset offset(Offset value) {
     return value;
   }
 }

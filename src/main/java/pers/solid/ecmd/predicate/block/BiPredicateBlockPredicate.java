@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -76,8 +77,8 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      final BlockPredicate parse = BlockPredicate.parse(parser, suggestionsOnly);
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      final BlockPredicate parse = BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
       if (value1 == null) {
         value1 = parse;
       } else if (value2 == null) {
@@ -110,10 +111,10 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       CommandSyntaxException exception = null;
       try {
-        final BiPredicateBlockPredicate parse1 = new Parser("same", Text.translatable("blockPredicate.bi_predicate_same"), true).parse(parser, suggestionsOnly);
+        final BiPredicateBlockPredicate parse1 = new Parser("same", Text.translatable("blockPredicate.bi_predicate_same"), true).parse(commandRegistryAccess, parser, suggestionsOnly);
         if (parse1 != null) {
           return parse1;
         }
@@ -121,7 +122,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
           CommandSyntaxException exception1) {
         exception = exception1;
       }
-      final BiPredicateBlockPredicate parse2 = new Parser("diff", Text.translatable("blockPredicate.bi_predicate_diff"), false).parse(parser, suggestionsOnly);
+      final BiPredicateBlockPredicate parse2 = new Parser("diff", Text.translatable("blockPredicate.bi_predicate_diff"), false).parse(commandRegistryAccess, parser, suggestionsOnly);
       if (parse2 != null) {
         return parse2;
       } else if (exception != null) {

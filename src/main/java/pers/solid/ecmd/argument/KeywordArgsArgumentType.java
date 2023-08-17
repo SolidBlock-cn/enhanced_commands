@@ -46,13 +46,13 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
 
   @Override
   public KeywordArgs parse(StringReader reader) throws CommandSyntaxException {
-    final SuggestedParser parser = new SuggestedParser(null, reader);
+    final SuggestedParser parser = new SuggestedParser(reader);
     return parseAndSuggest(parser, false);
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-    final SuggestedParser suggestedParser = new SuggestedParser(null, new StringReader(builder.getInput()));
+    final SuggestedParser suggestedParser = new SuggestedParser(new StringReader(builder.getInput()));
     suggestedParser.reader.setCursor(builder.getStart());
     try {
       parseAndSuggest(suggestedParser, true);
@@ -93,7 +93,7 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
       final ArgumentType<?> argumentType = arguments.get(name);
       if (hasSuggestions) {
         parser.suggestions.clear();
-        parser.suggestions.add((context, builder) -> argumentType.listSuggestions(context, builder));
+        parser.suggestions.add(argumentType::listSuggestions);
       }
       final Object parse = argumentType.parse(parser.reader);
 

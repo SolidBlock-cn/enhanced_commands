@@ -5,6 +5,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -176,7 +177,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         parser.suggestions.clear();
         exposureType = parser.readAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
@@ -245,8 +246,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public @NotNull ExposeBlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(parser, suggestionsOnly);
+    public @NotNull ExposeBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

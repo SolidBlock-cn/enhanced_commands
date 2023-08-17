@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -92,8 +93,8 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
     CUBOID_WALL_TYPE;
 
     @Override
-    public @Nullable RegionArgument<CuboidWallRegion> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(parser, suggestionsOnly);
+    public @Nullable RegionArgument<CuboidWallRegion> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 

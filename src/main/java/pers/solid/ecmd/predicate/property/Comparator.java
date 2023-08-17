@@ -28,13 +28,13 @@ public enum Comparator implements StringIdentifiable {
     this.biPredicate = biPredicate;
   }
 
+  public static Comparator fromName(String name) {
+    return NAME_TO_VALUE.get(name);
+  }
+
   @Override
   public String asString() {
     return name;
-  }
-
-  public static Comparator fromName(String name) {
-    return NAME_TO_VALUE.get(name);
   }
 
   public <T extends Comparable<T>> boolean test(T actual, T expected) {
@@ -48,6 +48,67 @@ public enum Comparator implements StringIdentifiable {
   public <T extends Comparable<T>> boolean parseAndTest(BlockState actual, Property<T> property, String name) {
     final Optional<T> parse = property.parse(name);
     return parse.filter(t -> biPredicate.test(actual.get(property), t)).isPresent();
+  }
+
+  public boolean compareDouble(double actual, double expected) {
+    return switch (this) {
+      case EQ -> actual == expected;
+      case GT -> actual > expected;
+      case GE -> actual >= expected;
+      case LT -> actual < expected;
+      case LE -> actual <= expected;
+      case NE -> actual != expected;
+    };
+  }
+  public boolean compareFloat(float actual, float expected) {
+    return switch (this) {
+      case EQ -> actual == expected;
+      case GT -> actual > expected;
+      case GE -> actual >= expected;
+      case LT -> actual < expected;
+      case LE -> actual <= expected;
+      case NE -> actual != expected;
+    };
+  }
+  public boolean compareLong(long actual, long expected) {
+    return switch (this) {
+      case EQ -> actual == expected;
+      case GT -> actual > expected;
+      case GE -> actual >= expected;
+      case LT -> actual < expected;
+      case LE -> actual <= expected;
+      case NE -> actual != expected;
+    };
+  }
+  public boolean compareInt(int actual, int expected) {
+    return switch (this) {
+      case EQ -> actual == expected;
+      case GT -> actual > expected;
+      case GE -> actual >= expected;
+      case LT -> actual < expected;
+      case LE -> actual <= expected;
+      case NE -> actual != expected;
+    };
+  }
+  public boolean compareShort(short actual, short expected) {
+    return switch (this) {
+      case EQ -> actual == expected;
+      case GT -> actual > expected;
+      case GE -> actual >= expected;
+      case LT -> actual < expected;
+      case LE -> actual <= expected;
+      case NE -> actual != expected;
+    };
+  }
+  public boolean compareByte(byte actual, byte expected) {
+    return switch (this) {
+      case EQ -> actual == expected;
+      case GT -> actual > expected;
+      case GE -> actual >= expected;
+      case LT -> actual < expected;
+      case LE -> actual <= expected;
+      case NE -> actual != expected;
+    };
   }
 
   public interface BiPredicate {

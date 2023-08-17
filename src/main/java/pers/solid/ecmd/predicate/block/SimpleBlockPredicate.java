@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -106,8 +107,8 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     }
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(parser0);
+    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
+      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser0);
       parser.suggestions.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(parser.registryWrapper.streamKeys().map(RegistryKey::getValue)::iterator, suggestionsBuilder.getRemaining().toLowerCase(), id -> id, id -> suggestionsBuilder.suggest(id.toString())));
       if (parser.reader.canRead() && Identifier.isCharValid(parser.reader.peek())) {
         parser.parseBlockId();

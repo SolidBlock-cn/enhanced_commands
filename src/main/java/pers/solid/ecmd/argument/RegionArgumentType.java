@@ -37,16 +37,16 @@ public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) im
 
   @Override
   public RegionArgument<?> parse(StringReader reader) throws CommandSyntaxException {
-    return RegionArgument.parse(new SuggestedParser(commandRegistryAccess, reader), false);
+    return RegionArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false);
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser parser = new SuggestedParser(commandRegistryAccess, stringReader);
+    final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      RegionArgument.parse(parser, true);
+      RegionArgument.parse(commandRegistryAccess, parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

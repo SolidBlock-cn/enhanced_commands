@@ -10,6 +10,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockPosArgumentType;
+import net.minecraft.command.argument.NbtElementArgumentType;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -27,6 +29,8 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.DirectionArgumentType;
+import pers.solid.ecmd.argument.NbtPredicateArgumentType;
+import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ToFloatTriFunction;
 import pers.solid.ecmd.util.ToIntQuadFunction;
 import pers.solid.ecmd.util.ToIntTriFunction;
@@ -42,7 +46,30 @@ public enum TestForCommand implements CommandRegistrationCallback {
     dispatcher.register(CommandManager.literal("testfor")
         .requires(ModCommands.REQUIRES_PERMISSION_2)
         .then(addBlockCommandProperties(CommandManager.literal("block"), registryAccess))
-        .then(addBlockInfoCommandProperties(CommandManager.literal("block_info"), registryAccess)));
+        .then(addBlockInfoCommandProperties(CommandManager.literal("block_info"), registryAccess))
+        .then(addArgumentCommandProperties(CommandManager.literal("argument"))));
+  }
+
+  private static LiteralArgumentBuilder<ServerCommandSource> addArgumentCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder) {
+    return argumentBuilder
+        .then(CommandManager.literal("nbt_predicate")
+            .then(CommandManager.argument("nbt_predicate", NbtPredicateArgumentType.ELEMENT)
+                .then(CommandManager.literal("match")
+                    .then(CommandManager.argument("nbt_to_test", NbtElementArgumentType.nbtElement())
+                        .executes(context -> {
+                          final NbtElement nbtToTest = NbtElementArgumentType.getNbtElement(context, "nbt_to_test");
+                          final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
+                          final boolean test = nbtPredicate.test(nbtToTest);
+                          context.getSource().sendFeedback(Text.literal(Boolean.toString(test)), false);
+                          return BooleanUtils.toInteger(test);
+                        })))
+                .then(CommandManager.literal("tostring")
+                    .executes(context -> {
+                      final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
+                      context.getSource().sendFeedback(Text.literal(nbtPredicate.asString()), false);
+                      return 1;
+                    }))
+            ));
   }
 
   private static LiteralArgumentBuilder<ServerCommandSource> addBlockCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, CommandRegistryAccess registryAccess) {

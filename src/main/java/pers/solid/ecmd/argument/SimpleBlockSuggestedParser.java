@@ -31,13 +31,15 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   public static final Text START_OF_PROPERTIES = Text.translatable("enhancedCommands.argument.block_predicate.start_of_properties");
   public static final Text NEXT_PROPERTY = Text.translatable("enhancedCommands.argument.block_predicate.next_property");
   public static final Text END_OF_PROPERTIES = Text.translatable("enhancedCommands.argument.block_predicate.end_of_properties");
+  protected final CommandRegistryAccess commandRegistryAccess;
   public final RegistryWrapper<Block> registryWrapper;
   public Block block;
   public Identifier blockId;
   public RegistryEntryList.Named<Block> tagId;
 
   public SimpleBlockSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader, RegistryWrapper<Block> registryWrapper) {
-    super(commandRegistryAccess, reader);
+    super(reader);
+    this.commandRegistryAccess = commandRegistryAccess;
     this.registryWrapper = registryWrapper;
   }
 

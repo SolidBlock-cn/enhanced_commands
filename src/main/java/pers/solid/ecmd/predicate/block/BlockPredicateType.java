@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -18,5 +19,5 @@ public interface BlockPredicateType<T extends BlockPredicate> {
 
   @NotNull T fromNbt(@NotNull NbtCompound nbtCompound);
 
-  @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
+  @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
 }

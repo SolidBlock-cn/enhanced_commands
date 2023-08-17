@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
@@ -109,8 +110,8 @@ public record CylinderRegion(double radius, double height, Vec3d center) impleme
     CYLINDER_TYPE;
 
     @Override
-    public @Nullable RegionArgument<?> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(parser, suggestionsOnly);
+    public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
@@ -135,7 +136,7 @@ public record CylinderRegion(double radius, double height, Vec3d center) impleme
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         radius = parser.reader.readDouble();
       } else if (paramIndex == 1) {

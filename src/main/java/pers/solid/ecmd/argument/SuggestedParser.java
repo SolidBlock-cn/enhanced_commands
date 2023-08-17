@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import org.apache.commons.lang3.function.FailableFunction;
@@ -24,20 +23,20 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class SuggestedParser {
-  public final CommandRegistryAccess commandRegistryAccess;
 
   public final StringReader reader;
   public List<SuggestionProvider> suggestions = new ArrayList<>();
 
-  public SuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
-    this.commandRegistryAccess = commandRegistryAccess;
+  public SuggestedParser(StringReader reader) {
     this.reader = reader;
   }
 
   public CompletableFuture<Suggestions> buildSuggestions(CommandContext<?> context, SuggestionsBuilder builder) {
     for (SuggestionProvider suggestion : suggestions) {
-      if (suggestion instanceof SuggestionProvider.Modifying modifying) {
+      if (suggestion instanceof final SuggestionProvider.Modifying modifying) {
         return modifying.apply(context, builder);
+      } else if (suggestion instanceof final SuggestionProvider.Offset offset) {
+        builder = offset.apply(context, builder);
       } else {
         suggestion.accept(context, builder);
       }

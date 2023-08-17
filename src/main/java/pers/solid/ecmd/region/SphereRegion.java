@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
@@ -62,8 +63,8 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     SPHERE_TYPE;
 
     @Override
-    public @Nullable RegionArgument<SphereRegion> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(parser, suggestionsOnly);
+    public @Nullable RegionArgument<SphereRegion> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
@@ -87,7 +88,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
       if (paramIndex == 0) {
         radius = parser.reader.readDouble();

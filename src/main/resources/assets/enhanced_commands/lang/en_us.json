@@ -177,5 +177,9 @@
   "enhancedCommands.outlineType.wall_connected": "Block positions horizontally near at least one (in 8) that is not in",
   "enhancedCommands.paramTooFew": "The number of parameters (%s) is lower than the limit (%s)",
   "enhancedCommands.paramTooMany": "The number of parameters (%s) exceeds the limit (%s)",
-  "enhancedCommands.position": "(%s, %s, %s)"
+  "enhancedCommands.position": "(%s, %s, %s)",
+  "enhancedCommands.argument.nbt_predicate.sign_expected": "Sign (':' or '=') expected",
+  "enhancedCommands.argument.nbt_predicate.duplicate_key": "Duplicate key: %s",
+  "enhancedCommands.argument.nbt_predicate.invalid_regex": "Invalid regex: %s",
+  "enhancedCommands.argument.nbt_predicate.must_be_number_or_string": "The value after the comparator must be a number or string, instead of %s"
 }

@@ -2,6 +2,7 @@ package pers.solid.ecmd.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +29,7 @@ public interface FunctionLikeParser<T> {
   @Contract(pure = true)
   Text tooltip();
 
-  default T parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  default T parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final String name = functionName();
     if (name.startsWith(parser.reader.getRemaining().toLowerCase())) {
       parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest(name + "(", tooltip()));
@@ -63,7 +64,7 @@ public interface FunctionLikeParser<T> {
       }
     }
     while (true) {
-      parseParameter(parser, paramsCount, suggestionsOnly);
+      parseParameter(commandRegistryAccess, parser, paramsCount, suggestionsOnly);
       paramsCount++;
       parser.reader.skipWhitespace();
       parser.suggestions.clear();
@@ -104,5 +105,5 @@ public interface FunctionLikeParser<T> {
 
   T getParseResult();
 
-  void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
+  void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
 }

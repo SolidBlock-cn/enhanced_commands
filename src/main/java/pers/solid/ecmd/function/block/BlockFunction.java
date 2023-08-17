@@ -3,6 +3,7 @@ package pers.solid.ecmd.function.block;
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -21,14 +22,14 @@ public interface BlockFunction extends SerializableFunction, NbtConvertible {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_function.cannotParse"));
 
   @NotNull
-  static BlockFunction parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
     int cursorOnEnd = cursorOnStart;
     for (BlockFunctionType<?> type : BlockFunctionType.REGISTRY) {
       try {
         parser.reader.setCursor(cursorOnStart);
-        final BlockFunction parse = type.parse(parser, suggestionsOnly);
+        final BlockFunction parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
         if (parse != null) {
           // keep the current position of the cursor
           return parse;

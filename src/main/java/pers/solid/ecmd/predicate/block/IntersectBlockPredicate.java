@@ -4,6 +4,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -78,8 +79,8 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockPredicates.add(BlockPredicate.parse(parser, suggestionsOnly));
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      blockPredicates.add(BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly));
     }
   }
 
@@ -92,8 +93,8 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser(new ImmutableList.Builder<>()).parse(parser, suggestionsOnly);
+    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser(new ImmutableList.Builder<>()).parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

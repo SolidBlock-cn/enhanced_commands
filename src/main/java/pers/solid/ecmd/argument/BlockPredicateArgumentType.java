@@ -25,16 +25,16 @@ public record BlockPredicateArgumentType(CommandRegistryAccess commandRegistryAc
 
   @Override
   public BlockPredicate parse(StringReader reader) throws CommandSyntaxException {
-    return BlockPredicate.parse(new SuggestedParser(commandRegistryAccess, reader), false);
+    return BlockPredicate.parse(commandRegistryAccess, new SuggestedParser(reader), false);
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser parser = new SuggestedParser(commandRegistryAccess, stringReader);
+    final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      BlockPredicate.parse(parser, true);
+      BlockPredicate.parse(commandRegistryAccess, parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

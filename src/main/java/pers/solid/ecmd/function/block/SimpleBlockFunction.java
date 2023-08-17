@@ -4,6 +4,7 @@ import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -78,8 +79,8 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
     }
 
     @Override
-    public @Nullable SimpleBlockFunction parse(SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
-      SimpleBlockFunctionSuggestedParser parser = new SimpleBlockFunctionSuggestedParser(parser0);
+    public @Nullable SimpleBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
+      SimpleBlockFunctionSuggestedParser parser = new SimpleBlockFunctionSuggestedParser(commandRegistryAccess, parser0);
       parser.suggestions.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(parser.registryWrapper.streamKeys().map(RegistryKey::getValue)::iterator, suggestionsBuilder.getRemaining().toLowerCase(), id -> id, id -> suggestionsBuilder.suggest(id.toString())));
       if (parser.reader.canRead() && Identifier.isCharValid(parser.reader.peek())) {
         parser.parseBlockId();

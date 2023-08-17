@@ -95,7 +95,7 @@ public interface Region extends Iterable<BlockPos>, StringIdentifiable {
   double volume();
 
   /**
-   * @return The <em>estimated</em> number that will be affected. It will be used to determine how should a multi-block operation be executed.
+   * @return The <em>estimated</em> expected that will be affected. It will be used to determine how should a multi-block operation be executed.
    */
   @Contract(pure = true)
   default long numberOfBlocksAffected() {

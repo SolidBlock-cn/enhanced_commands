@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -10,14 +11,14 @@ import pers.solid.ecmd.argument.SuggestedParser;
  */
 public interface RegionArgument<T extends Region> {
   @NotNull
-  static RegionArgument<?> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
     int cursorOnEnd = cursorOnStart;
     for (RegionType<?> type : RegionType.REGISTRY) {
       try {
         parser.reader.setCursor(cursorOnStart);
-        final RegionArgument<?> parse = type.parse(parser, suggestionsOnly);
+        final RegionArgument<?> parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
         if (parse != null) {
           // keep the current position of the cursor
           return parse;
@@ -29,7 +30,8 @@ public interface RegionArgument<T extends Region> {
       }
     }
     parser.reader.setCursor(cursorOnEnd);
-    if (exception != null) throw exception;
+    if (exception != null)
+      throw exception;
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
   }
 

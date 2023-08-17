@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -17,14 +18,14 @@ public interface BlockPredicate extends SerializablePredicate, NbtConvertible {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
 
   @NotNull
-  static BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
     int cursorOnEnd = cursorOnStart;
     for (BlockPredicateType<?> type : BlockPredicateType.REGISTRY) {
       try {
         parser.reader.setCursor(cursorOnStart);
-        final BlockPredicate parse = type.parse(parser, suggestionsOnly);
+        final BlockPredicate parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
         if (parse != null) {
           // keep the current position of the cursor
           return parse;

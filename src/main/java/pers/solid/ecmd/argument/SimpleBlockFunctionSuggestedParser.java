@@ -24,8 +24,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
     super(commandRegistryAccess, reader, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
   }
 
-  public SimpleBlockFunctionSuggestedParser(SuggestedParser parser) {
-    this(parser.commandRegistryAccess, parser.reader);
+  public SimpleBlockFunctionSuggestedParser(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    this(commandRegistryAccess, parser.reader);
     this.suggestions = parser.suggestions;
   }
 

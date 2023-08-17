@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import joptsimple.internal.Strings;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -73,7 +74,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     }
 
     @Override
-    public @Nullable BlockPredicate parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       if (parser.reader.getRemaining().isEmpty()) {
         parser.suggestions.add((context, suggestionsBuilder) -> {
           suggestionsBuilder.suggest("<", BENEATH_BLOCK);
@@ -99,9 +100,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
         }
       }
       if (offset != 0) {
-        return new HorizontalOffsetBlockPredicate(offset, BlockPredicate.parse(parser, suggestionsOnly));
+        return new HorizontalOffsetBlockPredicate(offset, BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly));
       } else if (prefixed) {
-        return BlockPredicate.parse(parser, suggestionsOnly);
+        return BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
       return null;
     }

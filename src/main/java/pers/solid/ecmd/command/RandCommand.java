@@ -78,7 +78,7 @@ public enum RandCommand implements CommandRegistrationCallback {
       throw MIN_MAX_WRONG.create(min, max);
     }
     final float value = RandomUtils.nextFloat(min, max);
-    context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.rand.number." + RandomUtils.nextInt(0, 9), Float.toString(min), Float.toString(max), Text.literal(Float.toString(value)).styled(EnhancedCommands.STYLE_FOR_RESULT)), true);
+    context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.rand.expected." + RandomUtils.nextInt(0, 9), Float.toString(min), Float.toString(max), Text.literal(Float.toString(value)).styled(EnhancedCommands.STYLE_FOR_RESULT)), true);
     return (int) value;
   }
 
@@ -87,7 +87,7 @@ public enum RandCommand implements CommandRegistrationCallback {
       throw MIN_MAX_WRONG.create(min, max);
     }
     final int value = RandomUtils.nextInt(min, max);
-    context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.rand.number." + RandomUtils.nextInt(0, 9), Integer.toString(min), Integer.toString(max), Text.literal(Integer.toString(value)).styled(EnhancedCommands.STYLE_FOR_RESULT)), true);
+    context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.rand.expected." + RandomUtils.nextInt(0, 9), Integer.toString(min), Integer.toString(max), Text.literal(Integer.toString(value)).styled(EnhancedCommands.STYLE_FOR_RESULT)), true);
     return value;
   }
 }

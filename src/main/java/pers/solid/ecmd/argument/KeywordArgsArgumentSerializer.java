@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.network.PacketByteBuf;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +40,7 @@ public class KeywordArgsArgumentSerializer implements ArgumentSerializer<Keyword
     Objects.requireNonNull(nbtCompound, "nbtCompound from buf");
     final NbtList arguments = nbtCompound.getList("arguments", NbtElement.STRING_TYPE);
     final NbtList optionalArguments = nbtCompound.getList("optionalArguments", NbtElement.STRING_TYPE);
-    return new Properties(arguments.stream().collect(ImmutableMap.toImmutableMap(NbtElement::asString, o -> null)), optionalArguments.stream().collect(ImmutableMap.toImmutableMap(NbtElement::asString, nbtElement -> null)));
+    return new Properties(arguments.stream().collect(ImmutableMap.toImmutableMap(new StringNbtWriter()::apply, o -> null)), optionalArguments.stream().collect(ImmutableMap.toImmutableMap(NbtElement::asString, nbtElement -> null)));
   }
 
   @Override

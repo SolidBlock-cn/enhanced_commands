@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
@@ -149,8 +150,8 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     OUTLINE_TYPE;
 
     @Override
-    public @Nullable RegionArgument<?> parse(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(parser, suggestionsOnly);
+    public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
@@ -174,11 +175,11 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public void parseParameter(SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 1) {
         outlineType = parser.readAndSuggestEnums(OutlineTypes.values(), OutlineTypes::getDisplayName, OutlineTypes.CODEC);
       } else if (paramIndex == 0) {
-        regionArgument = RegionArgument.parse(parser, suggestionsOnly);
+        regionArgument = RegionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
     }
 
