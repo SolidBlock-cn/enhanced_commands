@@ -23,7 +23,7 @@ import java.util.List;
 public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "all(" + String.join(", ", Collections2.transform(blockPredicates, SerializablePredicate::asString) + ")");
+    return "all(" + String.join(", ", Collections2.transform(blockPredicates, SerializablePredicate::asString)) + ")";
   }
 
   @Override
@@ -43,9 +43,9 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes < build.size()) {
-      return new TestResult(true, List.of(Text.translatable("blockPredicate.intersect.fail", successes, build.size()).formatted(Formatting.RED)), build);
+      return new TestResult(true, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.intersect.fail", successes, build.size()).formatted(Formatting.RED)), build);
     } else {
-      return new TestResult(false, List.of(Text.translatable("blockPredicate.intersect.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
+      return new TestResult(false, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.intersect.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
     }
   }
 
@@ -70,7 +70,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
 
     @Override
     public Text tooltip() {
-      return Text.translatable("blockPredicate.intersect");
+      return Text.translatable("enhancedCommands.argument.blockPredicate.intersect");
     }
 
     @Override

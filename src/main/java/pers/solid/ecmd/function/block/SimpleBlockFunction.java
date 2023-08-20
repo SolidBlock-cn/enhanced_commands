@@ -59,7 +59,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
 
   @Override
   public BlockFunctionType<?> getType() {
-    return null;
+    return BlockFunctionTypes.SIMPLE;
   }
 
   public enum Type implements BlockFunctionType<SimpleBlockFunction> {

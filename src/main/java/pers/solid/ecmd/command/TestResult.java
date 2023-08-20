@@ -22,11 +22,11 @@ public record TestResult(boolean successes, @Unmodifiable List<Text> description
   }
 
   public static TestResult success(BlockPos blockPos) {
-    return new TestResult(true, Text.translatable("blockPredicate.pass", EnhancedCommands.wrapBlockPos(blockPos)).formatted(Formatting.GREEN));
+    return new TestResult(true, Text.translatable("enhancedCommands.argument.blockPredicate.pass", EnhancedCommands.wrapBlockPos(blockPos)).formatted(Formatting.GREEN));
   }
 
   public static TestResult fail(BlockPos blockPos) {
-    return new TestResult(false, Text.translatable("blockPredicate.fail", EnhancedCommands.wrapBlockPos(blockPos)).formatted(Formatting.RED));
+    return new TestResult(false, Text.translatable("enhancedCommands.argument.blockPredicate.fail", EnhancedCommands.wrapBlockPos(blockPos)).formatted(Formatting.RED));
   }
 
   public static TestResult successOrFail(boolean successes, BlockPos blockPos) {

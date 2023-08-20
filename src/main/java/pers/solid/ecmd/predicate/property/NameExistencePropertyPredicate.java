@@ -27,7 +27,7 @@ public record NameExistencePropertyPredicate(String propertyName, boolean exists
     final String string = successes ? "pass" : "fail";
     final String string2 = actualExists ? "exists" : "does_not_exist";
     final Formatting formatting = successes ? Formatting.GREEN : Formatting.RED;
-    return new TestResult(successes, Text.translatable("blockPredicate.property_name_" + string + "_" + string2, Text.literal(propertyName).styled(EnhancedCommands.STYLE_FOR_TARGET)).formatted(formatting));
+    return new TestResult(successes, Text.translatable("enhancedCommands.argument.blockPredicate.property_name_" + string + "_" + string2, Text.literal(propertyName).styled(EnhancedCommands.STYLE_FOR_TARGET)).formatted(formatting));
   }
 
   @Override

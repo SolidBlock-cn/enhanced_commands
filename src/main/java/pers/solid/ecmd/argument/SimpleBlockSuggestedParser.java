@@ -23,6 +23,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.Comparator;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
@@ -86,6 +87,11 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
       }
     });
+    if (reader.canRead() && reader.peek() == ']') {
+      reader.skip();
+      suggestions.clear();
+      return;
+    }
     while (reader.canRead()) {
       final int cursorBeforeReadString = reader.getCursor();
       // parse block property name
@@ -149,23 +155,11 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   }
 
   protected void addComparatorTypeSuggestions() {
-    suggestions.add((context, suggestionsBuilder) -> {
-      for (Comparator value : Comparator.values()) {
-        if (value.asString().startsWith(suggestionsBuilder.getRemaining())) {
-          suggestionsBuilder.suggest(value.asString());
-        }
-      }
-    });
+    suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).map(Comparator::asString), suggestionsBuilder));
   }
 
   protected void addPropertyNameSuggestions() {
-    suggestions.add((context, suggestionsBuilder) -> {
-      for (Property<?> property : block.getStateManager().getProperties()) {
-        if (property.getName().startsWith(suggestionsBuilder.getRemainingLowerCase())) {
-          suggestionsBuilder.suggest(property.getName());
-        }
-      }
-    });
+    suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(block.getStateManager().getProperties().stream().map(Property::getName), suggestionsBuilder));
   }
 
   public void parseBlockTagIdAndProperties() throws CommandSyntaxException {
@@ -210,6 +204,11 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
       }
     });
+    if (reader.canRead() && reader.peek() == ']') {
+      reader.skip();
+      suggestions.clear();
+      return;
+    }
 
     while (this.reader.canRead()) {
       // parse a property name
@@ -217,14 +216,15 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       final String propertyName = this.reader.readString();
       if (propertyName.isEmpty()) {
         this.reader.setCursor(cursorBeforePropertyName);
-        throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, this.tagId.getTag().id().toString(), propertyName);
+        throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, tagId == null ?
+            "" : this.tagId.getTag().id().toString(), propertyName);
       }
       // parse comparator
       reader.skipWhitespace();
       final int cursorBeforeReadingComparator = reader.getCursor();
       reader.setCursor(cursorBeforePropertyName);
       final String remaining = reader.getRemaining();
-      if (tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream()).distinct().noneMatch(property -> property.getName().startsWith(remaining) && !property.getName().equals(remaining))) {
+      if (tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream()).distinct().noneMatch(property -> property.getName().startsWith(remaining) && !property.getName().equals(remaining))) {
         suggestions.clear();
         reader.setCursor(cursorBeforeReadingComparator);
         addComparatorTypeSuggestions();
@@ -234,7 +234,8 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       if (reader.canRead()) {
         comparator = parseComparator();
       } else {
-        throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, this.tagId.getTag().id().toString(), propertyName);
+        throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, tagId == null ?
+            "" : this.tagId.getTag().id().toString(), propertyName);
       }
 
       // parse valueName

@@ -33,7 +33,10 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::asString), positionalExpected.stream().map(pair -> pair.leftInt() + " " + pair.right().asString(true))).collect(Collectors.joining(", ")) + "]";
+    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::asString), positionalExpected.stream().map(pair -> {
+      final String valueAsString = pair.right().asString(true);
+      return pair.leftInt() + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
+    })).collect(Collectors.joining(", ")) + "]";
   }
 
   @Override
@@ -54,7 +57,10 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
     }
     final int size = nbtList.size();
     for (IntObjectPair<NbtPredicate> pair : positionalExpected) {
-      final int expectedIndex = pair.leftInt();
+      int expectedIndex = pair.leftInt();
+      if (expectedIndex < 0) {
+        expectedIndex += nbtList.size();
+      }
       if (size > expectedIndex) {
         if (!pair.right().test(nbtList.get(expectedIndex))) {
           return negated;

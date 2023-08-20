@@ -1,6 +1,9 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -9,16 +12,57 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.SerializablePredicate;
+import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.NbtConvertible;
+
+import java.util.Arrays;
+import java.util.List;
 
 public interface BlockPredicate extends SerializablePredicate, NbtConvertible {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
 
+  static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    final BlockPredicate parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly);
+    List<PropertyNamePredicate> propertyNamePredicates = null;
+    if (parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
+      // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
+      // 尝试读取属性
+      parser.suggestions.add((context, suggestionsBuilder) -> {
+        if (suggestionsBuilder.getRemaining().isEmpty()) {
+          suggestionsBuilder.suggest("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES);
+        }
+      });
+      if (parser.reader.canRead() && parser.reader.peek() == '[') {
+        final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser);
+        suggestedParser.parsePropertyName();
+        propertyNamePredicates = suggestedParser.propertyNamePredicates;
+      }
+    }
+    NbtPredicate nbtPredicate = null;
+    parser.suggestions.add((context, suggestionsBuilder) -> {
+      if (suggestionsBuilder.getRemaining().isEmpty()) {
+        suggestionsBuilder.suggest("{", NbtPredicateSuggestedParser.START_OF_COMPOUND);
+      }
+    });
+    if (parser.reader.canRead() && parser.reader.peek() == '{') {
+      // 尝试读取 NBT
+      nbtPredicate = new NbtPredicateSuggestedParser(parser.reader, parser.suggestions).parseCompound(false, false);
+    }
+    if ((propertyNamePredicates != null) || nbtPredicate != null) {
+      return new IntersectBlockPredicate(ImmutableList.copyOf(Iterables.filter(Arrays.asList(parseUnit, (propertyNamePredicates == null) ? null : new PropertyNamesPredicate(propertyNamePredicates)), Predicates.notNull())));
+    }
+    return parseUnit;
+  }
+
   @NotNull
-  static BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static BlockPredicate parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
     int cursorOnEnd = cursorOnStart;
@@ -30,7 +74,6 @@ public interface BlockPredicate extends SerializablePredicate, NbtConvertible {
           // keep the current position of the cursor
           return parse;
         }
-
       } catch (
           CommandSyntaxException exception1) {
         cursorOnEnd = parser.reader.getCursor();

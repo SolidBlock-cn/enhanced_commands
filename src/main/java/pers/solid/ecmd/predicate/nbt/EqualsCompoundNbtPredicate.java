@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull NbtPredicate> map, boolean negated) implements NbtPredicate {
   @Override
@@ -31,7 +32,7 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
       } else {
         return keyAsString + " " + valueAsString;
       }
-    });
+    }).collect(Collectors.joining(", ")) + "}";
   }
 
   @Override

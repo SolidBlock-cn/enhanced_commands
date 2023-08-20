@@ -40,7 +40,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     while (reader.canRead()) {
       final char peek = reader.peek();
       if (peek == '=' || peek == '<' || peek == '!' || peek == '>') {
-        if (stringBuilder.length() > 0 && stringBuilder.charAt(stringBuilder.length() - 1) == '=' && peek == '!') {
+        if (!stringBuilder.isEmpty() && stringBuilder.charAt(stringBuilder.length() - 1) == '=' && peek == '!') {
           break;
         }
         stringBuilder.append(peek);

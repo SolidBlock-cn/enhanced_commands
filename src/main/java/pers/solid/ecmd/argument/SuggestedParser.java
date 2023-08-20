@@ -25,10 +25,15 @@ import java.util.function.Function;
 public class SuggestedParser {
 
   public final StringReader reader;
-  public List<SuggestionProvider> suggestions = new ArrayList<>();
+  public List<SuggestionProvider> suggestions;
 
   public SuggestedParser(StringReader reader) {
+    this(reader, new ArrayList<>());
+  }
+
+  public SuggestedParser(StringReader reader, List<SuggestionProvider> suggestions) {
     this.reader = reader;
+    this.suggestions = suggestions;
   }
 
   public CompletableFuture<Suggestions> buildSuggestions(CommandContext<?> context, SuggestionsBuilder builder) {

@@ -45,9 +45,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     final String string = successes ? "pass" : "fail";
     final Formatting formatting = successes ? Formatting.GREEN : Formatting.RED;
     if (offset > 0) {
-      description = Text.translatable("blockPredicate.test_relative_above_" + string, offset, EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(formatting);
+      description = Text.translatable("enhancedCommands.argument.blockPredicate.test_relative_above_" + string, offset, EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(formatting);
     } else {
-      description = Text.translatable("blockPredicate.test_relative_below_" + string, -offset, EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(formatting);
+      description = Text.translatable("enhancedCommands.argument.blockPredicate.test_relative_below_" + string, -offset, EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(formatting);
     }
     return new TestResult(successes, List.of(description), List.of(attachment));
   }

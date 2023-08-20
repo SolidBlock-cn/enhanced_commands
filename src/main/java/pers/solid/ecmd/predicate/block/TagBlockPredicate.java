@@ -66,7 +66,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
     if (!inTag) {
       successes = false;
-      messages.add(Text.translatable("blockPredicate.not_in_the_tag", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      messages.add(Text.translatable("enhancedCommands.argument.blockPredicate.not_in_the_tag", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
     }
     for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, cachedBlockPosition.getBlockPos());
@@ -76,7 +76,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
       }
     }
     if (successes) {
-      messages.add(Text.translatable("blockPredicate.in_the_tag", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), Text.literal("#" + blockTag.id().toString()).styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
+      messages.add(Text.translatable("enhancedCommands.argument.blockPredicate.in_the_tag", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), Text.literal("#" + blockTag.id().toString()).styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
     }
     return new TestResult(successes, messages.build());
   }
@@ -110,7 +110,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable TagBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
       SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {

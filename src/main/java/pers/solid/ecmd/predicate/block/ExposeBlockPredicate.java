@@ -55,7 +55,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     for (Direction direction : directions) {
       var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
       final boolean test = exposureType.test(offsetCachedBlockPosition, direction);
-      testResults.add(new TestResult(test, Text.translatable("blockPredicate.expose.side." + (test ? "pass" : "fail"), EnhancedCommands.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
+      testResults.add(new TestResult(test, Text.translatable("enhancedCommands.argument.blockPredicate.expose.side." + (test ? "pass" : "fail"), EnhancedCommands.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
       if (test) {
         result = true;
       }
@@ -63,7 +63,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     if (testResults.size() == 1) {
       return testResults.get(0);
     } else {
-      return new TestResult(result, List.of(Text.translatable("blockPredicate.expose." + (result ? "pass" : "fail")).formatted(result ? Formatting.GREEN : Formatting.RED)), testResults);
+      return new TestResult(result, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.expose." + (result ? "pass" : "fail")).formatted(result ? Formatting.GREEN : Formatting.RED)), testResults);
     }
   }
 
@@ -104,7 +104,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     /**
      * The block is exposed to a block with an empty collision shape at that side, such as a bottom-half slab below it.
      */
-    EMPTY_SIDE_COLLISION("empty_collision_side") {
+    EMPTY_SIDE_COLLISION("empty_side_collision") {
       @Override
       public boolean test(CachedBlockPosition offsetCachedBlockPosition, Direction direction) {
         return offsetCachedBlockPosition.getBlockState().getCollisionShape(offsetCachedBlockPosition.getWorld(), offsetCachedBlockPosition.getBlockPos()).getFace(direction.getOpposite()).isEmpty();
@@ -158,7 +158,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
 
     @Override
     public Text tooltip() {
-      return Text.translatable("blockPredicate.expose");
+      return Text.translatable("enhancedCommands.argument.blockPredicate.expose");
     }
 
     @Override

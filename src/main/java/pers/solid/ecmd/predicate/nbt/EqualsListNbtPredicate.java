@@ -16,7 +16,7 @@ public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expect
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? "= " : "") + "[" + expected.stream().map(NbtPredicate::asString).collect(Collectors.joining(", ")) + "]";
+    return (negated ? "!" : "") + (requirePrefix ? "= " : "") + "[" + expected.stream().map(nbtPredicate -> nbtPredicate.asString(true)).collect(Collectors.joining(", ")) + "]";
   }
 
   @Override
