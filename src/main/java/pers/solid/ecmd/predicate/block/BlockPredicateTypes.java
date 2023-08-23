@@ -19,6 +19,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<HorizontalOffsetBlockPredicate> HORIZONTAL_OFFSET = register(HorizontalOffsetBlockPredicate.Type.INSTANCE, "horizontal_offset");
   public static final BlockPredicateType<PropertyNamesPredicate> PROPERTY_NAMES = register(PropertyNamesPredicate.Type.PROPERTY_NAMES_TYPE, "property_names");
   public static final BlockPredicateType<NbtBlockPredicate> NBT = register(NbtBlockPredicate.Type.NBT_TYPE, "nbt");
+  public static final BlockPredicateType<PropertiesNbtCombinationBlockPredicate> PROPERTIES_NBT_COMBINATION = register(PropertiesNbtCombinationBlockPredicate.Type.PROPERTIES_NBT_COMBINATION_TYPE, "properties_nbt_combination");
   public static final BlockPredicateType<ConstantBlockPredicate> CONSTANT = register(ConstantBlockPredicate.Type.CONSTANT_TYPE, "constant");
   public static final BlockPredicateType<TagBlockPredicate> TAG = register(TagBlockPredicate.Type.INSTANCE, "tag");
   public static final BlockPredicateType<UnionBlockPredicate> UNION = register(UnionBlockPredicate.Type.INSTANCE, "union");

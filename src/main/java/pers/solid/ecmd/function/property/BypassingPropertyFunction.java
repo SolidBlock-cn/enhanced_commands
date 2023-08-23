@@ -32,7 +32,7 @@ public record BypassingPropertyFunction<T extends Comparable<T>>(Property<T> pro
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", property.getName());
     nbtCompound.putString("value", "~");
     nbtCompound.putBoolean("must", must);

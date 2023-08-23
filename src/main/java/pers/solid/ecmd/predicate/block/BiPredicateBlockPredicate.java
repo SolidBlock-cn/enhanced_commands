@@ -42,7 +42,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putBoolean("same", same);
     nbtCompound.put("predicate1", blockPredicate1.createNbt());
     nbtCompound.put("predicate2", blockPredicate2.createNbt());

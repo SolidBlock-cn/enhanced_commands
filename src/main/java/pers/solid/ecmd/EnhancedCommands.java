@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Position;
@@ -50,5 +51,9 @@ public class EnhancedCommands implements ModInitializer {
 
   public static MutableText wrapDirection(Direction direction) {
     return Text.translatable("enhancedCommands.direction." + direction.asString());
+  }
+
+  public static MutableText wrapBoolean(boolean b) {
+    return Text.literal(Boolean.toString(b)).formatted(b ? Formatting.GREEN : Formatting.RED);
   }
 }

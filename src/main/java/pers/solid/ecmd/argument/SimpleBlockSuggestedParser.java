@@ -165,7 +165,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   public void parseBlockTagIdAndProperties() throws CommandSyntaxException {
     parseBlockTagId();
     if (tagId != null) {
-      parsePropertyName();
+      parsePropertyNames();
     }
   }
 
@@ -184,7 +184,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     }
   }
 
-  public void parsePropertyName() throws CommandSyntaxException {
+  public void parsePropertyNames() throws CommandSyntaxException {
     suggestions.clear();
     suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {

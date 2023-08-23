@@ -25,7 +25,7 @@ public record BypassingPropertyNameFunction(String propertyName, boolean must) i
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", propertyName);
     nbtCompound.putString("value", "~");
     nbtCompound.putBoolean("must", must);

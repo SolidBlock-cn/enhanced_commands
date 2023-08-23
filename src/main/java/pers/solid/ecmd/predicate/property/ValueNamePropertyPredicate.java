@@ -52,7 +52,7 @@ public record ValueNamePropertyPredicate(String propertyName, Comparator compara
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", propertyName);
     nbtCompound.putString("comparator", comparator.asString());
     nbtCompound.putString("value", valueName);

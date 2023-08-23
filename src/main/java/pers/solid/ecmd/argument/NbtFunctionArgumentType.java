@@ -10,39 +10,39 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
-import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.function.nbt.NbtFunction;
 
 import java.util.concurrent.CompletableFuture;
 
-public enum NbtPredicateArgumentType implements ArgumentType<NbtPredicate>, ArgumentSerializer.ArgumentTypeProperties<NbtPredicateArgumentType> {
+public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, ArgumentSerializer.ArgumentTypeProperties<NbtFunctionArgumentType> {
   COMPOUND(true), ELEMENT(false);
 
   private final boolean onlyCompounds;
 
-  NbtPredicateArgumentType(boolean onlyCompounds) {
+  NbtFunctionArgumentType(boolean onlyCompounds) {
     this.onlyCompounds = onlyCompounds;
   }
 
-  public static NbtPredicate getNbtPredicate(CommandContext<?> context, String name) {
-    return context.getArgument(name, NbtPredicate.class);
+  public static NbtFunction getNbtFunction(CommandContext<?> context, String name) {
+    return context.getArgument(name, NbtFunction.class);
   }
 
   @Override
-  public NbtPredicate parse(StringReader reader) throws CommandSyntaxException {
-    final NbtPredicateSuggestedParser parser = new NbtPredicateSuggestedParser(reader);
-    return onlyCompounds ? parser.parseCompound(false, false) : parser.parsePredicate(false, false);
+  public NbtFunction parse(StringReader reader) throws CommandSyntaxException {
+    final NbtFunctionSuggestedParser parser = new NbtFunctionSuggestedParser(reader);
+    return onlyCompounds ? parser.parseCompound(false) : parser.parseFunction(false, false);
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final NbtPredicateSuggestedParser parser = new NbtPredicateSuggestedParser(stringReader);
+    final NbtFunctionSuggestedParser parser = new NbtFunctionSuggestedParser(stringReader);
     try {
       if (onlyCompounds) {
-        parser.parseCompound(false, false);
+        parser.parseCompound(false);
       } else {
-        parser.parsePredicate(false, false);
+        parser.parseFunction(false, false);
       }
     } catch (CommandSyntaxException ignore) {
     }
@@ -51,35 +51,35 @@ public enum NbtPredicateArgumentType implements ArgumentType<NbtPredicate>, Argu
   }
 
   @Override
-  public NbtPredicateArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+  public NbtFunctionArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
     return this;
   }
 
   @Override
-  public ArgumentSerializer<NbtPredicateArgumentType, ?> getSerializer() {
+  public ArgumentSerializer<NbtFunctionArgumentType, ?> getSerializer() {
     return Serializer.INSTANCE;
   }
 
-  public enum Serializer implements ArgumentSerializer<NbtPredicateArgumentType, NbtPredicateArgumentType> {
+  public enum Serializer implements ArgumentSerializer<NbtFunctionArgumentType, NbtFunctionArgumentType> {
     INSTANCE;
 
     @Override
-    public void writePacket(NbtPredicateArgumentType properties, PacketByteBuf buf) {
+    public void writePacket(NbtFunctionArgumentType properties, PacketByteBuf buf) {
       buf.writeBoolean(properties.onlyCompounds);
     }
 
     @Override
-    public NbtPredicateArgumentType fromPacket(PacketByteBuf buf) {
+    public NbtFunctionArgumentType fromPacket(PacketByteBuf buf) {
       return buf.readBoolean() ? COMPOUND : ELEMENT;
     }
 
     @Override
-    public void writeJson(NbtPredicateArgumentType properties, JsonObject json) {
+    public void writeJson(NbtFunctionArgumentType properties, JsonObject json) {
       json.addProperty("onlyCompounds", properties.onlyCompounds);
     }
 
     @Override
-    public NbtPredicateArgumentType getArgumentTypeProperties(NbtPredicateArgumentType argumentType) {
+    public NbtFunctionArgumentType getArgumentTypeProperties(NbtFunctionArgumentType argumentType) {
       return argumentType;
     }
   }

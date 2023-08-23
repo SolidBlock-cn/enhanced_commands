@@ -335,7 +335,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       return ConstantNbtPredicate.of(!isNegated);
     } else if (reader.peek() == '{') {
       return parseCompound(isUsingEqual, isNegated);
-    } else if (reader.peek() == '[') {
+    } else if (reader.peek() == '[' && !(reader.canRead(3) && !StringReader.isQuotedStringStart(reader.peek()) && reader.peek(2) == ';')) {
       return parseList(isUsingEqual, isNegated);
     } else {
       // 先尝试读取 NumberRange

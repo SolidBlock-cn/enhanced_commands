@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.util.SuggestionUtil;
 
 public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredicate {
   @Override
@@ -30,7 +31,7 @@ public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredi
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("nbtPredicate", nbtPredicate.asString());
   }
 
@@ -48,8 +49,13 @@ public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredi
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return null;
+    public @Nullable NbtBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
+      if (parser.reader.canRead() && parser.reader.peek() == '{') {
+        return new NbtBlockPredicate(new NbtPredicateSuggestedParser(parser.reader, parser.suggestions).parseCompound(false, false));
+      } else {
+        return null;
+      }
     }
   }
 }

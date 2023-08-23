@@ -23,7 +23,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.SerializablePredicate;
+import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.NbtConvertible;
 
@@ -40,7 +40,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     if (propertyNamePredicates.isEmpty()) {
       return "#" + blockTag.id().toString();
     } else {
-      return "#" + blockTag.id().toString() + "[" + propertyNamePredicates.stream().map(SerializablePredicate::asString).collect(Collectors.joining(",")) + "]";
+      return "#" + blockTag.id().toString() + "[" + propertyNamePredicates.stream().map(StringRepresentablePredicate::asString).collect(Collectors.joining(",")) + "]";
     }
   }
 
@@ -87,7 +87,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("tag", blockTag.id().toString());
     if (!propertyNamePredicates.isEmpty()) {
       final NbtList nbtList = new NbtList();

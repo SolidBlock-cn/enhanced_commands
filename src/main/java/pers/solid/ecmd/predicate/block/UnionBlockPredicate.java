@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.SerializablePredicate;
+import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
 import java.util.Collection;
@@ -23,7 +23,7 @@ import java.util.List;
 public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "any(" + String.join(", ", Collections2.transform(blockPredicates, SerializablePredicate::asString)) + ")";
+    return "any(" + String.join(", ", Collections2.transform(blockPredicates, StringRepresentablePredicate::asString)) + ")";
   }
 
   @Override
@@ -55,7 +55,7 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     final NbtList nbtList = new NbtList();
     nbtCompound.put("predicates", nbtList);
     nbtList.addAll(Collections2.transform(blockPredicates, BlockPredicate::createNbt));

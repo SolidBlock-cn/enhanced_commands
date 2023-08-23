@@ -84,7 +84,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("block", Registries.BLOCK.getId(block).toString());
     if (!propertyEntries.isEmpty()) {
       final NbtList nbtList = new NbtList();

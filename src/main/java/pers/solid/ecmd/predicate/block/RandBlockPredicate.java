@@ -65,7 +65,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putFloat("value", value);
     if (predicate != null) {
       nbtCompound.put("predicate", predicate.createNbt());

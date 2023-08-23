@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.SerializableFunction;
+import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.function.property.PropertyFunction;
 
 import java.util.Collection;
@@ -31,7 +31,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
     final StringBuilder stringBuilder = new StringBuilder(Registries.BLOCK.getId(block).toString());
     if (!propertyFunctions.isEmpty()) {
       stringBuilder.append('[');
-      stringBuilder.append(propertyFunctions.stream().map(SerializableFunction::asString).collect(Collectors.joining(", ")));
+      stringBuilder.append(propertyFunctions.stream().map(StringRepresentableFunction::asString).collect(Collectors.joining(", ")));
       stringBuilder.append(']');
     }
     return stringBuilder.toString();
@@ -48,7 +48,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("block", Registries.BLOCK.getId(block).toString());
     if (!propertyFunctions.isEmpty()) {
       final NbtList nbtList = new NbtList();

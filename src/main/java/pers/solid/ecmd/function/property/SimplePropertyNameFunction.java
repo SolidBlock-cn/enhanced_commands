@@ -35,7 +35,7 @@ public record SimplePropertyNameFunction(String propertyName, String valueName, 
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", propertyName);
     nbtCompound.putString("value", valueName);
     nbtCompound.putBoolean("must", must);

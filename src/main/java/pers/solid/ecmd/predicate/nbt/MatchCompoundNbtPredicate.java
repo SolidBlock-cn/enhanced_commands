@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
  *   {a: one, b: two} match {*: "[Ww][Oo]$"} -> true
  * </pre>
  * 注意：值可以是任意的谓词，但是键必须是精准的字符串或者完全不指定。允许重复键。
+ *
+ * @see net.minecraft.nbt.NbtHelper#matches(NbtElement, NbtElement, boolean)
  */
 public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull NbtPredicate> entries, boolean negated) implements NbtPredicate {
   @Override

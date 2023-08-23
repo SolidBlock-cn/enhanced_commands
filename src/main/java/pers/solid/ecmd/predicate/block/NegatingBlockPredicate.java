@@ -40,7 +40,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.put("predicate", blockPredicate.createNbt());
   }
 

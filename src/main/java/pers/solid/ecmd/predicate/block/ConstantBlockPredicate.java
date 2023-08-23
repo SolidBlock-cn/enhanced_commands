@@ -35,7 +35,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
 
   }
 

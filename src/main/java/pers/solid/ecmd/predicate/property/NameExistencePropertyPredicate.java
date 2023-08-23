@@ -31,7 +31,7 @@ public record NameExistencePropertyPredicate(String propertyName, boolean exists
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", propertyName);
     nbtCompound.putBoolean("exists", exists);
   }

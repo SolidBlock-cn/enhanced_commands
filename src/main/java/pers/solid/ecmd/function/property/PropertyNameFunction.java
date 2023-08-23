@@ -7,10 +7,10 @@ import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.function.SerializableFunction;
+import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 
-public interface PropertyNameFunction extends SerializableFunction, NbtConvertible {
+public interface PropertyNameFunction extends StringRepresentableFunction, NbtConvertible {
   @Contract(pure = true)
   BlockState getModifiedState(BlockState blockState, BlockState origState);
 

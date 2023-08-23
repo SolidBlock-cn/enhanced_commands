@@ -26,7 +26,7 @@ public record SimplePropertyFunction<T extends Comparable<T>>(Property<T> proper
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", property.getName());
     nbtCompound.putString("value", property.name(value));
     nbtCompound.putBoolean("must", must);

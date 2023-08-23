@@ -1,9 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -17,21 +14,23 @@ import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.SerializablePredicate;
+import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.NbtConvertible;
 
-import java.util.Arrays;
 import java.util.List;
 
-public interface BlockPredicate extends SerializablePredicate, NbtConvertible {
+public interface BlockPredicate extends StringRepresentablePredicate, NbtConvertible {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final BlockPredicate parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly);
+    if (parseUnit instanceof NbtPredicate) {
+      return parseUnit;
+    }
     List<PropertyNamePredicate> propertyNamePredicates = null;
-    if (parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
+    if (!(parseUnit instanceof PropertyNamesPredicate) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
       // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
       // 尝试读取属性
       parser.suggestions.add((context, suggestionsBuilder) -> {
@@ -41,7 +40,7 @@ public interface BlockPredicate extends SerializablePredicate, NbtConvertible {
       });
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
         final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser);
-        suggestedParser.parsePropertyName();
+        suggestedParser.parsePropertyNames();
         propertyNamePredicates = suggestedParser.propertyNamePredicates;
       }
     }
@@ -55,8 +54,8 @@ public interface BlockPredicate extends SerializablePredicate, NbtConvertible {
       // 尝试读取 NBT
       nbtPredicate = new NbtPredicateSuggestedParser(parser.reader, parser.suggestions).parseCompound(false, false);
     }
-    if ((propertyNamePredicates != null) || nbtPredicate != null) {
-      return new IntersectBlockPredicate(ImmutableList.copyOf(Iterables.filter(Arrays.asList(parseUnit, (propertyNamePredicates == null) ? null : new PropertyNamesPredicate(propertyNamePredicates)), Predicates.notNull())));
+    if (propertyNamePredicates != null || nbtPredicate != null) {
+      return new PropertiesNbtCombinationBlockPredicate(parseUnit, new PropertyNamesPredicate(propertyNamePredicates), new NbtBlockPredicate(nbtPredicate));
     }
     return parseUnit;
   }
@@ -104,6 +103,9 @@ public interface BlockPredicate extends SerializablePredicate, NbtConvertible {
     return nbt;
   }
 
+  /**
+   * 从 NBT 中获取一个 BlockPredicate 对象。会先从这个 NBT 中获取 type，并从注册表中获取。如果这个 type 不正确，或者里面的参数不正确，会直接抛出错误。
+   */
   static BlockPredicate fromNbt(NbtCompound nbtCompound) {
     final BlockPredicateType<?> type = BlockPredicateType.REGISTRY.get(new Identifier(nbtCompound.getString("type")));
     Preconditions.checkNotNull(type, "Unknown block predicate type: %s", type);

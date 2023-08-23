@@ -17,7 +17,7 @@ public record ValuePropertyPredicate<T extends Comparable<T>>(Property<T> proper
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", property.getName());
     nbtCompound.putString("comparator", comparator.asString());
     nbtCompound.putString("value", property.name(value));

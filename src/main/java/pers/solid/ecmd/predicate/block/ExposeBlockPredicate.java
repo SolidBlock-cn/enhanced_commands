@@ -73,7 +73,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("type", exposureType.asString());
     final NbtList nbtList = new NbtList();
     nbtCompound.put("directions", nbtList);

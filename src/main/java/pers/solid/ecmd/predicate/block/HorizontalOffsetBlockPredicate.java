@@ -58,7 +58,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putInt("offset", offset);
     nbtCompound.put("predicate", blockPredicate.createNbt());
   }

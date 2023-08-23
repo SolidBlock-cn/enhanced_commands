@@ -6,7 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.function.SerializableFunction;
+import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 
 /**
@@ -14,7 +14,7 @@ import pers.solid.ecmd.util.NbtConvertible;
  *
  * @param <T> 该属性的类型。
  */
-public interface PropertyFunction<T extends Comparable<T>> extends SerializableFunction, NbtConvertible {
+public interface PropertyFunction<T extends Comparable<T>> extends StringRepresentableFunction, NbtConvertible {
   /**
    * 修改方块状态，并返回修改后的方块状态。由于方块状态是不可变对象，因此返回的是另一个方块状态对象（也有可能是同一个）。
    *

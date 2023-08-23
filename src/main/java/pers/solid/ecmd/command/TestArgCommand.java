@@ -1,6 +1,7 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
@@ -12,11 +13,12 @@ import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.BooleanUtils;
-import pers.solid.ecmd.argument.BlockFunctionArgumentType;
-import pers.solid.ecmd.argument.BlockPredicateArgumentType;
-import pers.solid.ecmd.argument.NbtPredicateArgumentType;
+import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
@@ -33,6 +35,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
         .then(addNbtProperties(literal("nbt")))
         .then(addNbtPredicateProperties(literal("nbt_predicate")))
+        .then(addNbtFunctionProperties(literal("nbt_function")))
     );
   }
 
@@ -100,7 +103,23 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             .executes(context -> {
               context.getSource().sendFeedback(new NbtTextFormatter("  ", 0).apply(NbtElementArgumentType.getNbtElement(context, "nbt")), false);
               return 1;
-            })));
+            }))
+        .then(literal("test")
+            .executes(context -> {
+              final NbtElement nbtElement = NbtElementArgumentType.getNbtElement(context, "nbt");
+              final String s = new StringNbtWriter().apply(nbtElement);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(EnhancedCommands.STYLE_FOR_RESULT)), false);
+              final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser(new StringReader(s)).parsePredicate(false, false);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(EnhancedCommands.STYLE_FOR_RESULT)), false);
+              final NbtFunction reparsedFunction = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(EnhancedCommands.STYLE_FOR_RESULT)), false);
+              final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_predicate_matches", EnhancedCommands.wrapBoolean(reparsedPredicateMatches)), false);
+              final boolean reparsedFunctionEqual = reparsedFunction.apply(null).equals(nbtElement);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_function_equal", EnhancedCommands.wrapBoolean(reparsedFunctionEqual)), false);
+              return (reparsedPredicateMatches ? 2 : 0) + (reparsedFunctionEqual ? 1 : 0);
+            }))
+    );
   }
 
   private static LiteralArgumentBuilder<ServerCommandSource> addNbtPredicateProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder) {
@@ -124,6 +143,58 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
               context.getSource().sendFeedback(Text.literal(nbtPredicate.asString()), false);
               return 1;
+            }))
+        .then(literal("reparse")
+            .executes(context -> {
+              final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
+              final String s = nbtPredicate.asString();
+              context.getSource().sendFeedback(Text.literal(s), false);
+              final NbtPredicate reparse = new NbtPredicateSuggestedParser(new StringReader(s)).parseCompound(false, false);
+              final boolean b = nbtPredicate.equals(reparse);
+              context.getSource().sendFeedback(EnhancedCommands.wrapBoolean(b), false);
+              return BooleanUtils.toInteger(b);
+            }))
+    );
+  }
+
+  private static LiteralArgumentBuilder<ServerCommandSource> addNbtFunctionProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder) {
+    return argumentBuilder.then(argument("nbt_function", NbtFunctionArgumentType.ELEMENT)
+        .executes(context -> {
+          final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
+          context.getSource().sendFeedback(Text.literal(nbtFunction.asString()), false);
+          return 1;
+        })
+        .then(literal("apply")
+            .executes(context -> {
+              final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
+              final NbtElement apply = nbtFunction.apply(null);
+              context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(apply), false);
+              return 1;
+            })
+            .then(argument("nbt_element", NbtElementArgumentType.nbtElement())
+                .executes(context -> {
+                  final NbtElement nbtElement = NbtElementArgumentType.getNbtElement(context, "nbt_element");
+                  final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
+                  final NbtElement apply = nbtFunction.apply(nbtElement);
+                  context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(apply), false);
+                  return 1;
+                })))
+        .then(literal("tostring")
+            .executes(context -> {
+              final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
+              context.getSource().sendFeedback(Text.literal(nbtFunction.asString(false)), false);
+              return 1;
+            }))
+        .then(literal("reparse")
+            .executes(context -> {
+              final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
+              final String s = nbtFunction.asString(false);
+              context.getSource().sendFeedback(Text.literal(s), false);
+              final NbtFunction reparse = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
+              context.getSource().sendFeedback(Text.literal(reparse.asString(false)).formatted(Formatting.GRAY), false);
+              final boolean b = nbtFunction.equals(reparse);
+              context.getSource().sendFeedback(EnhancedCommands.wrapBoolean(b), false);
+              return BooleanUtils.toInteger(b);
             }))
     );
   }

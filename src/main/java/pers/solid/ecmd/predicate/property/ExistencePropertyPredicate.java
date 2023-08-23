@@ -17,7 +17,7 @@ public record ExistencePropertyPredicate<T extends Comparable<T>>(Property<T> pr
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", property.getName());
     nbtCompound.putBoolean("exists", exists);
   }

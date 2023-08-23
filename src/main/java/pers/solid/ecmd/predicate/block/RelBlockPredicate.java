@@ -50,7 +50,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putIntArray("pos", new int[]{relPos.getX(), relPos.getY(), relPos.getZ()});
     nbtCompound.put("predicate", predicate.createNbt());
   }

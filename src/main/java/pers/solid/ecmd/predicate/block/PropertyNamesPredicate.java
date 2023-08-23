@@ -12,11 +12,14 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.SerializablePredicate;
+import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -28,7 +31,7 @@ import java.util.stream.Collectors;
 public record PropertyNamesPredicate(Collection<PropertyNamePredicate> propertyNamePredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "[" + propertyNamePredicates.stream().map(SerializablePredicate::asString).collect(Collectors.joining(",")) + "]";
+    return "[" + propertyNamePredicates.stream().map(StringRepresentablePredicate::asString).collect(Collectors.joining(",")) + "]";
   }
 
   @Override
@@ -62,7 +65,7 @@ public record PropertyNamesPredicate(Collection<PropertyNamePredicate> propertyN
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     final NbtList nbtList = new NbtList();
     nbtCompound.put("properties", nbtList);
     nbtList.addAll(Collections2.transform(propertyNamePredicates, NbtConvertible::createNbt));
@@ -81,8 +84,15 @@ public record PropertyNamesPredicate(Collection<PropertyNamePredicate> propertyN
     }
 
     @Override
-    public @Nullable PropertyNamesPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
-      return null;
+    public @Nullable PropertyNamesPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
+      if (parser.reader.canRead() && parser.reader.peek() == '[') {
+        final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser);
+        suggestedParser.parsePropertyNames();
+        return new PropertyNamesPredicate(suggestedParser.propertyNamePredicates);
+      } else {
+        return null;
+      }
     }
   }
 }

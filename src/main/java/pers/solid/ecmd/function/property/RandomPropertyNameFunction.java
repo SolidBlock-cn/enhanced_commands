@@ -29,7 +29,7 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
   }
 
   @Override
-  public void writeNbt(NbtCompound nbtCompound) {
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", propertyName);
     nbtCompound.putString("value", "*");
     nbtCompound.putBoolean("must", must);
