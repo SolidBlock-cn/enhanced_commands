@@ -19,13 +19,13 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +40,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     if (propertyNamePredicates.isEmpty()) {
       return "#" + blockTag.id().toString();
     } else {
-      return "#" + blockTag.id().toString() + "[" + propertyNamePredicates.stream().map(StringRepresentablePredicate::asString).collect(Collectors.joining(",")) + "]";
+      return "#" + blockTag.id().toString() + "[" + propertyNamePredicates.stream().map(StringRepresentablePredicate::asString).collect(Collectors.joining(", ")) + "]";
     }
   }
 
@@ -66,7 +66,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
     if (!inTag) {
       successes = false;
-      messages.add(Text.translatable("enhancedCommands.argument.blockPredicate.not_in_the_tag", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      messages.add(Text.translatable("enhancedCommands.argument.block_predicate.not_in_the_tag", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
     }
     for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, cachedBlockPosition.getBlockPos());
@@ -76,7 +76,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
       }
     }
     if (successes) {
-      messages.add(Text.translatable("enhancedCommands.argument.blockPredicate.in_the_tag", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), Text.literal("#" + blockTag.id().toString()).styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
+      messages.add(Text.translatable("enhancedCommands.argument.block_predicate.in_the_tag", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), Text.literal("#" + blockTag.id().toString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
     }
     return new TestResult(successes, messages.build());
   }
@@ -97,7 +97,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
   }
 
   public enum Type implements BlockPredicateType<TagBlockPredicate> {
-    INSTANCE;
+    TAG_TYPE;
 
     @Override
     public @NotNull TagBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {

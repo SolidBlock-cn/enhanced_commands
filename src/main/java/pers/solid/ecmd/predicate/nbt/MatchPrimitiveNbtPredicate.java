@@ -2,8 +2,8 @@ package pers.solid.ecmd.predicate.nbt;
 
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.visitor.StringNbtWriter;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.TextUtil;
 
 /**
  * 匹配一个 NBT 的值（除了列表等复杂类型）是否能够与一个值直接匹配，通常来说要求值相等，包括内容也是相等的。例如：
@@ -21,7 +21,7 @@ public record MatchPrimitiveNbtPredicate(NbtElement expected, boolean negated) i
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + new StringNbtWriter().apply(expected);
+    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(expected);
   }
 
   @Override

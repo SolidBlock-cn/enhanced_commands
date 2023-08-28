@@ -5,6 +5,7 @@ import com.google.common.collect.Streams;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,13 +56,18 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, Int2Object
     };
     final Function<Int2ObjectMap.Entry<List<NbtFunction>>, String> indexValuesToStringMapper = entry -> {
       final int index = entry.getIntKey();
-      final String valueAsString = entry.getValue().stream().map(nbtFunction -> nbtFunction.asString(true)).collect(Collectors.joining(", "));
+      MutableBoolean elementRequiresPrefix = new MutableBoolean(true);
+      final String valueAsString = entry.getValue().stream().map(nbtFunction -> {
+        final boolean value = elementRequiresPrefix.booleanValue();
+        elementRequiresPrefix.setFalse();
+        return nbtFunction.asString(value);
+      }).collect(Collectors.joining(", "));
       return index + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
     };
     return (requirePrefix ? ": " : "") + "[" + Stream.<String>concat(
         valueReplacements == null ? Stream.empty() : valueReplacements.stream().map(NbtFunction::asString),
         positionalFunctions == null ? Stream.empty() : positionalFunctions.int2ObjectEntrySet().stream().map(indexValueToStringMapper)
-    ).collect(Collectors.joining(", ")) + (valueReplacements == null && positionalFunctions == null && positionalInsertions != null ? "" : "; ") + (positionalInsertions == null ? "" : Streams.concat(
+    ).collect(Collectors.joining(", ")) + ((valueReplacements != null || positionalFunctions != null) && positionalInsertions != null ? "; " : "") + (positionalInsertions == null ? "" : Streams.concat(
         positionalInsertions.int2ObjectEntrySet().stream().filter(entry -> entry.getIntKey() < 0).map(indexValuesToStringMapper),
         Stream.of("..."),
         Streams.concat(
@@ -74,7 +80,9 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, Int2Object
     final NbtList targetList = nbtElement instanceof final NbtList nbtList ? nbtList : new NbtList();
     if (valueReplacements != null) {
       targetList.clear();
-      targetList.addAll(Lists.transform(valueReplacements, nbtFunction -> nbtFunction.apply(null)));
+      try {
+        targetList.addAll(Lists.transform(valueReplacements, nbtFunction -> nbtFunction.apply(null)));
+      } catch (UnsupportedOperationException ignored) {}
     }
     if (positionalFunctions != null) {
       for (Int2ObjectMap.Entry<NbtFunction> entry : positionalFunctions.int2ObjectEntrySet()) {

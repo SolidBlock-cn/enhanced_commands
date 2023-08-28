@@ -143,7 +143,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
     }
 
     @Override
-    public RegionArgument<CuboidOutlineRegion> getParseResult() {
+    public RegionArgument<CuboidOutlineRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       return source -> new CuboidOutlineRegion(new BlockCuboidRegion(fromPos.toAbsoluteBlockPos(source), toPos.toAbsoluteBlockPos(source)), thickness);
     }
   }

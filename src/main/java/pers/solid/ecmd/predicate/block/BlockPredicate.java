@@ -30,7 +30,7 @@ public interface BlockPredicate extends StringRepresentablePredicate, NbtConvert
       return parseUnit;
     }
     List<PropertyNamePredicate> propertyNamePredicates = null;
-    if (!(parseUnit instanceof PropertyNamesPredicate) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
+    if (!(parseUnit instanceof PropertyNamesBlockPredicate) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
       // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
       // 尝试读取属性
       parser.suggestions.add((context, suggestionsBuilder) -> {
@@ -55,7 +55,7 @@ public interface BlockPredicate extends StringRepresentablePredicate, NbtConvert
       nbtPredicate = new NbtPredicateSuggestedParser(parser.reader, parser.suggestions).parseCompound(false, false);
     }
     if (propertyNamePredicates != null || nbtPredicate != null) {
-      return new PropertiesNbtCombinationBlockPredicate(parseUnit, new PropertyNamesPredicate(propertyNamePredicates), new NbtBlockPredicate(nbtPredicate));
+      return new PropertiesNbtCombinationBlockPredicate(parseUnit, propertyNamePredicates == null ? null : new PropertyNamesBlockPredicate(propertyNamePredicates), nbtPredicate == null ? null : new NbtBlockPredicate(nbtPredicate));
     }
     return parseUnit;
   }

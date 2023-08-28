@@ -18,11 +18,11 @@ import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.*;
 
@@ -55,7 +55,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     for (Direction direction : directions) {
       var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
       final boolean test = exposureType.test(offsetCachedBlockPosition, direction);
-      testResults.add(new TestResult(test, Text.translatable("enhancedCommands.argument.blockPredicate.expose.side." + (test ? "pass" : "fail"), EnhancedCommands.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
+      testResults.add(new TestResult(test, Text.translatable("enhancedCommands.argument.block_predicate.expose.side." + (test ? "pass" : "fail"), TextUtil.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
       if (test) {
         result = true;
       }
@@ -63,7 +63,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     if (testResults.size() == 1) {
       return testResults.get(0);
     } else {
-      return new TestResult(result, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.expose." + (result ? "pass" : "fail")).formatted(result ? Formatting.GREEN : Formatting.RED)), testResults);
+      return new TestResult(result, List.of(Text.translatable("enhancedCommands.argument.block_predicate.expose." + (result ? "pass" : "fail")).formatted(result ? Formatting.GREEN : Formatting.RED)), testResults);
     }
   }
 
@@ -158,11 +158,11 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.blockPredicate.expose");
+      return Text.translatable("enhancedCommands.argument.block_predicate.expose");
     }
 
     @Override
-    public ExposeBlockPredicate getParseResult() {
+    public ExposeBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       return new ExposeBlockPredicate(exposureType, directions.isEmpty() ? List.of(Direction.values()) : List.copyOf(directions));
     }
 
@@ -229,7 +229,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   public enum Type implements BlockPredicateType<ExposeBlockPredicate> {
-    INSTANCE;
+    EXPOSE_TYPE;
 
     @Override
     public @NotNull ExposeBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {

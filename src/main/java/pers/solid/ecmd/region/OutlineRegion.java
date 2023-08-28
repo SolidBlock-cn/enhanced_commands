@@ -170,7 +170,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public RegionArgument<OutlineRegion> getParseResult() {
+    public RegionArgument<OutlineRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       return source -> new OutlineRegion(outlineType, regionArgument.toAbsoluteRegion(source));
     }
 

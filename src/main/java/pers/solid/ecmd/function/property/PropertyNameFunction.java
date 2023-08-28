@@ -2,6 +2,7 @@ package pers.solid.ecmd.function.property;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.Contract;
@@ -11,6 +12,19 @@ import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 
 public interface PropertyNameFunction extends StringRepresentableFunction, NbtConvertible {
+  static PropertyNameFunction fromNbt(NbtCompound nbtCompound) {
+    final String property = nbtCompound.getString("property");
+    final String value = nbtCompound.getString("value");
+    final boolean must = nbtCompound.getBoolean("must");
+    if ("~".equals(value)) {
+      return new BypassingPropertyNameFunction(property, must);
+    } else if ("*".equals(value)) {
+      return new RandomPropertyNameFunction(property, must);
+    } else {
+      return new SimplePropertyNameFunction(property, value, must);
+    }
+  }
+
   @Contract(pure = true)
   BlockState getModifiedState(BlockState blockState, BlockState origState);
 

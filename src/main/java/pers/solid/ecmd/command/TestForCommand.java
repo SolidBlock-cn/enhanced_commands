@@ -24,13 +24,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LightType;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.DirectionArgumentType;
-import pers.solid.ecmd.util.ToFloatTriFunction;
-import pers.solid.ecmd.util.ToIntQuadFunction;
-import pers.solid.ecmd.util.ToIntTriFunction;
-import pers.solid.ecmd.util.TriPredicate;
+import pers.solid.ecmd.util.*;
 
 import java.util.Collection;
 
@@ -64,7 +60,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(blockPos);
     final Collection<Property<?>> properties = blockState.getProperties();
-    source.sendFeedback(Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", EnhancedCommands.wrapBlockPos(blockPos), blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_ACTUAL), Text.literal(Registries.BLOCK.getId(blockState.getBlock()).toString()).styled(EnhancedCommands.STYLE_FOR_ACTUAL)), true);
+    source.sendFeedback(Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", TextUtil.wrapBlockPos(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(Registries.BLOCK.getId(blockState.getBlock()).toString()).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     for (Property<?> property : properties) {
       source.sendFeedback(expressPropertyValue(blockState, property), true);
     }
@@ -120,7 +116,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final int value = function.applyAsInt(blockState, world, pos);
-    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), EnhancedCommands.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(EnhancedCommands.STYLE_FOR_ACTUAL)), true);
+    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     return value;
   }
 
@@ -131,7 +127,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final BlockState blockState = world.getBlockState(pos);
     final Direction direction = DirectionArgumentType.getDirection(context, "directions");
     final int value = function.applyAsInt(blockState, world, pos, direction);
-    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), EnhancedCommands.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(EnhancedCommands.STYLE_FOR_ACTUAL), EnhancedCommands.wrapDirection(direction).styled(EnhancedCommands.STYLE_FOR_TARGET)), true);
+    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.wrapDirection(direction).styled(TextUtil.STYLE_FOR_TARGET)), true);
     return value;
   }
 
@@ -141,7 +137,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final float value = function.applyAsFloat(blockState, world, pos);
-    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), EnhancedCommands.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(EnhancedCommands.STYLE_FOR_ACTUAL)), true);
+    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     return value;
   }
 
@@ -151,7 +147,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final boolean value = predicate.test(blockState, world, pos);
-    source.sendFeedback(Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), EnhancedCommands.wrapBlockPos(pos)), true);
+    source.sendFeedback(Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos)), true);
     return value;
   }
 
@@ -195,10 +191,10 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final BlockState blockState = world.getBlockState(pos);
     final Vec3d modelOffset = blockState.getModelOffset(world, pos);
     if (modelOffset.equals(Vec3d.ZERO)) {
-      source.sendFeedback(Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), EnhancedCommands.wrapBlockPos(pos)), true);
+      source.sendFeedback(Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos)), true);
       return 0;
     } else {
-      source.sendFeedback(Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_TARGET), EnhancedCommands.wrapBlockPos(pos), EnhancedCommands.wrapPosition(modelOffset)), true);
+      source.sendFeedback(Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), TextUtil.wrapPosition(modelOffset)), true);
       return 1;
     }
   }

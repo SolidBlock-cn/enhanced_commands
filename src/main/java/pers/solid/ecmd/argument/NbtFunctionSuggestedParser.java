@@ -78,7 +78,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
     return isUsingEqual;
   }
 
-  public NbtFunction parseCompound(boolean isUsingEqual) throws CommandSyntaxException {
+  public CompoundNbtFunction parseCompound(boolean isUsingEqual) throws CommandSyntaxException {
     suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
     reader.expect('{');
     suggestions.clear();
@@ -204,13 +204,14 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
             break;
           } else if (reader.peek() == ',') {
             reader.skip();
+            reader.skipWhitespace();
             suggestions.clear();
             continue;
           } else {
             suggestions.clear();
             continue;
           }
-        }
+        } // 解析省略号结束
 
         boolean isUsingPositionalPredicate = false;
         // 对于 isUsingEqual = false 的情况，尝试读取带有键的列表元素谓词
@@ -222,6 +223,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
           try {
             final int index = reader.readInt();
             reader.skipWhitespace();
+            suggestions.clear();
             final NbtFunction nbtFunction = parseFunction(true, false);
             currentlyAppendingList.add(IntObjectPair.of(index, nbtFunction));
             isUsingPositionalPredicate = true;

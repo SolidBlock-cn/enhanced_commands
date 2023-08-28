@@ -43,9 +43,9 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes < build.size()) {
-      return new TestResult(true, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.intersect.fail", successes, build.size()).formatted(Formatting.RED)), build);
+      return new TestResult(true, List.of(Text.translatable("enhancedCommands.argument.block_predicate.intersect.fail", successes, build.size()).formatted(Formatting.RED)), build);
     } else {
-      return new TestResult(false, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.intersect.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
+      return new TestResult(false, List.of(Text.translatable("enhancedCommands.argument.block_predicate.intersect.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
     }
   }
 
@@ -70,11 +70,11 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.blockPredicate.intersect");
+      return Text.translatable("enhancedCommands.argument.block_predicate.intersect");
     }
 
     @Override
-    public BlockPredicate getParseResult() {
+    public BlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       return new IntersectBlockPredicate(blockPredicates.build());
     }
 
@@ -85,7 +85,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
   }
 
   public enum Type implements BlockPredicateType<IntersectBlockPredicate> {
-    INSTANCE;
+    INTERSECT_TYPE;
 
     @Override
     public @NotNull IntersectBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {

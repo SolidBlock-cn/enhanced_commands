@@ -49,7 +49,7 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement) {
+  public @NotNull NbtCompound apply(@Nullable NbtElement nbtElement) {
     final NbtCompound targetCompound = (nbtElement instanceof final NbtCompound nbtCompound && allowsMerge) ? nbtCompound : new NbtCompound();
     source.forEach((key, nbtFunction) -> {
       if (nbtFunction == null) {

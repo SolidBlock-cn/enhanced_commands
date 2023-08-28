@@ -58,7 +58,7 @@ public interface FunctionLikeParser<T> {
         // In this case, the parameters are empty
         parser.reader.skip();
         parser.suggestions.clear();
-        return getParseResult();
+        return getParseResult(parser);
       } else {
         throw PARAMS_TOO_FEW.createWithContext(parser.reader, paramsCount, minParamsCount());
       }
@@ -100,10 +100,10 @@ public interface FunctionLikeParser<T> {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ")");
       }
     }
-    return getParseResult();
+    return getParseResult(parser);
   }
 
-  T getParseResult();
+  T getParseResult(SuggestedParser parser) throws CommandSyntaxException;
 
   void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
 }

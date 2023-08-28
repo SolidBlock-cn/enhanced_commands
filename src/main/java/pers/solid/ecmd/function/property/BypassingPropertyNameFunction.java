@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.StateUtil;
 
 public record BypassingPropertyNameFunction(String propertyName, boolean must) implements PropertyNameFunction {
   @Override
@@ -17,11 +18,7 @@ public record BypassingPropertyNameFunction(String propertyName, boolean must) i
     if (property == null) {
       return blockState;
     }
-    return getModifiedStateForProperty(blockState, origState, property);
-  }
-
-  private <T extends Comparable<T>> BlockState getModifiedStateForProperty(BlockState blockState, BlockState origState, Property<T> property) {
-    return blockState.with(property, origState.get(property));
+    return StateUtil.withPropertyOfValueFromAnother(blockState, origState, property);
   }
 
   @Override

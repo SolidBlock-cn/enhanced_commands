@@ -10,7 +10,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
 
 import java.util.Arrays;
@@ -46,7 +45,7 @@ public final class SuggestionUtil {
   }
 
   public static CompletableFuture<Suggestions> suggestDirections(Iterable<Direction> directions, SuggestionsBuilder builder) {
-    return suggestMatchingEnumWithTooltip(directions, EnhancedCommands::wrapDirection, builder);
+    return suggestMatchingEnumWithTooltip(directions, TextUtil::wrapDirection, builder);
   }
 
   public static CompletableFuture<Suggestions> suggestDirections(SuggestionsBuilder builder) {

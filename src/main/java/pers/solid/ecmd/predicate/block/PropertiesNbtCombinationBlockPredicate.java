@@ -23,7 +23,7 @@ import java.util.stream.Stream;
  *   oak_sign{front_text = [~"a", ~"b", *, *]}
  * </pre>
  */
-public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate firstBlockPredicate, @Nullable PropertyNamesPredicate propertyNamesPredicate, @Nullable NbtBlockPredicate nbtBlockPredicate) implements BlockPredicate {
+public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate firstBlockPredicate, @Nullable PropertyNamesBlockPredicate propertyNamesPredicate, @Nullable NbtBlockPredicate nbtBlockPredicate) implements BlockPredicate {
   @Contract(value = "_, null, null -> fail", pure = true)
   public PropertiesNbtCombinationBlockPredicate {
     if (propertyNamesPredicate == null && nbtBlockPredicate == null) {
@@ -32,7 +32,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
     if (firstBlockPredicate instanceof NbtPredicate) {
       throw new IllegalArgumentException("The firstBlockPredicate cannot be NbtPredicate or PropertyNamesPredicate");
     }
-    if (firstBlockPredicate instanceof PropertyNamesPredicate && propertyNamesPredicate != null) {
+    if (firstBlockPredicate instanceof PropertyNamesBlockPredicate && propertyNamesPredicate != null) {
       throw new IllegalArgumentException("The propertyNamesPredicate must be null when the firstBlockPredicate is instance of PropertyNamesPredicate");
     }
   }
@@ -70,7 +70,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
     public @NotNull PropertiesNbtCombinationBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
       return new PropertiesNbtCombinationBlockPredicate(
           BlockPredicate.fromNbt(nbtCompound.getCompound("first")),
-          nbtCompound.contains("propertyNames", NbtElement.COMPOUND_TYPE) ? PropertyNamesPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("propertyNames")) : null,
+          nbtCompound.contains("propertyNames", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("propertyNames")) : null,
           nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockPredicate.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt")) : null
       );
     }

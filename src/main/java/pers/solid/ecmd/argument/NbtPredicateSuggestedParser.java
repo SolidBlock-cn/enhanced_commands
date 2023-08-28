@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.nbt.*;
 import pers.solid.ecmd.predicate.property.Comparator;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.SuggestionProvider;
 import pers.solid.ecmd.util.SuggestionUtil;
 
@@ -44,7 +45,6 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
 
   public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.nbt_predicate.sign_expected"));
   public static final DynamicCommandExceptionType DUPLICATE_KEY = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.nbt_predicate.duplicate_key", o));
-  public static final DynamicCommandExceptionType INVALID_REGEX = new DynamicCommandExceptionType(msg -> Text.translatable("enhancedCommands.argument.nbt_predicate.invalid_regex", msg));
   public static final DynamicCommandExceptionType MUST_BE_NUMBER_OR_STRING = new DynamicCommandExceptionType(actualType -> Text.translatable("enhancedCommands.argument.nbt_predicate.must_be_number_or_string", actualType));
 
   public NbtPredicateSuggestedParser(StringReader reader) {
@@ -270,7 +270,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
         return new RegexNbtPredicate(Pattern.compile(reader.readString()), false);
       } catch (PatternSyntaxException e) {
         reader.setCursor(cursorBeforeRegex + e.getIndex());
-        throw INVALID_REGEX.createWithContext(reader, e.getDescription());
+        throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(reader, e.getDescription());
       }
     }
 

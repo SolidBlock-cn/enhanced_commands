@@ -9,18 +9,17 @@ import net.minecraft.command.argument.NbtElementArgumentType;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.visitor.NbtTextFormatter;
-import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.BooleanUtils;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.util.TextUtil;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -91,7 +90,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         })
         .then(literal("plainstring")
             .executes(context -> {
-              context.getSource().sendFeedback(Text.literal(new StringNbtWriter().apply(NbtElementArgumentType.getNbtElement(context, "nbt"))), false);
+              context.getSource().sendFeedback(Text.literal(TextUtil.toSpacedStringNbt(NbtElementArgumentType.getNbtElement(context, "nbt"))), false);
               return 1;
             }))
         .then(literal("prettyprinted")
@@ -107,16 +106,16 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("test")
             .executes(context -> {
               final NbtElement nbtElement = NbtElementArgumentType.getNbtElement(context, "nbt");
-              final String s = new StringNbtWriter().apply(nbtElement);
-              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(EnhancedCommands.STYLE_FOR_RESULT)), false);
+              final String s = TextUtil.toSpacedStringNbt(nbtElement);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(TextUtil.STYLE_FOR_RESULT)), false);
               final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser(new StringReader(s)).parsePredicate(false, false);
-              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(EnhancedCommands.STYLE_FOR_RESULT)), false);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(TextUtil.STYLE_FOR_RESULT)), false);
               final NbtFunction reparsedFunction = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
-              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(EnhancedCommands.STYLE_FOR_RESULT)), false);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(TextUtil.STYLE_FOR_RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
-              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_predicate_matches", EnhancedCommands.wrapBoolean(reparsedPredicateMatches)), false);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
               final boolean reparsedFunctionEqual = reparsedFunction.apply(null).equals(nbtElement);
-              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_function_equal", EnhancedCommands.wrapBoolean(reparsedFunctionEqual)), false);
+              context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
               return (reparsedPredicateMatches ? 2 : 0) + (reparsedFunctionEqual ? 1 : 0);
             }))
     );
@@ -151,7 +150,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               context.getSource().sendFeedback(Text.literal(s), false);
               final NbtPredicate reparse = new NbtPredicateSuggestedParser(new StringReader(s)).parseCompound(false, false);
               final boolean b = nbtPredicate.equals(reparse);
-              context.getSource().sendFeedback(EnhancedCommands.wrapBoolean(b), false);
+              context.getSource().sendFeedback(TextUtil.wrapBoolean(b), false);
               return BooleanUtils.toInteger(b);
             }))
     );
@@ -193,7 +192,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final NbtFunction reparse = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
               context.getSource().sendFeedback(Text.literal(reparse.asString(false)).formatted(Formatting.GRAY), false);
               final boolean b = nbtFunction.equals(reparse);
-              context.getSource().sendFeedback(EnhancedCommands.wrapBoolean(b), false);
+              context.getSource().sendFeedback(TextUtil.wrapBoolean(b), false);
               return BooleanUtils.toInteger(b);
             }))
     );

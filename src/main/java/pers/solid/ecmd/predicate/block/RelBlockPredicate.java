@@ -15,12 +15,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final BlockPos pos = cachedBlockPosition.getBlockPos().add(relPos);
     final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(cachedBlockPosition.getWorld(), pos, false));
-    return new TestResult(testResult.successes(), List.of(Text.translatable("enhancedCommands.argument.blockPredicate.rel." + (testResult.successes() ? "pass" : "fail"), EnhancedCommands.wrapBlockPos(relPos)).formatted(testResult.successes() ? Formatting.GREEN : Formatting.RED)), List.of(testResult));
+    return new TestResult(testResult.successes(), List.of(Text.translatable("enhancedCommands.argument.block_predicate.rel." + (testResult.successes() ? "pass" : "fail"), TextUtil.wrapBlockPos(relPos)).formatted(testResult.successes() ? Formatting.GREEN : Formatting.RED)), List.of(testResult));
   }
 
   @Override
@@ -66,11 +66,11 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.blockPredicate.rel");
+      return Text.translatable("enhancedCommands.argument.block_predicate.rel");
     }
 
     @Override
-    public RelBlockPredicate getParseResult() {
+    public RelBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       Preconditions.checkNotNull(relPos, "relPos (argument 1)");
       Preconditions.checkNotNull(blockPredicate, "blockPredicate (argument 2)");
       return new RelBlockPredicate(relPos, blockPredicate);
@@ -99,7 +99,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
   }
 
   public enum Type implements BlockPredicateType<RelBlockPredicate> {
-    INSTANCE;
+    REL_TYPE;
 
     @Override
     public @NotNull RelBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {

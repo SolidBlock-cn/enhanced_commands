@@ -33,7 +33,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     final boolean result = actual == same;
     final String passOfFail = result ? "pass" : "fail";
     final String sameOrDiff = actual ? "same" : "diff";
-    return new TestResult(result, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.bi_predicate_" + sameOrDiff + "_" + passOfFail).formatted(result ? Formatting.GREEN : Formatting.RED)), List.of(testResult1, testResult2));
+    return new TestResult(result, List.of(Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_" + sameOrDiff + "_" + passOfFail).formatted(result ? Formatting.GREEN : Formatting.RED)), List.of(testResult1, testResult2));
   }
 
   @Override
@@ -72,7 +72,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public BiPredicateBlockPredicate getParseResult() {
+    public BiPredicateBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       return new BiPredicateBlockPredicate(value1, value2, same);
     }
 
@@ -100,7 +100,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   }
 
   public enum Type implements BlockPredicateType<BiPredicateBlockPredicate> {
-    INSTANCE;
+    BI_PREDICATE_TYPE;
 
     @Override
     public @NotNull BiPredicateBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
@@ -114,7 +114,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       CommandSyntaxException exception = null;
       try {
-        final BiPredicateBlockPredicate parse1 = new Parser("same", Text.translatable("enhancedCommands.argument.blockPredicate.bi_predicate_same"), true).parse(commandRegistryAccess, parser, suggestionsOnly);
+        final BiPredicateBlockPredicate parse1 = new Parser("same", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_same"), true).parse(commandRegistryAccess, parser, suggestionsOnly);
         if (parse1 != null) {
           return parse1;
         }
@@ -122,7 +122,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
           CommandSyntaxException exception1) {
         exception = exception1;
       }
-      final BiPredicateBlockPredicate parse2 = new Parser("diff", Text.translatable("enhancedCommands.argument.blockPredicate.bi_predicate_diff"), false).parse(commandRegistryAccess, parser, suggestionsOnly);
+      final BiPredicateBlockPredicate parse2 = new Parser("diff", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_diff"), false).parse(commandRegistryAccess, parser, suggestionsOnly);
       if (parse2 != null) {
         return parse2;
       } else if (exception != null) {

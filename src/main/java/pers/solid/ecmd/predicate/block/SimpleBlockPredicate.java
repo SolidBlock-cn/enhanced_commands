@@ -20,12 +20,12 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -53,16 +53,16 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     final BlockState blockState = cachedBlockPosition.getBlockState();
     ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
     if (!blockState.isOf(block)) {
-      messages.add(Text.translatable("enhancedCommands.argument.blockPredicate.not_the_block", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(EnhancedCommands.STYLE_FOR_ACTUAL), block.getName().styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      messages.add(Text.translatable("enhancedCommands.argument.block_predicate.not_the_block", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), block.getName().styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
       matches = false;
     }
     for (PropertyPredicate<?> propertyPredicate : propertyEntries) {
       if (!propertyPredicate.test(blockState)) {
         final Property<?> property = propertyPredicate.property();
         if (blockState.contains(property)) {
-          messages.add(Text.translatable("enhancedCommands.argument.blockPredicate.property_not_this_value", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), expressPropertyValue(blockState, property).styled(EnhancedCommands.STYLE_FOR_ACTUAL), Text.literal(propertyPredicate.asString()).styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.property_not_this_value", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), expressPropertyValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(propertyPredicate.asString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
         } else {
-          messages.add(Text.translatable("enhancedCommands.argument.blockPredicate.expected_property_does_not_exist", EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos()), Text.literal(property.getName()).styled(EnhancedCommands.STYLE_FOR_ACTUAL), Text.literal(propertyPredicate.asString()).styled(EnhancedCommands.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.expected_property_does_not_exist", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), Text.literal(property.getName()).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(propertyPredicate.asString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
         }
         matches = false;
       }
@@ -94,7 +94,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
   }
 
   public enum Type implements BlockPredicateType<SimpleBlockPredicate> {
-    INSTANCE;
+    SIMPLE_TYPE;
 
     @Override
     public @NotNull SimpleBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {

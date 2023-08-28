@@ -3,9 +3,9 @@ package pers.solid.ecmd.predicate.nbt;
 import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.nbt.visitor.StringNbtWriter;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.Comparator;
+import pers.solid.ecmd.util.TextUtil;
 
 /**
  * 匹配一个 NBT 数值是否在数值上与指定的值相等，而不考虑其类型。例如：
@@ -18,7 +18,7 @@ import pers.solid.ecmd.predicate.property.Comparator;
 public record ComparisonNbtPredicate(Comparator comparator, NbtElement expected) implements NbtPredicate {
   @Override
   public @NotNull String asString() {
-    return comparator.asString() + " " + new StringNbtWriter().apply(expected);
+    return comparator.asString() + " " + TextUtil.toSpacedStringNbt(expected);
   }
 
   @Override

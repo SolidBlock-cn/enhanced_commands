@@ -13,7 +13,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.SuggestionUtil;
 
-public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredicate {
+public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     return nbtPredicate.asString(false);

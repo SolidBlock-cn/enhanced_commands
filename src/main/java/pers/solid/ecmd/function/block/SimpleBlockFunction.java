@@ -14,6 +14,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
@@ -38,13 +39,12 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
   }
 
   @Override
-  public boolean setBlock(World world, BlockPos pos, int flags) {
-    final BlockState origState = world.getBlockState(pos);
+  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     BlockState stateToPlace = block.getDefaultState();
     for (PropertyFunction<?> propertyFunction : propertyFunctions) {
       stateToPlace = propertyFunction.getModifiedState(stateToPlace, origState);
     }
-    return world.setBlockState(pos, stateToPlace, flags);
+    return stateToPlace;
   }
 
   @Override
@@ -58,7 +58,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
   }
 
   @Override
-  public BlockFunctionType<?> getType() {
+  public @NotNull BlockFunctionType<SimpleBlockFunction> getType() {
     return BlockFunctionTypes.SIMPLE;
   }
 

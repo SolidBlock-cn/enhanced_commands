@@ -1,9 +1,9 @@
 package pers.solid.ecmd.function.nbt;
 
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.visitor.StringNbtWriter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.TextUtil;
 
 /**
  * 无论原先值，直接返回固定时的 NBT 函数。
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public record SimpleNbtFunction(@NotNull NbtElement element) implements NbtFunction {
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (requirePrefix ? ": " : "") + new StringNbtWriter().apply(element);
+    return (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(element);
   }
 
   @Override

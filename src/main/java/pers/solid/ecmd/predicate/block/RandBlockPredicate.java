@@ -11,10 +11,10 @@ import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Random;
 
@@ -50,12 +50,12 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final float nextFloat = RandomUtils.nextFloat(0, 1);
-    final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(EnhancedCommands.STYLE_FOR_ACTUAL);
-    final MutableText o2 = Text.literal(String.valueOf(value)).styled(EnhancedCommands.STYLE_FOR_EXPECTED);
+    final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(TextUtil.STYLE_FOR_ACTUAL);
+    final MutableText o2 = Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_EXPECTED);
     if (nextFloat < value) {
-      return new TestResult(true, Text.translatable("enhancedCommands.argument.blockPredicate.probability.pass", o1, o2).formatted(Formatting.GREEN));
+      return new TestResult(true, Text.translatable("enhancedCommands.argument.block_predicate.probability.pass", o1, o2).formatted(Formatting.GREEN));
     } else {
-      return new TestResult(false, Text.translatable("enhancedCommands.argument.blockPredicate.probability.fail", o1, o2).formatted(Formatting.RED));
+      return new TestResult(false, Text.translatable("enhancedCommands.argument.block_predicate.probability.fail", o1, o2).formatted(Formatting.RED));
     }
   }
 
@@ -85,11 +85,11 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.blockPredicate.probability");
+      return Text.translatable("enhancedCommands.argument.block_predicate.probability");
     }
 
     @Override
-    public RandBlockPredicate getParseResult() {
+    public RandBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       return new RandBlockPredicate(value, predicate);
     }
 
@@ -119,7 +119,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
   }
 
   public enum Type implements BlockPredicateType<RandBlockPredicate> {
-    INSTANCE;
+    RAND_TYPE;
 
     @Override
     public @NotNull RandBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {

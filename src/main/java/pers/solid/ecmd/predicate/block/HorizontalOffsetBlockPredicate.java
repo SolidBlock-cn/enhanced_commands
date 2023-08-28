@@ -10,9 +10,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
 
@@ -45,9 +45,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     final String string = successes ? "pass" : "fail";
     final Formatting formatting = successes ? Formatting.GREEN : Formatting.RED;
     if (offset > 0) {
-      description = Text.translatable("enhancedCommands.argument.blockPredicate.test_relative_above_" + string, offset, EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(formatting);
+      description = Text.translatable("enhancedCommands.argument.block_predicate.test_relative_above_" + string, offset, TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(formatting);
     } else {
-      description = Text.translatable("enhancedCommands.argument.blockPredicate.test_relative_below_" + string, -offset, EnhancedCommands.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(formatting);
+      description = Text.translatable("enhancedCommands.argument.block_predicate.test_relative_below_" + string, -offset, TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos())).formatted(formatting);
     }
     return new TestResult(successes, List.of(description), List.of(attachment));
   }
@@ -64,7 +64,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate> {
-    INSTANCE;
+    HORIZONTAL_OFFSET_TYPE;
 
     @Override
     public @NotNull HorizontalOffsetBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {

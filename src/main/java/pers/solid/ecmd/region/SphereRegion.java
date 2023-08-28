@@ -83,7 +83,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     }
 
     @Override
-    public RegionArgument<SphereRegion> getParseResult() {
+    public RegionArgument<SphereRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       return source -> new SphereRegion(radius, centerPos.toAbsolutePos(source));
     }
 

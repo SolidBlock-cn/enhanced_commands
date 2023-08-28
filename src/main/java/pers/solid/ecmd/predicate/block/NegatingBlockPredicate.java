@@ -28,15 +28,15 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition);
     if (testResult.successes()) {
-      return new TestResult(false, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.negation.fail").formatted(Formatting.RED)), List.of(testResult));
+      return new TestResult(false, List.of(Text.translatable("enhancedCommands.argument.block_predicate.negation.fail").formatted(Formatting.RED)), List.of(testResult));
     } else {
-      return new TestResult(true, List.of(Text.translatable("enhancedCommands.argument.blockPredicate.negation.pass").formatted(Formatting.GREEN)), List.of(testResult));
+      return new TestResult(true, List.of(Text.translatable("enhancedCommands.argument.block_predicate.negation.pass").formatted(Formatting.GREEN)), List.of(testResult));
     }
   }
 
   @Override
   public @NotNull BlockPredicateType<?> getType() {
-    return BlockPredicateTypes.NOT;
+    return BlockPredicateTypes.NEGATING;
   }
 
   @Override
@@ -46,7 +46,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
 
 
   public enum Type implements BlockPredicateType<NegatingBlockPredicate> {
-    INSTANCE;
+    NEGATING_TYPE;
 
     @Override
     public @NotNull NegatingBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
@@ -56,7 +56,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
     @Override
     public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       if (parser.reader.getRemaining().isEmpty())
-        parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("!", Text.translatable("enhancedCommands.argument.blockPredicate.negation")));
+        parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("!", Text.translatable("enhancedCommands.argument.block_predicate.negation")));
       boolean negates = false;
       boolean suffixed = false;
       while (parser.reader.canRead() && parser.reader.peek() == '!') {
