@@ -72,7 +72,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public BiPredicateBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public BiPredicateBlockPredicate getParseResult(SuggestedParser parser) {
       return new BiPredicateBlockPredicate(value1, value2, same);
     }
 

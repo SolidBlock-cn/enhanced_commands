@@ -87,7 +87,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     }
 
     @Override
-    public ConditionalBlockFunction getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public ConditionalBlockFunction getParseResult(SuggestedParser parser) {
       return new ConditionalBlockFunction(condition, valueIfTrue, valueIfFalse);
     }
 

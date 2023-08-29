@@ -1,7 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -162,7 +161,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public ExposeBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public ExposeBlockPredicate getParseResult(SuggestedParser parser) {
       return new ExposeBlockPredicate(exposureType, directions.isEmpty() ? List.of(Direction.values()) : List.copyOf(directions));
     }
 
@@ -240,7 +239,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
       if (nbtCompound.contains("directions", NbtElement.STRING_TYPE)) {
         directions = Collections.singletonList(Direction.byName(nbtCompound.getString("directions")));
       } else {
-        directions = nbtCompound.getList("directions", NbtElement.STRING_TYPE).stream().map(nbtElement -> Direction.byName(nbtElement.asString())).filter(Predicates.notNull()).toList();
+        directions = nbtCompound.getList("directions", NbtElement.STRING_TYPE).stream().map(nbtElement -> Direction.byName(nbtElement.asString())).filter(Objects::nonNull).toList();
       }
       return new ExposeBlockPredicate(type, directions);
     }

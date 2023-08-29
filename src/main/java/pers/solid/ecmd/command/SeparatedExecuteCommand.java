@@ -237,7 +237,7 @@ public final class SeparatedExecuteCommand {
         int i = requestResult ? result : success ? 1 : 0;
         path.put(nbtCompound, nbtSetter.apply(i));
         object.setNbt(nbtCompound);
-      } catch (CommandSyntaxException var9) {
+      } catch (CommandSyntaxException ignored) {
       }
     }, BINARY_RESULT_CONSUMER);
   }

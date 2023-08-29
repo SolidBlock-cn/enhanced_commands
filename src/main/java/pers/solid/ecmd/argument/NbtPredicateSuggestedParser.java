@@ -1,6 +1,5 @@
 package pers.solid.ecmd.argument;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -275,7 +274,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
     }
 
     // 尝试读取比较值（除了等号和不等号之外的值）
-    suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).filter(Predicates.not(Predicates.in(List.of(Comparator.EQ, Comparator.NE)))).map(Comparator::asString), suggestionsBuilder));
+    suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).filter(comparator -> comparator != Comparator.EQ && comparator != Comparator.NE).map(Comparator::asString), suggestionsBuilder));
 
     final int cursorBeforeSign = reader.getCursor();
     for (Comparator comparator : Comparator.values()) {

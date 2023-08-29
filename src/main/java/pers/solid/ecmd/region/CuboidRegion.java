@@ -155,7 +155,7 @@ public record CuboidRegion(Box box) implements Region {
     }
 
     @Override
-    public RegionArgument<Region> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public RegionArgument<Region> getParseResult(SuggestedParser parser) {
       if (EnhancedPosArgument.isInt(from) && EnhancedPosArgument.isInt(to)) {
         return source -> new BlockCuboidRegion(from.toAbsoluteBlockPos(source), to.toAbsoluteBlockPos(source));
       }

@@ -80,7 +80,7 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     }
 
     @Override
-    public UnionBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public UnionBlockPredicate getParseResult(SuggestedParser parser) {
       return new UnionBlockPredicate(blockPredicates.build());
     }
   }

@@ -1,6 +1,5 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -48,7 +47,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
       parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_predicate.constant"), suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();

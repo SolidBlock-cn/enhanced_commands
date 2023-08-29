@@ -66,9 +66,7 @@ public interface BlockPredicate extends StringRepresentablePredicate, NbtConvert
 
   @NotNull
   static BlockPredicate parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
-    int cursorOnEnd = cursorOnStart;
     final Stream<BlockPredicateType<?>> stream = commandRegistryAccess.createWrapper(BlockPredicateType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
     Iterable<BlockPredicateType<?>> iterable = Iterables.concat(stream.filter(type -> type != BlockPredicateTypes.SIMPLE)::iterator, Collections.singleton(BlockPredicateTypes.SIMPLE));
     for (BlockPredicateType<?> type : iterable) {
@@ -79,7 +77,7 @@ public interface BlockPredicate extends StringRepresentablePredicate, NbtConvert
         return parse;
       }
     }
-    parser.reader.setCursor(cursorOnEnd);
+    parser.reader.setCursor(cursorOnStart);
     throw CANNOT_PARSE.createWithContext(parser.reader);
   }
 

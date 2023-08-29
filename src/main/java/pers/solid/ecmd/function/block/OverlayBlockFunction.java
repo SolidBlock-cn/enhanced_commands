@@ -79,7 +79,7 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
     }
 
     @Override
-    public OverlayBlockFunction getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public OverlayBlockFunction getParseResult(SuggestedParser parser) {
       return new OverlayBlockFunction(blockFunctions.build());
     }
 

@@ -1,7 +1,6 @@
 package pers.solid.ecmd.function.block;
 
 import com.google.common.base.Suppliers;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -85,7 +84,7 @@ public final class RandomBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable RandomBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable RandomBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
       if (parser.reader.getRemaining().isEmpty()) {
         parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhancedCommands.argument.block_function.random")));
       }

@@ -70,7 +70,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
 
     @Override
-    public RelBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public RelBlockPredicate getParseResult(SuggestedParser parser) {
       Preconditions.checkNotNull(relPos, "relPos (argument 1)");
       Preconditions.checkNotNull(blockPredicate, "blockPredicate (argument 2)");
       return new RelBlockPredicate(relPos, blockPredicate);

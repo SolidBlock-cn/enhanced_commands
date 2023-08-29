@@ -105,7 +105,7 @@ public final class IdMatchBlockFunction implements BlockFunction {
         @Override public Text tooltip() {return Text.translatable("enhancedCommands.argument.block_function.id_match");}
         // @formatter:one
         @Override
-        public IdMatchBlockFunction getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+        public IdMatchBlockFunction getParseResult(SuggestedParser parser) {
           return new IdMatchBlockFunction(pattern, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
         }
 

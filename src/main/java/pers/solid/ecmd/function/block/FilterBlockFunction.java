@@ -92,7 +92,7 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
     }
 
     @Override
-    public FilterBlockFunction getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public FilterBlockFunction getParseResult(SuggestedParser parser) {
       return new FilterBlockFunction(blockFunction, blockPredicate, elseFunction);
     }
 

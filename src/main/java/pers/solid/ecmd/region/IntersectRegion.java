@@ -106,7 +106,7 @@ public record IntersectRegion(Collection<Region> regions) implements Region {
     }
 
     @Override
-    public RegionArgument<IntersectRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public RegionArgument<IntersectRegion> getParseResult(SuggestedParser parser) {
       return source -> new IntersectRegion(regions.stream().map(regionArgument -> (Region) regionArgument.toAbsoluteRegion(source)).toList());
     }
 

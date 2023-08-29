@@ -1,6 +1,5 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -76,7 +75,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
     }
 
     @Override
-    public @Nullable PropertiesNbtCombinationBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable PropertiesNbtCombinationBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
       return null;
     }
   }

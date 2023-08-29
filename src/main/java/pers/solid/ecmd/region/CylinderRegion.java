@@ -131,7 +131,7 @@ public record CylinderRegion(double radius, double height, Vec3d center) impleme
     }
 
     @Override
-    public RegionArgument<CylinderRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public RegionArgument<CylinderRegion> getParseResult(SuggestedParser parser) {
       return source -> new CylinderRegion(radius, height, center.toAbsolutePos(source));
     }
 

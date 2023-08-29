@@ -81,7 +81,7 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
     }
 
     @Override
-    public DryBlockFunction getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public DryBlockFunction getParseResult(SuggestedParser parser) {
       return new DryBlockFunction(blockFunction);
     }
 

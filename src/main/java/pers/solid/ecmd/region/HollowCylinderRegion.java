@@ -174,7 +174,7 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
     }
 
     @Override
-    public RegionArgument<HollowCylinderRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public RegionArgument<HollowCylinderRegion> getParseResult(SuggestedParser parser) {
       return source -> new HollowCylinderRegion(new CylinderRegion(radius, height, center.toAbsolutePos(source)), type);
     }
 

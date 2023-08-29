@@ -102,7 +102,7 @@ public record UnionRegion(Collection<Region> regions) implements Region {
     }
 
     @Override
-    public RegionArgument<UnionRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public RegionArgument<UnionRegion> getParseResult(SuggestedParser parser) {
       return source -> new UnionRegion(regions.stream().map(regionArgument -> (Region) regionArgument.toAbsoluteRegion(source)).toList());
     }
 

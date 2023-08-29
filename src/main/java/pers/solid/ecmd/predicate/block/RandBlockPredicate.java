@@ -89,7 +89,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
 
     @Override
-    public RandBlockPredicate getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public RandBlockPredicate getParseResult(SuggestedParser parser) {
       return new RandBlockPredicate(value, predicate);
     }
 

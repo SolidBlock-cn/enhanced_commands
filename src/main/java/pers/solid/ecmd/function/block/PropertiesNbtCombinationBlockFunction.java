@@ -1,6 +1,5 @@
 package pers.solid.ecmd.function.block;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -80,7 +79,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
     }
 
     @Override
-    public @Nullable PropertiesNbtCombinationBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable PropertiesNbtCombinationBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
       return null;
     }
   }

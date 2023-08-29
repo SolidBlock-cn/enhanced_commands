@@ -139,7 +139,7 @@ public interface PickBlockFunction extends BlockFunction {
 
   class Parser implements FunctionLikeParser<PickBlockFunction> {
     boolean weighted = false;
-    List<ObjectDoublePair<BlockFunction>> pairs = new ArrayList<>();
+    final List<ObjectDoublePair<BlockFunction>> pairs = new ArrayList<>();
 
     @Override
     public @NotNull String functionName() {
