@@ -16,6 +16,7 @@ import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.StringRepresentableFunction;
+import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.SuggestionUtil;
@@ -59,6 +60,7 @@ public record PropertyNamesBlockFunction(@NotNull Collection<PropertyNameFunctio
           .stream()
           .map(nbtElement -> PropertyNameFunction.fromNbt((NbtCompound) nbtElement))
           .toList();
+      GeneralPropertyFunction.OfName.updateExcepts(functions);
       return new PropertyNamesBlockFunction(functions);
     }
 

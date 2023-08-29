@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.StringRepresentableFunction;
+import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 
@@ -112,10 +113,11 @@ public final class TagBlockFunction implements BlockFunction {
     @Override
     public TagBlockFunction fromNbt(NbtCompound nbtCompound) {
       final TagKey<Block> tag = TagKey.of(RegistryKeys.BLOCK, new Identifier(nbtCompound.getString("tag")));
-      final List<PropertyNameFunction> functions = nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE)
+      final List<PropertyNameFunction> functions = nbtCompound.getList("properties", NbtElement.COMPOUND_TYPE)
           .stream()
           .map(nbtElement -> PropertyNameFunction.fromNbt((NbtCompound) nbtElement))
           .toList();
+      GeneralPropertyFunction.OfName.updateExcepts(functions);
       return new TagBlockFunction(tag, functions, Registries.BLOCK.getReadOnlyWrapper());
     }
 

@@ -3,6 +3,7 @@ package pers.solid.ecmd.argument;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.state.property.Property;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,7 +65,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
   }
 
   @Override
-  protected <T extends Comparable<T>> void parsePropertyValue(Property<T> property, Comparator comparator) throws CommandSyntaxException {
+  protected <T extends Comparable<T>> void parsePropertyNameValue(Property<T> property, Comparator comparator) throws CommandSyntaxException {
     suggestions.clear();
     if (comparator == Comparator.EQ || comparator == Comparator.NE) {
       addSpecialPropertyValueSuggestions();
@@ -107,7 +109,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
    * @return the cursor before the value, or -1 if no value is expected
    */
   @Override
-  protected int parsePropertyValue(String propertyName, Comparator comparator) throws CommandSyntaxException {
+  protected int parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException {
     suggestions.clear();
     if (comparator == Comparator.EQ || comparator == Comparator.NE) {
       addSpecialPropertyValueSuggestions();
@@ -133,5 +135,10 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     propertyNamePredicates.add(new ValueNamePropertyPredicate(propertyName, comparator, valueName));
     reader.skipWhitespace();
     return expectEndOfValue ? -1 : cursorBeforeValue;
+  }
+
+  @Override
+  protected void addComparatorTypeSuggestions() {
+    suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).map(Comparator::asString), suggestionsBuilder));
   }
 }

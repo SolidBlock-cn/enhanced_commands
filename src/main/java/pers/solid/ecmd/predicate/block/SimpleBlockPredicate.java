@@ -97,7 +97,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     @Override
     public @NotNull SimpleBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
       final Block block = Registries.BLOCK.getOrEmpty(new Identifier(nbtCompound.getString("block"))).orElseThrow();
-      final List<PropertyPredicate<?>> predicates = nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE)
+      final List<PropertyPredicate<?>> predicates = nbtCompound.getList("properties", NbtElement.COMPOUND_TYPE)
           .stream()
           .<PropertyPredicate<?>>map(nbtElement -> PropertyPredicate.fromNbt((NbtCompound) nbtElement, block))
           .toList();

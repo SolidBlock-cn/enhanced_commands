@@ -67,7 +67,7 @@ public record PropertyNamesBlockPredicate(@NotNull Collection<PropertyNamePredic
   @Override
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     final NbtList nbtList = new NbtList();
-    nbtCompound.put("properties", nbtList);
+    nbtCompound.put("predicates", nbtList);
     nbtList.addAll(Collections2.transform(propertyNamePredicates, NbtConvertible::createNbt));
   }
 

@@ -79,7 +79,7 @@ public interface FunctionLikeParser<T> {
           }
         }
       });
-      // end of an expression, expect a comma or right parentheses
+      // end of an expression, except a comma or right parentheses
       if (!parser.reader.canRead()) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ")");
       } else if (parser.reader.peek() == ',') {

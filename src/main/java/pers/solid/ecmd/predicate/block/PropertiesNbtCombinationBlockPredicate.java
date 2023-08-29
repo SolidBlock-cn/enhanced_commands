@@ -55,7 +55,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.put("first", firstBlockPredicate.createNbt());
     if (propertyNamesPredicate != null) {
-      nbtCompound.put("propertyNames", propertyNamesPredicate.createNbt());
+      nbtCompound.put("properties", propertyNamesPredicate.createNbt());
     }
     if (nbtBlockPredicate != null) {
       nbtCompound.put("nbt", nbtBlockPredicate.createNbt());
@@ -69,7 +69,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
     public @NotNull PropertiesNbtCombinationBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
       return new PropertiesNbtCombinationBlockPredicate(
           BlockPredicate.fromNbt(nbtCompound.getCompound("first")),
-          nbtCompound.contains("propertyNames", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("propertyNames")) : null,
+          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties")) : null,
           nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockPredicate.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt")) : null
       );
     }

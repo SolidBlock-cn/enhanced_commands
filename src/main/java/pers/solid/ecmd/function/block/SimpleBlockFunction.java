@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.StringRepresentableFunction;
+import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyFunction;
 
 import java.util.Collection;
@@ -68,8 +69,9 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
       final Block block = Registries.BLOCK.get(new Identifier(nbtCompound.getString("block")));
       final Collection<PropertyFunction<?>> propertyFunctions;
       final NbtElement propertiesElement = nbtCompound.get("properties");
-      if (propertiesElement instanceof NbtList nbtList && nbtList.getType() == NbtElement.COMPOUND_TYPE) {
+      if (propertiesElement instanceof NbtList nbtList && nbtList.getHeldType() == NbtElement.COMPOUND_TYPE) {
         propertyFunctions = nbtList.stream().map(nbtElement -> PropertyFunction.fromNbt((NbtCompound) nbtElement, block)).collect(Collectors.toUnmodifiableList());
+        GeneralPropertyFunction.updateExcepts(propertyFunctions);
       } else {
         propertyFunctions = Collections.emptyList();
       }

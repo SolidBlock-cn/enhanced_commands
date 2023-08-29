@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 
+import java.util.HashSet;
+
 /**
  * 用于修改一个方块的方块状态属性的函数，通常用于方块函数中。通常来说，状态属性函数包含状态属性以及一个值，用于将方块的这个属性设置为另一个值。
  *
@@ -32,6 +34,11 @@ public interface PropertyFunction<T extends Comparable<T>> extends StringReprese
 
   static PropertyFunction<?> fromNbt(@NotNull NbtCompound nbtCompound, @NotNull Block block) {
     final String propertyName = nbtCompound.getString("property");
+    if ("*".equals(propertyName)) {
+      return new AllRandomPropertyFunction(new HashSet<>());
+    } else if ("~".equals(propertyName)) {
+      return new AllOriginalPropertyFunction(new HashSet<>());
+    }
     final String valueName = nbtCompound.getString("value");
     final boolean must = nbtCompound.getBoolean("must");
 

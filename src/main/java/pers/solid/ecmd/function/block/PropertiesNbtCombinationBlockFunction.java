@@ -59,7 +59,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.put("first", firstBlockFunction.createNbt());
     if (propertyNamesFunction != null) {
-      nbtCompound.put("propertyNames", propertyNamesFunction.createNbt());
+      nbtCompound.put("properties", propertyNamesFunction.createNbt());
     }
     if (nbtBlockFunction != null) {
       nbtCompound.put("nbt", nbtBlockFunction.createNbt());
@@ -73,7 +73,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
     public @NotNull PropertiesNbtCombinationBlockFunction fromNbt(@NotNull NbtCompound nbtCompound) {
       return new PropertiesNbtCombinationBlockFunction(
           BlockFunction.fromNbt(nbtCompound.getCompound("first")),
-          nbtCompound.contains("propertyNames", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("propertyNames")) : null,
+          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties")) : null,
           nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockFunction.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt")) : null
       );
     }

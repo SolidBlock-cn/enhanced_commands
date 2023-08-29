@@ -27,7 +27,6 @@ import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.SuggestionUtil;
 import pers.solid.ecmd.util.TextUtil;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
@@ -36,8 +35,8 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   public static final Text START_OF_PROPERTIES = Text.translatable("enhancedCommands.argument.block_predicate.start_of_properties");
   public static final Text NEXT_PROPERTY = Text.translatable("enhancedCommands.argument.block_predicate.next_property");
   public static final Text END_OF_PROPERTIES = Text.translatable("enhancedCommands.argument.block_predicate.end_of_properties");
-  protected final CommandRegistryAccess commandRegistryAccess;
   public final RegistryWrapper<Block> registryWrapper;
+  protected final CommandRegistryAccess commandRegistryAccess;
   public Block block;
   public Identifier blockId;
   public RegistryEntryList.Named<Block> tagId;
@@ -104,7 +103,6 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     } else {
       return;
     }
-    addPropertyNameSuggestions();
     suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
@@ -115,54 +113,80 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       suggestions.clear();
       return;
     }
-    while (reader.canRead()) {
-      final int cursorBeforeReadString = reader.getCursor();
-      // parse block property name
-      String propertyName = reader.readString();
-      if (propertyName.isEmpty()) {
-        this.reader.setCursor(cursorBeforeReadString);
-        throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, this.blockId.toString(), propertyName);
-      }
-      final StateManager<Block, BlockState> stateManager = block.getStateManager();
-      Property<?> property = stateManager.getProperty(propertyName);
-      if (property == null) {
-        reader.setCursor(cursorBeforeReadString);
-        throw BlockArgumentParser.UNKNOWN_PROPERTY_EXCEPTION.createWithContext(reader, blockId, propertyName);
-      }
-      suggestions.clear();
+    while (reader.canRead(-1)) {
+      parsePropertyEntry();
       reader.skipWhitespace();
 
-      // parse comparator
-
-      addComparatorTypeSuggestions();
-      final Comparator comparator;
-      if (reader.canRead()) {
-        comparator = parseComparator();
-      } else {
-        throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, this.blockId.toString(), propertyName);
-      }
-
-      // parse valueName
-      parsePropertyValue(property, comparator);
       if (suggestions.isEmpty()) {
         addPropertiesFinishedSuggestions();
       }
-      reader.skipWhitespace();
-
-      if (reader.canRead()) {
-        if (reader.peek() == ']') {
-          reader.skip();
-          suggestions.clear();
-          return;
-        } else if (reader.peek() == ',') {
-          reader.skip();
-          suggestions.clear();
-          addPropertyNameSuggestions();
-          reader.skipWhitespace();
-        }
-      }
+      if (parsePropertyEntryEnd())
+        return;
     }
     throw BlockArgumentParser.UNCLOSED_PROPERTIES_EXCEPTION.createWithContext(this.reader);
+  }
+
+  /**
+   * 解析属性列表中的逗号和结束方括号。
+   *
+   * @return 是否表示着整个属性列表（含方括号）已经结束。
+   */
+  private boolean parsePropertyEntryEnd() throws CommandSyntaxException {
+    boolean commaFound = false;
+    if (reader.canRead() && reader.peek() == ',') {
+      commaFound = true;
+      reader.skip();
+      suggestions.clear();
+      reader.skipWhitespace();
+    }
+    if (reader.canRead() && reader.peek() == ']') {
+      reader.skip();
+      suggestions.clear();
+      return true;
+    }
+    if (!commaFound) {
+      reader.expect(',');
+    }
+    return false;
+  }
+
+  protected void parsePropertyEntry() throws CommandSyntaxException {
+    final Property<?> property = parseProperty();
+    reader.skipWhitespace();
+
+    // parse comparator
+
+    addComparatorTypeSuggestions();
+    final Comparator comparator;
+    if (reader.canRead()) {
+      comparator = parseComparator();
+    } else {
+      throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, this.blockId.toString(), property.getName());
+    }
+    reader.skipWhitespace();
+
+    // parse valueName
+    parsePropertyNameValue(property, comparator);
+  }
+
+  @NotNull
+  protected Property<?> parseProperty() throws CommandSyntaxException {
+    addPropertyNameSuggestions();
+    final int cursorBeforeReadString = reader.getCursor();
+    // parse block property name
+    String propertyName = reader.readString();
+    if (propertyName.isEmpty()) {
+      this.reader.setCursor(cursorBeforeReadString);
+      throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, this.blockId.toString(), propertyName);
+    }
+    final StateManager<Block, BlockState> stateManager = block.getStateManager();
+    Property<?> property = stateManager.getProperty(propertyName);
+    if (property == null) {
+      reader.setCursor(cursorBeforeReadString);
+      throw BlockArgumentParser.UNKNOWN_PROPERTY_EXCEPTION.createWithContext(reader, blockId, propertyName);
+    }
+    suggestions.clear();
+    return property;
   }
 
   @NotNull
@@ -177,9 +201,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     });
   }
 
-  protected void addComparatorTypeSuggestions() {
-    suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).map(Comparator::asString), suggestionsBuilder));
-  }
+  protected abstract void addComparatorTypeSuggestions();
 
   protected void addPropertyNameSuggestions() {
     suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(block.getStateManager().getProperties().stream().map(Property::getName), suggestionsBuilder));
@@ -221,7 +243,6 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     } else {
       return;
     }
-    addTagPropertiesNameSuggestions();
     suggestions.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
@@ -233,56 +254,54 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       return;
     }
 
-    while (this.reader.canRead()) {
-      // parse a property name
-      final int cursorBeforePropertyName = reader.getCursor();
-      final String propertyName = this.reader.readString();
-      if (propertyName.isEmpty()) {
-        this.reader.setCursor(cursorBeforePropertyName);
-        throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, tagId == null ?
-            "" : this.tagId.getTag().id().toString(), propertyName);
-      }
-      // parse comparator
-      reader.skipWhitespace();
-      final int cursorBeforeReadingComparator = reader.getCursor();
-      reader.setCursor(cursorBeforePropertyName);
-      final String remaining = reader.getRemaining();
-      if (tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream()).distinct().noneMatch(property -> property.getName().startsWith(remaining) && !property.getName().equals(remaining))) {
-        suggestions.clear();
-        reader.setCursor(cursorBeforeReadingComparator);
-        addComparatorTypeSuggestions();
-      }
-
-      final Comparator comparator;
-      if (reader.canRead()) {
-        comparator = parseComparator();
-      } else {
-        throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, tagId == null ?
-            "" : this.tagId.getTag().id().toString(), propertyName);
-      }
-
-      // parse valueName
-      final int cursorExpect = parsePropertyValue(propertyName, comparator);
-      if (cursorExpect >= 0) {
-        reader.setCursor(cursorExpect);
+    while (this.reader.canRead(-1)) {
+      if (parsePropertyNameEntry())
         break;
-      }
       reader.skipWhitespace();
 
-      if (reader.canRead()) {
-        if (reader.peek() == ']') {
-          reader.skip();
-          suggestions.clear();
-          return;
-        } else if (reader.peek() == ',') {
-          reader.skip();
-          suggestions.clear();
-          addTagPropertiesNameSuggestions();
-          reader.skipWhitespace();
-        }
-      }
+      if (parsePropertyEntryEnd())
+        return;
     }
     throw BlockArgumentParser.UNCLOSED_PROPERTIES_EXCEPTION.createWithContext(this.reader);
+  }
+
+  protected boolean parsePropertyNameEntry() throws CommandSyntaxException {
+    // parse a property name
+    addTagPropertiesNameSuggestions();
+    final int cursorBeforePropertyName = reader.getCursor();
+    final String propertyName = this.reader.readString();
+    if (propertyName.isEmpty()) {
+      this.reader.setCursor(cursorBeforePropertyName);
+      throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, tagId == null ?
+          "" : this.tagId.getTag().id().toString(), propertyName);
+    }
+    // parse comparator
+    reader.skipWhitespace();
+    final int cursorBeforeReadingComparator = reader.getCursor();
+    reader.setCursor(cursorBeforePropertyName);
+    final String remaining = reader.getRemaining();
+    if (tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream()).distinct().noneMatch(property -> property.getName().startsWith(remaining) && !property.getName().equals(remaining))) {
+      suggestions.clear();
+      reader.setCursor(cursorBeforeReadingComparator);
+      addComparatorTypeSuggestions();
+    }
+
+    final Comparator comparator;
+    if (reader.canRead()) {
+      comparator = parseComparator();
+    } else {
+      throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, tagId == null ?
+          "" : this.tagId.getTag().id().toString(), propertyName);
+    }
+    reader.skipWhitespace();
+
+    // parse valueName
+    final int cursorBeforeUnfinishedValue = parsePropertyNameValue(propertyName, comparator);
+    if (cursorBeforeUnfinishedValue >= 0) {
+      reader.setCursor(cursorBeforeUnfinishedValue);
+      return true;
+    }
+    return false;
   }
 
   private void addTagPropertiesNameSuggestions() {
@@ -314,7 +333,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     }
   }
 
-  protected abstract <T extends Comparable<T>> void parsePropertyValue(Property<T> property, Comparator comparator) throws CommandSyntaxException;
+  protected abstract <T extends Comparable<T>> void parsePropertyNameValue(Property<T> property, Comparator comparator) throws CommandSyntaxException;
 
-  protected abstract int parsePropertyValue(String propertyName, Comparator comparator) throws CommandSyntaxException;
+  protected abstract int parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException;
 }

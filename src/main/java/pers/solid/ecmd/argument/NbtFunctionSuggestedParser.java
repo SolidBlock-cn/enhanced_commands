@@ -290,7 +290,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
               throw exception;
             }
           }
-        } // end expect ending square bracket
+        } // end except ending square bracket
       } // end while
 
       suggestions.clear();

@@ -11,9 +11,16 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 
+import java.util.HashSet;
+
 public interface PropertyNameFunction extends StringRepresentableFunction, NbtConvertible {
   static PropertyNameFunction fromNbt(NbtCompound nbtCompound) {
     final String property = nbtCompound.getString("property");
+    if ("*".equals(property)) {
+      return new AllRandomPropertyNameFunction(new HashSet<>());
+    } else if ("~".equals(property)) {
+      return new AllOriginalPropertyNameFunctions(new HashSet<>());
+    }
     final String value = nbtCompound.getString("value");
     final boolean must = nbtCompound.getBoolean("must");
     if ("~".equals(value)) {

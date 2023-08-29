@@ -102,7 +102,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     @Override
     public @NotNull TagBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
       final TagKey<Block> tag = TagKey.of(RegistryKeys.BLOCK, new Identifier(nbtCompound.getString("tag")));
-      final List<PropertyNamePredicate> predicates = nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE)
+      final List<PropertyNamePredicate> predicates = nbtCompound.getList("properties", NbtElement.COMPOUND_TYPE)
           .stream()
           .map(nbtElement -> PropertyNamePredicate.fromNbt((NbtCompound) nbtElement))
           .toList();
