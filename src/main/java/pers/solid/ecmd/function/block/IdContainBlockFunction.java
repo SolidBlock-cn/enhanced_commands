@@ -28,21 +28,21 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * 从 id 符合指定正则表达式的方块中随机选择一个。
+ * 从 id 包含指定正则表达式的方块中随机选择一个。
  */
-public final class IdMatchBlockFunction implements BlockFunction {
+public final class IdContainBlockFunction implements BlockFunction {
   public @NotNull
   final Pattern pattern;
   private transient final Supplier<Block[]> blocks;
 
-  public IdMatchBlockFunction(@NotNull Pattern pattern, RegistryWrapper<Block> registryWrapper) {
+  public IdContainBlockFunction(@NotNull Pattern pattern, RegistryWrapper<Block> registryWrapper) {
     this.pattern = pattern;
-    blocks = Suppliers.memoize(() -> registryWrapper.streamEntries().filter(reference -> pattern.matcher(reference.registryKey().getValue().toString()).matches()).map(RegistryEntry.Reference::value).toArray(Block[]::new));
+    blocks = Suppliers.memoize(() -> registryWrapper.streamEntries().filter(reference -> pattern.matcher(reference.registryKey().getValue().toString()).find()).map(RegistryEntry.Reference::value).toArray(Block[]::new));
   }
 
   @Override
   public @NotNull String asString() {
-    return "idmatch(" + NbtString.escape(pattern.toString()) + ")";
+    return "idcontain(" + NbtString.escape(pattern.toString()) + ")";
   }
 
   @Override
@@ -60,15 +60,15 @@ public final class IdMatchBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockFunctionType<IdMatchBlockFunction> getType() {
-    return BlockFunctionTypes.ID_MATCH;
+  public @NotNull BlockFunctionType<IdContainBlockFunction> getType() {
+    return BlockFunctionTypes.ID_CONTAIN;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if (!(o instanceof IdMatchBlockFunction that))
+    if (!(o instanceof IdContainBlockFunction that))
       return false;
 
     return pattern.pattern().equals(that.pattern.pattern());
@@ -81,32 +81,32 @@ public final class IdMatchBlockFunction implements BlockFunction {
 
   @Override
   public String toString() {
-    return "IdMatchBlockFunction{" +
+    return "IdContainBlockFunction{" +
         "pattern=" + pattern +
         '}';
   }
 
-  public enum Type implements BlockFunctionType<IdMatchBlockFunction> {
-    ID_MATCH_TYPE;
+  public enum Type implements BlockFunctionType<IdContainBlockFunction> {
+    ID_CONTAIN_TYPE;
 
     @Override
-    public IdMatchBlockFunction fromNbt(NbtCompound nbtCompound) {
-      return new IdMatchBlockFunction(Pattern.compile(nbtCompound.getString("pattern")), Registries.BLOCK.getReadOnlyWrapper());
+    public IdContainBlockFunction fromNbt(NbtCompound nbtCompound) {
+      return new IdContainBlockFunction(Pattern.compile(nbtCompound.getString("pattern")), Registries.BLOCK.getReadOnlyWrapper());
     }
 
     @Override
-    public @Nullable IdMatchBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new FunctionLikeParser<IdMatchBlockFunction>() {
+    public @Nullable IdContainBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new FunctionLikeParser<IdContainBlockFunction>() {
         // @formatter:off
         Pattern pattern;
         @Override public int minParamsCount() {return 1;}
         @Override public int maxParamsCount() {return 1;}
-        @Override public @NotNull String functionName() {return "idmatch";}
-        @Override public Text tooltip() {return Text.translatable("enhancedCommands.argument.block_function.id_match");}
+        @Override public @NotNull String functionName() {return "idcontain";}
+        @Override public Text tooltip() {return Text.translatable("enhancedCommands.argument.block_function.id_contain");}
         // @formatter:one
         @Override
-        public IdMatchBlockFunction getParseResult(SuggestedParser parser) {
-          return new IdMatchBlockFunction(pattern, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
+        public IdContainBlockFunction getParseResult(SuggestedParser parser) {
+          return new IdContainBlockFunction(pattern, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
         }
 
         @Override

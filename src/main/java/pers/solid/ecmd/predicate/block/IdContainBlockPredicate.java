@@ -21,27 +21,27 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public record IdMatchBlockPredicate(@NotNull Pattern pattern) implements BlockPredicate {
+public record IdContainBlockPredicate(@NotNull Pattern pattern) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "idmatch(" + NbtString.escape(pattern.pattern()) + ")";
+    return "idcontain(" + NbtString.escape(pattern.pattern()) + ")";
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return pattern.matcher(Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString()).matches();
+    return pattern.matcher(Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString()).find();
   }
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final String id = Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString();
     final boolean matches = pattern.matcher(id).matches();
-    return new TestResult(matches, Text.translatable("enhancedCommands.argument.block_predicate.id_match." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(TextUtil.STYLE_FOR_EXPECTED), Text.literal(id).styled(TextUtil.STYLE_FOR_ACTUAL)).formatted(matches ? Formatting.GREEN : Formatting.RED));
+    return new TestResult(matches, Text.translatable("enhancedCommands.argument.block_predicate.id_contain." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(TextUtil.STYLE_FOR_EXPECTED), Text.literal(id).styled(TextUtil.STYLE_FOR_ACTUAL)).formatted(matches ? Formatting.GREEN : Formatting.RED));
   }
 
   @Override
-  public @NotNull BlockPredicateType<IdMatchBlockPredicate> getType() {
-    return BlockPredicateTypes.ID_MATCH;
+  public @NotNull BlockPredicateType<IdContainBlockPredicate> getType() {
+    return BlockPredicateTypes.ID_CONTAIN;
   }
 
   @Override
@@ -53,7 +53,7 @@ public record IdMatchBlockPredicate(@NotNull Pattern pattern) implements BlockPr
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if (!(o instanceof IdMatchBlockPredicate that))
+    if (!(o instanceof IdContainBlockPredicate that))
       return false;
 
     return pattern.pattern().equals(that.pattern.pattern());
@@ -64,25 +64,25 @@ public record IdMatchBlockPredicate(@NotNull Pattern pattern) implements BlockPr
     return pattern.pattern().hashCode();
   }
 
-  public enum Type implements BlockPredicateType<IdMatchBlockPredicate> {
-    ID_MATCH_TYPE;
+  public enum Type implements BlockPredicateType<IdContainBlockPredicate> {
+    ID_CONTAIN_TYPE;
 
     @Override
-    public @NotNull IdMatchBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
-      return new IdMatchBlockPredicate(Pattern.compile(nbtCompound.getString("pattern")));
+    public @NotNull IdContainBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+      return new IdContainBlockPredicate(Pattern.compile(nbtCompound.getString("pattern")));
     }
 
     @Override
-    public @Nullable IdMatchBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new FunctionLikeParser<IdMatchBlockPredicate>() {// @formatter:off
+    public @Nullable IdContainBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new FunctionLikeParser<IdContainBlockPredicate>() {// @formatter:off
         Pattern pattern;
         @Override public int minParamsCount() {return 1;}
         @Override public int maxParamsCount() {return 1;}
-        @Override public @NotNull String functionName() {return "idmatch";}
-        @Override public Text tooltip() {return Text.translatable("enhancedCommands.argument.block_predicate.id_match");}
+        @Override public @NotNull String functionName() {return "idcontain";}
+        @Override public Text tooltip() {return Text.translatable("enhancedCommands.argument.block_predicate.id_contain");}
         @Override
-        public IdMatchBlockPredicate getParseResult(SuggestedParser parser) { // @formatter:on
-          return new IdMatchBlockPredicate(pattern);
+        public IdContainBlockPredicate getParseResult(SuggestedParser parser) { // @formatter:on
+          return new IdContainBlockPredicate(pattern);
         }
 
         @Override

@@ -30,7 +30,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<BiPredicateBlockPredicate> BI_PREDICATE = register(BiPredicateBlockPredicate.Type.BI_PREDICATE_TYPE, "bi_predicate");
   public static final BlockPredicateType<RelBlockPredicate> REL = register(RelBlockPredicate.Type.REL_TYPE, "rel");
   public static final BlockPredicateType<ExposeBlockPredicate> EXPOSE = register(ExposeBlockPredicate.Type.EXPOSE_TYPE, "expose");
-  public static final BlockPredicateType<IdMatchBlockPredicate> ID_MATCH = register(IdMatchBlockPredicate.Type.ID_MATCH_TYPE, "id_match");
+  public static final BlockPredicateType<IdContainBlockPredicate> ID_CONTAIN = register(IdContainBlockPredicate.Type.ID_CONTAIN_TYPE, "id_contain");
 
   public static void init() {
     Preconditions.checkState(BlockPredicateType.REGISTRY.size() != 0);

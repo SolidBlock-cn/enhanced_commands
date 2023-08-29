@@ -23,9 +23,10 @@ public final class BlockFunctionTypes {
   public static final BlockFunctionType<DryBlockFunction> DRY = register(DryBlockFunction.Type.DRY_TYPE, "dry");
   public static final BlockFunctionType<OverlayBlockFunction> OVERLAY = register(OverlayBlockFunction.Type.OVERLAY_TYPE, "overlay");
   public static final BlockFunctionType<FilterBlockFunction> FILTER = register(FilterBlockFunction.Type.FILTER_TYPE, "filter");
-  public static final BlockFunctionType<IdMatchBlockFunction> ID_MATCH = register(IdMatchBlockFunction.Type.ID_MATCH_TYPE, "id_match");
+  public static final BlockFunctionType<IdContainBlockFunction> ID_CONTAIN = register(IdContainBlockFunction.Type.ID_CONTAIN_TYPE, "id_contain");
   public static final BlockFunctionType<StonecutBlockFunction> STONE_CUT = register(StonecutBlockFunction.Type.STONE_CUT_TYPE, "stonecut");
   public static final BlockFunctionType<ConditionalBlockFunction> CONDITIONAL = register(ConditionalBlockFunction.Type.CONDITIONAL_TYPE, "conditional");
+  public static final BlockFunctionType<IdReplaceBlockFunction> ID_REPLACE = register(IdReplaceBlockFunction.Type.ID_REPLACE_TYPE, "id_replace");
 
   public static void init() {
   }
