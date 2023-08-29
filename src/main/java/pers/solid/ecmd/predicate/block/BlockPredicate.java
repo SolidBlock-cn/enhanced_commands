@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -27,6 +28,10 @@ import java.util.stream.Stream;
 
 public interface BlockPredicate extends StringRepresentablePredicate, NbtConvertible {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
+
+  static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, String s) throws CommandSyntaxException {
+    return parse(commandRegistryAccess, new SuggestedParser(new StringReader(s)), false);
+  }
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final BlockPredicate parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly);

@@ -7,12 +7,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -109,13 +107,9 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     @Override
     public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
       SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser0);
-      parser.suggestions.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(parser.registryWrapper.streamKeys().map(RegistryKey::getValue)::iterator, suggestionsBuilder.getRemaining().toLowerCase(), id -> id, id -> suggestionsBuilder.suggest(id.toString())));
-      if (parser.reader.canRead() && Identifier.isCharValid(parser.reader.peek())) {
-        parser.parseBlockId();
-        parser.parseProperties();
-        return new SimpleBlockPredicate(parser.block, parser.propertyPredicates);
-      }
-      return null;
+      parser.parseBlockId();
+      parser.parseProperties();
+      return new SimpleBlockPredicate(parser.block, parser.propertyPredicates);
     }
   }
 }

@@ -21,10 +21,10 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public record IdMatchBlockPredicate(Pattern pattern) implements BlockPredicate {
+public record IdMatchBlockPredicate(@NotNull Pattern pattern) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "idmatch(" + NbtString.escape(pattern.toString()) + ")";
+    return "idmatch(" + NbtString.escape(pattern.pattern()) + ")";
   }
 
   @Override
@@ -47,6 +47,21 @@ public record IdMatchBlockPredicate(Pattern pattern) implements BlockPredicate {
   @Override
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("pattern", pattern.toString());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (!(o instanceof IdMatchBlockPredicate that))
+      return false;
+
+    return pattern.pattern().equals(that.pattern.pattern());
+  }
+
+  @Override
+  public int hashCode() {
+    return pattern.pattern().hashCode();
   }
 
   public enum Type implements BlockPredicateType<IdMatchBlockPredicate> {

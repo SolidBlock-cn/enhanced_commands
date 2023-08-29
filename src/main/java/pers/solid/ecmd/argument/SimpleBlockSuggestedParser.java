@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockArgumentParser;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
@@ -22,6 +23,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.Comparator;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -58,13 +62,32 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   }
 
   public void parseBlockId() throws CommandSyntaxException {
-    int cursorBeforeParsing = this.reader.getCursor();
-    this.blockId = Identifier.fromCommandInput(this.reader);
-    this.block = this.registryWrapper.getOptional(RegistryKey.of(RegistryKeys.BLOCK, this.blockId)).orElseThrow(() -> {
-      this.reader.setCursor(cursorBeforeParsing);
-      return BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(this.reader, this.blockId.toString());
-    }).value();
-    suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("[", START_OF_PROPERTIES));
+    if (reader.canRead() && reader.peek() == '@') {
+      reader.skip();
+      int cursorBeforeParsing = this.reader.getCursor();
+      suggestions.clear();
+      suggestions.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(Registries.BLOCK.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName())));
+      blockId = Identifier.fromCommandInput(reader);
+      block = Registries.BLOCK.getOrEmpty(blockId).orElseThrow(() -> {
+        this.reader.setCursor(cursorBeforeParsing);
+        return BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString());
+      });
+    } else {
+      int cursorBeforeParsing = this.reader.getCursor();
+      suggestions.add((context, suggestionsBuilder) -> {
+        SuggestionUtil.suggestString("@", Text.translatable("enhancedCommands.argument.block.ignore_feature_flag"), suggestionsBuilder);
+        CommandSource.forEachMatching(registryWrapper.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName()));
+      });
+      this.blockId = Identifier.fromCommandInput(this.reader);
+      this.block = this.registryWrapper.getOptional(RegistryKey.of(RegistryKeys.BLOCK, this.blockId)).orElseThrow(() -> {
+        this.reader.setCursor(cursorBeforeParsing);
+        if (Registries.BLOCK.containsId(blockId)) {
+          final Block block1 = Registries.BLOCK.get(blockId);
+          return ModCommandExceptionTypes.FEATURE_REQUIRED.createWithContext(reader, Text.literal(blockId.toString()).styled(TextUtil.STYLE_FOR_ACTUAL), block1.getName().styled(TextUtil.STYLE_FOR_TARGET));
+        }
+        return BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString());
+      }).value();
+    }
   }
 
   public void parseProperties() throws CommandSyntaxException {

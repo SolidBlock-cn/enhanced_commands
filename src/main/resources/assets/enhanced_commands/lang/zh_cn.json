@@ -1,5 +1,8 @@
 {
+  "enhancedCommands.argument.block.feature_required": "方块id %s（%s）存在，但是无法使用，因为当前世界没有启用相应的功能标签（通常是实验性内容）",
+  "enhancedCommands.argument.block.ignore_feature_flag": "忽略需要的功能标签",
   "enhancedCommands.argument.block_function.cannotParse": "无法解析方块函数",
+  "enhancedCommands.argument.block_function.conditional": "当方块谓词通过时使用此函数",
   "enhancedCommands.argument.block_function.dry": "从方块中移除流体",
   "enhancedCommands.argument.block_function.filter": "当谓词通过时应用方块函数",
   "enhancedCommands.argument.block_function.id_match": "随机选择id符合正则表达式的方块",
@@ -9,6 +12,7 @@
   "enhancedCommands.argument.block_function.pick.zero_sum": "权重值的和不能为零",
   "enhancedCommands.argument.block_function.random": "带有随机状态的随机方块",
   "enhancedCommands.argument.block_function.randomValue": "随机值",
+  "enhancedCommands.argument.block_function.stone_cut": "方块切石后的结果",
   "enhancedCommands.argument.block_function.use_original": "使用原始的方块",
   "enhancedCommands.argument.block_predicate.above_block": "在符合谓词的方块的上方",
   "enhancedCommands.argument.block_predicate.anyValue": "匹配任意值，只要该属性存在",

@@ -52,6 +52,9 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.put("function", blockFunction.createNbt());
     nbtCompound.put("predicate", blockPredicate.createNbt());
+    if (elseFunction != null) {
+      nbtCompound.put("else", elseFunction.createNbt());
+    }
   }
 
   @Override

@@ -23,19 +23,19 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * 从 id 符合指定的正则表达式的方块中随机选择一个。
+ * 从 id 符合指定正则表达式的方块中随机选择一个。
  */
 public final class IdMatchBlockFunction implements BlockFunction {
-  public final Pattern pattern;
+  public @NotNull
+  final Pattern pattern;
   private transient final Supplier<Block[]> blocks;
 
-  public IdMatchBlockFunction(Pattern pattern, RegistryWrapper<Block> registryWrapper) {
+  public IdMatchBlockFunction(@NotNull Pattern pattern, RegistryWrapper<Block> registryWrapper) {
     this.pattern = pattern;
     blocks = Suppliers.memoize(() -> registryWrapper.streamEntries().filter(reference -> pattern.matcher(reference.registryKey().getValue().toString()).matches()).map(RegistryEntry.Reference::value).toArray(Block[]::new));
   }
@@ -71,12 +71,12 @@ public final class IdMatchBlockFunction implements BlockFunction {
     if (!(o instanceof IdMatchBlockFunction that))
       return false;
 
-    return Objects.equals(pattern, that.pattern);
+    return pattern.pattern().equals(that.pattern.pattern());
   }
 
   @Override
   public int hashCode() {
-    return pattern != null ? pattern.hashCode() : 0;
+    return pattern.pattern().hashCode();
   }
 
   @Override

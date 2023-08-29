@@ -2,6 +2,7 @@ package pers.solid.ecmd.function.block;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.BlockState;
@@ -33,6 +34,9 @@ import java.util.stream.Stream;
 public interface BlockFunction extends StringRepresentableFunction, NbtConvertible {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_function.cannotParse"));
 
+  static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, String s) throws CommandSyntaxException {
+    return parse(commandRegistryAccess, new SuggestedParser(new StringReader(s)), false);
+  }
 
   static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final BlockFunction parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly);

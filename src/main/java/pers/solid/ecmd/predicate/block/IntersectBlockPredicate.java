@@ -89,7 +89,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
 
     @Override
     public @NotNull IntersectBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
-      return new IntersectBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt(nbtCompound)).toList());
+      return new IntersectBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement)).toList());
     }
 
     @Override

@@ -73,7 +73,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
 
   @Override
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("type", exposureType.asString());
+    nbtCompound.putString("exposure_type", exposureType.asString());
     final NbtList nbtList = new NbtList();
     nbtCompound.put("directions", nbtList);
     for (Direction direction : directions) {
@@ -232,7 +232,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
 
     @Override
     public @NotNull ExposeBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
-      final String typeName = nbtCompound.getString("type");
+      final String typeName = nbtCompound.getString("exposure_type");
       final ExposureType type = ExposureType.CODEC.byId(typeName);
       Preconditions.checkNotNull(type, "Unknown exposure type: %", typeName);
       final List<Direction> directions;

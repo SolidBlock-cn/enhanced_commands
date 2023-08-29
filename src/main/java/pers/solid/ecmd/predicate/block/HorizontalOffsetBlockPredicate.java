@@ -24,9 +24,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   @Override
   public @NotNull String asString() {
     if (offset > 0) {
-      return Strings.repeat('>', offset) + blockPredicate.asString();
+      return Strings.repeat('<', offset) + blockPredicate.asString();
     } else if (offset < 0) {
-      return Strings.repeat('<', -offset) + blockPredicate.asString();
+      return Strings.repeat('>', -offset) + blockPredicate.asString();
     } else {
       return blockPredicate.asString();
     }

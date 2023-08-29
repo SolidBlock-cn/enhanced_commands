@@ -3,9 +3,11 @@ package pers.solid.ecmd.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.NbtElementArgumentType;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.visitor.NbtTextFormatter;
@@ -14,6 +16,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.BooleanUtils;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
@@ -57,7 +60,33 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
               context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(blockFunction.createNbt()), false);
               return 1;
-            })));
+            }))
+        .then(literal("reparse")
+            .executes(context -> {
+              final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
+              final String s = blockFunction.asString();
+              context.getSource().sendFeedback(Text.literal(s), false);
+              final BlockFunction reparse = BlockFunction.parse(registryAccess, s);
+              final boolean b = blockFunction.equals(reparse);
+              context.getSource().sendFeedback(TextUtil.wrapBoolean(b), false);
+              return BooleanUtils.toInteger(b);
+            }))
+        .then(literal("redeserialize")
+            .executes(context -> {
+              final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
+              final NbtCompound nbt = blockFunction.createNbt();
+              context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(nbt), false);
+              try {
+                final BlockFunction reDeserialize = BlockFunction.fromNbt(nbt);
+                final boolean b = blockFunction.equals(reDeserialize);
+                context.getSource().sendFeedback(TextUtil.wrapBoolean(b), false);
+                return BooleanUtils.toInteger(b);
+              } catch (Throwable e) {
+                EnhancedCommands.LOGGER.error("Parsing block function from NBT:", e);
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
+              }
+            }))
+    );
   }
 
   private static LiteralArgumentBuilder<ServerCommandSource> addBlockPredicateProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, CommandRegistryAccess registryAccess) {
@@ -79,10 +108,36 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
               context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(blockPredicate.createNbt()), false);
               return 1;
-            })));
+            }))
+        .then(literal("reparse")
+            .executes(context -> {
+              final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
+              final String s = blockPredicate.asString();
+              context.getSource().sendFeedback(Text.literal(s), false);
+              final BlockPredicate reparse = BlockPredicate.parse(registryAccess, s);
+              final boolean b = blockPredicate.equals(reparse);
+              context.getSource().sendFeedback(TextUtil.wrapBoolean(b), false);
+              return BooleanUtils.toInteger(b);
+            }))
+        .then(literal("redeserialize")
+            .executes(context -> {
+              final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
+              final NbtCompound nbt = blockPredicate.createNbt();
+              context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(nbt), false);
+              try {
+                final BlockPredicate reDeserialize = BlockPredicate.fromNbt(nbt);
+                final boolean b = blockPredicate.equals(reDeserialize);
+                context.getSource().sendFeedback(TextUtil.wrapBoolean(b), false);
+                return BooleanUtils.toInteger(b);
+              } catch (Throwable e) {
+                EnhancedCommands.LOGGER.error("Parsing block predicate from NBT:", e);
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
+              }
+            }))
+    );
   }
 
-  private LiteralArgumentBuilder<ServerCommandSource> addNbtProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder) {
+  private static LiteralArgumentBuilder<ServerCommandSource> addNbtProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder) {
     return argumentBuilder.then(argument("nbt", NbtElementArgumentType.nbtElement())
         .executes(context -> {
           context.getSource().sendFeedback(NbtHelper.toPrettyPrintedText(NbtElementArgumentType.getNbtElement(context, "nbt")), false);
