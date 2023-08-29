@@ -242,7 +242,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       final int cursorExpect = parsePropertyValue(propertyName, comparator);
       if (cursorExpect >= 0) {
         reader.setCursor(cursorExpect);
-        return;
+        break;
       }
       reader.skipWhitespace();
 

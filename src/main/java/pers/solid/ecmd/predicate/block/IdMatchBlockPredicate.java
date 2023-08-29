@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -78,7 +79,7 @@ public record IdMatchBlockPredicate(Pattern pattern) implements BlockPredicate {
             pattern = Pattern.compile(reader.readString());
           } catch (PatternSyntaxException e) {
             reader.setCursor(cursorAtRegexBegin);
-            throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(reader, e.getMessage());
+            throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(reader, e.getMessage().replace(StringUtils.CR, StringUtils.EMPTY));
           }
         }
       }.parse(commandRegistryAccess, parser, suggestionsOnly);

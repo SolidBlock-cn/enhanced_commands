@@ -15,6 +15,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -117,7 +118,7 @@ public final class IdMatchBlockFunction implements BlockFunction {
             pattern = Pattern.compile(reader.readString());
           } catch (PatternSyntaxException e) {
             reader.setCursor(cursorAtRegexBegin);
-            throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(reader, e.getMessage());
+            throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(reader, e.getMessage().replace(StringUtils.CR, StringUtils.EMPTY));
           }
         }
       }.parse(commandRegistryAccess, parser, suggestionsOnly);

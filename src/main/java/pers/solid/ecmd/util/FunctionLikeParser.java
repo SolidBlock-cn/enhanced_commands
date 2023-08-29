@@ -31,8 +31,8 @@ public interface FunctionLikeParser<T> {
 
   default T parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final String name = functionName();
-    if (name.startsWith(parser.reader.getRemaining().toLowerCase())) {
-      parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest(name + "(", tooltip()));
+    if (suggestionsOnly) {
+      parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(name + "(", tooltip(), suggestionsBuilder));
     }
     final int cursorBeforeUnion = parser.reader.getCursor();
     final String s = parser.reader.readUnquotedString();
@@ -64,10 +64,10 @@ public interface FunctionLikeParser<T> {
       }
     }
     while (true) {
+      parser.suggestions.clear();
       parseParameter(commandRegistryAccess, parser, paramsCount, suggestionsOnly);
       paramsCount++;
       parser.reader.skipWhitespace();
-      parser.suggestions.clear();
       final int finalParamsCount = paramsCount;
       parser.suggestions.add((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {

@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -20,13 +21,14 @@ import pers.solid.ecmd.util.FunctionLikeParser;
  * 一种特殊的方块函数，当指定的方块函数的结果只有符合指定的谓词时，才会应用。例如：
  * <pre>
  *   filter(*, !#infiniburn)  // 任何方块，但不能用 #infiniburn 标签，否则不应用。
+ *   filter(*, !#infiniburn, bedrock)  // 任何方块，如果其随机的结果是含有 #infiniburn 标签的方块，则使用基岩。
  * </pre>
  * 注意：此方法不一定能够正常地对方块实体进行检测。
  */
-public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull BlockPredicate blockPredicate) implements BlockFunction {
+public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull BlockPredicate blockPredicate, @Nullable BlockFunction elseFunction) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "filter(" + blockFunction.asString() + ", " + blockPredicate.asString() + ")";
+    return "filter(" + blockFunction.asString() + ", " + blockPredicate.asString() + (elseFunction == null ? "" : ", " + elseFunction.asString()) + ")";
   }
 
   @Override
@@ -37,9 +39,12 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
     ((CachedBlockPositionAccessor) cachedBlockPosition).setState(newState);
     if (blockPredicate.test(cachedBlockPosition)) {
       return newState;
-    } else {
+    } else if (elseFunction == null) {
       blockEntityData.setValue(valueBeforeModify);
       return blockState;
+    } else {
+      blockEntityData.setValue(valueBeforeModify);
+      return elseFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
   }
 
@@ -60,8 +65,8 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
     @Override
     public FilterBlockFunction fromNbt(NbtCompound nbtCompound) {
       return new FilterBlockFunction(
-          BlockFunction.fromNbt(nbtCompound.getCompound("function")),
-          BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"))
+          BlockFunction.fromNbt(nbtCompound.getCompound("function")), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")),
+          nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else")) : null
       );
     }
 
@@ -72,8 +77,9 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
   }
 
   private static final class Parser implements FunctionLikeParser<FilterBlockFunction> {
-    private BlockFunction blockFunction;
     private BlockPredicate blockPredicate;
+    private BlockFunction blockFunction;
+    private BlockFunction elseFunction;
 
     @Override
     public @NotNull String functionName() {
@@ -87,7 +93,7 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
 
     @Override
     public FilterBlockFunction getParseResult(SuggestedParser parser) throws CommandSyntaxException {
-      return new FilterBlockFunction(blockFunction, blockPredicate);
+      return new FilterBlockFunction(blockFunction, blockPredicate, elseFunction);
     }
 
     @Override
@@ -96,7 +102,14 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
         blockFunction = BlockFunction.parse(commandRegistryAccess, parser, suggestionsOnly);
       } else if (paramIndex == 1) {
         blockPredicate = BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
+      } else if (paramIndex == 2) {
+        elseFunction = BlockFunction.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
     }
+
+    // @formatter:off
+    @Override public int minParamsCount() {return 2;}
+    @Override public int maxParamsCount() {return 3;}
+    // @formatter:on
   }
 }

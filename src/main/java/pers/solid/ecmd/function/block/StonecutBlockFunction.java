@@ -28,7 +28,7 @@ import java.util.List;
 public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "stonecut(" + (blockFunction == null ? null : blockFunction.asString()) + ")";
+    return "stonecut(" + (blockFunction == null ? "" : blockFunction.asString()) + ")";
   }
 
   @Override

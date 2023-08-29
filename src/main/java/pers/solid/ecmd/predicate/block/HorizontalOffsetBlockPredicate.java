@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.SuggestionUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -75,12 +76,10 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
 
     @Override
     public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      if (parser.reader.getRemaining().isEmpty()) {
-        parser.suggestions.add((context, suggestionsBuilder) -> {
-          suggestionsBuilder.suggest("<", BENEATH_BLOCK);
-          suggestionsBuilder.suggest(">", ABOVE_BLOCK);
-        });
-      }
+      parser.suggestions.add((context, suggestionsBuilder) -> {
+        SuggestionUtil.suggestString("<", BENEATH_BLOCK, suggestionsBuilder);
+        SuggestionUtil.suggestString(">", ABOVE_BLOCK, suggestionsBuilder);
+      });
       int offset = 0;
       boolean prefixed = false;
       final StringReader reader = parser.reader;

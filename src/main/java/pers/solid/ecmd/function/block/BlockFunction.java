@@ -1,6 +1,7 @@
 package pers.solid.ecmd.function.block;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.BlockState;
@@ -8,6 +9,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -21,7 +23,9 @@ import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockStateArgument} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
@@ -68,28 +72,21 @@ public interface BlockFunction extends StringRepresentableFunction, NbtConvertib
 
   @NotNull
   static BlockFunction parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
-    int cursorOnEnd = cursorOnStart;
-    for (BlockFunctionType<?> type : BlockFunctionType.REGISTRY) {
-      try {
-        parser.reader.setCursor(cursorOnStart);
-        final BlockFunction parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
-        if (parse != null) {
-          // keep the current position of the cursor
-          return parse;
-        }
 
-      } catch (
-          CommandSyntaxException exception1) {
-        cursorOnEnd = parser.reader.getCursor();
-        exception = exception1;
+    final Stream<BlockFunctionType<?>> stream = commandRegistryAccess.createWrapper(BlockFunctionType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
+    // 强制将 simple 调整到最后再去使用
+    Iterable<BlockFunctionType<?>> iterable = Iterables.concat(stream.filter(type -> type != BlockFunctionTypes.SIMPLE)::iterator, Collections.singleton(BlockFunctionTypes.SIMPLE));
+    for (BlockFunctionType<?> type : iterable) {
+      parser.reader.setCursor(cursorOnStart);
+      final BlockFunction parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
+      if (parse != null) {
+        // keep the current position of the cursor
+        return parse;
       }
+
     }
-    parser.reader.setCursor(cursorOnEnd);
-    if (exception != null) {
-      throw exception;
-    }
+    parser.reader.setCursor(cursorOnStart);
     throw CANNOT_PARSE.createWithContext(parser.reader);
   }
 

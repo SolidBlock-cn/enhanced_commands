@@ -25,6 +25,7 @@ public final class BlockFunctionTypes {
   public static final BlockFunctionType<FilterBlockFunction> FILTER = register(FilterBlockFunction.Type.FILTER_TYPE, "filter");
   public static final BlockFunctionType<IdMatchBlockFunction> ID_MATCH = register(IdMatchBlockFunction.Type.ID_MATCH_TYPE, "id_match");
   public static final BlockFunctionType<StonecutBlockFunction> STONE_CUT = register(StonecutBlockFunction.Type.STONE_CUT_TYPE, "stonecut");
+  public static final BlockFunctionType<ConditionalBlockFunction> CONDITIONAL = register(ConditionalBlockFunction.Type.CONDITIONAL_TYPE, "conditional");
 
   public static void init() {
   }

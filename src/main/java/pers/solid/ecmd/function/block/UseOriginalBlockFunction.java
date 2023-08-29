@@ -11,6 +11,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.SuggestionUtil;
 
 public enum UseOriginalBlockFunction implements BlockFunction {
   USE_ORIGINAL;
@@ -43,11 +44,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
 
     @Override
     public @Nullable UseOriginalBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      parser.suggestions.add((context, suggestionsBuilder) -> {
-        if (suggestionsBuilder.getRemaining().isEmpty()) {
-          suggestionsBuilder.suggest("~", Text.translatable("enhancedCommands.argument.block_function.use_original"));
-        }
-      });
+      parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.use_original"), suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '~') {
         parser.reader.skip();
         parser.suggestions.clear();

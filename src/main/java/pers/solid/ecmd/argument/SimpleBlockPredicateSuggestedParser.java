@@ -126,7 +126,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     final String valueName = this.reader.readString();
     addTagPropertiesValueSuggestions(propertyName);
     final boolean expectEndOfValue = tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream().filter(property -> property.getName().equals(propertyName))).flatMap(SimpleBlockPredicateSuggestedParser::getPropertyValueNameStream).noneMatch(value -> value.startsWith(valueName) && !value.equals(valueName));
-    if (expectEndOfValue) {
+    if (expectEndOfValue && !valueName.isEmpty()) {
       suggestions.clear();
     }
     addPropertiesFinishedSuggestions();

@@ -32,8 +32,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAcc
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
       BlockFunction.parse(commandRegistryAccess, parser, true);
-    } catch (
-        CommandSyntaxException ignore) {
+    } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
     return parser.buildSuggestions(context, builderOffset);

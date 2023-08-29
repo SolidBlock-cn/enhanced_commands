@@ -86,11 +86,9 @@ public final class RandomBlockFunction implements BlockFunction {
 
     @Override
     public @Nullable RandomBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      parser.suggestions.add((context, suggestionsBuilder) -> {
-        if (suggestionsBuilder.getRemaining().isEmpty()) {
-          suggestionsBuilder.suggest("*", Text.translatable("enhancedCommands.argument.block_function.random"));
-        }
-      });
+      if (parser.reader.getRemaining().isEmpty()) {
+        parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhancedCommands.argument.block_function.random")));
+      }
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();
         parser.suggestions.clear();

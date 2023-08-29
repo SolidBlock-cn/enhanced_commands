@@ -1,11 +1,13 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +21,9 @@ import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.NbtConvertible;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface BlockPredicate extends StringRepresentablePredicate, NbtConvertible {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
@@ -65,23 +69,17 @@ public interface BlockPredicate extends StringRepresentablePredicate, NbtConvert
     CommandSyntaxException exception = null;
     final int cursorOnStart = parser.reader.getCursor();
     int cursorOnEnd = cursorOnStart;
-    for (BlockPredicateType<?> type : BlockPredicateType.REGISTRY) {
-      try {
-        parser.reader.setCursor(cursorOnStart);
-        final BlockPredicate parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
-        if (parse != null) {
-          // keep the current position of the cursor
-          return parse;
-        }
-      } catch (
-          CommandSyntaxException exception1) {
-        cursorOnEnd = parser.reader.getCursor();
-        exception = exception1;
+    final Stream<BlockPredicateType<?>> stream = commandRegistryAccess.createWrapper(BlockPredicateType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
+    Iterable<BlockPredicateType<?>> iterable = Iterables.concat(stream.filter(type -> type != BlockPredicateTypes.SIMPLE)::iterator, Collections.singleton(BlockPredicateTypes.SIMPLE));
+    for (BlockPredicateType<?> type : iterable) {
+      parser.reader.setCursor(cursorOnStart);
+      final BlockPredicate parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
+      if (parse != null) {
+        // keep the current position of the cursor
+        return parse;
       }
     }
     parser.reader.setCursor(cursorOnEnd);
-    if (exception != null)
-      throw exception;
     throw CANNOT_PARSE.createWithContext(parser.reader);
   }
 

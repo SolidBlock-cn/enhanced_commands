@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.List;
 
@@ -55,8 +56,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
 
     @Override
     public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      if (parser.reader.getRemaining().isEmpty())
-        parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("!", Text.translatable("enhancedCommands.argument.block_predicate.negation")));
+      parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("!", Text.translatable("enhancedCommands.argument.block_predicate.negation"), suggestionsBuilder));
       boolean negates = false;
       boolean suffixed = false;
       while (parser.reader.canRead() && parser.reader.peek() == '!') {
