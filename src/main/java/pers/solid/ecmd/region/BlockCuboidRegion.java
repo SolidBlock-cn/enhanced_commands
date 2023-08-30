@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.Iterator;
 
@@ -12,7 +13,7 @@ import java.util.Iterator;
  * <p>For example, the <em>block cuboid region</em> {@code cuboid(0 0 0, 5 5 5)} is a cuboid from the southwest bottom corner of block position {@code (0 0 0)} to the northeast top corner of block position {@code (5 5 5)}, which is also the southwest bottom corner of block position {@code (6 6 6)}. Therefore, it is identical to the <em>cuboid region</em> {@code cuboid(0.0 0.0 0.0, 6.0 6.0 6.0)}.
  * <p>In any case, a block cuboid region has a minimum volume of 1, which means the two corners are a same block position.
  */
-public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements Region {
+public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements IntBackedRegion {
   /**
    * Create a block cuboid region from several coordinates. The comparison is required. The min value must not be larger than max value (but can be equal).
    *
@@ -39,7 +40,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   /**
-   * Create a block cuboid region from two int positions (which can be {@link BlockPos}. The relative relation of the two positions are not required.
+   * Create a block cuboid region from two int positions (which can be {@link BlockPos}). The relative relation of the two positions are not required.
    */
   public BlockCuboidRegion(Vec3i from, Vec3i to) {
     this(BlockBox.create(from, to));
@@ -74,13 +75,23 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull BlockCuboidRegion rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    throw new UnsupportedOperationException(); // TODO: 2023/5/6, 006  rotate cuboid
+  public @NotNull Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return asCuboidRegion().rotated(pivot, blockRotation);
   }
 
   @Override
-  public @NotNull Region mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    throw new UnsupportedOperationException(); // TODO: 2023/5/6, 006  mirror cuboid
+  public @NotNull BlockCuboidRegion rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation) {
+    return new BlockCuboidRegion(GeoUtil.rotate(new Vec3i(minX, minY, minZ), blockRotation, pivot), GeoUtil.rotate(new Vec3i(maxX, maxY, maxZ), blockRotation, pivot));
+  }
+
+  @Override
+  public @NotNull Region mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return asCuboidRegion().mirrored(pivot, axis);
+  }
+
+  @Override
+  public @NotNull BlockCuboidRegion mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
+    return new BlockCuboidRegion(GeoUtil.mirror(new Vec3i(minX, minY, minZ), axis, pivot), GeoUtil.mirror(new Vec3i(maxX, maxY, maxZ), axis, pivot));
   }
 
   @Override

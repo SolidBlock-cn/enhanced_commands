@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.Iterator;
@@ -35,13 +36,13 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   }
 
   @Override
-  public @NotNull Region rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    throw new UnsupportedOperationException();
+  public @NotNull Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return new SphereRegion(radius, GeoUtil.rotate(center, blockRotation, pivot));
   }
 
   @Override
-  public @NotNull Region mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    throw new UnsupportedOperationException();
+  public @NotNull Region mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return new SphereRegion(radius, GeoUtil.mirror(center, axis, pivot));
   }
 
   @Override
@@ -56,7 +57,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
 
   @Override
   public @NotNull String asString() {
-    return "sphere(%s %s %s, %s)".formatted(center.x, center.y, center.z, radius);
+    return "sphere(%s, %s %s %s)".formatted(radius, center.x, center.y, center.z);
   }
 
   public enum Type implements RegionType<SphereRegion> {

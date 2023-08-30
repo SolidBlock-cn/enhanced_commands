@@ -58,9 +58,9 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
         .then(argument("region", RegionArgumentType.region(registryAccess))
             .then(argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
                 .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-                    .executes(context -> execute(context, BlockPredicateArgumentType.getBlockPredicate(context, "predicate")::test))
+                    .executes(context -> execute(context, cachedBlockPosition -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition)))
                     .then(argument("kwargs", KEYWORD_ARGS)
-                        .executes(context -> execute(context, BlockPredicateArgumentType.getBlockPredicate(context, "predicate")::test, KeywordArgsArgumentType.getKeywordArgs("kwargs", context))))))));
+                        .executes(context -> execute(context, cachedBlockPosition1 -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition1), KeywordArgsArgumentType.getKeywordArgs("kwargs", context))))))));
   }
 
   /**

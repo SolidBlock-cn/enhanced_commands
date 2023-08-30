@@ -48,12 +48,12 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     nbtCompound.put("predicate2", blockPredicate2.createNbt());
   }
 
-  public static final class Parser implements FunctionLikeParser<BiPredicateBlockPredicate> {
+  public static final class Parser implements FunctionLikeParser<BlockPredicateArgument> {
     private final String functionName;
     private final Text tooltip;
     private final boolean same;
-    private BlockPredicate value1;
-    private BlockPredicate value2;
+    private BlockPredicateArgument value1;
+    private BlockPredicateArgument value2;
 
     public Parser(String functionName, Text tooltip, boolean same) {
       this.functionName = functionName;
@@ -72,13 +72,13 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public BiPredicateBlockPredicate getParseResult(SuggestedParser parser) {
-      return new BiPredicateBlockPredicate(value1, value2, same);
+    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
+      return source -> new BiPredicateBlockPredicate(value1.apply(source), value2.apply(source), same);
     }
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      final BlockPredicate parse = BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
+      final BlockPredicateArgument parse = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       if (value1 == null) {
         value1 = parse;
       } else if (value2 == null) {
@@ -111,10 +111,10 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       CommandSyntaxException exception = null;
       try {
-        final BiPredicateBlockPredicate parse1 = new Parser("same", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_same"), true).parse(commandRegistryAccess, parser, suggestionsOnly);
+        final BlockPredicateArgument parse1 = new Parser("same", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_same"), true).parse(commandRegistryAccess, parser, suggestionsOnly);
         if (parse1 != null) {
           return parse1;
         }
@@ -122,7 +122,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
           CommandSyntaxException exception1) {
         exception = exception1;
       }
-      final BiPredicateBlockPredicate parse2 = new Parser("diff", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_diff"), false).parse(commandRegistryAccess, parser, suggestionsOnly);
+      final BlockPredicateArgument parse2 = new Parser("diff", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_diff"), false).parse(commandRegistryAccess, parser, suggestionsOnly);
       if (parse2 != null) {
         return parse2;
       } else if (exception != null) {

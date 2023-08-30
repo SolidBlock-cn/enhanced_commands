@@ -55,7 +55,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("!", Text.translatable("enhancedCommands.argument.block_predicate.negation"), suggestionsBuilder));
       boolean negates = false;
       boolean suffixed = false;
@@ -64,12 +64,13 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
         negates = !negates;
         suffixed = true;
       }
+      if (!suffixed) return null;
+      final BlockPredicateArgument parse = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       if (negates) {
-        return new NegatingBlockPredicate(BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly));
-      } else if (suffixed) {
-        return BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
+        return source -> new NegatingBlockPredicate(parse.apply(source));
+      } else {
+        return parse;
       }
-      return null;
     }
   }
 }

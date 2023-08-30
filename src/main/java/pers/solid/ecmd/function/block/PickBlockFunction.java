@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -132,14 +131,14 @@ public interface PickBlockFunction extends BlockFunction {
     }
 
     @Override
-    public @Nullable BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
-  class Parser implements FunctionLikeParser<PickBlockFunction> {
+  class Parser implements FunctionLikeParser<BlockFunctionArgument> {
     boolean weighted = false;
-    final List<ObjectDoublePair<BlockFunction>> pairs = new ArrayList<>();
+    final List<ObjectDoublePair<BlockFunctionArgument>> pairs = new ArrayList<>();
 
     @Override
     public @NotNull String functionName() {
@@ -152,21 +151,21 @@ public interface PickBlockFunction extends BlockFunction {
     }
 
     @Override
-    public PickBlockFunction getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public BlockFunctionArgument getParseResult(SuggestedParser parser) throws CommandSyntaxException {
       if (weighted) {
         final double sum = pairs.stream().mapToDouble(ObjectDoublePair::rightDouble).sum();
         if (sum == 0) {
           throw SUM_ZERO.createWithContext(parser.reader);
         }
-        return new Weighted(ImmutableList.copyOf(Lists.transform(pairs, pair -> ObjectDoublePair.of(pair.left(), pair.rightDouble() / sum))));
+        return source -> new Weighted(ImmutableList.copyOf(Lists.transform(pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble() / sum))));
       } else {
-        return new Uniform(ImmutableList.copyOf(Lists.transform(pairs, Pair::left)));
+        return source -> new Uniform(ImmutableList.copyOf(Lists.transform(pairs, pair -> pair.left().apply(source))));
       }
     }
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      final BlockFunction parse = BlockFunction.parse(commandRegistryAccess, parser, suggestionsOnly);
+      final BlockFunctionArgument parse = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       parser.reader.skipWhitespace();
       if (parser.reader.canRead() && StringReader.isAllowedNumber(parser.reader.peek())) {
         final int cursorBeforeDouble = parser.reader.getCursor();

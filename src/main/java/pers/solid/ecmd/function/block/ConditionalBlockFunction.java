@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
 /**
@@ -67,14 +68,14 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     }
 
     @Override
-    public @Nullable ConditionalBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
-  private static class Parser implements FunctionLikeParser<ConditionalBlockFunction> {
-    private BlockPredicate condition;
-    private BlockFunction valueIfTrue, valueIfFalse;
+  private static class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+    private BlockPredicateArgument condition;
+    private BlockFunctionArgument valueIfTrue, valueIfFalse;
 
     @Override
     public @NotNull String functionName() {
@@ -87,18 +88,18 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     }
 
     @Override
-    public ConditionalBlockFunction getParseResult(SuggestedParser parser) {
-      return new ConditionalBlockFunction(condition, valueIfTrue, valueIfFalse);
+    public BlockFunctionArgument getParseResult(SuggestedParser parser) {
+      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse.apply(source));
     }
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        condition = BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
+        condition = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       } else if (paramIndex == 1) {
-        valueIfTrue = BlockFunction.parse(commandRegistryAccess, parser, suggestionsOnly);
+        valueIfTrue = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       } else if (paramIndex == 2) {
-        valueIfFalse = BlockFunction.parse(commandRegistryAccess, parser, suggestionsOnly);
+        valueIfFalse = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
     }
 

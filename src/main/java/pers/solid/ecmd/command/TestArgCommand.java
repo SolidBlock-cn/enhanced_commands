@@ -66,7 +66,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
               final String s = blockFunction.asString();
               context.getSource().sendFeedback(Text.literal(s), false);
-              final BlockFunction reparse = BlockFunction.parse(registryAccess, s);
+              final BlockFunction reparse = BlockFunction.parse(registryAccess, s, context.getSource());
               final boolean b = blockFunction.equals(reparse);
               context.getSource().sendFeedback(TextUtil.wrapBoolean(b), false);
               return BooleanUtils.toInteger(b);
@@ -114,7 +114,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
               final String s = blockPredicate.asString();
               context.getSource().sendFeedback(Text.literal(s), false);
-              final BlockPredicate reparse = BlockPredicate.parse(registryAccess, s);
+              final BlockPredicate reparse = BlockPredicate.parse(registryAccess, s, context.getSource());
               final boolean b = blockPredicate.equals(reparse);
               context.getSource().sendFeedback(TextUtil.wrapBoolean(b), false);
               return BooleanUtils.toInteger(b);

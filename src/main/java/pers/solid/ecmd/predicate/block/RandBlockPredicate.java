@@ -74,9 +74,9 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
   }
 
-  public static final class Parser implements FunctionLikeParser<RandBlockPredicate> {
+  public static final class Parser implements FunctionLikeParser<BlockPredicateArgument> {
     private float value;
-    private @Nullable BlockPredicate predicate;
+    private @Nullable BlockPredicateArgument predicate;
 
     @Override
     public @NotNull String functionName() {
@@ -89,8 +89,8 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
 
     @Override
-    public RandBlockPredicate getParseResult(SuggestedParser parser) {
-      return new RandBlockPredicate(value, predicate);
+    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
+      return source -> new RandBlockPredicate(value, predicate == null ? null : predicate.apply(source));
     }
 
     @Override
@@ -113,7 +113,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooLow().createWithContext(parser.reader, value, 0);
         }
       } else if (paramIndex == 1) {
-        predicate = BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
+        predicate = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
     }
   }
@@ -131,7 +131,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }

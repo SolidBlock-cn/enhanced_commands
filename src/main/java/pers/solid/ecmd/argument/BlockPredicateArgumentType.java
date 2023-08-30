@@ -7,25 +7,27 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
  * @see net.minecraft.command.argument.BlockPredicateArgumentType
  */
-public record BlockPredicateArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<BlockPredicate> {
+public record BlockPredicateArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<BlockPredicateArgument> {
   public static BlockPredicateArgumentType blockPredicate(CommandRegistryAccess commandRegistryAccess) {
     return new BlockPredicateArgumentType(commandRegistryAccess);
   }
 
-  public static BlockPredicate getBlockPredicate(CommandContext<?> context, String name) {
-    return context.getArgument(name, BlockPredicate.class);
+  public static BlockPredicate getBlockPredicate(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, BlockPredicateArgument.class).apply(context.getSource());
   }
 
   @Override
-  public BlockPredicate parse(StringReader reader) throws CommandSyntaxException {
-    return BlockPredicate.parse(commandRegistryAccess, new SuggestedParser(reader), false);
+  public BlockPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
+    return BlockPredicateArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false);
   }
 
   @Override
@@ -34,7 +36,7 @@ public record BlockPredicateArgumentType(CommandRegistryAccess commandRegistryAc
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      BlockPredicate.parse(commandRegistryAccess, parser, true);
+      BlockPredicateArgument.parse(commandRegistryAccess, parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

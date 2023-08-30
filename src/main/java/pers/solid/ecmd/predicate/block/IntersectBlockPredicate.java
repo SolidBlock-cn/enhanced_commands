@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -17,6 +18,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -61,7 +63,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     nbtList.addAll(Collections2.transform(blockPredicates, BlockPredicate::createNbt));
   }
 
-  public record Parser(ImmutableList.Builder<BlockPredicate> blockPredicates) implements FunctionLikeParser<BlockPredicate> {
+  public record Parser(List<BlockPredicateArgument> blockPredicates) implements FunctionLikeParser<BlockPredicateArgument> {
 
     @Override
     public @NotNull String functionName() {
@@ -74,13 +76,13 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
 
     @Override
-    public BlockPredicate getParseResult(SuggestedParser parser) {
-      return new IntersectBlockPredicate(blockPredicates.build());
+    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
+      return source -> new IntersectBlockPredicate(ImmutableList.copyOf(Lists.transform(blockPredicates, x -> x.apply(source))));
     }
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockPredicates.add(BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly));
+      blockPredicates.add(BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly));
     }
   }
 
@@ -93,8 +95,8 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser(new ImmutableList.Builder<>()).parse(commandRegistryAccess, parser, suggestionsOnly);
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new Parser(new ArrayList<>()).parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

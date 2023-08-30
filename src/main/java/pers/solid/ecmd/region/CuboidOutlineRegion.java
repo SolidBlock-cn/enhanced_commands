@@ -81,13 +81,13 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
   }
 
   @Override
-  public @NotNull CuboidOutlineRegion rotated(@NotNull Vec3i center, @NotNull BlockRotation blockRotation) {
-    return null;
+  public @NotNull CuboidOutlineRegion rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation) {
+    return new CuboidOutlineRegion(blockCuboidRegion.rotated(pivot, blockRotation), thickness);
   }
 
   @Override
-  public @NotNull CuboidOutlineRegion mirrored(Vec3i center, Direction.@NotNull Axis axis) {
-    return null;
+  public @NotNull CuboidOutlineRegion mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
+    return new CuboidOutlineRegion(blockCuboidRegion.mirrored(pivot, axis), thickness);
   }
 
   @Override

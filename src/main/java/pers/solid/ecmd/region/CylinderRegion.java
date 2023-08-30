@@ -15,6 +15,7 @@ import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.Iterator;
@@ -82,13 +83,13 @@ public record CylinderRegion(double radius, double height, Vec3d center) impleme
   }
 
   @Override
-  public @NotNull CylinderRegion rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    return null;
+  public @NotNull CylinderRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return new CylinderRegion(radius, height, GeoUtil.rotate(pivot, blockRotation, pivot));
   }
 
   @Override
-  public @NotNull CylinderRegion mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    return null;
+  public @NotNull CylinderRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return new CylinderRegion(radius, height, GeoUtil.mirror(pivot, axis, pivot));
   }
 
   @Override

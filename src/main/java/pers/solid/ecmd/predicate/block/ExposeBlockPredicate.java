@@ -181,8 +181,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
         parser.suggestions.clear();
         exposureType = parser.readAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
       } else if (paramIndex == 1) {
-        do
-        {
+        do {
           parser.suggestions.clear();
           parser.reader.skipWhitespace();
           if (directions.isEmpty()) {

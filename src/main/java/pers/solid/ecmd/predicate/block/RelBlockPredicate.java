@@ -55,9 +55,9 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     nbtCompound.put("predicate", predicate.createNbt());
   }
 
-  public static final class Parser implements FunctionLikeParser<RelBlockPredicate> {
+  public static final class Parser implements FunctionLikeParser<BlockPredicateArgument> {
     private Vec3i relPos;
-    private BlockPredicate blockPredicate;
+    private BlockPredicateArgument blockPredicate;
 
     @Override
     public @NotNull String functionName() {
@@ -70,10 +70,10 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
 
     @Override
-    public RelBlockPredicate getParseResult(SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
       Preconditions.checkNotNull(relPos, "relPos (argument 1)");
       Preconditions.checkNotNull(blockPredicate, "blockPredicate (argument 2)");
-      return new RelBlockPredicate(relPos, blockPredicate);
+      return source -> new RelBlockPredicate(relPos, blockPredicate.apply(source));
     }
 
     @Override
@@ -93,7 +93,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
         final PosArgument argument = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
         relPos = argument.toAbsoluteBlockPos(new ServerCommandSource(null, Vec3d.ZERO, Vec2f.ZERO, null, 0, null, null, null, null));
       } else if (paramIndex == 1) {
-        blockPredicate = BlockPredicate.parse(commandRegistryAccess, parser, suggestionsOnly);
+        blockPredicate = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
     }
   }
@@ -112,7 +112,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }

@@ -15,6 +15,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.Collections;
@@ -76,13 +77,19 @@ public record CuboidRegion(Box box) implements Region {
   }
 
   @Override
-  public @NotNull Region rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    throw new UnsupportedOperationException(); // TODO: 2023/5/6, 006  rotate cuboid
+  public @NotNull Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return new CuboidRegion(
+        GeoUtil.rotate(new Vec3d(box.minX, box.minY, box.minZ), blockRotation, pivot),
+        GeoUtil.rotate(new Vec3d(box.maxX, box.maxY, box.maxZ), blockRotation, pivot)
+    );
   }
 
   @Override
-  public @NotNull Region mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    throw new UnsupportedOperationException(); // TODO: 2023/5/6, 006  mirror cuboid
+  public @NotNull Region mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return new CuboidRegion(
+        GeoUtil.mirror(new Vec3d(box.minX, box.minY, box.minZ), axis, pivot),
+        GeoUtil.mirror(new Vec3d(box.maxX, box.maxY, box.maxZ), axis, pivot)
+    );
   }
 
   @Override

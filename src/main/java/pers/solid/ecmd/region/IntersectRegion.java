@@ -56,13 +56,13 @@ public record IntersectRegion(Collection<Region> regions) implements Region {
   }
 
   @Override
-  public @NotNull IntersectRegion rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    return new IntersectRegion(Collections2.transform(regions, region -> region.rotated(center, blockRotation)));
+  public @NotNull IntersectRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return new IntersectRegion(Collections2.transform(regions, region -> region.rotated(pivot, blockRotation)));
   }
 
   @Override
-  public @NotNull IntersectRegion mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    return new IntersectRegion(Collections2.transform(regions, region -> region.mirrored(center, axis)));
+  public @NotNull IntersectRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return new IntersectRegion(Collections2.transform(regions, region -> region.mirrored(pivot, axis)));
   }
 
   @Override

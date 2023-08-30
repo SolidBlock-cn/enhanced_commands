@@ -73,9 +73,9 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
     }
 
     @Override
-    public @Nullable StonecutBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new FunctionLikeParser<StonecutBlockFunction>() {
-        BlockFunction blockFunction = null;
+    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      return new FunctionLikeParser<BlockFunctionArgument>() {
+        private BlockFunctionArgument blockFunction = null;
 
         @Override
         public @NotNull String functionName() {
@@ -88,13 +88,13 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
         }
 
         @Override
-        public StonecutBlockFunction getParseResult(SuggestedParser parser) {
-          return new StonecutBlockFunction(blockFunction);
+        public BlockFunctionArgument getParseResult(SuggestedParser parser) {
+          return source -> new StonecutBlockFunction(blockFunction.apply(source));
         }
 
         @Override
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-          blockFunction = BlockFunction.parse(commandRegistryAccess, parser, suggestionsOnly);
+          blockFunction = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
         }
 
         @Override

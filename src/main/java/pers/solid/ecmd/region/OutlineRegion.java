@@ -51,13 +51,13 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   @Override
-  public @NotNull OutlineRegion rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    return new OutlineRegion(outlineType, region.rotated(center, blockRotation));
+  public @NotNull OutlineRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return new OutlineRegion(outlineType, region.rotated(pivot, blockRotation));
   }
 
   @Override
-  public @NotNull OutlineRegion mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    return new OutlineRegion(outlineType, region.mirrored(center, axis));
+  public @NotNull OutlineRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return new OutlineRegion(outlineType, region.mirrored(pivot, axis));
   }
 
   @Override

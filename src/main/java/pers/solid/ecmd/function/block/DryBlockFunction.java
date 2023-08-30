@@ -62,13 +62,13 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
     }
 
     @Override
-    public @Nullable DryBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
-  public static class Parser implements FunctionLikeParser<DryBlockFunction> {
-    BlockFunction blockFunction = null;
+  public static class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+    BlockFunctionArgument blockFunction = null;
 
     @Override
     public @NotNull String functionName() {
@@ -81,13 +81,13 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
     }
 
     @Override
-    public DryBlockFunction getParseResult(SuggestedParser parser) {
-      return new DryBlockFunction(blockFunction);
+    public BlockFunctionArgument getParseResult(SuggestedParser parser) {
+      return source -> new DryBlockFunction(blockFunction == null ? null : blockFunction.apply(source));
     }
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockFunction = BlockFunction.parse(commandRegistryAccess, parser, suggestionsOnly);
+      blockFunction = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
     }
 
     @Override

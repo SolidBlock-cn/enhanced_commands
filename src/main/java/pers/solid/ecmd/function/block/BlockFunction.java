@@ -1,7 +1,6 @@
 package pers.solid.ecmd.function.block;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -10,7 +9,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -18,80 +17,18 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.StringRepresentableFunction;
-import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
-import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.NbtConvertible;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockStateArgument} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
  */
-public interface BlockFunction extends StringRepresentableFunction, NbtConvertible {
+public interface BlockFunction extends StringRepresentableFunction, NbtConvertible, BlockFunctionArgument {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_function.cannotParse"));
 
-  static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, String s) throws CommandSyntaxException {
-    return parse(commandRegistryAccess, new SuggestedParser(new StringReader(s)), false);
-  }
-
-  static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    final BlockFunction parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly);
-    if (parseUnit instanceof NbtBlockFunction) {
-      return parseUnit;
-    }
-    List<PropertyNameFunction> propertyNameFunctions = null;
-    if (!(parseUnit instanceof PropertyNamesBlockFunction) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
-      // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
-      // 尝试读取属性
-      parser.suggestions.add((context, suggestionsBuilder) -> {
-        if (suggestionsBuilder.getRemaining().isEmpty()) {
-          suggestionsBuilder.suggest("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES);
-        }
-      });
-      if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockFunctionSuggestedParser suggestedParser = new SimpleBlockFunctionSuggestedParser(commandRegistryAccess, parser);
-        suggestedParser.parsePropertyNames();
-        propertyNameFunctions = suggestedParser.propertyNameFunctions;
-      }
-    }
-    CompoundNbtFunction nbtFunction = null;
-    parser.suggestions.add((context, suggestionsBuilder) -> {
-      if (suggestionsBuilder.getRemaining().isEmpty()) {
-        suggestionsBuilder.suggest("{", NbtPredicateSuggestedParser.START_OF_COMPOUND);
-      }
-    });
-    if (parser.reader.canRead() && parser.reader.peek() == '{') {
-      // 尝试读取 NBT
-      nbtFunction = new NbtFunctionSuggestedParser(parser.reader, parser.suggestions).parseCompound(false);
-    }
-    if (propertyNameFunctions != null || nbtFunction != null) {
-      return new PropertiesNbtCombinationBlockFunction(parseUnit, propertyNameFunctions == null ? null : new PropertyNamesBlockFunction(propertyNameFunctions), nbtFunction == null ? null : new NbtBlockFunction(nbtFunction));
-    }
-    return parseUnit;
-  }
-
-  @NotNull
-  static BlockFunction parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    final int cursorOnStart = parser.reader.getCursor();
-
-    final Stream<BlockFunctionType<?>> stream = commandRegistryAccess.createWrapper(BlockFunctionType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
-    // 强制将 simple 调整到最后再去使用
-    Iterable<BlockFunctionType<?>> iterable = Iterables.concat(stream.filter(type -> type != BlockFunctionTypes.SIMPLE)::iterator, Collections.singleton(BlockFunctionTypes.SIMPLE));
-    for (BlockFunctionType<?> type : iterable) {
-      parser.reader.setCursor(cursorOnStart);
-      final BlockFunction parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
-      if (parse != null) {
-        // keep the current position of the cursor
-        return parse;
-      }
-
-    }
-    parser.reader.setCursor(cursorOnStart);
-    throw CANNOT_PARSE.createWithContext(parser.reader);
+  static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
+    return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(new StringReader(s)), false).apply(source);
   }
 
   default boolean setBlock(World world, BlockPos pos, int flags) {
@@ -141,5 +78,10 @@ public interface BlockFunction extends StringRepresentableFunction, NbtConvertib
     final BlockFunctionType<?> type = BlockFunctionType.REGISTRY.get(new Identifier(nbtCompound.getString("type")));
     Preconditions.checkNotNull(type, "Unknown block function type: %s", type);
     return type.fromNbt(nbtCompound);
+  }
+
+  @Override
+  default BlockFunction apply(ServerCommandSource source) {
+    return this;
   }
 }

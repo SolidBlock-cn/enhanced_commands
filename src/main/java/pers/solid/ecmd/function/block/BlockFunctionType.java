@@ -18,5 +18,5 @@ public interface BlockFunctionType<T extends BlockFunction> {
 
   T fromNbt(NbtCompound nbtCompound);
 
-  @Nullable BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
+  @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
 }

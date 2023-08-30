@@ -7,22 +7,24 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.function.block.BlockFunctionArgument;
 
 import java.util.concurrent.CompletableFuture;
 
-public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<BlockFunction> {
+public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<BlockFunctionArgument> {
   public static BlockFunctionArgumentType blockFunction(CommandRegistryAccess commandRegistryAccess) {
     return new BlockFunctionArgumentType(commandRegistryAccess);
   }
 
-  public static BlockFunction getBlockFunction(CommandContext<?> context, String name) {
-    return context.getArgument(name, BlockFunction.class);
+  public static BlockFunction getBlockFunction(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, BlockFunctionArgument.class).apply(context.getSource());
   }
 
   @Override
-  public BlockFunction parse(StringReader reader) throws CommandSyntaxException {
-    return BlockFunction.parse(commandRegistryAccess, new SuggestedParser(reader), false);
+  public BlockFunctionArgument parse(StringReader reader) throws CommandSyntaxException {
+    return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false);
   }
 
   @Override
@@ -31,7 +33,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAcc
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      BlockFunction.parse(commandRegistryAccess, parser, true);
+      BlockFunctionArgument.parse(commandRegistryAccess, parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

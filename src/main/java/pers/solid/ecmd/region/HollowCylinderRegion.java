@@ -29,8 +29,6 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
-    final Vec3d center = cylinderRegion.center();
-    final double radius = cylinderRegion.radius();
     final long topHeight = cylinderRegion.getTopHeight();
     final long bottomHeight = cylinderRegion.getBottomHeight();
     if (outlineType == OutlineRegion.OutlineTypes.EXPOSE || outlineType == OutlineRegion.OutlineTypes.NEARLY_EXPOSE || outlineType == OutlineRegion.OutlineTypes.VERTICALLY_EXPOSE) {
@@ -54,12 +52,9 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
   public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineRegion.OutlineTypes outlineType, BlockPos testPos) {
     outlineType = switch (outlineType) {
-      case EXPOSE ->
-          OutlineRegion.OutlineTypes.HORIZONTALLY_EXPOSE;
-      case NEARLY_EXPOSE ->
-          OutlineRegion.OutlineTypes.HORIZONTALLY_NEARLY_EXPOSE;
-      default ->
-          outlineType;
+      case EXPOSE -> OutlineRegion.OutlineTypes.HORIZONTALLY_EXPOSE;
+      case NEARLY_EXPOSE -> OutlineRegion.OutlineTypes.HORIZONTALLY_NEARLY_EXPOSE;
+      default -> outlineType;
     };
     return outlineType.modifiedTest(blockPos -> {
       final Vec3d centerPos = blockPos.toCenterPos();
@@ -105,13 +100,13 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
   }
 
   @Override
-  public @NotNull HollowCylinderRegion rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    return new HollowCylinderRegion(cylinderRegion.rotated(center, blockRotation), outlineType);
+  public @NotNull HollowCylinderRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return new HollowCylinderRegion(cylinderRegion.rotated(pivot, blockRotation), outlineType);
   }
 
   @Override
-  public @NotNull HollowCylinderRegion mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    return new HollowCylinderRegion(cylinderRegion.mirrored(center, axis), outlineType);
+  public @NotNull HollowCylinderRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return new HollowCylinderRegion(cylinderRegion.mirrored(pivot, axis), outlineType);
   }
 
   @Override
@@ -134,12 +129,9 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
     var roundSurface = Math.PI * MathHelper.square(cylinderRegion.radius());
     var roundWallSurface = roundSurface - Math.PI * MathHelper.square(cylinderRegion.radius() - 1);
     return switch (outlineType) {
-      case EXPOSE, NEARLY_EXPOSE ->
-          2 * roundSurface + (cylinderRegion.height() - 2) * roundWallSurface;
-      case HORIZONTALLY_EXPOSE, HORIZONTALLY_NEARLY_EXPOSE ->
-          cylinderRegion.height() * roundWallSurface;
-      case VERTICALLY_EXPOSE ->
-          2 * roundSurface;
+      case EXPOSE, NEARLY_EXPOSE -> 2 * roundSurface + (cylinderRegion.height() - 2) * roundWallSurface;
+      case HORIZONTALLY_EXPOSE, HORIZONTALLY_NEARLY_EXPOSE -> cylinderRegion.height() * roundWallSurface;
+      case VERTICALLY_EXPOSE -> 2 * roundSurface;
     };
   }
 

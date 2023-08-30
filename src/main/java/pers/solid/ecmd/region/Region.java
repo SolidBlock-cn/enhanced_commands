@@ -66,10 +66,10 @@ public interface Region extends Iterable<BlockPos>, StringIdentifiable {
   Region moved(@NotNull Vec3d relativePos);
 
   @NotNull
-  Region rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation);
+  Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation);
 
   @NotNull
-  Region mirrored(@NotNull Vec3d center, @NotNull Direction.Axis axis);
+  Region mirrored(@NotNull Vec3d pivot, @NotNull Direction.Axis axis);
 
   @NotNull
   default Region expanded(double offset) {

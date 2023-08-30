@@ -40,13 +40,13 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
     if (!(o instanceof IdReplaceBlockFunction that))
       return false;
     // 忽略 registryWrapper
-    return pattern.equals(that.pattern) && replacement.equals(that.replacement);
+    return pattern.pattern().equals(that.pattern.pattern()) && replacement.equals(that.replacement);
   }
 
   @Override
   public int hashCode() {
     // 忽略 registryWrapper
-    return 31 * pattern.hashCode() + replacement.hashCode();
+    return 31 * pattern.pattern().hashCode() + replacement.hashCode();
   }
 
   @Override
@@ -105,7 +105,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
         }
 
         @Override
-        public IdReplaceBlockFunction getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+        public IdReplaceBlockFunction getParseResult(SuggestedParser parser) {
           return new IdReplaceBlockFunction(pattern, replacement, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
         }
 

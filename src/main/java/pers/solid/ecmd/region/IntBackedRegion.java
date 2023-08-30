@@ -83,19 +83,19 @@ public interface IntBackedRegion extends Region {
 
   @Override
   @NotNull
-  default Region rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    return rotated(toIntOrThrow(center), blockRotation);
+  default Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return rotated(toIntOrThrow(pivot), blockRotation);
   }
 
-  @NotNull Region rotated(@NotNull Vec3i center, @NotNull BlockRotation blockRotation);
+  @NotNull Region rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation);
 
   @Override
   @NotNull
-  default Region mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    return mirrored(toIntOrThrow(center), axis);
+  default Region mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return mirrored(toIntOrThrow(pivot), axis);
   }
 
-  @NotNull Region mirrored(Vec3i center, Direction.@NotNull Axis axis);
+  @NotNull Region mirrored(Vec3i pivot, Direction.@NotNull Axis axis);
 
   @Override
   long numberOfBlocksAffected();

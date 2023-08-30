@@ -52,13 +52,13 @@ public record UnionRegion(Collection<Region> regions) implements Region {
   }
 
   @Override
-  public @NotNull UnionRegion rotated(@NotNull Vec3d center, @NotNull BlockRotation blockRotation) {
-    return new UnionRegion(Collections2.transform(regions, region -> region.rotated(center, blockRotation)));
+  public @NotNull UnionRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+    return new UnionRegion(Collections2.transform(regions, region -> region.rotated(pivot, blockRotation)));
   }
 
   @Override
-  public @NotNull UnionRegion mirrored(@NotNull Vec3d center, Direction.@NotNull Axis axis) {
-    return new UnionRegion(Collections2.transform(regions, region -> region.mirrored(center, axis)));
+  public @NotNull UnionRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+    return new UnionRegion(Collections2.transform(regions, region -> region.mirrored(pivot, axis)));
   }
 
   @Override

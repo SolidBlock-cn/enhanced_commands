@@ -19,7 +19,9 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -60,13 +62,13 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
     }
 
     @Override
-    public @Nullable OverlayBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 
-  private static final class Parser implements FunctionLikeParser<OverlayBlockFunction> {
-    private final ImmutableList.Builder<BlockFunction> blockFunctions = new ImmutableList.Builder<>();
+  private static final class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+    private final List<BlockFunctionArgument> blockFunctions = new ArrayList<>();
 
     @Override
     public @NotNull String functionName() {
@@ -79,13 +81,13 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
     }
 
     @Override
-    public OverlayBlockFunction getParseResult(SuggestedParser parser) {
-      return new OverlayBlockFunction(blockFunctions.build());
+    public BlockFunctionArgument getParseResult(SuggestedParser parser) {
+      return source -> new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(blockFunctions, input -> input.apply(source))));
     }
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockFunctions.add(BlockFunction.parse(commandRegistryAccess, parser, suggestionsOnly));
+      blockFunctions.add(BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly));
     }
   }
 }

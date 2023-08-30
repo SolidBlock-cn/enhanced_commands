@@ -47,13 +47,15 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
   }
 
   @Override
-  public @NotNull CuboidWallRegion rotated(@NotNull Vec3i center, @NotNull BlockRotation blockRotation) {
-    return null;
+  public @NotNull CuboidWallRegion rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation) {
+    final BlockCuboidRegion rotated = blockCuboidRegion.rotated(pivot, blockRotation);
+    return rotated.equals(blockCuboidRegion) ? this : new CuboidWallRegion(rotated, thickness);
   }
 
   @Override
-  public @NotNull CuboidWallRegion mirrored(Vec3i center, Direction.@NotNull Axis axis) {
-    return null;
+  public @NotNull CuboidWallRegion mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
+    final BlockCuboidRegion mirrored = blockCuboidRegion.mirrored(pivot, axis);
+    return mirrored.equals(blockCuboidRegion) ? this : new CuboidWallRegion(mirrored, thickness);
   }
 
   @Override
