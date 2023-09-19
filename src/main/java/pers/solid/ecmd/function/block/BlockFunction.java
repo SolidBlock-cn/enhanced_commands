@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.command.CommandRegistryAccess;
@@ -18,6 +19,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.command.SetBlocksCommand;
 import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.NbtConvertible;
 
@@ -31,10 +33,14 @@ public interface BlockFunction extends StringRepresentableFunction, NbtConvertib
     return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(new StringReader(s)), false).apply(source);
   }
 
-  default boolean setBlock(World world, BlockPos pos, int flags) {
+  default boolean setBlock(World world, BlockPos pos, int flags, int modFlags) {
     final BlockState origState = world.getBlockState(pos);
     MutableObject<NbtCompound> blockEntityData = new MutableObject<>(null);
-    boolean result = world.setBlockState(pos, getModifiedState(origState, origState, world, pos, flags, blockEntityData), flags);
+    BlockState modifiedState = getModifiedState(origState, origState, world, pos, flags, blockEntityData);
+    if ((modFlags & SetBlocksCommand.POST_PROCESS_FLAG) != 0) {
+      modifiedState = Block.postProcessState(modifiedState, world, pos);
+    }
+    boolean result = world.setBlockState(pos, modifiedState, flags);
     final BlockEntity blockEntity = world.getBlockEntity(pos);
     if (blockEntity != null) {
       final NbtCompound modifiedData = blockEntityData.getValue();

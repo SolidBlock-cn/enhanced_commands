@@ -118,14 +118,15 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
 
         if (behavior.intOnly()) {
           if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
-            values[i] = reader.readInt() + (isRelative ? 0.5 : 0);
+            // 在仅整数模式下，如果是相对坐标，也应该接受小数的相对坐标。
+            values[i] = (isRelative ? reader.readDouble() : reader.readInt()) + (isRelative ? 0.5 : 0);
           } else {
             omitsNumber[i] = true;
             values[i] = 0;
           }
         } else {
           final int cursorBeforeReadDouble = reader.getCursor();
-          double num = 0;
+          double num;
           if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
             // if there is a tilde, it may not be performed, in order to avoid exceptions, if there is an empty expected
             // however, is there is no tilde, the row must be read, resulting exceptions if there is no expected
@@ -224,20 +225,11 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
         }
 
         // Currently, integer values (without dot) are always centered.
-        if (behavior.intOnly()) {
-          try {
-            if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
-              reader.readInt();
-            }
-          } catch (CommandSyntaxException ignored) {
+        try {
+          if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
+            reader.readDouble(); // 这里应该是与 readInt 兼容的（当 intOnly 且非相对坐标的情况下）
           }
-        } else {
-          try {
-            if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
-              reader.readDouble();
-            }
-          } catch (CommandSyntaxException ignored) {
-          }
+        } catch (CommandSyntaxException ignored) {
         }
         if (i < 2) {
           // before the end of iteration
@@ -246,26 +238,32 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
       }
       if (i < 3) {
         builder.suggest("~".repeat(3 - i), i == 0 ? Text.translatable("enhancedCommands.argument.pos.relative_coordinate") : Text.translatable("enhancedCommands.argument.pos.relative_coordinate.remaining"));
-        if (!relativeOnly && (i == 0 || !reader.canRead(-1) || !StringReader.isAllowedNumber(reader.peek(-1)))) {
-          // ensure that when suggesting numbers, there must be a whitespace before.
+        if (!relativeOnly && (i == 0 || reader.canRead(-1) && Character.isWhitespace(reader.peek(-1)))) {
+          // 确保在建议数字时，前面必须已经是一个空格，或者还没有参数。
+          // 在仅接收相对坐标的情况下，不建议 crossHair 中的坐标。
           if (crossHairBlockPos != null && !behavior.doubleOnly()) {
             switch (i) {
-              case 0 -> builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int"));
-              case 1 -> builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int.remaining"));
-              case 2 -> builder.suggest(crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int.remaining"));
+              case 0 ->
+                  builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int"));
+              case 1 ->
+                  builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int.remaining"));
+              case 2 ->
+                  builder.suggest(crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int.remaining"));
             }
           }
           if (crossHairPos != null && !behavior.intOnly()) {
             switch (i) {
-              case 0 -> builder.suggest(crossHairPos.getX() + " " + crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_double"));
-              case 1 -> builder.suggest(crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_double.remaining"));
-              case 2 -> builder.suggest(String.valueOf(crossHairPos.getZ()), Text.translatable("enhancedCommands.argument.pos.crosshair_double.remaining"));
+              case 0 ->
+                  builder.suggest(crossHairPos.getX() + " " + crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_double"));
+              case 1 ->
+                  builder.suggest(crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_double.remaining"));
+              case 2 ->
+                  builder.suggest(String.valueOf(crossHairPos.getZ()), Text.translatable("enhancedCommands.argument.pos.crosshair_double.remaining"));
             }
           }
         }
       }
     }
-    // TODO: 2023/5/18, 018 check and optimize: 之前添加的一些建议会把已有的 StringRange 也记录进去，导致 createOffset 实际没有起作用。
     final SuggestionsBuilder builderOffset = builder.createOffset(reader.getCursor());
     final List<Suggestion> list = builder.build().getList();
     for (Suggestion suggestion : list) {

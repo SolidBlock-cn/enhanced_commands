@@ -9,17 +9,15 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public record IdContainBlockPredicate(@NotNull Pattern pattern) implements BlockPredicate {
   @Override
@@ -89,13 +87,8 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
           final StringReader reader = parser.reader;
           final int cursorAtRegexBegin = reader.getCursor() + (reader.canRead() && StringReader.isQuotedStringStart(reader.peek()) ? 1 : 0);
-          try {
-            parser.suggestions.clear();
-            pattern = Pattern.compile(reader.readString());
-          } catch (PatternSyntaxException e) {
-            reader.setCursor(cursorAtRegexBegin);
-            throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(reader, e.getMessage().replace(StringUtils.CR, StringUtils.EMPTY));
-          }
+          parser.suggestions.clear();
+          pattern = StringUtil.readRegex(parser.reader);
         }
       }.parse(commandRegistryAccess, parser, suggestionsOnly);
     }

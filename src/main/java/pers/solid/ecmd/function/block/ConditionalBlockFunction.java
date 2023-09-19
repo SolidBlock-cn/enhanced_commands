@@ -89,7 +89,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
 
     @Override
     public BlockFunctionArgument getParseResult(SuggestedParser parser) {
-      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse.apply(source));
+      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? null : valueIfFalse.apply(source));
     }
 
     @Override

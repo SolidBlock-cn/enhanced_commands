@@ -81,7 +81,15 @@ public interface FunctionLikeParser<T> {
       });
       // end of an expression, except a comma or right parentheses
       if (!parser.reader.canRead()) {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ")");
+        if (paramsCount < minParamsCount()) {
+          // params not enough, suggest comma
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ",");
+        } else if (paramsCount < maxParamsCount()) {
+          // params enough but not full, suggest both
+          throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(parser.reader, ",", ")");
+        } else {
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ")");
+        }
       } else if (parser.reader.peek() == ',') {
         if (paramsCount >= maxParamsCount()) {
           throw PARAMS_TOO_MANY.createWithContext(parser.reader, paramsCount + 1, maxParamsCount());
@@ -97,7 +105,7 @@ public interface FunctionLikeParser<T> {
         parser.suggestions.clear();
         break;
       } else {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ")");
+        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
       }
     }
     return getParseResult(parser);

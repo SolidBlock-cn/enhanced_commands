@@ -34,6 +34,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public enum SetBlocksCommand implements CommandRegistrationCallback {
   INSTANCE;
+  public static final int POST_PROCESS_FLAG = 1;
 
   public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.keywordArgsBuilder()
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
@@ -42,6 +43,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
       .addOptionalArg("notify_listeners", BoolArgumentType.bool(), true)
       .addOptionalArg("notify_neighbors", BoolArgumentType.bool(), false)
       .addOptionalArg("force_state", BoolArgumentType.bool(), false)
+      .addOptionalArg("post_process", BoolArgumentType.bool(), false)
       .builder();
   public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.commands.setblocks.region_too_large", a, b));
   public static final int REGION_SIZE_LIMIT = 16777215;
@@ -67,7 +69,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
    * Execute the command with the default parameters.
    */
   private static int execute(CommandContext<ServerCommandSource> context, Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
-    return execute(context, predicate, false, false, Block.NOTIFY_LISTENERS);
+    return execute(context, predicate, false, false, Block.NOTIFY_LISTENERS, 0);
   }
 
   /**
@@ -76,7 +78,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
   private static int execute(CommandContext<ServerCommandSource> context, Predicate<CachedBlockPosition> predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
     final boolean immediately = kwArgs.getBoolean("immediately");
     final boolean bypassLimit = kwArgs.getBoolean("bypass_limit");
-    return execute(context, predicate, immediately, bypassLimit, getFlags(kwArgs));
+    return execute(context, predicate, immediately, bypassLimit, getFlags(kwArgs), getModFlags(kwArgs));
   }
 
   /**
@@ -86,7 +88,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
    * @param bypassLimit If the range exceeds the limit, it will also perform it, instead of forbidding.
    * @param flags       The flags used to set block state.
    */
-  private static int execute(CommandContext<ServerCommandSource> context, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags) throws CommandSyntaxException {
+  private static int execute(CommandContext<ServerCommandSource> context, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags, int modFlags) throws CommandSyntaxException {
     final Region region = RegionArgumentType.getRegion(context, "region");
     if (!bypassLimit && region.numberOfBlocksAffected() > REGION_SIZE_LIMIT) {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), REGION_SIZE_LIMIT);
@@ -101,7 +103,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
     if (predicate == null) {
       mainIterator = region.stream()
           .peek(blockPos -> {
-            if (block.setBlock(world, blockPos, flags))
+            if (block.setBlock(world, blockPos, flags, modFlags))
               numbersAffected.increment();
           })
           .map(blockPos -> null)
@@ -120,7 +122,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
       IterateUtils.exhaust(testPosIterator);
       mainIterator = posThatMatch.stream()
           .peek(blockPos -> {
-            if (block.setBlock(world, blockPos, 3))
+            if (block.setBlock(world, blockPos, flags, modFlags))
               numbersAffected.increment();
           })
           .map(blockPos -> null)
@@ -151,6 +153,14 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
     }
     if (args.getBoolean("force_state")) {
       value |= Block.FORCE_STATE;
+    }
+    return value;
+  }
+
+  private static int getModFlags(KeywordArgs args) {
+    int value = 0;
+    if (args.getBoolean("post_process")) {
+      value |= POST_PROCESS_FLAG;
     }
     return value;
   }

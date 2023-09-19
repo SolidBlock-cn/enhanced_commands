@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Stream;
 
 public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thickness) implements IntBackedRegion {
@@ -60,7 +59,13 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
 
   @Override
   public long numberOfBlocksAffected() {
-    return blockCuboidRegion.numberOfBlocksAffected() - blockCuboidRegion.expanded(-thickness, Direction.Axis.X).expanded(-thickness, Direction.Axis.Z).numberOfBlocksAffected();
+    final int innerBlocks;
+    if (blockCuboidRegion.minX() + thickness > blockCuboidRegion.maxX() - thickness || blockCuboidRegion.minZ() + thickness > blockCuboidRegion.maxZ() + thickness) {
+      innerBlocks = 0;
+    } else {
+      innerBlocks = (blockCuboidRegion.maxX() - blockCuboidRegion.minX() - 2 * thickness + 1) * (blockCuboidRegion.maxY() - blockCuboidRegion.minY() + 1) * (blockCuboidRegion.maxZ() - blockCuboidRegion.minZ() - 2 * thickness + 1);
+    }
+    return blockCuboidRegion.numberOfBlocksAffected() - innerBlocks;
   }
 
   @Override
@@ -75,11 +80,16 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
 
   @Override
   public Stream<BlockPos> stream() {
-    return decompose().stream().flatMap(Region::stream);
+    return decompose().flatMap(Region::stream);
   }
 
-  public @NotNull List<BlockCuboidRegion> decompose() {
-    return List.of(
+  public @NotNull Stream<BlockCuboidRegion> decompose() {
+    // 考虑正好中间的空间为零的情况，这种情况下，正好相当于实心的 BlockCuboidRegion
+    if (blockCuboidRegion.minX() + thickness > blockCuboidRegion.maxX() - thickness
+        || blockCuboidRegion.minZ() + thickness > blockCuboidRegion.maxZ() - thickness) {
+      return Stream.of(blockCuboidRegion);
+    }
+    return Stream.of(
         // lower x part
         new BlockCuboidRegion(blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.minX() + thickness - 1, blockCuboidRegion.maxY(), blockCuboidRegion.maxZ()),
         // higher x part

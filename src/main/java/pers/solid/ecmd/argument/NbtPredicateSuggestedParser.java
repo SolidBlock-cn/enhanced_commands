@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.nbt.*;
 import pers.solid.ecmd.predicate.property.Comparator;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.SuggestionProvider;
 import pers.solid.ecmd.util.SuggestionUtil;
 
@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public class NbtPredicateSuggestedParser extends SuggestedParser {
   public static final Text MATCH = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.match");
@@ -265,12 +263,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       suggestions.clear();
       reader.skipWhitespace();
       final int cursorBeforeRegex = reader.getCursor();
-      try {
-        return new RegexNbtPredicate(Pattern.compile(reader.readString()), false);
-      } catch (PatternSyntaxException e) {
-        reader.setCursor(cursorBeforeRegex + e.getIndex());
-        throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(reader, e.getDescription());
-      }
+      return new RegexNbtPredicate(StringUtil.readRegex(reader), false);
     }
 
     // 尝试读取比较值（除了等号和不等号之外的值）

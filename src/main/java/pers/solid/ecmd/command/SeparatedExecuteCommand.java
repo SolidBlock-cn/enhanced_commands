@@ -70,8 +70,8 @@ import static pers.solid.ecmd.command.ModCommands.REQUIRES_PERMISSION_2;
  */
 public final class SeparatedExecuteCommand {
   private static final Dynamic2CommandExceptionType BLOCKS_TOOBIG_EXCEPTION = new Dynamic2CommandExceptionType((maxCount, count) -> Text.translatable("commands.execute.blocks.toobig", maxCount, count));
-  private static final SimpleCommandExceptionType CONDITIONAL_FAIL_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.execute.condition.fail"));
-  private static final DynamicCommandExceptionType CONDITIONAL_FAIL_COUNT_EXCEPTION = new DynamicCommandExceptionType(count -> Text.translatable("commands.execute.condition.fail_count", count));
+  private static final SimpleCommandExceptionType CONDITIONAL_FAIL_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.execute.conditional.fail"));
+  private static final DynamicCommandExceptionType CONDITIONAL_FAIL_COUNT_EXCEPTION = new DynamicCommandExceptionType(count -> Text.translatable("commands.execute.conditional.fail_count", count));
   private static final BinaryOperator<ResultConsumer<ServerCommandSource>> BINARY_RESULT_CONSUMER = (consumer, consumer2) -> (context, success, result) -> {
     consumer.onCommandComplete(context, success, result);
     consumer2.onCommandComplete(context, success, result);
@@ -322,7 +322,7 @@ public final class SeparatedExecuteCommand {
     return positive ? context -> {
       int i = condition.test(context);
       if (i > 0) {
-        context.getSource().sendFeedback(Text.translatable("commands.execute.condition.pass_count", i), false);
+        context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass_count", i), false);
         return i;
       } else {
         throw CONDITIONAL_FAIL_EXCEPTION.create();
@@ -330,7 +330,7 @@ public final class SeparatedExecuteCommand {
     } : context -> {
       int i = condition.test(context);
       if (i == 0) {
-        context.getSource().sendFeedback(Text.translatable("commands.execute.condition.pass"), false);
+        context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass"), false);
         return 1;
       } else {
         throw CONDITIONAL_FAIL_COUNT_EXCEPTION.create(i);
@@ -377,7 +377,7 @@ public final class SeparatedExecuteCommand {
   private static ArgumentBuilder<ServerCommandSource, ?> addConditionLogic(CommandNode<ServerCommandSource> root, ArgumentBuilder<ServerCommandSource, ?> builder, boolean positive, Condition condition) {
     return builder.fork(root, context -> getSourceOrEmptyForConditionFork(context, positive, condition.test(context))).executes(context -> {
       if (positive == condition.test(context)) {
-        context.getSource().sendFeedback(Text.translatable("commands.execute.condition.pass"), false);
+        context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass"), false);
         return 1;
       } else {
         throw CONDITIONAL_FAIL_EXCEPTION.create();
@@ -392,7 +392,7 @@ public final class SeparatedExecuteCommand {
   private static int executePositiveBlockCondition(CommandContext<ServerCommandSource> context, boolean masked) throws CommandSyntaxException {
     OptionalInt optionalInt = testBlocksCondition(context, masked);
     if (optionalInt.isPresent()) {
-      context.getSource().sendFeedback(Text.translatable("commands.execute.condition.pass_count", optionalInt.getAsInt()), false);
+      context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass_count", optionalInt.getAsInt()), false);
       return optionalInt.getAsInt();
     } else {
       throw CONDITIONAL_FAIL_EXCEPTION.create();
@@ -404,7 +404,7 @@ public final class SeparatedExecuteCommand {
     if (optionalInt.isPresent()) {
       throw CONDITIONAL_FAIL_COUNT_EXCEPTION.create(optionalInt.getAsInt());
     } else {
-      context.getSource().sendFeedback(Text.translatable("commands.execute.condition.pass"), false);
+      context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass"), false);
       return 1;
     }
   }

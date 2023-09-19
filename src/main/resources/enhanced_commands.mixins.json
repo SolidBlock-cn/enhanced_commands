@@ -4,8 +4,13 @@
   "package": "pers.solid.ecmd.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BlockPosArgumentTypeMixin",
+    "BlockPredicateArgumentTypeMixin",
+    "BlockStateArgumentTypeMixin",
     "CachedBlockPositionAccessor",
-    "ThreadExecutorMixin"
+    "GameModeArgumentTypeMixin",
+    "ThreadExecutorMixin",
+    "Vec3ArgumentTypeMixin"
   ],
   "client": [
     "ClientCommandSourceAccessor"

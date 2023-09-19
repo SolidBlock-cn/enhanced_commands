@@ -79,12 +79,14 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
     if (outlineType == OutlineRegion.OutlineTypes.EXPOSE || outlineType == OutlineRegion.OutlineTypes.NEARLY_EXPOSE || outlineType == OutlineRegion.OutlineTypes.VERTICALLY_EXPOSE) {
       if (topHeight == bottomHeight) {
         return Streams.stream(iterable).map(blockPos -> blockPos.withY(bottomHeight));
+      } else if (topHeight < bottomHeight) {
+        throw new IllegalStateException("Invalid hollow cylinder! topHeight < bottomHeight, topHeight = " + topHeight + ", bottomHeight = " + bottomHeight);
       }
       List<Stream<BlockPos>> parts = new ArrayList<>();
       // add top and bottom ceiling
       parts.add(Streams.stream(iterable).filter(blockPos -> horizontallyWithinCylinder(cylinderRegion, Vec3d.ofCenter(blockPos))).flatMap(blockPos -> Stream.of(blockPos.withY(topHeight), blockPos.withY(bottomHeight))));
       // add walls that excluded the top and bottom ceiling
-      if (outlineType != OutlineRegion.OutlineTypes.VERTICALLY_EXPOSE) {
+      if (outlineType != OutlineRegion.OutlineTypes.VERTICALLY_EXPOSE && topHeight - 1 > bottomHeight + 1) {
         parts.add(flatOutlineRoundStream.flatMap(blockPos -> BlockPos.stream(blockPos.getX(), bottomHeight + 1, blockPos.getZ(), blockPos.getX(), topHeight - 1, blockPos.getZ()).map(BlockPos::toImmutable)));
       }
       return parts.stream().flatMap(Function.identity());
@@ -173,8 +175,20 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
+        final int cursorBeforeReadDouble = parser.reader.getCursor();
+        radius = parser.reader.readDouble();
+        if (radius < 0) {
+          parser.reader.setCursor(cursorBeforeReadDouble);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, radius);
+        }
         radius = parser.reader.readDouble();
       } else if (paramIndex == 1) {
+        final int cursorBeforeReadDouble = parser.reader.getCursor();
+        height = parser.reader.readDouble();
+        if (height < 0) {
+          parser.reader.setCursor(cursorBeforeReadDouble);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, height);
+        }
         height = parser.reader.readDouble();
       } else if (paramIndex == 2) {
         center = SuggestionUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);

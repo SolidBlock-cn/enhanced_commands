@@ -39,7 +39,16 @@ public class SuggestedParser {
   public CompletableFuture<Suggestions> buildSuggestions(CommandContext<?> context, SuggestionsBuilder builder) {
     for (SuggestionProvider suggestion : suggestions) {
       if (suggestion instanceof final SuggestionProvider.Modifying modifying) {
-        return modifying.apply(context, builder);
+        final CompletableFuture<Suggestions> apply = modifying.apply(context, builder);
+        if (apply.isDone()) {
+          // 考虑到返回了空白建议的情况，这种情况下不阻止继续在后续的迭代中获取建议。
+          final Suggestions now = apply.getNow(null);
+          if (now != null && !now.isEmpty()) {
+            return apply;
+          }
+        } else {
+          return apply;
+        }
       } else if (suggestion instanceof final SuggestionProvider.Offset offset) {
         builder = offset.apply(context, builder);
       } else {

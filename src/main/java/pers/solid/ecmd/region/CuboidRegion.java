@@ -174,6 +174,16 @@ public record CuboidRegion(Box box) implements Region {
       final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
       if (paramIndex == 0) {
         from = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {
+          parser.reader.skipWhitespace();
+          // 在有接受到空格后，可直接接受第二个参数
+          if (parser.reader.canRead()) {
+            final char peek = parser.reader.peek();
+            if (peek != ',' && peek != ')') {
+              to = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+            }
+          }
+        }
       } else if (paramIndex == 1) {
         to = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
       }
@@ -181,12 +191,13 @@ public record CuboidRegion(Box box) implements Region {
 
     @Override
     public int minParamsCount() {
-      return 2;
+      return to != null ? 1 : 2;
     }
 
     @Override
     public int maxParamsCount() {
-      return 2;
+      // 如果接受到了以空格区分的参数，那么不需要接受第二个参数了。
+      return to != null ? 1 : 2;
     }
   }
 }

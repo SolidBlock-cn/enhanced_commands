@@ -236,5 +236,8 @@
   "enhancedCommands.outlineType.wall_connected": "Block positions horizontally near at least one (in 8) that is not in",
   "enhancedCommands.paramTooFew": "The number of parameters (%s) is lower than the limit (%s)",
   "enhancedCommands.paramTooMany": "The number of parameters (%s) exceeds the limit (%s)",
+  "enhancedCommands.parsing.expected.2": "Expected '%s' or '%s'",
+  "enhancedCommands.parsing.expected.3": "Expected '%s', '%s' or '%s'",
+  "enhancedCommands.parsing.expected.4": "Expected '%s', '%s', '%s' or '%s'",
   "enhancedCommands.position": "(%s, %s, %s)"
 }

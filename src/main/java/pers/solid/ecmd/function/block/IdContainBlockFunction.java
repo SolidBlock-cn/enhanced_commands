@@ -15,17 +15,15 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.StringUtil;
 
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 /**
  * 从 id 包含指定正则表达式的方块中随机选择一个。
@@ -112,14 +110,8 @@ public final class IdContainBlockFunction implements BlockFunction {
         @Override
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
           final StringReader reader = parser.reader;
-          final int cursorAtRegexBegin = reader.getCursor() + (reader.canRead() && StringReader.isQuotedStringStart(reader.peek()) ? 1 : 0);
-          try {
-            parser.suggestions.clear();
-            pattern = Pattern.compile(reader.readString());
-          } catch (PatternSyntaxException e) {
-            reader.setCursor(cursorAtRegexBegin);
-            throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(reader, e.getMessage().replace(StringUtils.CR, StringUtils.EMPTY));
-          }
+          parser.suggestions.clear();
+          pattern = StringUtil.readRegex(parser.reader);
         }
       }.parse(commandRegistryAccess, parser, suggestionsOnly);
     }

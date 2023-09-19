@@ -236,5 +236,8 @@
   "enhancedCommands.outlineType.wall_connected": "方块位置水平方向接近的8个中至少1个不在里面",
   "enhancedCommands.paramTooFew": "参数的数量（%s）低于限制（%s）",
   "enhancedCommands.paramTooMany": "参数的数量（%s）超过限制（%s）",
-  "enhancedCommands.position": "(%s, %s, %s)"
+  "enhancedCommands.position": "(%s, %s, %s)",
+  "enhancedCommands.parsing.expected.2": "需要“%s”或“%s”",
+  "enhancedCommands.parsing.expected.3": "需要“%s”、“%s”或“%s”",
+  "enhancedCommands.parsing.expected.4": "需要“%s”、“%s”、“%s”或“%s”"
 }

@@ -11,6 +11,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -21,7 +22,7 @@ import pers.solid.ecmd.util.SuggestionUtil;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public record CylinderRegion(double radius, double height, Vec3d center) implements Region {
+public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius, @Range(from = 0, to = Long.MAX_VALUE) double height, Vec3d center) implements Region {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     if (center.y + height / 2 < vec3d.y || center.y - height / 2 > vec3d.y) {
@@ -48,12 +49,19 @@ public record CylinderRegion(double radius, double height, Vec3d center) impleme
 
   @Override
   public Stream<BlockPos> stream() {
-    return BlockPos.stream(MathHelper.ceil(center.x - radius - 0.5), 0, MathHelper.ceil(center.z - radius - 0.5), MathHelper.floor(center.x + radius - 0.5), 0, MathHelper.floor(center.z + radius - 0.5)) // a one-height cuboid that contains a round
+    final Stream<BlockPos> oneHeightRound = BlockPos.stream(MathHelper.ceil(center.x - radius - 0.5), 0, MathHelper.ceil(center.z - radius - 0.5), MathHelper.floor(center.x + radius - 0.5), 0, MathHelper.floor(center.z + radius - 0.5)) // a one-height cuboid that contains a round
         .filter(blockPos -> {
           final Vec3d centerPos = blockPos.toCenterPos();
           return Vector2d.distance(centerPos.x, centerPos.z, center.x, center.z) <= radius;
-        }) // a one-height round
-        .flatMap(blockPos -> BlockPos.stream(blockPos.getX(), getBottomHeight(), blockPos.getZ(), blockPos.getX(), getTopHeight(), blockPos.getZ()));
+        });
+    final int bottomHeight = getBottomHeight();
+    final int topHeight = getTopHeight();
+    if (bottomHeight > topHeight) {
+      // 这种情况一般不应该发生
+      return Stream.empty();
+    }
+    return oneHeightRound
+        .flatMap(blockPos -> BlockPos.stream(blockPos.getX(), bottomHeight, blockPos.getZ(), blockPos.getX(), topHeight, blockPos.getZ()));
   }
 
   @Override
@@ -139,9 +147,19 @@ public record CylinderRegion(double radius, double height, Vec3d center) impleme
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
+        final int cursorBeforeReadDouble = parser.reader.getCursor();
         radius = parser.reader.readDouble();
+        if (radius < 0) {
+          parser.reader.setCursor(cursorBeforeReadDouble);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, radius);
+        }
       } else if (paramIndex == 1) {
+        final int cursorBeforeReadDouble = parser.reader.getCursor();
         height = parser.reader.readDouble();
+        if (height < 0) {
+          parser.reader.setCursor(cursorBeforeReadDouble);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, height);
+        }
       } else if (paramIndex == 2) {
         final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
         center = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);

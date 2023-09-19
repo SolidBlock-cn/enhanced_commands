@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -21,7 +22,6 @@ import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.stream.Stream;
 
 public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thickness) implements IntBackedRegion {
@@ -59,19 +59,15 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
 
   @Override
   public Stream<BlockPos> stream() {
-    return decompose().stream().flatMap(Region::stream);
+    return decompose().flatMap(Region::stream);
   }
 
-  public @NotNull List<BlockCuboidRegion> decompose() {
-    final List<BlockCuboidRegion> walls = new CuboidWallRegion(blockCuboidRegion, thickness).decompose();
-    return List.of(
-        // top part
-        new BlockCuboidRegion(blockCuboidRegion.minX(), blockCuboidRegion.maxY() - thickness + 1, blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.maxY(), blockCuboidRegion.maxZ()),
-        walls.get(0),
-        walls.get(1),
-        walls.get(2),
-        walls.get(3),
-        new BlockCuboidRegion(blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.minY() + thickness - 1, blockCuboidRegion.maxZ())
+  public @NotNull Stream<BlockCuboidRegion> decompose() {
+    final Stream<BlockCuboidRegion> walls = new CuboidWallRegion(blockCuboidRegion, thickness).decompose();
+    return Streams.concat(
+        Stream.of(new BlockCuboidRegion(blockCuboidRegion.minX(), blockCuboidRegion.maxY() - thickness + 1, blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.maxY(), blockCuboidRegion.maxZ())),
+        walls,
+        Stream.of(new BlockCuboidRegion(blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.minY() + thickness - 1, blockCuboidRegion.maxZ()))
     );
   }
 
@@ -121,12 +117,28 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
       if (paramIndex == 0) {
-        fromPos = SuggestionUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
-      } else if (paramIndex == 1) {
-        toPos = SuggestionUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
-      } else if (paramIndex == 2) {
+        fromPos = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {
+          parser.reader.skipWhitespace();
+          // 在有接受到空格后，可直接接受第二个参数
+          if (parser.reader.canRead()) {
+            final char peek = parser.reader.peek();
+            if (peek != ',' && peek != ')') {
+              toPos = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+            }
+          }
+        }
+      } else if (toPos == null && paramIndex == 1) {
+        toPos = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+      } else if (toPos != null) {
+        final int cursorBeforeInt = parser.reader.getCursor();
         thickness = parser.reader.readInt();
+        if (thickness < 0) {
+          parser.reader.setCursor(cursorBeforeInt);
+          throw NON_POSITIVE_THICKNESS.createWithContext(parser.reader, thickness);
+        }
       }
     }
   }
