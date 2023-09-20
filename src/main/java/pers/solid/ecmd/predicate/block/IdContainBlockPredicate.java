@@ -87,7 +87,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
           final StringReader reader = parser.reader;
           final int cursorAtRegexBegin = reader.getCursor() + (reader.canRead() && StringReader.isQuotedStringStart(reader.peek()) ? 1 : 0);
-          parser.suggestions.clear();
+          parser.suggestionProviders.clear();
           pattern = StringUtil.readRegex(parser.reader);
         }
       }.parse(commandRegistryAccess, parser, suggestionsOnly);

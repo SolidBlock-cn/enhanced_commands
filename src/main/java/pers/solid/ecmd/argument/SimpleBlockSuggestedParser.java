@@ -64,8 +64,8 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     if (reader.canRead() && reader.peek() == '@') {
       reader.skip();
       int cursorBeforeParsing = this.reader.getCursor();
-      suggestions.clear();
-      suggestions.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(Registries.BLOCK.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName())));
+      suggestionProviders.clear();
+      suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(Registries.BLOCK.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName())));
       blockId = Identifier.fromCommandInput(reader);
       block = Registries.BLOCK.getOrEmpty(blockId).orElseThrow(() -> {
         this.reader.setCursor(cursorBeforeParsing);
@@ -73,7 +73,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       });
     } else {
       int cursorBeforeParsing = this.reader.getCursor();
-      suggestions.add((context, suggestionsBuilder) -> {
+      suggestionProviders.add((context, suggestionsBuilder) -> {
         SuggestionUtil.suggestString("@", Text.translatable("enhancedCommands.argument.block.ignore_feature_flag"), suggestionsBuilder);
         CommandSource.forEachMatching(registryWrapper.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName()));
       });
@@ -90,8 +90,8 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   }
 
   public void parseProperties() throws CommandSyntaxException {
-    suggestions.clear();
-    suggestions.add((context, suggestionsBuilder) -> {
+    suggestionProviders.clear();
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("[", START_OF_PROPERTIES);
       }
@@ -99,25 +99,25 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     if (reader.canRead() && reader.peek() == '[') {
       reader.skip();
       reader.skipWhitespace();
-      suggestions.clear();
+      suggestionProviders.clear();
     } else {
       return;
     }
-    suggestions.add((context, suggestionsBuilder) -> {
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
       }
     });
     if (reader.canRead() && reader.peek() == ']') {
       reader.skip();
-      suggestions.clear();
+      suggestionProviders.clear();
       return;
     }
     while (reader.canRead(-1)) {
       parsePropertyEntry();
       reader.skipWhitespace();
 
-      if (suggestions.isEmpty()) {
+      if (suggestionProviders.isEmpty()) {
         addPropertiesFinishedSuggestions();
       }
       if (parsePropertyEntryEnd())
@@ -136,12 +136,12 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     if (reader.canRead() && reader.peek() == ',') {
       commaFound = true;
       reader.skip();
-      suggestions.clear();
+      suggestionProviders.clear();
       reader.skipWhitespace();
     }
     if (reader.canRead() && reader.peek() == ']') {
       reader.skip();
-      suggestions.clear();
+      suggestionProviders.clear();
       return true;
     }
     if (!commaFound) {
@@ -185,7 +185,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       reader.setCursor(cursorBeforeReadString);
       throw BlockArgumentParser.UNKNOWN_PROPERTY_EXCEPTION.createWithContext(reader, blockId, propertyName);
     }
-    suggestions.clear();
+    suggestionProviders.clear();
     return property;
   }
 
@@ -193,7 +193,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   protected abstract Comparator parseComparator() throws CommandSyntaxException;
 
   protected void addPropertiesFinishedSuggestions() {
-    suggestions.add((context, suggestionsBuilder) -> {
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest(",", NEXT_PROPERTY);
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
@@ -204,7 +204,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   protected abstract void addComparatorTypeSuggestions();
 
   protected void addPropertyNameSuggestions() {
-    suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(block.getStateManager().getProperties().stream().map(Property::getName), suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(block.getStateManager().getProperties().stream().map(Property::getName), suggestionsBuilder));
   }
 
   public void parseBlockTagIdAndProperties() throws CommandSyntaxException {
@@ -220,7 +220,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       reader.skip();
 
       // start parsing tag id, after the hash symbol
-      suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestIdentifiers(this.registryWrapper.streamTagKeys().map(TagKey::id), suggestionsBuilder, "#"));
+      suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestIdentifiers(this.registryWrapper.streamTagKeys().map(TagKey::id), suggestionsBuilder, "#"));
       Identifier identifier = Identifier.fromCommandInput(this.reader);
       this.tagId = this.registryWrapper.getOptional(TagKey.of(RegistryKeys.BLOCK, identifier)).orElseThrow(() -> {
         this.reader.setCursor(cursorBeforeHash);
@@ -230,8 +230,8 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   }
 
   public void parsePropertyNames() throws CommandSyntaxException {
-    suggestions.clear();
-    suggestions.add((context, suggestionsBuilder) -> {
+    suggestionProviders.clear();
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("[", START_OF_PROPERTIES);
       }
@@ -239,18 +239,18 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     if (reader.canRead() && reader.peek() == '[') {
       reader.skip();
       reader.skipWhitespace();
-      suggestions.clear();
+      suggestionProviders.clear();
     } else {
       return;
     }
-    suggestions.add((context, suggestionsBuilder) -> {
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
       }
     });
     if (reader.canRead() && reader.peek() == ']') {
       reader.skip();
-      suggestions.clear();
+      suggestionProviders.clear();
       return;
     }
 
@@ -281,7 +281,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     reader.setCursor(cursorBeforePropertyName);
     final String remaining = reader.getRemaining();
     if (tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream()).distinct().noneMatch(property -> property.getName().startsWith(remaining) && !property.getName().equals(remaining))) {
-      suggestions.clear();
+      suggestionProviders.clear();
       reader.setCursor(cursorBeforeReadingComparator);
       addComparatorTypeSuggestions();
     }
@@ -305,7 +305,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   }
 
   private void addTagPropertiesNameSuggestions() {
-    suggestions.add((context, suggestionsBuilder) -> {
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       String string = suggestionsBuilder.getRemainingLowerCase();
       if (this.tagId != null) {
         for (RegistryEntry<Block> registryEntry : this.tagId) {
@@ -321,7 +321,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
 
   protected void addTagPropertiesValueSuggestions(String propertyName) {
     if (this.tagId != null) {
-      suggestions.add((context, suggestionsBuilder) -> {
+      suggestionProviders.add((context, suggestionsBuilder) -> {
         for (RegistryEntry<Block> registryEntry : this.tagId) {
           Block block = registryEntry.value();
           Property<?> property = block.getStateManager().getProperty(propertyName);

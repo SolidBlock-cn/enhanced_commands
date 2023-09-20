@@ -32,7 +32,7 @@ public interface FunctionLikeParser<T> {
   default T parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final String name = functionName();
     if (suggestionsOnly) {
-      parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(name + "(", tooltip(), suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(name + "(", tooltip(), suggestionsBuilder));
     }
     final int cursorBeforeUnion = parser.reader.getCursor();
     final String s = parser.reader.readUnquotedString();
@@ -47,7 +47,7 @@ public interface FunctionLikeParser<T> {
 
     // when allows zero params, deal with empty
     if (paramsCount >= minParamsCount()) {
-      parser.suggestions.add((context, suggestionsBuilder) -> {
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           suggestionsBuilder.suggest(")");
         }
@@ -57,19 +57,19 @@ public interface FunctionLikeParser<T> {
       if (paramsCount >= minParamsCount()) {
         // In this case, the parameters are empty
         parser.reader.skip();
-        parser.suggestions.clear();
+        parser.suggestionProviders.clear();
         return getParseResult(parser);
       } else {
         throw PARAMS_TOO_FEW.createWithContext(parser.reader, paramsCount, minParamsCount());
       }
     }
     while (true) {
-      parser.suggestions.clear();
+      parser.suggestionProviders.clear();
       parseParameter(commandRegistryAccess, parser, paramsCount, suggestionsOnly);
       paramsCount++;
       parser.reader.skipWhitespace();
       final int finalParamsCount = paramsCount;
-      parser.suggestions.add((context, suggestionsBuilder) -> {
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           if (finalParamsCount < maxParamsCount()) {
             suggestionsBuilder.suggest(",");
@@ -96,13 +96,13 @@ public interface FunctionLikeParser<T> {
         }
         parser.reader.skip();
         parser.reader.skipWhitespace();
-        parser.suggestions.clear();
+        parser.suggestionProviders.clear();
       } else if (parser.reader.peek() == ')') {
         if (paramsCount < minParamsCount()) {
           throw PARAMS_TOO_FEW.createWithContext(parser.reader, paramsCount, minParamsCount());
         }
         parser.reader.skip();
-        parser.suggestions.clear();
+        parser.suggestionProviders.clear();
         break;
       } else {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);

@@ -88,7 +88,9 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
           num = 0;
         }
         values[i] = num;
-        reader.skipWhitespace();
+        if (i < 2) {
+          reader.skipWhitespace();
+        }
       }
       return new LookingPosArgument(values[0], values[1], values[2]);
     } else {

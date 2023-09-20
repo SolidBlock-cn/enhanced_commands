@@ -3,6 +3,7 @@ package pers.solid.ecmd.util;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.chars.CharSet;
+import net.minecraft.util.math.Position;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -75,5 +76,16 @@ public final class StringUtil {
       stringReader.setCursor(cursorAtRegexBegin);
       throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(stringReader, e.getMessage().replace(StringUtils.CR, StringUtils.EMPTY));
     }
+  }
+
+  public static String wrapPosition(Position position) {
+    return position.getX() + " " + position.getY() + " " + position.getZ();
+  }
+
+  public static void expectAndSkipWhitespace(StringReader reader) throws CommandSyntaxException {
+    if (!reader.canRead() || !Character.isWhitespace(reader.peek())) {
+      throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, " ");
+    }
+    reader.skipWhitespace();
   }
 }

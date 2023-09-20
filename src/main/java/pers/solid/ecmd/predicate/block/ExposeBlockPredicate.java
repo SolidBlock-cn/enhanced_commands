@@ -178,20 +178,20 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        parser.suggestions.clear();
+        parser.suggestionProviders.clear();
         exposureType = parser.readAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
       } else if (paramIndex == 1) {
         do {
-          parser.suggestions.clear();
+          parser.suggestionProviders.clear();
           parser.reader.skipWhitespace();
           if (directions.isEmpty()) {
-            parser.suggestions.add((context, suggestionsBuilder) -> {
+            parser.suggestionProviders.add((context, suggestionsBuilder) -> {
               SuggestionUtil.suggestString("all", Text.translatable("enhancedCommands.direction.all"), suggestionsBuilder);
               SuggestionUtil.suggestString("horizontal", Text.translatable("enhancedCommands.direction.horizontal"), suggestionsBuilder);
               SuggestionUtil.suggestString("vertical", Text.translatable("enhancedCommands.direction.vertical"), suggestionsBuilder);
             });
           }
-          parser.suggestions.add((context, builder) -> SuggestionUtil.suggestDirections(builder));
+          parser.suggestionProviders.add((context, builder) -> SuggestionUtil.suggestDirections(builder));
           final int cursorBeforeReadString = parser.reader.getCursor();
           final String id = parser.reader.readString();
           if (id.isEmpty())

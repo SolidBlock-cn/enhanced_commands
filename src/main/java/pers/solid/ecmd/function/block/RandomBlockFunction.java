@@ -86,11 +86,11 @@ public final class RandomBlockFunction implements BlockFunction {
     @Override
     public @Nullable RandomBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
       if (parser.reader.getRemaining().isEmpty()) {
-        parser.suggestions.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhancedCommands.argument.block_function.random")));
+        parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhancedCommands.argument.block_function.random")));
       }
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();
-        parser.suggestions.clear();
+        parser.suggestionProviders.clear();
         return new RandomBlockFunction(commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
       }
       return null;

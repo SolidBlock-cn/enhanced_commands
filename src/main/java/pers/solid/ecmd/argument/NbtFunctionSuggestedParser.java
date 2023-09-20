@@ -46,7 +46,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
   public boolean parseSign(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     boolean isUsingEqual = equalsForDefault;
     final int cursorBeforeSign = reader.getCursor();
-    suggestions.add((commandContext, suggestionsBuilder) -> {
+    suggestionProviders.add((commandContext, suggestionsBuilder) -> {
       SuggestionUtil.suggestString(":", MERGE, suggestionsBuilder);
       SuggestionUtil.suggestString("=", EQUAL, suggestionsBuilder);
     });
@@ -79,16 +79,16 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
   }
 
   public CompoundNbtFunction parseCompound(boolean isUsingEqual) throws CommandSyntaxException {
-    suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
     reader.expect('{');
-    suggestions.clear();
+    suggestionProviders.clear();
     this.reader.skipWhitespace();
     Map<String, NbtFunction> entries = new LinkedHashMap<>();
 
     while (!this.reader.canRead() || this.reader.peek() != '}') {
       reader.skipWhitespace();
       int cursorBeforeKey = this.reader.getCursor();
-      suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("-", REMOVE_KEY, suggestionsBuilder));
+      suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("-", REMOVE_KEY, suggestionsBuilder));
       final String key;
       boolean markAsRemoveKey = false;
       if (!this.reader.canRead()) {
@@ -113,11 +113,11 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
         }
         entries.put(key, null);
       }
-      suggestions.clear();
-      suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(",", NbtPredicateSuggestedParser.SEPARATE, suggestionsBuilder));
+      suggestionProviders.clear();
+      suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(",", NbtPredicateSuggestedParser.SEPARATE, suggestionsBuilder));
       if (reader.canRead() && reader.peek() == ',') {
         reader.skip();
-        suggestions.clear();
+        suggestionProviders.clear();
         reader.skipWhitespace();
       } else {
         break;
@@ -125,9 +125,9 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
     }
 
     reader.skipWhitespace();
-    suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("}", NbtPredicateSuggestedParser.END_OF_COMPOUND, suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("}", NbtPredicateSuggestedParser.END_OF_COMPOUND, suggestionsBuilder));
     reader.expect('}');
-    suggestions.clear();
+    suggestionProviders.clear();
     return new CompoundNbtFunction(entries, !isUsingEqual);
   }
 
@@ -139,14 +139,14 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
    */
   public NbtFunction parseList(boolean isUsingEqual) throws CommandSyntaxException {
     reader.expect('[');
-    suggestions.clear();
+    suggestionProviders.clear();
     this.reader.skipWhitespace();
 
-    suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("]", NbtPredicateSuggestedParser.END_OF_LIST, suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("]", NbtPredicateSuggestedParser.END_OF_LIST, suggestionsBuilder));
     if (reader.canRead() && reader.peek() == ']') {
       // 空列表
       reader.skip();
-      suggestions.clear();
+      suggestionProviders.clear();
       return new ListOpsNbtFunction(List.of(), null, null);
     } else {
       // 列表根据分号，分为左边和右边两部分。
@@ -159,10 +159,10 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
       boolean hasFoundEclipse = false;
       boolean hasFoundSemicolon = false;
       // 第一个元素后面可能会有分号。
-      suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(";", SEMICOLON, suggestionsBuilder));
+      suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(";", SEMICOLON, suggestionsBuilder));
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
-        suggestions.clear();
+        suggestionProviders.clear();
         hasFoundSemicolon = true;
         rightPartList = leftPartList;
         leftPartList = null;
@@ -172,7 +172,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
         int cursorBeforeListElement = this.reader.getCursor();
         // 先检测是否有省略号。
         if (!hasFoundEclipse) {
-          suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("...", ECLIPSE, suggestionsBuilder));
+          suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("...", ECLIPSE, suggestionsBuilder));
         }
         if (reader.canRead(3) && reader.peek() == '.' && reader.peek(1) == '.' && reader.peek(2) == '.') {
           // 解析到了省略号的情况
@@ -180,7 +180,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
             throw DUPLICATE_ECLIPSE.createWithContext(reader);
           }
           reader.setCursor(reader.getCursor() + 3);
-          suggestions.clear();
+          suggestionProviders.clear();
           hasFoundEclipse = true;
 
           // 如果当前正在解析的是左边的部分，解析到省略号之后，说明当前正在解析的是右边的部分，需要进行迁移，同时之后不应再允许出现分号。
@@ -192,7 +192,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
 
           // 解析完省略号之后，应该是逗号。
           reader.skipWhitespace();
-          suggestions.add((context, suggestionsBuilder) -> {
+          suggestionProviders.add((context, suggestionsBuilder) -> {
             SuggestionUtil.suggestString(",", NbtPredicateSuggestedParser.SEPARATE, suggestionsBuilder);
             SuggestionUtil.suggestString("]", NbtPredicateSuggestedParser.END_OF_LIST, suggestionsBuilder);
           });
@@ -200,15 +200,15 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
             reader.expect(',');
           } else if (reader.peek() == ']') {
             reader.skip(); // 结束列表
-            suggestions.clear();
+            suggestionProviders.clear();
             break;
           } else if (reader.peek() == ',') {
             reader.skip();
             reader.skipWhitespace();
-            suggestions.clear();
+            suggestionProviders.clear();
             continue;
           } else {
-            suggestions.clear();
+            suggestionProviders.clear();
             continue;
           }
         } // 解析省略号结束
@@ -223,14 +223,14 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
           try {
             final int index = reader.readInt();
             reader.skipWhitespace();
-            suggestions.clear();
+            suggestionProviders.clear();
             final NbtFunction nbtFunction = parseFunction(true, false);
             currentlyAppendingList.add(IntObjectPair.of(index, nbtFunction));
             isUsingPositionalPredicate = true;
           } catch (CommandSyntaxException e) {
             cursorWhenParsingPositionalFunction = reader.getCursor();
             exceptionWhenParsingPositionalFunction = e;
-            suggestionsWhenParsingPositionalFunction = List.copyOf(suggestions);
+            suggestionsWhenParsingPositionalFunction = List.copyOf(suggestionProviders);
             reader.setCursor(cursorBeforeListElement);
           }
         }
@@ -241,7 +241,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
           } catch (CommandSyntaxException exception) {
             if (exceptionWhenParsingPositionalFunction != null) {
               reader.setCursor(cursorWhenParsingPositionalFunction);
-              suggestions.addAll(suggestionsWhenParsingPositionalFunction);
+              suggestionProviders.addAll(suggestionsWhenParsingPositionalFunction);
               throw exceptionWhenParsingPositionalFunction;
             } else {
               throw exception;
@@ -250,15 +250,15 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
         }
 
         this.reader.skipWhitespace();
-        suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(",", NbtPredicateSuggestedParser.SEPARATE, suggestionsBuilder));
+        suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(",", NbtPredicateSuggestedParser.SEPARATE, suggestionsBuilder));
         if (currentlyAppendingList == leftPartList && !hasFoundSemicolon) {
           // 此时，可以有分号
-          suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(";", SEMICOLON, suggestionsBuilder));
+          suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(";", SEMICOLON, suggestionsBuilder));
         }
 
         if (this.reader.canRead() && this.reader.peek() == ',') {
           this.reader.skip();
-          suggestions.clear();
+          suggestionProviders.clear();
           this.reader.skipWhitespace();
         } else if (this.reader.canRead() && this.reader.peek() == ';') {
           if (hasFoundSemicolon) {
@@ -268,23 +268,23 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
           } else {
             rightPartList = new ArrayList<>();
             currentlyAppendingList = rightPartList;
-            suggestions.clear();
+            suggestionProviders.clear();
             reader.skip();
             reader.skipWhitespace();
             hasFoundSemicolon = true;
           }
         } else {
-          suggestions.clear();
+          suggestionProviders.clear();
           try {
             reader.skipWhitespace();
-            suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("]", NbtPredicateSuggestedParser.END_OF_LIST, suggestionsBuilder));
+            suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("]", NbtPredicateSuggestedParser.END_OF_LIST, suggestionsBuilder));
             reader.expect(']'); // 结束列表
             break;
           } catch (CommandSyntaxException exception) {
             if (exceptionWhenParsingPositionalFunction != null) {
               reader.setCursor(cursorWhenParsingPositionalFunction);
-              suggestions.clear();
-              suggestions.addAll(suggestionsWhenParsingPositionalFunction);
+              suggestionProviders.clear();
+              suggestionProviders.addAll(suggestionsWhenParsingPositionalFunction);
               throw exceptionWhenParsingPositionalFunction;
             } else {
               throw exception;
@@ -293,7 +293,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
         } // end except ending square bracket
       } // end while
 
-      suggestions.clear();
+      suggestionProviders.clear();
       // 解析完成，处理数据
       final List<NbtFunction> valueReplacements = leftPartList == null ? null : leftPartList.stream().filter(pair -> !(pair instanceof IntObjectPair<NbtFunction>) && pair.left() == null).map(Pair::right).toList();
       final Int2ObjectMap<NbtFunction> positionalFunctions = leftPartList == null ? null : new Int2ObjectOpenHashMap<>();
@@ -344,9 +344,9 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
     final boolean hasExplicitSign = cursorBeforeSign != reader.getCursor();
     reader.skipWhitespace();
     if (hasExplicitSign) {
-      suggestions.clear();
+      suggestionProviders.clear();
     }
-    suggestions.add((context, suggestionsBuilder) -> {
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       SuggestionUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder);
       SuggestionUtil.suggestString("[", NbtPredicateSuggestedParser.START_OF_LIST, suggestionsBuilder);
     });
@@ -359,7 +359,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
       return parseList(isUsingEqual);
     } else {
       final NbtElement element = new StringNbtReader(reader).parseElement();
-      suggestions.clear();
+      suggestionProviders.clear();
       return new SimpleNbtFunction(element);
     }
   }

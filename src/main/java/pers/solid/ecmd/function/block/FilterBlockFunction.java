@@ -83,7 +83,7 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
   private static final class Parser implements FunctionLikeParser<BlockFunctionArgument> {
     private BlockPredicateArgument blockPredicate;
     private BlockFunctionArgument blockFunction;
-    private BlockFunctionArgument elseFunction;
+    private @Nullable BlockFunctionArgument elseFunction;
 
     @Override
     public @NotNull String functionName() {
@@ -97,7 +97,7 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
 
     @Override
     public BlockFunctionArgument getParseResult(SuggestedParser parser) {
-      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction.apply(source));
+      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? null : elseFunction.apply(source));
     }
 
     @Override

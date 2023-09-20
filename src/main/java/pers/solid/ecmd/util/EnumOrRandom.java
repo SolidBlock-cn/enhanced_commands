@@ -37,7 +37,7 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
    * @see net.minecraft.command.argument.EnumArgumentType#parse(StringReader)
    */
   static <E extends Enum<E> & StringIdentifiable> EnumOrRandom<E> parseAndSuggest(E[] values, com.mojang.serialization.Codec<E> codec, SuggestedParser parser) throws CommandSyntaxException {
-    parser.suggestions.add((context, suggestionsBuilder) -> {
+    parser.suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("*");
       }

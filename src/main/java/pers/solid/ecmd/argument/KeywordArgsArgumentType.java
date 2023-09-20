@@ -18,23 +18,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
+public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, @Unmodifiable Map<@NotNull String, Object> defaultValues) implements ArgumentType<KeywordArgs> {
   public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.keyword_args.unknown_argument_name", o));
   public static final DynamicCommandExceptionType DUPLICATE_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.keyword_args.duplicate_argument_name", o));
-  public final @Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments;
-  public final @Unmodifiable Map<@NotNull String, Object> defaultValues;
-
-  public KeywordArgsArgumentType(@Unmodifiable Map<String, ArgumentType<?>> arguments, @Unmodifiable Map<@NotNull String, Object> defaultValues) {
-    this.arguments = arguments;
-    this.defaultValues = defaultValues;
-  }
 
   public static Builder keywordArgsBuilder() {
     return new Builder(new ImmutableMap.Builder<>(), new ImmutableMap.Builder<>());
   }
 
-  public static KeywordArgs getKeywordArgs(String name, CommandContext<?> source) {
-    return source.getArgument(name, KeywordArgs.class);
+  public static KeywordArgs getKeywordArgs(String name, CommandContext<?> context) {
+    return context.getArgument(name, KeywordArgs.class);
   }
 
   public static Builder keywordArgsBuilder(@NotNull KeywordArgsArgumentType copyFrom) {
@@ -59,7 +52,7 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
     } catch (CommandSyntaxException ignored) {
     }
     final var builder2 = builder.createOffset(suggestedParser.reader.getCursor());
-    suggestedParser.suggestions.forEach(consumer -> consumer.accept(context, builder2));
+    suggestedParser.suggestionProviders.forEach(consumer -> consumer.accept(context, builder2));
     return builder2.buildFuture();
   }
 
@@ -67,8 +60,8 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
     final Map<String, Object> values = new HashMap<>();
     final SuggestionProvider nameSuggestion = (context, builder) -> CommandSource.suggestMatching(arguments.keySet().stream().filter(s -> !values.containsKey(s)), builder);
     if (hasSuggestions) {
-      parser.suggestions.clear();
-      parser.suggestions.add(nameSuggestion);
+      parser.suggestionProviders.clear();
+      parser.suggestionProviders.add(nameSuggestion);
     }
 
     for (int i = 0; i < 1024 && parser.reader.canRead(); i++) {
@@ -84,28 +77,28 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
       }
       parser.reader.skipWhitespace();
       if (hasSuggestions) {
-        parser.suggestions.clear();
-        parser.suggestions.add((context, builder) -> builder.suggest("="));
+        parser.suggestionProviders.clear();
+        parser.suggestionProviders.add((context, builder) -> builder.suggest("="));
       }
       parser.reader.expect('=');
       parser.reader.skipWhitespace();
       // parse value
       final ArgumentType<?> argumentType = arguments.get(name);
       if (hasSuggestions) {
-        parser.suggestions.clear();
-        parser.suggestions.add(argumentType::listSuggestions);
+        parser.suggestionProviders.clear();
+        parser.suggestionProviders.add(argumentType::listSuggestions);
       }
       final Object parse = argumentType.parse(parser.reader);
 
       values.put(name, parse);
 
-      parser.suggestions.clear();
+      parser.suggestionProviders.clear();
       if (!parser.reader.canRead()) {
         // ensure there is at least a whitespace
         break;
       }
       if (hasSuggestions) {
-        parser.suggestions.add(nameSuggestion);
+        parser.suggestionProviders.add(nameSuggestion);
       }
       parser.reader.skipWhitespace();
     }
@@ -132,9 +125,14 @@ public class KeywordArgsArgumentType implements ArgumentType<KeywordArgs> {
       return this;
     }
 
-    public KeywordArgsArgumentType builder() {
+    public Builder addAll(KeywordArgsArgumentType source) {
+      arguments.putAll(source.arguments);
+      defaultValues.putAll(source.defaultValues);
+      return this;
+    }
+
+    public KeywordArgsArgumentType build() {
       return new KeywordArgsArgumentType(arguments.build(), defaultValues.build());
     }
   }
-
 }

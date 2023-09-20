@@ -6,6 +6,7 @@ import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.util.Identifier;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.curve.CurveTypes;
 import pers.solid.ecmd.function.block.BlockFunctionTypes;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
 import pers.solid.ecmd.region.RegionTypes;
@@ -17,16 +18,18 @@ public class ModArgumentTypes {
   public static void init() {
     BlockPredicateTypes.init();
     BlockFunctionTypes.init();
+    CurveTypes.init();
+    RegionTypes.init();
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
+    register("curve", CurveArgumentType.class, ConstantArgumentSerializer.of(CurveArgumentType::new));
     register("directions", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::create));
     register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
     register("nbt_function", NbtFunctionArgumentType.class, NbtFunctionArgumentType.Serializer.INSTANCE);
     register("keyword_args", KeywordArgsArgumentType.class, new KeywordArgsArgumentSerializer());
     register("pos", EnhancedPosArgumentType.class, new EnhancedPosArgumentType.Serializer());
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));
-    register("vanilla_wrapped", VanillaWrappedArgumentType.class, new VanillaWrappedArgumentType.Serializer());
-    RegionTypes.init();
+    register("vanilla_wrapped", VanillaWrappedArgumentType.class, VanillaWrappedArgumentType.Serializer.INSTANCE);
   }
 
   private static <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void register(

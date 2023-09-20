@@ -110,7 +110,7 @@ public final class IdContainBlockFunction implements BlockFunction {
         @Override
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
           final StringReader reader = parser.reader;
-          parser.suggestions.clear();
+          parser.suggestionProviders.clear();
           pattern = StringUtil.readRegex(parser.reader);
         }
       }.parse(commandRegistryAccess, parser, suggestionsOnly);

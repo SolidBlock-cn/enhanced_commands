@@ -181,7 +181,6 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
           parser.reader.setCursor(cursorBeforeReadDouble);
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, radius);
         }
-        radius = parser.reader.readDouble();
       } else if (paramIndex == 1) {
         final int cursorBeforeReadDouble = parser.reader.getCursor();
         height = parser.reader.readDouble();
@@ -189,7 +188,6 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
           parser.reader.setCursor(cursorBeforeReadDouble);
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, height);
         }
-        height = parser.reader.readDouble();
       } else if (paramIndex == 2) {
         center = SuggestionUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
       } else if (paramIndex == 3) {

@@ -24,7 +24,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAcc
 
   @Override
   public BlockFunctionArgument parse(StringReader reader) throws CommandSyntaxException {
-    return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false);
+    return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false, false);
   }
 
   @Override
@@ -33,7 +33,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAcc
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      BlockFunctionArgument.parse(commandRegistryAccess, parser, true);
+      BlockFunctionArgument.parse(commandRegistryAccess, parser, true, false);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

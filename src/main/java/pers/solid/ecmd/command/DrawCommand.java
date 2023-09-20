@@ -1,0 +1,96 @@
+package pers.solid.ecmd.command;
+
+import com.google.common.collect.Iterators;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.block.Block;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import org.apache.commons.lang3.mutable.MutableInt;
+import pers.solid.ecmd.argument.BlockFunctionArgumentType;
+import pers.solid.ecmd.argument.CurveArgumentType;
+import pers.solid.ecmd.argument.KeywordArgs;
+import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.curve.Curve;
+import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.region.SphereRegion;
+import pers.solid.ecmd.util.iterator.IterateUtils;
+
+import java.util.Iterator;
+import java.util.stream.Stream;
+
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
+
+public enum DrawCommand implements CommandRegistrationCallback {
+  INSTANCE;
+  public static final int POST_PROCESS_FLAG = SetBlocksCommand.POST_PROCESS_FLAG;
+  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.keywordArgsBuilder()
+      .addAll(SetBlocksCommand.KEYWORD_ARGS)
+      .addOptionalArg("interval", DoubleArgumentType.doubleArg(0d), 0d)
+      .addOptionalArg("thickness", DoubleArgumentType.doubleArg(0d, 64d), 0d)
+      .build();
+
+  @Override
+  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    dispatcher.register(literal("draw")
+        .then(argument("curve", CurveArgumentType.curve(registryAccess))
+            .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+                .executes(context -> execute(context, false, false, 0, Block.NOTIFY_ALL, 0, 0))
+                .then(argument("kwargs", KEYWORD_ARGS)
+                    .executes(context -> {
+                      final KeywordArgs kwargs = KeywordArgsArgumentType.getKeywordArgs("kwargs", context);
+                      return execute(context, kwargs.getBoolean("immediately"), kwargs.getBoolean("bypass_limit"), kwargs.getDouble("interval"), SetBlocksCommand.getFlags(kwargs), SetBlocksCommand.getModFlags(kwargs), kwargs.getDouble("thickness"));
+                    })))));
+  }
+
+  private static int execute(CommandContext<ServerCommandSource> context, boolean immediately, boolean bypassLimit, double interval, int flags, int modFlags, double thickness) throws CommandSyntaxException {
+    final Curve curve = CurveArgumentType.getCurve(context, "curve");
+    if (interval > 0 && interval < 0.05) interval = 0.05;
+    final double estimatedIterationAmount = curve.length() / (interval == 0 ? 1 : interval) * (thickness == 0 ? 1 : Math.max(1d, MathHelper.square(thickness) * Math.PI));
+    if (!bypassLimit && estimatedIterationAmount > SetBlocksCommand.REGION_SIZE_LIMIT) {
+      throw SetBlocksCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, SetBlocksCommand.REGION_SIZE_LIMIT);
+    }
+    final BlockFunction block = BlockFunctionArgumentType.getBlockFunction(context, "block");
+    final ServerCommandSource source = context.getSource();
+    final ServerWorld world = source.getWorld();
+
+    final Iterator<?> mainIterator;
+    final MutableInt numbersAffected = new MutableInt();
+    Stream<BlockPos> stream = interval == 0 ? curve.streamBlockPos() : curve.streamPoints(interval)
+        .map(BlockPos::ofFloored)
+        .distinct();
+
+    if (thickness > 0) {
+      stream = stream.flatMap(pos -> new SphereRegion(thickness, pos.toCenterPos()).stream()).distinct();
+    }
+
+    mainIterator = stream
+        .peek(blockPos -> {
+          if (block.setBlock(world, blockPos, flags, modFlags))
+            numbersAffected.increment();
+        })
+        .map(blockPos -> null)
+        .iterator();
+    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> source.sendFeedback(Text.translatable("enhancedCommands.commands.setblocks.complete", numbersAffected.getValue()), true)));
+    if (!immediately && estimatedIterationAmount > 16384) {
+      // The region is too large. Send a server task.
+      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.draw.task_name", curve.asString()), IterateUtils.batchAndSkip(iterator, 8192, 7));
+      source.sendFeedback(Text.translatable("enhancedCommands.commands.setblocks.large_region", estimatedIterationAmount).formatted(Formatting.YELLOW), true);
+      return 1;
+    } else {
+      IterateUtils.exhaust(iterator);
+      return numbersAffected.intValue();
+    }
+  }
+}

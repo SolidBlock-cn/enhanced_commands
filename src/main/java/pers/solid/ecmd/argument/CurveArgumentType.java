@@ -8,26 +8,23 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
-import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.curve.Curve;
+import pers.solid.ecmd.curve.CurveArgument;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<RegionArgument<?>> {
-  private static final List<String> EXAMPLES = List.of("cuboid(1 1 1, 2 2 2)", "sphere(3)", "cyl(3, 2)", "outline(cuboid(~~~, ~~~5))");
+public record CurveArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<CurveArgument<?>> {
+  private static final List<String> EXAMPLES = List.of("straight(~~~, ~3~3~3)", "straight(from ^^^ to ^^^5)", "circle(5)");
 
-  public static RegionArgumentType region(CommandRegistryAccess commandRegistryAccess) {
-    return new RegionArgumentType(commandRegistryAccess);
+  public static CurveArgumentType curve(CommandRegistryAccess commandRegistryAccess) {
+    return new CurveArgumentType(commandRegistryAccess);
   }
 
-  /**
-   * @see net.minecraft.command.argument.Vec3ArgumentType#getVec3(CommandContext, String)
-   */
-  public static Region getRegion(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static Curve getCurve(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     try {
-      return context.getArgument(name, RegionArgument.class).toAbsoluteRegion(context.getSource());
+      return context.getArgument(name, CurveArgument.class).toAbsoluteRegion(context.getSource());
     } catch (RuntimeException e) {
       if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
         throw commandSyntaxException;
@@ -38,8 +35,8 @@ public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) im
   }
 
   @Override
-  public RegionArgument<?> parse(StringReader reader) throws CommandSyntaxException {
-    return RegionArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false);
+  public CurveArgument<?> parse(StringReader reader) throws CommandSyntaxException {
+    return CurveArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false);
   }
 
   @Override
@@ -48,7 +45,7 @@ public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) im
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      RegionArgument.parse(commandRegistryAccess, parser, true);
+      CurveArgument.parse(commandRegistryAccess, parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

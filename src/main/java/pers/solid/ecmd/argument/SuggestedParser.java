@@ -6,6 +6,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.text.Text;
@@ -25,42 +26,42 @@ import java.util.function.Function;
 public class SuggestedParser {
 
   public final StringReader reader;
-  public List<SuggestionProvider> suggestions;
+  public List<SuggestionProvider> suggestionProviders;
 
   public SuggestedParser(StringReader reader) {
     this(reader, new ArrayList<>());
   }
 
-  public SuggestedParser(StringReader reader, List<SuggestionProvider> suggestions) {
+  public SuggestedParser(StringReader reader, List<SuggestionProvider> suggestionProviders) {
     this.reader = reader;
-    this.suggestions = suggestions;
+    this.suggestionProviders = suggestionProviders;
   }
 
   public CompletableFuture<Suggestions> buildSuggestions(CommandContext<?> context, SuggestionsBuilder builder) {
-    for (SuggestionProvider suggestion : suggestions) {
-      if (suggestion instanceof final SuggestionProvider.Modifying modifying) {
+    final List<Suggestion> suggestions = new ArrayList<>();
+    for (SuggestionProvider suggestionProvider : suggestionProviders) {
+      if (suggestionProvider instanceof final SuggestionProvider.Modifying modifying) {
         final CompletableFuture<Suggestions> apply = modifying.apply(context, builder);
         if (apply.isDone()) {
           // 考虑到返回了空白建议的情况，这种情况下不阻止继续在后续的迭代中获取建议。
           final Suggestions now = apply.getNow(null);
-          if (now != null && !now.isEmpty()) {
-            return apply;
-          }
+          suggestions.addAll(now.getList());
         } else {
           return apply;
         }
-      } else if (suggestion instanceof final SuggestionProvider.Offset offset) {
+      } else if (suggestionProvider instanceof final SuggestionProvider.Offset offset) {
         builder = offset.apply(context, builder);
       } else {
-        suggestion.accept(context, builder);
+        suggestionProvider.accept(context, builder);
       }
     }
-    return builder.buildFuture();
+    suggestions.addAll(builder.build().getList());
+    return CompletableFuture.completedFuture(Suggestions.create(builder.getInput(), suggestions));
   }
 
   public <T> @NotNull T readAndSuggestValues(Iterable<@Nullable T> iterable, Function<T, String> suggestions, Function<T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     final int cursorBeforeRead = reader.getCursor();
-    this.suggestions.add((context, builder) -> SuggestionUtil.suggestMatchingWithTooltip(iterable, suggestions, tooltip, builder));
+    this.suggestionProviders.add((context, builder) -> SuggestionUtil.suggestMatchingWithTooltip(iterable, suggestions, tooltip, builder));
     final String name = reader.readString();
     final T value = valueGetter.apply(name);
     if (value == null) {

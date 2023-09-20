@@ -47,6 +47,9 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
   }
 
   public static class Serializer<T, F extends ArgumentType<T>, FP extends ArgumentSerializer.ArgumentTypeProperties<F>> implements ArgumentSerializer<VanillaWrappedArgumentType<T, F>, Properties<T, F, FP>> {
+    @SuppressWarnings("rawtypes")
+    public static final Serializer INSTANCE = new Serializer();
+
     @SuppressWarnings("unchecked")
     @Override
     public void writePacket(Properties<T, F, FP> properties, PacketByteBuf buf) {
@@ -55,6 +58,7 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
       forwardSerializer.writePacket(properties.forwardProperties, buf);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Properties<T, F, FP> fromPacket(PacketByteBuf buf) {
       final ArgumentSerializer<F, FP> forwardSerializer = (ArgumentSerializer<F, FP>) Registries.COMMAND_ARGUMENT_TYPE.get(buf.readIdentifier());
@@ -62,6 +66,7 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
       return new Properties<>(forwardProperties);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void writeJson(Properties<T, F, FP> properties, JsonObject json) {
       final ArgumentSerializer<F, FP> forwardSerializer = (ArgumentSerializer<F, FP>) properties.forwardProperties.getSerializer();
@@ -71,6 +76,7 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
       json.add("forward", forward);
     }
 
+    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
     @Override
     public Properties<T, F, FP> getArgumentTypeProperties(VanillaWrappedArgumentType<T, F> argumentType) {
       final ArgumentSerializer<F, FP> forwardSerializer = (ArgumentSerializer<F, FP>) ArgumentTypesAccessor.fabric_getClassMap().get(argumentType.forward.getClass());

@@ -8,11 +8,12 @@ public final class BlockFunctionTypes {
   private BlockFunctionTypes() {
   }
 
-  private static <T extends BlockFunction> BlockFunctionType<T> register(BlockFunctionType<T> value, String name) {
+  private static <T extends BlockFunctionType<?>> T register(T value, String name) {
     return Registry.register(BlockFunctionType.REGISTRY, new Identifier(EnhancedCommands.MOD_ID, name), value);
   }
 
   public static final BlockFunctionType<SimpleBlockFunction> SIMPLE = register(SimpleBlockFunction.Type.SIMPLE_TYPE, "simple");
+  public static final ParenthesesBlockFunctionType PARENTHESES = register(ParenthesesBlockFunctionType.PARENTHESES_TYPE, "parentheses");
   public static final BlockFunctionType<PropertyNamesBlockFunction> PROPERTY_NAMES = register(PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE, "property_names");
   public static final BlockFunctionType<NbtBlockFunction> NBT = register(NbtBlockFunction.Type.NBT_TYPE, "nbt");
   public static final BlockFunctionType<PropertiesNbtCombinationBlockFunction> PROPERTIES_NBT_COMBINATION = register(PropertiesNbtCombinationBlockFunction.Type.PROPERTIES_NBT_COMBINATION_TYPE, "property_name_combination");

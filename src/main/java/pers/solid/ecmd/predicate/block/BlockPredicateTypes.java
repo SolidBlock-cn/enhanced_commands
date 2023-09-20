@@ -7,6 +7,7 @@ import pers.solid.ecmd.EnhancedCommands;
 
 public final class BlockPredicateTypes {
   public static final BlockPredicateType<SimpleBlockPredicate> SIMPLE = register(SimpleBlockPredicate.Type.SIMPLE_TYPE, "simple");
+  public static final ParenthesesBlockPredicateType PARENTHESES = register(ParenthesesBlockPredicateType.PARENTHESES_TYPE, "parentheses");
   public static final BlockPredicateType<NegatingBlockPredicate> NEGATING = register(NegatingBlockPredicate.Type.NEGATING_TYPE, "negating");
   public static final BlockPredicateType<HorizontalOffsetBlockPredicate> HORIZONTAL_OFFSET = register(HorizontalOffsetBlockPredicate.Type.HORIZONTAL_OFFSET_TYPE, "horizontal_offset");
   public static final BlockPredicateType<PropertyNamesBlockPredicate> PROPERTY_NAMES = register(PropertyNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE, "property_names");
@@ -26,7 +27,7 @@ public final class BlockPredicateTypes {
   private BlockPredicateTypes() {
   }
 
-  private static <T extends BlockPredicate> BlockPredicateType<T> register(BlockPredicateType<T> value, String name) {
+  private static <T extends BlockPredicateType<?>> T register(T value, String name) {
     return Registry.register(BlockPredicateType.REGISTRY, new Identifier(EnhancedCommands.MOD_ID, name), value);
   }
 

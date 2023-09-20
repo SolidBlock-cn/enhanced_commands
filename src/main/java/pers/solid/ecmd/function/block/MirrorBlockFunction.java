@@ -83,7 +83,7 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
         @Override
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
           final int cursor1 = parser.reader.getCursor();
-          parser.suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("forward", "side"), suggestionsBuilder));
+          parser.suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("forward", "side"), suggestionsBuilder));
           final String s = parser.reader.readString();
           if ("forward".equals(s)) {
             // 沿玩家视觉前方的轴镜像

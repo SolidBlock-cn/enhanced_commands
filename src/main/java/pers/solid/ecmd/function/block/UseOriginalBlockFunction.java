@@ -43,10 +43,10 @@ public enum UseOriginalBlockFunction implements BlockFunction {
 
     @Override
     public @Nullable UseOriginalBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
-      parser.suggestions.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.use_original"), suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.use_original"), suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '~') {
         parser.reader.skip();
-        parser.suggestions.clear();
+        parser.suggestionProviders.clear();
         return USE_ORIGINAL;
       }
       return null;

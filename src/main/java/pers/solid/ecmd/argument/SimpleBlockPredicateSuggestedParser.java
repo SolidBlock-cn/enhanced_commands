@@ -31,7 +31,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
 
   public SimpleBlockPredicateSuggestedParser(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
     this(commandRegistryAccess, parser.reader);
-    this.suggestions = parser.suggestions;
+    this.suggestionProviders = parser.suggestionProviders;
   }
 
   @NotNull
@@ -66,17 +66,17 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
 
   @Override
   protected <T extends Comparable<T>> void parsePropertyNameValue(Property<T> property, Comparator comparator) throws CommandSyntaxException {
-    suggestions.clear();
+    suggestionProviders.clear();
     if (comparator == Comparator.EQ || comparator == Comparator.NE) {
       addSpecialPropertyValueSuggestions();
     }
-    suggestions.add((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder));
     if (reader.canRead()) {
       if (comparator == Comparator.EQ || comparator == Comparator.NE) {
         if (reader.peek() == '*') {
           propertyPredicates.add(new ExistencePropertyPredicate<>(property, comparator == Comparator.EQ));
           reader.skip();
-          suggestions.clear();
+          suggestionProviders.clear();
           return;
         }
       }
@@ -85,7 +85,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
       final Optional<T> parse = property.parse(valueName);
       if (parse.isPresent()) {
         propertyPredicates.add(new ValuePropertyPredicate<>(property, comparator, parse.get()));
-        suggestions.clear();
+        suggestionProviders.clear();
       } else {
         this.reader.setCursor(cursorBeforeParseValue);
         throw BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(this.reader, blockId.toString(), property.getName(), valueName);
@@ -94,7 +94,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
   }
 
   private void addSpecialPropertyValueSuggestions() {
-    suggestions.add((context, suggestionsBuilder) -> {
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         if (suggestionsBuilder.getInput().endsWith("!=")) {
           suggestionsBuilder.suggest("*", MATCH_NONE_VALUE);
@@ -110,7 +110,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
    */
   @Override
   protected int parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException {
-    suggestions.clear();
+    suggestionProviders.clear();
     if (comparator == Comparator.EQ || comparator == Comparator.NE) {
       addSpecialPropertyValueSuggestions();
     }
@@ -119,7 +119,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
         if (reader.peek() == '*') {
           propertyNamePredicates.add(new NameExistencePropertyPredicate(propertyName, comparator == Comparator.EQ));
           reader.skip();
-          suggestions.clear();
+          suggestionProviders.clear();
           return -1;
         }
       }
@@ -129,7 +129,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     addTagPropertiesValueSuggestions(propertyName);
     final boolean expectEndOfValue = tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream().filter(property -> property.getName().equals(propertyName))).flatMap(SimpleBlockPredicateSuggestedParser::getPropertyValueNameStream).noneMatch(value -> value.startsWith(valueName) && !value.equals(valueName));
     if (expectEndOfValue && !valueName.isEmpty()) {
-      suggestions.clear();
+      suggestionProviders.clear();
     }
     addPropertiesFinishedSuggestions();
     propertyNamePredicates.add(new ValueNamePropertyPredicate(propertyName, comparator, valueName));
@@ -139,6 +139,6 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
 
   @Override
   protected void addComparatorTypeSuggestions() {
-    suggestions.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).map(Comparator::asString), suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).map(Comparator::asString), suggestionsBuilder));
   }
 }

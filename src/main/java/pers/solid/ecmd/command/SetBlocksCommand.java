@@ -44,7 +44,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
       .addOptionalArg("notify_neighbors", BoolArgumentType.bool(), false)
       .addOptionalArg("force_state", BoolArgumentType.bool(), false)
       .addOptionalArg("post_process", BoolArgumentType.bool(), false)
-      .builder();
+      .build();
   public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.commands.setblocks.region_too_large", a, b));
   public static final int REGION_SIZE_LIMIT = 16777215;
 
@@ -140,7 +140,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
     }
   }
 
-  private static int getFlags(KeywordArgs args) {
+  public static int getFlags(KeywordArgs args) {
     int value = 0;
     if (args.getBoolean("skip_light_update")) {
       value |= Block.SKIP_LIGHTING_UPDATES;
@@ -157,7 +157,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
     return value;
   }
 
-  private static int getModFlags(KeywordArgs args) {
+  public static int getModFlags(KeywordArgs args) {
     int value = 0;
     if (args.getBoolean("post_process")) {
       value |= POST_PROCESS_FLAG;

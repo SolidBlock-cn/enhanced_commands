@@ -59,7 +59,7 @@ public class KeywordArgsArgumentSerializer implements ArgumentSerializer<Keyword
 
   @Override
   public Properties getArgumentTypeProperties(KeywordArgsArgumentType argumentType) {
-    return new Properties(argumentType.arguments, argumentType.defaultValues);
+    return new Properties(argumentType.arguments(), argumentType.defaultValues());
   }
 
   public record Properties(Map<@NotNull String, ArgumentType<?>> arguments, Map<@NotNull String, Object> defaultValues) implements ArgumentTypeProperties<KeywordArgsArgumentType> {
