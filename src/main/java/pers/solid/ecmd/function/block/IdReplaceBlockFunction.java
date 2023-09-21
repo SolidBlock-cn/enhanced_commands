@@ -53,7 +53,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     final Block block = blockState.getBlock();
     final String old = Registries.BLOCK.getId(block).toString();
     final String replaced = pattern.matcher(old).replaceAll(replacement);
@@ -87,7 +87,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
     }
 
     @Override
-    public @Nullable BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       return new FunctionLikeParser<IdReplaceBlockFunction>() {
         private Pattern pattern;
         private String replacement;

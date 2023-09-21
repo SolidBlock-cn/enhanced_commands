@@ -34,7 +34,7 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     for (BlockFunction blockFunction : blockFunctions) {
       blockState = blockFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
@@ -62,7 +62,7 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
     }
 
     @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }

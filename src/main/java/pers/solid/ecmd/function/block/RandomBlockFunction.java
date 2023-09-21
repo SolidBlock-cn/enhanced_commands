@@ -40,7 +40,7 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     final Block[] blocks = this.blocks.get();
     if (blocks.length == 0) {
       return null;
@@ -84,7 +84,7 @@ public final class RandomBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable RandomBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
+    public @Nullable RandomBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
       if (parser.reader.getRemaining().isEmpty()) {
         parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhancedCommands.argument.block_function.random")));
       }

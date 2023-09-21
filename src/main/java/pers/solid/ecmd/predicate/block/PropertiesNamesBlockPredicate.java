@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 /**
  * @see TagBlockPredicate#propertyNamePredicates
  */
-public record PropertyNamesBlockPredicate(@NotNull Collection<PropertyNamePredicate> propertyNamePredicates) implements BlockPredicate {
+public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePredicate> propertyNamePredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     return "[" + propertyNamePredicates.stream().map(StringRepresentablePredicate::asString).collect(Collectors.joining(",")) + "]";
@@ -71,25 +71,25 @@ public record PropertyNamesBlockPredicate(@NotNull Collection<PropertyNamePredic
     nbtList.addAll(Collections2.transform(propertyNamePredicates, NbtConvertible::createNbt));
   }
 
-  public enum Type implements BlockPredicateType<PropertyNamesBlockPredicate> {
+  public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate> {
     PROPERTY_NAMES_TYPE;
 
     @Override
-    public @NotNull PropertyNamesBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull PropertiesNamesBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
       final List<PropertyNamePredicate> predicates = nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE)
           .stream()
           .map(nbtElement -> PropertyNamePredicate.fromNbt((NbtCompound) nbtElement))
           .toList();
-      return new PropertyNamesBlockPredicate(predicates);
+      return new PropertiesNamesBlockPredicate(predicates);
     }
 
     @Override
-    public @Nullable PropertyNamesBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable PropertiesNamesBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
         final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser);
         suggestedParser.parsePropertyNames();
-        return new PropertyNamesBlockPredicate(suggestedParser.propertyNamePredicates);
+        return new PropertiesNamesBlockPredicate(suggestedParser.propertyNamePredicates);
       } else {
         return null;
       }

@@ -23,7 +23,7 @@ public class ModArgumentTypes {
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
     register("curve", CurveArgumentType.class, ConstantArgumentSerializer.of(CurveArgumentType::new));
-    register("directions", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::create));
+    register("direction", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::create));
     register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
     register("nbt_function", NbtFunctionArgumentType.class, NbtFunctionArgumentType.Serializer.INSTANCE);
     register("keyword_args", KeywordArgsArgumentType.class, new KeywordArgsArgumentSerializer());

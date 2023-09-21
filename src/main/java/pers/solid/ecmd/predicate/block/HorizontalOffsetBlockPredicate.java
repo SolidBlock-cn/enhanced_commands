@@ -75,7 +75,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> {
         SuggestionUtil.suggestString("<", BENEATH_BLOCK, suggestionsBuilder);
         SuggestionUtil.suggestString(">", ABOVE_BLOCK, suggestionsBuilder);
@@ -99,7 +99,8 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
         }
       }
       if (!prefixed) return null;
-      final BlockPredicateArgument parse = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+      if (allowsSparse) reader.skipWhitespace();
+      final BlockPredicateArgument parse = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
       if (offset != 0) {
         int finalOffset = offset;
         return source -> new HorizontalOffsetBlockPredicate(finalOffset, parse.apply(source));

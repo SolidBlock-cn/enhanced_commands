@@ -8,6 +8,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,8 +16,6 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.TextUtil;
-
-import java.util.Random;
 
 /**
  * <p>The predicate that passes only a probability test is passed.</p>
@@ -27,7 +26,7 @@ import java.util.Random;
  *   </ul>
  */
 public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate) implements BlockPredicate {
-  private static final Random RANDOM = new Random();
+  private static final Random RANDOM = Random.create();
 
   @Override
   public @NotNull String asString() {
@@ -131,7 +130,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }

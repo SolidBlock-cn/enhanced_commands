@@ -39,16 +39,16 @@ public interface BlockPredicateArgument extends Function<ServerCommandSource, Bl
   }
 
   static @NotNull BlockPredicateArgument parseIntersect(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return SuggestionUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly), predicates -> source -> new IntersectBlockPredicate(ImmutableList.copyOf(Lists.transform(predicates, input -> input.apply(source)))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
+    return SuggestionUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new IntersectBlockPredicate(ImmutableList.copyOf(Lists.transform(predicates, input -> input.apply(source)))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
   }
 
-  static @NotNull BlockPredicateArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    final BlockPredicateArgument parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly);
+  static @NotNull BlockPredicateArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    final BlockPredicateArgument parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
     if (parseUnit instanceof NbtPredicate) {
       return parseUnit;
     }
     List<PropertyNamePredicate> propertyNamePredicates;
-    if (!(parseUnit instanceof PropertyNamesBlockPredicate) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
+    if (!(parseUnit instanceof PropertiesNamesBlockPredicate) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
       // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
       // 尝试读取属性
       parser.suggestionProviders.add((context, suggestionsBuilder) -> {
@@ -73,19 +73,19 @@ public interface BlockPredicateArgument extends Function<ServerCommandSource, Bl
       nbtPredicate = new NbtPredicateSuggestedParser(parser.reader, parser.suggestionProviders).parseCompound(false, false);
     } else nbtPredicate = null;
     if (propertyNamePredicates != null || nbtPredicate != null) {
-      return source -> new PropertiesNbtCombinationBlockPredicate(parseUnit.apply(source), propertyNamePredicates == null ? null : new PropertyNamesBlockPredicate(propertyNamePredicates), nbtPredicate == null ? null : new NbtBlockPredicate(nbtPredicate));
+      return source -> new PropertiesNbtCombinationBlockPredicate(parseUnit.apply(source), propertyNamePredicates == null ? null : new PropertiesNamesBlockPredicate(propertyNamePredicates), nbtPredicate == null ? null : new NbtBlockPredicate(nbtPredicate));
     }
     return parseUnit;
   }
 
   @NotNull
-  static BlockPredicateArgument parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static BlockPredicateArgument parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
     final int cursorOnStart = parser.reader.getCursor();
     final Stream<BlockPredicateType<?>> stream = commandRegistryAccess.createWrapper(BlockPredicateType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
     Iterable<BlockPredicateType<?>> iterable = Iterables.concat(stream.filter(type -> type != BlockPredicateTypes.SIMPLE)::iterator, Collections.singleton(BlockPredicateTypes.SIMPLE));
     for (BlockPredicateType<?> type : iterable) {
       parser.reader.setCursor(cursorOnStart);
-      final BlockPredicateArgument parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
+      final BlockPredicateArgument parse = type.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
       if (parse != null) {
         // keep the current position of the cursor
         return parse;

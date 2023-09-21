@@ -64,7 +64,7 @@ public interface BlockFunction extends StringRepresentableFunction, NbtConvertib
    * @return 修改后的方块状态。
    */
   @Contract(mutates = "param6")
-  BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData);
+  @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData);
 
   void writeNbt(@NotNull NbtCompound nbtCompound);
 

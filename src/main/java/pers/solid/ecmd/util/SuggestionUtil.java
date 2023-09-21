@@ -12,6 +12,8 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.Nullable;
@@ -188,5 +190,52 @@ public final class SuggestionUtil {
       reader.setCursor(cursorBeforeUnit);
       throw ModCommandExceptionTypes.ANGLE_UNIT_UNKNOWN.createWithContext(reader, unit);
     }
+  }
+
+  /**
+   * 解析双精度浮点数的向量。这不是代表一个坐标，因此也不支持绝对坐标和局部坐标。
+   */
+  public static Vec3d parseVec3d(SuggestedParser parser) throws CommandSyntaxException {
+    final StringReader reader = parser.reader;
+    final double x = reader.readDouble();
+    StringUtil.expectAndSkipWhitespace(reader);
+    parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestDirections(suggestionsBuilder));
+    final int cursorBeforeDirection = reader.getCursor();
+    final String unquotedString = reader.readUnquotedString();
+    final Direction byName = Direction.byName(unquotedString);
+    if (byName != null) {
+      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
+      return Vec3d.of(byName.getVector()).multiply(x);
+    } else {
+      reader.setCursor(cursorBeforeDirection);
+    }
+    final double y = reader.readDouble();
+    parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
+    StringUtil.expectAndSkipWhitespace(reader);
+    final double z = reader.readDouble();
+    return new Vec3d(x, y, z);
+  }
+
+  /**
+   * 解析整数的向量。这不是代表一个坐标，因此也不支持绝对坐标和局部坐标。
+   */
+  public static Vec3i parseVec3i(SuggestedParser parser) throws CommandSyntaxException {
+    final StringReader reader = parser.reader;
+    final int x = reader.readInt();
+    StringUtil.expectAndSkipWhitespace(reader);
+    parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestDirections(suggestionsBuilder));
+    final int cursorBeforeDirection = reader.getCursor();
+    final String unquotedString = parser.reader.readUnquotedString();
+    final Direction byName = Direction.byName(unquotedString);
+    if (byName != null) {
+      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
+      return byName.getVector().multiply(x);
+    } else {
+      parser.reader.setCursor(cursorBeforeDirection);
+    }
+    final int y = reader.readInt();
+    StringUtil.expectAndSkipWhitespace(reader);
+    final int z = reader.readInt();
+    return new Vec3i(x, y, z);
   }
 }

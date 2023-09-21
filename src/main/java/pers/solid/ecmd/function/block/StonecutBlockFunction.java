@@ -13,6 +13,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.state.property.Properties;
+import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -32,7 +33,7 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     if (blockFunction != null) {
       blockState = blockFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
@@ -46,7 +47,21 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
     }
     final ItemStack output = allMatches.get(world.getRandom().nextInt(allMatches.size())).getOutput(world.getRegistryManager());
     if (output.getItem() instanceof BlockItem blockItem) {
-      return StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), world.random).withIfExists(Properties.WATERLOGGED, false);
+      BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), world.random);
+      for (Property<?> property : result.getProperties()) {
+        if (blockState.contains(property)) {
+          result = StateUtil.withPropertyOfValueFromAnother(result, blockState, property);
+        } else {
+          result = StateUtil.withPropertyOfRandomValue(result, property, world.getRandom());
+        }
+      }
+      if (!blockState.contains(Properties.WATERLOGGED)) {
+        result = result.withIfExists(Properties.WATERLOGGED, false);
+      }
+      if (!blockState.contains(Properties.POWERED)) {
+        result = result.withIfExists(Properties.POWERED, false);
+      }
+      return result;
     } else {
       return blockState;
     }
@@ -73,7 +88,7 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
     }
 
     @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       return new FunctionLikeParser<BlockFunctionArgument>() {
         private BlockFunctionArgument blockFunction = null;
 
@@ -89,7 +104,7 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
 
         @Override
         public BlockFunctionArgument getParseResult(SuggestedParser parser) {
-          return source -> new StonecutBlockFunction(blockFunction.apply(source));
+          return source -> new StonecutBlockFunction(blockFunction == null ? null : blockFunction.apply(source));
         }
 
         @Override

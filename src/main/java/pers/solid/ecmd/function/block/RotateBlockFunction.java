@@ -22,8 +22,8 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    return blockState.rotate(rotation.get());
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+    return blockState.rotate(rotation.apply(world.getRandom()));
   }
 
   @Override
@@ -45,7 +45,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
     }
 
     @Override
-    public @Nullable RotateBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable RotateBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       return new FunctionLikeParser<RotateBlockFunction>() {
         private EnumOrRandom<BlockRotation> rotation;
 

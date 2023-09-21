@@ -53,10 +53,10 @@ public final class TagBlockFunction implements BlockFunction {
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     final Block[] blocks = this.blocks.get();
     if (blocks.length == 0) {
-      return null;
+      return blockState;
     }
     BlockState state = blocks[world.getRandom().nextInt(blocks.length)].getDefaultState();
     for (PropertyNameFunction propertyNameFunction : propertyNameFunctions) {
@@ -122,7 +122,7 @@ public final class TagBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable TagBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable TagBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       SimpleBlockFunctionSuggestedParser parser = new SimpleBlockFunctionSuggestedParser(commandRegistryAccess, parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {

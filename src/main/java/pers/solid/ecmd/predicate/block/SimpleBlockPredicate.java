@@ -104,7 +104,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     }
 
     @Override
-    public @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser0);
       parser.parseBlockId();
       parser.parseProperties();

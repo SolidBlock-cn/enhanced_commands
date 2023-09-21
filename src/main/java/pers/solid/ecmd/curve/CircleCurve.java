@@ -7,13 +7,16 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
+import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.Range;
+import org.apache.commons.lang3.function.FailableBiFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4d;
@@ -23,21 +26,26 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.*;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 
 /**
- * 完整的圆或者仅一个圆弧。语法规则：
+ * <p>完整的圆或者仅一个圆弧。语法规则：
  * <table>
  *   <tr><th>代码<th>描述
- *   <tr><td>{@code circle(<radius>, <center>[ ranging <range>])}
+ *   <tr><td>{@code circle(<radius> [at <center>] [ranging <range>])}
  *    <td>绕 y 轴正方向单位向量，从 x 轴正方向单位向量旋转
- *   <tr><td>{@code circle(<radius>, <center> around <axis>)}
+ *   <tr><td>{@code circle(<radius> [at <center>] [around <axis>])}
  *    <td>绕指定坐标轴正方向单位向量，从另一坐标轴正方向单位向量旋转完整一周
- *   <tr><td>{@code circle(from [positive|negative] <radiusAxis>, <center> around [positive|negative] <axis> [ranging <range>])}
+ *   <tr><td>{@code circle(from <radiusVector> [at <center>] [around <axisVector>] [ranging <range>])}
  *    <td>绕指定坐标轴方向的单位向量，从另一坐标轴单位向量旋转。
- *   <tr><td>{@code circle(from <vec>, <center> around <vec> [ranging <range>])}
+ *   <tr><td>{@code circle(from <radiusVector> [at <center>] [around <axisVector>] [ranging <range>])}
  *    <td>绕指定向量，从另一向量开始旋转。
  * </table>
+ *
+ * <p>{@code around <axisVector>} 等价于 {@code rotated <x> <y>} 或 {@code facing <targetPos>}。所有轴向量都会被单位化。
+ * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code <length> <direction>}（参照 {@link SuggestionUtil#parseVec3d(SuggestedParser)}。
+ * <p>当半径指定为标量时，其方向为轴向量与 y 轴正方向的向量积的方向，若轴向量为 y 轴正方向或负方向，则其方向为 x 轴正方向或负方向。
  *
  * @param radius 圆的半径，是一个相对向量。
  * @param center 圆的中心。
@@ -181,9 +189,8 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
   private static class Parser implements FunctionLikeParser<CurveArgument<CircleCurve>> {
     private @Nullable Either<Double, Vec3d> radius;
     private @Nullable PosArgument center;
-    private @Nullable Vec3d around;
+    private @Nullable FailableBiFunction<ServerCommandSource, Vec3d, Vec3d, CommandSyntaxException> around;
     private @Nullable Range<Double> range;
-    private static final EnhancedPosArgumentType VECTOR_POS_ARGUMENT = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.DOUBLE_ONLY, true);
 
     @Override
     public @NotNull String functionName() {
@@ -197,21 +204,24 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
 
     @Override
     public CurveArgument<CircleCurve> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
-      final Vec3d around = this.around == null ? new Vec3d(0, 1, 0) : this.around.normalize();
       if (this.radius == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, "radius");
       }
-      final Vec3d radius = this.radius.map(d -> {
-        Vec3d crossProduct = around.crossProduct(new Vec3d(0, 1, 0));
-        if (crossProduct.equals(Vec3d.ZERO)) {
-          crossProduct = around.y >= 0 ? new Vec3d(1, 0, 0) : new Vec3d(-1, 0, 0);
-        } else {
-          crossProduct = crossProduct.multiply(1 / crossProduct.length());
-        }
-        return crossProduct.multiply(d);
-      }, Function.identity());
       final PosArgument center = this.center == null ? EnhancedPosArgumentType.HERE_INT : this.center;
-      return source -> new CircleCurve(radius, center.toAbsolutePos(source), around, range == null ? FULL_TURN_RANGE : range);
+      return source -> {
+        final Vec3d absoluteCenter = center.toAbsolutePos(source);
+        final Vec3d around = this.around == null ? new Vec3d(0, 1, 0) : this.around.apply(source, absoluteCenter).normalize();
+        final Vec3d radius = this.radius.map(d -> {
+          Vec3d crossProduct = around.crossProduct(new Vec3d(0, 1, 0));
+          if (crossProduct.lengthSquared() == 0) {
+            crossProduct = around.y >= 0 ? new Vec3d(1, 0, 0) : new Vec3d(-1, 0, 0);
+          } else {
+            crossProduct = crossProduct.multiply(1 / crossProduct.length());
+          }
+          return crossProduct.multiply(d);
+        }, Function.identity());
+        return new CircleCurve(radius, absoluteCenter, around, range == null ? FULL_TURN_RANGE : range);
+      };
     }
 
     @Override
@@ -221,7 +231,9 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
         final int cursorBeforeWhite = parser.reader.getCursor();
         parser.reader.skipWhitespace();
         if (parser.reader.getCursor() > cursorBeforeWhite) {
-          parseAdditionalParameters(parser, suggestionsOnly);
+          if (parseAdditionalParameters(parser, suggestionsOnly)) {
+            break;
+          }
         } else {
           break;
         }
@@ -237,9 +249,9 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
       final String unquotedString = reader.readUnquotedString();
       parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("from", suggestionsBuilder));
       if ("from".equals(unquotedString)) {
+        parser.suggestionProviders.clear();
         StringUtil.expectAndSkipWhitespace(reader);
-        // TODO: 2023年9月20日 to accept axis names
-        radius = Either.right(parseVector(parser, suggestionsOnly));
+        radius = Either.right(SuggestionUtil.parseVec3d(parser));
       } else {
         reader.setCursor(cursorBeforeKeyword);
         if (!CommandSource.shouldSuggest(reader.getRemaining(), "from")) parser.suggestionProviders.clear();
@@ -248,16 +260,18 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
       }
     }
 
-    private void parseAdditionalParameters(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    private boolean parseAdditionalParameters(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       parser.suggestionProviders.clear();
       parser.suggestionProviders.add((context, suggestionsBuilder) -> {
         if (center == null) SuggestionUtil.suggestString("at", suggestionsBuilder);
-        if (around == null) SuggestionUtil.suggestString("around", suggestionsBuilder);
+        if (around == null) CommandSource.suggestMatching(List.of("around", "facing", "rotated"), suggestionsBuilder);
         if (range == null) SuggestionUtil.suggestString("ranging", suggestionsBuilder);
       });
       final int cursorBeforeKeyword = parser.reader.getCursor();
       final String unquotedString = parser.reader.readUnquotedString();
-      if ("at".equals(unquotedString)) {
+      if (unquotedString.isEmpty()) {
+        return true;
+      } else if ("at".equals(unquotedString)) {
         if (center != null) {
           parser.reader.setCursor(cursorBeforeKeyword);
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
@@ -265,15 +279,33 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
         parser.suggestionProviders.clear();
         StringUtil.expectAndSkipWhitespace(parser.reader);
         center = SuggestionUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
-      } else if ("around".equals(unquotedString)) {
+      } else if ("around".equals(unquotedString) || "rotated".equals(unquotedString) || "facing".equals(unquotedString)) {
         if (around != null) {
           parser.reader.setCursor(cursorBeforeKeyword);
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
         }
         parser.suggestionProviders.clear();
         StringUtil.expectAndSkipWhitespace(parser.reader);
-        // TODO: 2023年9月20日 to accept direction names
-        around = parseVector(parser, suggestionsOnly);
+        switch (unquotedString) {
+          case "around" -> {
+            final Vec3d vec3d = SuggestionUtil.parseVec3d(parser);
+            around = (source, ignored) -> vec3d;
+          }
+          case "rotated" -> {
+            final PosArgument posArgument = SuggestionUtil.suggestParserFromType(new RotationArgumentType(), parser, suggestionsOnly);
+            around = (source, ignored) -> {
+              final Vec2f rotation = posArgument.toAbsoluteRotation(source);
+              return new Vec3d(0, 0, 1).rotateX(-MathHelper.RADIANS_PER_DEGREE * rotation.x).rotateY(-MathHelper.RADIANS_PER_DEGREE * rotation.y);
+            };
+          }
+          case "facing" -> {
+            final PosArgument posArgument = SuggestionUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
+            around = (source, center) -> {
+              final Vec3d facingTarget = posArgument.toAbsolutePos(source);
+              return facingTarget.subtract(center).normalize();
+            };
+          }
+        }
       } else if ("ranging".equals(unquotedString)) {
         if (range != null) {
           parser.reader.setCursor(cursorBeforeKeyword);
@@ -286,11 +318,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
         parser.reader.setCursor(cursorBeforeKeyword);
         throw ModCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(parser.reader, unquotedString);
       }
-    }
-
-    private Vec3d parseVector(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      final PosArgument posArgument = SuggestionUtil.suggestParserFromType(VECTOR_POS_ARGUMENT, parser, suggestionsOnly);
-      return posArgument.toAbsolutePos(new ServerCommandSource(null, Vec3d.ZERO, Vec2f.ZERO, null, 0, null, null, null, null));
+      return false;
     }
 
     private Range<Double> parseAngleRange(SuggestedParser parser) throws CommandSyntaxException {

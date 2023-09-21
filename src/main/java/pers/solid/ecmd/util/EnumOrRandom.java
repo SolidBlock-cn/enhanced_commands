@@ -13,9 +13,10 @@ import pers.solid.ecmd.argument.SuggestedParser;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> extends StringIdentifiable, Supplier<E> {
+public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> extends StringIdentifiable, Supplier<E>, Function<Random, E> {
   Random RANDOM = Random.create();
   DynamicCommandExceptionType INVALID_ENUM_EXCEPTION = new DynamicCommandExceptionType(
       value -> Text.translatable("argument.enum.invalid", value)
@@ -67,6 +68,11 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
     public String asString() {
       return value.asString();
     }
+
+    @Override
+    public E apply(Random random) {
+      return value;
+    }
   }
 
   record RandomValue<E extends Enum<E> & StringIdentifiable>(E[] values, String name) implements EnumOrRandom<E> {
@@ -78,6 +84,11 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
     @Override
     public String asString() {
       return name;
+    }
+
+    @Override
+    public E apply(Random random) {
+      return values[random.nextInt(values.length)];
     }
   }
 }

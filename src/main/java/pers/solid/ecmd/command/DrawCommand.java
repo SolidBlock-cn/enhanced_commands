@@ -58,6 +58,9 @@ public enum DrawCommand implements CommandRegistrationCallback {
     final Curve curve = CurveArgumentType.getCurve(context, "curve");
     if (interval > 0 && interval < 0.05) interval = 0.05;
     final double estimatedIterationAmount = curve.length() / (interval == 0 ? 1 : interval) * (thickness == 0 ? 1 : Math.max(1d, MathHelper.square(thickness) * Math.PI));
+    if (!Double.isFinite(estimatedIterationAmount)) {
+      throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().create();
+    }
     if (!bypassLimit && estimatedIterationAmount > SetBlocksCommand.REGION_SIZE_LIMIT) {
       throw SetBlocksCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, SetBlocksCommand.REGION_SIZE_LIMIT);
     }
@@ -85,7 +88,7 @@ public enum DrawCommand implements CommandRegistrationCallback {
     final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> source.sendFeedback(Text.translatable("enhancedCommands.commands.setblocks.complete", numbersAffected.getValue()), true)));
     if (!immediately && estimatedIterationAmount > 16384) {
       // The region is too large. Send a server task.
-      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.draw.task_name", curve.asString()), IterateUtils.batchAndSkip(iterator, 8192, 7));
+      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.draw.task_name", curve.asString()), IterateUtils.batchAndSkip(iterator, 16384, 7));
       source.sendFeedback(Text.translatable("enhancedCommands.commands.setblocks.large_region", estimatedIterationAmount).formatted(Formatting.YELLOW), true);
       return 1;
     } else {

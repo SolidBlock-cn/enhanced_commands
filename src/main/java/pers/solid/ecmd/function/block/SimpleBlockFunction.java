@@ -37,7 +37,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     BlockState stateToPlace = block.getDefaultState();
     for (PropertyFunction<?> propertyFunction : propertyFunctions) {
       stateToPlace = propertyFunction.getModifiedState(stateToPlace, origState);
@@ -78,7 +78,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
     }
 
     @Override
-    public @NotNull SimpleBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @NotNull SimpleBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       SimpleBlockFunctionSuggestedParser parser = new SimpleBlockFunctionSuggestedParser(commandRegistryAccess, parser0);
       parser.parseBlockId();
       parser.parseProperties();

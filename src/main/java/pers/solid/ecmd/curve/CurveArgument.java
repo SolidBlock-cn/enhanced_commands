@@ -26,5 +26,5 @@ public interface CurveArgument<T extends Curve> {
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
   }
 
-  T toAbsoluteRegion(ServerCommandSource source);
+  T toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException;
 }

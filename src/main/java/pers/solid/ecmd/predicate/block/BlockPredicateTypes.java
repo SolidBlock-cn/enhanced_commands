@@ -10,7 +10,7 @@ public final class BlockPredicateTypes {
   public static final ParenthesesBlockPredicateType PARENTHESES = register(ParenthesesBlockPredicateType.PARENTHESES_TYPE, "parentheses");
   public static final BlockPredicateType<NegatingBlockPredicate> NEGATING = register(NegatingBlockPredicate.Type.NEGATING_TYPE, "negating");
   public static final BlockPredicateType<HorizontalOffsetBlockPredicate> HORIZONTAL_OFFSET = register(HorizontalOffsetBlockPredicate.Type.HORIZONTAL_OFFSET_TYPE, "horizontal_offset");
-  public static final BlockPredicateType<PropertyNamesBlockPredicate> PROPERTY_NAMES = register(PropertyNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE, "property_names");
+  public static final BlockPredicateType<PropertiesNamesBlockPredicate> PROPERTY_NAMES = register(PropertiesNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE, "property_names");
   public static final BlockPredicateType<NbtBlockPredicate> NBT = register(NbtBlockPredicate.Type.NBT_TYPE, "nbt");
   public static final BlockPredicateType<PropertiesNbtCombinationBlockPredicate> PROPERTIES_NBT_COMBINATION = register(PropertiesNbtCombinationBlockPredicate.Type.PROPERTIES_NBT_COMBINATION_TYPE, "properties_nbt_combination");
   public static final BlockPredicateType<ConstantBlockPredicate> CONSTANT = register(ConstantBlockPredicate.Type.CONSTANT_TYPE, "constant");

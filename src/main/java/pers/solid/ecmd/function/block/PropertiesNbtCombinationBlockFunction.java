@@ -44,7 +44,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     blockState = firstBlockFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     if (propertyNamesFunction != null) {
       blockState = propertyNamesFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
@@ -79,7 +79,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
     }
 
     @Override
-    public @Nullable PropertiesNbtCombinationBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
+    public @Nullable PropertiesNbtCombinationBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
       return null;
     }
   }

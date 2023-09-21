@@ -26,7 +26,7 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     BlockState state = blockFunction == null ? blockState : blockFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     if (state.contains(Properties.WATERLOGGED)) {
       state = state.with(Properties.WATERLOGGED, false);
@@ -62,7 +62,7 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
     }
 
     @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }

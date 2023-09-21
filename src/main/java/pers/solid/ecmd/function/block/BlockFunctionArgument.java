@@ -36,11 +36,11 @@ public interface BlockFunctionArgument extends Function<ServerCommandSource, Blo
   }
 
   static @NotNull BlockFunctionArgument parseOverlay(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return SuggestionUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly), functions -> source -> new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(functions, function -> function.apply(source)))), "*", OVERLAY_TOOLTIP, parser, allowsSparse);
+    return SuggestionUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(functions, function -> function.apply(source)))), "*", OVERLAY_TOOLTIP, parser, allowsSparse);
   }
 
-  static @NotNull BlockFunctionArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    final BlockFunctionArgument parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly);
+  static @NotNull BlockFunctionArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    final BlockFunctionArgument parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
     if (parseUnit instanceof NbtBlockFunction) {
       return parseUnit;
     }
@@ -76,7 +76,7 @@ public interface BlockFunctionArgument extends Function<ServerCommandSource, Blo
   }
 
   @NotNull
-  static BlockFunctionArgument parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static BlockFunctionArgument parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
     final int cursorOnStart = parser.reader.getCursor();
 
     final Stream<BlockFunctionType<?>> stream = commandRegistryAccess.createWrapper(BlockFunctionType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
@@ -84,7 +84,7 @@ public interface BlockFunctionArgument extends Function<ServerCommandSource, Blo
     Iterable<BlockFunctionType<?>> iterable = Iterables.concat(stream.filter(type -> type != BlockFunctionTypes.SIMPLE)::iterator, Collections.singleton(BlockFunctionTypes.SIMPLE));
     for (BlockFunctionType<?> type : iterable) {
       parser.reader.setCursor(cursorOnStart);
-      final BlockFunctionArgument parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
+      final BlockFunctionArgument parse = type.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
       if (parse != null) {
         // keep the current position of the cursor
         return parse;

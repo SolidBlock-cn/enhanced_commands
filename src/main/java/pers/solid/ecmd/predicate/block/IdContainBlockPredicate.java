@@ -1,6 +1,5 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -71,7 +70,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     }
 
     @Override
-    public @Nullable IdContainBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable IdContainBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       return new FunctionLikeParser<IdContainBlockPredicate>() {// @formatter:off
         Pattern pattern;
         @Override public int minParamsCount() {return 1;}
@@ -85,8 +84,6 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
 
         @Override
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-          final StringReader reader = parser.reader;
-          final int cursorAtRegexBegin = reader.getCursor() + (reader.canRead() && StringReader.isQuotedStringStart(reader.peek()) ? 1 : 0);
           parser.suggestionProviders.clear();
           pattern = StringUtil.readRegex(parser.reader);
         }

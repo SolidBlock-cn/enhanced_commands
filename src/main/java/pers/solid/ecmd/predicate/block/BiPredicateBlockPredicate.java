@@ -111,25 +111,13 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       CommandSyntaxException exception = null;
-      try {
-        final BlockPredicateArgument parse1 = new Parser("same", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_same"), true).parse(commandRegistryAccess, parser, suggestionsOnly);
-        if (parse1 != null) {
-          return parse1;
-        }
-      } catch (
-          CommandSyntaxException exception1) {
-        exception = exception1;
+      final BlockPredicateArgument parse1 = new Parser("same", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_same"), true).parse(commandRegistryAccess, parser, suggestionsOnly);
+      if (parse1 != null) {
+        return parse1;
       }
-      final BlockPredicateArgument parse2 = new Parser("diff", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_diff"), false).parse(commandRegistryAccess, parser, suggestionsOnly);
-      if (parse2 != null) {
-        return parse2;
-      } else if (exception != null) {
-        throw exception;
-      } else {
-        return null;
-      }
+      return new Parser("diff", Text.translatable("enhancedCommands.argument.block_predicate.bi_predicate_diff"), false).parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

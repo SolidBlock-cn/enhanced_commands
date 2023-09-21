@@ -19,5 +19,5 @@ public interface BlockPredicateType<T extends BlockPredicate> {
 
   @NotNull T fromNbt(@NotNull NbtCompound nbtCompound);
 
-  @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
+  @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException;
 }

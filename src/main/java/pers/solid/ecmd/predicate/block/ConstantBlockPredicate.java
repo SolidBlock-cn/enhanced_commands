@@ -47,7 +47,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
+    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_predicate.constant"), suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();

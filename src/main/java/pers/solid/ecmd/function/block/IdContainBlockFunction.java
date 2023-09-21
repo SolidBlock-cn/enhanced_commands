@@ -44,7 +44,7 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     final Block[] blocks = this.blocks.get();
     if (blocks.length == 0) {
       return blockState;
@@ -93,7 +93,7 @@ public final class IdContainBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable IdContainBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public @Nullable IdContainBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       return new FunctionLikeParser<IdContainBlockFunction>() {
         // @formatter:off
         Pattern pattern;

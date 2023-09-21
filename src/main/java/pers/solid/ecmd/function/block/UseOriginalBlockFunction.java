@@ -21,7 +21,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     return origState;
   }
 
@@ -42,7 +42,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable UseOriginalBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) {
+    public @Nullable UseOriginalBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.use_original"), suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '~') {
         parser.reader.skip();
