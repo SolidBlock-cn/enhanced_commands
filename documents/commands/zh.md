@@ -4,16 +4,16 @@
 
 这些命令用于放置方块。
 
-- [`/draw`](draw/zh.md)
-- [`/rand`](rand/zh.md)
-- [`/setblocks`](setblocks/zh.md)
+- [`/draw`](draw/zh.md)：在世界内绘制一条曲线。
+- [`/replace`](replace/zh.md)：替换一个区域内的符合指定谓词的方块。
+- [`/setblocks`](setblocks/zh.md)：设置区域内的方块。
 
 ## 测试命令
 
-- [`/region`](region/zh.md)
-- [`/testarg`](testarg/zh.md)
-- [`/testfor`](testfor/zh.md)
-- [`/testpos`](testpos/zh.md)
+- [`/region`](region/zh.md)：测试一个区域。
+- [`/testarg`](testarg/zh.md)：对特定类型的参数进行测试。
+- [`/testfor`](testfor/zh.md)：测试和获取当前世界中的数据。
+- [`/testpos`](testpos/zh.md)：测试一个坐标，并返回其在当前执行环境下的绝对坐标。
 
 ## 独立的 `/execute` 子命令
 
@@ -48,4 +48,5 @@
 
 ## 其他命令
 
-- [`/tasks`](tasks/zh.md)
+- [`/tasks`](tasks/zh.md)：管理当前服务器中的任务。
+- [`/rand`](rand/zh.md)：生成随机数。
