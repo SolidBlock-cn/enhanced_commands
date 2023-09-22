@@ -1,16 +1,12 @@
 package pers.solid.ecmd.util.bridge;
 
-import com.google.common.base.Suppliers;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextContent;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.mixin.ServerCommandSourceAccessor;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 public final class CommandBridge {
@@ -30,48 +26,10 @@ public final class CommandBridge {
   }
 
   public static void sendFeedback(@NotNull ServerCommandSource source, Supplier<@NotNull Text> text, boolean broadcastToOps) {
-    source.sendFeedback(new LazyText(text), broadcastToOps);
-  }
-
-  /**
-   * @see Suppliers#memoize(com.google.common.base.Supplier)
-   */
-  private static class LazyText implements Text {
-    private Supplier<@NotNull Text> supplier;
-    private Text value;
-
-    private LazyText(@NotNull Supplier<@NotNull Text> supplier) {
-      this.supplier = supplier;
-    }
-
-    private @NotNull Text get() {
-      if (value == null) {
-        synchronized (this) {
-          value = Objects.requireNonNull(supplier.get(), "The Supplier<Text> must not return a null value");
-          supplier = null;
-        }
-      }
-      return value;
-    }
-
-    @Override
-    public Style getStyle() {
-      return get().getStyle();
-    }
-
-    @Override
-    public TextContent getContent() {
-      return get().getContent();
-    }
-
-    @Override
-    public List<Text> getSiblings() {
-      return get().getSiblings();
-    }
-
-    @Override
-    public OrderedText asOrderedText() {
-      return get().asOrderedText();
+    if (((ServerCommandSourceAccessor) source).isSilent()) return;
+    final CommandOutput output = ((ServerCommandSourceAccessor) source).getOutput();
+    if (output.shouldReceiveFeedback() || (broadcastToOps && output.shouldBroadcastConsoleToOps())) {
+      source.sendFeedback(text.get(), broadcastToOps);
     }
   }
 }

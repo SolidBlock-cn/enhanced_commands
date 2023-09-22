@@ -9,6 +9,7 @@
     "BlockStateArgumentTypeMixin",
     "CachedBlockPositionAccessor",
     "GameModeArgumentTypeMixin",
+    "ServerCommandSourceAccessor",
     "ThreadExecutorMixin",
     "Vec3ArgumentTypeMixin"
   ],
