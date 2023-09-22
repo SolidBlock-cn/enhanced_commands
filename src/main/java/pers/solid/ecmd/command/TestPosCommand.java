@@ -15,6 +15,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.VanillaWrappedArgumentType;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 
 public enum TestPosCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -25,8 +26,8 @@ public enum TestPosCommand implements CommandRegistrationCallback {
     final Command<ServerCommandSource> execution = context -> {
       final PosArgument pos = EnhancedPosArgumentType.getPos("pos", context);
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
-      context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.testpos.result"), true);
-      context.getSource().sendFeedback(Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testpos.result"), true);
+      CommandBridge.sendFeedback(context, () -> Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY), true);
       return 1;
     };
     for (final var value : EnhancedPosArgumentType.Behavior.values()) {

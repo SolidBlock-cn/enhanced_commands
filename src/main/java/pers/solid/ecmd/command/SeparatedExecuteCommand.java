@@ -53,6 +53,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.chunk.WorldChunk;
 import org.apache.commons.lang3.RandomUtils;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -322,7 +323,7 @@ public final class SeparatedExecuteCommand {
     return positive ? context -> {
       int i = condition.test(context);
       if (i > 0) {
-        context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass_count", i), false);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("commands.execute.conditional.pass_count", i), false);
         return i;
       } else {
         throw CONDITIONAL_FAIL_EXCEPTION.create();
@@ -330,7 +331,7 @@ public final class SeparatedExecuteCommand {
     } : context -> {
       int i = condition.test(context);
       if (i == 0) {
-        context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass"), false);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("commands.execute.conditional.pass"), false);
         return 1;
       } else {
         throw CONDITIONAL_FAIL_COUNT_EXCEPTION.create(i);
@@ -377,7 +378,7 @@ public final class SeparatedExecuteCommand {
   private static ArgumentBuilder<ServerCommandSource, ?> addConditionLogic(CommandNode<ServerCommandSource> root, ArgumentBuilder<ServerCommandSource, ?> builder, boolean positive, Condition condition) {
     return builder.fork(root, context -> getSourceOrEmptyForConditionFork(context, positive, condition.test(context))).executes(context -> {
       if (positive == condition.test(context)) {
-        context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass"), false);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("commands.execute.conditional.pass"), false);
         return 1;
       } else {
         throw CONDITIONAL_FAIL_EXCEPTION.create();
@@ -392,7 +393,7 @@ public final class SeparatedExecuteCommand {
   private static int executePositiveBlockCondition(CommandContext<ServerCommandSource> context, boolean masked) throws CommandSyntaxException {
     OptionalInt optionalInt = testBlocksCondition(context, masked);
     if (optionalInt.isPresent()) {
-      context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass_count", optionalInt.getAsInt()), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("commands.execute.conditional.pass_count", optionalInt.getAsInt()), false);
       return optionalInt.getAsInt();
     } else {
       throw CONDITIONAL_FAIL_EXCEPTION.create();
@@ -404,7 +405,7 @@ public final class SeparatedExecuteCommand {
     if (optionalInt.isPresent()) {
       throw CONDITIONAL_FAIL_COUNT_EXCEPTION.create(optionalInt.getAsInt());
     } else {
-      context.getSource().sendFeedback(Text.translatable("commands.execute.conditional.pass"), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("commands.execute.conditional.pass"), false);
       return 1;
     }
   }

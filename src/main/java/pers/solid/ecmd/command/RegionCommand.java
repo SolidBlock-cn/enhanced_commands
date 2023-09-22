@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import pers.solid.ecmd.argument.RegionArgumentType;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -59,7 +60,9 @@ public enum RegionCommand implements CommandRegistrationCallback {
         }
       }
     }
-    context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.region.verify.result", Text.literal(region.asString()).formatted(Formatting.GRAY), Integer.toString(numOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(numOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), true);
+    final int finalNumOfIteratedButNotMatch = numOfIteratedButNotMatch;
+    final int finalNumOfNotIteratedButMatch = numOfNotIteratedButMatch;
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.region.verify.result", Text.literal(region.asString()).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), true);
     return numOfIteratedButNotMatch;
   }
 }

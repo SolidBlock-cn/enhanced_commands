@@ -20,6 +20,7 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.lang.ref.WeakReference;
@@ -65,11 +66,11 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).ec_getIteratorTasks();
     final int size = iteratorTasks.size();
     if (size == 0) {
-      context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.count.none", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.count.none", size), true);
     } else if (size == 1) {
-      context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.count.single", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.count.single", size), true);
     } else {
-      context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.count.plural", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.count.plural", size), true);
     }
     return size;
   }
@@ -79,11 +80,11 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final int size = iteratorTasks.size();
     iteratorTasks.clear();
     if (size == 0) {
-      context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.clear.none", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.clear.none", size), true);
     } else if (size == 1) {
-      context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.clear.single", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.clear.single", size), true);
     } else {
-      context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.clear.plural", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.clear.plural", size), true);
     }
     return size;
   }
@@ -96,10 +97,10 @@ public enum TasksCommand implements CommandRegistrationCallback {
       final IteratorTask<?> remove = uuidToTasks.remove(uuid).get();
       ((ThreadExecutorExtension) server).ec_getIteratorTasks().remove(remove);
       if (remove != null) {
-        context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.remove.success", remove.name), true);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.remove.success", remove.name), true);
         return 1;
       } else {
-        context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.remove.collected").formatted(Formatting.YELLOW), true);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.remove.collected").formatted(Formatting.YELLOW), true);
         return 0;
       }
     }
@@ -132,13 +133,13 @@ public enum TasksCommand implements CommandRegistrationCallback {
             throw new CommandSyntaxException(null, Text.translatable("enhancedCommands.commands.tasks.suspend.already_suspended", iteratorTask.name));
           } else {
             iteratorTask.suspended = true;
-            context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.suspend.success", iteratorTask.name).append("  ").append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(List.of(createContinueButton(uuid), createRemoveButton(uuid)), Text.literal("|"))).formatted(Formatting.GRAY)), true);
+            CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.suspend.success", iteratorTask.name).append("  ").append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(List.of(createContinueButton(uuid), createRemoveButton(uuid)), Text.literal("|"))).formatted(Formatting.GRAY)), true);
             return 2;
           }
         } else {
           if (iteratorTask.suspended) {
             iteratorTask.suspended = false;
-            context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.continue.success", iteratorTask.name).append("  ").append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(List.of(createSuspendButton(uuid), createRemoveButton(uuid)), Text.literal("|"))).formatted(Formatting.GRAY)), true);
+            CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.continue.success", iteratorTask.name).append("  ").append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(List.of(createSuspendButton(uuid), createRemoveButton(uuid)), Text.literal("|"))).formatted(Formatting.GRAY)), true);
             return 1;
           } else {
             throw new CommandSyntaxException(null, Text.translatable("enhancedCommands.commands.tasks.continue.not_suspended", iteratorTask.name));
@@ -156,7 +157,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
     if (uuidToTasks.containsKey(uuid)) {
       final IteratorTask<?> iteratorTask = uuidToTasks.get(uuid).get();
       if (iteratorTask != null) {
-        context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.exhaust.start", iteratorTask.name), true);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.exhaust.start", iteratorTask.name), true);
         if (limit <= 0) {
           IterateUtils.exhaust(iteratorTask);
         } else {
@@ -166,7 +167,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
           uuidToTasks.remove(iteratorTask.uuid);
           ((ThreadExecutorExtension) server).ec_getIteratorTasks().remove(iteratorTask);
         }
-        context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.exhaust.success", iteratorTask.name), true);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.exhaust.success", iteratorTask.name), true);
         return 1;
       } else {
         uuidToTasks.remove(uuid);
@@ -181,27 +182,28 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final int size = iteratorTasks.size();
 
     if (size == 0) {
-      context.getSource().sendFeedback(Text.translatable("enhancedCommands.commands.tasks.list.none").formatted(Formatting.RED), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.list.none").formatted(Formatting.RED), true);
       return 0;
     }
-
-    final MutableText message = Text.translatable("enhancedCommands.commands.tasks.list.summary", Integer.toString(size));
-    for (IteratorTask<?> iteratorTask : Iterables.limit(iteratorTasks, limit)) {
-      final List<Text> list = new ArrayList<>();
-      if (iteratorTask.suspended) {
-        list.add(Text.translatable("enhancedCommands.commands.tasks.buttons.suspended").formatted(Formatting.LIGHT_PURPLE));
-        list.add(createContinueButton(iteratorTask.uuid));
-      } else {
-        list.add(createSuspendButton(iteratorTask.uuid));
+    CommandBridge.sendFeedback(context.getSource(), () -> {
+      final MutableText message = Text.translatable("enhancedCommands.commands.tasks.list.summary", Integer.toString(size));
+      for (IteratorTask<?> iteratorTask : Iterables.limit(iteratorTasks, limit)) {
+        final List<Text> list = new ArrayList<>();
+        if (iteratorTask.suspended) {
+          list.add(Text.translatable("enhancedCommands.commands.tasks.buttons.suspended").formatted(Formatting.LIGHT_PURPLE));
+          list.add(createContinueButton(iteratorTask.uuid));
+        } else {
+          list.add(createSuspendButton(iteratorTask.uuid));
+        }
+        list.add(createExhaustButton(iteratorTask.uuid));
+        list.add(createRemoveButton(iteratorTask.uuid));
+        message.append(ScreenTexts.LINE_BREAK).append(Text.literal(" - ").formatted(Formatting.GRAY).append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(list, Text.literal("|")))).append(ScreenTexts.SPACE).append(iteratorTask.name));
       }
-      list.add(createExhaustButton(iteratorTask.uuid));
-      list.add(createRemoveButton(iteratorTask.uuid));
-      message.append(ScreenTexts.LINE_BREAK).append(Text.literal(" - ").formatted(Formatting.GRAY).append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(list, Text.literal("|")))).append(ScreenTexts.SPACE).append(iteratorTask.name));
-    }
-    if (size > limit) {
-      message.append(ScreenTexts.LINE_BREAK).append(Text.translatable("enhancedCommands.commands.tasks.list.limit_note").styled(style -> style.withColor(0xffa960)));
-    }
-    context.getSource().sendFeedback(message, true);
+      if (size > limit) {
+        message.append(ScreenTexts.LINE_BREAK).append(Text.translatable("enhancedCommands.commands.tasks.list.limit_note").styled(style -> style.withColor(0xffa960)));
+      }
+      return message;
+    }, true);
     return size;
   }
 }

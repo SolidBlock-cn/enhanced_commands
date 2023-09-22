@@ -58,5 +58,4 @@ public interface ThreadExecutorExtension {
       }
     }
   }
-
 }

@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.DirectionArgumentType;
 import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 
@@ -50,6 +51,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
                   final ServerCommandSource source = context.getSource();
                   final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(new CachedBlockPosition(source.getWorld(), BlockPosArgumentType.getBlockPos(context, "pos"), false));
                   testResult.sendMessage(source);
+                  // FIXME: 2023/9/22, 022 需要考虑区块未被加载的情况
                   return BooleanUtils.toInteger(testResult.successes());
                 })));
   }
@@ -60,9 +62,9 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(blockPos);
     final Collection<Property<?>> properties = blockState.getProperties();
-    source.sendFeedback(Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", TextUtil.wrapBlockPos(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(Registries.BLOCK.getId(blockState.getBlock()).toString()).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", TextUtil.wrapBlockPos(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(Registries.BLOCK.getId(blockState.getBlock()).toString()).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     for (Property<?> property : properties) {
-      source.sendFeedback(expressPropertyValue(blockState, property), true);
+      CommandBridge.sendFeedback(source, () -> expressPropertyValue(blockState, property), true);
     }
     return 1;
   }
@@ -116,7 +118,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final int value = function.applyAsInt(blockState, world, pos);
-    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     return value;
   }
 
@@ -127,7 +129,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final BlockState blockState = world.getBlockState(pos);
     final Direction direction = DirectionArgumentType.getDirection(context, "directions");
     final int value = function.applyAsInt(blockState, world, pos, direction);
-    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.wrapDirection(direction).styled(TextUtil.STYLE_FOR_TARGET)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.wrapDirection(direction).styled(TextUtil.STYLE_FOR_TARGET)), true);
     return value;
   }
 
@@ -137,7 +139,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final float value = function.applyAsFloat(blockState, world, pos);
-    source.sendFeedback(Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     return value;
   }
 
@@ -147,7 +149,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final boolean value = predicate.test(blockState, world, pos);
-    source.sendFeedback(Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos)), true);
     return value;
   }
 
@@ -191,10 +193,10 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final BlockState blockState = world.getBlockState(pos);
     final Vec3d modelOffset = blockState.getModelOffset(world, pos);
     if (modelOffset.equals(Vec3d.ZERO)) {
-      source.sendFeedback(Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos)), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos)), true);
       return 0;
     } else {
-      source.sendFeedback(Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), TextUtil.wrapPosition(modelOffset)), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), TextUtil.wrapPosition(modelOffset)), true);
       return 1;
     }
   }

@@ -12,6 +12,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.GameRules;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -37,13 +38,13 @@ public enum GameModeAliasCommand implements CommandRegistrationCallback {
   private static void sendFeedback(ServerCommandSource source, ServerPlayerEntity player, GameMode gameMode) {
     final Text name = getName(gameMode);
     if (source.getEntity() == player) {
-      source.sendFeedback(Text.translatable("commands.gamemode.success.self", name), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("commands.gamemode.success.self", name), true);
     } else {
       if (source.getWorld().getGameRules().getBoolean(GameRules.SEND_COMMAND_FEEDBACK)) {
         player.sendMessage(Text.translatable("gameMode.changed", name));
       }
 
-      source.sendFeedback(Text.translatable("commands.gamemode.success.other", player.getDisplayName(), name), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("commands.gamemode.success.other", player.getDisplayName(), name), true);
     }
   }
 

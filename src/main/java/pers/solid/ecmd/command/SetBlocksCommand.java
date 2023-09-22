@@ -22,6 +22,7 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;
@@ -131,8 +132,8 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
     final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> source.sendFeedback(Text.translatable("enhancedCommands.commands.setblocks.complete", numbersAffected.getValue()), true)));
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
-      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.setblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 16384, 7));
-      source.sendFeedback(Text.translatable("enhancedCommands.commands.setblocks.large_region", region.numberOfBlocksAffected()).formatted(Formatting.YELLOW), true);
+      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.setblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.setblocks.large_region", region.numberOfBlocksAffected()).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

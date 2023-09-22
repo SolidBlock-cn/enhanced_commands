@@ -1,16 +1,18 @@
 package pers.solid.ecmd.command;
 
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public record TestResult(boolean successes, @Unmodifiable List<Text> descriptions, @Unmodifiable List<TestResult> attachments) {
   public TestResult(boolean booleanValue, Text descriptions) {
@@ -33,29 +35,25 @@ public record TestResult(boolean successes, @Unmodifiable List<Text> description
     return successes ? success(blockPos) : fail(blockPos);
   }
 
-  public List<Text> descriptions() {
-    return Collections.unmodifiableList(descriptions);
-  }
-
-  @Override
-  public List<TestResult> attachments() {
-    return Collections.unmodifiableList(attachments);
-  }
-
-  public void sendMessage(Consumer<Text> messageSender, int level) {
+  @Contract(mutates = "param1")
+  public void appendTexts(List<Text> lines, int level) {
     for (Text text : descriptions) {
       if (level <= 0) {
-        messageSender.accept(text);
+        lines.add(text);
       } else if (level <= 6) {
-        messageSender.accept(Text.literal(StringUtils.repeat(' ', 2 * (level))).append(text));
+        lines.add(Text.literal(StringUtils.repeat(' ', 2 * (level))).append(text));
       }
     }
     for (TestResult attachment : attachments) {
-      attachment.sendMessage(messageSender, level + 1);
+      attachment.appendTexts(lines, level + 1);
     }
   }
 
   public void sendMessage(ServerCommandSource serverCommandSource) {
-    sendMessage(text -> serverCommandSource.sendFeedback(text, false), 0);
+    CommandBridge.sendFeedback(serverCommandSource, () -> {
+      final List<Text> lines = new ArrayList<>();
+      appendTexts(lines, 0);
+      return ScreenTexts.joinLines(lines);
+    }, false);
   }
 }
