@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util;
+package pers.solid.ecmd.util.lambda;
 
 @FunctionalInterface
 public interface ToIntQuadFunction<T, U, V, W> {

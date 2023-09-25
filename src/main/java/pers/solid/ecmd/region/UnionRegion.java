@@ -5,19 +5,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 public record UnionRegion(Collection<Region> regions) implements Region {
@@ -77,6 +71,22 @@ public record UnionRegion(Collection<Region> regions) implements Region {
   @Override
   public @NotNull String asString() {
     return "union(" + String.join(", ", Collections2.transform(regions, Region::asString)) + ")";
+  }
+
+  @Override
+  public @Nullable Box maxContainingBox() {
+    final List<@NotNull Box> maxContainingBoxes = regions.stream().map(Region::maxContainingBox).filter(Objects::nonNull).toList();
+    final double minX = maxContainingBoxes.stream().mapToDouble(value -> value.minX).min().orElse(Double.POSITIVE_INFINITY);
+    final double minY = maxContainingBoxes.stream().mapToDouble(value -> value.minY).min().orElse(Double.POSITIVE_INFINITY);
+    final double minZ = maxContainingBoxes.stream().mapToDouble(value -> value.minZ).min().orElse(Double.POSITIVE_INFINITY);
+    final double maxX = maxContainingBoxes.stream().mapToDouble(value -> value.maxX).max().orElse(Double.NEGATIVE_INFINITY);
+    final double maxY = maxContainingBoxes.stream().mapToDouble(value -> value.maxY).max().orElse(Double.NEGATIVE_INFINITY);
+    final double maxZ = maxContainingBoxes.stream().mapToDouble(value -> value.maxZ).max().orElse(Double.NEGATIVE_INFINITY);
+    if (minX > maxX || minY > maxY || minZ > maxZ) {
+      return null;
+    } else {
+      return new Box(minX, minY, minZ, maxX, maxY, maxZ);
+    }
   }
 
   public enum Type implements RegionType<UnionRegion> {

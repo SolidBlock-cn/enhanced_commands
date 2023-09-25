@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.Iterator;
@@ -159,6 +160,11 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   @Override
   public @NotNull String asString() {
     return "cuboid(%s %s %s, %s %s %s)".formatted(Integer.toString(minX), Integer.toString(minY), Integer.toString(minZ), Integer.toString(maxX), Integer.toString(maxY), Integer.toString(maxZ));
+  }
+
+  @Override
+  public @Nullable Box maxContainingBox() {
+    return asCuboidRegion().maxContainingBox();
   }
 
   @Override

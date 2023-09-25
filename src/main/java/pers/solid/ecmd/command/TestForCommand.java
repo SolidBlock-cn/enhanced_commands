@@ -1,9 +1,12 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
@@ -26,40 +29,42 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.DirectionArgumentType;
-import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
+import pers.solid.ecmd.util.lambda.ToFloatTriFunction;
+import pers.solid.ecmd.util.lambda.ToIntQuadFunction;
+import pers.solid.ecmd.util.lambda.ToIntTriFunction;
+import pers.solid.ecmd.util.lambda.TriPredicate;
 
 import java.util.Collection;
 
 public enum TestForCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(CommandManager.literal("testfor")
-        .requires(ModCommands.REQUIRES_PERMISSION_2)
-        .then(addBlockCommandProperties(CommandManager.literal("block"), registryAccess))
-        .then(addBlockInfoCommandProperties(CommandManager.literal("block_info"), registryAccess)));
-  }
+  public static final KeywordArgsArgumentType BLOCK_KEYWORD_ARGS = KeywordArgsArgumentType.keywordArgsBuilder()
+      .addOptionalArg("force_load", BoolArgumentType.bool(), false)
+      .build();
+  public static final DynamicCommandExceptionType TEST_FOR_BLOCK_NOT_LOADED = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.commands.testfor.block.not_loaded", o));
+  public static final DynamicCommandExceptionType TEST_FOR_BLOCK_PREDICATE_NOT_LOADED = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.commands.testfor.block.not_loaded_for_predicate", o));
 
   private static LiteralArgumentBuilder<ServerCommandSource> addBlockCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, CommandRegistryAccess registryAccess) {
     return argumentBuilder
         .then(CommandManager.argument("pos", BlockPosArgumentType.blockPos())
-            .executes(TestForCommand::executesTestForBlock)
+            .executes(TestForCommand::executeTestForBlock)
             .then(CommandManager.argument("predicate", new BlockPredicateArgumentType(registryAccess))
-                .executes(context -> {
-                  final ServerCommandSource source = context.getSource();
-                  final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(new CachedBlockPosition(source.getWorld(), BlockPosArgumentType.getBlockPos(context, "pos"), false));
-                  testResult.sendMessage(source);
-                  // FIXME: 2023/9/22, 022 需要考虑区块未被加载的情况
-                  return BooleanUtils.toInteger(testResult.successes());
-                })));
+                .executes(context -> executeTestForBlockPredicate(context, false))
+                .then(CommandManager.argument("keyword_args", BLOCK_KEYWORD_ARGS)
+                    .executes(context -> executeTestForBlockPredicate(context, KeywordArgsArgumentType.getKeywordArgs("keyword_args", context).getBoolean("force_load"))))));
   }
 
-  private static int executesTestForBlock(CommandContext<ServerCommandSource> context) {
-    final BlockPos blockPos = BlockPosArgumentType.getBlockPos(context, "pos");
+  private static int executeTestForBlock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    final BlockPos blockPos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerCommandSource source = context.getSource();
     final ServerWorld world = source.getWorld();
+    if (!world.isChunkLoaded(blockPos)) {
+      throw TEST_FOR_BLOCK_NOT_LOADED.create(TextUtil.wrapBlockPos(blockPos));
+    }
     final BlockState blockState = world.getBlockState(blockPos);
     final Collection<Property<?>> properties = blockState.getProperties();
     CommandBridge.sendFeedback(source, () -> Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", TextUtil.wrapBlockPos(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(Registries.BLOCK.getId(blockState.getBlock()).toString()).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
@@ -67,6 +72,18 @@ public enum TestForCommand implements CommandRegistrationCallback {
       CommandBridge.sendFeedback(source, () -> expressPropertyValue(blockState, property), true);
     }
     return 1;
+  }
+
+  private static int executeTestForBlockPredicate(CommandContext<ServerCommandSource> context, boolean forceLoad) throws CommandSyntaxException {
+    final ServerCommandSource source = context.getSource();
+    final BlockPos blockPos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+    final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(source.getWorld(), blockPos, forceLoad);
+    if (cachedBlockPosition.getBlockState() == null) {
+      throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapBlockPos(blockPos));
+    }
+    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition);
+    testResult.sendMessage(source);
+    return BooleanUtils.toInteger(testResult.successes());
   }
 
   private static <T extends Comparable<T>> MutableText expressPropertyValue(BlockState blockState, Property<T> property) {
@@ -85,10 +102,10 @@ public enum TestForCommand implements CommandRegistrationCallback {
             .then(CommandManager.literal("luminance")
                 .executes(TestForCommand::executeGetLuminance))
             .then(CommandManager.literal("strong_redstone_power")
-                .then(CommandManager.argument("directions", DirectionArgumentType.create())
+                .then(CommandManager.argument("direction", DirectionArgumentType.create())
                     .executes(TestForCommand::executeGetStrongRedstonePower)))
             .then(CommandManager.literal("weak_redstone_power")
-                .then(CommandManager.argument("directions", DirectionArgumentType.create())
+                .then(CommandManager.argument("direction", DirectionArgumentType.create())
                     .executes(TestForCommand::executeGetWeakRedstonePower)))
             .then(CommandManager.literal("light")
                 .executes(context -> executeGetLight(context, null)))
@@ -112,9 +129,9 @@ public enum TestForCommand implements CommandRegistrationCallback {
                 .executes(TestForCommand::executeGetRandomTicks)));
   }
 
-  private static int getIntBlockInfo(CommandContext<ServerCommandSource> context, String translationKey, ToIntTriFunction<BlockState, ServerWorld, BlockPos> function) {
+  private static int getIntBlockInfo(CommandContext<ServerCommandSource> context, String translationKey, ToIntTriFunction<BlockState, ServerWorld, BlockPos> function) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
+    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final int value = function.applyAsInt(blockState, world, pos);
@@ -122,20 +139,20 @@ public enum TestForCommand implements CommandRegistrationCallback {
     return value;
   }
 
-  private static int getIntBlockInfoWithDirection(CommandContext<ServerCommandSource> context, String translationKey, ToIntQuadFunction<BlockState, ServerWorld, BlockPos, Direction> function) {
+  private static int getIntBlockInfoWithDirection(CommandContext<ServerCommandSource> context, String translationKey, ToIntQuadFunction<BlockState, ServerWorld, BlockPos, Direction> function) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
+    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
-    final Direction direction = DirectionArgumentType.getDirection(context, "directions");
+    final Direction direction = DirectionArgumentType.getDirection(context, "direction");
     final int value = function.applyAsInt(blockState, world, pos, direction);
     CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.wrapDirection(direction).styled(TextUtil.STYLE_FOR_TARGET)), true);
     return value;
   }
 
-  private static float getFloatBlockInfo(CommandContext<ServerCommandSource> context, String translationKey, ToFloatTriFunction<BlockState, ServerWorld, BlockPos> function) {
+  private static float getFloatBlockInfo(CommandContext<ServerCommandSource> context, String translationKey, ToFloatTriFunction<BlockState, ServerWorld, BlockPos> function) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
+    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final float value = function.applyAsFloat(blockState, world, pos);
@@ -143,9 +160,9 @@ public enum TestForCommand implements CommandRegistrationCallback {
     return value;
   }
 
-  private static boolean getBooleanBlockInfo(CommandContext<ServerCommandSource> context, String translationKeyWhenFalse, String translationKeyWhenTrue, TriPredicate<BlockState, ServerWorld, BlockPos> predicate) {
+  private static boolean getBooleanBlockInfo(CommandContext<ServerCommandSource> context, String translationKeyWhenFalse, String translationKeyWhenTrue, TriPredicate<BlockState, ServerWorld, BlockPos> predicate) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
+    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final boolean value = predicate.test(blockState, world, pos);
@@ -153,24 +170,24 @@ public enum TestForCommand implements CommandRegistrationCallback {
     return value;
   }
 
-  private static int executeGetHardness(CommandContext<ServerCommandSource> context, float scale) {
+  private static int executeGetHardness(CommandContext<ServerCommandSource> context, float scale) throws CommandSyntaxException {
     final double hardness = getFloatBlockInfo(context, "enhancedCommands.commands.testfor.block_info.hardness", AbstractBlock.AbstractBlockState::getHardness);
     return (int) (hardness * scale);
   }
 
-  private static int executeGetLuminance(CommandContext<ServerCommandSource> context) {
+  private static int executeGetLuminance(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return getIntBlockInfo(context, "enhancedCommands.commands.testfor.block_info.luminance", (blockState, serverWorld, blockPos) -> blockState.getLuminance());
   }
 
-  private static int executeGetStrongRedstonePower(CommandContext<ServerCommandSource> context) {
+  private static int executeGetStrongRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return getIntBlockInfoWithDirection(context, "enhancedCommands.commands.testfor.block_info.strong_redstone_power", AbstractBlock.AbstractBlockState::getStrongRedstonePower);
   }
 
-  private static int executeGetWeakRedstonePower(CommandContext<ServerCommandSource> context) {
+  private static int executeGetWeakRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return getIntBlockInfoWithDirection(context, "enhancedCommands.commands.testfor.block_info.weak_redstone_power", AbstractBlock.AbstractBlockState::getWeakRedstonePower);
   }
 
-  private static int executeGetLight(CommandContext<ServerCommandSource> context, @Nullable LightType lightType) {
+  private static int executeGetLight(CommandContext<ServerCommandSource> context, @Nullable LightType lightType) throws CommandSyntaxException {
     if (lightType == null) {
       return getIntBlockInfo(context, "enhancedCommands.commands.testfor.block_info.light", (blockState, serverWorld, blockPos) -> serverWorld.getLightLevel(blockPos));
     } else {
@@ -178,17 +195,17 @@ public enum TestForCommand implements CommandRegistrationCallback {
     }
   }
 
-  private static int executeGetEmitsRedstonePower(CommandContext<ServerCommandSource> context) {
+  private static int executeGetEmitsRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhancedCommands.commands.testfor.block_info.emits_redstone_power.false", "enhancedCommands.commands.testfor.block_info.emits_redstone_power.true", (blockState, serverWorld, blockPos) -> blockState.emitsRedstonePower()));
   }
 
-  private static int executeGetOpaque(CommandContext<ServerCommandSource> context) {
+  private static int executeGetOpaque(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhancedCommands.commands.testfor.block_info.opaque.false", "enhancedCommands.commands.testfor.block_info.opaque.true", (blockState, serverWorld, blockPos) -> blockState.isOpaque()));
   }
 
-  private static int executeGetModelOffset(CommandContext<ServerCommandSource> context) {
+  private static int executeGetModelOffset(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getBlockPos(context, "pos");
+    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final Vec3d modelOffset = blockState.getModelOffset(world, pos);
@@ -201,19 +218,27 @@ public enum TestForCommand implements CommandRegistrationCallback {
     }
   }
 
-  private static int executeGetSuffocate(CommandContext<ServerCommandSource> context) {
+  private static int executeGetSuffocate(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhancedCommands.commands.testfor.block_info.suffocate.false", "enhancedCommands.commands.testfor.block_info.suffocate.true", AbstractBlock.AbstractBlockState::shouldSuffocate));
   }
 
-  private static int executeGetBlockVision(CommandContext<ServerCommandSource> context) {
+  private static int executeGetBlockVision(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhancedCommands.commands.testfor.block_info.block_vision.false", "enhancedCommands.commands.testfor.block_info.block_vision.true", AbstractBlock.AbstractBlockState::shouldBlockVision));
   }
 
-  private static int executeGetReplaceable(CommandContext<ServerCommandSource> context) {
+  private static int executeGetReplaceable(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhancedCommands.commands.testfor.block_info.replaceable.false", "enhancedCommands.commands.testfor.block_info.replaceable.true", (blockState, serverWorld, blockPos) -> blockState.isReplaceable()));
   }
 
-  private static int executeGetRandomTicks(CommandContext<ServerCommandSource> context) {
+  private static int executeGetRandomTicks(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhancedCommands.commands.testfor.block_info.random_ticks.false", "enhancedCommands.commands.testfor.block_info.random_ticks.true", (blockState, serverWorld, blockPos) -> blockState.hasRandomTicks()));
+  }
+
+  @Override
+  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    dispatcher.register(CommandManager.literal("testfor")
+        .requires(ModCommands.REQUIRES_PERMISSION_2)
+        .then(addBlockCommandProperties(CommandManager.literal("block"), registryAccess))
+        .then(addBlockInfoCommandProperties(CommandManager.literal("block_info"), registryAccess)));
   }
 }

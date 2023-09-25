@@ -138,6 +138,11 @@ public record CuboidRegion(Box box) implements Region {
     return "cuboid(%s %s %s, %s %s %s)".formatted(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
   }
 
+  @Override
+  public @Nullable Box maxContainingBox() {
+    return box;
+  }
+
   public enum Type implements RegionType<CuboidRegion> {
     CUBOID_TYPE;
 

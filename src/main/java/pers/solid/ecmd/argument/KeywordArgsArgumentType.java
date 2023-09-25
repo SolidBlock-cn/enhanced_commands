@@ -6,13 +6,15 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.util.SuggestionProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,68 +41,71 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
 
   @Override
   public KeywordArgs parse(StringReader reader) throws CommandSyntaxException {
-    final SuggestedParser parser = new SuggestedParser(reader);
-    return parseAndSuggest(parser, false);
+    return parseAndSuggest(reader, null);
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-    final SuggestedParser suggestedParser = new SuggestedParser(new StringReader(builder.getInput()));
-    suggestedParser.reader.setCursor(builder.getStart());
+    final StringReader reader = new StringReader(builder.getInput());
+    reader.setCursor(builder.getStart());
+    final MutableObject<SuggestionProvider<S>> mutableObject = new MutableObject<>();
     try {
-      parseAndSuggest(suggestedParser, true);
-    } catch (CommandSyntaxException ignored) {
+      parseAndSuggest(reader, mutableObject);
+    } catch (CommandSyntaxException ignored) {}
+    if (mutableObject.getValue() != null) {
+      try {
+        return mutableObject.getValue().getSuggestions(context, builder);
+      } catch (CommandSyntaxException ignored) {}
     }
-    final var builder2 = builder.createOffset(suggestedParser.reader.getCursor());
-    suggestedParser.suggestionProviders.forEach(consumer -> consumer.accept(context, builder2));
-    return builder2.buildFuture();
+    return Suggestions.empty();
   }
 
-  private KeywordArgs parseAndSuggest(SuggestedParser parser, boolean hasSuggestions) throws CommandSyntaxException {
+  private <S> KeywordArgs parseAndSuggest(StringReader reader, @Nullable final MutableObject<SuggestionProvider<S>> suggestionProvider) throws CommandSyntaxException {
     final Map<String, Object> values = new HashMap<>();
-    final SuggestionProvider nameSuggestion = (context, builder) -> CommandSource.suggestMatching(arguments.keySet().stream().filter(s -> !values.containsKey(s)), builder);
-    if (hasSuggestions) {
-      parser.suggestionProviders.clear();
-      parser.suggestionProviders.add(nameSuggestion);
+    final SuggestionProvider<S> nameSuggestion = (context, builder) -> CommandSource.suggestMatching(arguments.keySet().stream().filter(s -> !values.containsKey(s)), builder.createOffset(reader.getCursor()));
+    if (suggestionProvider != null) {
+      suggestionProvider.setValue(nameSuggestion);
     }
 
-    for (int i = 0; i < 1024 && parser.reader.canRead(); i++) {
+    for (int i = 0; i < 1024 && reader.canRead(); i++) {
       // parse name
-      final int cursorBeforeReadName = parser.reader.getCursor();
-      final String name = parser.reader.readString();
+      final int cursorBeforeReadName = reader.getCursor();
+      final String name = reader.readString();
       if (!arguments.containsKey(name)) {
-        parser.reader.setCursor(cursorBeforeReadName);
-        throw UNKNOWN_ARGUMENT_NAME.createWithContext(parser.reader, name);
+        reader.setCursor(cursorBeforeReadName);
+        throw UNKNOWN_ARGUMENT_NAME.createWithContext(reader, name);
       } else if (values.containsKey(name)) {
-        parser.reader.setCursor(cursorBeforeReadName);
-        throw DUPLICATE_ARGUMENT_NAME.createWithContext(parser.reader, name);
+        reader.setCursor(cursorBeforeReadName);
+        throw DUPLICATE_ARGUMENT_NAME.createWithContext(reader, name);
       }
-      parser.reader.skipWhitespace();
-      if (hasSuggestions) {
-        parser.suggestionProviders.clear();
-        parser.suggestionProviders.add((context, builder) -> builder.suggest("="));
+      reader.skipWhitespace();
+      if (suggestionProvider != null) {
+        final int cursorBeforeEqual = reader.getCursor();
+        suggestionProvider.setValue((context, builder) -> builder.suggest("=").createOffset(cursorBeforeEqual).buildFuture());
       }
-      parser.reader.expect('=');
-      parser.reader.skipWhitespace();
+      reader.expect('=');
+      reader.skipWhitespace();
       // parse value
       final ArgumentType<?> argumentType = arguments.get(name);
-      if (hasSuggestions) {
-        parser.suggestionProviders.clear();
-        parser.suggestionProviders.add(argumentType::listSuggestions);
+      if (suggestionProvider != null) {
+        final int cursorBeforeParseValue = reader.getCursor();
+        suggestionProvider.setValue((context, builder) -> argumentType.listSuggestions(context, builder.createOffset(cursorBeforeParseValue)));
       }
-      final Object parse = argumentType.parse(parser.reader);
+      final Object parse = argumentType.parse(reader);
 
       values.put(name, parse);
 
-      parser.suggestionProviders.clear();
-      if (!parser.reader.canRead()) {
+      if (suggestionProvider != null) {
+        suggestionProvider.setValue(null);
+      }
+      if (!reader.canRead()) {
         // ensure there is at least a whitespace
         break;
       }
-      if (hasSuggestions) {
-        parser.suggestionProviders.add(nameSuggestion);
+      if (suggestionProvider != null) {
+        suggestionProvider.setValue(nameSuggestion);
       }
-      parser.reader.skipWhitespace();
+      reader.skipWhitespace();
     }
     return new KeywordArgs(this, Map.copyOf(values));
   }

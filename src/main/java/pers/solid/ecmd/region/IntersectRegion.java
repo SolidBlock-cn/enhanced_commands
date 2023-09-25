@@ -5,10 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -78,9 +75,33 @@ public record IntersectRegion(Collection<Region> regions) implements Region {
     return regions.stream().mapToDouble(Region::volume).min().orElse(0);
   }
 
+  /**
+   * 和 {@link #volume()} 类似，其返回值是各区域中的最小值。
+   */
+  @Override
+  public long numberOfBlocksAffected() {
+    return regions.stream().mapToLong(Region::numberOfBlocksAffected).min().orElse(0);
+  }
+
   @Override
   public @NotNull String asString() {
     return "intersect(" + String.join(", ", Collections2.transform(regions, Region::asString) + ")");
+  }
+
+  @Override
+  public @Nullable Box maxContainingBox() {
+    final List<@Nullable Box> maxContainingBoxes = regions.stream().map(Region::maxContainingBox).toList();
+    final double minX = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minX).max().orElse(Double.POSITIVE_INFINITY);
+    final double minY = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minY).max().orElse(Double.POSITIVE_INFINITY);
+    final double minZ = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minZ).max().orElse(Double.POSITIVE_INFINITY);
+    final double maxX = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.NEGATIVE_INFINITY : value.maxX).min().orElse(Double.NEGATIVE_INFINITY);
+    final double maxY = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.NEGATIVE_INFINITY : value.maxY).min().orElse(Double.NEGATIVE_INFINITY);
+    final double maxZ = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.NEGATIVE_INFINITY : value.maxZ).min().orElse(Double.NEGATIVE_INFINITY);
+    if (minX > maxX || minY > maxY || minZ > maxZ) {
+      return null;
+    } else {
+      return new Box(minX, minY, minZ, maxX, maxY, maxZ);
+    }
   }
 
   public enum Type implements RegionType<IntersectRegion> {

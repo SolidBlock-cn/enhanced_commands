@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util;
+package pers.solid.ecmd.util.lambda;
 
 import org.apache.commons.lang3.function.TriFunction;
 
@@ -8,6 +8,6 @@ public interface TriPredicate<T, U, V> extends TriFunction<T, U, V, Boolean> {
 
   @Override
   default Boolean apply(T t, U u, V v) {
-    return test(t,u,v);
+    return test(t, u, v);
   }
 }

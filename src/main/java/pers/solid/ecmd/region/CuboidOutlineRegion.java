@@ -9,10 +9,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -99,6 +96,11 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
   @Override
   public @NotNull String asString() {
     return String.format("cuboid_outline(%s %s %s, %s %s %s, %s)", blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.maxY(), blockCuboidRegion.maxZ(), thickness);
+  }
+
+  @Override
+  public @Nullable Box maxContainingBox() {
+    return blockCuboidRegion.maxContainingBox();
   }
 
   public enum Type implements RegionType<CuboidOutlineRegion> {

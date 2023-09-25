@@ -3,12 +3,10 @@ package pers.solid.ecmd.region;
 import com.google.common.collect.Streams;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Iterator;
@@ -104,4 +102,11 @@ public interface Region extends Iterable<BlockPos>, StringIdentifiable {
 
   @Override
   @NotNull String asString();
+
+  @Nullable Box maxContainingBox();
+
+  default @Nullable BlockBox maxContainingBlockBox() {
+    final Box maxContainingBox = maxContainingBox();
+    return maxContainingBox == null ? null : new BlockBox(MathHelper.floor(maxContainingBox.minX), MathHelper.floor(maxContainingBox.minY), MathHelper.floor(maxContainingBox.minZ), MathHelper.floor(maxContainingBox.maxX), MathHelper.floor(maxContainingBox.maxY), MathHelper.floor(maxContainingBox.maxZ));
+  }
 }

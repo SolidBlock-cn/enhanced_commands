@@ -6,10 +6,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -67,13 +64,22 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
 
   @Override
   public double volume() {
-    final double fullVolume = region.volume();
-    return Math.min(fullVolume, Math.max(6, fullVolume * 0.95));
+    return region.volume();
+  }
+
+  @Override
+  public long numberOfBlocksAffected() {
+    return region.numberOfBlocksAffected();
   }
 
   @Override
   public @NotNull String asString() {
     return "outline(" + region.asString() + ", " + outlineType + ")";
+  }
+
+  @Override
+  public @Nullable Box maxContainingBox() {
+    return region.maxContainingBox();
   }
 
   public interface OutlineType extends StringIdentifiable {

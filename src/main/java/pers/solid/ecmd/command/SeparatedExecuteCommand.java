@@ -18,6 +18,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -50,10 +51,18 @@ import net.minecraft.server.world.ChunkHolder;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
+import net.minecraft.world.LightType;
 import net.minecraft.world.chunk.WorldChunk;
 import org.apache.commons.lang3.RandomUtils;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
+import pers.solid.ecmd.argument.DirectionArgumentType;
+import pers.solid.ecmd.argument.RegionArgumentType;
+import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.bridge.CommandBridge;
+import pers.solid.ecmd.util.lambda.ToFloatTriFunction;
+import pers.solid.ecmd.util.lambda.ToIntQuadFunction;
+import pers.solid.ecmd.util.lambda.ToIntTriFunction;
+import pers.solid.ecmd.util.lambda.TriPredicate;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -115,6 +124,29 @@ public final class SeparatedExecuteCommand {
 
           return list;
         })));
+    dispatcher.register(literalR2("for")
+        .then(argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
+          final ServerCommandSource source = context.getSource();
+          List<ServerCommandSource> list = new ArrayList<>();
+          for (Entity entity : EntityArgumentType.getOptionalEntities(context, "targets")) {
+            ServerCommandSource serverCommandSource = source.withEntity(entity).withWorld((ServerWorld) entity.world).withPosition(entity.getPos()).withRotation(entity.getRotationClient());
+            list.add(serverCommandSource);
+          }
+          return list;
+        })));
+    dispatcher.register(literalR2("for_region")
+        .then(argument("region", RegionArgumentType.region(commandRegistryAccess))
+            .fork(literalCommandNode, context -> {
+              final Region region = RegionArgumentType.getRegion(context, "region");
+              final ServerCommandSource source = context.getSource();
+              List<ServerCommandSource> list = new ArrayList<>();
+              for (BlockPos pos : region) {
+                ServerCommandSource serverCommandSource = source.withPosition(Vec3d.ofBottomCenter(pos));
+                list.add(serverCommandSource);
+              }
+              return list;
+            })));
+    dispatcher.register(literalR2("silenced").redirect(literalCommandNode, context -> context.getSource().withSilent()));
     dispatcher.register(literalR2("store")
         .then(addStoreArguments(literalCommandNode, literal("result"), true))
         .then(addStoreArguments(literalCommandNode, literal("success"), false)));
@@ -260,6 +292,8 @@ public final class SeparatedExecuteCommand {
             .then(argument("pos", BlockPosArgumentType.blockPos())
                 // note the block predicate type is in this mod
                 .then(addConditionLogic(root, argument("block", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess)), positive, context -> BlockPredicateArgumentType.getBlockPredicate(context, "block").test(new CachedBlockPosition(context.getSource().getWorld(), BlockPosArgumentType.getLoadedBlockPos(context, "pos"), true))))))
+        .then(literal("block_info")
+            .then(addBlockInfoArguments(root, argument("pos", BlockPosArgumentType.blockPos()), positive)))
         .then(literal("biome")
             .then(argument("pos", BlockPosArgumentType.blockPos())
                 .then(addConditionLogic(root, argument("biome", RegistryEntryPredicateArgumentType.registryEntryPredicate(commandRegistryAccess, RegistryKeys.BIOME)), positive, context -> RegistryEntryPredicateArgumentType.getRegistryEntryPredicate(context, "biome", RegistryKeys.BIOME).test(context.getSource().getWorld().getBiome(BlockPosArgumentType.getLoadedBlockPos(context, "pos")))))))
@@ -291,8 +325,60 @@ public final class SeparatedExecuteCommand {
     return argumentBuilder;
   }
 
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockInfoArguments(CommandNode<ServerCommandSource> root, T argumentBuilder, boolean positive) {
+    return argumentBuilder
+        .then(addBlockFloatInfoConditionalLogic(root, literal("hardness"), AbstractBlock.AbstractBlockState::getHardness, positive))
+        .then(addBlockIntInfoConditionalLogic(root, literal("luminance"), (state, serverWorld, pos) -> state.getLuminance(), positive))
+        .then(addBlockIntInfoConditionalLogicWithDirection(root, literal("strong_redstone_power"), AbstractBlock.AbstractBlockState::getStrongRedstonePower, positive))
+        .then(addBlockIntInfoConditionalLogicWithDirection(root, literal("weak_redstone_power"), AbstractBlock.AbstractBlockState::getWeakRedstonePower, positive))
+        .then(addBlockIntInfoConditionalLogic(root, literal("light"), (state, serverWorld, pos) -> serverWorld.getLightLevel(pos), positive))
+        .then(addBlockIntInfoConditionalLogic(root, literal("block_light"), (state, serverWorld, pos) -> serverWorld.getLightLevel(LightType.BLOCK, pos), positive))
+        .then(addBlockIntInfoConditionalLogic(root, literal("sky_light"), (state, serverWorld, pos) -> serverWorld.getLightLevel(LightType.SKY, pos), positive))
+        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("emits_redstone_power"), (state, serverWorld, pos) -> state.emitsRedstonePower(), positive))
+        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("opaque"), (state, serverWorld, pos) -> state.isOpaque(), positive))
+        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("model_offset"), (state, serverWorld, pos) -> !state.getModelOffset(serverWorld, pos).equals(Vec3d.ZERO), positive))
+        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("suffocate"), AbstractBlock.AbstractBlockState::shouldSuffocate, positive))
+        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("block_vision"), AbstractBlock.AbstractBlockState::shouldBlockVision, positive))
+        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("replaceable"), (state, serverWorld, pos) -> state.isReplaceable(), positive))
+        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("random_ticks"), (state, serverWorld, pos) -> state.hasRandomTicks(), positive));
+  }
 
-  public static LiteralArgumentBuilder<ServerCommandSource> addExtraConditionArguments(CommandNode<ServerCommandSource> root, LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockFloatInfoConditionalLogic(CommandNode<ServerCommandSource> root, T node, ToFloatTriFunction<BlockState, ServerWorld, BlockPos> function, boolean positive) {
+    return node.then(addConditionLogic(root, argument("range", NumberRangeArgumentType.floatRange()), positive, context -> {
+      final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+      final ServerWorld world = context.getSource().getWorld();
+      return NumberRangeArgumentType.FloatRangeArgumentType.getRangeArgument(context, "range").test(function.applyAsFloat(world.getBlockState(pos), world, pos));
+    }));
+  }
+
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockIntInfoConditionalLogic(CommandNode<ServerCommandSource> root, T node, ToIntTriFunction<BlockState, ServerWorld, BlockPos> function, boolean positive) {
+    return node.then(addConditionLogic(root, argument("range", NumberRangeArgumentType.intRange()), positive, context -> {
+      final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+      final ServerWorld world = context.getSource().getWorld();
+      return NumberRangeArgumentType.IntRangeArgumentType.getRangeArgument(context, "range").test(function.applyAsInt(world.getBlockState(pos), world, pos));
+    }));
+  }
+
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockIntInfoConditionalLogicWithDirection(CommandNode<ServerCommandSource> root, T node, ToIntQuadFunction<BlockState, ServerWorld, BlockPos, Direction> function, boolean positive) {
+    return node.then(argument("direction", DirectionArgumentType.create())
+        .then(addConditionLogic(root, argument("range", NumberRangeArgumentType.intRange()), positive, context -> {
+          final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+          final ServerWorld world = context.getSource().getWorld();
+          final Direction direction = DirectionArgumentType.getDirection(context, "direction");
+          return NumberRangeArgumentType.IntRangeArgumentType.getRangeArgument(context, "range").test(function.applyAsInt(world.getBlockState(pos), world, pos, direction));
+        })));
+  }
+
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockBooleanInfoConditionalLogicWith(CommandNode<ServerCommandSource> root, T node, TriPredicate<BlockState, ServerWorld, BlockPos> function, boolean positive) {
+    return addConditionLogic(root, node, positive, context -> {
+      final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+      final ServerWorld world = context.getSource().getWorld();
+      return function.test(world.getBlockState(pos), world, pos);
+    });
+  }
+
+
+  public static <T extends ArgumentBuilder<ServerCommandSource, T>> T addExtraConditionArguments(CommandNode<ServerCommandSource> root, T argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
     return argumentBuilder
         .then(literal("rand")
             .then(addConditionLogic(root, argument("probability", FloatArgumentType.floatArg(0, 1)), positive, context -> RandomUtils.nextFloat(0, 1) < FloatArgumentType.getFloat(context, "probability"))));
@@ -375,7 +461,7 @@ public final class SeparatedExecuteCommand {
     return value == positive ? Collections.singleton(context.getSource()) : Collections.emptyList();
   }
 
-  private static ArgumentBuilder<ServerCommandSource, ?> addConditionLogic(CommandNode<ServerCommandSource> root, ArgumentBuilder<ServerCommandSource, ?> builder, boolean positive, Condition condition) {
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addConditionLogic(CommandNode<ServerCommandSource> root, T builder, boolean positive, Condition condition) {
     return builder.fork(root, context -> getSourceOrEmptyForConditionFork(context, positive, condition.test(context))).executes(context -> {
       if (positive == condition.test(context)) {
         CommandBridge.sendFeedback(context, () -> Text.translatable("commands.execute.conditional.pass"), false);

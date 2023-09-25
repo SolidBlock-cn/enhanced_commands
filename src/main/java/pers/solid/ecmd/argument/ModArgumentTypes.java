@@ -29,6 +29,7 @@ public class ModArgumentTypes {
     register("keyword_args", KeywordArgsArgumentType.class, new KeywordArgsArgumentSerializer());
     register("pos", EnhancedPosArgumentType.class, new EnhancedPosArgumentType.Serializer());
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));
+    register("unloaded_pos_behavior", UnloadedPosBehaviorArgumentType.class, ConstantArgumentSerializer.of(UnloadedPosBehaviorArgumentType::new));
     register("vanilla_wrapped", VanillaWrappedArgumentType.class, VanillaWrappedArgumentType.Serializer.INSTANCE);
   }
 

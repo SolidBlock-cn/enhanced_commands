@@ -142,6 +142,11 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
     return String.format("hcyl(%s, %s, %s %s %s, %s)", cylinderRegion.radius(), cylinderRegion.height(), cylinderRegion.center().x, cylinderRegion.center().y, cylinderRegion.center().z, outlineType.asString());
   }
 
+  @Override
+  public @Nullable Box maxContainingBox() {
+    return cylinderRegion.maxContainingBox();
+  }
+
   public enum Type implements RegionType<HollowCylinderRegion> {
     HOLLOW_CYLINDER_TYPE;
 

@@ -7,6 +7,7 @@ import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +59,11 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   @Override
   public @NotNull String asString() {
     return "sphere(%s, %s %s %s)".formatted(radius, center.x, center.y, center.z);
+  }
+
+  @Override
+  public @NotNull Box maxContainingBox() {
+    return Box.of(center, 2 * radius, 2 * radius, 2 * radius);
   }
 
   public enum Type implements RegionType<SphereRegion> {

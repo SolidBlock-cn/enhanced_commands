@@ -5,10 +5,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -113,6 +110,11 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   @Override
   public @NotNull String asString() {
     return String.format("cyl(%s, %s, %s %s %s)", radius, height, center.x, center.y, center.z);
+  }
+
+  @Override
+  public @Nullable Box maxContainingBox() {
+    return new Box(center.x - radius, center.y - height / 2, center.z - radius, center.x + radius, center.y + height / 2, center.z + radius);
   }
 
   public enum Type implements RegionType<CylinderRegion> {

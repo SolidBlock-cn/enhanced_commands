@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util;
+package pers.solid.ecmd.util.lambda;
 
 import org.apache.commons.lang3.function.TriFunction;
 

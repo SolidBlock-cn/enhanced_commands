@@ -6,6 +6,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
@@ -71,6 +72,11 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
   @Override
   public @NotNull String asString() {
     return String.format("cuboid_wall(%s %s %s, %s %s %s, %s)", blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.maxY(), blockCuboidRegion.maxZ(), thickness);
+  }
+
+  @Override
+  public @Nullable Box maxContainingBox() {
+    return blockCuboidRegion.maxContainingBox();
   }
 
   @Override
