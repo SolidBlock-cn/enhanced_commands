@@ -26,6 +26,7 @@ import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.SuggestionUtil;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.stream.Stream;
 
@@ -68,8 +69,9 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(Registries.BLOCK.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName())));
       blockId = Identifier.fromCommandInput(reader);
       block = Registries.BLOCK.getOrEmpty(blockId).orElseThrow(() -> {
+        final int cursorAfterParsing = reader.getCursor();
         this.reader.setCursor(cursorBeforeParsing);
-        return BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString());
+        return CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString()), cursorAfterParsing);
       });
     } else {
       int cursorBeforeParsing = this.reader.getCursor();
@@ -79,12 +81,13 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       });
       this.blockId = Identifier.fromCommandInput(this.reader);
       this.block = this.registryWrapper.getOptional(RegistryKey.of(RegistryKeys.BLOCK, this.blockId)).orElseThrow(() -> {
+        final int cursorAfterParsing = reader.getCursor();
         this.reader.setCursor(cursorBeforeParsing);
         if (Registries.BLOCK.containsId(blockId)) {
           final Block block1 = Registries.BLOCK.get(blockId);
-          return ModCommandExceptionTypes.FEATURE_REQUIRED.createWithContext(reader, Text.literal(blockId.toString()).styled(TextUtil.STYLE_FOR_ACTUAL), block1.getName().styled(TextUtil.STYLE_FOR_TARGET));
+          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.FEATURE_REQUIRED.createWithContext(reader, Text.literal(blockId.toString()).styled(TextUtil.STYLE_FOR_ACTUAL), block1.getName().styled(TextUtil.STYLE_FOR_TARGET)), cursorAfterParsing);
         }
-        return BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString());
+        return CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString()), cursorAfterParsing);
       }).value();
     }
   }

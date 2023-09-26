@@ -8,6 +8,8 @@
     "BlockPredicateArgumentTypeMixin",
     "BlockStateArgumentTypeMixin",
     "CachedBlockPositionAccessor",
+    "CommandManagerMixin",
+    "CommandSyntaxExceptionMixin",
     "GameModeArgumentTypeMixin",
     "ServerCommandSourceAccessor",
     "ThreadExecutorMixin",
