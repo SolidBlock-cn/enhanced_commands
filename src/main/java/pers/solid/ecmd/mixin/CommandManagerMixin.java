@@ -1,14 +1,13 @@
 package pers.solid.ecmd.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -19,23 +18,12 @@ import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 @Mixin(CommandManager.class)
 public abstract class CommandManagerMixin {
-  @Unique
-  private CommandSyntaxException ec$sharedCommandSyntaxException = null;
-  @Unique
-  private int ec$sharedI = -1;
-
-  @Inject(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;empty()Lnet/minecraft/text/MutableText;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/CommandSyntaxException;getRawMessage()Lcom/mojang/brigadier/Message;", remap = false), to = @At(value = "INVOKE", target = "Lnet/minecraft/text/MutableText;formatted(Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/MutableText;")), locals = LocalCapture.CAPTURE_FAILSOFT)
-  public void injectedLocalShare(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfoReturnable<Integer> cir, ServerCommandSource serverCommandSource, CommandSyntaxException commandSyntaxException, int i) {
-    ec$sharedCommandSyntaxException = commandSyntaxException;
-    ec$sharedI = i;
-  }
-
   @ModifyArg(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;literal(Ljava/lang/String;)Lnet/minecraft/text/MutableText;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/text/MutableText;formatted([Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/MutableText;")))
-  public String modifiedGetErrorMessage(String string) {
-    if (ec$sharedCommandSyntaxException != null) {
-      final int cursorEnd = Math.min(ec$sharedCommandSyntaxException.getInput().length(), ((CommandSyntaxExceptionExtension) ec$sharedCommandSyntaxException).ec$getCursorEnd());
-      if (cursorEnd >= ec$sharedI) {
-        return string.substring(0, cursorEnd - ec$sharedI);
+  public String modifiedGetErrorMessage(String string, @Local CommandSyntaxException commandSyntaxException, @Local int i) {
+    if (commandSyntaxException != null) {
+      final int cursorEnd = Math.min(commandSyntaxException.getInput().length(), ((CommandSyntaxExceptionExtension) commandSyntaxException).ec$getCursorEnd());
+      if (cursorEnd >= i) {
+        return string.substring(0, cursorEnd - i);
       }
     }
     return string;
@@ -45,7 +33,6 @@ public abstract class CommandManagerMixin {
   public void injectedAppendText(ParseResults<ServerCommandSource> parseResults, String command, CallbackInfoReturnable<Integer> cir, ServerCommandSource serverCommandSource, CommandSyntaxException commandSyntaxException, int i, MutableText mutableText, Text text) {
     final int cursorEnd = ((CommandSyntaxExceptionExtension) commandSyntaxException).ec$getCursorEnd();
     if (cursorEnd >= i) {
-      ((MutableText) text).formatted(Formatting.DARK_RED);
       mutableText.append(Text.literal(commandSyntaxException.getInput().substring(cursorEnd, Math.min(cursorEnd + 10, commandSyntaxException.getInput().length()))));
     }
   }

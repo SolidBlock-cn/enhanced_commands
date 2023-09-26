@@ -10,8 +10,13 @@
     "CachedBlockPositionAccessor",
     "CommandManagerMixin",
     "CommandSyntaxExceptionMixin",
+    "EnumArgumentTypeMixin",
     "GameModeArgumentTypeMixin",
+    "IdentifierMixin",
+    "RegistryEntryArgumentTypeMixin",
+    "RegistryEntryPredicateArgumentTypeMixin",
     "ServerCommandSourceAccessor",
+    "StringReaderMixin",
     "ThreadExecutorMixin",
     "Vec3ArgumentTypeMixin"
   ],

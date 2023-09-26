@@ -10,6 +10,7 @@ import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.*;
+import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,8 +88,9 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
         propertyPredicates.add(new ValuePropertyPredicate<>(property, comparator, parse.get()));
         suggestionProviders.clear();
       } else {
+        final int cursorAfterParseValue = reader.getCursor();
         this.reader.setCursor(cursorBeforeParseValue);
-        throw BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(this.reader, blockId.toString(), property.getName(), valueName);
+        throw CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(this.reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
       }
     }
   }

@@ -179,14 +179,16 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     // parse block property name
     String propertyName = reader.readString();
     if (propertyName.isEmpty()) {
+      final int cursorAfterReadString = reader.getCursor();
       this.reader.setCursor(cursorBeforeReadString);
-      throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, this.blockId.toString(), propertyName);
+      throw CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(this.reader, this.blockId.toString(), propertyName), cursorAfterReadString);
     }
     final StateManager<Block, BlockState> stateManager = block.getStateManager();
     Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) {
+      final int cursorAfterReadString = reader.getCursor();
       reader.setCursor(cursorBeforeReadString);
-      throw BlockArgumentParser.UNKNOWN_PROPERTY_EXCEPTION.createWithContext(reader, blockId, propertyName);
+      throw CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.UNKNOWN_PROPERTY_EXCEPTION.createWithContext(reader, blockId, propertyName), cursorAfterReadString);
     }
     suggestionProviders.clear();
     return property;

@@ -17,6 +17,8 @@ import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.*;
 
+import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCursorEnd;
+
 public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedParser {
   public final List<PropertyFunction<?>> propertyFunctions = new ArrayList<>();
   public final Set<Property<?>> mentionedProperties = new HashSet<>();
@@ -84,8 +86,9 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
         propertyFunctions.add(new SimplePropertyFunction<>(property, parse.get(), must));
         suggestionProviders.clear();
       } else {
+        final int cursorAfterParseValue = reader.getCursor();
         this.reader.setCursor(cursorBeforeParseValue);
-        throw BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(this.reader, blockId.toString(), property.getName(), valueName);
+        throw withCursorEnd(BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(this.reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
       }
     }
   }
@@ -164,9 +167,9 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
       if (peek == '*' || peek == '~') {
         cursorBeforeGeneralFunction = reader.getCursor();
         if (exceptionForGeneralProperty != null) {
-          throw DUPLICATE_GENERAL_PROPERTY_FUNCTION.createWithContext(reader);
+          throw withCursorEnd(DUPLICATE_GENERAL_PROPERTY_FUNCTION.createWithContext(reader), reader.getCursor() + 1);
         } else if (propertiesExhausted) {
-          throw EXHAUSTED_GENERAL_PROPERTIES.createWithContext(reader);
+          throw withCursorEnd(EXHAUSTED_GENERAL_PROPERTIES.createWithContext(reader), reader.getCursor() + 1);
         }
         reader.skip();
         suggestionProviders.clear();
@@ -190,7 +193,7 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
       final char peek = reader.peek();
       if (peek == '*' || peek == '~') {
         if (exceptionForGeneralPropertyName != null) {
-          throw DUPLICATE_GENERAL_PROPERTY_FUNCTION.createWithContext(reader);
+          throw withCursorEnd(DUPLICATE_GENERAL_PROPERTY_FUNCTION.createWithContext(reader), reader.getCursor() + 1);
         }
         reader.skip();
         suggestionProviders.clear();

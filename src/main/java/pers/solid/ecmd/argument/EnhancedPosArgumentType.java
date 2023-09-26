@@ -33,6 +33,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCursorEnd;
+
 /**
  * Similar to {@link net.minecraft.command.argument.BlockPosArgumentType} and {@link Vec3ArgumentType}, with some slight modifications.
  *
@@ -74,12 +76,12 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
       double[] values = new double[3];
       for (int i = 0; i < 3; i++) {
         if (!reader.canRead()) {
-          throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+          throw withCursorEnd(Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
         }
         if (reader.peek() == '^') {
           reader.skip();
         } else {
-          throw Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader);
+          throw withCursorEnd(Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
         }
         final double num;
         if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
@@ -115,7 +117,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
           hasTilde = true;
           reader.skip();
         } else if (reader.peek() == '^') {
-          throw Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader);
+          throw withCursorEnd(Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
         }
 
         if (behavior.intOnly()) {

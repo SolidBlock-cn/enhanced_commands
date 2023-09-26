@@ -17,6 +17,7 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.nbt.SimpleNbtFunction;
 import pers.solid.ecmd.util.SuggestionProvider;
 import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -109,7 +110,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
         entries.put(key, parseFunction(true, false));
       } else {
         if (reader.canRead() && (reader.peek() == ':' || reader.peek() == '=')) {
-          throw SIGN_UNEXPECTED_WHEN_REMOVING_KEY.createWithContext(reader);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(SIGN_UNEXPECTED_WHEN_REMOVING_KEY.createWithContext(reader), reader.getCursor() + 1);
         }
         entries.put(key, null);
       }
@@ -177,7 +178,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
         if (reader.canRead(3) && reader.peek() == '.' && reader.peek(1) == '.' && reader.peek(2) == '.') {
           // 解析到了省略号的情况
           if (hasFoundEclipse) {
-            throw DUPLICATE_ECLIPSE.createWithContext(reader);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(DUPLICATE_ECLIPSE.createWithContext(reader), reader.getCursor() + 3);
           }
           reader.setCursor(reader.getCursor() + 3);
           suggestionProviders.clear();
@@ -262,9 +263,9 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
           this.reader.skipWhitespace();
         } else if (this.reader.canRead() && this.reader.peek() == ';') {
           if (hasFoundSemicolon) {
-            throw DUPLICATE_SEMICOLON.createWithContext(reader);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(DUPLICATE_SEMICOLON.createWithContext(reader), reader.getCursor() + 1);
           } else if (currentlyAppendingList == rightPartList) {
-            throw UNEXPECTED_SEMICOLON_AFTER_ECLIPSE.createWithContext(reader);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(UNEXPECTED_SEMICOLON_AFTER_ECLIPSE.createWithContext(reader), reader.getCursor() + 1);
           } else {
             rightPartList = new ArrayList<>();
             currentlyAppendingList = rightPartList;

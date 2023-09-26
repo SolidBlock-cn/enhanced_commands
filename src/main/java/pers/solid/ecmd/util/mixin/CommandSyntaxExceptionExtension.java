@@ -7,7 +7,7 @@ public interface CommandSyntaxExceptionExtension {
 
   int ec$getCursorEnd();
 
-  static CommandSyntaxException withCursorEnd(CommandSyntaxException exception, int cursorEnd) {
+  static <T extends CommandSyntaxException> T withCursorEnd(T exception, int cursorEnd) {
     ((CommandSyntaxExceptionExtension) exception).ec$setCursorEnd(cursorEnd);
     return exception;
   }
