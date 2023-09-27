@@ -16,12 +16,10 @@ public final class ModCommands implements CommandRegistrationCallback {
     DrawCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RandCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    RegionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     SeparatedExecuteCommand.register(dispatcher, registryAccess);
     SetBlocksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TasksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestArgCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestForCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    TestPosCommand.INSTANCE.register(dispatcher, registryAccess, environment);
   }
 }

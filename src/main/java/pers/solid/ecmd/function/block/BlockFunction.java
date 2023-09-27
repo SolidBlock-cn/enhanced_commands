@@ -1,7 +1,6 @@
 package pers.solid.ecmd.function.block;
 
 import com.google.common.base.Preconditions;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.Block;
@@ -30,7 +29,7 @@ public interface BlockFunction extends StringRepresentableFunction, NbtConvertib
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_function.cannotParse"));
 
   static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(new StringReader(s)), false).apply(source);
+    return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).apply(source);
   }
 
   default boolean setBlock(World world, BlockPos pos, int flags, int modFlags) {

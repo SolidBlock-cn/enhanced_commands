@@ -1,7 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Preconditions;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -20,7 +19,7 @@ public interface BlockPredicate extends StringRepresentablePredicate, NbtConvert
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return BlockPredicateArgument.parse(commandRegistryAccess, new SuggestedParser(new StringReader(s)), false).apply(source);
+    return BlockPredicateArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).apply(source);
   }
 
   boolean test(CachedBlockPosition cachedBlockPosition);

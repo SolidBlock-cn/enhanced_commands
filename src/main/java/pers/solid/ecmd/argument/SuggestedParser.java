@@ -28,6 +28,10 @@ public class SuggestedParser {
   public final StringReader reader;
   public List<SuggestionProvider> suggestionProviders;
 
+  public SuggestedParser(String string) {
+    this(new StringReader(string));
+  }
+
   public SuggestedParser(StringReader reader) {
     this(reader, new ArrayList<>());
   }
