@@ -5,6 +5,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic3CommandExceptionType;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -12,21 +14,24 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.LookingPosArgument;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixin.ClientCommandSourceAccessor;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,21 +56,82 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
 
   public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.pos.local_coordinates_not_allowed"));
 
-  public static PosArgument getPos(String name, CommandContext<?> context) {
+  public static PosArgument getPos(CommandContext<?> context, String name) {
     return context.getArgument(name, PosArgument.class);
+  }
+
+  /**
+   * 获取方块坐标，且不检查是否在加载的区块内以及坐标是否有效。
+   */
+  public static BlockPos getBlockPos(CommandContext<ServerCommandSource> context, String name) {
+    return getPos(context, name).toAbsoluteBlockPos(context.getSource());
+  }
+
+  /**
+   * 获取方块坐标，并检查是否在已加载的区块内，不会检查坐标是否在高度限制内。
+   */
+  public static BlockPos getLoadedBlockPos(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    return checkChunkLoaded(context.getSource().getWorld(), getBlockPos(context, name));
+  }
+
+  /**
+   * 获取方块坐标，并检查方块坐标是否可用于旋转方块，不会检查坐标是否在已加载的区块内。
+   */
+  public static BlockPos getBuildableBlockPos(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    return checkBuildLimit(context.getSource().getWorld(), getBlockPos(context, name));
+  }
+
+  /**
+   * 获取方块坐标，并检查方块坐标是否在已加载的区块内且在建筑的范围限制内。
+   *
+   * @see net.minecraft.command.argument.BlockPosArgumentType#getLoadedBlockPos(CommandContext, ServerWorld, String)
+   */
+  public static BlockPos getLoadedBuildableBlockPos(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    final BlockPos blockPos = getBlockPos(context, name);
+    final ServerWorld world = context.getSource().getWorld();
+    checkChunkLoaded(world, blockPos);
+    checkBuildLimit(world, blockPos);
+    return blockPos;
+  }
+
+  public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.unloaded", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.out_of_build_limit", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.out_of_bounds", pos));
+  public static final Dynamic3CommandExceptionType OUT_OF_HEIGHT_LIMIT = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhancedCommands.argument.pos.out_of_height_limit", pos, lowest, highest));
+  public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhancedCommands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
+
+  public static <T extends BlockPos> T checkChunkLoaded(ServerWorld world, T blockPos) throws CommandSyntaxException {
+    if (!world.isChunkLoaded(blockPos)) {
+      throw UNLOADED_EXCEPTION.create(TextUtil.wrapBlockPos(blockPos));
+    }
+    return blockPos;
+  }
+
+  public static <T extends BlockPos> T checkBuildLimit(ServerWorld world, T blockPos) throws CommandSyntaxException {
+    if (!world.isInBuildLimit(blockPos)) {
+      if (world.isOutOfHeightLimit(blockPos)) {
+        throw OUT_OF_HEIGHT_LIMIT.create(TextUtil.wrapBlockPos(blockPos), world.getBottomY(), world.getTopY());
+      } else if (!isValidHorizontally(blockPos)) {
+        throw OUT_OF_HORIZONTAL_BOUNDS.create(TextUtil.wrapBlockPos(blockPos), -30000000, 30000000);
+      } else {
+        throw OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapBlockPos(blockPos));
+      }
+    }
+    return blockPos;
+  }
+
+  private static boolean isValidHorizontally(BlockPos pos) {
+    return pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000;
+  }
+
+  private static boolean isInvalidVertically(int y) {
+    return y < -20000000 || y >= 20000000;
   }
 
   @Override
   public PosArgument parse(StringReader reader) throws CommandSyntaxException {
     if (!reader.canRead()) {
       throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
-    }
-    final int cursorBeforeRead = reader.getCursor();
-    // try to read the word "here".
-    if (reader.readString().equals(HERE_STRING)) {
-      return behavior.preferInt() ? HERE_INT : HERE_DOUBLE;
-    } else {
-      reader.setCursor(cursorBeforeRead);
     }
 
     // try to read a looking pos
@@ -167,7 +233,6 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-    final String remaining = builder.getRemaining();
 
     @Nullable Vec3d crossHairPos = null;
     @Nullable Vec3i crossHairBlockPos = null;
@@ -179,10 +244,6 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
           crossHairBlockPos = blockHitResult.getBlockPos();
         }
       }
-    }
-
-    if (CommandSource.shouldSuggest(remaining, HERE_STRING)) {
-      builder.suggest(HERE_STRING, behavior.preferInt() ? Text.translatable("enhancedCommands.argument.pos.here_int") : Text.translatable("enhancedCommands.argument.pos.here_double"));
     }
 
     // try to read a looking pos

@@ -12,7 +12,6 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -29,6 +28,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.DirectionArgumentType;
+import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
@@ -50,7 +50,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static LiteralArgumentBuilder<ServerCommandSource> addBlockCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, CommandRegistryAccess registryAccess) {
     return argumentBuilder
-        .then(CommandManager.argument("pos", BlockPosArgumentType.blockPos())
+        .then(CommandManager.argument("pos", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
             .executes(TestForCommand::executeTestForBlock)
             .then(CommandManager.argument("predicate", new BlockPredicateArgumentType(registryAccess))
                 .executes(context -> executeTestForBlockPredicate(context, false))
@@ -59,7 +59,8 @@ public enum TestForCommand implements CommandRegistrationCallback {
   }
 
   private static int executeTestForBlock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final BlockPos blockPos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
+    // 会检查区块已加载，不过不是在这里，而是在下面。
     final ServerCommandSource source = context.getSource();
     final ServerWorld world = source.getWorld();
     if (!world.isChunkLoaded(blockPos)) {
@@ -76,7 +77,8 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static int executeTestForBlockPredicate(CommandContext<ServerCommandSource> context, boolean forceLoad) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos blockPos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
+    // 检查方块的代码在后面
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(source.getWorld(), blockPos, forceLoad);
     if (cachedBlockPosition.getBlockState() == null) {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapBlockPos(blockPos));
@@ -92,9 +94,9 @@ public enum TestForCommand implements CommandRegistrationCallback {
     return text.append(value instanceof Boolean bool ? Text.literal(property.name(value)).formatted(bool ? Formatting.GREEN : Formatting.RED) : Text.literal(property.name(value)));
   }
 
-  private static LiteralArgumentBuilder<ServerCommandSource> addBlockInfoCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, CommandRegistryAccess registryAccess) {
+  private static LiteralArgumentBuilder<ServerCommandSource> addBlockInfoCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder) {
     return argumentBuilder
-        .then(CommandManager.argument("pos", BlockPosArgumentType.blockPos())
+        .then(CommandManager.argument("pos", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
             .then(CommandManager.literal("hardness")
                 .executes(context -> executeGetHardness(context, 1))
                 .then(CommandManager.argument("scale", FloatArgumentType.floatArg())
@@ -131,7 +133,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static int getIntBlockInfo(CommandContext<ServerCommandSource> context, String translationKey, ToIntTriFunction<BlockState, ServerWorld, BlockPos> function) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final int value = function.applyAsInt(blockState, world, pos);
@@ -141,7 +143,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static int getIntBlockInfoWithDirection(CommandContext<ServerCommandSource> context, String translationKey, ToIntQuadFunction<BlockState, ServerWorld, BlockPos, Direction> function) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final Direction direction = DirectionArgumentType.getDirection(context, "direction");
@@ -152,7 +154,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static float getFloatBlockInfo(CommandContext<ServerCommandSource> context, String translationKey, ToFloatTriFunction<BlockState, ServerWorld, BlockPos> function) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final float value = function.applyAsFloat(blockState, world, pos);
@@ -162,7 +164,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static boolean getBooleanBlockInfo(CommandContext<ServerCommandSource> context, String translationKeyWhenFalse, String translationKeyWhenTrue, TriPredicate<BlockState, ServerWorld, BlockPos> predicate) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final boolean value = predicate.test(blockState, world, pos);
@@ -205,7 +207,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static int executeGetModelOffset(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final Vec3d modelOffset = blockState.getModelOffset(world, pos);
@@ -239,6 +241,6 @@ public enum TestForCommand implements CommandRegistrationCallback {
     dispatcher.register(CommandManager.literal("testfor")
         .requires(ModCommands.REQUIRES_PERMISSION_2)
         .then(addBlockCommandProperties(CommandManager.literal("block"), registryAccess))
-        .then(addBlockInfoCommandProperties(CommandManager.literal("block_info"), registryAccess)));
+        .then(addBlockInfoCommandProperties(CommandManager.literal("block_info"))));
   }
 }

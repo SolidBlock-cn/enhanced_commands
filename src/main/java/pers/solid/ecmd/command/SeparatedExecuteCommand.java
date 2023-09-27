@@ -56,6 +56,7 @@ import net.minecraft.world.chunk.WorldChunk;
 import org.apache.commons.lang3.RandomUtils;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.DirectionArgumentType;
+import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.RegionArgumentType;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.bridge.CommandBridge;
@@ -289,25 +290,25 @@ public final class SeparatedExecuteCommand {
   private static LiteralArgumentBuilder<ServerCommandSource> addConditionArguments(CommandNode<ServerCommandSource> root, LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
     argumentBuilder
         .then(literal("block")
-            .then(argument("pos", BlockPosArgumentType.blockPos())
+            .then(argument("pos", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
                 // note the block predicate type is in this mod
-                .then(addConditionLogic(root, argument("block", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess)), positive, context -> BlockPredicateArgumentType.getBlockPredicate(context, "block").test(new CachedBlockPosition(context.getSource().getWorld(), BlockPosArgumentType.getLoadedBlockPos(context, "pos"), true))))))
+                .then(addConditionLogic(root, argument("block", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess)), positive, context -> BlockPredicateArgumentType.getBlockPredicate(context, "block").test(new CachedBlockPosition(context.getSource().getWorld(), EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), true))))))
         .then(literal("block_info")
-            .then(addBlockInfoArguments(root, argument("pos", BlockPosArgumentType.blockPos()), positive)))
+            .then(addBlockInfoArguments(root, argument("pos", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false)), positive)))
         .then(literal("biome")
-            .then(argument("pos", BlockPosArgumentType.blockPos())
-                .then(addConditionLogic(root, argument("biome", RegistryEntryPredicateArgumentType.registryEntryPredicate(commandRegistryAccess, RegistryKeys.BIOME)), positive, context -> RegistryEntryPredicateArgumentType.getRegistryEntryPredicate(context, "biome", RegistryKeys.BIOME).test(context.getSource().getWorld().getBiome(BlockPosArgumentType.getLoadedBlockPos(context, "pos")))))))
+            .then(argument("pos", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
+                .then(addConditionLogic(root, argument("biome", RegistryEntryPredicateArgumentType.registryEntryPredicate(commandRegistryAccess, RegistryKeys.BIOME)), positive, context -> RegistryEntryPredicateArgumentType.getRegistryEntryPredicate(context, "biome", RegistryKeys.BIOME).test(context.getSource().getWorld().getBiome(EnhancedPosArgumentType.getLoadedBlockPos(context, "pos")))))))
         .then(literal("loaded")
-            .then(addConditionLogic(root, argument("pos", BlockPosArgumentType.blockPos()), positive, commandContext -> isLoaded(commandContext.getSource().getWorld(), BlockPosArgumentType.getBlockPos(commandContext, "pos")))))
+            .then(addConditionLogic(root, argument("pos", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false)), positive, commandContext -> isLoaded(commandContext.getSource().getWorld(), EnhancedPosArgumentType.getBlockPos(commandContext, "pos")))))
         .then(literal("dimension")
             .then(addConditionLogic(root, argument("dimension", DimensionArgumentType.dimension()), positive, context -> DimensionArgumentType.getDimensionArgument(context, "dimension") == context.getSource().getWorld())))
         .then(literal("score")
             .then(argument("target", ScoreHolderArgumentType.scoreHolder()).suggests(ScoreHolderArgumentType.SUGGESTION_PROVIDER)
                 .then(getScoreTargetObjectiveArgument(root, positive))))
         .then(literal("blocks")
-            .then(argument("start", BlockPosArgumentType.blockPos())
-                .then(argument("end", BlockPosArgumentType.blockPos())
-                    .then(argument("destination", BlockPosArgumentType.blockPos())
+            .then(argument("start", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
+                .then(argument("end", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
+                    .then(argument("destination", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
                         .then(addBlocksConditionLogic(root, literal("all"), positive, false))
                         .then(addBlocksConditionLogic(root, literal("masked"), positive, true))))))
         .then(literal("entity")
@@ -345,7 +346,7 @@ public final class SeparatedExecuteCommand {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockFloatInfoConditionalLogic(CommandNode<ServerCommandSource> root, T node, ToFloatTriFunction<BlockState, ServerWorld, BlockPos> function, boolean positive) {
     return node.then(addConditionLogic(root, argument("range", NumberRangeArgumentType.floatRange()), positive, context -> {
-      final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+      final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
       final ServerWorld world = context.getSource().getWorld();
       return NumberRangeArgumentType.FloatRangeArgumentType.getRangeArgument(context, "range").test(function.applyAsFloat(world.getBlockState(pos), world, pos));
     }));
@@ -353,7 +354,7 @@ public final class SeparatedExecuteCommand {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockIntInfoConditionalLogic(CommandNode<ServerCommandSource> root, T node, ToIntTriFunction<BlockState, ServerWorld, BlockPos> function, boolean positive) {
     return node.then(addConditionLogic(root, argument("range", NumberRangeArgumentType.intRange()), positive, context -> {
-      final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+      final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
       final ServerWorld world = context.getSource().getWorld();
       return NumberRangeArgumentType.IntRangeArgumentType.getRangeArgument(context, "range").test(function.applyAsInt(world.getBlockState(pos), world, pos));
     }));
@@ -362,7 +363,7 @@ public final class SeparatedExecuteCommand {
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockIntInfoConditionalLogicWithDirection(CommandNode<ServerCommandSource> root, T node, ToIntQuadFunction<BlockState, ServerWorld, BlockPos, Direction> function, boolean positive) {
     return node.then(argument("direction", DirectionArgumentType.create())
         .then(addConditionLogic(root, argument("range", NumberRangeArgumentType.intRange()), positive, context -> {
-          final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+          final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
           final ServerWorld world = context.getSource().getWorld();
           final Direction direction = DirectionArgumentType.getDirection(context, "direction");
           return NumberRangeArgumentType.IntRangeArgumentType.getRangeArgument(context, "range").test(function.applyAsInt(world.getBlockState(pos), world, pos, direction));
@@ -371,7 +372,7 @@ public final class SeparatedExecuteCommand {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockBooleanInfoConditionalLogicWith(CommandNode<ServerCommandSource> root, T node, TriPredicate<BlockState, ServerWorld, BlockPos> function, boolean positive) {
     return addConditionLogic(root, node, positive, context -> {
-      final BlockPos pos = BlockPosArgumentType.getLoadedBlockPos(context, "pos");
+      final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
       final ServerWorld world = context.getSource().getWorld();
       return function.test(world.getBlockState(pos), world, pos);
     });
@@ -497,7 +498,7 @@ public final class SeparatedExecuteCommand {
   }
 
   private static OptionalInt testBlocksCondition(CommandContext<ServerCommandSource> context, boolean masked) throws CommandSyntaxException {
-    return testBlocksCondition(context.getSource().getWorld(), BlockPosArgumentType.getLoadedBlockPos(context, "start"), BlockPosArgumentType.getLoadedBlockPos(context, "end"), BlockPosArgumentType.getLoadedBlockPos(context, "destination"), masked);
+    return testBlocksCondition(context.getSource().getWorld(), EnhancedPosArgumentType.getLoadedBlockPos(context, "start"), EnhancedPosArgumentType.getLoadedBlockPos(context, "end"), EnhancedPosArgumentType.getLoadedBlockPos(context, "destination"), masked);
   }
 
   private static OptionalInt testBlocksCondition(ServerWorld world, BlockPos start, BlockPos end, BlockPos destination, boolean masked) throws CommandSyntaxException {

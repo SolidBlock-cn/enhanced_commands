@@ -24,7 +24,7 @@ public enum TestPosCommand implements CommandRegistrationCallback {
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     final LiteralArgumentBuilder<ServerCommandSource> literal = CommandManager.literal("testpos");
     final Command<ServerCommandSource> execution = context -> {
-      final PosArgument pos = EnhancedPosArgumentType.getPos("pos", context);
+      final PosArgument pos = EnhancedPosArgumentType.getPos(context, "pos");
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testpos.result"), true);
       CommandBridge.sendFeedback(context, () -> Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY), true);

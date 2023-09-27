@@ -10,7 +10,7 @@ import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 @Mixin(Identifier.class)
 public abstract class IdentifierMixin {
-  @ModifyExpressionValue(method = "fromCommandInput", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"))
+  @ModifyExpressionValue(method = "fromCommandInput", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static CommandSyntaxException modifiedException(CommandSyntaxException commandSyntaxException, @Local int cursor, @Local String string) {
     return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursor + string.length());
   }
