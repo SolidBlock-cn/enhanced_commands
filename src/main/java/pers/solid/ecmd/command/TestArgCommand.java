@@ -274,7 +274,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addPosProperties(T argumentBuilder) {
     final Command<ServerCommandSource> execution = context -> {
-      final PosArgument pos = EnhancedPosArgumentType.getPos(context, "pos");
+      final PosArgument pos = EnhancedPosArgumentType.getPosArgument(context, "pos");
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.pos.result"), true);
       CommandBridge.sendFeedback(context, () -> Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY), true);

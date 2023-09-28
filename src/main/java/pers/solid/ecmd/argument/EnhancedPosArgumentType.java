@@ -56,7 +56,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
 
   public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.pos.local_coordinates_not_allowed"));
 
-  public static PosArgument getPos(CommandContext<?> context, String name) {
+  public static PosArgument getPosArgument(CommandContext<?> context, String name) {
     return context.getArgument(name, PosArgument.class);
   }
 
@@ -64,7 +64,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
    * 获取方块坐标，且不检查是否在加载的区块内以及坐标是否有效。
    */
   public static BlockPos getBlockPos(CommandContext<ServerCommandSource> context, String name) {
-    return getPos(context, name).toAbsoluteBlockPos(context.getSource());
+    return getPosArgument(context, name).toAbsoluteBlockPos(context.getSource());
   }
 
   /**
