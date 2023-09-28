@@ -19,7 +19,8 @@
     "StringReaderMixin",
     "TextSerializerMixin",
     "ThreadExecutorMixin",
-    "Vec3ArgumentTypeMixin"
+    "Vec3ArgumentTypeMixin",
+    "WorldChunkMixin"
   ],
   "client": [
     "ClientCommandSourceAccessor"

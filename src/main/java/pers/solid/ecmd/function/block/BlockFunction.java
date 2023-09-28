@@ -21,6 +21,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.SetBlocksCommand;
 import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
 /**
  * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockStateArgument} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
@@ -39,7 +40,17 @@ public interface BlockFunction extends StringRepresentableFunction, NbtConvertib
     if ((modFlags & SetBlocksCommand.POST_PROCESS_FLAG) != 0) {
       modifiedState = Block.postProcessState(modifiedState, world, pos);
     }
-    boolean result = world.setBlockState(pos, modifiedState, flags);
+    final boolean suppressInitialCheck = (modFlags & SetBlocksCommand.SUPPRESS_INITIAL_CHECK_FLAG) != 0;
+    final boolean suppressReplacedCheck = (modFlags & SetBlocksCommand.SUPPRESS_REPLACED_CHECK_FLAG) != 0;
+    if (suppressInitialCheck) MixinSharedVariables.suppressOnBlockAdded = true;
+    if (suppressReplacedCheck) MixinSharedVariables.suppressOnStateReplaced = true;
+    boolean result;
+    try {
+      result = world.setBlockState(pos, modifiedState, flags);
+    } finally {
+      if (suppressInitialCheck) MixinSharedVariables.suppressOnBlockAdded = false;
+      if (suppressReplacedCheck) MixinSharedVariables.suppressOnStateReplaced = false;
+    }
     final BlockEntity blockEntity = world.getBlockEntity(pos);
     if (blockEntity != null) {
       final NbtCompound modifiedData = blockEntityData.getValue();

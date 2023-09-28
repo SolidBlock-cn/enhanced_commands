@@ -1,11 +1,9 @@
 package pers.solid.ecmd.region;
 
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A region that supports only integer operations. Operations related double will throw {@link UnsupportedOperationException}, unless it equals to the integer.
@@ -111,6 +109,20 @@ public interface IntBackedRegion extends Region {
       return vec3i;
     } else {
       throw new UnsupportedOperationException();
+    }
+  }
+
+  @Override
+  @Nullable BlockBox maxContainingBlockBox();
+
+  @Override
+  @Nullable
+  default Box maxContainingBox() {
+    final BlockBox blockBox = maxContainingBlockBox();
+    if (blockBox == null) {
+      return null;
+    } else {
+      return Box.from(blockBox);
     }
   }
 }

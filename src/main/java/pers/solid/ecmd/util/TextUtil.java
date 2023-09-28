@@ -36,7 +36,7 @@ public final class TextUtil {
   }
 
   public static MutableText wrapBlockPos(Vec3i blockPos) {
-    return Text.translatable("enhancedCommands.blockPos", blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    return Text.translatable("enhancedCommands.vec3i", blockPos.getX(), blockPos.getY(), blockPos.getZ());
   }
 
   public static MutableText wrapPosition(Position position) {

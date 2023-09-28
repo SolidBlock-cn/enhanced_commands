@@ -20,6 +20,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
@@ -42,6 +43,8 @@ import static net.minecraft.server.command.CommandManager.literal;
 public enum SetBlocksCommand implements CommandRegistrationCallback {
   INSTANCE;
   public static final int POST_PROCESS_FLAG = 1;
+  public static final int SUPPRESS_INITIAL_CHECK_FLAG = 2;
+  public static final int SUPPRESS_REPLACED_CHECK_FLAG = 4;
 
   public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.keywordArgsBuilder()
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
@@ -52,6 +55,9 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
       .addOptionalArg("force_state", BoolArgumentType.bool(), false)
       .addOptionalArg("post_process", BoolArgumentType.bool(), false)
       .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgumentType(), UnloadedPosBehavior.REJECT)
+      .addOptionalArg("suppress_initial_check", BoolArgumentType.bool(), false)
+      .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
+      .addOptionalArg("force", BoolArgumentType.bool(), false)
       .build();
   public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.commands.setblocks.region_too_large", a, b));
   public static final int REGION_SIZE_LIMIT = 16777215;
@@ -77,7 +83,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
    * Execute the command with the default parameters.
    */
   private static int execute(CommandContext<ServerCommandSource> context, Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
-    return execute(context, predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT);
+    return setBlocksInRegion(context.getSource(), predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT, RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"));
   }
 
   /**
@@ -86,24 +92,15 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
   private static int execute(CommandContext<ServerCommandSource> context, Predicate<CachedBlockPosition> predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
     final boolean immediately = kwArgs.getBoolean("immediately");
     final boolean bypassLimit = kwArgs.getBoolean("bypass_limit");
-    return execute(context, predicate, immediately, bypassLimit, getFlags(kwArgs), getModFlags(kwArgs), kwArgs.getArg("unloaded_pos"));
+    return setBlocksInRegion(context.getSource(), predicate, immediately, bypassLimit, getFlags(kwArgs), getModFlags(kwArgs), kwArgs.getArg("unloaded_pos"), RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"));
   }
 
   public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
-  /**
-   * Execute the command with the provided args.
-   *
-   * @param immediately Whether the operation is executed immediately, even if it is a large range.
-   * @param bypassLimit If the range exceeds the limit, it will also perform it, instead of forbidding.
-   * @param flags       The flags used to set block state.
-   */
-  private static int execute(CommandContext<ServerCommandSource> context, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior) throws CommandSyntaxException {
-    final Region region = RegionArgumentType.getRegion(context, "region");
+  public static int setBlocksInRegion(ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior, Region region, BlockFunction blockFunction) throws CommandSyntaxException {
     if (!bypassLimit && region.numberOfBlocksAffected() > REGION_SIZE_LIMIT) {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), REGION_SIZE_LIMIT);
     }
-    final ServerCommandSource source = context.getSource();
     final ServerWorld world = source.getWorld();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       final BlockBox box = region.maxContainingBlockBox();
@@ -111,10 +108,8 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
         throw UNLOADED_POS.create();
       }
     }
-    final BlockFunction block = BlockFunctionArgumentType.getBlockFunction(context, "block");
-    // If the predicate exists, pre-determine positions that will be affected, instead of testing the predicate before placing each block.
-    // To avoid that placing one block may affect the predicate tests thereafter.
-    final Iterator<?> mainIterator;
+
+    final Iterator<Void> mainIterator;
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();
     Stream<BlockPos> stream = region.stream();
@@ -131,10 +126,10 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
         return chunkLoaded;
       });
     }
+
     if (predicate == null) {
-      mainIterator = stream
-          .map(blockPos -> {
-            if (block.setBlock(world, blockPos, flags, modFlags)) {
+      mainIterator = stream.<Void>map(blockPos -> {
+            if (blockFunction.setBlock(world, blockPos, flags, modFlags)) {
               numbersAffected.increment();
             }
             return null;
@@ -142,8 +137,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
           .iterator();
     } else {
       List<BlockPos> posThatMatch = new ArrayList<>();
-      Iterator<?> testPosIterator = stream
-          .<Void>map(blockPos -> {
+      Iterator<Void> testPosIterator = stream.<Void>map(blockPos -> {
             final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, true);
             if (predicate.test(cachedBlockPosition)) {
               posThatMatch.add(blockPos.toImmutable());
@@ -151,21 +145,22 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
             return null;
           })
           .iterator();
-      IterateUtils.exhaust(testPosIterator);
-      mainIterator = posThatMatch.stream()
-          .<Void>map(blockPos -> {
-            if (block.setBlock(world, blockPos, flags, modFlags)) {
+      Iterator<Void> placingIterator = posThatMatch.stream().<Void>map(blockPos -> {
+            if (blockFunction.setBlock(world, blockPos, flags, modFlags)) {
               numbersAffected.increment();
             }
             return null;
           })
-          .iterator(); // Iterators.concat(testPosIterator, placingIterator);
+          .iterator();
+      mainIterator = Iterators.concat(testPosIterator, placingIterator);
     }
-    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(switch (unloadedPosBehavior) {
+    final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(switch (unloadedPosBehavior) {
       case SKIP -> "enhancedCommands.commands.setblocks.complete_skipped";
       case BREAK -> "enhancedCommands.commands.setblocks.complete_broken";
       default -> "enhancedCommands.commands.setblocks.complete";
-    }, numbersAffected.getValue()), true)));
+    }, numbersAffected.getValue()), true));
+    final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
+
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
       ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.setblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));
@@ -177,7 +172,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
     }
   }
 
-  public static int getFlags(KeywordArgs args) {
+  public static int getFlags(@NotNull KeywordArgs args) {
     int value = 0;
     if (args.getBoolean("skip_light_update")) {
       value |= Block.SKIP_LIGHTING_UPDATES;
@@ -191,13 +186,26 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
     if (args.getBoolean("force_state")) {
       value |= Block.FORCE_STATE;
     }
+    if (args.getBoolean("force")) {
+      value |= Block.FORCE_STATE;
+      value &= ~Block.NOTIFY_NEIGHBORS;
+    }
     return value;
   }
 
-  public static int getModFlags(KeywordArgs args) {
+  public static int getModFlags(@NotNull KeywordArgs args) {
     int value = 0;
     if (args.getBoolean("post_process")) {
       value |= POST_PROCESS_FLAG;
+    }
+    if (args.getBoolean("suppress_initial_check")) {
+      value |= SUPPRESS_INITIAL_CHECK_FLAG;
+    }
+    if (args.getBoolean("suppress_replaced_check")) {
+      value |= SUPPRESS_REPLACED_CHECK_FLAG;
+    }
+    if (args.getBoolean("force")) {
+      value |= SUPPRESS_INITIAL_CHECK_FLAG | SUPPRESS_REPLACED_CHECK_FLAG;
     }
     return value;
   }

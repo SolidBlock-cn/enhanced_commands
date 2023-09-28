@@ -5,10 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -42,7 +39,7 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
   }
 
   @Override
-  public @NotNull RegionType<CuboidWallRegion> getType() {
+  public @NotNull Type getType() {
     return RegionTypes.CUBOID_WALL;
   }
 
@@ -67,6 +64,11 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
       innerBlocks = (blockCuboidRegion.maxX() - blockCuboidRegion.minX() - 2 * thickness + 1) * (blockCuboidRegion.maxY() - blockCuboidRegion.minY() + 1) * (blockCuboidRegion.maxZ() - blockCuboidRegion.minZ() - 2 * thickness + 1);
     }
     return blockCuboidRegion.numberOfBlocksAffected() - innerBlocks;
+  }
+
+  @Override
+  public @NotNull BlockBox maxContainingBlockBox() {
+    return blockCuboidRegion.maxContainingBlockBox();
   }
 
   @Override

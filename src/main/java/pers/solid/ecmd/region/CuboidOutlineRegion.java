@@ -84,13 +84,18 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
   }
 
   @Override
-  public @NotNull RegionType<CuboidOutlineRegion> getType() {
+  public @NotNull Type getType() {
     return RegionTypes.CUBOID_OUTLINE;
   }
 
   @Override
   public long numberOfBlocksAffected() {
     return blockCuboidRegion.numberOfBlocksAffected() - blockCuboidRegion.expanded(-thickness).numberOfBlocksAffected();
+  }
+
+  @Override
+  public @NotNull BlockBox maxContainingBlockBox() {
+    return blockCuboidRegion.blockBox();
   }
 
   @Override

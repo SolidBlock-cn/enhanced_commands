@@ -143,13 +143,18 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull RegionType<?> getType() {
+  public @NotNull CuboidRegion.Type getType() {
     return RegionTypes.CUBOID;
   }
 
   @Override
   public double volume() {
     return numberOfBlocksAffected();
+  }
+
+  @Override
+  public @NotNull BlockBox maxContainingBlockBox() {
+    return blockBox();
   }
 
   @Override
