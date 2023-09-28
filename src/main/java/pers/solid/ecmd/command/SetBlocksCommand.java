@@ -25,6 +25,7 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -160,7 +161,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
           })
           .iterator(); // Iterators.concat(testPosIterator, placingIterator);
     }
-    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> Text.translatable(switch (unloadedPosBehavior) {
+    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(switch (unloadedPosBehavior) {
       case SKIP -> "enhancedCommands.commands.setblocks.complete_skipped";
       case BREAK -> "enhancedCommands.commands.setblocks.complete_broken";
       default -> "enhancedCommands.commands.setblocks.complete";

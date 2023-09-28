@@ -20,6 +20,7 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
@@ -67,10 +68,8 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final int size = iteratorTasks.size();
     if (size == 0) {
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.count.none", size), true);
-    } else if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.count.single", size), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.count.plural", size), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.tasks.count", size), true);
     }
     return size;
   }
@@ -81,10 +80,8 @@ public enum TasksCommand implements CommandRegistrationCallback {
     iteratorTasks.clear();
     if (size == 0) {
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.clear.none", size), true);
-    } else if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.clear.single", size), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.clear.plural", size), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.tasks.clear", size), true);
     }
     return size;
   }
@@ -186,7 +183,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
       return 0;
     }
     CommandBridge.sendFeedback(context.getSource(), () -> {
-      final MutableText message = Text.translatable("enhancedCommands.commands.tasks.list.summary", Integer.toString(size));
+      final MutableText message = TextUtil.enhancedTranslatable("enhancedCommands.commands.tasks.list.summary", Integer.toString(size));
       for (IteratorTask<?> iteratorTask : Iterables.limit(iteratorTasks, limit)) {
         final List<Text> list = new ArrayList<>();
         if (iteratorTask.suspended) {

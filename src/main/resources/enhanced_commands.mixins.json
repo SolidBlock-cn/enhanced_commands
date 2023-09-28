@@ -17,6 +17,7 @@
     "RegistryEntryPredicateArgumentTypeMixin",
     "ServerCommandSourceAccessor",
     "StringReaderMixin",
+    "TextSerializerMixin",
     "ThreadExecutorMixin",
     "Vec3ArgumentTypeMixin"
   ],

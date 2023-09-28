@@ -5,12 +5,14 @@ import net.minecraft.nbt.visitor.NbtOrderedStringFormatter;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
@@ -47,5 +49,21 @@ public final class TextUtil {
 
   public static MutableText wrapBoolean(boolean b) {
     return Text.literal(Boolean.toString(b)).formatted(b ? Formatting.GREEN : Formatting.RED);
+  }
+
+  public static MutableText enhancedTranslatable(String key) {
+    return MutableText.of(new EnhancedTranslatableTextContent(key, null, TranslatableTextContent.EMPTY_ARGUMENTS));
+  }
+
+  public static MutableText enhancedTranslatable(String key, Object... args) {
+    return MutableText.of(new EnhancedTranslatableTextContent(key, null, args));
+  }
+
+  public static MutableText enhancedTranslatableWithFallback(String key, @Nullable String fallback) {
+    return MutableText.of(new EnhancedTranslatableTextContent(key, fallback, TranslatableTextContent.EMPTY_ARGUMENTS));
+  }
+
+  public static MutableText enhancedTranslatableWithFallback(String key, @Nullable String fallback, Object... args) {
+    return MutableText.of(new EnhancedTranslatableTextContent(key, fallback, args));
   }
 }
