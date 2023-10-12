@@ -77,8 +77,8 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
-    return blockCuboidRegion.maxContainingBox();
+  public @Nullable Box minContainingBox() {
+    return blockCuboidRegion.minContainingBox();
   }
 
   @Override

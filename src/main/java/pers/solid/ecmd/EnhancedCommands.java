@@ -19,20 +19,13 @@ public class EnhancedCommands implements ModInitializer {
     ModArgumentTypes.init();
 
     // 注册命令
-    CommandRegistrationCallback.EVENT.register(new ModCommands());
+    CommandRegistrationCallback.EVENT.register(ModCommands.INSTANCE);
 
     // 注册服务器运行任务的事件
     ServerTickEvents.END_SERVER_TICK.register(new Identifier(MOD_ID, "tick_iterator_task"), server -> {
       server.getProfiler().push("enhanced_commands:tick_iterator_task");
       ((ThreadExecutorExtension) server).ec_advanceTasks();
       server.getProfiler().pop();
-    });/*
-    ServerLifecycleEvents.SERVER_STOPPING.register(new Identifier(MOD_ID, "remove_iterator_tasks"), server -> {
-      final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).ec_getIteratorTasks();
-      if (!iteratorTasks.isEmpty()) {
-        LOGGER.warn("Removing {} undone iterator tasks because the server is being closed.", iteratorTasks.size());
-      }
-      iteratorTasks.clear();
-    });*/
+    });
   }
 }

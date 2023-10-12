@@ -25,9 +25,7 @@ import pers.solid.ecmd.util.TextUtil;
  *   <li>{@code rand(<value>, <predicate>)} - passes when both probability test and another block predicate passes. Identical to {@code all(rand(value), <predicate>)}.</li>
  *   </ul>
  */
-public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate) implements BlockPredicate {
-  private static final Random RANDOM = Random.create();
-
+public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate, Random random) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     if (predicate == null) {
@@ -40,9 +38,9 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     if (predicate == null) {
-      return RANDOM.nextFloat() < value;
+      return random.nextFloat() < value;
     } else {
-      return RANDOM.nextFloat() < value && predicate.test(cachedBlockPosition);
+      return random.nextFloat() < value && predicate.test(cachedBlockPosition);
     }
   }
 
@@ -89,7 +87,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
 
     @Override
     public BlockPredicateArgument getParseResult(SuggestedParser parser) {
-      return source -> new RandBlockPredicate(value, predicate == null ? null : predicate.apply(source));
+      return source -> new RandBlockPredicate(value, predicate == null ? null : predicate.apply(source), source.getWorld().getRandom());
     }
 
     @Override
@@ -123,9 +121,9 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     @Override
     public @NotNull RandBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
       if (nbtCompound.contains("predicate", NbtElement.COMPOUND_TYPE)) {
-        return new RandBlockPredicate(nbtCompound.getFloat("value"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
+        return new RandBlockPredicate(nbtCompound.getFloat("value"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")), Random.create());
       } else {
-        return new RandBlockPredicate(nbtCompound.getFloat("value"), null);
+        return new RandBlockPredicate(nbtCompound.getFloat("value"), null, Random.create());
       }
     }
 

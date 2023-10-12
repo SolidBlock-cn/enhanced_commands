@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.regex.Pattern;
@@ -85,7 +85,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
         @Override
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
           parser.suggestionProviders.clear();
-          pattern = StringUtil.readRegex(parser.reader);
+          pattern = ParsingUtil.readRegex(parser.reader);
         }
       }.parse(commandRegistryAccess, parser, suggestionsOnly);
     }

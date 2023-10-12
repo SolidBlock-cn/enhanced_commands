@@ -3,6 +3,7 @@ package pers.solid.ecmd.function.property;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -23,7 +24,7 @@ public record BypassingPropertyFunction<T extends Comparable<T>>(Property<T> pro
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState) {
+  public BlockState getModifiedState(BlockState blockState, BlockState origState, Random random) {
     if (must || (blockState.contains(property) && origState.contains(property))) {
       return blockState.with(property, origState.get(property));
     } else {

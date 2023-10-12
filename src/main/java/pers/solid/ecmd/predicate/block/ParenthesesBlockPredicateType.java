@@ -6,7 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 public enum ParenthesesBlockPredicateType implements BlockPredicateType<BlockPredicate> {
   PARENTHESES_TYPE;
@@ -18,6 +18,6 @@ public enum ParenthesesBlockPredicateType implements BlockPredicateType<BlockPre
 
   @Override
   public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return SuggestionUtil.parseParentheses(() -> BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly, true), parser);
+    return ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly, true), parser);
   }
 }

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.property.*;
 import pers.solid.ecmd.predicate.property.Comparator;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.*;
 
@@ -157,8 +157,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
     if (exceptionForGeneralProperty == null) {
       if (!propertiesExhausted) {
         suggestionProviders.add((context, suggestionsBuilder) -> {
-          SuggestionUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_function.property.all_random"), suggestionsBuilder);
-          SuggestionUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.property.all_original"), suggestionsBuilder);
+          ParsingUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_function.property.all_random"), suggestionsBuilder);
+          ParsingUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.property.all_original"), suggestionsBuilder);
         });
       }
     }
@@ -185,8 +185,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   protected boolean parsePropertyNameEntry() throws CommandSyntaxException {
     if (exceptionForGeneralPropertyName == null) {
       suggestionProviders.add((context, suggestionsBuilder) -> {
-        SuggestionUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_function.property.all_random"), suggestionsBuilder);
-        SuggestionUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.property.all_original"), suggestionsBuilder);
+        ParsingUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_function.property.all_random"), suggestionsBuilder);
+        ParsingUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.property.all_original"), suggestionsBuilder);
       });
     }
     if (reader.canRead()) {

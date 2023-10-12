@@ -16,10 +16,10 @@ import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePredicate> propertyNamePredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "[" + propertyNamePredicates.stream().map(StringRepresentablePredicate::asString).collect(Collectors.joining(",")) + "]";
+    return "[" + propertyNamePredicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(",")) + "]";
   }
 
   @Override
@@ -85,7 +85,7 @@ public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePred
 
     @Override
     public @Nullable PropertiesNamesBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
         final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser);
         suggestedParser.parsePropertyNames();

@@ -19,7 +19,6 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
 import java.util.ArrayList;
@@ -50,7 +49,7 @@ public interface PickBlockFunction extends BlockFunction {
   record Uniform(List<BlockFunction> blockFunctions) implements PickBlockFunction {
     @Override
     public @NotNull String asString() {
-      return "pick(" + blockFunctions.stream().map(StringRepresentableFunction::asString).collect(Collectors.joining(", ")) + ")";
+      return "pick(" + blockFunctions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
     }
 
     @Override

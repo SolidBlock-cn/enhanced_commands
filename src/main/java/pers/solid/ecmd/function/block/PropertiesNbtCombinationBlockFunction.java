@@ -11,7 +11,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 
 import java.util.Objects;
@@ -34,7 +33,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
 
   @Override
   public @NotNull String asString() {
-    return Stream.of(firstBlockFunction, propertyNamesFunction, nbtBlockFunction).filter(Objects::nonNull).map(StringRepresentableFunction::asString).collect(Collectors.joining());
+    return Stream.of(firstBlockFunction, propertyNamesFunction, nbtBlockFunction).filter(Objects::nonNull).map(BlockFunction::asString).collect(Collectors.joining());
   }
 
 

@@ -14,7 +14,7 @@ import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) implements BlockFunction {
   @Override
@@ -54,7 +54,7 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
 
     @Override
     public @Nullable NbtBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '{') {
         return new NbtBlockFunction(new NbtFunctionSuggestedParser(parser.reader, parser.suggestionProviders).parseCompound(false));
       } else {

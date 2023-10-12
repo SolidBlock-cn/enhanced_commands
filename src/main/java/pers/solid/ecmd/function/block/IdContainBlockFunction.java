@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -111,7 +111,7 @@ public final class IdContainBlockFunction implements BlockFunction {
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
           final StringReader reader = parser.reader;
           parser.suggestionProviders.clear();
-          pattern = StringUtil.readRegex(parser.reader);
+          pattern = ParsingUtil.readRegex(parser.reader);
         }
       }.parse(commandRegistryAccess, parser, suggestionsOnly);
     }

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 public enum ConstantBlockPredicate implements BlockPredicate {
   ALWAYS_TRUE;
@@ -48,7 +48,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
 
     @Override
     public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_predicate.constant"), suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_predicate.constant"), suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();
         parser.suggestionProviders.clear();

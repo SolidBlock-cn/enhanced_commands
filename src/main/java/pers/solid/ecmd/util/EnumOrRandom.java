@@ -16,8 +16,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> extends StringIdentifiable, Supplier<E>, Function<Random, E> {
-  Random RANDOM = Random.create();
+public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> extends StringIdentifiable, Function<Random, E> {
   DynamicCommandExceptionType INVALID_ENUM_EXCEPTION = new DynamicCommandExceptionType(
       value -> Text.translatable("argument.enum.invalid", value)
   );
@@ -59,10 +58,6 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
   }
 
   record Instance<E extends Enum<E> & StringIdentifiable>(E value) implements EnumOrRandom<E> {
-    @Override
-    public E get() {
-      return value;
-    }
 
     @Override
     public String asString() {
@@ -76,11 +71,6 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
   }
 
   record RandomValue<E extends Enum<E> & StringIdentifiable>(E[] values, String name) implements EnumOrRandom<E> {
-    @Override
-    public E get() {
-      return values[RANDOM.nextInt(values.length)];
-    }
-
     @Override
     public String asString() {
       return name;

@@ -3,6 +3,7 @@ package pers.solid.ecmd.function.property;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
@@ -15,13 +16,13 @@ public record AllRandomPropertyNameFunction(@NotNull Collection<String> except) 
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState) {
+  public BlockState getModifiedState(BlockState origState, BlockState blockState, Random random) {
     if (except.isEmpty()) {
-      return StateUtil.getBlockWithRandomProperties(blockState.getBlock(), AllRandomPropertyFunction.RANDOM);
+      return StateUtil.getBlockWithRandomProperties(blockState.getBlock(), random);
     } else {
       for (Property<?> property : blockState.getProperties()) {
         if (!except.contains(property.getName())) {
-          blockState = StateUtil.withPropertyOfRandomValue(blockState, property, AllRandomPropertyFunction.RANDOM);
+          blockState = StateUtil.withPropertyOfRandomValue(blockState, property, random);
         }
       }
       return blockState;

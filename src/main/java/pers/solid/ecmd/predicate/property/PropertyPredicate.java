@@ -7,10 +7,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.predicate.StringRepresentablePredicate;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 
-public interface PropertyPredicate<T extends Comparable<T>> extends StringRepresentablePredicate, NbtConvertible {
+public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionConvertible, NbtConvertible {
   boolean test(BlockState blockState);
 
   Property<T> property();

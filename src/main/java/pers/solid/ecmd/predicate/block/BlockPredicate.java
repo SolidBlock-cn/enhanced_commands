@@ -12,10 +12,10 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.StringRepresentablePredicate;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 
-public interface BlockPredicate extends StringRepresentablePredicate, NbtConvertible, BlockPredicateArgument {
+public interface BlockPredicate extends ExpressionConvertible, NbtConvertible, BlockPredicateArgument {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {

@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.NbtConvertible;
@@ -48,7 +47,7 @@ public final class TagBlockFunction implements BlockFunction {
     if (propertyNameFunctions.isEmpty()) {
       return "#" + blockTag.id().toString();
     } else {
-      return "#" + blockTag.id().toString() + "[" + propertyNameFunctions.stream().map(StringRepresentableFunction::asString).collect(Collectors.joining(", ")) + "]";
+      return "#" + blockTag.id().toString() + "[" + propertyNameFunctions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(", ")) + "]";
     }
   }
 
@@ -60,7 +59,7 @@ public final class TagBlockFunction implements BlockFunction {
     }
     BlockState state = blocks[world.getRandom().nextInt(blocks.length)].getDefaultState();
     for (PropertyNameFunction propertyNameFunction : propertyNameFunctions) {
-      state = propertyNameFunction.getModifiedState(state, origState);
+      state = propertyNameFunction.getModifiedState(origState, state, world.getRandom());
     }
     return state;
   }

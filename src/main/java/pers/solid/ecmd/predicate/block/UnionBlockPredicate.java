@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.StringRepresentablePredicate;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.List;
 public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "any(" + String.join(", ", Collections2.transform(blockPredicates, StringRepresentablePredicate::asString)) + ")";
+    return "any(" + String.join(", ", Collections2.transform(blockPredicates, ExpressionConvertible::asString)) + ")";
   }
 
   @Override

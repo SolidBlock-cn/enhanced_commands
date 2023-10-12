@@ -11,20 +11,18 @@ import pers.solid.ecmd.util.StateUtil;
 import java.util.Collection;
 
 public record AllRandomPropertyFunction(@NotNull Collection<Property<?>> except) implements GeneralPropertyFunction {
-  static final Random RANDOM = Random.create();
-
   @Override
   public @NotNull String asString() {
     return "*";
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState) {
+  public BlockState getModifiedState(BlockState blockState, BlockState origState, Random random) {
     if (except.isEmpty()) {
-      return StateUtil.getBlockWithRandomProperties(blockState.getBlock(), RANDOM);
+      return StateUtil.getBlockWithRandomProperties(blockState.getBlock(), random);
     } else {
       for (Property<?> property : Collections2.filter(blockState.getProperties(), predicate -> !except.contains(predicate))) {
-        blockState = StateUtil.withPropertyOfRandomValue(blockState, property, RANDOM);
+        blockState = StateUtil.withPropertyOfRandomValue(blockState, property, random);
       }
       return blockState;
     }

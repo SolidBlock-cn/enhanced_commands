@@ -3,9 +3,9 @@ package pers.solid.ecmd.function.nbt;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.function.StringRepresentableFunction;
+import pers.solid.ecmd.util.ExpressionConvertible;
 
-public interface NbtFunction extends StringRepresentableFunction {
+public interface NbtFunction extends ExpressionConvertible {
   @Override
   @NotNull
   default String asString() {

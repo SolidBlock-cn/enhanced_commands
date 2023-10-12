@@ -16,7 +16,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
 
@@ -62,7 +62,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   }
 
   @Override
-  public @NotNull Box maxContainingBox() {
+  public @NotNull Box minContainingBox() {
     return Box.of(center, 2 * radius, 2 * radius, 2 * radius);
   }
 
@@ -100,7 +100,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
       if (paramIndex == 0) {
         radius = parser.reader.readDouble();
       } else if (paramIndex == 1) {
-        centerPos = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        centerPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
       }
     }
 

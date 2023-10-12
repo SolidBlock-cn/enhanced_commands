@@ -4,7 +4,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
       final String key = entry.getKey();
       final String keyAsString;
       final NbtPredicate value = entry.getValue();
-      if (StringUtil.isAllowedInUnquotedString(key)) {
+      if (ParsingUtil.isAllowedInUnquotedString(key)) {
         keyAsString = key;
       } else {
         keyAsString = NbtString.escape(key);

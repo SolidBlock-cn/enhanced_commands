@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.*;
@@ -186,12 +186,12 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
           parser.reader.skipWhitespace();
           if (directions.isEmpty()) {
             parser.suggestionProviders.add((context, suggestionsBuilder) -> {
-              SuggestionUtil.suggestString("all", Text.translatable("enhancedCommands.direction.all"), suggestionsBuilder);
-              SuggestionUtil.suggestString("horizontal", Text.translatable("enhancedCommands.direction.horizontal"), suggestionsBuilder);
-              SuggestionUtil.suggestString("vertical", Text.translatable("enhancedCommands.direction.vertical"), suggestionsBuilder);
+              ParsingUtil.suggestString("all", Text.translatable("enhancedCommands.direction.all"), suggestionsBuilder);
+              ParsingUtil.suggestString("horizontal", Text.translatable("enhancedCommands.direction.horizontal"), suggestionsBuilder);
+              ParsingUtil.suggestString("vertical", Text.translatable("enhancedCommands.direction.vertical"), suggestionsBuilder);
             });
           }
-          parser.suggestionProviders.add((context, builder) -> SuggestionUtil.suggestDirections(builder));
+          parser.suggestionProviders.add((context, builder) -> ParsingUtil.suggestDirections(builder));
           final int cursorBeforeReadString = parser.reader.getCursor();
           final String id = parser.reader.readString();
           if (id.isEmpty())

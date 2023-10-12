@@ -117,7 +117,7 @@ public interface IntBackedRegion extends Region {
 
   @Override
   @Nullable
-  default Box maxContainingBox() {
+  default Box minContainingBox() {
     final BlockBox blockBox = maxContainingBlockBox();
     if (blockBox == null) {
       return null;

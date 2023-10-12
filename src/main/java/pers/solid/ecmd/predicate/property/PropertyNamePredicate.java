@@ -7,10 +7,10 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.StringRepresentablePredicate;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 
-public interface PropertyNamePredicate extends StringRepresentablePredicate, NbtConvertible {
+public interface PropertyNamePredicate extends ExpressionConvertible, NbtConvertible {
   boolean test(BlockState blockState);
 
   TestResult testAndDescribe(BlockState blockState, BlockPos blockPos);

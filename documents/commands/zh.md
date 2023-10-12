@@ -1,4 +1,4 @@
-本模组加入了一系列增强的命令。
+本模组加入了一系列增强的**命令**。
 
 ## 方块命令
 
@@ -10,10 +10,8 @@
 
 ## 测试命令
 
-- [`/region`](region/zh.md)：测试一个区域。
 - [`/testarg`](testarg/zh.md)：对特定类型的参数进行测试。
 - [`/testfor`](testfor/zh.md)：测试和获取当前世界中的数据。
-- [`/testpos`](testpos/zh.md)：测试一个坐标，并返回其在当前执行环境下的绝对坐标。
 
 ## 独立的 `/execute` 子命令
 
@@ -34,6 +32,9 @@
     - `/anchored`
     - `/in`
     - `/summon`
+    - [`/silenced`](../silenced/zh.md)（本模组添加）：执行命令，但是不会在聊天或者控制台产生任何反馈。
+    - [`/for_region`](../for_region/zh.md)（本模组添加）
+    - [`/for`](../for/zh.md)（本模组添加）
 - 存储子命令：
     - `/store`
 

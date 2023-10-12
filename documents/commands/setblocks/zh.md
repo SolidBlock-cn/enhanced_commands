@@ -8,7 +8,7 @@
 
 ## 语法
 
-`/setblocks <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process]`
+`/setblocks <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process | unloaded_pos | suppress_initial_check | suppress_replaced_check | force]`
 
 ## 参数
 
@@ -22,33 +22,54 @@
 
 ### 关键字参数
 
-### `immediately`
+#### `immediately`
 
 布尔值，默认为 `false`。方块是否立即在完成执行，而不是分步骤地执行，即使预估的方块数量超过 16384 个。这意味着可能会对服务器产生短时间的卡顿。
 
-### `by_pass_limit`
+#### `by_pass_limit`
 
 布尔值，默认为 `false`。如果设为 `true`，即使预估的方块数量超过 16777215，命令也会执行。
 
-### `skip_light_update`
+#### `skip_light_update`
 
-布尔值，默认为 `false`。如果设为 `true`，那么方块在放置时不会产生光照更新。此参数在 1.20 以上版本无效，因此 1.20 对光照进行了优化。
+布尔值，默认为 `false`。如果设为 `true`，那么方块在放置时不会产生光照更新。此参数在部分情况下可能会失效，在 1.20 以上版本无效，因此 1.20 对光照进行了优化。
 
-### `notify_listeners`
+#### `notify_listeners`
 
-布尔值，默认为 `true`。方块放置后会告知客户端，如果设为 `false`，客户端不会同步相应的放声更新，从而导致客户端与服务器不一致，出现幽灵方块现象。
+布尔值，默认为 `true`。方块放置后会告知客户端，如果设为 `false`，客户端不会同步相应的方块更新，从而导致客户端与服务器不一致，出现幽灵方块现象。
 
-### `notify_neighbors`
+#### `notify_neighbors`
 
-布尔值，默认为 `true`。放置放置后更新毗邻的方块。
+布尔值，默认为 `true`。放置放置后更新毗邻的方块。例如，清除流体后，如果此参数设置为 `true`，那么旁边的流体不会受到影响。
 
-### `force_state`
+#### `force_state`
 
-布尔值，默认为 `false`。抑制相应的方块更新，强制放置方块。此参数不会影响放置流体导致了流体流动，但是能够抑制在移除流体后周围流体的流动。
+布尔值，默认为 `false`。抑制相应的方块更新，强制放置方块，抑制有关的方块更新。
 
-### `post_process`
+#### `post_process`
 
-布尔值，默认为 `false`。此参数对于原版的 `/setblock` 命令而言则为 `true`。方块在放置前会进行额外的处理。
+布尔值，默认为 `false`。此参数对于原版的 `/setblock` 命令而言则为 `true`。方块在放置前会进行额外的处理。例如，放置一个单一的栅栏或墙，此过程会使其形状根据其附近的方块改变。
+
+#### `unloaded_pos`
+
+枚举，默认为 `reject`。此参数用于处理方块处理过程在遇到未加载的区块的行为，但不会检查方块是否位于可放置方块的坐标内（即世界的界限内）。可接受以下值：
+
+- `reject`：当检测到区域内有坐标可能位于未加载的区块内时，直接拒绝整个放置过程。此行为与原版的 `/fill` 较为类似。需要注意的是，在某些情况下，可能区域的所有坐标都在已加载的区域内但仍检测到部分在未加载的区块内，这是正常现象。
+- `skip`：执行方块放置操作，但是如果在操作过程中遇到了没有加载的区块，则跳过没有加载的区块，继续完成剩余的在已加载的区块内的部分。这有可能会导致方块的放置结果不完整。
+- `break`：执行方块放置操作，如果在操作过程中遇到了没有加载的区块，则终止操作，剩余的部分即使有在已加载的区块内的部分也会被抛弃，已经操作的部分不受影响。这有可能导致方块的放置结果不完整。
+- `force`：执行放置放置操作，如果遇到没有加载的区块，则强制加载该区块，确保命令完成。如果遇到还没有生成过地形的区块，此操作会强制使这些区块生成地形再加载，这可能会对服务器造成一些负荷。当一个操作并不包含太多方块但是包含了大量未加载的区块时，由于命令会瞬间执行，这就有可能导致服务器长时间卡顿甚至内存不足。
+
+#### `suppress_initial_check`
+
+布尔值，默认为 `false`。此参数会阻止方块在放置时调用放置被放置时的反应，例如火检查其位置是否合法，以及流体流动。例如，将此参数设置为 `true` 后，放置的流体不会流动也不会与其他的实体进行交互。
+
+#### `suppress_replaced_check`
+
+布尔值，默认为 `false`。此参数会阻止原先的方块被替换时的反应，例如箱子掉落里面的物品。但是，为了避免潜在的问题，即使此参数设置为 `true`，也会正常地清除掉方块实体。
+
+#### `force`
+
+布尔值，默认为 `false`。若设置 `true`，相当于设置了以下参数：`force_state=true update_neighbors=false suppress_initial_check=true suppress_replaced_check=true`。
 
 ## 示例
 
@@ -58,3 +79,4 @@
 - `/setblocks hcyl(80, 20) air immediately=true`：立即将半径 80、高度 20 的圆柱体方块范围设为空气，不分步骤执行。
 - `/setblocks cuboid(~~~, ~2~2~2) cactus force_state=true`：放置仙人掌，尽管在正常情况下这些仙人掌不可能成功放置。
 - `/setblocks sphere(20) dry()`：去除半径 20 的球体范围内的方块中的水。
+- `/setblocks single(~~~) water suppress_initial_check=true`：在当前位置放置水，并且使水不会流出去。

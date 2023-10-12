@@ -5,15 +5,16 @@ import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.function.StringRepresentableFunction;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 
 import java.util.HashSet;
 
-public interface PropertyNameFunction extends StringRepresentableFunction, NbtConvertible {
+public interface PropertyNameFunction extends ExpressionConvertible, NbtConvertible {
   static PropertyNameFunction fromNbt(NbtCompound nbtCompound) {
     final String property = nbtCompound.getString("property");
     if ("*".equals(property)) {
@@ -33,7 +34,7 @@ public interface PropertyNameFunction extends StringRepresentableFunction, NbtCo
   }
 
   @Contract(pure = true)
-  BlockState getModifiedState(BlockState blockState, BlockState origState);
+  BlockState getModifiedState(BlockState origState, BlockState blockState, Random random);
 
   @Contract(pure = true)
   String propertyName();

@@ -168,8 +168,8 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
-    return asCuboidRegion().maxContainingBox();
+  public @Nullable Box minContainingBox() {
+    return asCuboidRegion().minContainingBox();
   }
 
   @Override

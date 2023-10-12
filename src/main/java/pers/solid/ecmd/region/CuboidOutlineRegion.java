@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -104,8 +104,8 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
-    return blockCuboidRegion.maxContainingBox();
+  public @Nullable Box minContainingBox() {
+    return blockCuboidRegion.minContainingBox();
   }
 
   public enum Type implements RegionType<CuboidOutlineRegion> {
@@ -126,19 +126,19 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
       if (paramIndex == 0) {
-        fromPos = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        fromPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
         if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {
           parser.reader.skipWhitespace();
           // 在有接受到空格后，可直接接受第二个参数
           if (parser.reader.canRead()) {
             final char peek = parser.reader.peek();
             if (peek != ',' && peek != ')') {
-              toPos = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+              toPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
             }
           }
         }
       } else if (toPos == null && paramIndex == 1) {
-        toPos = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        toPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
       } else if (toPos != null) {
         final int cursorBeforeInt = parser.reader.getCursor();
         thickness = parser.reader.readInt();

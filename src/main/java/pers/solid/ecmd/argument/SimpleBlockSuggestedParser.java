@@ -24,7 +24,7 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
@@ -76,7 +76,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     } else {
       int cursorBeforeParsing = this.reader.getCursor();
       suggestionProviders.add((context, suggestionsBuilder) -> {
-        SuggestionUtil.suggestString("@", Text.translatable("enhancedCommands.argument.block.ignore_feature_flag"), suggestionsBuilder);
+        ParsingUtil.suggestString("@", Text.translatable("enhancedCommands.argument.block.ignore_feature_flag"), suggestionsBuilder);
         CommandSource.forEachMatching(registryWrapper.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName()));
       });
       this.blockId = Identifier.fromCommandInput(this.reader);

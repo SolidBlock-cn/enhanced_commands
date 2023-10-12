@@ -11,12 +11,12 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyFunction;
 
@@ -30,7 +30,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
     final StringBuilder stringBuilder = new StringBuilder(Registries.BLOCK.getId(block).toString());
     if (!propertyFunctions.isEmpty()) {
       stringBuilder.append('[');
-      stringBuilder.append(propertyFunctions.stream().map(StringRepresentableFunction::asString).collect(Collectors.joining(", ")));
+      stringBuilder.append(propertyFunctions.stream().map(PropertyFunction::asString).collect(Collectors.joining(", ")));
       stringBuilder.append(']');
     }
     return stringBuilder.toString();
@@ -39,8 +39,9 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     BlockState stateToPlace = block.getDefaultState();
+    final Random random = world.getRandom();
     for (PropertyFunction<?> propertyFunction : propertyFunctions) {
-      stateToPlace = propertyFunction.getModifiedState(stateToPlace, origState);
+      stateToPlace = propertyFunction.getModifiedState(stateToPlace, origState, random);
     }
     return stateToPlace;
   }

@@ -4,9 +4,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.function.StringRepresentableFunction;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 
 import java.util.HashSet;
@@ -16,15 +17,16 @@ import java.util.HashSet;
  *
  * @param <T> 该属性的类型。
  */
-public interface PropertyFunction<T extends Comparable<T>> extends StringRepresentableFunction, NbtConvertible {
+public interface PropertyFunction<T extends Comparable<T>> extends ExpressionConvertible, NbtConvertible {
   /**
    * 修改方块状态，并返回修改后的方块状态。由于方块状态是不可变对象，因此返回的是另一个方块状态对象（也有可能是同一个）。
    *
    * @param blockState 当前正在修改的方块状态
    * @param origState  整个修改过程之前的方块状态
+   * @param random
    */
   @Contract(pure = true)
-  BlockState getModifiedState(BlockState blockState, BlockState origState);
+  BlockState getModifiedState(BlockState blockState, BlockState origState, Random random);
 
   /**
    * 该函数需要修改的那个属性，必须是准确的属性，而非根据属性的名称来匹配到那个名称的属性。

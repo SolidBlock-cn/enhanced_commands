@@ -16,7 +16,6 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
 import java.util.ArrayList;
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
 public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "overlay(" + blockFunctions.stream().map(StringRepresentableFunction::asString).collect(Collectors.joining(", ")) + ")";
+    return "overlay(" + blockFunctions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
   }
 
   @Override

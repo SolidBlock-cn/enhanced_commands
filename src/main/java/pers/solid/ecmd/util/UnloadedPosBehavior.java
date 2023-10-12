@@ -6,7 +6,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 
 /**
- * 此枚举表示了批量方块操作在遇到没有加载的坐标时的行为。
+ * 批量方块操作在遇到没有加载的坐标时的行为。
  */
 public enum UnloadedPosBehavior implements StringIdentifiable {
   /**

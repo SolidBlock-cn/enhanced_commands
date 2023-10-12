@@ -89,8 +89,8 @@ public record IntersectRegion(Collection<Region> regions) implements Region {
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
-    final List<@Nullable Box> maxContainingBoxes = regions.stream().map(Region::maxContainingBox).toList();
+  public @Nullable Box minContainingBox() {
+    final List<@Nullable Box> maxContainingBoxes = regions.stream().map(Region::minContainingBox).toList();
     final double minX = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minX).max().orElse(Double.POSITIVE_INFINITY);
     final double minY = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minY).max().orElse(Double.POSITIVE_INFINITY);
     final double minZ = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minZ).max().orElse(Double.POSITIVE_INFINITY);

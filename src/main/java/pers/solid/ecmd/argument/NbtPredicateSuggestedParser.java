@@ -16,9 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.nbt.*;
 import pers.solid.ecmd.predicate.property.Comparator;
-import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.SuggestionProvider;
-import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,10 +63,10 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
     boolean isNegated = false;
     final int cursorBeforeSign = reader.getCursor();
     suggestionProviders.add((commandContext, suggestionsBuilder) -> {
-      SuggestionUtil.suggestString(":", MATCH, suggestionsBuilder);
-      SuggestionUtil.suggestString("!:", NOT_MATCH, suggestionsBuilder);
-      SuggestionUtil.suggestString("=", EQUAL, suggestionsBuilder);
-      SuggestionUtil.suggestString("!=", NOT_EQUAL, suggestionsBuilder);
+      ParsingUtil.suggestString(":", MATCH, suggestionsBuilder);
+      ParsingUtil.suggestString("!:", NOT_MATCH, suggestionsBuilder);
+      ParsingUtil.suggestString("=", EQUAL, suggestionsBuilder);
+      ParsingUtil.suggestString("!=", NOT_EQUAL, suggestionsBuilder);
     });
     if (!reader.canRead()) {
       if (mustExpectSign) {
@@ -108,7 +107,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
    * @see StringNbtReader#parseCompound()
    */
   public NbtPredicate parseCompound(boolean isUsingEqual, boolean isNegated) throws CommandSyntaxException {
-    suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("{", START_OF_COMPOUND, suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", START_OF_COMPOUND, suggestionsBuilder));
     reader.expect('{');
     suggestionProviders.clear();
     this.reader.skipWhitespace();
@@ -117,7 +116,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
     while (!this.reader.canRead() || this.reader.peek() != '}') {
       reader.skipWhitespace();
       int cursorBeforeKey = this.reader.getCursor();
-      suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("*", ANY_KEY, suggestionsBuilder));
+      suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", ANY_KEY, suggestionsBuilder));
       final String key;
       if (!this.reader.canRead()) {
         throw StringNbtReader.EXPECTED_KEY.createWithContext(this.reader);
@@ -135,7 +134,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       reader.skipWhitespace();
       entries.put(key, parsePredicate(true, false));
       suggestionProviders.clear();
-      suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(",", SEPARATE, suggestionsBuilder));
+      suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString(",", SEPARATE, suggestionsBuilder));
       if (reader.canRead() && reader.peek() == ',') {
         reader.skip();
         suggestionProviders.clear();
@@ -146,7 +145,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
     }
 
     reader.skipWhitespace();
-    suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("}", END_OF_COMPOUND, suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("}", END_OF_COMPOUND, suggestionsBuilder));
     reader.expect('}');
     suggestionProviders.clear();
     if (isUsingEqual) {
@@ -172,7 +171,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
     final List<@NotNull NbtPredicate> expected = new ArrayList<>();
     final List<IntObjectPair<NbtPredicate>> expectedPositional = isUsingEqual ? null : new ArrayList<>();
 
-    suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("]", END_OF_LIST, suggestionsBuilder));
+    suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("]", END_OF_LIST, suggestionsBuilder));
     if (reader.canRead() && reader.peek() == ']') {
       // 空列表
       reader.skip();
@@ -216,7 +215,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
         }
 
         this.reader.skipWhitespace();
-        suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(",", SEPARATE, suggestionsBuilder));
+        suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString(",", SEPARATE, suggestionsBuilder));
         if (this.reader.canRead() && this.reader.peek() == ',') {
           this.reader.skip();
           suggestionProviders.clear();
@@ -225,7 +224,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
           suggestionProviders.clear();
           try {
             reader.skipWhitespace();
-            suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("]", END_OF_LIST, suggestionsBuilder));
+            suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("]", END_OF_LIST, suggestionsBuilder));
             reader.expect(']'); // 结束列表
           } catch (CommandSyntaxException exception) {
             if (exceptionWhenParsingPositionalPredicate != null) {
@@ -250,8 +249,8 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       throws CommandSyntaxException {
     // 尝试读取正则表达式语法
     suggestionProviders.add((context, suggestionsBuilder) -> {
-      SuggestionUtil.suggestString("~", REGEX, suggestionsBuilder);
-      SuggestionUtil.suggestString("!~", NOT_REGEX, suggestionsBuilder);
+      ParsingUtil.suggestString("~", REGEX, suggestionsBuilder);
+      ParsingUtil.suggestString("!~", NOT_REGEX, suggestionsBuilder);
     });
     if ((reader.canRead() && reader.peek() == '~') || (reader.canRead(2) && reader.peek() == '!' && reader.peek(1) == '~')) {
       final boolean isNegated = reader.peek() == '!';
@@ -263,7 +262,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       suggestionProviders.clear();
       reader.skipWhitespace();
       final int cursorBeforeRegex = reader.getCursor();
-      return new RegexNbtPredicate(StringUtil.readRegex(reader), false);
+      return new RegexNbtPredicate(ParsingUtil.readRegex(reader), false);
     }
 
     // 尝试读取比较值（除了等号和不等号之外的值）
@@ -314,9 +313,9 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       suggestionProviders.clear();
     }
     suggestionProviders.add((context, suggestionsBuilder) -> {
-      SuggestionUtil.suggestString("*", ANY_VALUE, suggestionsBuilder);
-      SuggestionUtil.suggestString("{", START_OF_COMPOUND, suggestionsBuilder);
-      SuggestionUtil.suggestString("[", START_OF_LIST, suggestionsBuilder);
+      ParsingUtil.suggestString("*", ANY_VALUE, suggestionsBuilder);
+      ParsingUtil.suggestString("{", START_OF_COMPOUND, suggestionsBuilder);
+      ParsingUtil.suggestString("[", START_OF_LIST, suggestionsBuilder);
     });
     if (!reader.canRead()) {
       throw StringNbtReader.EXPECTED_VALUE.createWithContext(reader);

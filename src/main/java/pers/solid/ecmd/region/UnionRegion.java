@@ -74,8 +74,8 @@ public record UnionRegion(Collection<Region> regions) implements Region {
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
-    final List<@NotNull Box> maxContainingBoxes = regions.stream().map(Region::maxContainingBox).filter(Objects::nonNull).toList();
+  public @Nullable Box minContainingBox() {
+    final List<@NotNull Box> maxContainingBoxes = regions.stream().map(Region::minContainingBox).filter(Objects::nonNull).toList();
     final double minX = maxContainingBoxes.stream().mapToDouble(value -> value.minX).min().orElse(Double.POSITIVE_INFINITY);
     final double minY = maxContainingBoxes.stream().mapToDouble(value -> value.minY).min().orElse(Double.POSITIVE_INFINITY);
     final double minZ = maxContainingBoxes.stream().mapToDouble(value -> value.minZ).min().orElse(Double.POSITIVE_INFINITY);

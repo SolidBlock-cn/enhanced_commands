@@ -5,7 +5,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 public enum ParenthesesBlockFunctionType implements BlockFunctionType<BlockFunction> {
   PARENTHESES_TYPE;
@@ -17,6 +17,6 @@ public enum ParenthesesBlockFunctionType implements BlockFunctionType<BlockFunct
 
   @Override
   public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return SuggestionUtil.parseParentheses(() -> BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly, true), parser);
+    return ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly, true), parser);
   }
 }

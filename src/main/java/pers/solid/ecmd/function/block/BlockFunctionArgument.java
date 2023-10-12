@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,11 +32,11 @@ public interface BlockFunctionArgument extends Function<ServerCommandSource, Blo
   }
 
   static @NotNull BlockFunctionArgument parsePick(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return SuggestionUtil.parseUnifiable(() -> parseOverlay(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> new PickBlockFunction.Uniform(ImmutableList.copyOf(Lists.transform(functions, function -> function.apply(source)))), "|", PICK_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseOverlay(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> new PickBlockFunction.Uniform(ImmutableList.copyOf(Lists.transform(functions, function -> function.apply(source)))), "|", PICK_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockFunctionArgument parseOverlay(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return SuggestionUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(functions, function -> function.apply(source)))), "*", OVERLAY_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(functions, function -> function.apply(source)))), "*", OVERLAY_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockFunctionArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {

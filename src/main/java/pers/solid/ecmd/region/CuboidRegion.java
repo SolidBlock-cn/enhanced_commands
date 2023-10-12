@@ -16,7 +16,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -139,7 +139,7 @@ public record CuboidRegion(Box box) implements Region {
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
+  public @Nullable Box minContainingBox() {
     return box;
   }
 
@@ -178,19 +178,19 @@ public record CuboidRegion(Box box) implements Region {
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
       if (paramIndex == 0) {
-        from = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        from = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
         if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {
           parser.reader.skipWhitespace();
           // 在有接受到空格后，可直接接受第二个参数
           if (parser.reader.canRead()) {
             final char peek = parser.reader.peek();
             if (peek != ',' && peek != ')') {
-              to = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+              to = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
             }
           }
         }
       } else if (paramIndex == 1) {
-        to = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        to = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
       }
     }
 

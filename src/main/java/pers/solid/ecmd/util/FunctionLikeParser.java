@@ -8,31 +8,46 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 
+/**
+ * 解析函数形式的内容的解析器。实现时，需要指定函数名称以及函数内各个参数的解析方式，然后得出一个解析结果。当未解析到此函数时，解析会返回 {@code null}。
+ */
 public interface FunctionLikeParser<T> {
   Dynamic2CommandExceptionType PARAMS_TOO_FEW = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.paramTooFew", a, b));
   Dynamic2CommandExceptionType PARAMS_TOO_MANY = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.paramTooMany", a, b));
 
+  /**
+   * 函数形式的名称，即括号前的内容。通常应该是常量。
+   */
   @Contract(pure = true)
   @NotNull
   String functionName();
 
+  /**
+   * 在显示建议时，为此函数名称提供建议时的提示文本。
+   */
+  @Contract(pure = true)
+  Text tooltip();
+
+  /**
+   * 最小参数数量。解析过程中，如果参数数量过少，则抛出错误。
+   */
   @Contract(pure = true)
   default int minParamsCount() {
     return 0;
   }
 
+  /**
+   * 最大参数数量。解析过程中，如果参数数量过多，则抛出错误。
+   */
   @Contract(pure = true)
   default int maxParamsCount() {
     return Integer.MAX_VALUE;
   }
 
-  @Contract(pure = true)
-  Text tooltip();
-
   default T parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final String name = functionName();
     if (suggestionsOnly) {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString(name + "(", tooltip(), suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString(name + "(", tooltip(), suggestionsBuilder));
     }
     final int cursorBeforeUnion = parser.reader.getCursor();
     final String s = parser.reader.readUnquotedString();
@@ -43,6 +58,7 @@ public interface FunctionLikeParser<T> {
     parser.reader.skip();
     // after the left parentheses
     parser.reader.skipWhitespace();
+
     int paramsCount = 0;
 
     // when allows zero params, deal with empty

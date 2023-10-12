@@ -19,10 +19,25 @@ import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import java.util.ArrayList;
 import java.util.function.UnaryOperator;
 
+/**
+ * 和{@linkplain Text 文本组件}有关的实用方法。
+ */
 public final class TextUtil {
+  /**
+   * 命令输出结果中的目标部分的样式。
+   */
   public static final UnaryOperator<Style> STYLE_FOR_TARGET = style -> style.withColor(0x30f5c5);
+  /**
+   * 命令输出结果中获得到的实际值部分的样式。
+   */
   public static final UnaryOperator<Style> STYLE_FOR_ACTUAL = style -> style.withColor(0xf5c255);
+  /**
+   * 命令输出结果中的预期值（可能与实际值不同）的部分的样式。
+   */
   public static final UnaryOperator<Style> STYLE_FOR_EXPECTED = style -> style.withColor(0xb8f530);
+  /**
+   * 命令输出结果中表示计算或者运行的结果中的部分的样式。
+   */
   public static final UnaryOperator<Style> STYLE_FOR_RESULT = style -> style.withColor(0x7cf3a0);
 
   private TextUtil() {
@@ -35,26 +50,44 @@ public final class TextUtil {
     return new NbtOrderedStringFormatter(StringUtils.EMPTY, 0, new ArrayList<>()).apply(nbtElement);
   }
 
+  /**
+   * 将方块坐标表示为文本组件。
+   */
   public static MutableText wrapBlockPos(Vec3i blockPos) {
     return Text.translatable("enhancedCommands.vec3i", blockPos.getX(), blockPos.getY(), blockPos.getZ());
   }
 
+  /**
+   * 将坐标表示为文本组件，以用于命令输出。
+   */
   public static MutableText wrapPosition(Position position) {
     return Text.translatable("enhancedCommands.position", position.getX(), position.getY(), position.getZ());
   }
 
+  /**
+   * 将方向表示为可翻译的文本组件。
+   */
   public static MutableText wrapDirection(Direction direction) {
     return Text.translatable("enhancedCommands.direction." + direction.asString());
   }
 
+  /**
+   * 将布尔值表示为文本组件，不翻译但是夫根据其值来应用格式。
+   */
   public static MutableText wrapBoolean(boolean b) {
     return Text.literal(Boolean.toString(b)).formatted(b ? Formatting.GREEN : Formatting.RED);
   }
 
+  /**
+   * 可翻译并使用增强功能的文本组件，相比 {@link Text#translatable} 有增强的功能。
+   */
   public static MutableText enhancedTranslatable(String key) {
     return MutableText.of(new EnhancedTranslatableTextContent(key, null, TranslatableTextContent.EMPTY_ARGUMENTS));
   }
 
+  /**
+   * 可翻译并使用增强功能的文本组件，相比 {@link Text#translatable} 有增强的功能。
+   */
   public static MutableText enhancedTranslatable(String key, Object... args) {
     return MutableText.of(new EnhancedTranslatableTextContent(key, null, args));
   }

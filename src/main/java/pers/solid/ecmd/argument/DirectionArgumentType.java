@@ -6,7 +6,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.argument.EnumArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.Direction;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +26,6 @@ public class DirectionArgumentType extends EnumArgumentType<DirectionArgument> {
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-    return SuggestionUtil.suggestMatchingEnumWithTooltip(Arrays.asList(DirectionArgument.values()), DirectionArgument::getDisplayName, builder);
+    return ParsingUtil.suggestMatchingEnumWithTooltip(Arrays.asList(DirectionArgument.values()), DirectionArgument::getDisplayName, builder);
   }
 }

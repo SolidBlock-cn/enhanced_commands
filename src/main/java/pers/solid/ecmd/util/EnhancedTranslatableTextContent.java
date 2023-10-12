@@ -86,11 +86,11 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
           if ("plural".equals(unquotedString)) {
             stringReader.expect('(');
             stringReader.skipWhitespace();
-            final @NotNull String p1 = StringUtil.readRegexString(stringReader);
+            final @NotNull String p1 = ParsingUtil.readRegexString(stringReader);
             stringReader.skipWhitespace();
             stringReader.expect(',');
             stringReader.skipWhitespace();
-            final @NotNull String p2 = StringUtil.readRegexString(stringReader);
+            final @NotNull String p2 = ParsingUtil.readRegexString(stringReader);
             stringReader.skipWhitespace();
             final @Nullable String p3;
             if (stringReader.canRead()) {
@@ -99,7 +99,7 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
                 p3 = null;
               } else if (read == ',') {
                 stringReader.skipWhitespace();
-                p3 = StringUtil.readRegexString(stringReader);
+                p3 = ParsingUtil.readRegexString(stringReader);
                 stringReader.skipWhitespace();
                 stringReader.expect(')');
               } else {

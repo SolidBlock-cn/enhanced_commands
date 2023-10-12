@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.util.ExpressionConvertible;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,7 +38,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
 
   @Override
   public @NotNull String asString() {
-    return Stream.of(firstBlockPredicate, propertyNamesPredicate, nbtBlockPredicate).filter(Objects::nonNull).map(StringRepresentablePredicate::asString).collect(Collectors.joining());
+    return Stream.of(firstBlockPredicate, propertyNamesPredicate, nbtBlockPredicate).filter(Objects::nonNull).map(ExpressionConvertible::asString).collect(Collectors.joining());
   }
 
   @Override

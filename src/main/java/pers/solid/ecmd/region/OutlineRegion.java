@@ -78,8 +78,8 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
-    return region.maxContainingBox();
+  public @Nullable Box minContainingBox() {
+    return region.minContainingBox();
   }
 
   public interface OutlineType extends StringIdentifiable {

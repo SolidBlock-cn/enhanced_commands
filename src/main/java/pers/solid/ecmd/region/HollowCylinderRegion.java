@@ -13,7 +13,7 @@ import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -143,8 +143,8 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
-    return cylinderRegion.maxContainingBox();
+  public @Nullable Box minContainingBox() {
+    return cylinderRegion.minContainingBox();
   }
 
   public enum Type implements RegionType<HollowCylinderRegion> {
@@ -194,7 +194,7 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, height);
         }
       } else if (paramIndex == 2) {
-        center = SuggestionUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
+        center = ParsingUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
       } else if (paramIndex == 3) {
         type = parser.readAndSuggestEnums(OutlineRegion.OutlineTypes.values(), OutlineRegion.OutlineTypes::getDisplayName, OutlineRegion.OutlineTypes.CODEC);
       }

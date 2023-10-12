@@ -2,9 +2,9 @@ package pers.solid.ecmd.predicate.nbt;
 
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.predicate.StringRepresentablePredicate;
+import pers.solid.ecmd.util.ExpressionConvertible;
 
-public interface NbtPredicate extends StringRepresentablePredicate {
+public interface NbtPredicate extends ExpressionConvertible {
   @Override
   @NotNull String asString();
 

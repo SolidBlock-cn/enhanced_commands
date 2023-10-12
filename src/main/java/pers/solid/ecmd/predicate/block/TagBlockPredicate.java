@@ -22,8 +22,8 @@ import org.jetbrains.annotations.UnmodifiableView;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.StringRepresentablePredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -40,7 +40,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     if (propertyNamePredicates.isEmpty()) {
       return "#" + blockTag.id().toString();
     } else {
-      return "#" + blockTag.id().toString() + "[" + propertyNamePredicates.stream().map(StringRepresentablePredicate::asString).collect(Collectors.joining(", ")) + "]";
+      return "#" + blockTag.id().toString() + "[" + propertyNamePredicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + "]";
     }
   }
 

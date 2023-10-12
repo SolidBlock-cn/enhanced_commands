@@ -14,7 +14,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -113,7 +113,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @Nullable Box maxContainingBox() {
+  public @Nullable Box minContainingBox() {
     return new Box(center.x - radius, center.y - height / 2, center.z - radius, center.x + radius, center.y + height / 2, center.z + radius);
   }
 
@@ -164,7 +164,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
         }
       } else if (paramIndex == 2) {
         final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
-        center = SuggestionUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        center = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
       }
     }
 

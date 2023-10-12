@@ -14,8 +14,8 @@ import net.minecraft.util.StringIdentifiable;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.SuggestionProvider;
-import pers.solid.ecmd.util.SuggestionUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,7 +65,7 @@ public class SuggestedParser {
 
   public <T> @NotNull T readAndSuggestValues(Iterable<@Nullable T> iterable, Function<T, String> suggestions, Function<T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     final int cursorBeforeRead = reader.getCursor();
-    this.suggestionProviders.add((context, builder) -> SuggestionUtil.suggestMatchingWithTooltip(iterable, suggestions, tooltip, builder));
+    this.suggestionProviders.add((context, builder) -> ParsingUtil.suggestMatchingWithTooltip(iterable, suggestions, tooltip, builder));
     final String name = reader.readString();
     final T value = valueGetter.apply(name);
     if (value == null) {

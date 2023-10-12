@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.regex.Pattern;
 
@@ -110,7 +110,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
         @Override
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
           if (paramIndex == 0) {
-            pattern = StringUtil.readRegex(parser.reader);
+            pattern = ParsingUtil.readRegex(parser.reader);
           } else if (paramIndex == 1) {
             replacement = parser.reader.readString();
           }

@@ -15,7 +15,7 @@ import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,11 +35,11 @@ public interface BlockPredicateArgument extends Function<ServerCommandSource, Bl
   }
 
   static @NotNull BlockPredicateArgument parseUnion(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return SuggestionUtil.parseUnifiable(() -> parseIntersect(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new UnionBlockPredicate(ImmutableList.copyOf(Lists.transform(predicates, input -> input.apply(source)))), "|", UNION_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseIntersect(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new UnionBlockPredicate(ImmutableList.copyOf(Lists.transform(predicates, input -> input.apply(source)))), "|", UNION_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockPredicateArgument parseIntersect(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return SuggestionUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new IntersectBlockPredicate(ImmutableList.copyOf(Lists.transform(predicates, input -> input.apply(source)))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new IntersectBlockPredicate(ImmutableList.copyOf(Lists.transform(predicates, input -> input.apply(source)))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockPredicateArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {

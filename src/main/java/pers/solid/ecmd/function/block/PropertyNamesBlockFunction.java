@@ -15,11 +15,10 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.StringRepresentableFunction;
 import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.NbtConvertible;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -28,13 +27,13 @@ import java.util.stream.Collectors;
 public record PropertyNamesBlockFunction(@NotNull Collection<PropertyNameFunction> propertyNameFunctions) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "[" + propertyNameFunctions.stream().map(StringRepresentableFunction::asString).collect(Collectors.joining(",")) + "]";
+    return "[" + propertyNameFunctions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(",")) + "]";
   }
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     for (PropertyNameFunction propertyNameFunction : propertyNameFunctions) {
-      blockState = propertyNameFunction.getModifiedState(blockState, origState);
+      blockState = propertyNameFunction.getModifiedState(origState, blockState, world.getRandom());
     }
     return blockState;
   }
@@ -66,7 +65,7 @@ public record PropertyNamesBlockFunction(@NotNull Collection<PropertyNameFunctio
 
     @Override
     public @Nullable BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
         final SimpleBlockFunctionSuggestedParser suggestedParser = new SimpleBlockFunctionSuggestedParser(commandRegistryAccess, parser);
         suggestedParser.parsePropertyNames();

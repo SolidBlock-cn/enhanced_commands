@@ -8,7 +8,8 @@ import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.function.Predicate;
 
-public final class ModCommands implements CommandRegistrationCallback {
+public enum ModCommands implements CommandRegistrationCallback {
+  INSTANCE;
   public static final Predicate<ServerCommandSource> REQUIRES_PERMISSION_2 = source -> source.hasPermissionLevel(2);
 
   @Override

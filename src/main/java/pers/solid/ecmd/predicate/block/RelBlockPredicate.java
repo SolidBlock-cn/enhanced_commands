@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -84,7 +84,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        relPos = SuggestionUtil.parseVec3i(parser);
+        relPos = ParsingUtil.parseVec3i(parser);
       } else if (paramIndex == 1) {
         blockPredicate = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }

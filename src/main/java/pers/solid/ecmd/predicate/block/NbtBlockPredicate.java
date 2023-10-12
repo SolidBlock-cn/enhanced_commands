@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
-import pers.solid.ecmd.util.SuggestionUtil;
+import pers.solid.ecmd.util.ParsingUtil;
 
 public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {
   @Override
@@ -50,7 +50,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
 
     @Override
     public @Nullable NbtBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> SuggestionUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '{') {
         return new NbtBlockPredicate(new NbtPredicateSuggestedParser(parser.reader, parser.suggestionProviders).parseCompound(false, false));
       } else {
