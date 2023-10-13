@@ -86,13 +86,14 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, Int2Object
     }
     if (positionalFunctions != null) {
       for (Int2ObjectMap.Entry<NbtFunction> entry : positionalFunctions.int2ObjectEntrySet()) {
-        final int index = entry.getIntKey();
+        int index = entry.getIntKey();
         final NbtFunction function = entry.getValue();
-        if (index < targetList.size()) {
-          try {
-            targetList.setElement(index, function.apply(targetList.get(index)));
-          } catch (UnsupportedOperationException ignored) {}
+        if (index < 0) {
+          index += targetList.size();
         }
+        try {
+          targetList.setElement(index, function.apply(targetList.get(index)));
+        } catch (UnsupportedOperationException | IndexOutOfBoundsException ignored) {}
       }
     }
     if (positionalInsertions != null) {

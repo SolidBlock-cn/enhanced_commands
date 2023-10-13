@@ -44,7 +44,7 @@ import java.util.function.Function;
  * </table>
  *
  * <p>{@code around <axisVector>} 等价于 {@code rotated <x> <y>} 或 {@code facing <targetPos>}。所有轴向量都会被单位化。
- * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code <length> <direction>}（参照 {@link ParsingUtil#parseVec3d(SuggestedParser)}。
+ * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code [length] <direction>}（参照 {@link ParsingUtil#parseVec3d(SuggestedParser)}。
  * <p>当半径指定为标量时，其方向为轴向量与 y 轴正方向的向量积的方向，若轴向量为 y 轴正方向或负方向，则其方向为 x 轴正方向或负方向。
  *
  * @param radius 圆的半径，是一个相对向量。
@@ -136,30 +136,10 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
   }
 
   public static String wrapVector(Vec3d vec3d) {
-    if (vec3d.multiply(0, 1, 1).equals(Vec3d.ZERO)) {
-      if (vec3d.x == 1) return "positive x";
-      else if (vec3d.x == -1) return "negative x";
-    } else if (vec3d.multiply(1, 0, 1).equals(Vec3d.ZERO)) {
-      if (vec3d.y == 1) return "positive y";
-      else if (vec3d.y == -1) return "negative y";
-    } else if (vec3d.multiply(1, 1, 0).equals(Vec3d.ZERO)) {
-      if (vec3d.z == 1) return "positive z";
-      else if (vec3d.z == -1) return "negative z";
-    }
     return StringUtil.wrapPosition(vec3d);
   }
 
   public static String wrapRadius(Vec3d vec3d) {
-    if (vec3d.multiply(0, 1, 1).equals(Vec3d.ZERO)) {
-      if (vec3d.x > 0) return "positive x " + vec3d.x;
-      else if (vec3d.x < 0) return "negative x " + -vec3d.x;
-    } else if (vec3d.multiply(1, 0, 1).equals(Vec3d.ZERO)) {
-      if (vec3d.y > 0) return "positive y " + vec3d.y;
-      else if (vec3d.y < 0) return "negative y " + -vec3d.y;
-    } else if (vec3d.multiply(1, 1, 0).equals(Vec3d.ZERO)) {
-      if (vec3d.z > 0) return "positive z " + vec3d.z;
-      else if (vec3d.z < 0) return "negative z " + -vec3d.z;
-    }
     return StringUtil.wrapPosition(vec3d);
   }
 
@@ -178,13 +158,13 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
    *   circle(<radius> [at <center>] <=> [ranging <range>] <=> [around <axis>])
    *   circle(from <radiusVec> [at <center>] <=> [around <axis>] <=> [ranging <range>])
    *
-   *   <radiusVec> = ([positive|negative] x|y|z <radius: double>) | <vec>
-   *   <axis> = ([positive|negative] x|y|z) | <vec>
+   *   <radiusVec> = (<radius: double> <direction>) | <vec>
+   *   <axis> = <direction> | <vec>
    *   <range> = <angle>[..<angle>]
    *   <angle> = <int>deg|<int>turn|<int>rad
    * }</pre>
    * <p>
-   * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <axis>} 的默认值为 {@code positive y}。{@code [positive|negative]} 未指定时，默认为 {@code positive}。当 {@code <radius>} 指定为标量时，其方向相当于 {@code <axis>} 与 {@code positive y} 的向量积的方向。当 {@code <axis>} 正好指定为 {@code positive y} 方向时，{@code <radius>} 方向为 x 正方向，或为 {@code negative y} 方向，则 {@code <radius>} 方向为 x 负方向。
+   * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <axis>} 的默认值为 {@code 0 1 0}。当 {@code <radius>} 指定为标量时，其方向相当于 {@code <axis>} 与 y 轴正方向的向量积的方向。当 {@code <axis>} 正好指定为 y 轴正方向时，{@code <radius>} 方向为 x 正方向，若为 y 轴负方向，则 {@code <radius>} 方向为 x 负方向。
    */
   private static class Parser implements FunctionLikeParser<CurveArgument<CircleCurve>> {
     private @Nullable Either<Double, Vec3d> radius;
@@ -241,7 +221,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
     }
 
     /**
-     * 解析半径。即：{@code <double> | from (<vector> | [positive|negative] (x|y|z) <double>)}。
+     * 解析半径。即：{@code <double> | from (<vector> | <double> <direction>)}。
      */
     private void parseRadius(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;

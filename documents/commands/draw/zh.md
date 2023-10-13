@@ -14,11 +14,11 @@
 
 ### `<曲线>`
 
-需要绘制的曲线。
+需要绘制的[曲线](/documents/arguments/curve/zh.md)。
 
 ### `<方块>`
 
-需要在此曲线上使用的方块函数。
+需要在此曲线上使用的[方块函数](/documents/arguments/block_function)。
 
 ### 关键字参数
 

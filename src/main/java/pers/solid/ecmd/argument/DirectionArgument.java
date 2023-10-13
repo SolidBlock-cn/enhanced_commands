@@ -1,7 +1,5 @@
 package pers.solid.ecmd.argument;
 
-import com.google.common.base.Functions;
-import com.google.common.base.Suppliers;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -12,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-public enum DirectionArgument implements StringIdentifiable, Function<@NotNull ServerCommandSource,@NotNull Direction> {
+public enum DirectionArgument implements StringIdentifiable, Function<@NotNull ServerCommandSource, @NotNull Direction> {
   DOWN(Direction.DOWN),
   UP(Direction.UP),
   NORTH(Direction.NORTH),
@@ -32,9 +30,13 @@ public enum DirectionArgument implements StringIdentifiable, Function<@NotNull S
   BACK("back", FRONT.function.andThen(Direction::getOpposite)),
   FRONT_HORIZONTAL("front_horizontal", source -> Direction.fromRotation(source.getRotation().y)),
   BACK_HORIZONTAL("back_horizontal", FRONT_HORIZONTAL.function.andThen(Direction::getOpposite)),
+  FRONT_VERTICAL("front_vertical", source -> source.getRotation().x > 0 ? Direction.UP : Direction.DOWN),
+  BACK_VERTICAL("from_vertical", source -> source.getRotation().x > 0 ? Direction.DOWN : Direction.UP),
   LEFT("left", FRONT_HORIZONTAL.function.andThen(Direction::rotateYCounterclockwise)),
   RIGHT("right", FRONT_HORIZONTAL.function.andThen(Direction::rotateYClockwise)),
-  RANDOM("random", source -> Direction.random(source.getWorld().random));
+  RANDOM("random", source -> Direction.random(source.getWorld().getRandom())),
+  RANDOM_HORIZONTAL("random_horizontal", source -> Direction.Type.HORIZONTAL.random(source.getWorld().getRandom())),
+  RANDOM_VERTICAL("random_vertical", source -> Direction.Type.VERTICAL.random(source.getWorld().getRandom()));
 
   public static final Codec<DirectionArgument> CODEC = StringIdentifiable.createCodec(DirectionArgument::values);
   private final String name;
@@ -42,7 +44,7 @@ public enum DirectionArgument implements StringIdentifiable, Function<@NotNull S
 
   DirectionArgument(@NotNull Direction direction) {
     this.name = direction.asString();
-    this.function = Functions.forSupplier(Suppliers.ofInstance(direction));
+    this.function = source -> direction;
   }
 
   DirectionArgument(String name, Function<ServerCommandSource, Direction> function) {

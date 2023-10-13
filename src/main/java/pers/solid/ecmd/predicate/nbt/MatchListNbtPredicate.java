@@ -61,7 +61,7 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
       if (expectedIndex < 0) {
         expectedIndex += nbtList.size();
       }
-      if (size > expectedIndex) {
+      if (expectedIndex >= 0 && size > expectedIndex) {
         if (!pair.right().test(nbtList.get(expectedIndex))) {
           return negated;
         }

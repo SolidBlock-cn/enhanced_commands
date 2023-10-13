@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  *   {a: one, b: two} match {a: three} -> false
  *   {a: one, b: two} match {a: one, b: one} -> false
  *   {a: one, b: two} match {a: *} -> true
- *   {a: one, b: two} match {c: *} -> true
+ *   {a: one, b: two} match {c: *} -> false
  *   {a: one, b: two} match {*: one} -> true
  *   {a: one, b: two} match {*: true} -> false
  *   {a: one, b: two} match {a: ~n} -> true

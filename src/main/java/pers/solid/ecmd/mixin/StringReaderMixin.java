@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Slice;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
-@Mixin(StringReader.class)
+@Mixin(value = StringReader.class, remap = false)
 public abstract class StringReaderMixin {
   @Shadow
   private int cursor;
