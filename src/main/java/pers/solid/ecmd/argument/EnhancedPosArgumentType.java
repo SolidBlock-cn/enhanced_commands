@@ -29,6 +29,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixin.ClientCommandSourceAccessor;
 import pers.solid.ecmd.util.TextUtil;
@@ -43,18 +44,25 @@ import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCur
 /**
  * Similar to {@link net.minecraft.command.argument.BlockPosArgumentType} and {@link Vec3ArgumentType}, with some slight modifications.
  *
- * @param behavior     The behavior of the argument type when accepting different values.
- * @param relativeOnly Whether the argument only accepts relative positions, instead of absolute positions and looking positions. In this case, the tilde "~" can be omitted.
+ * @param numberType   The behavior of the argument type when accepting different values.
+ * @param intAlignType
  * @see PosArgument
  * @see net.minecraft.command.argument.BlockPosArgumentType
  * @see Vec3ArgumentType
  */
-public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) implements ArgumentType<PosArgument>, ArgumentSerializer.ArgumentTypeProperties<EnhancedPosArgumentType> {
-  public static final String HERE_STRING = "here";
+public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<PosArgument>, ArgumentSerializer.ArgumentTypeProperties<EnhancedPosArgumentType> {
   public static final EnhancedPosArgument HERE_DOUBLE = new EnhancedPosArgument.DoublePos(0, 0, 0, true, true, true);
   public static final EnhancedPosArgument HERE_INT = new EnhancedPosArgument.IntPos(0, 0, 0, true, true, true);
 
   public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.pos.local_coordinates_not_allowed"));
+
+  public static EnhancedPosArgumentType blockPos() {
+    return new EnhancedPosArgumentType(NumberType.INT_ONLY, IntAlignType.FLOOR);
+  }
+
+  public static EnhancedPosArgumentType posPreferringCenteredInt() {
+    return new EnhancedPosArgumentType(NumberType.PREFER_INT, IntAlignType.CENTERED);
+  }
 
   public static PosArgument getPosArgument(CommandContext<?> context, String name) {
     return context.getArgument(name, PosArgument.class);
@@ -136,9 +144,6 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
 
     // try to read a looking pos
     if (reader.peek() == '^') {
-      if (relativeOnly) {
-        throw LOOKING_DIRECTION_NOT_ALLOWED.createWithContext(reader);
-      }
       double[] values = new double[3];
       for (int i = 0; i < 3; i++) {
         if (!reader.canRead()) {
@@ -164,11 +169,11 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
     } else {
       double[] values = new double[3];
       boolean[] isRelatives = new boolean[3];
-      Arrays.fill(isRelatives, relativeOnly);
+      Arrays.fill(isRelatives, false);
       boolean[] omitsNumber = new boolean[3];
 
       // the initial value, which may be modified later
-      boolean isDoublePos = behavior.doubleOnly();
+      boolean isDoublePos = numberType.doubleOnly();
       for (int i = 0; i < 3; i++) {
         if (!reader.canRead()) {
           throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
@@ -186,10 +191,10 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
           throw withCursorEnd(Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
         }
 
-        if (behavior.intOnly()) {
+        if (numberType.intOnly()) {
           if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
             // 在仅整数模式下，如果是相对坐标，也应该接受小数的相对坐标。
-            values[i] = (isRelative ? reader.readDouble() : reader.readInt()) + (isRelative ? 0.5 : 0);
+            values[i] = (isRelative ? reader.readDouble() : reader.readInt()) + (isRelative && intAlignType.shouldAdjustToCenter(i) ? 0.5 : 0);
           } else {
             omitsNumber[i] = true;
             values[i] = 0;
@@ -208,7 +213,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
           final String numAsString = reader.getString().substring(cursorBeforeReadDouble, reader.getCursor());
           if (StringUtils.contains(numAsString, '.')) {
             isDoublePos = true;
-          } else if (!behavior.preferInt() && !isRelative && behavior.centeredInt()) {
+          } else if (!numberType.preferInt() && !isRelative && intAlignType.shouldAdjustToCenter(i)) {
             num += 0.5;
           }
           values[i] = num;
@@ -221,12 +226,12 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
 
       // If there omits expected (such as "~ ~ ~"), it should be seen as a double pos.
       if (omitsNumber[0] && omitsNumber[1] && omitsNumber[2]) {
-        isDoublePos = behavior.doubleOnly() || !behavior.preferInt();
+        isDoublePos = numberType.doubleOnly() || !numberType.preferInt();
       }
       if (isDoublePos) {
         return new EnhancedPosArgument.DoublePos(values[0], values[1], values[2], isRelatives[0], isRelatives[1], isRelatives[2]);
       } else {
-        return new EnhancedPosArgument.IntPos(MathHelper.floor(values[0]), MathHelper.floor(values[1]), MathHelper.floor(values[2]), isRelatives[0], isRelatives[1], isRelatives[2]);
+        return new EnhancedPosArgument.IntPos(MathHelper.floor(values[0]), MathHelper.floor(values[1]), MathHelper.floor(values[2]), isRelatives[0], isRelatives[1], isRelatives[2], intAlignType);
       }
     }
   }
@@ -249,13 +254,10 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
     // try to read a looking pos
     final StringReader reader = new StringReader(builder.getInput());
     reader.setCursor(builder.getStart());
-    if (!reader.canRead() && !relativeOnly) {
+    if (!reader.canRead()) {
       builder.suggest("^^^", Text.translatable("enhancedCommands.argument.pos.local_coordinate"));
     }
     if (reader.canRead() && reader.peek() == '^') {
-      if (relativeOnly) {
-        return builder.createOffset(reader.getCursor()).buildFuture();
-      }
       int i;
       for (i = 0; i < 3; i++) {
         if (!reader.canRead()) {
@@ -289,7 +291,6 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
           break;
         }
 
-        // Currently, integer values (without dot) are always centered.
         try {
           if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
             reader.readDouble(); // 这里应该是与 readInt 兼容的（当 intOnly 且非相对坐标的情况下）
@@ -297,16 +298,14 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
         } catch (CommandSyntaxException ignored) {
         }
         if (i < 2) {
-          // before the end of iteration
           reader.skipWhitespace();
         }
       }
       if (i < 3) {
         builder.suggest("~".repeat(3 - i), i == 0 ? Text.translatable("enhancedCommands.argument.pos.relative_coordinate") : Text.translatable("enhancedCommands.argument.pos.relative_coordinate.remaining"));
-        if (!relativeOnly && (i == 0 || reader.canRead(-1) && Character.isWhitespace(reader.peek(-1)))) {
+        if (i == 0 || reader.canRead(-1) && Character.isWhitespace(reader.peek(-1))) {
           // 确保在建议数字时，前面必须已经是一个空格，或者还没有参数。
-          // 在仅接收相对坐标的情况下，不建议 crossHair 中的坐标。
-          if (crossHairBlockPos != null && !behavior.doubleOnly()) {
+          if (crossHairBlockPos != null && !numberType.doubleOnly()) {
             switch (i) {
               case 0 ->
                   builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int"));
@@ -316,7 +315,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
                   builder.suggest(crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int.remaining"));
             }
           }
-          if (crossHairPos != null && !behavior.intOnly()) {
+          if (crossHairPos != null && !numberType.intOnly()) {
             switch (i) {
               case 0 ->
                   builder.suggest(crossHairPos.getX() + " " + crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_double"));
@@ -340,7 +339,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
 
   @Override
   public Collection<String> getExamples() {
-    return List.of(HERE_STRING, "~ ~ ~", "^ ^ ^", "1 2 3");
+    return List.of("~ ~ ~", "^ ^ ^", "1 2 3");
   }
 
   @Override
@@ -356,19 +355,19 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
   public static class Serializer implements ArgumentSerializer<EnhancedPosArgumentType, EnhancedPosArgumentType> {
     @Override
     public void writePacket(EnhancedPosArgumentType properties, PacketByteBuf buf) {
-      buf.writeEnumConstant(properties.behavior);
-      buf.writeBoolean(properties.relativeOnly);
+      buf.writeEnumConstant(properties.numberType);
+      buf.writeEnumConstant(properties.intAlignType);
     }
 
     @Override
     public EnhancedPosArgumentType fromPacket(PacketByteBuf buf) {
-      return new EnhancedPosArgumentType(buf.readEnumConstant(Behavior.class), buf.readBoolean());
+      return new EnhancedPosArgumentType(buf.readEnumConstant(NumberType.class), buf.readEnumConstant(IntAlignType.class));
     }
 
     @Override
     public void writeJson(EnhancedPosArgumentType properties, JsonObject json) {
-      json.addProperty("behavior", properties.behavior.ordinal());
-      json.addProperty("relativeOnly", properties.relativeOnly);
+      json.addProperty("numberType", properties.numberType.ordinal());
+      json.addProperty("intAlignType", properties.intAlignType.ordinal());
     }
 
     @Override
@@ -377,7 +376,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
     }
   }
 
-  public enum Behavior {
+  public enum NumberType {
     /**
      * Only accepts integer values. Keyword "here" and tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
      */
@@ -393,11 +392,7 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
     /**
      * Accepts double values only. Integer values will be interpreted as doubles.
      */
-    DOUBLE_ONLY,
-    /**
-     * Accepts double values only. Integer values will be added 0.5. For example "1 2.0 3.1" is identical to "1.5 2.0 3.1". Tilde values and local coordinates will not be added 0.5.
-     */
-    DOUBLE_OR_CENTERED_INT;
+    DOUBLE_ONLY;
 
     public boolean preferInt() {
       return this == INT_ONLY || this == PREFER_INT;
@@ -407,12 +402,44 @@ public record EnhancedPosArgumentType(Behavior behavior, boolean relativeOnly) i
       return this == INT_ONLY;
     }
 
-    public boolean centeredInt() {
-      return this == INT_ONLY || this == PREFER_INT || this == DOUBLE_OR_CENTERED_INT;
+    public boolean doubleOnly() {
+      return this == DOUBLE_ONLY;
+    }
+  }
+
+  public enum IntAlignType {
+    FLOOR {
+      @Override
+      public boolean shouldAdjustToCenter(int index) {
+        return false;
+      }
+    },
+    HORIZONTALLY_CENTERED {
+      @Override
+      public boolean shouldAdjustToCenter(int index) {
+        return index != 1;
+      }
+    },
+    CENTERED {
+      @Override
+      public boolean shouldAdjustToCenter(int index) {
+        return true;
+      }
+    };
+
+    @Contract(pure = true)
+    public abstract boolean shouldAdjustToCenter(int index);
+
+    public double mayAdjustToCenter(int value, int index) {
+      if (shouldAdjustToCenter(index)) {
+        return value + 0.5;
+      } else {
+        return value;
+      }
     }
 
-    public boolean doubleOnly() {
-      return this == DOUBLE_ONLY || this == DOUBLE_OR_CENTERED_INT;
+    public Vec3d mayAdjustToCenter(Vec3i vec3i) {
+      return new Vec3d(mayAdjustToCenter(vec3i.getX(), 0), mayAdjustToCenter(vec3i.getY(), 1), mayAdjustToCenter(vec3i.getZ(), 2));
     }
   }
 }

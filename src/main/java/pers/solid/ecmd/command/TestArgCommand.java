@@ -5,6 +5,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.Block;
@@ -280,10 +281,14 @@ public enum TestArgCommand implements CommandRegistrationCallback {
       CommandBridge.sendFeedback(context, () -> Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY), true);
       return 1;
     };
-    for (final var value : EnhancedPosArgumentType.Behavior.values()) {
-      argumentBuilder.then(literal(value.name().toLowerCase())
-          .then(argument("pos", new EnhancedPosArgumentType(value, false))
-              .executes(execution)));
+    for (final EnhancedPosArgumentType.NumberType numberType : EnhancedPosArgumentType.NumberType.values()) {
+      final LiteralArgumentBuilder<ServerCommandSource> node = literal(numberType.name().toLowerCase());
+      for (EnhancedPosArgumentType.IntAlignType intAlignType : EnhancedPosArgumentType.IntAlignType.values()) {
+        node.then(literal(intAlignType.name().toLowerCase())
+            .then(argument("pos", new EnhancedPosArgumentType(numberType, intAlignType))
+                .executes(execution)));
+      }
+      argumentBuilder.then(node);
     }
 
     // 由于传入客户端的数据包并不会告知这个参数类型是强制使用了原版的，因此需要在这里手动指定 suggestionProvider
@@ -314,7 +319,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final String s = region.asString();
               CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
               final Region reparse = RegionArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).toAbsoluteRegion(context.getSource());
-              final boolean b = reparse.equals(reparse);
+              final boolean b = reparse.equals(region);
               CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
               return BooleanUtils.toInteger(b);
             }))

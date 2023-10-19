@@ -258,7 +258,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
         }
         parser.suggestionProviders.clear();
         ParsingUtil.expectAndSkipWhitespace(parser.reader);
-        center = ParsingUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
+        center = ParsingUtil.suggestParserFromType(EnhancedPosArgumentType.posPreferringCenteredInt(), parser, suggestionsOnly);
       } else if ("around".equals(unquotedString) || "rotated".equals(unquotedString) || "facing".equals(unquotedString)) {
         if (around != null) {
           parser.reader.setCursor(cursorBeforeKeyword);
@@ -279,7 +279,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
             };
           }
           case "facing" -> {
-            final PosArgument posArgument = ParsingUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false), parser, suggestionsOnly);
+            final PosArgument posArgument = ParsingUtil.suggestParserFromType(EnhancedPosArgumentType.posPreferringCenteredInt(), parser, suggestionsOnly);
             around = (source, center) -> {
               final Vec3d facingTarget = posArgument.toAbsolutePos(source);
               return facingTarget.subtract(center).normalize();

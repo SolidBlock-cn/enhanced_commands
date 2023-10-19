@@ -96,7 +96,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
+      final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {
         radius = parser.reader.readDouble();
       } else if (paramIndex == 1) {

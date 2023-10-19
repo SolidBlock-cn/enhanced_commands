@@ -163,7 +163,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, height);
         }
       } else if (paramIndex == 2) {
-        final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
+        final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
         center = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
       }
     }

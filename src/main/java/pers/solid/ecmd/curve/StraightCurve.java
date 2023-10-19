@@ -165,7 +165,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
-      final EnhancedPosArgumentType argumentType = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
+      final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {
         parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder));
         final int cursorBeforeKeyword = reader.getCursor();

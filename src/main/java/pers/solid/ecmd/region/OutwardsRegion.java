@@ -104,7 +104,7 @@ public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBac
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        center = ParsingUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false), parser, suggestionsOnly);
+        center = ParsingUtil.suggestParserFromType(EnhancedPosArgumentType.blockPos(), parser, suggestionsOnly);
       } else if (paramIndex == 1) {
         final StringReader reader = parser.reader;
         x = reader.readInt();

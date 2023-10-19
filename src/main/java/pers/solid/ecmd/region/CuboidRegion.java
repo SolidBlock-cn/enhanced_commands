@@ -176,7 +176,7 @@ public record CuboidRegion(Box box) implements Region {
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
+      final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {
         from = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
         if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {

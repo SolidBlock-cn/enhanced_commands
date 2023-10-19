@@ -50,7 +50,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static LiteralArgumentBuilder<ServerCommandSource> addBlockCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, CommandRegistryAccess registryAccess) {
     return argumentBuilder
-        .then(CommandManager.argument("pos", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
+        .then(CommandManager.argument("pos", EnhancedPosArgumentType.blockPos())
             .executes(TestForCommand::executeTestForBlock)
             .then(CommandManager.argument("predicate", new BlockPredicateArgumentType(registryAccess))
                 .executes(context -> executeTestForBlockPredicate(context, false))
@@ -96,7 +96,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   private static LiteralArgumentBuilder<ServerCommandSource> addBlockInfoCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder) {
     return argumentBuilder
-        .then(CommandManager.argument("pos", new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false))
+        .then(CommandManager.argument("pos", EnhancedPosArgumentType.blockPos())
             .then(CommandManager.literal("hardness")
                 .executes(context -> executeGetHardness(context, 1))
                 .then(CommandManager.argument("scale", FloatArgumentType.floatArg())

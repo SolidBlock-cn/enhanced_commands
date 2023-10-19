@@ -110,7 +110,7 @@ public record SingleBlockPosRegion(Vec3i vec3i) implements IntBackedRegion {
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      posArgument = ParsingUtil.suggestParserFromType(new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false), parser, suggestionsOnly);
+      posArgument = ParsingUtil.suggestParserFromType(EnhancedPosArgumentType.blockPos(), parser, suggestionsOnly);
     }
   }
 }

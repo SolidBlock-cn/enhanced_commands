@@ -80,12 +80,18 @@ public interface EnhancedPosArgument extends PosArgument {
 
   class IntPos extends DefaultPos {
     private final int x, y, z;
+    private final EnhancedPosArgumentType.IntAlignType intAlignType;
 
-    protected IntPos(int x, int y, int z, boolean xRelative, boolean yRelative, boolean zRelative) {
+    protected IntPos(int x, int y, int z, boolean xRelative, boolean yRelative, boolean zRelative, EnhancedPosArgumentType.IntAlignType intAlignType) {
       super(xRelative, yRelative, zRelative);
       this.x = x;
       this.y = y;
       this.z = z;
+      this.intAlignType = intAlignType;
+    }
+
+    protected IntPos(int x, int y, int z, boolean xRelative, boolean yRelative, boolean zRelative) {
+      this(x, y, z, xRelative, yRelative, zRelative, EnhancedPosArgumentType.IntAlignType.CENTERED);
     }
 
     @Override
@@ -95,7 +101,8 @@ public interface EnhancedPosArgument extends PosArgument {
 
     @Override
     public Vec3d toAbsolutePos(ServerCommandSource source) {
-      return Vec3d.ofCenter(toAbsoluteBlockPos(source));
+      final BlockPos blockPos = toAbsoluteBlockPos(source);
+      return intAlignType.mayAdjustToCenter(blockPos);
     }
 
     @Override

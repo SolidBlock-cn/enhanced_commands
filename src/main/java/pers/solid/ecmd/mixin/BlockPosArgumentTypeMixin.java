@@ -33,7 +33,7 @@ public abstract class BlockPosArgumentTypeMixin implements ArgumentTypeExtension
 
   @Inject(method = "<init>", at = @At("TAIL"))
   private void injectedInit(CallbackInfo ci) {
-    modArgumentType = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.INT_ONLY, false);
+    modArgumentType = EnhancedPosArgumentType.blockPos();
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/PosArgument;", at = @At("HEAD"), cancellable = true)

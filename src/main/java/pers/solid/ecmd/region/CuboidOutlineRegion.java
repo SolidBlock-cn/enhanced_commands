@@ -124,7 +124,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.Behavior.PREFER_INT, false);
+      final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
       if (paramIndex == 0) {
         fromPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
         if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {
