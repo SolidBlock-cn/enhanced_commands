@@ -159,7 +159,7 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
   public static final class Parser implements FunctionLikeParser<RegionArgument<HollowCylinderRegion>> {
     private double radius;
     private double height = 1;
-    private PosArgument center = EnhancedPosArgumentType.HERE_INT;
+    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
     private OutlineRegion.OutlineTypes type = OutlineRegion.OutlineTypes.WALL;
 
     @Override

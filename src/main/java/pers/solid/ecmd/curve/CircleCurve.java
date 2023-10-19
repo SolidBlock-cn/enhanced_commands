@@ -187,7 +187,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
       if (this.radius == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, "radius");
       }
-      final PosArgument center = this.center == null ? EnhancedPosArgumentType.HERE_INT : this.center;
+      final PosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
       return source -> {
         final Vec3d absoluteCenter = center.toAbsolutePos(source);
         final Vec3d around = this.around == null ? new Vec3d(0, 1, 0) : this.around.apply(source, absoluteCenter).normalize();

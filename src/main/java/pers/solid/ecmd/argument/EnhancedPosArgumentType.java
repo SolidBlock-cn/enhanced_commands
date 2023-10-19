@@ -51,13 +51,13 @@ import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCur
  * @see Vec3ArgumentType
  */
 public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<PosArgument>, ArgumentSerializer.ArgumentTypeProperties<EnhancedPosArgumentType> {
-  public static final EnhancedPosArgument HERE_DOUBLE = new EnhancedPosArgument.DoublePos(0, 0, 0, true, true, true);
-  public static final EnhancedPosArgument HERE_INT = new EnhancedPosArgument.IntPos(0, 0, 0, true, true, true);
+  public static final EnhancedPosArgument CURRENT_POS = new EnhancedPosArgument.DoublePos(0, 0, 0, true, true, true);
+  public static final EnhancedPosArgument CURRENT_BLOCK_POS_CENTER = new EnhancedPosArgument.IntPos(0, 0, 0, true, true, true);
 
   public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.pos.local_coordinates_not_allowed"));
 
   public static EnhancedPosArgumentType blockPos() {
-    return new EnhancedPosArgumentType(NumberType.INT_ONLY, IntAlignType.FLOOR);
+    return new EnhancedPosArgumentType(NumberType.INT_ONLY, IntAlignType.UNCHANGED);
   }
 
   public static EnhancedPosArgumentType posPreferringCenteredInt() {
@@ -376,17 +376,20 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     }
   }
 
+  /**
+   * 坐标的数字的解析方式，指定能否解析成整数或双精度浮点数，以及解析的结果应该是整数还是双精度浮点数。
+   */
   public enum NumberType {
     /**
-     * Only accepts integer values. Keyword "here" and tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
+     * Only accepts integer values. Tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
      */
     INT_ONLY,
     /**
-     * Accepts both integer and double value. Keyword "here" and tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
+     * Accepts both integer and double value. Pure tilde "~ ~ ~" and tilde with integer values (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
      */
     PREFER_INT,
     /**
-     * Accepts both integer and double value. Keyword "here" and tilde "~ ~ ~" will be interpreted as double pos.
+     * Accepts both integer and double value. Tilde "~ ~ ~" and local coordinates "^ ^ ^" will be interpreted as double pos.
      */
     PREFER_DOUBLE,
     /**
@@ -407,19 +410,31 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     }
   }
 
+  /**
+   * 指定了整数坐标（没有小数部分）如何对齐到精确坐标（浮点数坐标）。浮点数（包括数值上等于整数但指定了小数部分的数）不会受到影响。
+   */
   public enum IntAlignType {
-    FLOOR {
+    /**
+     * 不改变值，即整数坐标会被解析成数值相等的浮点坐标。例如：(1, 2, 3) -> (1.0, 2.0, 3.0)。
+     */
+    UNCHANGED {
       @Override
       public boolean shouldAdjustToCenter(int index) {
         return false;
       }
     },
+    /**
+     * 仅在水平方向上向坐标对齐，类似于 {@code /teleport} 命令中的参数，例如：(1, 2, 3) -> (1.5, 2.0, 3.5)。
+     */
     HORIZONTALLY_CENTERED {
       @Override
       public boolean shouldAdjustToCenter(int index) {
         return index != 1;
       }
     },
+    /**
+     * 对齐的方块的中心位置，即各整数值均增加 0.5。例如：(1, 2, 3) -> (1.5, 2.5, 3.5)。
+     */
     CENTERED {
       @Override
       public boolean shouldAdjustToCenter(int index) {

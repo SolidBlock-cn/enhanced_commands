@@ -27,7 +27,7 @@ public abstract class Vec3ArgumentTypeMixin implements ArgumentTypeExtension {
 
   @Inject(method = "<init>", at = @At("TAIL"))
   private void injectedInit(boolean centerIntegers, CallbackInfo ci) {
-    modArgumentType = new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.PREFER_DOUBLE, centerIntegers ? EnhancedPosArgumentType.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgumentType.IntAlignType.FLOOR);
+    modArgumentType = new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.PREFER_DOUBLE, centerIntegers ? EnhancedPosArgumentType.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgumentType.IntAlignType.UNCHANGED);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/PosArgument;", at = @At("HEAD"), cancellable = true)

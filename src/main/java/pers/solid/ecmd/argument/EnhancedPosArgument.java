@@ -3,6 +3,7 @@ package pers.solid.ecmd.argument;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 
@@ -119,8 +120,8 @@ public interface EnhancedPosArgument extends PosArgument {
       if (!xRelative && !yRelative && !zRelative) {
         return new BlockPos(x, y, z);
       }
-      final BlockPos position = BlockPos.ofFloored(source.getPosition());
-      return new BlockPos(xRelative ? position.getX() + x : x, yRelative ? position.getY() + y : y, zRelative ? position.getZ() + z : z);
+      final Vec3d position = source.getPosition();
+      return new BlockPos(xRelative ? MathHelper.floor(position.getX() + x) : x, yRelative ? MathHelper.floor(position.getY() + y) : y, zRelative ? MathHelper.floor(position.getZ() + z) : z);
     }
   }
 }

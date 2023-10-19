@@ -129,7 +129,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   public static final class Parser implements FunctionLikeParser<RegionArgument<CylinderRegion>> {
     private double radius;
     private double height = 1;
-    private PosArgument center = EnhancedPosArgumentType.HERE_INT;
+    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
 
     @Override
     public @NotNull String functionName() {

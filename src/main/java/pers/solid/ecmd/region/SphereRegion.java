@@ -76,7 +76,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   }
 
   public static final class Parser implements FunctionLikeParser<RegionArgument<SphereRegion>> {
-    private PosArgument centerPos = EnhancedPosArgumentType.HERE_INT;
+    private PosArgument centerPos = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
     private double radius;
 
     @Override
