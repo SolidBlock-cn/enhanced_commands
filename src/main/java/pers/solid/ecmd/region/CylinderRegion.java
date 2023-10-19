@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius, @Range(from = 0, to = Long.MAX_VALUE) double height, Vec3d center) implements Region {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
-    if (center.y + height / 2 < vec3d.y || center.y - height / 2 > vec3d.y) {
+    if (center.y + height / 2 <= vec3d.y || center.y - height / 2 > vec3d.y) {
       return false; // not in this height
     } else {
       // whether within this radius
@@ -40,8 +40,8 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   public int getTopHeight() {
-    // round(center.y + height/2) - 1
-    return MathHelper.floor(center.y + height / 2 - 0.5);
+    // round(center.y + height/2) - 1, round down 0.5
+    return MathHelper.ceil(center.y + height / 2 - 1.5);
   }
 
   @Override
@@ -113,7 +113,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
+  public @NotNull Box minContainingBox() {
     return new Box(center.x - radius, center.y - height / 2, center.z - radius, center.x + radius, center.y + height / 2, center.z + radius);
   }
 
@@ -128,7 +128,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
 
   public static final class Parser implements FunctionLikeParser<RegionArgument<CylinderRegion>> {
     private double radius;
-    private double height;
+    private double height = 1;
     private PosArgument center = EnhancedPosArgumentType.HERE_INT;
 
     @Override
@@ -170,7 +170,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
 
     @Override
     public int minParamsCount() {
-      return 2;
+      return 1;
     }
 
     @Override

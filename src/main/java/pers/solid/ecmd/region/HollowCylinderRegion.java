@@ -31,13 +31,13 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
   public boolean contains(@NotNull Vec3i vec3i) {
     final long topHeight = cylinderRegion.getTopHeight();
     final long bottomHeight = cylinderRegion.getBottomHeight();
-    if (outlineType == OutlineRegion.OutlineTypes.EXPOSE || outlineType == OutlineRegion.OutlineTypes.NEARLY_EXPOSE || outlineType == OutlineRegion.OutlineTypes.VERTICALLY_EXPOSE) {
+    if (outlineType == OutlineRegion.OutlineTypes.OUTLINE || outlineType == OutlineRegion.OutlineTypes.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
       // match the top or bottom ceiling
       if (vec3i.getY() == bottomHeight || vec3i.getY() == topHeight) {
         return horizontallyWithinCylinder(cylinderRegion, Vec3d.ofCenter(vec3i));
       }
     }
-    if (outlineType != OutlineRegion.OutlineTypes.VERTICALLY_EXPOSE) {
+    if (outlineType != OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
       // match the walls
       if (vec3i.getY() >= bottomHeight && vec3i.getY() <= topHeight) {
         return horizontallyWithinHollowCylinder(cylinderRegion, outlineType, new BlockPos(vec3i));
@@ -52,8 +52,8 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
   public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineRegion.OutlineTypes outlineType, BlockPos testPos) {
     outlineType = switch (outlineType) {
-      case EXPOSE -> OutlineRegion.OutlineTypes.HORIZONTALLY_EXPOSE;
-      case NEARLY_EXPOSE -> OutlineRegion.OutlineTypes.HORIZONTALLY_NEARLY_EXPOSE;
+      case OUTLINE -> OutlineRegion.OutlineTypes.WALL;
+      case OUTLINE_CONNECTED -> OutlineRegion.OutlineTypes.WALL_CONNECTED;
       default -> outlineType;
     };
     return outlineType.modifiedTest(blockPos -> {
@@ -76,7 +76,7 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
     final Iterable<BlockPos> iterable = BlockPos.iterate(MathHelper.ceil(center.x - radius - 0.5), 0, MathHelper.ceil(center.z - radius - 0.5), MathHelper.floor(center.x + radius - 0.5), 0, MathHelper.floor(center.z + radius - 0.5));
     final Stream<BlockPos> flatOutlineRoundStream = Streams.stream(iterable).filter(blockPos -> horizontallyWithinHollowCylinder(cylinderRegion, outlineType, blockPos));
-    if (outlineType == OutlineRegion.OutlineTypes.EXPOSE || outlineType == OutlineRegion.OutlineTypes.NEARLY_EXPOSE || outlineType == OutlineRegion.OutlineTypes.VERTICALLY_EXPOSE) {
+    if (outlineType == OutlineRegion.OutlineTypes.OUTLINE || outlineType == OutlineRegion.OutlineTypes.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
       if (topHeight == bottomHeight) {
         return Streams.stream(iterable).map(blockPos -> blockPos.withY(bottomHeight));
       } else if (topHeight < bottomHeight) {
@@ -86,7 +86,7 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
       // add top and bottom ceiling
       parts.add(Streams.stream(iterable).filter(blockPos -> horizontallyWithinCylinder(cylinderRegion, Vec3d.ofCenter(blockPos))).flatMap(blockPos -> Stream.of(blockPos.withY(topHeight), blockPos.withY(bottomHeight))));
       // add walls that excluded the top and bottom ceiling
-      if (outlineType != OutlineRegion.OutlineTypes.VERTICALLY_EXPOSE && topHeight - 1 > bottomHeight + 1) {
+      if (outlineType != OutlineRegion.OutlineTypes.FLOOR_AND_CEIL && topHeight - 1 > bottomHeight + 1) {
         parts.add(flatOutlineRoundStream.flatMap(blockPos -> BlockPos.stream(blockPos.getX(), bottomHeight + 1, blockPos.getZ(), blockPos.getX(), topHeight - 1, blockPos.getZ()).map(BlockPos::toImmutable)));
       }
       return parts.stream().flatMap(Function.identity());
@@ -131,9 +131,9 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
     var roundSurface = Math.PI * MathHelper.square(cylinderRegion.radius());
     var roundWallSurface = roundSurface - Math.PI * MathHelper.square(cylinderRegion.radius() - 1);
     return switch (outlineType) {
-      case EXPOSE, NEARLY_EXPOSE -> 2 * roundSurface + (cylinderRegion.height() - 2) * roundWallSurface;
-      case HORIZONTALLY_EXPOSE, HORIZONTALLY_NEARLY_EXPOSE -> cylinderRegion.height() * roundWallSurface;
-      case VERTICALLY_EXPOSE -> 2 * roundSurface;
+      case OUTLINE, OUTLINE_CONNECTED -> 2 * roundSurface + (cylinderRegion.height() - 2) * roundWallSurface;
+      case WALL, WALL_CONNECTED -> cylinderRegion.height() * roundWallSurface;
+      case FLOOR_AND_CEIL -> 2 * roundSurface;
     };
   }
 
@@ -143,7 +143,7 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
+  public @NotNull Box minContainingBox() {
     return cylinderRegion.minContainingBox();
   }
 
@@ -158,9 +158,9 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
   public static final class Parser implements FunctionLikeParser<RegionArgument<HollowCylinderRegion>> {
     private double radius;
-    private double height;
+    private double height = 1;
     private PosArgument center = EnhancedPosArgumentType.HERE_INT;
-    private OutlineRegion.OutlineTypes type = OutlineRegion.OutlineTypes.HORIZONTALLY_EXPOSE;
+    private OutlineRegion.OutlineTypes type = OutlineRegion.OutlineTypes.WALL;
 
     @Override
     public @NotNull String functionName() {
@@ -202,7 +202,7 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
     @Override
     public int minParamsCount() {
-      return 2;
+      return 1;
     }
 
     @Override

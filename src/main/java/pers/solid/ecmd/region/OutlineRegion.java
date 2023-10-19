@@ -104,31 +104,31 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     /**
      * The pos itself is in the region, but one if its near pos is not in the region.
      */
-    EXPOSE("outline") {
+    OUTLINE("outline") {
       @Override
       public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
         return Direction.stream().map(blockPos::offset);
       }
     },
-    NEARLY_EXPOSE("outline_connected") {
+    OUTLINE_CONNECTED("outline_connected") {
       @Override
       public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
         return BlockPos.stream(-1, -1, -1, 1, 1, 1).filter(blockPos1 -> blockPos1 != BlockPos.ORIGIN).map(blockPos::add);
       }
     },
-    HORIZONTALLY_EXPOSE("wall") {
+    WALL("wall") {
       @Override
       public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
         return Direction.Type.HORIZONTAL.stream().map(blockPos::offset);
       }
     },
-    HORIZONTALLY_NEARLY_EXPOSE("wall_connected") {
+    WALL_CONNECTED("wall_connected") {
       @Override
       public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
         return BlockPos.stream(-1, 0, -1, 1, 0, 1).filter(blockPos1 -> blockPos1 != BlockPos.ORIGIN).map(blockPos::add);
       }
     },
-    VERTICALLY_EXPOSE("floor_and_ceil") {
+    FLOOR_AND_CEIL("floor_and_ceil") {
       @Override
       public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
         return Stream.of(blockPos.up(), blockPos.down());
@@ -162,7 +162,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   public static final class Parser implements FunctionLikeParser<RegionArgument<OutlineRegion>> {
-    private OutlineType outlineType = OutlineTypes.EXPOSE;
+    private OutlineType outlineType = OutlineTypes.OUTLINE;
     private RegionArgument<?> regionArgument;
 
     @Override
