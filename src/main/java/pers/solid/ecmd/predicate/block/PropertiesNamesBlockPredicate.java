@@ -10,6 +10,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
@@ -75,7 +76,7 @@ public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePred
     PROPERTY_NAMES_TYPE;
 
     @Override
-    public @NotNull PropertiesNamesBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull PropertiesNamesBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final List<PropertyNamePredicate> predicates = nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE)
           .stream()
           .map(nbtElement -> PropertyNamePredicate.fromNbt((NbtCompound) nbtElement))

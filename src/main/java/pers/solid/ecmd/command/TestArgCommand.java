@@ -97,7 +97,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final NbtCompound nbt = blockFunction.createNbt();
               CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
               try {
-                final BlockFunction reDeserialize = BlockFunction.fromNbt(nbt);
+                final BlockFunction reDeserialize = BlockFunction.fromNbt(nbt, context.getSource().getWorld());
                 final boolean b = blockFunction.equals(reDeserialize);
                 CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
                 return BooleanUtils.toInteger(b);
@@ -145,7 +145,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final NbtCompound nbt = blockPredicate.createNbt();
               CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
               try {
-                final BlockPredicate reDeserialize = BlockPredicate.fromNbt(nbt);
+                final BlockPredicate reDeserialize = BlockPredicate.fromNbt(nbt, context.getSource().getWorld());
                 final boolean b = blockPredicate.equals(reDeserialize);
                 CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
                 return BooleanUtils.toInteger(b);
@@ -212,7 +212,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                   CommandBridge.sendFeedback(context, () -> Text.literal(Boolean.toString(test)), false);
                   return BooleanUtils.toInteger(test);
                 })))
-        .then(literal("tostring")
+        .then(literal("string")
             .executes(context -> {
               final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
               CommandBridge.sendFeedback(context, () -> Text.literal(nbtPredicate.asString()), false);
@@ -253,7 +253,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                   CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(apply), false);
                   return 1;
                 })))
-        .then(literal("tostring")
+        .then(literal("string")
             .executes(context -> {
               final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
               CommandBridge.sendFeedback(context, () -> Text.literal(nbtFunction.asString(false)), false);

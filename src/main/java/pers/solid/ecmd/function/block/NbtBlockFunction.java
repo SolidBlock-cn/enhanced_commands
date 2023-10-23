@@ -43,7 +43,7 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
     NBT_TYPE;
 
     @Override
-    public @NotNull NbtBlockFunction fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull NbtBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final String s = nbtCompound.getString("nbtPredicate");
       try {
         return new NbtBlockFunction(new NbtFunctionSuggestedParser(new StringReader(s)).parseCompound(false));

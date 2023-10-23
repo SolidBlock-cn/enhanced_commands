@@ -9,6 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -95,12 +96,12 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     REL_TYPE;
 
     @Override
-    public @NotNull RelBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull RelBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final int[] intArray = nbtCompound.getIntArray("pos");
       if (intArray.length != 3) {
         throw new IllegalArgumentException("The length of integer array 'pos' must be 3.");
       } else {
-        return new RelBlockPredicate(new Vec3i(intArray[0], intArray[1], intArray[2]), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
+        return new RelBlockPredicate(new Vec3i(intArray[0], intArray[1], intArray[2]), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world));
       }
     }
 

@@ -40,7 +40,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
     ROTATE_TYPE;
 
     @Override
-    public RotateBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull RotateBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new RotateBlockFunction(EnumOrRandom.parse(BlockRotation.CODEC, nbtCompound.getString("rotation"), BlockRotation::values).orElseThrow());
     }
 

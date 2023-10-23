@@ -6,6 +6,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -103,10 +104,10 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     BI_PREDICATE_TYPE;
 
     @Override
-    public @NotNull BiPredicateBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull BiPredicateBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final boolean same = nbtCompound.getBoolean("same");
-      final BlockPredicate predicate1 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate1"));
-      final BlockPredicate predicate2 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate2"));
+      final BlockPredicate predicate1 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate1"), world);
+      final BlockPredicate predicate2 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate2"), world);
       return new BiPredicateBlockPredicate(predicate1, predicate2, same);
     }
 

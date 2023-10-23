@@ -1,16 +1,12 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.base.Suppliers;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -22,20 +18,24 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.ParsingUtil;
 
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
  * 从 id 包含指定正则表达式的方块中随机选择一个。
  */
 public final class IdContainBlockFunction implements BlockFunction {
-  public @NotNull
-  final Pattern pattern;
-  private transient final Supplier<Block[]> blocks;
+  private final @NotNull Pattern pattern;
+  private transient World world;
+  private transient Block[] blocks;
 
-  public IdContainBlockFunction(@NotNull Pattern pattern, RegistryWrapper<Block> registryWrapper) {
-    this.pattern = pattern;
-    blocks = Suppliers.memoize(() -> registryWrapper.streamEntries().filter(reference -> pattern.matcher(reference.registryKey().getValue().toString()).find()).map(RegistryEntry.Reference::value).toArray(Block[]::new));
+  public IdContainBlockFunction(@NotNull Pattern pattern) {this.pattern = pattern;}
+
+  public @NotNull Block[] getBlocks(@NotNull World world) {
+    if (!world.equals(this.world)) {
+      blocks = world.createCommandRegistryWrapper(RegistryKeys.BLOCK).streamEntries().filter(reference -> pattern.matcher(reference.registryKey().getValue().toString()).find()).map(RegistryEntry.Reference::value).toArray(Block[]::new);
+      this.world = world;
+    }
+    return blocks;
   }
 
   @Override
@@ -45,7 +45,7 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    final Block[] blocks = this.blocks.get();
+    final Block[] blocks = getBlocks(world);
     if (blocks.length == 0) {
       return blockState;
     }
@@ -84,12 +84,15 @@ public final class IdContainBlockFunction implements BlockFunction {
         '}';
   }
 
+  public @NotNull Pattern pattern() {return pattern;}
+
+
   public enum Type implements BlockFunctionType<IdContainBlockFunction> {
     ID_CONTAIN_TYPE;
 
     @Override
-    public IdContainBlockFunction fromNbt(NbtCompound nbtCompound) {
-      return new IdContainBlockFunction(Pattern.compile(nbtCompound.getString("pattern")), Registries.BLOCK.getReadOnlyWrapper());
+    public @NotNull IdContainBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new IdContainBlockFunction(Pattern.compile(nbtCompound.getString("pattern")));
     }
 
     @Override
@@ -104,12 +107,11 @@ public final class IdContainBlockFunction implements BlockFunction {
         // @formatter:one
         @Override
         public IdContainBlockFunction getParseResult(SuggestedParser parser) {
-          return new IdContainBlockFunction(pattern, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
+          return new IdContainBlockFunction(pattern);
         }
 
         @Override
         public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-          final StringReader reader = parser.reader;
           parser.suggestionProviders.clear();
           pattern = ParsingUtil.readRegex(parser.reader);
         }

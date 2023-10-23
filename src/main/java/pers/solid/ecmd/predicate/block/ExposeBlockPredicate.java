@@ -16,6 +16,7 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
@@ -230,7 +231,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     EXPOSE_TYPE;
 
     @Override
-    public @NotNull ExposeBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull ExposeBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final String typeName = nbtCompound.getString("exposure_type");
       final ExposureType type = ExposureType.CODEC.byId(typeName);
       Preconditions.checkNotNull(type, "Unknown exposure type: %", typeName);

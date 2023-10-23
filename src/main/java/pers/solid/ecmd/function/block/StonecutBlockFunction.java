@@ -83,8 +83,8 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
     STONE_CUT_TYPE;
 
     @Override
-    public StonecutBlockFunction fromNbt(NbtCompound nbtCompound) {
-      return new StonecutBlockFunction(nbtCompound.contains("function", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("function")) : null);
+    public @NotNull StonecutBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new StonecutBlockFunction(nbtCompound.contains("function", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("function"), world) : null);
     }
 
     @Override

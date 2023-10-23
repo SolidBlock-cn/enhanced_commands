@@ -69,11 +69,11 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
     PROPERTIES_NBT_COMBINATION_TYPE;
 
     @Override
-    public @NotNull PropertiesNbtCombinationBlockFunction fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull PropertiesNbtCombinationBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new PropertiesNbtCombinationBlockFunction(
-          BlockFunction.fromNbt(nbtCompound.getCompound("first")),
-          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties")) : null,
-          nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockFunction.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt")) : null
+          BlockFunction.fromNbt(nbtCompound.getCompound("first"), world),
+          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), ) : null,
+          nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockFunction.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), ) : null
       );
     }
 

@@ -54,7 +54,7 @@ public record PropertyNamesBlockFunction(@NotNull Collection<PropertyNameFunctio
     PROPERTY_NAMES_TYPE;
 
     @Override
-    public PropertyNamesBlockFunction fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull PropertyNamesBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final List<PropertyNameFunction> functions = nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE)
           .stream()
           .map(nbtElement -> PropertyNameFunction.fromNbt((NbtCompound) nbtElement))

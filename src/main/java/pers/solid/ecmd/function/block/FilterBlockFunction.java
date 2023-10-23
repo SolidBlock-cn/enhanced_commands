@@ -67,10 +67,10 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
     FILTER_TYPE;
 
     @Override
-    public FilterBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull FilterBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new FilterBlockFunction(
-          BlockFunction.fromNbt(nbtCompound.getCompound("function")), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")),
-          nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else")) : null
+          BlockFunction.fromNbt(nbtCompound.getCompound("function"), world), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world),
+          nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else"), world) : null
       );
     }
 

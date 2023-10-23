@@ -65,7 +65,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
     SIMPLE_TYPE;
 
     @Override
-    public SimpleBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull SimpleBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final Block block = Registries.BLOCK.get(new Identifier(nbtCompound.getString("block")));
       final Collection<PropertyFunction<?>> propertyFunctions;
       final NbtElement propertiesElement = nbtCompound.get("properties");

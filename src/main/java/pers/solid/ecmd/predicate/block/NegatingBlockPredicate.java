@@ -6,6 +6,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -50,8 +51,8 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
     NEGATING_TYPE;
 
     @Override
-    public @NotNull NegatingBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
-      return new NegatingBlockPredicate(BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
+    public @NotNull NegatingBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new NegatingBlockPredicate(BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world));
     }
 
     @Override

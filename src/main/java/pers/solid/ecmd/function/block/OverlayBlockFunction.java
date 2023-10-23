@@ -56,8 +56,8 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
     OVERLAY_TYPE;
 
     @Override
-    public OverlayBlockFunction fromNbt(NbtCompound nbtCompound) {
-      return new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE), nbtElement -> BlockFunction.fromNbt((NbtCompound) nbtElement))));
+    public @NotNull OverlayBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE), nbtElement -> BlockFunction.fromNbt((NbtCompound) nbtElement, world))));
     }
 
     @Override

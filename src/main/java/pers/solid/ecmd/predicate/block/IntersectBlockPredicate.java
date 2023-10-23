@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -90,8 +91,8 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     INTERSECT_TYPE;
 
     @Override
-    public @NotNull IntersectBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
-      return new IntersectBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement)).toList());
+    public @NotNull IntersectBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new IntersectBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement, world)).toList());
     }
 
     @Override

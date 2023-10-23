@@ -78,11 +78,11 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
     ID_REPLACE_TYPE;
 
     @Override
-    public IdReplaceBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull IdReplaceBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new IdReplaceBlockFunction(
           Pattern.compile(nbtCompound.getString("pattern")),
           nbtCompound.getString("replacement"),
-          Registries.BLOCK.getReadOnlyWrapper()
+          world.createCommandRegistryWrapper(RegistryKeys.BLOCK)
       );
     }
 

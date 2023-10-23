@@ -4,6 +4,7 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -42,7 +43,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     CONSTANT_TYPE;
 
     @Override
-    public @NotNull ConstantBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull ConstantBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return ALWAYS_TRUE;
     }
 

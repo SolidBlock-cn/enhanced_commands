@@ -37,7 +37,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     USE_ORIGINAL_TYPE;
 
     @Override
-    public UseOriginalBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull UseOriginalBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return USE_ORIGINAL;
     }
 

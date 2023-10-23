@@ -46,7 +46,7 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
     MIRROR_TYPE;
 
     @Override
-    public MirrorBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull MirrorBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new MirrorBlockFunction(EnumOrRandom.parse(BlockMirror.CODEC, nbtCompound.getString("mirror"), BlockMirror::values).orElseThrow());
     }
 

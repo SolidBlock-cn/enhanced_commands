@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
@@ -44,10 +45,10 @@ public interface BlockPredicate extends ExpressionConvertible, NbtConvertible, B
   /**
    * 从 NBT 中获取一个 BlockPredicate 对象。会先从这个 NBT 中获取 type，并从注册表中获取。如果这个 type 不正确，或者里面的参数不正确，会直接抛出错误。
    */
-  static BlockPredicate fromNbt(NbtCompound nbtCompound) {
+  static @NotNull BlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
     final BlockPredicateType<?> type = BlockPredicateType.REGISTRY.get(new Identifier(nbtCompound.getString("type")));
     Preconditions.checkNotNull(type, "Unknown block predicate type: %s", type);
-    return type.fromNbt(nbtCompound);
+    return type.fromNbt(nbtCompound, world);
   }
 
   @Override

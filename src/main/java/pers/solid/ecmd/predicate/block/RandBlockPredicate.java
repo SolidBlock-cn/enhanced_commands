@@ -9,6 +9,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -119,9 +120,9 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     RAND_TYPE;
 
     @Override
-    public @NotNull RandBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull RandBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       if (nbtCompound.contains("predicate", NbtElement.COMPOUND_TYPE)) {
-        return new RandBlockPredicate(nbtCompound.getFloat("value"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")), Random.create());
+        return new RandBlockPredicate(nbtCompound.getFloat("value"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world), Random.create());
       } else {
         return new RandBlockPredicate(nbtCompound.getFloat("value"), null, Random.create());
       }

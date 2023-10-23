@@ -53,9 +53,9 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
     DRY_TYPE;
 
     @Override
-    public DryBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull DryBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       if (nbtCompound.contains("function", NbtElement.COMPOUND_TYPE)) {
-        return new DryBlockFunction(BlockFunction.fromNbt(nbtCompound.getCompound("function")));
+        return new DryBlockFunction(BlockFunction.fromNbt(nbtCompound.getCompound("function"), world));
       } else {
         return new DryBlockFunction(null);
       }

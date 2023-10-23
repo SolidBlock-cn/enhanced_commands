@@ -8,6 +8,7 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -65,7 +66,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     ID_CONTAIN_TYPE;
 
     @Override
-    public @NotNull IdContainBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull IdContainBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new IdContainBlockPredicate(Pattern.compile(nbtCompound.getString("pattern")));
     }
 

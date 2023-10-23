@@ -90,10 +90,10 @@ public interface BlockFunction extends ExpressionConvertible, NbtConvertible, Bl
     return nbtCompound;
   }
 
-  static BlockFunction fromNbt(NbtCompound nbtCompound) {
+  static @NotNull BlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
     final BlockFunctionType<?> type = BlockFunctionType.REGISTRY.get(new Identifier(nbtCompound.getString("type")));
     Preconditions.checkNotNull(type, "Unknown block function type: %s", type);
-    return type.fromNbt(nbtCompound);
+    return type.fromNbt(nbtCompound, world);
   }
 
   @Override

@@ -110,7 +110,7 @@ public interface PickBlockFunction extends BlockFunction {
     PICK_TYPE;
 
     @Override
-    public PickBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull PickBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final boolean weighted = nbtCompound.getBoolean("weighted");
       if (weighted) {
         final ImmutableList.Builder<ObjectDoublePair<BlockFunction>> pairsBuilder = new ImmutableList.Builder<>();
@@ -119,13 +119,13 @@ public interface PickBlockFunction extends BlockFunction {
           if (!(element instanceof final NbtCompound nbtCompound1))
             continue;
           final float weight = nbtCompound1.getFloat("weight");
-          final BlockFunction value = BlockFunction.fromNbt(nbtCompound1.getCompound("value"));
+          final BlockFunction value = BlockFunction.fromNbt(nbtCompound1.getCompound("value"), world);
           pairsBuilder.add(ObjectDoublePair.of(value, weight));
         }
         return new Weighted(pairsBuilder.build());
       } else {
         final NbtList nbtList = nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE);
-        return new Uniform(nbtList.stream().map(nbtElement -> BlockFunction.fromNbt(((NbtCompound) nbtElement))).collect(ImmutableList.toImmutableList()));
+        return new Uniform(nbtList.stream().map(nbtElement -> BlockFunction.fromNbt(((NbtCompound) nbtElement), world)).collect(ImmutableList.toImmutableList()));
       }
     }
 

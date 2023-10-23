@@ -5,7 +5,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -79,8 +78,8 @@ public final class RandomBlockFunction implements BlockFunction {
     RANDOM_TYPE;
 
     @Override
-    public RandomBlockFunction fromNbt(NbtCompound nbtCompound) {
-      return new RandomBlockFunction(Registries.BLOCK.getReadOnlyWrapper());
+    public @NotNull RandomBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new RandomBlockFunction(world.createCommandRegistryWrapper(RegistryKeys.BLOCK));
     }
 
     @Override

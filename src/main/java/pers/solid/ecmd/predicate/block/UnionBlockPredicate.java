@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -91,8 +92,8 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     UNION_TYPE;
 
     @Override
-    public @NotNull UnionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
-      return new UnionBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement)).toList());
+    public @NotNull UnionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new UnionBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement, world)).toList());
     }
 
     @Override

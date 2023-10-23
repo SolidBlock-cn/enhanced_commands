@@ -16,6 +16,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -94,7 +95,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     SIMPLE_TYPE;
 
     @Override
-    public @NotNull SimpleBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull SimpleBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final Block block = Registries.BLOCK.getOrEmpty(new Identifier(nbtCompound.getString("block"))).orElseThrow();
       final List<PropertyPredicate<?>> predicates = nbtCompound.getList("properties", NbtElement.COMPOUND_TYPE)
           .stream()

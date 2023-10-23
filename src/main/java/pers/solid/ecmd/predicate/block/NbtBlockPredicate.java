@@ -6,6 +6,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
@@ -39,7 +40,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     NBT_TYPE;
 
     @Override
-    public @NotNull NbtBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull NbtBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final String s = nbtCompound.getString("nbtPredicate");
       try {
         return new NbtBlockPredicate(new NbtPredicateSuggestedParser(new StringReader(s)).parseCompound(false, false));

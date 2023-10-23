@@ -59,11 +59,11 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     CONDITIONAL_TYPE;
 
     @Override
-    public ConditionalBlockFunction fromNbt(NbtCompound nbtCompound) {
+    public @NotNull ConditionalBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new ConditionalBlockFunction(
-          BlockPredicate.fromNbt(nbtCompound.getCompound("if")),
-          BlockFunction.fromNbt(nbtCompound.getCompound("then")),
-          nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else")) : null
+          BlockPredicate.fromNbt(nbtCompound.getCompound("if"), world),
+          BlockFunction.fromNbt(nbtCompound.getCompound("then"), world),
+          nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else"), world) : null
       );
     }
 

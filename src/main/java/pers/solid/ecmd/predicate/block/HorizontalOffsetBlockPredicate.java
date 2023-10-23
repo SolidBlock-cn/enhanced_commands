@@ -8,6 +8,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -68,9 +69,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     HORIZONTAL_OFFSET_TYPE;
 
     @Override
-    public @NotNull HorizontalOffsetBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull HorizontalOffsetBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final int offset = nbtCompound.getInt("offset");
-      final BlockPredicate predicate = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"));
+      final BlockPredicate predicate = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world);
       return new HorizontalOffsetBlockPredicate(offset, predicate);
     }
 

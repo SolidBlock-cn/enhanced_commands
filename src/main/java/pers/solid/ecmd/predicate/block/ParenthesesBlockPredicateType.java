@@ -3,6 +3,7 @@ package pers.solid.ecmd.predicate.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -12,8 +13,8 @@ public enum ParenthesesBlockPredicateType implements BlockPredicateType<BlockPre
   PARENTHESES_TYPE;
 
   @Override
-  public @NotNull BlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
-    return BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"));
+  public @NotNull BlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+    return BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world);
   }
 
   @Override

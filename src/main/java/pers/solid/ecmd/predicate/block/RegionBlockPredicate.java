@@ -6,6 +6,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -47,7 +48,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
     REGION_TYPE;
 
     @Override
-    public @NotNull RegionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound) {
+    public @NotNull RegionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       throw new UnsupportedOperationException();
     }
 
