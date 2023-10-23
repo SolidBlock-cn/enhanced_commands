@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +15,7 @@ import java.util.Iterator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public record OutlineRegion(OutlineType outlineType, Region region) implements Region {
+public record OutlineRegion(OutlineType outlineType, Region region) implements RegionBasedRegion<OutlineRegion, Region> {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return false;
@@ -35,26 +34,6 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   @Override
   public Stream<BlockPos> stream() {
     return region.stream().filter(this::contains);
-  }
-
-  @Override
-  public @NotNull OutlineRegion moved(@NotNull Vec3d relativePos) {
-    return new OutlineRegion(outlineType, region.moved(relativePos));
-  }
-
-  @Override
-  public @NotNull OutlineRegion moved(@NotNull Vec3i relativePos) {
-    return new OutlineRegion(outlineType, region.moved(relativePos));
-  }
-
-  @Override
-  public @NotNull OutlineRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return new OutlineRegion(outlineType, region.rotated(pivot, blockRotation));
-  }
-
-  @Override
-  public @NotNull OutlineRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return new OutlineRegion(outlineType, region.mirrored(pivot, axis));
   }
 
   @Override
@@ -82,12 +61,17 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     return region.minContainingBox();
   }
 
+  @Override
+  public OutlineRegion newRegion(Region region) {
+    return new OutlineRegion(outlineType, region);
+  }
+
   public interface OutlineType extends StringIdentifiable {
     boolean modifiedTest(Predicate<BlockPos> predicate, BlockPos blockPos);
 
     @Override
     default String asString() {
-      return "<custom outline type: " + this + ">";
+      return toString();
     }
   }
 

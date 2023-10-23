@@ -83,7 +83,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   }
 
   /**
-   * 获取方块坐标，并检查方块坐标是否可用于旋转方块，不会检查坐标是否在已加载的区块内。
+   * 获取方块坐标，并检查方块坐标是否可用于放置方块，不会检查坐标是否在已加载的区块内。
    */
   public static BlockPos getBuildableBlockPos(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     return checkBuildLimit(context.getSource().getWorld(), getBlockPos(context, name));

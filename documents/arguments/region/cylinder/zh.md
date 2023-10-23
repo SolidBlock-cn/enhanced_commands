@@ -9,7 +9,7 @@
 - `cyl(<半径>, [高度], [中心坐标])`
 - `hcyl(<半径>, [高度], [中心坐标], [边框类型])`
 
-其中，`hcyl(...)` 在效果上等价于 `outline(cylinder(...))`。
+其中，`hcyl(...)` 在效果上等价于 `outline(cylinder(...))`，但是在实现上有专门的优化。
 
 实体的圆柱体可以表述为这样的集合：`{(x, y, z)|distance((center.x, center.y), (x, y)) <= radius && center.y - height / 2 <= y < center.y + height / 2}`。
 
