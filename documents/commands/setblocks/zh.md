@@ -1,4 +1,4 @@
-# `/setblocks`
+# `/setblocks` 和 `//setblocks`
 
 此[命令](../zh.md)用于放置多个方块。
 
@@ -9,6 +9,8 @@
 ## 语法
 
 `/setblocks <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process | unloaded_pos | suppress_initial_check | suppress_replaced_check | force]`
+
+`//setblocks ...` 相当于 `/setblocks 玩家的活动区域 ...`。
 
 ## 参数
 

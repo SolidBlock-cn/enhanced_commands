@@ -70,8 +70,8 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
     public @NotNull PropertiesNbtCombinationBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new PropertiesNbtCombinationBlockPredicate(
           BlockPredicate.fromNbt(nbtCompound.getCompound("first"), world),
-          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertiesNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), ) : null,
-          nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockPredicate.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), ) : null
+          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertiesNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), world) : null,
+          nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockPredicate.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), world) : null
       );
     }
 

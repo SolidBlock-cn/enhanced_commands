@@ -72,8 +72,8 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
     public @NotNull PropertiesNbtCombinationBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new PropertiesNbtCombinationBlockFunction(
           BlockFunction.fromNbt(nbtCompound.getCompound("first"), world),
-          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), ) : null,
-          nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockFunction.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), ) : null
+          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), world) : null,
+          nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockFunction.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), world) : null
       );
     }
 

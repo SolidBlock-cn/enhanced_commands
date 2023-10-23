@@ -34,13 +34,13 @@
 
 ## 示例
 
-- `/testfor block ~~-1~`：检测执行位置下方一格的方块。
+- `/testfor block ~~-1~`：检测命令执行源的位置下方一格的方块。
 - `/testfor block ~ -165 ~`：检测 y 轴为 -165 的位置的方块。尽管此坐标超出了建筑限制范围，但仍能检测方块。
 - `/testfor block ~ ~ ~10000`：命令执行可能会失败，因为这个坐标通常没有被加载。
-- `/testfor block ~~-1~ redstone_block`：检测执行位置下方一格的方块是否为红石块。
-- `/testfor block ~~-1~ #planks`：检测执行位置下方一格的方块是否拥有 `#planks` 标签。
+- `/testfor block ~~-1~ redstone_block`：检测命令执行源位置下方一格的方块是否为红石块。
+- `/testfor block ~~-1~ #planks`：检测命令执行源位置下方一格的方块是否拥有 `#planks` 标签。
 - `/testfor block ~ ~ ~10000 air`：命令执行可能会失败，因为这个坐标通常没有被加载。
-- `/testfor block ~ ~ ~10000 air force_load=true`：检测执行位置 z 轴增加 10000 个方块后的位置的方块是否为空气，会强制加载这个位置。
+- `/testfor block ~ ~ ~10000 air force_load=true`：检测命令执行源位置 z 轴增加 10000 个方块后的位置的方块是否为空气，会强制加载这个位置。
 
 ## 参见
 

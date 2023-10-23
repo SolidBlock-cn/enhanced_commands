@@ -1,4 +1,4 @@
-# `/replace`
+# `/replace` 和 `//replace`
 
 此[命令](../zh.md)用于替换方块。方块放置的原理同 [`/setblocks`](../setblocks/zh.md)。
 
@@ -11,6 +11,8 @@
 关键字参数与 [`/setblocks`](../setblocks/zh.md) 相同，这里不作解释。
 
 由于对方块谓词的判断是预先进行的，此命令不等同于 `/setblock <区域> if(<方块谓词>, <方块函数>) [关键字参数]`。
+
+`//replace ...` 相当于 `/replace 玩家的活动区域 ...`。
 
 ## 参数
 

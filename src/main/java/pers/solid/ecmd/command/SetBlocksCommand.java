@@ -38,7 +38,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
 
 public enum SetBlocksCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -64,19 +63,21 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(literal("setblocks")
-        .then(argument("region", RegionArgumentType.region(registryAccess))
+    ModCommands.registerWithRegionArgumentModification(dispatcher,
+        "setblocks",
+        argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+            .executes(context -> execute(context, null))
+            .then(argument("kwargs", KEYWORD_ARGS)
+                .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs("kwargs", context)))),
+        registryAccess);
+    ModCommands.registerWithRegionArgumentModification(dispatcher,
+        "replace",
+        argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
             .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-                .executes(context -> execute(context, null))
+                .executes(context -> execute(context, cachedBlockPosition -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition)))
                 .then(argument("kwargs", KEYWORD_ARGS)
-                    .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs("kwargs", context)))))));
-    dispatcher.register(literal("replace")
-        .then(argument("region", RegionArgumentType.region(registryAccess))
-            .then(argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
-                .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-                    .executes(context -> execute(context, cachedBlockPosition -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition)))
-                    .then(argument("kwargs", KEYWORD_ARGS)
-                        .executes(context -> execute(context, cachedBlockPosition1 -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition1), KeywordArgsArgumentType.getKeywordArgs("kwargs", context))))))));
+                    .executes(context -> execute(context, cachedBlockPosition1 -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition1), KeywordArgsArgumentType.getKeywordArgs("kwargs", context))))),
+        registryAccess);
   }
 
   /**

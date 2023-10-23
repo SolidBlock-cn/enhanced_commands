@@ -28,8 +28,8 @@
     - `... string`：显示 NBT 谓词转换为字符串后的结果。
     - `... reparse`：将 NBT 谓词转换为字符串，将字符串重新解析为 NBT 谓词，并检测重新解析后的 NBT 谓词与原先提供的 NBT 谓词是否相等。
 - `/testarg pos ...`
-    - `... (int_only|prefer_int|prefer_double|double_only) (unchanged|horizontally_centered|centered) <坐标>`：显示指定类型的坐标参数根据命令的执行环境（如命令执行者所在的位置）的计算结果。
-    - `... (vanilla_vec3|vanilla_vec3_accurate|vanilla_block_pos) <坐标>`：显示指定原版类型的坐标参数根据命令的执行环境的计算结果。
+    - `... (int_only|prefer_int|prefer_double|double_only) (unchanged|horizontally_centered|centered) <坐标>`：显示指定类型的坐标参数根据命令的执行源（如命令执行者所在的位置）的计算结果。
+    - `... (vanilla_vec3|vanilla_vec3_accurate|vanilla_block_pos) <坐标>`：显示指定原版类型的坐标参数根据命令的执行源的计算结果。
 - `/testarg region <区域> ...`
     - `... string`：显示该区域转换为字符串后的结果。
     - `... reparse`：将区域转化为字符串后重新解析，并检查重新解析后的区域是否与原来的保持一致。

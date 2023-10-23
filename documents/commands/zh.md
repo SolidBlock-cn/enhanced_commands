@@ -5,8 +5,8 @@
 这些命令用于放置方块。
 
 - [`/draw`](draw/zh.md)：在世界内绘制一条曲线。
-- [`/replace`](replace/zh.md)：替换一个区域内的符合指定谓词的方块。
-- [`/setblocks`](setblocks/zh.md)：设置区域内的方块。
+- [`/replace`](replace/zh.md) 和 `//replace`：替换一个区域内的符合指定谓词的方块。
+- [`/setblocks`](setblocks/zh.md) 和 `//setblocks`：设置区域内的方块。
 
 ## 测试命令
 
@@ -49,5 +49,6 @@
 
 ## 其他命令
 
+- [`/activeregion`](activeregion/zh.md) 或 `/ar`：管理玩家的活动区域。
 - [`/tasks`](tasks/zh.md)：管理当前服务器中的任务。
 - [`/rand`](rand/zh.md)：生成随机数。

@@ -53,7 +53,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
 
   @Override
   public @NotNull String asString() {
-    return "outline(" + region.asString() + ", " + outlineType + ")";
+    return "outline(" + region.asString() + ", " + outlineType.asString() + ")";
   }
 
   @Override

@@ -23,7 +23,7 @@
 ## 示例
 
 - `/testfor block_info 1 2 3`：获取 (1, 2, 3) 位置的方块的硬度。
-- `/testfor block_info ~~-1~ strong_redstone_power up`：执行环境的位置下方一格位置的方块是否存在往上的强红石信号。
+- `/testfor block_info ~~-1~ strong_redstone_power up`：执行源的位置下方一格位置的方块是否存在往上的强红石信号。
 -
 
 ## 参见
