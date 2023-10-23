@@ -51,4 +51,5 @@
 
 - [`/activeregion`](activeregion/zh.md) 或 `/ar`：管理玩家的活动区域。
 - [`/tasks`](tasks/zh.md)：管理当前服务器中的任务。
+- [`/tprel`](tprel/zh.md)：传送实体，其中坐标和旋转均是以被传送实体为基础计算的。
 - [`/rand`](rand/zh.md)：生成随机数。

@@ -139,7 +139,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
       }
     }
     for (Entity entity : targets) {
-      final ServerCommandSource modifiedSource = source.withEntity(entity).withPosition(entity.getPos()).withRotation(entity.getRotationClient()).withWorld((ServerWorld) entity.getWorld());
+      final ServerCommandSource modifiedSource = entity.getCommandSource();
       vec3d = location.toAbsolutePos(modifiedSource);
       vec2f = rotation == null ? null : rotation.toAbsoluteRotation(modifiedSource);
       if (rotation == null) {
