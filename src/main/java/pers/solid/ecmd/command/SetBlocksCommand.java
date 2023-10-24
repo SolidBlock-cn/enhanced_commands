@@ -3,10 +3,12 @@ package pers.solid.ecmd.command;
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -25,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.function.block.BlockFunctionArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
@@ -38,6 +41,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 public enum SetBlocksCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -45,7 +49,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
   public static final int SUPPRESS_INITIAL_CHECK_FLAG = 2;
   public static final int SUPPRESS_REPLACED_CHECK_FLAG = 4;
 
-  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.keywordArgsBuilder()
+  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
       .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)
       .addOptionalArg("skip_light_update", BoolArgumentType.bool(), false)
@@ -63,13 +67,12 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    ModCommands.registerWithRegionArgumentModification(dispatcher,
-        "setblocks",
-        argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-            .executes(context -> execute(context, null))
-            .then(argument("kwargs", KEYWORD_ARGS)
-                .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs("kwargs", context)))),
-        registryAccess);
+    ArgumentCommandNode<ServerCommandSource, BlockFunctionArgument> fillArgument = argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+        .executes(context -> execute(context, null))
+        .then(argument("kwargs", KEYWORD_ARGS)
+            .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs("kwargs", context)))).build();
+    ModCommands.registerWithRegionArgumentModification(dispatcher, LiteralArgumentBuilder.literal("fill"), LiteralArgumentBuilder.literal("/fill"), fillArgument, registryAccess);
+    dispatcher.register(literal("/f").forward(fillArgument, ModCommands.REGION_ARGUMENTS_MODIFIER, false));
     ModCommands.registerWithRegionArgumentModification(dispatcher,
         "replace",
         argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
@@ -84,21 +87,27 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
    * Execute the command with the default parameters.
    */
   private static int execute(CommandContext<ServerCommandSource> context, Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
-    return setBlocksInRegion(context.getSource(), predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT, RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"));
+    return setBlocksWithDefaultKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate);
   }
 
   /**
    * Execute the command with the parameters read from args.
    */
   private static int execute(CommandContext<ServerCommandSource> context, Predicate<CachedBlockPosition> predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
-    final boolean immediately = kwArgs.getBoolean("immediately");
-    final boolean bypassLimit = kwArgs.getBoolean("bypass_limit");
-    return setBlocksInRegion(context.getSource(), predicate, immediately, bypassLimit, getFlags(kwArgs), getModFlags(kwArgs), kwArgs.getArg("unloaded_pos"), RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"));
+    return setBlocksFromKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate, kwArgs);
   }
 
   public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
-  public static int setBlocksInRegion(ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior, Region region, BlockFunction blockFunction) throws CommandSyntaxException {
+  public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
+    return setBlocksInRegion(region, blockFunction, source, predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT);
+  }
+
+  public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
+    return setBlocksInRegion(region, blockFunction, source, predicate, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), getFlags(kwArgs), getModFlags(kwArgs), kwArgs.getArg("unloaded_pos"));
+  }
+
+  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior) throws CommandSyntaxException {
     if (!bypassLimit && region.numberOfBlocksAffected() > REGION_SIZE_LIMIT) {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), REGION_SIZE_LIMIT);
     }

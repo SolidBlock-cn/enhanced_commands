@@ -1,6 +1,7 @@
 package pers.solid.ecmd.argument;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -18,27 +19,25 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCursorEnd;
 
-public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, @Unmodifiable Map<@NotNull String, Object> defaultValues) implements ArgumentType<KeywordArgs> {
+public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<@NotNull String, Object> defaultValues) implements ArgumentType<KeywordArgs> {
   public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.keyword_args.unknown_argument_name", o));
   public static final DynamicCommandExceptionType DUPLICATE_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.keyword_args.duplicate_argument_name", o));
 
-  public static Builder keywordArgsBuilder() {
-    return new Builder(new ImmutableMap.Builder<>(), new ImmutableMap.Builder<>());
+  public static Builder builder() {
+    return new Builder(new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableMap.Builder<>());
+  }
+
+  public static Builder builder(@NotNull KeywordArgsArgumentType copyFrom) {
+    return builder().addAll(copyFrom);
   }
 
   public static KeywordArgs getKeywordArgs(String name, CommandContext<?> context) {
     return context.getArgument(name, KeywordArgs.class);
-  }
-
-  public static Builder keywordArgsBuilder(@NotNull KeywordArgsArgumentType copyFrom) {
-    final Builder builder = new Builder(new ImmutableMap.Builder<>(), new ImmutableMap.Builder<>());
-    builder.arguments.putAll(copyFrom.arguments);
-    builder.defaultValues.putAll(copyFrom.defaultValues);
-    return builder;
   }
 
   @Override
@@ -116,32 +115,38 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
 
   public static class Builder {
     private final ImmutableMap.Builder<String, ArgumentType<?>> arguments;
+    private final ImmutableSet.Builder<String> requiredArguments;
     private final ImmutableMap.Builder<String, Object> defaultValues;
 
-    public Builder(ImmutableMap.Builder<String, ArgumentType<?>> arguments, ImmutableMap.Builder<String, Object> defaultValues) {
+    private Builder(ImmutableMap.Builder<String, ArgumentType<?>> arguments, ImmutableSet.Builder<String> requiredArgs, ImmutableMap.Builder<String, Object> defaultValues) {
       this.arguments = arguments;
+      this.requiredArguments = requiredArgs;
       this.defaultValues = defaultValues;
     }
 
     public Builder addRequiredArg(@NotNull String name, @NotNull ArgumentType<?> type) {
       arguments.put(name, type);
+      requiredArguments.add(name);
       return this;
     }
 
-    public <T> Builder addOptionalArg(@NotNull String name, @NotNull ArgumentType<T> type, T defaultValue) {
+    public <T> Builder addOptionalArg(@NotNull String name, @NotNull ArgumentType<T> type, @Nullable T defaultValue) {
       arguments.put(name, type);
-      defaultValues.put(name, defaultValue);
+      if (defaultValue != null) {
+        defaultValues.put(name, defaultValue);
+      }
       return this;
     }
 
     public Builder addAll(KeywordArgsArgumentType source) {
       arguments.putAll(source.arguments);
+      requiredArguments.addAll(source.requiredArguments);
       defaultValues.putAll(source.defaultValues);
       return this;
     }
 
     public KeywordArgsArgumentType build() {
-      return new KeywordArgsArgumentType(arguments.build(), defaultValues.build());
+      return new KeywordArgsArgumentType(arguments.build(), requiredArguments.build(), defaultValues.build());
     }
   }
 }

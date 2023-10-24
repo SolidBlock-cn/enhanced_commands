@@ -8,7 +8,10 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockBox;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,13 +42,13 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
-    return region.contains(vec3d) && region.expanded(-thickness).contains(vec3d);
-  }
-
-  @Override
   public boolean contains(@NotNull Vec3i vec3i) {
-    return region.contains(vec3i) && region.expanded(-thickness).contains(vec3i);
+    try {
+      return region.contains(vec3i) && region.expanded(-thickness).contains(vec3i);
+    } catch (IllegalArgumentException illegalArgumentException) {
+      // min max wrong
+      return true;
+    }
   }
 
   @Override

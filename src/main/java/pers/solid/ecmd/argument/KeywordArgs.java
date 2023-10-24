@@ -27,8 +27,10 @@ public class KeywordArgs {
     // The value is not provided
     if (type.defaultValues().containsKey(name)) {
       return (T) type.defaultValues().get(name);
-    } else {
+    } else if (type.requiredArguments().contains(name)) {
       throw new IllegalArgumentException("Argument %s is required, but not provided".formatted(name));
+    } else {
+      return null;
     }
   }
 

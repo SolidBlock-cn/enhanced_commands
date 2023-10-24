@@ -361,7 +361,7 @@ public final class SeparatedExecuteCommand {
   }
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockIntInfoConditionalLogicWithDirection(CommandNode<ServerCommandSource> root, T node, ToIntQuadFunction<BlockState, ServerWorld, BlockPos, Direction> function, boolean positive) {
-    return node.then(argument("direction", DirectionArgumentType.create())
+    return node.then(argument("direction", DirectionArgumentType.direction())
         .then(addConditionLogic(root, argument("range", NumberRangeArgumentType.intRange()), positive, context -> {
           final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
           final ServerWorld world = context.getSource().getWorld();

@@ -130,7 +130,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     var x = axis.choose(offset, 0, 0);
     var y = axis.choose(0, offset, 0);
     var z = axis.choose(0, 0, offset);
-    return new BlockCuboidRegion(minX - x, minY - y, minZ - z, maxX + x, maxX + y, maxZ + z);
+    return new BlockCuboidRegion(minX - x, minY - y, minZ - z, maxX + x, maxY + y, maxZ + z);
   }
 
   @Override

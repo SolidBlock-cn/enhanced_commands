@@ -12,10 +12,39 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public record OutlineRegion(OutlineType outlineType, Region region) implements RegionBasedRegion<OutlineRegion, Region> {
+  public static Region of(Region region, OutlineTypes outlineType) throws CommandSyntaxException {
+    try {
+      if (region instanceof BlockCuboidRegion cuboidRegion) {
+        if (outlineType == OutlineTypes.FLOOR_AND_CEIL) {
+          if (cuboidRegion.minY() == cuboidRegion.maxY() || cuboidRegion.minY() == cuboidRegion.maxY() + 1) {
+            return cuboidRegion;
+          } else {
+            return new UnionRegion(List.of(new BlockCuboidRegion(cuboidRegion.minX(), cuboidRegion.minY(), cuboidRegion.minZ(), cuboidRegion.maxX(), cuboidRegion.minY(), cuboidRegion.maxZ()), new BlockCuboidRegion(cuboidRegion.minX(), cuboidRegion.maxY(), cuboidRegion.minZ(), cuboidRegion.maxX(), cuboidRegion.maxY(), cuboidRegion.maxZ())));
+          }
+        } else if (outlineType == OutlineTypes.WALL || outlineType == OutlineTypes.WALL_CONNECTED) {
+          return new CuboidWallRegion(cuboidRegion, 1);
+        } else {
+          return new CuboidOutlineRegion(cuboidRegion, 1);
+        }
+      } else if (region instanceof CylinderRegion cylinderRegion) {
+        return new HollowCylinderRegion(cylinderRegion, outlineType);
+      } else {
+        return new OutlineRegion(outlineType, region);
+      }
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
+        throw commandSyntaxException;
+      } else {
+        throw e;
+      }
+    }
+  }
+
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return false;

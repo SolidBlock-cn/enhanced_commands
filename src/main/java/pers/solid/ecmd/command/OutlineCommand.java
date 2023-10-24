@@ -1,0 +1,61 @@
+package pers.solid.ecmd.command;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.context.ParsedArgument;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.ArgumentCommandNode;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.function.block.ConditionalBlockFunction;
+import pers.solid.ecmd.predicate.block.RegionBlockPredicate;
+import pers.solid.ecmd.region.OutlineRegion;
+import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.mixin.EnhancedRedirectModifier;
+
+public enum OutlineCommand implements CommandRegistrationCallback {
+  INSTANCE;
+
+  @Override
+  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    final KeywordArgsArgumentType kwArgsType = KeywordArgsArgumentType.builder(SetBlocksCommand.KEYWORD_ARGS)
+        .addOptionalArg("inner", BlockFunctionArgumentType.blockFunction(registryAccess), null)
+        .build();
+
+    final ArgumentCommandNode<ServerCommandSource, ?> outlineTypeArgumentNode;
+    ModCommands.registerWithRegionArgumentModification(dispatcher, "outline", CommandManager.argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+            .executes(context -> executeWithDefaultKeywordArgs(context, OutlineRegion.OutlineTypes.OUTLINE))
+            .then(outlineTypeArgumentNode = CommandManager.argument("outline_type", new SimpleEnumArgumentTypes.OutlineTypeArgumentType())
+                .executes(context -> executeWithDefaultKeywordArgs(context, context.getArgument("outline_type", OutlineRegion.OutlineTypes.class)))
+                .then(CommandManager.argument("keyword_args", kwArgsType)
+                    .executes(context -> executeFromKeywordArgs(context, context.getArgument("outline_type", OutlineRegion.OutlineTypes.class), KeywordArgsArgumentType.getKeywordArgs("keyword_args", context)))).build()),
+        registryAccess);
+    ModCommands.registerWithRegionArgumentModification(dispatcher, "wall", CommandManager.argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+        .executes(context -> executeWithDefaultKeywordArgs(context, OutlineRegion.OutlineTypes.WALL))
+        .forward(outlineTypeArgumentNode, (EnhancedRedirectModifier.Constant<ServerCommandSource>) (args, previousArguments, source) -> {
+          args.putAll(previousArguments);
+          args.put("outline_type", new ParsedArgument<>(0, 0, OutlineRegion.OutlineTypes.WALL));
+        }, false), registryAccess);
+  }
+
+  public static int executeWithDefaultKeywordArgs(CommandContext<ServerCommandSource> context, OutlineRegion.OutlineTypes outlineType) throws CommandSyntaxException {
+    return SetBlocksCommand.setBlocksWithDefaultKeywordArgs(OutlineRegion.of(RegionArgumentType.getRegion(context, "region"), outlineType), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), null);
+  }
+
+  public static int executeFromKeywordArgs(CommandContext<ServerCommandSource> context, OutlineRegion.OutlineTypes outlineType, KeywordArgs keywordArgs) throws CommandSyntaxException {
+    final @Nullable BlockFunction inner = keywordArgs.getArg("inner");
+    final Region region = RegionArgumentType.getRegion(context, "region");
+    final Region outlineRegion = OutlineRegion.of(region, outlineType);
+    final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block");
+    if (inner == null) {
+      return SetBlocksCommand.setBlocksFromKeywordArgs(outlineRegion, blockFunction, context.getSource(), null, keywordArgs);
+    } else {
+      return SetBlocksCommand.setBlocksFromKeywordArgs(region, new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
+    }
+  }
+}

@@ -42,7 +42,7 @@ import java.util.Collection;
 public enum TestForCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  public static final KeywordArgsArgumentType BLOCK_KEYWORD_ARGS = KeywordArgsArgumentType.keywordArgsBuilder()
+  public static final KeywordArgsArgumentType BLOCK_KEYWORD_ARGS = KeywordArgsArgumentType.builder()
       .addOptionalArg("force_load", BoolArgumentType.bool(), false)
       .build();
   public static final DynamicCommandExceptionType TEST_FOR_BLOCK_NOT_LOADED = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.commands.testfor.block.not_loaded", o));
@@ -104,10 +104,10 @@ public enum TestForCommand implements CommandRegistrationCallback {
             .then(CommandManager.literal("luminance")
                 .executes(TestForCommand::executeGetLuminance))
             .then(CommandManager.literal("strong_redstone_power")
-                .then(CommandManager.argument("direction", DirectionArgumentType.create())
+                .then(CommandManager.argument("direction", DirectionArgumentType.direction())
                     .executes(TestForCommand::executeGetStrongRedstonePower)))
             .then(CommandManager.literal("weak_redstone_power")
-                .then(CommandManager.argument("direction", DirectionArgumentType.create())
+                .then(CommandManager.argument("direction", DirectionArgumentType.direction())
                     .executes(TestForCommand::executeGetWeakRedstonePower)))
             .then(CommandManager.literal("light")
                 .executes(context -> executeGetLight(context, null)))

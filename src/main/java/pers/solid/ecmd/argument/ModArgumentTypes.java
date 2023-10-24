@@ -15,10 +15,11 @@ public class ModArgumentTypes {
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
     register("curve", CurveArgumentType.class, ConstantArgumentSerializer.of(CurveArgumentType::new));
-    register("direction", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::create));
+    register("direction", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::direction));
     register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
     register("nbt_function", NbtFunctionArgumentType.class, NbtFunctionArgumentType.Serializer.INSTANCE);
     register("keyword_args", KeywordArgsArgumentType.class, new KeywordArgsArgumentSerializer());
+    register("outline_type", SimpleEnumArgumentTypes.OutlineTypeArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.OutlineTypeArgumentType::new));
     register("pos", EnhancedPosArgumentType.class, new EnhancedPosArgumentType.Serializer());
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));
     register("unloaded_pos_behavior", UnloadedPosBehaviorArgumentType.class, ConstantArgumentSerializer.of(UnloadedPosBehaviorArgumentType::new));

@@ -46,7 +46,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public enum ActiveRegionCommand implements CommandRegistrationCallback {
   INSTANCE;
-  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.keywordArgsBuilder()
+  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
       .addOptionalArg("fixed", BoolArgumentType.bool(), true)
       .build();
 
@@ -68,7 +68,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
                 .executes(context -> executeMoveDirection(1, DirectionArgument.FRONT.apply(context.getSource()), context))
                 .then(argument("amount", DoubleArgumentType.doubleArg())
                     .executes(context -> executeMoveDirection(DoubleArgumentType.getDouble(context, "amount"), DirectionArgument.FRONT.apply(context.getSource()), context))
-                    .then(argument("direction", DirectionArgumentType.create())
+                    .then(argument("direction", DirectionArgumentType.direction())
                         .executes(context -> executeMoveDirection(DoubleArgumentType.getDouble(context, "amount"), DirectionArgumentType.getDirection(context, "direction"), context))))
                 .then(argument("x", DoubleArgumentType.doubleArg())
                     .then(argument("y", DoubleArgumentType.doubleArg())
@@ -85,7 +85,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     );
     dispatcher.register(literal("ar").redirect(literalCommandNode));
 
-    final EnhancedRedirectModifier<ServerCommandSource> slashModifier = EnhancedRedirectModifier.of((arguments, source) -> arguments.put("players", new ParsedArgument<>(0, 0, new EntitySelectorReader(new StringReader("@s")).read())));
+    final EnhancedRedirectModifier.Constant<ServerCommandSource> slashModifier = (arguments, previousArguments, source) -> arguments.put("players", new ParsedArgument<>(0, 0, new EntitySelectorReader(new StringReader("@s")).read()));
     final Command<ServerCommandSource> slashExecution = context -> executeGet(context.getSource().getPlayerOrThrow(), context);
     dispatcher.register(literal("/activeregion")
         .forward(playersArgumentNode, slashModifier, false)

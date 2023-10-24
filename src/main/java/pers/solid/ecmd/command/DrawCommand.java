@@ -36,7 +36,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public enum DrawCommand implements CommandRegistrationCallback {
   INSTANCE;
-  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.keywordArgsBuilder()
+  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
       .addAll(SetBlocksCommand.KEYWORD_ARGS)
       .addOptionalArg("interval", DoubleArgumentType.doubleArg(0d), 0d)
       .addOptionalArg("thickness", DoubleArgumentType.doubleArg(0d, 64d), 0d)

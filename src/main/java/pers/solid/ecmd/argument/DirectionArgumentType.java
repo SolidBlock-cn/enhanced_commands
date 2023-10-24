@@ -16,7 +16,7 @@ public class DirectionArgumentType extends EnumArgumentType<DirectionArgument> {
     super(DirectionArgument.CODEC, DirectionArgument::values);
   }
 
-  public static DirectionArgumentType create() {
+  public static DirectionArgumentType direction() {
     return new DirectionArgumentType();
   }
 

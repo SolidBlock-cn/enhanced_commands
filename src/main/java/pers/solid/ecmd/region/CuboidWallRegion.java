@@ -29,7 +29,12 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
 
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
-    return region.contains(vec3i) && !region.expanded(-thickness, Direction.Axis.X).expanded(-thickness, Direction.Axis.Z).contains(vec3i);
+    try {
+      return region.contains(vec3i) && !region.expanded(-thickness, Direction.Type.HORIZONTAL).contains(vec3i);
+    } catch (IllegalArgumentException args) {
+      // min max wrong
+      return true;
+    }
   }
 
   @Override
