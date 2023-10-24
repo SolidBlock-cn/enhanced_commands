@@ -102,6 +102,11 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     return blockPos;
   }
 
+
+  public static Vec3d getPos(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, PosArgument.class).toAbsolutePos(context.getSource());
+  }
+
   public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.unloaded", pos));
   public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.out_of_build_limit", pos));
   public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.out_of_bounds", pos));

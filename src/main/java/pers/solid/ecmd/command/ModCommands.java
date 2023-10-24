@@ -62,7 +62,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     return registerWithArgumentModification(dispatcher, directBuilder, indirectBuilder, RequiredArgumentBuilder.argument("region", RegionArgumentType.region(commandRegistryAccess)), then, EnhancedRedirectModifier.of(REGION_ARGUMENTS_MODIFIER));
   }
 
-  public static <ServerCommandSource> LiteralCommandNode<net.minecraft.server.command.ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<net.minecraft.server.command.ServerCommandSource> dispatcher, String name, ArgumentBuilder<net.minecraft.server.command.ServerCommandSource, ?> then, CommandRegistryAccess commandRegistryAccess) {
+  public static LiteralCommandNode<net.minecraft.server.command.ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<net.minecraft.server.command.ServerCommandSource> dispatcher, String name, ArgumentBuilder<net.minecraft.server.command.ServerCommandSource, ?> then, CommandRegistryAccess commandRegistryAccess) {
     return registerWithRegionArgumentModification(dispatcher, LiteralArgumentBuilder.literal(name), LiteralArgumentBuilder.literal("/" + name), then, commandRegistryAccess);
   }
 }

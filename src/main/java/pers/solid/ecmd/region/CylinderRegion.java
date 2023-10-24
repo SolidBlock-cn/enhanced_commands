@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
@@ -66,12 +67,14 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     return new CylinderRegion(radius, height, center.add(relativePos));
   }
 
+  public static final SimpleCommandExceptionType MUST_EXPAND_VERTICALLY = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.region.exception.cylinder_must_expand_vertically"));
+
   @Override
   public @NotNull CylinderRegion expanded(double offset, Direction direction) {
     if (direction.getAxis().isVertical()) {
       return new CylinderRegion(radius, height + offset, center.add(Vec3d.of(direction.getVector()).multiply(offset / 2)));
     } else {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(MUST_EXPAND_VERTICALLY.create());
     }
   }
 
@@ -83,7 +86,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
       }
       return new CylinderRegion(radius, height + 2 * offset, center);
     } else {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException(MUST_EXPAND_VERTICALLY.create());
     }
   }
 
