@@ -34,7 +34,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     RandCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RegionBuilderCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     SeparatedExecuteCommand.register(dispatcher, registryAccess);
-    SetBlocksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    FillReplaceCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TasksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestArgCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestForCommand.INSTANCE.register(dispatcher, registryAccess, environment);

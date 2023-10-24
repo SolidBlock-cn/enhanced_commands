@@ -18,7 +18,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.SetBlocksCommand;
+import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.mixin.MixinSharedVariables;
@@ -37,11 +37,11 @@ public interface BlockFunction extends ExpressionConvertible, NbtConvertible, Bl
     final BlockState origState = world.getBlockState(pos);
     MutableObject<NbtCompound> blockEntityData = new MutableObject<>(null);
     BlockState modifiedState = getModifiedState(origState, origState, world, pos, flags, blockEntityData);
-    if ((modFlags & SetBlocksCommand.POST_PROCESS_FLAG) != 0) {
+    if ((modFlags & FillReplaceCommand.POST_PROCESS_FLAG) != 0) {
       modifiedState = Block.postProcessState(modifiedState, world, pos);
     }
-    final boolean suppressInitialCheck = (modFlags & SetBlocksCommand.SUPPRESS_INITIAL_CHECK_FLAG) != 0;
-    final boolean suppressReplacedCheck = (modFlags & SetBlocksCommand.SUPPRESS_REPLACED_CHECK_FLAG) != 0;
+    final boolean suppressInitialCheck = (modFlags & FillReplaceCommand.SUPPRESS_INITIAL_CHECK_FLAG) != 0;
+    final boolean suppressReplacedCheck = (modFlags & FillReplaceCommand.SUPPRESS_REPLACED_CHECK_FLAG) != 0;
     if (suppressInitialCheck) MixinSharedVariables.suppressOnBlockAdded = true;
     if (suppressReplacedCheck) MixinSharedVariables.suppressOnStateReplaced = true;
     boolean result;

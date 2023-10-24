@@ -2,7 +2,7 @@
 
 此[方块函数](../zh.md)先检测当前方块是否符合指定的[方块谓词](../../block_predicate/zh.md)，如果符合，则使用方块函数 1，否则使用方块函数 2 或者不执行操作。
 
-需要注意的是，在对多个方块进行处理时（例如 [`/setblocks`](../../../commands/setblocks/zh.md)，如果方块谓词使用了相对位置方块的判断，例如 [`rel(...)`](../../block_predicate/rel/zh.md) 或 [`expose(...)`](../../block_predicate/expose/zh.md)，那么一个方块在放置后可能会影响下一个方块的谓词判断。
+需要注意的是，在对多个方块进行处理时（例如 [`/fill`](../../../commands/fill/zh.md)，如果方块谓词使用了相对位置方块的判断，例如 [`rel(...)`](../../block_predicate/rel/zh.md) 或 [`expose(...)`](../../block_predicate/expose/zh.md)，那么一个方块在放置后可能会影响下一个方块的谓词判断。
 
 ## 语法
 

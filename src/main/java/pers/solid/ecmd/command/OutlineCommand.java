@@ -23,7 +23,7 @@ public enum OutlineCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final KeywordArgsArgumentType kwArgsType = KeywordArgsArgumentType.builder(SetBlocksCommand.KEYWORD_ARGS)
+    final KeywordArgsArgumentType kwArgsType = KeywordArgsArgumentType.builder(FillReplaceCommand.KEYWORD_ARGS)
         .addOptionalArg("inner", BlockFunctionArgumentType.blockFunction(registryAccess), null)
         .build();
 
@@ -44,7 +44,7 @@ public enum OutlineCommand implements CommandRegistrationCallback {
   }
 
   public static int executeWithDefaultKeywordArgs(CommandContext<ServerCommandSource> context, OutlineRegion.OutlineTypes outlineType) throws CommandSyntaxException {
-    return SetBlocksCommand.setBlocksWithDefaultKeywordArgs(OutlineRegion.of(RegionArgumentType.getRegion(context, "region"), outlineType), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), null);
+    return FillReplaceCommand.setBlocksWithDefaultKeywordArgs(OutlineRegion.of(RegionArgumentType.getRegion(context, "region"), outlineType), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), null);
   }
 
   public static int executeFromKeywordArgs(CommandContext<ServerCommandSource> context, OutlineRegion.OutlineTypes outlineType, KeywordArgs keywordArgs) throws CommandSyntaxException {
@@ -53,9 +53,9 @@ public enum OutlineCommand implements CommandRegistrationCallback {
     final Region outlineRegion = OutlineRegion.of(region, outlineType);
     final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block");
     if (inner == null) {
-      return SetBlocksCommand.setBlocksFromKeywordArgs(outlineRegion, blockFunction, context.getSource(), null, keywordArgs);
+      return FillReplaceCommand.setBlocksFromKeywordArgs(outlineRegion, blockFunction, context.getSource(), null, keywordArgs);
     } else {
-      return SetBlocksCommand.setBlocksFromKeywordArgs(region, new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
+      return FillReplaceCommand.setBlocksFromKeywordArgs(region, new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
     }
   }
 }

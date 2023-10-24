@@ -1,4 +1,4 @@
-# `/setblocks` 和 `//setblocks`
+# `/fill` 和 `//fill`
 
 此[命令](../zh.md)用于放置多个方块。
 
@@ -8,9 +8,9 @@
 
 ## 语法
 
-`/setblocks <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process | unloaded_pos | suppress_initial_check | suppress_replaced_check | force]`
+`/fill <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process | unloaded_pos | suppress_initial_check | suppress_replaced_check | force]`
 
-`//setblocks ...` 相当于 `/setblocks 玩家的活动区域 ...`。
+`//fill ...` 相当于 `/fill 玩家的活动区域 ...`。`//f` 是 `//fill` 的简写。
 
 ## 参数
 
@@ -75,10 +75,10 @@
 
 ## 示例
 
-- `/setblocks cuboid(~~~, ~5~5~5) stone`：在当前位置到 `~5 ~5 ~5` 的位置之间的长方体放置石头。
-- `/setblocks sphere(5) white_stained_glass`：在半径 5 的球体范围内放置白色染色玻璃板。
-- `/setblocks hcyl(80, 20) air`：将半径 80、高度 20 的圆柱体方块范围设为空气。
-- `/setblocks hcyl(80, 20) air immediately=true`：立即将半径 80、高度 20 的圆柱体方块范围设为空气，不分步骤执行。
-- `/setblocks cuboid(~~~, ~2~2~2) cactus force_state=true`：放置仙人掌，尽管在正常情况下这些仙人掌不可能成功放置。
-- `/setblocks sphere(20) dry()`：去除半径 20 的球体范围内的方块中的水。
-- `/setblocks single(~~~) water suppress_initial_check=true`：在当前位置放置水，并且使水不会流出去。
+- `/fill cuboid(~~~, ~5~5~5) stone`：在当前位置到 `~5 ~5 ~5` 的位置之间的长方体放置石头。
+- `/fill sphere(5) white_stained_glass`：在半径 5 的球体范围内放置白色染色玻璃板。
+- `/fill hcyl(80, 20) air`：将半径 80、高度 20 的圆柱体方块范围设为空气。
+- `/fill hcyl(80, 20) air immediately=true`：立即将半径 80、高度 20 的圆柱体方块范围设为空气，不分步骤执行。
+- `/fill cuboid(~~~, ~2~2~2) cactus force_state=true`：放置仙人掌，尽管在正常情况下这些仙人掌不可能成功放置。
+- `/fill sphere(20) dry()`：去除半径 20 的球体范围内的方块中的水。
+- `/fill single(~~~) water suppress_initial_check=true`：在当前位置放置水，并且使水不会流出去。

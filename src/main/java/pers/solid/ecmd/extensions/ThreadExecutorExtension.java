@@ -5,6 +5,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.thread.ThreadExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pers.solid.ecmd.command.FillReplaceCommand;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
@@ -32,7 +33,7 @@ public interface ThreadExecutorExtension {
   Map<UUID, WeakReference<IteratorTask<?>>> ec_getUUIDToIteratorTasks();
 
   /**
-   * The method is used to handle tasks, such as those created by {@link pers.solid.ecmd.command.SetBlocksCommand} when handling quantities of blocks.
+   * The method is used to handle tasks, such as those created by {@link FillReplaceCommand} when handling quantities of blocks.
    *
    * @see pers.solid.ecmd.command.TasksCommand
    */

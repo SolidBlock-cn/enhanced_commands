@@ -37,7 +37,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 public enum DrawCommand implements CommandRegistrationCallback {
   INSTANCE;
   public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
-      .addAll(SetBlocksCommand.KEYWORD_ARGS)
+      .addAll(FillReplaceCommand.KEYWORD_ARGS)
       .addOptionalArg("interval", DoubleArgumentType.doubleArg(0d), 0d)
       .addOptionalArg("thickness", DoubleArgumentType.doubleArg(0d, 64d), 0d)
       .build();
@@ -51,7 +51,7 @@ public enum DrawCommand implements CommandRegistrationCallback {
                 .then(argument("kwargs", KEYWORD_ARGS)
                     .executes(context -> {
                       final KeywordArgs kwargs = KeywordArgsArgumentType.getKeywordArgs("kwargs", context);
-                      return execute(context, kwargs.getBoolean("immediately"), kwargs.getBoolean("bypass_limit"), kwargs.getDouble("interval"), SetBlocksCommand.getFlags(kwargs), SetBlocksCommand.getModFlags(kwargs), kwargs.getDouble("thickness"));
+                      return execute(context, kwargs.getBoolean("immediately"), kwargs.getBoolean("bypass_limit"), kwargs.getDouble("interval"), FillReplaceCommand.getFlags(kwargs), FillReplaceCommand.getModFlags(kwargs), kwargs.getDouble("thickness"));
                     })))));
   }
 
@@ -62,8 +62,8 @@ public enum DrawCommand implements CommandRegistrationCallback {
     if (!Double.isFinite(estimatedIterationAmount)) {
       throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().create();
     }
-    if (!bypassLimit && estimatedIterationAmount > SetBlocksCommand.REGION_SIZE_LIMIT) {
-      throw SetBlocksCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, SetBlocksCommand.REGION_SIZE_LIMIT);
+    if (!bypassLimit && estimatedIterationAmount > FillReplaceCommand.REGION_SIZE_LIMIT) {
+      throw FillReplaceCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, FillReplaceCommand.REGION_SIZE_LIMIT);
     }
     final BlockFunction block = BlockFunctionArgumentType.getBlockFunction(context, "block");
     final ServerCommandSource source = context.getSource();
@@ -86,11 +86,11 @@ public enum DrawCommand implements CommandRegistrationCallback {
         })
         .map(blockPos -> null)
         .iterator();
-    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> source.sendFeedback(TextUtil.enhancedTranslatable("enhancedCommands.commands.setblocks.complete", numbersAffected.getValue()), true)));
+    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> source.sendFeedback(TextUtil.enhancedTranslatable("enhancedCommands.commands.fill.complete", numbersAffected.getValue()), true)));
     if (!immediately && estimatedIterationAmount > 16384) {
       // The region is too large. Send a server task.
       ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.draw.task_name", curve.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.setblocks.large_region", estimatedIterationAmount).formatted(Formatting.YELLOW), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.large_region", estimatedIterationAmount).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

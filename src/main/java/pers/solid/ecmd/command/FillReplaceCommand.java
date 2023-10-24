@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -43,7 +44,7 @@ import java.util.stream.Stream;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
-public enum SetBlocksCommand implements CommandRegistrationCallback {
+public enum FillReplaceCommand implements CommandRegistrationCallback {
   INSTANCE;
   public static final int POST_PROCESS_FLAG = 1;
   public static final int SUPPRESS_INITIAL_CHECK_FLAG = 2;
@@ -62,7 +63,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
       .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
       .addOptionalArg("force", BoolArgumentType.bool(), false)
       .build();
-  public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.commands.setblocks.region_too_large", a, b));
+  public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.commands.fill.region_too_large", a, b));
   public static final int REGION_SIZE_LIMIT = 16777215;
 
   @Override
@@ -71,8 +72,8 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
         .executes(context -> execute(context, null))
         .then(argument("kwargs", KEYWORD_ARGS)
             .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs("kwargs", context)))).build();
-    ModCommands.registerWithRegionArgumentModification(dispatcher, LiteralArgumentBuilder.literal("fill"), LiteralArgumentBuilder.literal("/fill"), fillArgument, registryAccess);
-    dispatcher.register(literal("/f").forward(fillArgument, ModCommands.REGION_ARGUMENTS_MODIFIER, false));
+    final LiteralCommandNode<ServerCommandSource> fillNode = ModCommands.registerWithRegionArgumentModification(dispatcher, LiteralArgumentBuilder.literal("fill"), LiteralArgumentBuilder.literal("/fill"), fillArgument, registryAccess);
+    dispatcher.register(literal("/f").forward(fillNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
     ModCommands.registerWithRegionArgumentModification(dispatcher,
         "replace",
         argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
@@ -97,7 +98,7 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
     return setBlocksFromKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate, kwArgs);
   }
 
-  public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
+  public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.commands.fill.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
   public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
     return setBlocksInRegion(region, blockFunction, source, predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT);
@@ -165,16 +166,16 @@ public enum SetBlocksCommand implements CommandRegistrationCallback {
       mainIterator = Iterators.concat(testPosIterator, placingIterator);
     }
     final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(switch (unloadedPosBehavior) {
-      case SKIP -> "enhancedCommands.commands.setblocks.complete_skipped";
-      case BREAK -> "enhancedCommands.commands.setblocks.complete_broken";
-      default -> "enhancedCommands.commands.setblocks.complete";
+      case SKIP -> "enhancedCommands.commands.fill.complete_skipped";
+      case BREAK -> "enhancedCommands.commands.fill.complete_broken";
+      default -> "enhancedCommands.commands.fill.complete";
     }, numbersAffected.getValue()), true));
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
-      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.setblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.setblocks.large_region", region.numberOfBlocksAffected()).formatted(Formatting.YELLOW), true);
+      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.fill.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.large_region", region.numberOfBlocksAffected()).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

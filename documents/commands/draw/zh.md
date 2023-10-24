@@ -6,9 +6,9 @@
 
 ## 语法
 
-`/draw <曲线> <方块> [关键字参数：(同 setblocks) | interval | thickness]`
+`/draw <曲线> <方块> [关键字参数：(同 fill) | interval | thickness]`
 
-关键字参数继承 [`/setblocks`](../setblocks/zh.md) 的所有关键字参数，外加 `interval` 和 `thickness`。
+关键字参数继承 [`/fill`](../fill/zh.md) 的所有关键字参数，外加 `interval` 和 `thickness`。
 
 ## 参数
 
