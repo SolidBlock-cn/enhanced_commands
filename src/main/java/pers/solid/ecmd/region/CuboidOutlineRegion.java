@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
@@ -21,7 +20,7 @@ import pers.solid.ecmd.util.ParsingUtil;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thickness) implements IntBackedRegion {
+public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) implements RegionBasedRegion.IntBacked<CuboidOutlineRegion, BlockCuboidRegion> {
   public static final DynamicCommandExceptionType NON_POSITIVE_THICKNESS = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.region.cuboid_outline.non_positive_thickness", o));
   public static final Dynamic2CommandExceptionType TOO_THICK = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.argument.region.cuboid_outline.too_thick", a, b));
 
@@ -29,7 +28,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
     if (thickness <= 0) {
       throw new IllegalArgumentException(NON_POSITIVE_THICKNESS.create(thickness));
     }
-    final int maxAcceptableThickness = getMaxAcceptableThickness(blockCuboidRegion);
+    final int maxAcceptableThickness = getMaxAcceptableThickness(region);
     if (thickness > maxAcceptableThickness) {
       throw new IllegalArgumentException(TOO_THICK.create(maxAcceptableThickness, thickness));
     }
@@ -41,12 +40,12 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
 
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
-    return blockCuboidRegion.contains(vec3d) && blockCuboidRegion.expanded(-thickness).contains(vec3d);
+    return region.contains(vec3d) && region.expanded(-thickness).contains(vec3d);
   }
 
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
-    return blockCuboidRegion.contains(vec3i) && blockCuboidRegion.expanded(-thickness).contains(vec3i);
+    return region.contains(vec3i) && region.expanded(-thickness).contains(vec3i);
   }
 
   @Override
@@ -60,27 +59,17 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
   }
 
   public @NotNull Stream<BlockCuboidRegion> decompose() {
-    final Stream<BlockCuboidRegion> walls = new CuboidWallRegion(blockCuboidRegion, thickness).decompose();
+    final Stream<BlockCuboidRegion> walls = new CuboidWallRegion(region, thickness).decompose();
     return Streams.concat(
-        Stream.of(new BlockCuboidRegion(blockCuboidRegion.minX(), blockCuboidRegion.maxY() - thickness + 1, blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.maxY(), blockCuboidRegion.maxZ())),
+        Stream.of(new BlockCuboidRegion(region.minX(), region.maxY() - thickness + 1, region.minZ(), region.maxX(), region.maxY(), region.maxZ())),
         walls,
-        Stream.of(new BlockCuboidRegion(blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.minY() + thickness - 1, blockCuboidRegion.maxZ()))
+        Stream.of(new BlockCuboidRegion(region.minX(), region.minY(), region.minZ(), region.maxX(), region.minY() + thickness - 1, region.maxZ()))
     );
   }
 
   @Override
-  public @NotNull CuboidOutlineRegion moved(@NotNull Vec3i relativePos) {
-    return new CuboidOutlineRegion(blockCuboidRegion.moved(relativePos), thickness);
-  }
-
-  @Override
-  public @NotNull CuboidOutlineRegion rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation) {
-    return new CuboidOutlineRegion(blockCuboidRegion.rotated(pivot, blockRotation), thickness);
-  }
-
-  @Override
-  public @NotNull CuboidOutlineRegion mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
-    return new CuboidOutlineRegion(blockCuboidRegion.mirrored(pivot, axis), thickness);
+  public CuboidOutlineRegion newRegion(BlockCuboidRegion region) {
+    return new CuboidOutlineRegion(region, thickness);
   }
 
   @Override
@@ -90,22 +79,22 @@ public record CuboidOutlineRegion(BlockCuboidRegion blockCuboidRegion, int thick
 
   @Override
   public long numberOfBlocksAffected() {
-    return blockCuboidRegion.numberOfBlocksAffected() - blockCuboidRegion.expanded(-thickness).numberOfBlocksAffected();
+    return region.numberOfBlocksAffected() - region.expanded(-thickness).numberOfBlocksAffected();
   }
 
   @Override
   public @NotNull BlockBox maxContainingBlockBox() {
-    return blockCuboidRegion.blockBox();
+    return region.blockBox();
   }
 
   @Override
   public @NotNull String asString() {
-    return String.format("cuboid_outline(%s %s %s, %s %s %s, %s)", blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.maxY(), blockCuboidRegion.maxZ(), thickness);
+    return String.format("cuboid_outline(%s %s %s, %s %s %s, %s)", region.minX(), region.minY(), region.minZ(), region.maxX(), region.maxY(), region.maxZ(), thickness);
   }
 
   @Override
   public @Nullable Box minContainingBox() {
-    return blockCuboidRegion.minContainingBox();
+    return region.minContainingBox();
   }
 
   public enum Type implements RegionType<CuboidOutlineRegion> {

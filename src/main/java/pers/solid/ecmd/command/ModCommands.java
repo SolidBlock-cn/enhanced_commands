@@ -32,6 +32,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     DrawCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RandCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    RegionBuilderCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     SeparatedExecuteCommand.register(dispatcher, registryAccess);
     SetBlocksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TasksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -51,7 +52,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   public static final EnhancedRedirectModifier.ArgumentsModifier<ServerCommandSource> REGION_ARGUMENTS_MODIFIER = (arguments, source) -> {
     final ServerPlayerEntity player = source.getPlayerOrThrow();
-    final RegionArgument<?> regionArgument = ((ServerPlayerEntityExtension) player).ec_getActiveRegion();
+    final RegionArgument<?> regionArgument = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegion(source);
     if (regionArgument == null) {
       throw PLAYER_HAS_NO_ACTIVE_REGION.create(player.getName());
     }

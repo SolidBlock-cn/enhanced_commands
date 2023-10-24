@@ -5,9 +5,9 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.Iterator;
+import java.util.function.Function;
 
 /**
  * <p>The <b>block cuboid region</b> representing a cuboid defined by two block positions. It is similar to {@link CuboidRegion}, but positions are block positions, and are inclusive. A block position indicates a whole cube, instead of an accurate position.
@@ -67,6 +67,24 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
   }
 
+  @Override
+  public @NotNull Region rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
+    if (pivot.equals(Vec3d.ofCenter(BlockPos.ofFloored(pivot)))) {
+      return rotated(BlockPos.ofFloored(pivot), blockRotation);
+    } else {
+      return asCuboidRegion().rotated(blockRotation, pivot);
+    }
+  }
+
+  @Override
+  public @NotNull Region mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
+    if (pivot.equals(Vec3d.ofCenter(BlockPos.ofFloored(pivot)))) {
+      return mirrored(BlockPos.ofFloored(pivot), axis);
+    } else {
+      return asCuboidRegion().mirrored(axis, pivot);
+    }
+  }
+
   public BlockBox blockBox() {
     return new BlockBox(minX, minY, minZ, maxX, maxY, maxZ);
   }
@@ -75,24 +93,15 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     return new CuboidRegion(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
   }
 
+
   @Override
-  public @NotNull Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return asCuboidRegion().rotated(pivot, blockRotation);
+  public Region transformedInt(Function<Vec3i, Vec3i> transformation) {
+    return new BlockCuboidRegion(transformation.apply(new Vec3i(minX, minY, minZ)), transformation.apply(new Vec3i(maxX, maxY, maxZ)));
   }
 
   @Override
-  public @NotNull BlockCuboidRegion rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation) {
-    return new BlockCuboidRegion(GeoUtil.rotate(new Vec3i(minX, minY, minZ), blockRotation, pivot), GeoUtil.rotate(new Vec3i(maxX, maxY, maxZ), blockRotation, pivot));
-  }
-
-  @Override
-  public @NotNull Region mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return asCuboidRegion().mirrored(pivot, axis);
-  }
-
-  @Override
-  public @NotNull BlockCuboidRegion mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
-    return new BlockCuboidRegion(GeoUtil.mirror(new Vec3i(minX, minY, minZ), axis, pivot), GeoUtil.mirror(new Vec3i(maxX, maxY, maxZ), axis, pivot));
+  public Region transformed(Function<Vec3d, Vec3d> transformation) {
+    return asCuboidRegion().transformed(transformation);
   }
 
   @Override
@@ -140,6 +149,23 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     } else {
       return new BlockCuboidRegion(minX + vector.getX(), minY + vector.getY(), minZ + vector.getZ(), maxX, maxY, maxZ);
     }
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset, Direction.Type type) {
+    if (offset % 1 == 0) {
+      return expanded((int) offset, type);
+    } else {
+      return asCuboidRegion().expanded(offset, type);
+    }
+  }
+
+  @Override
+  public @NotNull BlockCuboidRegion expanded(int offset, Direction.Type type) {
+    return switch (type) {
+      case HORIZONTAL -> new BlockCuboidRegion(minX - offset, minY, minZ - offset, maxX + offset, maxY, maxZ + offset);
+      case VERTICAL -> new BlockCuboidRegion(minX, minY - offset, minZ, maxX, maxY + offset, maxZ);
+    };
   }
 
   @Override

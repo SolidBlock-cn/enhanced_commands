@@ -5,17 +5,19 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockBox;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
+import java.util.function.Function;
 
 public record SingleBlockPosRegion(Vec3i vec3i) implements IntBackedRegion {
   @Override
@@ -24,23 +26,13 @@ public record SingleBlockPosRegion(Vec3i vec3i) implements IntBackedRegion {
   }
 
   @Override
-  public @NotNull SingleBlockPosRegion moved(@NotNull Vec3i relativePos) {
-    return new SingleBlockPosRegion(vec3i.add(relativePos));
-  }
-
-  @Override
   public @NotNull Type getType() {
     return RegionTypes.SINGLE;
   }
 
   @Override
-  public @NotNull SingleBlockPosRegion rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation) {
-    return new SingleBlockPosRegion(GeoUtil.rotate(vec3i, blockRotation, pivot));
-  }
-
-  @Override
-  public @NotNull SingleBlockPosRegion mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
-    return new SingleBlockPosRegion(GeoUtil.mirror(vec3i, axis, pivot));
+  public SingleBlockPosRegion transformedInt(Function<Vec3i, Vec3i> transformation) {
+    return new SingleBlockPosRegion(transformation.apply(vec3i));
   }
 
   @Override

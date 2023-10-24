@@ -85,7 +85,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
         this.reader.setCursor(cursorBeforeParsing);
         if (Registries.BLOCK.containsId(blockId)) {
           final Block block1 = Registries.BLOCK.get(blockId);
-          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.FEATURE_REQUIRED.createWithContext(reader, Text.literal(blockId.toString()).styled(TextUtil.STYLE_FOR_ACTUAL), block1.getName().styled(TextUtil.STYLE_FOR_TARGET)), cursorAfterParsing);
+          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.FEATURE_REQUIRED.createWithContext(reader, TextUtil.literal(blockId).styled(TextUtil.STYLE_FOR_ACTUAL), block1.getName().styled(TextUtil.STYLE_FOR_TARGET)), cursorAfterParsing);
         }
         return CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString()), cursorAfterParsing);
       }).value();

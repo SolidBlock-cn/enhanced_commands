@@ -8,7 +8,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +18,7 @@ import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
+import java.util.function.Function;
 
 public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBackedRegion {
   @Override
@@ -29,11 +29,6 @@ public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBac
   @Override
   public @NotNull Iterator<BlockPos> iterator() {
     return BlockPos.iterateOutwards(new BlockPos(vec3i), x, y, z).iterator();
-  }
-
-  @Override
-  public @NotNull OutwardsRegion moved(@NotNull Vec3i relativePos) {
-    return new OutwardsRegion(vec3i.add(relativePos), x, y, z);
   }
 
   @Override
@@ -51,8 +46,8 @@ public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBac
   }
 
   @Override
-  public @NotNull OutwardsRegion mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
-    return new OutwardsRegion(GeoUtil.mirror(vec3i, axis, pivot), x, y, z);
+  public OutwardsRegion transformedInt(Function<Vec3i, Vec3i> transformation) {
+    return new OutwardsRegion(transformation.apply(vec3i), x, y, z);
   }
 
   @Override

@@ -4,8 +4,10 @@ import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -17,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record IntersectRegion(Collection<Region> regions) implements Region {
+public record IntersectRegion(Collection<Region> regions) implements RegionsBasedRegion<IntersectRegion, Region> {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return regions.stream().allMatch(region -> region.contains(vec3d));
@@ -40,26 +42,6 @@ public record IntersectRegion(Collection<Region> regions) implements Region {
     }
     return regions.iterator().next().stream()
         .filter(blockPos -> regions.stream().allMatch(region -> region.contains(blockPos)));
-  }
-
-  @Override
-  public @NotNull IntersectRegion moved(@NotNull Vec3d relativePos) {
-    return new IntersectRegion(Collections2.transform(regions, region -> region.moved(relativePos)));
-  }
-
-  @Override
-  public @NotNull IntersectRegion moved(@NotNull Vec3i relativePos) {
-    return new IntersectRegion(Collections2.transform(regions, region -> region.moved(relativePos)));
-  }
-
-  @Override
-  public @NotNull IntersectRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return new IntersectRegion(Collections2.transform(regions, region -> region.rotated(pivot, blockRotation)));
-  }
-
-  @Override
-  public @NotNull IntersectRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return new IntersectRegion(Collections2.transform(regions, region -> region.mirrored(pivot, axis)));
   }
 
   @Override
@@ -102,6 +84,11 @@ public record IntersectRegion(Collection<Region> regions) implements Region {
     } else {
       return new Box(minX, minY, minZ, maxX, maxY, maxZ);
     }
+  }
+
+  @Override
+  public IntersectRegion newRegion(Collection<Region> regions) {
+    return new IntersectRegion(regions);
   }
 
   public enum Type implements RegionType<IntersectRegion> {

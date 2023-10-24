@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -15,11 +14,11 @@ import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.function.Function;
 
 /**
  * <p>A <b>cuboid region</b> is a region representing a cuboid, which is defined by two positions. The positions are accurate positions, instead of block positions. The coordinates can be decimal, even if blocks only support non-decimal coordinates.
@@ -72,24 +71,8 @@ public record CuboidRegion(Box box) implements Region {
   }
 
   @Override
-  public @NotNull Region moved(@NotNull Vec3d relativePos) {
-    return new CuboidRegion(new Vec3d(box.minX, box.minY, box.minZ).add(relativePos), new Vec3d(box.maxZ, box.maxY, box.maxZ).add(relativePos));
-  }
-
-  @Override
-  public @NotNull Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return new CuboidRegion(
-        GeoUtil.rotate(new Vec3d(box.minX, box.minY, box.minZ), blockRotation, pivot),
-        GeoUtil.rotate(new Vec3d(box.maxX, box.maxY, box.maxZ), blockRotation, pivot)
-    );
-  }
-
-  @Override
-  public @NotNull Region mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return new CuboidRegion(
-        GeoUtil.mirror(new Vec3d(box.minX, box.minY, box.minZ), axis, pivot),
-        GeoUtil.mirror(new Vec3d(box.maxX, box.maxY, box.maxZ), axis, pivot)
-    );
+  public CuboidRegion transformed(Function<Vec3d, Vec3d> transformation) {
+    return new CuboidRegion(transformation.apply(new Vec3d(box.minX, box.minY, box.minZ)), transformation.apply(new Vec3d(box.maxX, box.maxY, box.maxZ)));
   }
 
   @Override

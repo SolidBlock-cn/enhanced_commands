@@ -4,8 +4,10 @@ import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -14,7 +16,7 @@ import pers.solid.ecmd.util.FunctionLikeParser;
 import java.util.*;
 import java.util.stream.Stream;
 
-public record UnionRegion(Collection<Region> regions) implements Region {
+public record UnionRegion(Collection<Region> regions) implements RegionsBasedRegion<UnionRegion, Region> {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return regions.stream().anyMatch(region -> region.contains(vec3d));
@@ -33,26 +35,6 @@ public record UnionRegion(Collection<Region> regions) implements Region {
   @Override
   public Stream<BlockPos> stream() {
     return regions.stream().flatMap(Region::stream).map(BlockPos::toImmutable).distinct();
-  }
-
-  @Override
-  public @NotNull UnionRegion moved(@NotNull Vec3d relativePos) {
-    return new UnionRegion(Collections2.transform(regions, region -> region.moved(relativePos)));
-  }
-
-  @Override
-  public @NotNull UnionRegion moved(@NotNull Vec3i relativePos) {
-    return new UnionRegion(Collections2.transform(regions, region -> region.moved(relativePos)));
-  }
-
-  @Override
-  public @NotNull UnionRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return new UnionRegion(Collections2.transform(regions, region -> region.rotated(pivot, blockRotation)));
-  }
-
-  @Override
-  public @NotNull UnionRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return new UnionRegion(Collections2.transform(regions, region -> region.mirrored(pivot, axis)));
   }
 
   @Override
@@ -87,6 +69,11 @@ public record UnionRegion(Collection<Region> regions) implements Region {
     } else {
       return new Box(minX, minY, minZ, maxX, maxY, maxZ);
     }
+  }
+
+  @Override
+  public UnionRegion newRegion(Collection<Region> regions) {
+    return new UnionRegion(regions);
   }
 
   public enum Type implements RegionType<UnionRegion> {

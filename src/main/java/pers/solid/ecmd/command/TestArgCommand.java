@@ -65,14 +65,14 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     return argumentBuilder.then(argument("block_function", BlockFunctionArgumentType.blockFunction(registryAccess))
         .executes(context -> {
           final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
-          CommandBridge.sendFeedback(context, () -> Text.literal(blockFunction.asString()), false);
+          CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockFunction), false);
           CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(blockFunction.createNbt()), false);
           return 1;
         })
         .then(literal("string")
             .executes(context -> {
               final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
-              CommandBridge.sendFeedback(context, () -> Text.literal(blockFunction.asString()), false);
+              CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockFunction), false);
               return 1;
             }))
         .then(literal("nbt")
@@ -113,14 +113,14 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     return argumentBuilder.then(argument("block_predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
         .executes(context -> {
           final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
-          CommandBridge.sendFeedback(context, () -> Text.literal(blockPredicate.asString()), false);
+          CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockPredicate), false);
           CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(blockPredicate.createNbt()), false);
           return 1;
         })
         .then(literal("string")
             .executes(context -> {
               final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
-              CommandBridge.sendFeedback(context, () -> Text.literal(blockPredicate.asString()), false);
+              CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockPredicate), false);
               return 1;
             }))
         .then(literal("nbt")
@@ -200,7 +200,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     return argumentBuilder.then(argument("nbt_predicate", NbtPredicateArgumentType.ELEMENT)
         .executes(context -> {
           final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
-          CommandBridge.sendFeedback(context, () -> Text.literal(nbtPredicate.asString()), false);
+          CommandBridge.sendFeedback(context, () -> TextUtil.literal(nbtPredicate), false);
           return 1;
         })
         .then(literal("match")
@@ -215,7 +215,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("string")
             .executes(context -> {
               final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
-              CommandBridge.sendFeedback(context, () -> Text.literal(nbtPredicate.asString()), false);
+              CommandBridge.sendFeedback(context, () -> TextUtil.literal(nbtPredicate), false);
               return 1;
             }))
         .then(literal("reparse")
@@ -235,7 +235,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     return argumentBuilder.then(argument("nbt_function", NbtFunctionArgumentType.ELEMENT)
         .executes(context -> {
           final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
-          CommandBridge.sendFeedback(context, () -> Text.literal(nbtFunction.asString()), false);
+          CommandBridge.sendFeedback(context, () -> TextUtil.literal(nbtFunction), false);
           return 1;
         })
         .then(literal("apply")
@@ -310,7 +310,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("string")
             .executes(context -> {
               final Region region = RegionArgumentType.getRegion(context, "region");
-              CommandBridge.sendFeedback(context, () -> Text.literal(region.asString()), false);
+              CommandBridge.sendFeedback(context, () -> TextUtil.literal(region), false);
               return 1;
             }))
         .then(literal("reparse")
@@ -351,7 +351,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               }
               final int finalNumOfIteratedButNotMatch = numOfIteratedButNotMatch;
               final int finalNumOfNotIteratedButMatch = numOfNotIteratedButMatch;
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.region.verify.result", Text.literal(region.asString()).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), true);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.region.verify.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), true);
               return numOfIteratedButNotMatch;
             }))
     );

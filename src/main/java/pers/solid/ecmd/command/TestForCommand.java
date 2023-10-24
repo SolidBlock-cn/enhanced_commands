@@ -68,7 +68,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     }
     final BlockState blockState = world.getBlockState(blockPos);
     final Collection<Property<?>> properties = blockState.getProperties();
-    CommandBridge.sendFeedback(source, () -> Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", TextUtil.wrapBlockPos(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(Registries.BLOCK.getId(blockState.getBlock()).toString()).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", TextUtil.wrapBlockPos(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(Registries.BLOCK.getId(blockState.getBlock())).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     for (Property<?> property : properties) {
       CommandBridge.sendFeedback(source, () -> expressPropertyValue(blockState, property), true);
     }

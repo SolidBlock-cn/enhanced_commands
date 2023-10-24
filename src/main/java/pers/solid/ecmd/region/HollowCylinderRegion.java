@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +20,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.OutlineTypes outlineType) implements Region {
+public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineTypes outlineType) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return contains(BlockPos.ofFloored(vec3d));
@@ -29,18 +28,18 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
-    final long topHeight = cylinderRegion.getTopHeight();
-    final long bottomHeight = cylinderRegion.getBottomHeight();
+    final long topHeight = region.getTopHeight();
+    final long bottomHeight = region.getBottomHeight();
     if (outlineType == OutlineRegion.OutlineTypes.OUTLINE || outlineType == OutlineRegion.OutlineTypes.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
       // match the top or bottom ceiling
       if (vec3i.getY() == bottomHeight || vec3i.getY() == topHeight) {
-        return horizontallyWithinCylinder(cylinderRegion, Vec3d.ofCenter(vec3i));
+        return horizontallyWithinCylinder(region, Vec3d.ofCenter(vec3i));
       }
     }
     if (outlineType != OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
       // match the walls
       if (vec3i.getY() >= bottomHeight && vec3i.getY() <= topHeight) {
-        return horizontallyWithinHollowCylinder(cylinderRegion, outlineType, new BlockPos(vec3i));
+        return horizontallyWithinHollowCylinder(region, outlineType, new BlockPos(vec3i));
       }
     }
     return false;
@@ -69,13 +68,13 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
   @Override
   public Stream<BlockPos> stream() {
-    final Vec3d center = cylinderRegion.center();
-    final double radius = cylinderRegion.radius();
-    final int topHeight = cylinderRegion.getTopHeight();
-    final int bottomHeight = cylinderRegion.getBottomHeight();
+    final Vec3d center = region.center();
+    final double radius = region.radius();
+    final int topHeight = region.getTopHeight();
+    final int bottomHeight = region.getBottomHeight();
 
     final Iterable<BlockPos> iterable = BlockPos.iterate(MathHelper.ceil(center.x - radius - 0.5), 0, MathHelper.ceil(center.z - radius - 0.5), MathHelper.floor(center.x + radius - 0.5), 0, MathHelper.floor(center.z + radius - 0.5));
-    final Stream<BlockPos> flatOutlineRoundStream = Streams.stream(iterable).filter(blockPos -> horizontallyWithinHollowCylinder(cylinderRegion, outlineType, blockPos));
+    final Stream<BlockPos> flatOutlineRoundStream = Streams.stream(iterable).filter(blockPos -> horizontallyWithinHollowCylinder(region, outlineType, blockPos));
     if (outlineType == OutlineRegion.OutlineTypes.OUTLINE || outlineType == OutlineRegion.OutlineTypes.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
       if (topHeight == bottomHeight) {
         return Streams.stream(iterable).map(blockPos -> blockPos.withY(bottomHeight));
@@ -84,7 +83,7 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
       }
       List<Stream<BlockPos>> parts = new ArrayList<>();
       // add top and bottom ceiling
-      parts.add(Streams.stream(iterable).filter(blockPos -> horizontallyWithinCylinder(cylinderRegion, Vec3d.ofCenter(blockPos))).flatMap(blockPos -> Stream.of(blockPos.withY(topHeight), blockPos.withY(bottomHeight))));
+      parts.add(Streams.stream(iterable).filter(blockPos -> horizontallyWithinCylinder(region, Vec3d.ofCenter(blockPos))).flatMap(blockPos -> Stream.of(blockPos.withY(topHeight), blockPos.withY(bottomHeight))));
       // add walls that excluded the top and bottom ceiling
       if (outlineType != OutlineRegion.OutlineTypes.FLOOR_AND_CEIL && topHeight - 1 > bottomHeight + 1) {
         parts.add(flatOutlineRoundStream.flatMap(blockPos -> BlockPos.stream(blockPos.getX(), bottomHeight + 1, blockPos.getZ(), blockPos.getX(), topHeight - 1, blockPos.getZ()).map(BlockPos::toImmutable)));
@@ -97,28 +96,8 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
   }
 
   @Override
-  public @NotNull HollowCylinderRegion moved(@NotNull Vec3d relativePos) {
-    return new HollowCylinderRegion(cylinderRegion.moved(relativePos), outlineType);
-  }
-
-  @Override
-  public @NotNull HollowCylinderRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return new HollowCylinderRegion(cylinderRegion.rotated(pivot, blockRotation), outlineType);
-  }
-
-  @Override
-  public @NotNull HollowCylinderRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return new HollowCylinderRegion(cylinderRegion.mirrored(pivot, axis), outlineType);
-  }
-
-  @Override
-  public @NotNull HollowCylinderRegion expanded(double offset, Direction.Axis axis) {
-    return new HollowCylinderRegion(cylinderRegion.expanded(offset, axis), outlineType);
-  }
-
-  @Override
-  public @NotNull HollowCylinderRegion expanded(double offset, Direction direction) {
-    return new HollowCylinderRegion(cylinderRegion.expanded(offset, direction), outlineType);
+  public HollowCylinderRegion newRegion(CylinderRegion region) {
+    return new HollowCylinderRegion(region, outlineType);
   }
 
   @Override
@@ -128,23 +107,23 @@ public record HollowCylinderRegion(CylinderRegion cylinderRegion, OutlineRegion.
 
   @Override
   public double volume() {
-    var roundSurface = Math.PI * MathHelper.square(cylinderRegion.radius());
-    var roundWallSurface = roundSurface - Math.PI * MathHelper.square(cylinderRegion.radius() - 1);
+    var roundSurface = Math.PI * MathHelper.square(region.radius());
+    var roundWallSurface = roundSurface - Math.PI * MathHelper.square(region.radius() - 1);
     return switch (outlineType) {
-      case OUTLINE, OUTLINE_CONNECTED -> 2 * roundSurface + (cylinderRegion.height() - 2) * roundWallSurface;
-      case WALL, WALL_CONNECTED -> cylinderRegion.height() * roundWallSurface;
+      case OUTLINE, OUTLINE_CONNECTED -> 2 * roundSurface + (region.height() - 2) * roundWallSurface;
+      case WALL, WALL_CONNECTED -> region.height() * roundWallSurface;
       case FLOOR_AND_CEIL -> 2 * roundSurface;
     };
   }
 
   @Override
   public @NotNull String asString() {
-    return String.format("hcyl(%s, %s, %s %s %s, %s)", cylinderRegion.radius(), cylinderRegion.height(), cylinderRegion.center().x, cylinderRegion.center().y, cylinderRegion.center().z, outlineType.asString());
+    return String.format("hcyl(%s, %s, %s %s %s, %s)", region.radius(), region.height(), region.center().x, region.center().y, region.center().z, outlineType.asString());
   }
 
   @Override
   public @NotNull Box minContainingBox() {
-    return cylinderRegion.minContainingBox();
+    return region.minContainingBox();
   }
 
   public enum Type implements RegionType<HollowCylinderRegion> {

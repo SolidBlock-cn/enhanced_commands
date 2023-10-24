@@ -6,20 +6,12 @@ import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.util.Identifier;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.curve.CurveTypes;
-import pers.solid.ecmd.function.block.BlockFunctionTypes;
-import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
-import pers.solid.ecmd.region.RegionTypes;
 
 /**
  * @see net.minecraft.command.argument.ArgumentTypes
  */
 public class ModArgumentTypes {
   public static void init() {
-    BlockPredicateTypes.init();
-    BlockFunctionTypes.init();
-    CurveTypes.init();
-    RegionTypes.init();
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
     register("curve", CurveArgumentType.class, ConstantArgumentSerializer.of(CurveArgumentType::new));

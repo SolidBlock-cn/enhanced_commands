@@ -58,9 +58,9 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
       if (!propertyPredicate.test(blockState)) {
         final Property<?> property = propertyPredicate.property();
         if (blockState.contains(property)) {
-          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.property_not_this_value", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), expressPropertyValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(propertyPredicate.asString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.property_not_this_value", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), expressPropertyValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(propertyPredicate).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
         } else {
-          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.expected_property_does_not_exist", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), Text.literal(property.getName()).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(propertyPredicate.asString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.expected_property_does_not_exist", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), Text.literal(property.getName()).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(propertyPredicate).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
         }
         matches = false;
       }

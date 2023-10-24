@@ -4,7 +4,6 @@ import com.google.common.collect.Iterators;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,12 +12,12 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thickness) implements IntBackedRegion {
+public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implements RegionBasedRegion.IntBacked<CuboidWallRegion, BlockCuboidRegion> {
   public CuboidWallRegion {
     if (thickness <= 0) {
       throw new IllegalArgumentException(CuboidOutlineRegion.NON_POSITIVE_THICKNESS.create(thickness));
     }
-    final int maxAcceptableThickness = getMaxAcceptableThickness(blockCuboidRegion);
+    final int maxAcceptableThickness = getMaxAcceptableThickness(region);
     if (thickness > maxAcceptableThickness) {
       throw new IllegalArgumentException(CuboidOutlineRegion.TOO_THICK.create(maxAcceptableThickness, thickness));
     }
@@ -30,12 +29,12 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
 
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
-    return blockCuboidRegion.contains(vec3i) && !blockCuboidRegion.expanded(-thickness, Direction.Axis.X).expanded(-thickness, Direction.Axis.Z).contains(vec3i);
+    return region.contains(vec3i) && !region.expanded(-thickness, Direction.Axis.X).expanded(-thickness, Direction.Axis.Z).contains(vec3i);
   }
 
   @Override
-  public @NotNull CuboidWallRegion moved(@NotNull Vec3i relativePos) {
-    return new CuboidWallRegion(blockCuboidRegion.moved(relativePos), thickness);
+  public CuboidWallRegion newRegion(BlockCuboidRegion region) {
+    return new CuboidWallRegion(region, thickness);
   }
 
   @Override
@@ -44,41 +43,29 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
   }
 
   @Override
-  public @NotNull CuboidWallRegion rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation) {
-    final BlockCuboidRegion rotated = blockCuboidRegion.rotated(pivot, blockRotation);
-    return rotated.equals(blockCuboidRegion) ? this : new CuboidWallRegion(rotated, thickness);
-  }
-
-  @Override
-  public @NotNull CuboidWallRegion mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
-    final BlockCuboidRegion mirrored = blockCuboidRegion.mirrored(pivot, axis);
-    return mirrored.equals(blockCuboidRegion) ? this : new CuboidWallRegion(mirrored, thickness);
-  }
-
-  @Override
   public long numberOfBlocksAffected() {
     final int innerBlocks;
-    if (blockCuboidRegion.minX() + thickness > blockCuboidRegion.maxX() - thickness || blockCuboidRegion.minZ() + thickness > blockCuboidRegion.maxZ() + thickness) {
+    if (region.minX() + thickness > region.maxX() - thickness || region.minZ() + thickness > region.maxZ() + thickness) {
       innerBlocks = 0;
     } else {
-      innerBlocks = (blockCuboidRegion.maxX() - blockCuboidRegion.minX() - 2 * thickness + 1) * (blockCuboidRegion.maxY() - blockCuboidRegion.minY() + 1) * (blockCuboidRegion.maxZ() - blockCuboidRegion.minZ() - 2 * thickness + 1);
+      innerBlocks = (region.maxX() - region.minX() - 2 * thickness + 1) * (region.maxY() - region.minY() + 1) * (region.maxZ() - region.minZ() - 2 * thickness + 1);
     }
-    return blockCuboidRegion.numberOfBlocksAffected() - innerBlocks;
+    return region.numberOfBlocksAffected() - innerBlocks;
   }
 
   @Override
   public @NotNull BlockBox maxContainingBlockBox() {
-    return blockCuboidRegion.maxContainingBlockBox();
+    return region.maxContainingBlockBox();
   }
 
   @Override
   public @NotNull String asString() {
-    return String.format("cuboid_wall(%s %s %s, %s %s %s, %s)", blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.maxY(), blockCuboidRegion.maxZ(), thickness);
+    return String.format("cuboid_wall(%s %s %s, %s %s %s, %s)", region.minX(), region.minY(), region.minZ(), region.maxX(), region.maxY(), region.maxZ(), thickness);
   }
 
   @Override
   public @Nullable Box minContainingBox() {
-    return blockCuboidRegion.minContainingBox();
+    return region.minContainingBox();
   }
 
   @Override
@@ -93,19 +80,19 @@ public record CuboidWallRegion(BlockCuboidRegion blockCuboidRegion, int thicknes
 
   public @NotNull Stream<BlockCuboidRegion> decompose() {
     // 考虑正好中间的空间为零的情况，这种情况下，正好相当于实心的 BlockCuboidRegion
-    if (blockCuboidRegion.minX() + thickness > blockCuboidRegion.maxX() - thickness
-        || blockCuboidRegion.minZ() + thickness > blockCuboidRegion.maxZ() - thickness) {
-      return Stream.of(blockCuboidRegion);
+    if (region.minX() + thickness > region.maxX() - thickness
+        || region.minZ() + thickness > region.maxZ() - thickness) {
+      return Stream.of(region);
     }
     return Stream.of(
         // lower x part
-        new BlockCuboidRegion(blockCuboidRegion.minX(), blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.minX() + thickness - 1, blockCuboidRegion.maxY(), blockCuboidRegion.maxZ()),
+        new BlockCuboidRegion(region.minX(), region.minY(), region.minZ(), region.minX() + thickness - 1, region.maxY(), region.maxZ()),
         // higher x part
-        new BlockCuboidRegion(blockCuboidRegion.maxX() - thickness + 1, blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX(), blockCuboidRegion.maxY(), blockCuboidRegion.maxZ()),
+        new BlockCuboidRegion(region.maxX() - thickness + 1, region.minY(), region.minZ(), region.maxX(), region.maxY(), region.maxZ()),
         // lower z part
-        new BlockCuboidRegion(blockCuboidRegion.minX() + thickness, blockCuboidRegion.minY(), blockCuboidRegion.minZ(), blockCuboidRegion.maxX() - thickness, blockCuboidRegion.maxY(), blockCuboidRegion.minZ() + thickness - 1),
+        new BlockCuboidRegion(region.minX() + thickness, region.minY(), region.minZ(), region.maxX() - thickness, region.maxY(), region.minZ() + thickness - 1),
         // higher z part
-        new BlockCuboidRegion(blockCuboidRegion.minX() + thickness, blockCuboidRegion.minY(), blockCuboidRegion.maxZ() - thickness + 1, blockCuboidRegion.maxX() - thickness, blockCuboidRegion.maxY(), blockCuboidRegion.maxZ())
+        new BlockCuboidRegion(region.minX() + thickness, region.minY(), region.maxZ() - thickness + 1, region.maxX() - thickness, region.maxY(), region.maxZ())
     );
   }
 

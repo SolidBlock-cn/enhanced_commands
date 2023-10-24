@@ -7,6 +7,8 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3i;
@@ -50,11 +52,39 @@ public final class TextUtil {
     return new NbtOrderedStringFormatter(StringUtils.EMPTY, 0, new ArrayList<>()).apply(nbtElement);
   }
 
+  public static MutableText literal(long value) {
+    return Text.literal(Long.toString(value));
+  }
+
+  public static MutableText literal(int value) {
+    return Text.literal(Integer.toString(value));
+  }
+
+  public static MutableText literal(float value) {
+    return Text.literal(Float.toString(value));
+  }
+
+  public static MutableText literal(double value) {
+    return Text.literal(Double.toString(value));
+  }
+
+  public static MutableText literal(Identifier value) {
+    return Text.literal(value.toString());
+  }
+
+  public static MutableText literal(StringIdentifiable value) {
+    return Text.literal(value.asString());
+  }
+
+  public static MutableText literal(ExpressionConvertible value) {
+    return Text.literal(value.asString());
+  }
+
   /**
    * 将方块坐标表示为文本组件。
    */
   public static MutableText wrapBlockPos(Vec3i blockPos) {
-    return Text.translatable("enhancedCommands.vec3i", blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    return Text.translatable("enhancedCommands.position", blockPos.getX(), blockPos.getY(), blockPos.getZ());
   }
 
   /**

@@ -5,20 +5,18 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
+import java.util.function.Function;
 
 public record SphereRegion(double radius, Vec3d center) implements Region {
   @Override
@@ -32,18 +30,8 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   }
 
   @Override
-  public @NotNull SphereRegion moved(@NotNull Vec3d relativePos) {
-    return new SphereRegion(radius, center.add(relativePos));
-  }
-
-  @Override
-  public @NotNull Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return new SphereRegion(radius, GeoUtil.rotate(center, blockRotation, pivot));
-  }
-
-  @Override
-  public @NotNull Region mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return new SphereRegion(radius, GeoUtil.mirror(center, axis, pivot));
+  public SphereRegion transformed(Function<Vec3d, Vec3d> transformation) {
+    return new SphereRegion(radius, transformation.apply(center));
   }
 
   @Override

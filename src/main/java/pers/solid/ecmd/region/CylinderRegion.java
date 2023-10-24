@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,10 +13,10 @@ import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius, @Range(from = 0, to = Long.MAX_VALUE) double height, Vec3d center) implements Region {
@@ -63,15 +62,23 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull CylinderRegion moved(@NotNull Vec3d relativePos) {
-    return new CylinderRegion(radius, height, center.add(relativePos));
+  public CylinderRegion transformed(Function<Vec3d, Vec3d> transformation) {
+    return new CylinderRegion(radius, height, transformation.apply(center));
   }
 
   public static final SimpleCommandExceptionType MUST_EXPAND_VERTICALLY = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.region.exception.cylinder_must_expand_vertically"));
 
   @Override
+  public @NotNull Region expanded(double offset) {
+    throw new UnsupportedOperationException(MUST_EXPAND_VERTICALLY.create());
+  }
+
+  @Override
   public @NotNull CylinderRegion expanded(double offset, Direction direction) {
     if (direction.getAxis().isVertical()) {
+      if (offset < -height) {
+        throw new IllegalArgumentException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().create(-height, offset));
+      }
       return new CylinderRegion(radius, height + offset, center.add(Vec3d.of(direction.getVector()).multiply(offset / 2)));
     } else {
       throw new UnsupportedOperationException(MUST_EXPAND_VERTICALLY.create());
@@ -81,8 +88,8 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   @Override
   public @NotNull CylinderRegion expanded(double offset, Direction.Axis axis) {
     if (axis.isVertical()) {
-      if (offset * 2 > height) {
-        throw new IllegalArgumentException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooHigh().create(height / 2, offset));
+      if (offset * 2 < -height) {
+        throw new IllegalArgumentException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().create(-height / 2, offset));
       }
       return new CylinderRegion(radius, height + 2 * offset, center);
     } else {
@@ -91,13 +98,15 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull CylinderRegion rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return new CylinderRegion(radius, height, GeoUtil.rotate(pivot, blockRotation, pivot));
-  }
-
-  @Override
-  public @NotNull CylinderRegion mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return new CylinderRegion(radius, height, GeoUtil.mirror(pivot, axis, pivot));
+  public @NotNull Region expanded(double offset, Direction.Type type) {
+    if (type == Direction.Type.VERTICAL) {
+      if (offset * 2 < -height) {
+        throw new IllegalArgumentException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().create(-height / 2, offset));
+      }
+      return new CylinderRegion(radius, height + 2 * offset, center);
+    } else {
+      throw new UnsupportedOperationException(MUST_EXPAND_VERTICALLY.create());
+    }
   }
 
   @Override

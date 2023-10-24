@@ -9,8 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.Iterator;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -47,22 +49,6 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
   }
 
   /**
-   * 该区域在指定方向上移动整数格后的区域。
-   */
-  @NotNull
-  default Region moved(int count, @NotNull Direction direction) {
-    return moved(direction.getVector().multiply(count));
-  }
-
-  /**
-   * 该区域在指定方向上移动浮点数格后的区域。
-   */
-  @NotNull
-  default Region moved(double count, @NotNull Direction direction) {
-    return moved(Vec3d.of(direction.getVector()).multiply(count));
-  }
-
-  /**
    * 该区域沿指定的整数向量移动后的区域。默认情况下会将这个整数向量转换为浮点向量，但特定情况下可以修改此方法以避免使用浮点数。
    */
   @NotNull
@@ -74,7 +60,9 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
    * 该区域沿指定的浮点数向量移动后的区域。
    */
   @NotNull
-  Region moved(@NotNull Vec3d relativePos);
+  default Region moved(@NotNull Vec3d relativePos) {
+    return transformed(vec3d -> vec3d.add(relativePos));
+  }
 
   /**
    * 区域旋转后的区域。
@@ -82,7 +70,9 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
    * @implSpec 此区域内的所有坐标在旋转后都应该是旋转后的区域内的所有坐标，但是不需要确保旋转后的迭代顺序与之前的一致。
    */
   @NotNull
-  Region rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation);
+  default Region rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
+    return transformed(vec3d -> GeoUtil.rotate(vec3d, blockRotation, pivot));
+  }
 
   /**
    * 区域翻转后的区域。
@@ -90,7 +80,11 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
    * @implSpec 此区域内的所有坐标在翻转后都应该是翻转后的区域内的所有坐标，但是不需要确保翻转后的迭代顺序与之前的一致。
    */
   @NotNull
-  Region mirrored(@NotNull Vec3d pivot, @NotNull Direction.Axis axis);
+  default Region mirrored(@NotNull Direction.Axis axis, @NotNull Vec3d pivot) {
+    return transformed(vec3d -> GeoUtil.mirror(vec3d, axis, pivot));
+  }
+
+  Region transformed(Function<Vec3d, Vec3d> transformation);
 
   /**
    * 区域向各方向延伸浮点数值后的区域。
@@ -115,6 +109,12 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
   default Region expanded(double offset, Direction direction) {
     throw new UnsupportedOperationException();
   }
+
+  /**
+   * 区域往水平或者竖直方向上延伸浮点数值后的区域。
+   */
+  @NotNull
+  default Region expanded(double offset, Direction.Type type) {throw new UnsupportedOperationException();}
 
   @NotNull RegionType<?> getType();
 
@@ -148,6 +148,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
     return maxContainingBox == null ? null : new BlockBox(MathHelper.floor(maxContainingBox.minX), MathHelper.floor(maxContainingBox.minY), MathHelper.floor(maxContainingBox.minZ), MathHelper.floor(maxContainingBox.maxX), MathHelper.floor(maxContainingBox.maxY), MathHelper.floor(maxContainingBox.maxZ));
   }
 
+  @Deprecated
   @Override
   default Region toAbsoluteRegion(ServerCommandSource source) {
     return this;
