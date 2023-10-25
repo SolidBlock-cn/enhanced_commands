@@ -101,6 +101,10 @@ public final class TextUtil {
     return Text.translatable("enhancedCommands.direction." + direction.asString());
   }
 
+  public static MutableText wrapAxis(Direction.Axis axis) {
+    return Text.translatable("enhancedCommands.axis." + axis.asString());
+  }
+
   /**
    * 将布尔值表示为文本组件，不翻译但是夫根据其值来应用格式。
    */

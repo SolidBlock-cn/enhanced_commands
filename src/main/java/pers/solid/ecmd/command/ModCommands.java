@@ -29,12 +29,13 @@ public enum ModCommands implements CommandRegistrationCallback {
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     ActiveRegionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     DrawCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    FillReplaceCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     OutlineCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RandCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RegionBuilderCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    RotateCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     SeparatedExecuteCommand.register(dispatcher, registryAccess);
-    FillReplaceCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TasksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestArgCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestForCommand.INSTANCE.register(dispatcher, registryAccess, environment);

@@ -12,10 +12,12 @@ import pers.solid.ecmd.EnhancedCommands;
  */
 public class ModArgumentTypes {
   public static void init() {
+    register("axis", AxisArgumentType.class, new AxisArgumentType.Serializer());
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
     register("curve", CurveArgumentType.class, ConstantArgumentSerializer.of(CurveArgumentType::new));
     register("direction", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::direction));
+    register("direction_type", SimpleEnumArgumentTypes.DirectionTypeArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.DirectionTypeArgumentType::new));
     register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
     register("nbt_function", NbtFunctionArgumentType.class, NbtFunctionArgumentType.Serializer.INSTANCE);
     register("keyword_args", KeywordArgsArgumentType.class, new KeywordArgsArgumentSerializer());

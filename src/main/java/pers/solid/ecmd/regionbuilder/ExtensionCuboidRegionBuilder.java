@@ -17,7 +17,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder {
+public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder, Cloneable {
   public Vec3i firstPos;
   public Vec3i secondPos;
 
@@ -100,8 +100,22 @@ public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder {
   }
 
   @Override
+  public @NotNull RegionBuilderType getType() {
+    return RegionBuilderTypes.EXTENSION;
+  }
+
+  @Override
   public void transformInt(Function<Vec3i, Vec3i> transformation) {
     firstPos = transformation.apply(firstPos);
     secondPos = transformation.apply(secondPos);
+  }
+
+  @Override
+  public ExtensionCuboidRegionBuilder clone() {
+    try {
+      return (ExtensionCuboidRegionBuilder) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

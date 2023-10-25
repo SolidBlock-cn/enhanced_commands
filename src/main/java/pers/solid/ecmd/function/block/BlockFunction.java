@@ -40,17 +40,7 @@ public interface BlockFunction extends ExpressionConvertible, NbtConvertible, Bl
     if ((modFlags & FillReplaceCommand.POST_PROCESS_FLAG) != 0) {
       modifiedState = Block.postProcessState(modifiedState, world, pos);
     }
-    final boolean suppressInitialCheck = (modFlags & FillReplaceCommand.SUPPRESS_INITIAL_CHECK_FLAG) != 0;
-    final boolean suppressReplacedCheck = (modFlags & FillReplaceCommand.SUPPRESS_REPLACED_CHECK_FLAG) != 0;
-    if (suppressInitialCheck) MixinSharedVariables.suppressOnBlockAdded = true;
-    if (suppressReplacedCheck) MixinSharedVariables.suppressOnStateReplaced = true;
-    boolean result;
-    try {
-      result = world.setBlockState(pos, modifiedState, flags);
-    } finally {
-      if (suppressInitialCheck) MixinSharedVariables.suppressOnBlockAdded = false;
-      if (suppressReplacedCheck) MixinSharedVariables.suppressOnStateReplaced = false;
-    }
+    boolean result = MixinSharedVariables.setBlockStateWithModFlags(world, pos, modifiedState, flags, modFlags);
     final BlockEntity blockEntity = world.getBlockEntity(pos);
     if (blockEntity != null) {
       final NbtCompound modifiedData = blockEntityData.getValue();

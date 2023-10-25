@@ -36,6 +36,11 @@ public interface ServerPlayerEntityExtension {
 
   void ec$setRegionBuilder(RegionBuilder regionBuilder);
 
+  default void ec$switchRegionBuilder(RegionBuilder regionBuilder) {
+    ec$setRegionBuilder(regionBuilder);
+    ec$setRegionBuilderType(regionBuilder.getType());
+  }
+
   RegionBuilderType ec$getRegionBuilderType();
 
   void ec$setRegionBuilderType(RegionBuilderType regionBuilderType);

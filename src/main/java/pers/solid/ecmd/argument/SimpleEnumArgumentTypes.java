@@ -6,7 +6,9 @@ import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.Message;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.OutlineRegion;
@@ -30,6 +32,25 @@ public final class SimpleEnumArgumentTypes {
   public static final class OutlineTypeArgumentType extends StringIdentifiableArgumentType<OutlineRegion.OutlineTypes> {
     public OutlineTypeArgumentType() {
       super(ImmutableList.copyOf(OutlineRegion.OutlineTypes.values()), OutlineRegion.OutlineTypes.CODEC, OutlineRegion.OutlineTypes::getDisplayName);
+    }
+  }
+
+  public static final class DirectionTypeArgumentType extends SimpleEnumArgumentType<Direction.Type> {
+    public static final Text HORIZONTAL = Text.translatable("enhancedCommands.direction_type.horizontal");
+    public static final Text VERTICAL = Text.translatable("enhancedCommands.direction_type.vertical");
+
+    public DirectionTypeArgumentType() {
+      super(ImmutableList.copyOf(Direction.Type.values()), type -> switch (type) {
+        case VERTICAL -> "vertical";
+        case HORIZONTAL -> "horizontal";
+      }, s -> switch (s) {
+        case "vertical" -> Direction.Type.VERTICAL;
+        case "horizontal" -> Direction.Type.HORIZONTAL;
+        default -> null;
+      }, type -> switch (type) {
+        case HORIZONTAL -> HORIZONTAL;
+        case VERTICAL -> VERTICAL;
+      });
     }
   }
 }

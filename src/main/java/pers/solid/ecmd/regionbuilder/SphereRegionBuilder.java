@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class SphereRegionBuilder implements RegionBuilder {
+public class SphereRegionBuilder implements RegionBuilder, Cloneable {
   public Vec3d center;
   public Vec3d radiusTarget;
   public double radius;
@@ -75,5 +75,19 @@ public class SphereRegionBuilder implements RegionBuilder {
   public void transform(Function<Vec3d, Vec3d> transformation) {
     center = transformation.apply(center);
     updateRadius();
+  }
+
+  @Override
+  public @NotNull RegionBuilderType getType() {
+    return RegionBuilderTypes.SPHERE;
+  }
+
+  @Override
+  public SphereRegionBuilder clone() {
+    try {
+      return (SphereRegionBuilder) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

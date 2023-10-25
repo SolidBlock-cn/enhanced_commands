@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.GeoUtil;
@@ -94,4 +95,9 @@ public interface RegionBuilder {
   }
 
   void transform(Function<Vec3d, Vec3d> transformation);
+
+  @Contract(pure = true)
+  @NotNull RegionBuilderType getType();
+
+  RegionBuilder clone();
 }

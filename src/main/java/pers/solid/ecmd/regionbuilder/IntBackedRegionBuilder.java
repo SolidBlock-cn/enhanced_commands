@@ -78,4 +78,7 @@ public interface IntBackedRegionBuilder extends RegionBuilder {
   }
 
   void transformInt(Function<Vec3i, Vec3i> transformation);
+
+  @Override
+  IntBackedRegionBuilder clone();
 }

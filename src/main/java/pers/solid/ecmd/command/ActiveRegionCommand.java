@@ -21,6 +21,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
@@ -80,7 +81,29 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
                     .then(argument("pivot", EnhancedPosArgumentType.posPreferringCenteredInt())
                         .executes(context -> executeRotate(EnhancedPosArgumentType.getPos(context, "pivot"), BlockRotationArgumentType.getBlockRotation(context, "rotation"), context)))))
             .then(literal("mirror")
-                .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), DirectionArgument.FRONT.apply(context.getSource()).getAxis(), context)))
+                .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), AxisArgument.FRONT_BACK.apply(context.getSource()), context))
+                .then(argument("axis", AxisArgumentType.axis(false))
+                    .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), AxisArgumentType.getAxis(context, "axis"), context))
+                    .then(argument("pivot", EnhancedPosArgumentType.posPreferringCenteredInt())
+                        .executes(context -> executeMirror(EnhancedPosArgumentType.getPos(context, "pivot"), AxisArgumentType.getAxis(context, "axis"), context)))))
+            .then(literal("expand")
+                .executes(context -> executeExpandDirection(1, DirectionArgument.FRONT.apply(context.getSource()), context))
+                .then(argument("direction", DirectionArgumentType.direction())
+                    .executes(context -> executeExpandDirection(1, DirectionArgumentType.getDirection(context, "direction"), context))
+                    .then(argument("offset", DoubleArgumentType.doubleArg())
+                        .executes(context -> executeExpandDirection(DoubleArgumentType.getDouble(context, "offset"), DirectionArgumentType.getDirection(context, "direction"), context))))
+                .then(argument("axis", AxisArgumentType.axis(true))
+                    .executes(context -> executeExpandAxis(1, AxisArgumentType.getAxis(context, "axis"), context))
+                    .then(argument("offset", DoubleArgumentType.doubleArg())
+                        .executes(context -> executeExpandAxis(DoubleArgumentType.getDouble(context, "offset"), AxisArgumentType.getAxis(context, "axis"), context))))
+                .then(argument("direction_type", new SimpleEnumArgumentTypes.DirectionTypeArgumentType())
+                    .executes(context -> executeExpandDirectionType(1, context.getArgument("direction_type", Direction.Type.class), context))
+                    .then(argument("offset", DoubleArgumentType.doubleArg())
+                        .executes(context -> executeExpandDirectionType(DoubleArgumentType.getDouble(context, "offset"), context.getArgument("direction_type", Direction.Type.class), context))))
+                .then(literal("all")
+                    .executes(context -> executeExpandAllDirections(1, context))
+                    .then(argument("offset", DoubleArgumentType.doubleArg())
+                        .executes(context -> executeExpandAllDirections(DoubleArgumentType.getDouble(context, "offset"), context)))))
             .build())
     );
     dispatcher.register(literal("ar").redirect(literalCommandNode));
@@ -193,6 +216,24 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
 
   public static int executeMirror(Vec3d pivot, Direction.Axis axis, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return executeRegionModification(region -> region.mirrored(axis, pivot), rb -> rb.mirror(axis, pivot), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.mirror.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.mirror.multiple", value), context);
+  }
+
+
+  public static int executeExpandDirection(double offset, Direction direction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    return executeRegionModification(region -> region.expanded(offset, direction), rb -> rb.expand(offset, direction), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.expand.direction.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.wrapDirection(direction), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.expand.direction.single", value, TextUtil.literal(offset), TextUtil.wrapDirection(direction)), context);
+  }
+
+  public static int executeExpandAxis(double offset, Direction.Axis axis, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    return executeRegionModification(region -> region.expanded(offset, axis), rb -> rb.expand(offset, axis), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.expand.axis.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.wrapAxis(axis), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.expand.axis.single", value, TextUtil.literal(offset), TextUtil.wrapAxis(axis)), context);
+  }
+
+  public static int executeExpandDirectionType(double offset, Direction.Type type, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    final MutableText adverb = Text.translatable("enhancedCommands.direction_type." + type.name().toLowerCase() + ".adverb");
+    return executeRegionModification(region -> region.expanded(offset, type), rb -> rb.expand(offset, type), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.expand.axis.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), adverb, TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.expand.axis.single", value, TextUtil.literal(offset), adverb), context);
+  }
+
+  public static int executeExpandAllDirections(double offset, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    return executeRegionModification(region -> region.expanded(offset), rb -> rb.expand(offset), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.expand.all_directions.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.expand.all_directions.single", value, TextUtil.literal(offset)), context);
   }
 
   public static int executeRegionModification(FailableFunction<Region, Region, CommandSyntaxException> regionOperation, FailableConsumer<RegionBuilder, CommandSyntaxException> regionBuilderFunction, BiFunction<ServerPlayerEntity, Region, Text> messageSingle, IntFunction<Text> messageMultiple, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

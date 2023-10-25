@@ -18,6 +18,10 @@ public class KeywordArgs {
     this.values = values;
   }
 
+  public boolean supportsArg(@NotNull String name) {
+    return type.arguments().containsKey(name);
+  }
+
   @SuppressWarnings("unchecked")
   public <T> T getArg(@NotNull String name) {
     Preconditions.checkArgument(type.arguments().containsKey(name), "Invalid arg name: %s", name);

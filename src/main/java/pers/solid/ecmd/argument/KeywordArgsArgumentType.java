@@ -40,6 +40,10 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
     return context.getArgument(name, KeywordArgs.class);
   }
 
+  public KeywordArgs defaultArgs() {
+    return new KeywordArgs(this, defaultValues);
+  }
+
   @Override
   public KeywordArgs parse(StringReader reader) throws CommandSyntaxException {
     return parseAndSuggest(reader, null);
