@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum DrawCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -44,13 +44,13 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(literal("draw")
+    dispatcher.register(literalR2("draw")
         .then(argument("curve", CurveArgumentType.curve(registryAccess))
             .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
                 .executes(context -> execute(context, false, false, 0, Block.NOTIFY_ALL, 0, 0))
                 .then(argument("kwargs", KEYWORD_ARGS)
                     .executes(context -> {
-                      final KeywordArgs kwargs = KeywordArgsArgumentType.getKeywordArgs("kwargs", context);
+                      final KeywordArgs kwargs = KeywordArgsArgumentType.getKeywordArgs(context, "kwargs");
                       return execute(context, kwargs.getBoolean("immediately"), kwargs.getBoolean("bypass_limit"), kwargs.getDouble("interval"), FillReplaceCommand.getFlags(kwargs), FillReplaceCommand.getModFlags(kwargs), kwargs.getDouble("thickness"));
                     })))));
   }

@@ -34,7 +34,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     final EnhancedPosArgumentType posType = new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.PREFER_DOUBLE, EnhancedPosArgumentType.IntAlignType.HORIZONTALLY_CENTERED);
-    dispatcher.register(CommandManager.literal("tprel")
+    dispatcher.register(ModCommands.literalR2("tprel")
         .requires(source -> source.hasPermissionLevel(2))
         .then(CommandManager.argument("location", posType)
             .executes(context -> execute(

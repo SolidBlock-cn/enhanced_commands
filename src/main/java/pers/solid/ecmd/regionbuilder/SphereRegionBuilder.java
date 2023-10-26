@@ -28,14 +28,14 @@ public class SphereRegionBuilder implements RegionBuilder, Cloneable {
   @Override
   public void clickFirstPoint(BlockPos point, PlayerEntity player) {
     center = point.toCenterPos();
-    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.sphere.set_center", TextUtil.wrapBlockPos(point).styled(TextUtil.STYLE_FOR_RESULT)));
+    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.sphere.set_center", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
     notifySphereStatistics(player);
   }
 
   @Override
   public void clickSecondPoint(BlockPos point, PlayerEntity player) {
     radiusTarget = point.toCenterPos();
-    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.sphere.set_radius", TextUtil.wrapBlockPos(point).styled(TextUtil.STYLE_FOR_RESULT)));
+    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.sphere.set_radius", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
     notifySphereStatistics(player);
   }
 

@@ -143,9 +143,9 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
   /**
    * 包含该区域内所有坐标的最小长方体方块区域，用于判断该区域内是否在坐标<em>可能</em>不在已加载的区块内。
    */
-  default @Nullable BlockBox maxContainingBlockBox() {
-    final Box maxContainingBox = minContainingBox();
-    return maxContainingBox == null ? null : new BlockBox(MathHelper.floor(maxContainingBox.minX), MathHelper.floor(maxContainingBox.minY), MathHelper.floor(maxContainingBox.minZ), MathHelper.floor(maxContainingBox.maxX), MathHelper.floor(maxContainingBox.maxY), MathHelper.floor(maxContainingBox.maxZ));
+  default @Nullable BlockBox minContainingBlockBox() {
+    final Box minContainingBox = minContainingBox();
+    return minContainingBox == null ? null : new BlockBox(MathHelper.floor(minContainingBox.minX), MathHelper.floor(minContainingBox.minY), MathHelper.floor(minContainingBox.minZ), MathHelper.floor(minContainingBox.maxX), MathHelper.floor(minContainingBox.maxY), MathHelper.floor(minContainingBox.maxZ));
   }
 
   @Deprecated

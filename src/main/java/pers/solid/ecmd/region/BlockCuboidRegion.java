@@ -179,7 +179,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull BlockBox maxContainingBlockBox() {
+  public @NotNull BlockBox minContainingBlockBox() {
     return blockBox();
   }
 

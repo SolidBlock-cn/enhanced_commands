@@ -44,13 +44,14 @@ import java.util.Set;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum TestArgCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(literal("testarg")
+    dispatcher.register(literalR2("testarg")
         .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
         .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
         .then(addNbtProperties(literal("nbt")))

@@ -20,9 +20,9 @@ public enum DirectionArgument implements StringIdentifiable, Function<@NotNull S
   FRONT("front", source -> {
     final Vec2f rotation = source.getRotation();
     if (rotation.x > 60) {
-      return Direction.UP;
-    } else if (rotation.x < -60) {
       return Direction.DOWN;
+    } else if (rotation.x < -60) {
+      return Direction.UP;
     } else {
       return Direction.fromRotation(rotation.y);
     }
@@ -31,7 +31,7 @@ public enum DirectionArgument implements StringIdentifiable, Function<@NotNull S
   FRONT_HORIZONTAL("front_horizontal", source -> Direction.fromRotation(source.getRotation().y)),
   BACK_HORIZONTAL("back_horizontal", FRONT_HORIZONTAL.function.andThen(Direction::getOpposite)),
   FRONT_VERTICAL("front_vertical", source -> source.getRotation().x > 0 ? Direction.UP : Direction.DOWN),
-  BACK_VERTICAL("from_vertical", source -> source.getRotation().x > 0 ? Direction.DOWN : Direction.UP),
+  BACK_VERTICAL("back_vertical", source -> source.getRotation().x > 0 ? Direction.DOWN : Direction.UP),
   LEFT("left", FRONT_HORIZONTAL.function.andThen(Direction::rotateYCounterclockwise)),
   RIGHT("right", FRONT_HORIZONTAL.function.andThen(Direction::rotateYClockwise)),
   RANDOM("random", source -> Direction.random(source.getWorld().getRandom())),

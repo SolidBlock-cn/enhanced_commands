@@ -1,143 +1,162 @@
 package pers.solid.ecmd.command;
 
-import com.google.common.collect.Iterators;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.BlockRotationArgumentType;
+import net.minecraft.command.argument.PosArgument;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import pers.solid.ecmd.argument.*;
-import pers.solid.ecmd.build.BlockTransformationTask;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.joml.AxisAngle4d;
+import org.joml.Vector3d;
+import pers.solid.ecmd.argument.KeywordArgs;
+import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.RegionArgumentType;
+import pers.solid.ecmd.build.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.regionbuilder.RegionBuilder;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
-import pers.solid.ecmd.util.iterator.IterateUtils;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
-import static net.minecraft.command.argument.BlockRotationArgumentType.blockRotation;
 import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
-import static pers.solid.ecmd.argument.EnhancedPosArgumentType.getBlockPos;
-import static pers.solid.ecmd.argument.RegionArgumentType.getRegion;
-import static pers.solid.ecmd.argument.RegionArgumentType.region;
+import static pers.solid.ecmd.argument.EnhancedPosArgumentType.CURRENT_POS;
+import static pers.solid.ecmd.argument.EnhancedPosArgumentType.blockPos;
+import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum RotateCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builder(FillReplaceCommand.KEYWORD_ARGS)
-        .addOptionalArg("affects", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
-        .addOptionalArg("transforms", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
-        .addOptionalArg("remains", BlockFunctionArgumentType.blockFunction(registryAccess), BlockTransformationTask.DEFAULT_REMAINING_FUNCTION)
-        .addOptionalArg("keeps", BoolArgumentType.bool(), false)
-        // TODO: 2023年10月25日 implement unloaded pos behavior
-        .build();
-    final KeywordArgsArgumentType keywordArgsWithSlash = KeywordArgsArgumentType.builder(keywordArgs)
-        .addOptionalArg("transforms_region", BoolArgumentType.bool(), false)
+    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
+        .addOptionalArg("pivot", blockPos(), CURRENT_POS)
+        .addOptionalArg("interpolate", BoolArgumentType.bool(), false)
         .build();
 
-    dispatcher.register(literal("rotate")
-        .then(argument("region", region(registryAccess))
-            .then(argument("rotation", blockRotation())
-                .executes(context -> executesRotate(getRegion(context, "region"), EnhancedPosArgumentType.CURRENT_POS.toAbsoluteBlockPos(context.getSource()), keywordArgs.defaultArgs(), context))
-                .then(argument("pivot", EnhancedPosArgumentType.blockPos())
-                    .executes(context -> executesRotate(getRegion(context, "region"), getBlockPos(context, "pivot"), keywordArgs.defaultArgs(), context))
-                    .then(argument("keyword_args", keywordArgs)
-                        .executes(context -> executesRotate(getRegion(context, "region"), getBlockPos(context, "pivot"), KeywordArgsArgumentType.getKeywordArgs("keyword_args", context), context)))))));
-    dispatcher.register(literal("/rotate")
-        .then(argument("rotation", blockRotation())
-            .executes(context -> executesRotate(((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).ec$getOrEvaluateActiveRegion(context.getSource()), EnhancedPosArgumentType.CURRENT_POS.toAbsoluteBlockPos(context.getSource()), keywordArgs.defaultArgs(), context))
-            .then(argument("pivot", EnhancedPosArgumentType.blockPos())
-                .executes(context -> executesRotate(((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).ec$getOrEvaluateActiveRegion(context.getSource()), getBlockPos(context, "pivot"), keywordArgsWithSlash.defaultArgs(), context))
-                .then(argument("keyword_args", keywordArgsWithSlash)
-                    .executes(context -> executesRotate(((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).ec$getOrEvaluateActiveRegion(context.getSource()), getBlockPos(context, "pivot"), KeywordArgsArgumentType.getKeywordArgs("keyword_args", context), context))))));
+    ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess, literalR2("rotate"), literalR2("/rotate"), argument("rotation", FloatArgumentType.floatArg())
+        .executes(context -> executesRotate(keywordArgs.defaultArgs(), context))
+        .then(argument("keyword_args", keywordArgs)
+            .executes(context -> executesRotate(KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))));
   }
 
-  public static int executesRotate(Region region, BlockPos pivot, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) {
-    final ServerCommandSource source = context.getSource();
-    final BlockRotation rotation = BlockRotationArgumentType.getBlockRotation(context, "rotation");
-    final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(source.getWorld(), region)
-        .setFlags(FillReplaceCommand.getFlags(keywordArgs))
-        .setModFlags(FillReplaceCommand.getModFlags(keywordArgs))
-        .transformsBlockPos(vec3i -> GeoUtil.rotate(vec3i, rotation, pivot))
-        .transformsPos(vec3d -> GeoUtil.rotate(vec3d, rotation, pivot.toCenterPos()))
-        .transformsEntity(entity -> entity.setYaw(entity.applyRotation(rotation)))
-        .transformsBlockState(blockState -> blockState.rotate(rotation))
-        .affectsOnly(keywordArgs.getArg("affects"))
-        .transformsOnly(keywordArgs.getArg("transforms"))
-        .fillRemainingWith(keywordArgs.getArg("remains"));
-    if (keywordArgs.getBoolean("keeps")) {
-      builder.keepRemaining();
-    }
-
-    final boolean transformsRegion = keywordArgs.supportsArg("transforms_region") && keywordArgs.getBoolean("transforms_region");
-    final ServerPlayerEntity player = source.getPlayer();
-
-    final boolean immediately = keywordArgs.getBoolean("immediately");
-
-    RegionBuilder regionBuilder = null;
-    RegionArgument<?> activeRegion = null;
-    if (transformsRegion && player != null) {
-      try {
-        regionBuilder = ((ServerPlayerEntityExtension) player).ec$getRegionBuilder();
-        if (regionBuilder != null) {
-          regionBuilder = regionBuilder.clone();
-          regionBuilder.rotate(rotation, pivot.toCenterPos());
-        }
-      } catch (RuntimeException e) {
-        regionBuilder = null;
-      }
-      try {
-        activeRegion = ((ServerPlayerEntityExtension) player).ec$getActiveRegion();
-        if (activeRegion != null) {
-          activeRegion = activeRegion.toAbsoluteRegion(source).rotated(rotation, pivot.toCenterPos());
-        }
-      } catch (RuntimeException e) {
-        activeRegion = null;
-      }
-    }
-
-    final BlockTransformationTask task = builder.build();
-    if (immediately && region.numberOfBlocksAffected() > 16384) {
-      RegionBuilder finalRegionBuilder = regionBuilder;
-      RegionArgument<?> finalActiveRegion = activeRegion;
-      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.rotate.task", region.asString()), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
-        if (finalRegionBuilder != null) {
-          ((ServerPlayerEntityExtension) player).ec$switchRegionBuilder(finalRegionBuilder);
-        }
-        if (finalActiveRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(finalActiveRegion);
-        }
-        CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.rotate.complete", Integer.toString(task.getAffectedBlocks())), true);
-      })));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
-      return 1;
+  public static int executesRotate(KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    final float rotation = MathHelper.wrapDegrees(FloatArgumentType.getFloat(context, "rotation"));
+    final @Nullable BlockRotation blockRotation;
+    if (rotation == 0) {
+      blockRotation = BlockRotation.NONE;
+    } else if (rotation == 90) {
+      blockRotation = BlockRotation.CLOCKWISE_90;
+    } else if (rotation == 180) {
+      blockRotation = BlockRotation.CLOCKWISE_180;
+    } else if (rotation == 270) {
+      blockRotation = BlockRotation.COUNTERCLOCKWISE_90;
     } else {
-      IterateUtils.exhaust(task.transformBlocks().getImmediateTask());
-      final int affectedBlocks = task.getAffectedBlocks();
-      CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.rotate.complete", Integer.toString(affectedBlocks)), true);
-      if (transformsRegion && player != null) {
-        if (activeRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
-        }
-        if (regionBuilder != null) {
-          ((ServerPlayerEntityExtension) player).ec$setRegionBuilder(regionBuilder);
+      blockRotation = null;
+    }
+    final @Nullable AxisAngle4d axisAngle4d = blockRotation == null ? new AxisAngle4d(-Math.toRadians(rotation), 0, 1, 0) : null;
+    final @NotNull BlockRotation nearestBlockRotation;
+    final BlockPos pivot = keywordArgs.<PosArgument>getArg("pivot").toAbsoluteBlockPos(context.getSource());
+    if (blockRotation != null) {
+      nearestBlockRotation = blockRotation;
+    } else {
+      if (rotation < 45 || rotation >= 315) {
+        nearestBlockRotation = BlockRotation.NONE;
+      } else if (rotation < 135) {
+        nearestBlockRotation = BlockRotation.CLOCKWISE_90;
+      } else if (rotation < 225) {
+        nearestBlockRotation = BlockRotation.CLOCKWISE_180;
+      } else {
+        nearestBlockRotation = BlockRotation.COUNTERCLOCKWISE_90;
+      }
+    }
+    final BlockTransformationCommand blockTransformationCommand = new BlockTransformationCommand() {
+      @Override
+      public Vec3i transformBlockPos(Vec3i original) {
+        if (blockRotation != null) {
+          return GeoUtil.rotate(original, blockRotation, pivot);
+        } else {
+          original = original.subtract(pivot);
+          final Vector3d transform = axisAngle4d.transform(new Vector3d(original.getX() + 0.5, original.getY() + 0.5, original.getZ() + 0.5));
+          return new BlockPos(MathHelper.floor(transform.x), MathHelper.floor(transform.y), MathHelper.floor(transform.z)).add(pivot);
         }
       }
-      return affectedBlocks;
-    }
+
+      @Override
+      public Vec3d transformPos(Vec3d original) {
+        if (blockRotation != null) {
+          return GeoUtil.rotate(original, blockRotation, pivot.toCenterPos());
+        } else {
+          original = original.subtract(pivot.toCenterPos());
+          final Vector3d transform = axisAngle4d.transform(new Vector3d(original.x, original.y, original.z));
+          return new Vec3d(transform.x, transform.y, transform.z).add(pivot.toCenterPos());
+        }
+      }
+
+      @Override
+      public Vec3d transformPosBack(Vec3d transformed) {
+        if (blockRotation != null) {
+          return GeoUtil.rotate(transformed, switch (blockRotation) {
+            case CLOCKWISE_180 -> BlockRotation.COUNTERCLOCKWISE_90;
+            case COUNTERCLOCKWISE_90 -> BlockRotation.CLOCKWISE_90;
+            default -> blockRotation;
+          }, pivot.toCenterPos());
+        } else {
+          transformed = transformed.subtract(pivot.toCenterPos());
+          final Vector3d transform = new AxisAngle4d(axisAngle4d.angle, -axisAngle4d.x, -axisAngle4d.y, -axisAngle4d.z).transform(new Vector3d(transformed.x, transformed.y, transformed.z));
+          return new Vec3d(transform.x, transform.y, transform.z).add(pivot.toCenterPos());
+        }
+      }
+
+      @Override
+      public void transformEntity(Entity entity) {
+        if (blockRotation != null) {
+          entity.setYaw(entity.applyRotation(blockRotation));
+        } else {
+          entity.setYaw(entity.getYaw() + rotation);
+        }
+      }
+
+      @Override
+      public BlockState transformBlockState(BlockState original) {
+        return original.rotate(nearestBlockRotation);
+      }
+
+      @Override
+      public Region transformRegion(Region region) {
+        return region.rotated(nearestBlockRotation, pivot.toCenterPos());
+      }
+
+      @Override
+      public void transformRegionBuilder(RegionBuilder regionBuilder) {
+        regionBuilder.rotate(nearestBlockRotation, pivot.toCenterPos());
+      }
+
+      @Override
+      public void notifyCompletion(ServerCommandSource source, int affectedNum) {
+        CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.rotate.complete", Integer.toString(affectedNum)), true);
+      }
+
+      @Override
+      public @NotNull MutableText getIteratorTaskName(Region region) {
+        return Text.translatable("enhancedCommands.commands.rotate.task", region.asString());
+      }
+    };
+
+    return blockTransformationCommand.execute(RegionArgumentType.getRegion(context, "region"), keywordArgs, context);
   }
 }

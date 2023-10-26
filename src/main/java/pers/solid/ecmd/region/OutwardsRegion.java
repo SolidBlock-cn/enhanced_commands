@@ -23,7 +23,7 @@ import java.util.function.Function;
 public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBackedRegion {
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
-    return maxContainingBlockBox().contains(vec3i);
+    return this.minContainingBlockBox().contains(vec3i);
   }
 
   @Override
@@ -56,7 +56,7 @@ public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBac
   }
 
   @Override
-  public @NotNull BlockBox maxContainingBlockBox() {
+  public @NotNull BlockBox minContainingBlockBox() {
     return BlockBox.create(vec3i.add(-x, -y, -z), vec3i.add(x, y, z));
   }
 

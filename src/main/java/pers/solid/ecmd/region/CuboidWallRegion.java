@@ -59,8 +59,8 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public @NotNull BlockBox maxContainingBlockBox() {
-    return region.maxContainingBlockBox();
+  public @NotNull BlockBox minContainingBlockBox() {
+    return region.minContainingBlockBox();
   }
 
   @Override

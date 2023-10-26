@@ -42,7 +42,7 @@ public record ValueNamePropertyPredicate(String propertyName, Comparator compara
     if (test) {
       return new TestResult(true, Text.translatable("enhancedCommands.argument.block_predicate.property_test_pass", TextUtil.literal(ValueNamePropertyPredicate.this).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
     } else {
-      return new TestResult(false, Text.translatable("enhancedCommands.argument.block_predicate.property_not_this_value", TextUtil.wrapBlockPos(blockPos), propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(ValueNamePropertyPredicate.this).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      return new TestResult(false, Text.translatable("enhancedCommands.argument.block_predicate.property_not_this_value", TextUtil.wrapVector(blockPos), propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(ValueNamePropertyPredicate.this).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
     }
   }
 

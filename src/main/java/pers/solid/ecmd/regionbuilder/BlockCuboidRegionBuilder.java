@@ -25,14 +25,14 @@ public class BlockCuboidRegionBuilder implements IntBackedRegionBuilder, Cloneab
   @Override
   public void clickFirstPoint(BlockPos point, PlayerEntity player) {
     first = point;
-    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_first", TextUtil.wrapBlockPos(first).styled(TextUtil.STYLE_FOR_RESULT)));
+    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_first", TextUtil.wrapVector(first).styled(TextUtil.STYLE_FOR_RESULT)));
     notifyStatistics(first, second, player);
   }
 
   @Override
   public void clickSecondPoint(BlockPos point, PlayerEntity player) {
     second = point;
-    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_second", TextUtil.wrapBlockPos(second).styled(TextUtil.STYLE_FOR_RESULT)));
+    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_second", TextUtil.wrapVector(second).styled(TextUtil.STYLE_FOR_RESULT)));
     notifyStatistics(first, second, player);
   }
 

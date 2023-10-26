@@ -16,12 +16,14 @@ import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
+import static pers.solid.ecmd.command.ModCommands.literalR2;
+
 public enum RegionBuilderCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(CommandManager.literal("regionbuilder")
+    dispatcher.register(literalR2("regionbuilder")
         .executes(context -> {
           final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
           player.giveItemStack(WandEvent.createWandStack());

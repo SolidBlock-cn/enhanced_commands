@@ -51,7 +51,7 @@ public record SingleBlockPosRegion(Vec3i vec3i) implements IntBackedRegion {
   }
 
   @Override
-  public @NotNull BlockBox maxContainingBlockBox() {
+  public @NotNull BlockBox minContainingBlockBox() {
     return BlockBox.create(vec3i, vec3i);
   }
 

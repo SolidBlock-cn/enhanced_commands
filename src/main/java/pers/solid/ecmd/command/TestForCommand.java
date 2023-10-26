@@ -55,7 +55,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
             .then(CommandManager.argument("predicate", new BlockPredicateArgumentType(registryAccess))
                 .executes(context -> executeTestForBlockPredicate(context, false))
                 .then(CommandManager.argument("keyword_args", BLOCK_KEYWORD_ARGS)
-                    .executes(context -> executeTestForBlockPredicate(context, KeywordArgsArgumentType.getKeywordArgs("keyword_args", context).getBoolean("force_load"))))));
+                    .executes(context -> executeTestForBlockPredicate(context, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getBoolean("force_load"))))));
   }
 
   private static int executeTestForBlock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -64,11 +64,11 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerCommandSource source = context.getSource();
     final ServerWorld world = source.getWorld();
     if (!world.isChunkLoaded(blockPos)) {
-      throw TEST_FOR_BLOCK_NOT_LOADED.create(TextUtil.wrapBlockPos(blockPos));
+      throw TEST_FOR_BLOCK_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final BlockState blockState = world.getBlockState(blockPos);
     final Collection<Property<?>> properties = blockState.getProperties();
-    CommandBridge.sendFeedback(source, () -> Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", TextUtil.wrapBlockPos(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(Registries.BLOCK.getId(blockState.getBlock())).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(properties.isEmpty() ? "enhancedCommands.commands.testfor.block.info" : "enhancedCommands.commands.testfor.block.info_with_properties", TextUtil.wrapVector(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(Registries.BLOCK.getId(blockState.getBlock())).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     for (Property<?> property : properties) {
       CommandBridge.sendFeedback(source, () -> expressPropertyValue(blockState, property), true);
     }
@@ -81,7 +81,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     // 检查方块的代码在后面
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(source.getWorld(), blockPos, forceLoad);
     if (cachedBlockPosition.getBlockState() == null) {
-      throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapBlockPos(blockPos));
+      throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition);
     testResult.sendMessage(source);
@@ -137,7 +137,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final int value = function.applyAsInt(blockState, world, pos);
-    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     return value;
   }
 
@@ -148,7 +148,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final BlockState blockState = world.getBlockState(pos);
     final Direction direction = DirectionArgumentType.getDirection(context, "direction");
     final int value = function.applyAsInt(blockState, world, pos, direction);
-    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.wrapDirection(direction).styled(TextUtil.STYLE_FOR_TARGET)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.wrapDirection(direction).styled(TextUtil.STYLE_FOR_TARGET)), true);
     return value;
   }
 
@@ -158,7 +158,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final float value = function.applyAsFloat(blockState, world, pos);
-    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
     return value;
   }
 
@@ -168,7 +168,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final boolean value = predicate.test(blockState, world, pos);
-    CommandBridge.sendFeedback(source, () -> Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos)), true);
     return value;
   }
 
@@ -212,10 +212,10 @@ public enum TestForCommand implements CommandRegistrationCallback {
     final BlockState blockState = world.getBlockState(pos);
     final Vec3d modelOffset = blockState.getModelOffset(world, pos);
     if (modelOffset.equals(Vec3d.ZERO)) {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos)), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos)), true);
       return 0;
     } else {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapBlockPos(pos), TextUtil.wrapPosition(modelOffset)), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), TextUtil.wrapVector(modelOffset)), true);
       return 1;
     }
   }
@@ -238,7 +238,7 @@ public enum TestForCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(CommandManager.literal("testfor")
+    dispatcher.register(ModCommands.literalR2("testfor")
         .requires(ModCommands.REQUIRES_PERMISSION_2)
         .then(addBlockCommandProperties(CommandManager.literal("block"), registryAccess))
         .then(addBlockInfoCommandProperties(CommandManager.literal("block_info"))));

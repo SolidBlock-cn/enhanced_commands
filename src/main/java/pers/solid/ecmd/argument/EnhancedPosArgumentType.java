@@ -115,7 +115,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
 
   public static <T extends BlockPos> T checkChunkLoaded(ServerWorld world, T blockPos) throws CommandSyntaxException {
     if (!world.isChunkLoaded(blockPos)) {
-      throw UNLOADED_EXCEPTION.create(TextUtil.wrapBlockPos(blockPos));
+      throw UNLOADED_EXCEPTION.create(TextUtil.wrapVector(blockPos));
     }
     return blockPos;
   }
@@ -123,11 +123,11 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   public static <T extends BlockPos> T checkBuildLimit(ServerWorld world, T blockPos) throws CommandSyntaxException {
     if (!world.isInBuildLimit(blockPos)) {
       if (world.isOutOfHeightLimit(blockPos)) {
-        throw OUT_OF_HEIGHT_LIMIT.create(TextUtil.wrapBlockPos(blockPos), world.getBottomY(), world.getTopY());
+        throw OUT_OF_HEIGHT_LIMIT.create(TextUtil.wrapVector(blockPos), world.getBottomY(), world.getTopY());
       } else if (!isValidHorizontally(blockPos)) {
-        throw OUT_OF_HORIZONTAL_BOUNDS.create(TextUtil.wrapBlockPos(blockPos), -30000000, 30000000);
+        throw OUT_OF_HORIZONTAL_BOUNDS.create(TextUtil.wrapVector(blockPos), -30000000, 30000000);
       } else {
-        throw OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapBlockPos(blockPos));
+        throw OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapVector(blockPos));
       }
     }
     return blockPos;

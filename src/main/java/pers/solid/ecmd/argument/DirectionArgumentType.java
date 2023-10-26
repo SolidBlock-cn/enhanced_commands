@@ -20,8 +20,8 @@ public class DirectionArgumentType extends EnumArgumentType<DirectionArgument> {
     return new DirectionArgumentType();
   }
 
-  public static Direction getDirection(CommandContext<ServerCommandSource> context, String id) {
-    return context.getArgument(id, DirectionArgument.class).apply(context.getSource());
+  public static Direction getDirection(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, DirectionArgument.class).apply(context.getSource());
   }
 
   @Override

@@ -36,7 +36,7 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
     return builder().addAll(copyFrom);
   }
 
-  public static KeywordArgs getKeywordArgs(String name, CommandContext<?> context) {
+  public static KeywordArgs getKeywordArgs(CommandContext<?> context, String name) {
     return context.getArgument(name, KeywordArgs.class);
   }
 

@@ -141,7 +141,7 @@ public interface IntBackedRegion extends Region {
     if (vec3d.equals(Vec3d.of(vec3i))) {
       return vec3i;
     } else {
-      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapPosition(vec3d).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(TextUtil.STYLE_FOR_ACTUAL)));
     }
   }
 
@@ -150,17 +150,17 @@ public interface IntBackedRegion extends Region {
     if (vec3d.equals(Vec3d.ofCenter(vec3i))) {
       return vec3i;
     } else {
-      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapPosition(vec3d).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(TextUtil.STYLE_FOR_ACTUAL)));
     }
   }
 
   @Override
-  @Nullable BlockBox maxContainingBlockBox();
+  @Nullable BlockBox minContainingBlockBox();
 
   @Override
   @Nullable
   default Box minContainingBox() {
-    final BlockBox blockBox = maxContainingBlockBox();
+    final BlockBox blockBox = minContainingBlockBox();
     if (blockBox == null) {
       return null;
     } else {

@@ -25,7 +25,7 @@ public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder, Clo
   public void clickFirstPoint(BlockPos point, PlayerEntity player) {
     firstPos = point;
     secondPos = null;
-    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_first", TextUtil.wrapBlockPos(firstPos).styled(TextUtil.STYLE_FOR_RESULT)));
+    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_first", TextUtil.wrapVector(firstPos).styled(TextUtil.STYLE_FOR_RESULT)));
     BlockCuboidRegionBuilder.notifyStatistics(firstPos, secondPos, player);
   }
 
@@ -33,14 +33,14 @@ public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder, Clo
   public void clickSecondPoint(BlockPos point, PlayerEntity player) {
     if (firstPos == null) {
       firstPos = point;
-      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_first", TextUtil.wrapBlockPos(firstPos).styled(TextUtil.STYLE_FOR_RESULT)));
+      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_first", TextUtil.wrapVector(firstPos).styled(TextUtil.STYLE_FOR_RESULT)));
     } else if (secondPos == null) {
       secondPos = point;
-      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.include", TextUtil.wrapBlockPos(point).styled(TextUtil.STYLE_FOR_RESULT)));
+      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.include", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
     } else {
       final BlockBox blockBox = BlockBox.create(firstPos, secondPos);
       if (blockBox.contains(point)) {
-        player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.not_infected", TextUtil.wrapBlockPos(point).styled(TextUtil.STYLE_FOR_RESULT)));
+        player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.not_infected", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
         BlockCuboidRegionBuilder.notifyStatistics(firstPos, secondPos, player);
         return;
       }
@@ -70,7 +70,7 @@ public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder, Clo
       if (!mutable2.equals(secondPos)) {
         secondPos = mutable2.toImmutable();
       }
-      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.include", TextUtil.wrapBlockPos(point).styled(TextUtil.STYLE_FOR_RESULT)));
+      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.include", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
       BlockCuboidRegionBuilder.notifyStatistics(firstPos, secondPos, player);
     }
   }

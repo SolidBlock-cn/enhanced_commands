@@ -44,6 +44,7 @@ import java.util.function.IntFunction;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum ActiveRegionCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -54,7 +55,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     final ArgumentCommandNode<ServerCommandSource, EntitySelector> playersArgumentNode;
-    final LiteralCommandNode<ServerCommandSource> literalCommandNode = dispatcher.register(literal("activeregion")
+    final LiteralCommandNode<ServerCommandSource> literalCommandNode = dispatcher.register(literalR2("activeregion")
         .then(playersArgumentNode = argument("players", EntityArgumentType.players())
             .then(literal("get")
                 .executes(context -> executeGet(EntityArgumentType.getPlayer(context, "players"), context)))
@@ -62,7 +63,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
                 .then(argument("region", RegionArgumentType.region(registryAccess))
                     .executes(context -> executeSet(EntityArgumentType.getPlayers(context, "players"), context, true))
                     .then(argument("keyword_args", KEYWORD_ARGS)
-                        .executes(context -> executeSet(EntityArgumentType.getPlayers(context, "players"), context, KeywordArgsArgumentType.getKeywordArgs("keyword_args", context).getBoolean("fixed"))))))
+                        .executes(context -> executeSet(EntityArgumentType.getPlayers(context, "players"), context, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getBoolean("fixed"))))))
             .then(literal("remove")
                 .executes(context -> executeRemove(EntityArgumentType.getPlayers(context, "players"), context)))
             .then(literal("move")
@@ -166,7 +167,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     return successes;
   }
 
-  public static final DynamicCommandExceptionType NO_ACTIVE_REGION = ModCommands.PLAYER_HAS_NO_ACTIVE_REGION;
+  public static final DynamicCommandExceptionType NO_ACTIVE_REGION = ServerPlayerEntityExtension.PLAYER_HAS_NO_ACTIVE_REGION;
   public static final SimpleCommandExceptionType UNSUPPORTED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.commands.activeregion.unsupported"));
   public static final DynamicCommandExceptionType UNSUPPORTED_WITH_REASON = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.commands.activeregion.unsupported_with_region", o));
 

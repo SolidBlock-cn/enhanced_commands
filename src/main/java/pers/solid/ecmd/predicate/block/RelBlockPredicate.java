@@ -32,7 +32,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final BlockPos pos = cachedBlockPosition.getBlockPos().add(relPos);
     final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(cachedBlockPosition.getWorld(), pos, false));
-    return new TestResult(testResult.successes(), List.of(Text.translatable("enhancedCommands.argument.block_predicate.rel." + (testResult.successes() ? "pass" : "fail"), TextUtil.wrapBlockPos(relPos)).formatted(testResult.successes() ? Formatting.GREEN : Formatting.RED)), List.of(testResult));
+    return new TestResult(testResult.successes(), List.of(Text.translatable("enhancedCommands.argument.block_predicate.rel." + (testResult.successes() ? "pass" : "fail"), TextUtil.wrapVector(relPos)).formatted(testResult.successes() ? Formatting.GREEN : Formatting.RED)), List.of(testResult));
   }
 
   @Override

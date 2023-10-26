@@ -3,12 +3,10 @@ package pers.solid.ecmd.command;
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.Block;
@@ -28,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
-import pers.solid.ecmd.function.block.BlockFunctionArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
@@ -42,7 +39,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum FillReplaceCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -68,20 +65,16 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    ArgumentCommandNode<ServerCommandSource, BlockFunctionArgument> fillArgument = argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-        .executes(context -> execute(context, null))
+    final LiteralCommandNode<ServerCommandSource> fillNode = ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess, literalR2("fill"), literalR2("/fill"), argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+        .executes(context1 -> execute(context1, null))
         .then(argument("kwargs", KEYWORD_ARGS)
-            .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs("kwargs", context)))).build();
-    final LiteralCommandNode<ServerCommandSource> fillNode = ModCommands.registerWithRegionArgumentModification(dispatcher, LiteralArgumentBuilder.literal("fill"), LiteralArgumentBuilder.literal("/fill"), fillArgument, registryAccess);
-    dispatcher.register(literal("/f").forward(fillNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
-    ModCommands.registerWithRegionArgumentModification(dispatcher,
-        "replace",
-        argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
-            .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-                .executes(context -> execute(context, cachedBlockPosition -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition)))
-                .then(argument("kwargs", KEYWORD_ARGS)
-                    .executes(context -> execute(context, cachedBlockPosition1 -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition1), KeywordArgsArgumentType.getKeywordArgs("kwargs", context))))),
-        registryAccess);
+            .executes(context1 -> execute(context1, null, KeywordArgsArgumentType.getKeywordArgs(context1, "kwargs")))).build());
+    dispatcher.register(literalR2("/f").forward(fillNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
+    ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess, literalR2("replace"), literalR2("/replace"), argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
+        .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+            .executes(context -> execute(context, cachedBlockPosition -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition)))
+            .then(argument("kwargs", KEYWORD_ARGS)
+                .executes(context -> execute(context, cachedBlockPosition1 -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition1), KeywordArgsArgumentType.getKeywordArgs(context, "kwargs"))))));
   }
 
   /**
@@ -114,7 +107,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     }
     final ServerWorld world = source.getWorld();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
-      final BlockBox box = region.maxContainingBlockBox();
+      final BlockBox box = region.minContainingBlockBox();
       if (box != null && (!world.isPosLoaded(box.getMinX(), box.getMinZ()) || !world.isPosLoaded(box.getMaxX(), box.getMaxZ()))) {
         throw UNLOADED_POS.create();
       }
@@ -165,11 +158,11 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
           .iterator();
       mainIterator = Iterators.concat(testPosIterator, placingIterator);
     }
-    final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(switch (unloadedPosBehavior) {
+    final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> "enhancedCommands.commands.fill.complete_skipped";
       case BREAK -> "enhancedCommands.commands.fill.complete_broken";
       default -> "enhancedCommands.commands.fill.complete";
-    }, numbersAffected.getValue()), true));
+    } : "enhancedCommands.commands.fill.complete", numbersAffected.getValue()), true));
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {

@@ -74,7 +74,7 @@ import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
-import static pers.solid.ecmd.command.ModCommands.REQUIRES_PERMISSION_2;
+import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 /**
  * @see net.minecraft.server.command.ExecuteCommand
@@ -91,10 +91,6 @@ public final class SeparatedExecuteCommand {
     LootConditionManager lootConditionManager = context.getSource().getServer().getPredicateManager();
     return CommandSource.suggestIdentifiers(lootConditionManager.getIds(), builder);
   };
-
-  private static LiteralArgumentBuilder<ServerCommandSource> literalR2(String literal) {
-    return literal(literal).requires(REQUIRES_PERMISSION_2);
-  }
 
   public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
     RootCommandNode<ServerCommandSource> literalCommandNode = dispatcher.getRoot();

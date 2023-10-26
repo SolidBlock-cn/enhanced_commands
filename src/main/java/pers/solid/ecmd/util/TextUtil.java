@@ -83,14 +83,14 @@ public final class TextUtil {
   /**
    * 将方块坐标表示为文本组件。
    */
-  public static MutableText wrapBlockPos(Vec3i blockPos) {
+  public static MutableText wrapVector(Vec3i blockPos) {
     return Text.translatable("enhancedCommands.position", blockPos.getX(), blockPos.getY(), blockPos.getZ());
   }
 
   /**
    * 将坐标表示为文本组件，以用于命令输出。
    */
-  public static MutableText wrapPosition(Position position) {
+  public static MutableText wrapVector(Position position) {
     return Text.translatable("enhancedCommands.position", position.getX(), position.getY(), position.getZ());
   }
 

@@ -51,16 +51,16 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     final BlockState blockState = cachedBlockPosition.getBlockState();
     ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
     if (!blockState.isOf(block)) {
-      messages.add(Text.translatable("enhancedCommands.argument.block_predicate.not_the_block", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), block.getName().styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      messages.add(Text.translatable("enhancedCommands.argument.block_predicate.not_the_block", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), block.getName().styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
       matches = false;
     }
     for (PropertyPredicate<?> propertyPredicate : propertyEntries) {
       if (!propertyPredicate.test(blockState)) {
         final Property<?> property = propertyPredicate.property();
         if (blockState.contains(property)) {
-          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.property_not_this_value", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), expressPropertyValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(propertyPredicate).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.property_not_this_value", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), expressPropertyValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(propertyPredicate).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
         } else {
-          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.expected_property_does_not_exist", TextUtil.wrapBlockPos(cachedBlockPosition.getBlockPos()), Text.literal(property.getName()).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(propertyPredicate).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+          messages.add(Text.translatable("enhancedCommands.argument.block_predicate.expected_property_does_not_exist", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), Text.literal(property.getName()).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(propertyPredicate).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
         }
         matches = false;
       }

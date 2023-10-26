@@ -86,7 +86,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public @NotNull BlockBox maxContainingBlockBox() {
+  public @NotNull BlockBox minContainingBlockBox() {
     return region.blockBox();
   }
 

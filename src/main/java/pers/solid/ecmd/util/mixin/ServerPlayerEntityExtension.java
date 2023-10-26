@@ -1,7 +1,11 @@
 package pers.solid.ecmd.util.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
@@ -24,6 +28,16 @@ public interface ServerPlayerEntityExtension {
     } else {
       return null;
     }
+  }
+
+  DynamicCommandExceptionType PLAYER_HAS_NO_ACTIVE_REGION = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.region.no_active_region", o));
+
+  default @NotNull RegionArgument<?> ec$getOrEvaluateActiveRegionOrThrow(ServerCommandSource source) throws CommandSyntaxException {
+    final RegionArgument<?> regionArgument = ec$getOrEvaluateActiveRegion(source);
+    if (regionArgument == null) {
+      throw PLAYER_HAS_NO_ACTIVE_REGION.create(((ServerPlayerEntity) this).getName());
+    }
+    return regionArgument;
   }
 
   void ec$setActiveRegion(RegionArgument<?> regionArgument);

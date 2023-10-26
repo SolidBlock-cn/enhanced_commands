@@ -36,7 +36,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
       final Map<UUID, WeakReference<IteratorTask<?>>> uuidToTasks = ((ThreadExecutorExtension) context.getSource().getServer()).ec_getUUIDToIteratorTasks();
       return CommandSource.suggestMatching(uuidToTasks.keySet().stream().map(UUID::toString), builder);
     };
-    dispatcher.register(CommandManager.literal("tasks")
+    dispatcher.register(ModCommands.literalR2("tasks")
         .executes(context -> executeListTasks(context.getSource().getServer(), context, 10))
         .then(CommandManager.literal("count")
             .executes(context -> executeCountTasks(context.getSource().getServer(), context)))
