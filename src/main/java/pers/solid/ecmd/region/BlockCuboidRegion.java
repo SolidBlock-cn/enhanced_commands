@@ -12,7 +12,7 @@ import java.util.function.Function;
 /**
  * <p>The <b>block cuboid region</b> representing a cuboid defined by two block positions. It is similar to {@link CuboidRegion}, but positions are block positions, and are inclusive. A block position indicates a whole cube, instead of an accurate position.
  * <p>For example, the <em>block cuboid region</em> {@code cuboid(0 0 0, 5 5 5)} is a cuboid from the southwest bottom corner of block position {@code (0 0 0)} to the northeast top corner of block position {@code (5 5 5)}, which is also the southwest bottom corner of block position {@code (6 6 6)}. Therefore, it is identical to the <em>cuboid region</em> {@code cuboid(0.0 0.0 0.0, 6.0 6.0 6.0)}.
- * <p>In any case, a block cuboid region has a minimum volume of 1, which means the two corners are a same block position.
+ * <p>In any case, a block cuboid region has a min volume of 1, which means the two corners are a same block position.
  */
 public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements IntBackedRegion {
   /**

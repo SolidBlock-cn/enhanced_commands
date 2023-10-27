@@ -302,7 +302,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
     }
 
     private Range<Double> parseAngleRange(SuggestedParser parser) throws CommandSyntaxException {
-      final double firstAngle = ParsingUtil.parseAngle(parser);
+      final double firstAngle = ParsingUtil.parseAngle(parser, true);
       parser.suggestionProviders.clear();
       final StringReader reader = parser.reader;
       final int cursorBeforeWhitespace = reader.getCursor();
@@ -310,7 +310,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
       if (reader.getString().startsWith("..", reader.getCursor())) {
         reader.setCursor(reader.getCursor() + "..".length());
         reader.skipWhitespace();
-        final double secondAngle = ParsingUtil.parseAngle(parser);
+        final double secondAngle = ParsingUtil.parseAngle(parser, true);
         parser.suggestionProviders.clear();
         return Range.between(firstAngle, secondAngle);
       } else {

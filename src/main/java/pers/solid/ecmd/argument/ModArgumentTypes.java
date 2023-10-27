@@ -12,6 +12,7 @@ import pers.solid.ecmd.EnhancedCommands;
  */
 public class ModArgumentTypes {
   public static void init() {
+    register("angle", AngleArgumentType.class, new AngleArgumentType.Serializer());
     register("axis", AxisArgumentType.class, new AxisArgumentType.Serializer());
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));

@@ -20,7 +20,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
-import pers.solid.ecmd.build.BlockTransformationCommand;
+import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.mixin.CommandContextAccessor;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionbuilder.RegionBuilder;

@@ -193,8 +193,10 @@ public final class ParsingUtil {
 
   /**
    * 解析一个不同类型的角度时，并返回弧度值。角度值的单位可以是 {@code deg}、{@code rad} 或 {@code turn}。零值可以不提供单位，其他情况下不提供单位会抛出错误。输入完数值后会为单位提供建议。
+   *
+   * @param radians 返回的值是否为弧度值，若为 {@code false}，则返回角度值。
    */
-  public static double parseAngle(SuggestedParser parser) throws CommandSyntaxException {
+  public static double parseAngle(SuggestedParser parser, boolean radians) throws CommandSyntaxException {
     final StringReader reader = parser.reader;
     final int cursorBeforeDouble = reader.getCursor();
     while (reader.canRead()) {
@@ -246,11 +248,14 @@ public final class ParsingUtil {
         throw ModCommandExceptionTypes.ANGLE_UNIT_EXPECTED.createWithContext(reader, substring);
       }
     } else if ("deg".equals(unit)) {
-      return Math.toRadians(v);
+      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
+      return radians ? Math.toRadians(v) : v;
     } else if ("rad".equals(unit)) {
-      return v;
+      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
+      return radians ? v : Math.toDegrees(v);
     } else if ("turn".equals(unit)) {
-      return Math.PI * 2 * v;
+      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
+      return (radians ? Math.PI * 2 : 360) * v;
     } else {
       final int cursorAfterUnit = reader.getCursor();
       reader.setCursor(cursorBeforeUnit);
