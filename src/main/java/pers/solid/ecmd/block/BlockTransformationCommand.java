@@ -30,6 +30,8 @@ import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.regionbuilder.RegionBuilder;
+import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
@@ -72,6 +74,7 @@ public interface BlockTransformationCommand {
     final @Nullable BlockPredicateArgument transformOnly = keywordArgs.getArg("transform_only");
     final @Nullable BlockFunctionArgument remaining = keywordArgs.getArg("remaining");
     final ServerWorld world = source.getWorld();
+    final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(world, region)
         .setFlags(FillReplaceCommand.getFlags(keywordArgs))
         .setModFlags(FillReplaceCommand.getModFlags(keywordArgs))
@@ -83,6 +86,7 @@ public interface BlockTransformationCommand {
         .affectsOnly(affectOnly == null ? null : affectOnly.apply(source))
         .transformsOnly(transformOnly == null ? null : transformOnly.apply(source))
         .fillRemainingWith(remaining == null ? null : remaining.apply(source))
+        .setUnloadedPosBehavior(unloadedPosBehavior)
         .interpolates(keywordArgs.supportsArg("interpolate") && keywordArgs.getBoolean("interpolate"));
     if (keywordArgs.getBoolean("keep_remaining")) {
       builder.keepRemaining();
@@ -131,12 +135,14 @@ public interface BlockTransformationCommand {
         if (finalActiveRegion != null) {
           ((ServerPlayerEntityExtension) player).ec$setActiveRegion(finalActiveRegion);
         }
+        notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks());
       })));
       CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(task.transformBlocks().getImmediateTask());
+      notifyUnloadedPos(task, unloadedPosBehavior, source);
       final int affectedBlocks = task.getAffectedBlocks();
       notifyCompletion(source, affectedBlocks);
       if (transformsRegion && player != null) {
@@ -148,6 +154,16 @@ public interface BlockTransformationCommand {
         }
       }
       return affectedBlocks;
+    }
+  }
+
+  private static void notifyUnloadedPos(BlockTransformationTask task, UnloadedPosBehavior unloadedPosBehavior, ServerCommandSource source) {
+    if (task.hasUnloadedPos) {
+      if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
+        CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.broken").styled(TextUtil.STYLE_FOR_ACTUAL), false);
+      } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
+        CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.skipped").styled(TextUtil.STYLE_FOR_ACTUAL), false);
+      }
     }
   }
 }

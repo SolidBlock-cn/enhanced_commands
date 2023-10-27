@@ -2,6 +2,7 @@ package pers.solid.ecmd.block;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -17,10 +18,13 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.SimpleBlockFunction;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.UnloadedPosBehavior;
+import pers.solid.ecmd.util.iterator.CatchingIterator;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
@@ -46,9 +50,11 @@ public class BlockTransformationTask {
   private @Nullable Stream<? extends Entity> entitiesToAffect;
   private int affectedBlocks = 0;
   private int affectedEntities = 0;
+  public boolean hasUnloadedPos = false;
   private final boolean interpolation;
+  private final @NotNull UnloadedPosBehavior unloadedPosBehavior;
 
-  private BlockTransformationTask(@NotNull Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3d, Vec3d> posTransformer, @Nullable Function<Vec3d, Vec3d> invertedPosTransformer, @NotNull Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @NotNull World world, @NotNull Region region, int flags, int modFlags, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Stream<? extends Entity> entitiesToAffect, boolean interpolation) {
+  private BlockTransformationTask(@NotNull Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3d, Vec3d> posTransformer, @Nullable Function<Vec3d, Vec3d> invertedPosTransformer, @NotNull Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @NotNull World world, @NotNull Region region, int flags, int modFlags, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Stream<? extends Entity> entitiesToAffect, boolean interpolation, @NotNull UnloadedPosBehavior unloadedPosBehavior) {
     this.blockPosTransformer = blockPosTransformer;
     this.posTransformer = posTransformer;
     this.invertedPosTransformer = invertedPosTransformer;
@@ -63,6 +69,7 @@ public class BlockTransformationTask {
     this.remaining = remaining;
     this.entitiesToAffect = entitiesToAffect;
     this.interpolation = interpolation;
+    this.unloadedPosBehavior = unloadedPosBehavior;
   }
 
   public int getAffectedBlocks() {
@@ -73,17 +80,55 @@ public class BlockTransformationTask {
     return affectedEntities;
   }
 
-  public TaskSeries transformBlocks() {
+  public void checkAndRejectUnloadedPos() throws CommandSyntaxException {
+    final BlockBox box = region.minContainingBlockBox();
+    if (box != null && (!world.isPosLoaded(box.getMinX(), box.getMinZ()) || !world.isPosLoaded(box.getMaxX(), box.getMaxZ()))) {
+      throw FillReplaceCommand.UNLOADED_POS.create();
+    }
+  }
+
+  public void checkAndRejectUnloadedPos(Stream<BlockPos> stream) throws CommandSyntaxException {
+    if (stream.anyMatch(blockPos -> !world.isChunkLoaded(blockPos))) {
+      throw FillReplaceCommand.UNLOADED_POS.create();
+    }
+  }
+
+  public Stream<BlockPos> modifyStream(Stream<BlockPos> stream) {
+    if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
+      stream = stream.filter(blockPos -> {
+        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+        if (!chunkLoaded) hasUnloadedPos = true;
+        return chunkLoaded;
+      });
+    } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
+      stream = stream.peek(blockPos -> {
+        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+        if (!chunkLoaded) {
+          hasUnloadedPos = true;
+          throw new UnloadedPosException(blockPos);
+        }
+      });
+    }
+    return stream;
+  }
+
+  public TaskSeries transformBlocks() throws CommandSyntaxException {
+    if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
+      checkAndRejectUnloadedPos();
+    }
+
     // 被转换走的方块在转换前的坐标
     final Map<BlockPos, BlockState> posTransformedOut = new HashMap<>();
     // 转换后的坐标和转换后的方块
     final Map<BlockPos, BlockState> transformedStates = new LinkedHashMap<>();
     // 转换后的坐标和 NBT，NBT 一般不进行转换
     final Map<BlockPos, NbtCompound> nbts = new HashMap<>();
-    final Iterator<Void> storeTransformed = region.stream()
+
+
+    final Iterator<Void> storeTransformed = modifyStream(modifyStream(region.stream())
         .map(blockPos -> {
-          final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, false);
-          if (transformsOnly == null || transformsOnly.test(cachedBlockPosition)) {
+          final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+          if (transformsOnly == null || transformsOnly.test(cachedBlockPosition) && world.isChunkLoaded(blockPos)) {
             final BlockState blockState = cachedBlockPosition.getBlockState();
             posTransformedOut.put(blockPos.toImmutable(), blockState);
             final BlockPos transformedBlockPos = new BlockPos(blockPosTransformer.apply(blockPos));
@@ -91,19 +136,23 @@ public class BlockTransformationTask {
             if (cachedBlockPosition.getBlockEntity() != null) {
               nbts.put(transformedBlockPos, cachedBlockPosition.getBlockEntity().createNbt());
             }
+
+            return transformedBlockPos;
           } else {
+            // 充 null 值表示未匹配到值，或者是未加载的区块。
             posTransformedOut.put(blockPos.toImmutable(), null);
+
+            return blockPos.toImmutable();
           }
-          return (Void) null;
-        })
-        .iterator();
+        }))
+        .map(blockPos -> (Void) null).iterator();
 
     final Iterator<Void> collectMatchingTransformed;
     final Set<BlockPos> matchingBlockPos;
     if (affectsOnly != null) {
       matchingBlockPos = new LinkedHashSet<>();
       collectMatchingTransformed = transformedStates.keySet().stream().map(blockPos -> {
-        if (affectsOnly.test(new CachedBlockPosition(world, blockPos, false))) {
+        if (affectsOnly.test(new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE))) {
           matchingBlockPos.add(blockPos);
         }
         return (Void) null;
@@ -223,7 +272,7 @@ public class BlockTransformationTask {
 
   public record TaskSeries(Iterator<Void> storeTransformed, Iterator<Void> collectMatchingTransformed, Iterator<Void> releaseTransformed, Iterator<Void> transformEntities, Iterator<Void> collectMatchingRemaining, Iterator<Void> setRemaining, Iterator<Void> addInterpolation) {
     public Iterator<Void> getSpeedAdjustedTask() {
-      return Iterators.concat(
+      return new CatchingIterator<>(Iterators.concat(
           IterateUtils.batchAndSkip(storeTransformed, 16384, 3),
           IterateUtils.batchAndSkip(collectMatchingTransformed, 16384, 3),
           IterateUtils.batchAndSkip(releaseTransformed, 32768, 15),
@@ -231,11 +280,15 @@ public class BlockTransformationTask {
           IterateUtils.batchAndSkip(collectMatchingRemaining, 16384, 3),
           IterateUtils.batchAndSkip(setRemaining, 32768, 15),
           IterateUtils.batchAndSkip(addInterpolation, 32768, 15)
-      );
+      ), e -> {
+        if (!(e instanceof UnloadedPosException)) throw e;
+      });
     }
 
     public Iterator<Void> getImmediateTask() {
-      return Iterators.concat(storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation);
+      return new CatchingIterator<>(Iterators.concat(storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation), e -> {
+        if (!(e instanceof UnloadedPosException)) throw e;
+      });
     }
   }
 
@@ -254,6 +307,7 @@ public class BlockTransformationTask {
     private @Nullable Stream<? extends Entity> entitiesToAffect = null;
     private Function<Vec3d, Vec3d> invertedPosTransformer;
     private boolean interpolation = false;
+    private @NotNull UnloadedPosBehavior unloadedPosBehavior = UnloadedPosBehavior.REJECT;
 
     public Builder(@NotNull World world, @NotNull Region region) {
       this.world = world;
@@ -325,8 +379,13 @@ public class BlockTransformationTask {
       return this;
     }
 
+    public Builder setUnloadedPosBehavior(UnloadedPosBehavior unloadedPosBehavior) {
+      this.unloadedPosBehavior = unloadedPosBehavior;
+      return this;
+    }
+
     public BlockTransformationTask build() {
-      return new BlockTransformationTask(blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, world, region, flags, modFlags, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation);
+      return new BlockTransformationTask(blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, world, region, flags, modFlags, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior);
     }
   }
 }
