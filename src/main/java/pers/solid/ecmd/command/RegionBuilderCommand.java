@@ -1,6 +1,8 @@
 package pers.solid.ecmd.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.RegistryEntryArgumentType;
@@ -23,13 +25,14 @@ public enum RegionBuilderCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(literalR2("regionbuilder")
-        .executes(context -> {
-          final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
-          player.giveItemStack(WandEvent.createWandStack());
-          CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhancedCommands.commands.regionbuilder.build_now", Text.keybind("key.attack").formatted(Formatting.GRAY), Text.keybind("key.use").formatted(Formatting.GRAY)), true);
-          return 1;
-        })
+    final Command<ServerCommandSource> executesWithoutParam = context -> {
+      final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
+      player.giveItemStack(WandEvent.createWandStack());
+      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhancedCommands.commands.regionbuilder.build_now", Text.keybind("key.attack").formatted(Formatting.GRAY), Text.keybind("key.use").formatted(Formatting.GRAY)), true);
+      return 1;
+    };
+    final LiteralCommandNode<ServerCommandSource> regionBuilderNode = dispatcher.register(literalR2("regionbuilder")
+        .executes(executesWithoutParam)
         .then(CommandManager.argument("type", RegistryEntryArgumentType.registryEntry(registryAccess, RegionBuilderType.REGISTRY_KEY))
             .executes(context -> {
               final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
@@ -39,5 +42,8 @@ public enum RegionBuilderCommand implements CommandRegistrationCallback {
               CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhancedCommands.commands.regionbuilder.changed", TextUtil.literal(registryEntry.registryKey().getValue()).styled(TextUtil.STYLE_FOR_RESULT)), true);
               return 1;
             })));
+    dispatcher.register(literalR2("rb")
+        .executes(executesWithoutParam)
+        .redirect(regionBuilderNode));
   }
 }

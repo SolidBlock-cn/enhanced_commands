@@ -58,7 +58,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
                 .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").getUnitVector()), keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)
                     .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").getUnitVector()), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
-            .then(literal("axis")
+            .then(literal("vector")
                 .then(argument("x", DoubleArgumentType.doubleArg())
                     .then(argument("y", DoubleArgumentType.doubleArg())
                         .then(argument("z", DoubleArgumentType.doubleArg())
@@ -76,9 +76,9 @@ public enum RotateCommand implements CommandRegistrationCallback {
         blockRotation = BlockRotation.NONE;
       } else if (rotation == 90) {
         blockRotation = BlockRotation.CLOCKWISE_90;
-      } else if (rotation == 180) {
+      } else if (rotation == -180) {
         blockRotation = BlockRotation.CLOCKWISE_180;
-      } else if (rotation == 270) {
+      } else if (rotation == -90) {
         blockRotation = BlockRotation.COUNTERCLOCKWISE_90;
       } else {
         blockRotation = null;
@@ -114,8 +114,8 @@ public enum RotateCommand implements CommandRegistrationCallback {
           return GeoUtil.rotate(original, blockRotation, pivot);
         } else {
           original = original.subtract(pivot);
-          final Vector3d transform = finalAxisAngle4d.transform(new Vector3d(original.getX() + 0.5, original.getY() + 0.5, original.getZ() + 0.5));
-          return new BlockPos(MathHelper.floor(transform.x), MathHelper.floor(transform.y), MathHelper.floor(transform.z)).add(pivot);
+          final Vector3d transform = finalAxisAngle4d.transform(new Vector3d(original.getX(), original.getY(), original.getZ()));
+          return new BlockPos(MathHelper.floor(transform.x + 0.5), MathHelper.floor(transform.y + 0.5), MathHelper.floor(transform.z + 0.5)).add(pivot);
         }
       }
 

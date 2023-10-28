@@ -30,12 +30,12 @@ public interface GeoUtil {
       default -> useModifiedPos = false;
     }
 
-    int l = pivot.getX();
-    int m = pivot.getZ();
+    int pivotX = pivot.getX();
+    int pivotZ = pivot.getZ();
     return switch (rotation) {
-      case COUNTERCLOCKWISE_90 -> new Vec3i(l - m + z, y, l + m - x);
-      case CLOCKWISE_90 -> new Vec3i(l + m - z, y, m - l + x);
-      case CLOCKWISE_180 -> new Vec3i(l + l - x, y, m + m - z);
+      case COUNTERCLOCKWISE_90 -> new Vec3i(pivotX - pivotZ + z, y, pivotX + pivotZ - x);
+      case CLOCKWISE_90 -> new Vec3i(pivotX + pivotZ - z, y, pivotZ - pivotX + x);
+      case CLOCKWISE_180 -> new Vec3i(pivotX + pivotX - x, y, pivotZ + pivotZ - z);
       default -> useModifiedPos ? new Vec3i(x, y, z) : pos;
     };
   }
@@ -57,9 +57,9 @@ public interface GeoUtil {
     double i = pivot.getX();
     double j = pivot.getZ();
     return switch (rotation) {
-      case COUNTERCLOCKWISE_90 -> new Vec3d((i - j) + z, y, (i + j + 1) - x);
-      case CLOCKWISE_90 -> new Vec3d((i + j + 1) - z, y, (j - i) + x);
-      case CLOCKWISE_180 -> new Vec3d((i + i + 1) - x, y, (j + j + 1) - z);
+      case COUNTERCLOCKWISE_90 -> new Vec3d((i - j) + z, y, (i + j) - x);
+      case CLOCKWISE_90 -> new Vec3d((i + j) - z, y, (j - i) + x);
+      case CLOCKWISE_180 -> new Vec3d((i + i) - x, y, (j + j) - z);
       default -> useModifiedPoint ? new Vec3d(x, y, z) : point;
     };
   }

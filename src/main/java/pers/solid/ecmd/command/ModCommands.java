@@ -33,6 +33,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     DrawCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     FillReplaceCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    MirrorCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     MoveCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     OutlineCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RandCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -62,7 +63,7 @@ public enum ModCommands implements CommandRegistrationCallback {
   };
 
   public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, CommandNode<ServerCommandSource> then) {
-    return registerWithArgumentModification(dispatcher, directBuilder, indirectBuilder, ((ArgumentBuilder<ServerCommandSource, ?>) CommandManager.argument("region", RegionArgumentType.region(commandRegistryAccess))).then(then), REGION_ARGUMENTS_MODIFIER);
+    return registerWithArgumentModification(dispatcher, directBuilder, indirectBuilder, CommandManager.argument("region", RegionArgumentType.region(commandRegistryAccess)).then(then), REGION_ARGUMENTS_MODIFIER);
   }
 
   public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, ArgumentBuilder<ServerCommandSource, ?> then) {

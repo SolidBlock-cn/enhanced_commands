@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pers.solid.ecmd.api.FlipStateCallback;
 import pers.solid.ecmd.argument.ModArgumentTypes;
 import pers.solid.ecmd.command.ModCommands;
 import pers.solid.ecmd.curve.CurveTypes;
@@ -31,6 +32,7 @@ public class EnhancedCommands implements ModInitializer {
 
     // 注册命令
     CommandRegistrationCallback.EVENT.register(ModCommands.INSTANCE);
+    FlipStateCallback.EVENT.register(FlipStateCallback.DEFAULT);
     WandEvent.registerEvents();
 
     // 注册服务器运行任务的事件
