@@ -12,6 +12,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import pers.solid.ecmd.argument.OmittedRegistryEntryArgumentType;
 import pers.solid.ecmd.regionbuilder.RegionBuilderType;
 import pers.solid.ecmd.regionbuilder.WandEvent;
 import pers.solid.ecmd.util.TextUtil;
@@ -33,7 +34,7 @@ public enum RegionBuilderCommand implements CommandRegistrationCallback {
     };
     final LiteralCommandNode<ServerCommandSource> regionBuilderNode = dispatcher.register(literalR2("regionbuilder")
         .executes(executesWithoutParam)
-        .then(CommandManager.argument("type", RegistryEntryArgumentType.registryEntry(registryAccess, RegionBuilderType.REGISTRY_KEY))
+        .then(CommandManager.argument("type", OmittedRegistryEntryArgumentType.omittedRegistryEntry(registryAccess, RegionBuilderType.REGISTRY_KEY))
             .executes(context -> {
               final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
               final RegistryEntry.Reference<RegionBuilderType> registryEntry = RegistryEntryArgumentType.getRegistryEntry(context, "type", RegionBuilderType.REGISTRY_KEY);

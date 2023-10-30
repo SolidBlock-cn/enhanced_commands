@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
@@ -100,7 +101,7 @@ public record UnionRegion(Collection<Region> regions) implements RegionsBasedReg
 
     @Override
     public RegionArgument<UnionRegion> getParseResult(SuggestedParser parser) {
-      return source -> new UnionRegion(regions.stream().map(regionArgument -> (Region) regionArgument.toAbsoluteRegion(source)).toList());
+      return source -> new UnionRegion(regions.stream().map(regionArgument -> (Region) regionArgument.toAbsoluteRegion(source)).collect(ImmutableList.toImmutableList()));
     }
 
     @Override

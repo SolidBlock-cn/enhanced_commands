@@ -156,9 +156,21 @@ public interface PickBlockFunction extends BlockFunction {
         if (sum == 0) {
           throw SUM_ZERO.createWithContext(parser.reader);
         }
-        return source -> new Weighted(ImmutableList.copyOf(Lists.transform(pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble() / sum))));
+        return source -> {
+          ImmutableList.Builder<ObjectDoublePair<BlockFunction>> builder = new ImmutableList.Builder<>();
+          for (ObjectDoublePair<BlockFunctionArgument> pair : pairs) {
+            builder.add(ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble() / sum));
+          }
+          return new Weighted(builder.build());
+        };
       } else {
-        return source -> new Uniform(ImmutableList.copyOf(Lists.transform(pairs, pair -> pair.left().apply(source))));
+        return source -> {
+          ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
+          for (ObjectDoublePair<BlockFunctionArgument> pair : pairs) {
+            builder.add(pair.left().apply(source));
+          }
+          return new Uniform(builder.build());
+        };
       }
     }
 

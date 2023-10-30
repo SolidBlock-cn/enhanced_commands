@@ -81,7 +81,13 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
 
     @Override
     public BlockFunctionArgument getParseResult(SuggestedParser parser) {
-      return source -> new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(blockFunctions, input -> input.apply(source))));
+      return source -> {
+        final ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
+        for (BlockFunctionArgument blockFunction : blockFunctions) {
+          builder.add(blockFunction.apply(source));
+        }
+        return new OverlayBlockFunction(builder.build());
+      };
     }
 
     @Override

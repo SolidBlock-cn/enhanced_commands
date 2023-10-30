@@ -22,6 +22,7 @@ public class ModArgumentTypes {
     register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
     register("nbt_function", NbtFunctionArgumentType.class, NbtFunctionArgumentType.Serializer.INSTANCE);
     register("keyword_args", KeywordArgsArgumentType.class, new KeywordArgsArgumentSerializer());
+    register("omitted_registry_entry", OmittedRegistryEntryArgumentType.class, new OmittedRegistryEntryArgumentType.Serializer());
     register("outline_type", SimpleEnumArgumentTypes.OutlineTypeArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.OutlineTypeArgumentType::new));
     register("pos", EnhancedPosArgumentType.class, new EnhancedPosArgumentType.Serializer());
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));

@@ -23,19 +23,19 @@ public abstract class ServerPlayerEntityMixin implements ServerPlayerEntityExten
   private RegionBuilderType ec$regionBuilderType = RegionBuilderTypes.CUBOID;
 
   @Override
-  public @Nullable RegionArgument<?> ec$getActiveRegion() {
+  public @Nullable RegionArgument<?> ec$getActiveRegionArgument() {
     return ec$activeRegion;
   }
 
   @Override
-  public void ec$setActiveRegion(RegionArgument<?> regionArgument) {
+  public void ec$setActiveRegionArgument(RegionArgument<?> regionArgument) {
     ec$activeRegion = regionArgument;
   }
 
   @Inject(method = "copyFrom", at = @At("TAIL"))
   public void injectedCopyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
     // 玩家重生时，需保留这些信息。
-    ec$setActiveRegion(((ServerPlayerEntityExtension) oldPlayer).ec$getActiveRegion());
+    ec$setActiveRegionArgument(((ServerPlayerEntityExtension) oldPlayer).ec$getActiveRegionArgument());
     ec$setRegionBuilder(((ServerPlayerEntityExtension) oldPlayer).ec$getRegionBuilder());
     ec$setRegionBuilderType(((ServerPlayerEntityExtension) oldPlayer).ec$getRegionBuilderType());
   }

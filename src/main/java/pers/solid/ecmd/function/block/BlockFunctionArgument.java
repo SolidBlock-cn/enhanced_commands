@@ -2,7 +2,6 @@ package pers.solid.ecmd.function.block;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -32,11 +31,23 @@ public interface BlockFunctionArgument extends Function<ServerCommandSource, Blo
   }
 
   static @NotNull BlockFunctionArgument parsePick(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseOverlay(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> new PickBlockFunction.Uniform(ImmutableList.copyOf(Lists.transform(functions, function -> function.apply(source)))), "|", PICK_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseOverlay(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> {
+      ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
+      for (BlockFunctionArgument function : functions) {
+        builder.add(function.apply(source));
+      }
+      return new PickBlockFunction.Uniform(builder.build());
+    }, "|", PICK_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockFunctionArgument parseOverlay(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(functions, function -> function.apply(source)))), "*", OVERLAY_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> {
+      ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
+      for (BlockFunctionArgument blockFunctionArgument : functions) {
+        builder.add(blockFunctionArgument.apply(source));
+      }
+      return new OverlayBlockFunction(builder.build());
+    }, "*", OVERLAY_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockFunctionArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
@@ -89,7 +100,6 @@ public interface BlockFunctionArgument extends Function<ServerCommandSource, Blo
         // keep the current position of the cursor
         return parse;
       }
-
     }
     parser.reader.setCursor(cursorOnStart);
     throw BlockFunction.CANNOT_PARSE.createWithContext(parser.reader);

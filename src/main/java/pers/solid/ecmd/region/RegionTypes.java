@@ -17,6 +17,7 @@ public final class RegionTypes {
   public static final CuboidOutlineRegion.Type CUBOID_OUTLINE = register(CuboidOutlineRegion.Type.CUBOID_OUTLINE_TYPE, "cuboid_outline");
   public static final CuboidWallRegion.Type CUBOID_WALL = register(CuboidWallRegion.Type.CUBOID_WALL_TYPE, "cuboid_wall");
   public static final OutwardsRegion.Type OUTWARDS = register(OutwardsRegion.Type.INSTANCE, "outwards");
+  public static final ActiveRegionType ACTIVE_REGION = register(ActiveRegionType.TYPE, "active_region");
 
   private RegionTypes() {
   }

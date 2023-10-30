@@ -115,7 +115,7 @@ public interface BlockTransformationCommand {
         regionBuilder = null;
       }
       try {
-        activeRegion = ((ServerPlayerEntityExtension) player).ec$getActiveRegion();
+        activeRegion = ((ServerPlayerEntityExtension) player).ec$getActiveRegionArgument();
         if (activeRegion != null) {
           activeRegion = transformRegion(activeRegion.toAbsoluteRegion(source));
         }
@@ -133,7 +133,7 @@ public interface BlockTransformationCommand {
           ((ServerPlayerEntityExtension) player).ec$switchRegionBuilder(finalRegionBuilder);
         }
         if (finalActiveRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(finalActiveRegion);
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(finalActiveRegion);
         }
         notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks());
@@ -147,7 +147,7 @@ public interface BlockTransformationCommand {
       notifyCompletion(source, affectedBlocks);
       if (transformsRegion && player != null) {
         if (activeRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(activeRegion);
         }
         if (regionBuilder != null) {
           ((ServerPlayerEntityExtension) player).ec$setRegionBuilder(regionBuilder);

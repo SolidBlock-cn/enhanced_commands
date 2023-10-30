@@ -13,15 +13,15 @@ import pers.solid.ecmd.regionbuilder.RegionBuilder;
 import pers.solid.ecmd.regionbuilder.RegionBuilderType;
 
 public interface ServerPlayerEntityExtension {
-  @Nullable RegionArgument<?> ec$getActiveRegion();
+  @Nullable RegionArgument<?> ec$getActiveRegionArgument();
 
   @Nullable
   default Region ec$getOrEvaluateActiveRegion(ServerCommandSource source) throws CommandSyntaxException {
     final RegionBuilder regionBuilder = ec$getRegionBuilder();
-    final RegionArgument<?> activeRegion = ec$getActiveRegion();
+    final RegionArgument<?> activeRegion = ec$getActiveRegionArgument();
     if (activeRegion == null && regionBuilder != null) {
       final Region buildRegion = regionBuilder.buildRegion();
-      ec$setActiveRegion(buildRegion);
+      ec$setActiveRegionArgument(buildRegion);
       return buildRegion;
     } else if (activeRegion != null) {
       return activeRegion.toAbsoluteRegion(source);
@@ -32,7 +32,7 @@ public interface ServerPlayerEntityExtension {
 
   DynamicCommandExceptionType PLAYER_HAS_NO_ACTIVE_REGION = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.region.no_active_region", o));
 
-  default @NotNull RegionArgument<?> ec$getOrEvaluateActiveRegionOrThrow(ServerCommandSource source) throws CommandSyntaxException {
+  default @NotNull RegionArgument<?> ec$getOrEvaluateActiveRegionArgumentOrThrow(ServerCommandSource source) throws CommandSyntaxException {
     final RegionArgument<?> regionArgument = ec$getOrEvaluateActiveRegion(source);
     if (regionArgument == null) {
       throw PLAYER_HAS_NO_ACTIVE_REGION.create(((ServerPlayerEntity) this).getName());
@@ -40,12 +40,16 @@ public interface ServerPlayerEntityExtension {
     return regionArgument;
   }
 
-  void ec$setActiveRegion(RegionArgument<?> regionArgument);
+  default @NotNull Region ec$getOrEvaluateActiveRegionOrThrow(ServerCommandSource source) throws CommandSyntaxException {
+    return ec$getOrEvaluateActiveRegionArgumentOrThrow(source).toAbsoluteRegion(source);
+  }
+
+  void ec$setActiveRegionArgument(RegionArgument<?> regionArgument);
 
   @Nullable RegionBuilder ec$getRegionBuilder();
 
   default void ec$requireUpdateRegionBuilder() {
-    ec$setActiveRegion(null);
+    ec$setActiveRegionArgument(null);
   }
 
   void ec$setRegionBuilder(RegionBuilder regionBuilder);

@@ -130,7 +130,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     }
   }
 
-  public static int executeSet(Collection<ServerPlayerEntity> players, CommandContext<ServerCommandSource> context, boolean fixed) {
+  public static int executeSet(Collection<ServerPlayerEntity> players, CommandContext<ServerCommandSource> context, boolean fixed) throws CommandSyntaxException {
     RegionArgument<?> region = context.getArgument("region", RegionArgument.class);
     int successes = 0;
     final ServerCommandSource source = context.getSource();
@@ -139,7 +139,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
         final Region absoluteRegion = region.toAbsoluteRegion(source);
         region = __ -> absoluteRegion;
       }
-      ((ServerPlayerEntityExtension) player).ec$setActiveRegion(region);
+      ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(region);
       ((ServerPlayerEntityExtension) player).ec$setRegionBuilder(null);
       successes++;
     }
@@ -155,7 +155,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     int successes = 0;
     final ServerCommandSource source = context.getSource();
     for (ServerPlayerEntity player : players) {
-      ((ServerPlayerEntityExtension) player).ec$setActiveRegion(null);
+      ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(null);
       ((ServerPlayerEntityExtension) player).ec$setRegionBuilder(null);
       successes++;
     }
@@ -245,7 +245,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
       final Region operatedRegion = invokeOperationOrThrow(regionOperation, getActiveAbsoluteRegionOrThrow(player, source));
 
       // 注意：当玩家有 regionBuilder 时，会自动生成 region，且理论上 regionBuilder 和 region 进行的操作应当是一致的。
-      ((ServerPlayerEntityExtension) player).ec$setActiveRegion(operatedRegion);
+      ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(operatedRegion);
       final RegionBuilder regionBuilder = ((ServerPlayerEntityExtension) player).ec$getRegionBuilder();
       if (regionBuilder != null) {
         invokeOperationOrThrow(input -> {
@@ -260,7 +260,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
       for (ServerPlayerEntity player : players) {
         try {
           final Region movedRegion = invokeOperationOrThrow(regionOperation, getActiveAbsoluteRegionOrThrow(player, source));
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(movedRegion);
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(movedRegion);
           final RegionBuilder regionBuilder = ((ServerPlayerEntityExtension) player).ec$getRegionBuilder();
           if (regionBuilder != null) {
             invokeOperationOrThrow(input -> {

@@ -47,7 +47,7 @@ public enum MirrorCommand implements CommandRegistrationCallback {
         literalR2("/mirror")
             .executes(context -> {
               final ServerCommandSource source = context.getSource();
-              return executeMirror(((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow(source).toAbsoluteRegion(source), AxisArgument.FRONT_BACK.apply(source), keywordArgs.defaultArgs(), context);
+              return executeMirror(((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow(source), AxisArgument.FRONT_BACK.apply(source), keywordArgs.defaultArgs(), context);
             }),
         argument("region", RegionArgumentType.region(registryAccess))
             .executes(context -> executeMirror(AxisArgument.FRONT_BACK.apply(context.getSource()), keywordArgs.defaultArgs(), context))
