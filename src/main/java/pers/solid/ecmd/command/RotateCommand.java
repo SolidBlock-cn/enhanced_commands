@@ -45,8 +45,8 @@ public enum RotateCommand implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
-        .addOptionalArg("pivot", blockPos(), CURRENT_POS)
         .addOptionalArg("interpolate", BoolArgumentType.bool(), false)
+        .addOptionalArg("pivot", blockPos(), CURRENT_POS)
         .build();
 
     ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess, literalR2("rotate"), literalR2("/rotate"), argument("rotation", AngleArgumentType.angle(false))
@@ -75,11 +75,11 @@ public enum RotateCommand implements CommandRegistrationCallback {
       if (rotation == 0) {
         blockRotation = BlockRotation.NONE;
       } else if (rotation == 90) {
-        blockRotation = BlockRotation.CLOCKWISE_90;
+        blockRotation = BlockRotation.COUNTERCLOCKWISE_90;
       } else if (rotation == -180) {
         blockRotation = BlockRotation.CLOCKWISE_180;
       } else if (rotation == -90) {
-        blockRotation = BlockRotation.COUNTERCLOCKWISE_90;
+        blockRotation = BlockRotation.CLOCKWISE_90;
       } else {
         blockRotation = null;
       }
@@ -87,7 +87,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
       rotation = axisAngle4d.angle;
       blockRotation = null;
     }
-    axisAngle4d = axisAngle4d == null ? new AxisAngle4d(-Math.toRadians(rotation), 0, 1, 0) : axisAngle4d;
+    axisAngle4d = axisAngle4d == null ? new AxisAngle4d(Math.toRadians(rotation), 0, 1, 0) : axisAngle4d;
     final @NotNull BlockRotation nearestBlockRotation;
     final BlockPos pivot = keywordArgs.<PosArgument>getArg("pivot").toAbsoluteBlockPos(context.getSource());
 

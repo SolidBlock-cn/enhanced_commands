@@ -1,4 +1,4 @@
-# `/activeregion` 或 `/ar`
+# `/activeregion` 或 `/ar` 以及 `//activeregion` 或 `//ar`
 
 此[命令](../zh.md)用于管理玩家的活动区域。
 

@@ -41,13 +41,13 @@ import java.util.function.Function;
 public interface BlockTransformationCommand {
   static KeywordArgsArgumentType.Builder createKeywordArgs(CommandRegistryAccess registryAccess) {
     return KeywordArgsArgumentType.builder(FillReplaceCommand.KEYWORD_ARGS)
-        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
         .addOptionalArg("affect_entities", EntityArgumentType.entities(), null)
-        .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
-        .addOptionalArg("remaining", BlockFunctionArgumentType.blockFunction(registryAccess), BlockTransformationTask.DEFAULT_REMAINING_FUNCTION)
+        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
         .addOptionalArg("keep_remaining", BoolArgumentType.bool(), false)
         .addOptionalArg("keep_state", BoolArgumentType.bool(), false)
-        .addOptionalArg("region", BoolArgumentType.bool(), false);
+        .addOptionalArg("remaining", BlockFunctionArgumentType.blockFunction(registryAccess), BlockTransformationTask.DEFAULT_REMAINING_FUNCTION)
+        .addOptionalArg("select", BoolArgumentType.bool(), false)
+        .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null);
   }
 
   Vec3i transformBlockPos(Vec3i original);
@@ -97,7 +97,7 @@ public interface BlockTransformationCommand {
           .stream().filter(entity -> region.contains(entity.getPos())));
     }
 
-    final boolean transformsRegion = keywordArgs.getBoolean("region");
+    final boolean transformsRegion = keywordArgs.getBoolean("select");
     final ServerPlayerEntity player = source.getPlayer();
 
     final boolean immediately = keywordArgs.getBoolean("immediately");

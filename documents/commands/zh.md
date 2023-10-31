@@ -1,12 +1,15 @@
 本模组加入了一系列增强的**命令**。
 
-## 方块命令
+## 区域操作命令
 
-这些命令用于放置方块。
+这些命令用于对一个区域内的方块（有时包括实体）进行操作。
 
 - [`/draw`](draw/zh.md)：在世界内绘制一条曲线。
-- [`/replace`](replace/zh.md) 和 `//replace`：替换一个区域内的符合指定谓词的方块。
 - [`/fill`](fill/zh.md)、`//fill` 和 `//f`：设置区域内的方块。
+- [`/mirror`](mirror/zh.md) 和 `//mirror`：镜像（翻转）区域内的方块和实体。
+- [`/move`](move/zh.md) 和 `//move`：移动区域内的方块和实体。
+- [`/replace`](replace/zh.md) 和 `//replace`：替换区域内的符合指定谓词的方块。
+- [`/rotate`](rotate/zh.md) 和 `//rotate`：旋转区域内的方块和实体。
 
 ## 测试命令
 
@@ -49,8 +52,8 @@
 
 ## 其他命令
 
-- [`/activeregion`](activeregion/zh.md) 或 `/ar`：管理玩家的活动区域。
-- [`/regionbuilder`](regionbuilder/zh.md)：管理玩家的区域构建器的类型。
+- [`/activeregion`](activeregion/zh.md) 或 `/ar` 以及 `//activeregion` 和 `//ar`：管理玩家的活动区域。
+- [`/regionbuilder`](regionbuilder/zh.md) 和 `/rb`：管理玩家的区域构建器的类型。
 - [`/tasks`](tasks/zh.md)：管理当前服务器中的任务。
 - [`/tprel`](tprel/zh.md)：传送实体，其中坐标和旋转均是以被传送实体为基础计算的。
 - [`/rand`](rand/zh.md)：生成随机数。
