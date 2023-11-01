@@ -176,8 +176,12 @@ public enum RotateCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public void notifyCompletion(ServerCommandSource source, int affectedNum) {
-        CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.rotate.complete", Integer.toString(affectedNum)), true);
+      public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
+        if (affectedEntities == -1) {
+          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.rotate.complete", Integer.toString(affectedBlocks)), true);
+        } else {
+          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.rotate.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)), true);
+        }
       }
 
       @Override

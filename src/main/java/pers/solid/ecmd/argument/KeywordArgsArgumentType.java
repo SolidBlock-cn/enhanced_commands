@@ -1,7 +1,10 @@
 package pers.solid.ecmd.argument;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -146,6 +149,13 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
       arguments.putAll(source.arguments);
       requiredArguments.addAll(source.requiredArguments);
       defaultValues.putAll(source.defaultValues);
+      return this;
+    }
+
+    public Builder addAll(KeywordArgsArgumentType source, Predicate<String> filterName) {
+      arguments.putAll(Maps.filterKeys(source.arguments, filterName));
+      requiredArguments.addAll(Sets.filter(source.requiredArguments, filterName));
+      defaultValues.putAll(Maps.filterKeys(source.defaultValues, filterName));
       return this;
     }
 

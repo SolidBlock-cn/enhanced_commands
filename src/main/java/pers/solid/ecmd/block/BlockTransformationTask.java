@@ -23,8 +23,8 @@ import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.SimpleBlockFunction;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
-import pers.solid.ecmd.util.iterator.CatchingIterator;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
@@ -82,7 +82,7 @@ public class BlockTransformationTask {
 
   public void checkAndRejectUnloadedPos() throws CommandSyntaxException {
     final BlockBox box = region.minContainingBlockBox();
-    if (box != null && (!world.isPosLoaded(box.getMinX(), box.getMinZ()) || !world.isPosLoaded(box.getMaxX(), box.getMaxZ()))) {
+    if (box != null && !LoadUtil.isPosLoaded(world, box)) {
       throw FillReplaceCommand.UNLOADED_POS.create();
     }
   }
@@ -272,7 +272,7 @@ public class BlockTransformationTask {
 
   public record TaskSeries(Iterator<Void> storeTransformed, Iterator<Void> collectMatchingTransformed, Iterator<Void> releaseTransformed, Iterator<Void> transformEntities, Iterator<Void> collectMatchingRemaining, Iterator<Void> setRemaining, Iterator<Void> addInterpolation) {
     public Iterator<Void> getSpeedAdjustedTask() {
-      return new CatchingIterator<>(Iterators.concat(
+      return UnloadedPosException.catching(Iterators.concat(
           IterateUtils.batchAndSkip(storeTransformed, 16384, 3),
           IterateUtils.batchAndSkip(collectMatchingTransformed, 16384, 3),
           IterateUtils.batchAndSkip(releaseTransformed, 32768, 15),
@@ -280,15 +280,11 @@ public class BlockTransformationTask {
           IterateUtils.batchAndSkip(collectMatchingRemaining, 16384, 3),
           IterateUtils.batchAndSkip(setRemaining, 32768, 15),
           IterateUtils.batchAndSkip(addInterpolation, 32768, 15)
-      ), e -> {
-        if (!(e instanceof UnloadedPosException)) throw e;
-      });
+      ));
     }
 
     public Iterator<Void> getImmediateTask() {
-      return new CatchingIterator<>(Iterators.concat(storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation), e -> {
-        if (!(e instanceof UnloadedPosException)) throw e;
-      });
+      return UnloadedPosException.catching(Iterators.concat(storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation));
     }
   }
 

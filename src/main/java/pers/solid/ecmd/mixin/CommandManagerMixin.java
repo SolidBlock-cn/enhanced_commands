@@ -1,5 +1,6 @@
 package pers.solid.ecmd.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -45,5 +46,10 @@ public abstract class CommandManagerMixin {
       mutableText.append(Text.literal("«").formatted(Formatting.DARK_RED));
       mutableText.append(Text.literal(commandSyntaxException.getInput().substring(cursorEnd, Math.min(cursorEnd + 10, commandSyntaxException.getInput().length()))));
     }
+  }
+
+  @ModifyExpressionValue(method = "execute", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;isDebugEnabled()Z", remap = false))
+  public boolean forceEnableDebugging(boolean original) {
+    return true;
   }
 }

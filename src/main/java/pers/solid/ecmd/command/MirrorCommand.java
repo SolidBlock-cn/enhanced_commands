@@ -28,7 +28,6 @@ import pers.solid.ecmd.regionbuilder.RegionBuilder;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
@@ -41,21 +40,16 @@ public enum MirrorCommand implements CommandRegistrationCallback {
     final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
         .addOptionalArg("pivot", EnhancedPosArgumentType.blockPos(), EnhancedPosArgumentType.CURRENT_POS)
         .build();
-    ModCommands.registerWithArgumentModification(
+    ModCommands.registerWithRegionArgumentModificationDefaults(
         dispatcher,
+        registryAccess,
         literalR2("mirror"),
-        literalR2("/mirror")
-            .executes(context -> {
-              final ServerCommandSource source = context.getSource();
-              return executeMirror(((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow(source), AxisArgument.FRONT_BACK.apply(source), keywordArgs.defaultArgs(), context);
-            }),
-        argument("region", RegionArgumentType.region(registryAccess))
-            .executes(context -> executeMirror(AxisArgument.FRONT_BACK.apply(context.getSource()), keywordArgs.defaultArgs(), context))
-            .then(argument("axis", AxisArgumentType.axis(false))
-                .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
-                .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context)))),
-        ModCommands.REGION_ARGUMENTS_MODIFIER
+        literalR2("/mirror"),
+        argument("axis", AxisArgumentType.axis(false))
+            .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
+            .then(argument("keyword_args", keywordArgs)
+                .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))).build(),
+        context -> executeMirror(AxisArgument.FRONT_BACK.apply(context.getSource()), keywordArgs.defaultArgs(), context)
     );
   }
 
@@ -117,8 +111,12 @@ public enum MirrorCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public void notifyCompletion(ServerCommandSource source, int affectedNum) {
-        CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.mirror.complete", Integer.toString(affectedNum)), true);
+      public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
+        if (affectedEntities == -1) {
+          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.mirror.complete", Integer.toString(affectedBlocks)), true);
+        } else {
+          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.mirror.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)), true);
+        }
       }
 
       @Override

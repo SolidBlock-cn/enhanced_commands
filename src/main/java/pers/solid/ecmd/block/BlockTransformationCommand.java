@@ -19,6 +19,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 import pers.solid.ecmd.argument.BlockFunctionArgumentType;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.KeywordArgs;
@@ -64,7 +65,13 @@ public interface BlockTransformationCommand {
 
   void transformRegionBuilder(RegionBuilder regionBuilder);
 
-  void notifyCompletion(ServerCommandSource source, int affectedNum);
+  /**
+   * 完成操作时通知影响的方块和实体的数量。
+   *
+   * @param affectedBlocks   影响的方块的数量。
+   * @param affectedEntities 影响的实体的数量，如果命令的参数未允许影响实体，则为 -1，如果允许影响实体但是没有影响到实体，则为 1。
+   */
+  void notifyCompletion(ServerCommandSource source, @Range(from = 0, to = Long.MAX_VALUE) int affectedBlocks, @Range(from = -1, to = Long.MAX_VALUE) int affectedEntities);
 
   @NotNull MutableText getIteratorTaskName(Region region);
 
@@ -136,7 +143,7 @@ public interface BlockTransformationCommand {
           ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(finalActiveRegion);
         }
         notifyUnloadedPos(task, unloadedPosBehavior, source);
-        notifyCompletion(source, task.getAffectedBlocks());
+        notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
       })));
       CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
@@ -144,16 +151,17 @@ public interface BlockTransformationCommand {
       IterateUtils.exhaust(task.transformBlocks().getImmediateTask());
       notifyUnloadedPos(task, unloadedPosBehavior, source);
       final int affectedBlocks = task.getAffectedBlocks();
-      notifyCompletion(source, affectedBlocks);
+      final int affectedEntities = task.getAffectedEntities();
+      notifyCompletion(source, affectedBlocks, entitiesToAffect == null ? -1 : affectedEntities);
       if (transformsRegion && player != null) {
         if (activeRegion != null) {
           ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(activeRegion);
         }
         if (regionBuilder != null) {
-          ((ServerPlayerEntityExtension) player).ec$setRegionBuilder(regionBuilder);
+          ((ServerPlayerEntityExtension) player).ec$switchRegionBuilder(regionBuilder);
         }
       }
-      return affectedBlocks;
+      return affectedBlocks + affectedEntities;
     }
   }
 

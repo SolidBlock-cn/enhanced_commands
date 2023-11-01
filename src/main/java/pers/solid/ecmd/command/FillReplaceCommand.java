@@ -27,6 +27,7 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
@@ -108,7 +109,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     final ServerWorld world = source.getWorld();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       final BlockBox box = region.minContainingBlockBox();
-      if (box != null && (!world.isPosLoaded(box.getMinX(), box.getMinZ()) || !world.isPosLoaded(box.getMaxX(), box.getMaxZ()))) {
+      if (box != null && !LoadUtil.isPosLoaded(world, box)) {
         throw UNLOADED_POS.create();
       }
     }
