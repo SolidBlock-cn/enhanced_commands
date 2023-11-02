@@ -89,44 +89,33 @@ public enum StackCommand implements CommandRegistrationCallback {
         .addOptionalArg("gap", integer(), 0)
         .build();
 
-    ModCommands.registerWithRegionArgumentModificationDefaults(
+    ModCommands.registerWithRegionArgumentModification(
         dispatcher,
-        registryAccess,
         literalR2("stack"),
         literalR2("/stack"),
-        argument("amount", integer())
-            .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "amount"), keywordArgsForDirections.defaultArgs(), context))
-            .then(argument("keyword_args", keywordArgsForDirections)
-                .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context)))
-            .then(argument("direction", DirectionArgumentType.direction())
-                .executes(context -> executeStackInDirection(getDirection(context, "direction"), getInteger(context, "amount"), keywordArgsForDirections.defaultArgs(), context))
+        argument("region", RegionArgumentType.region(registryAccess))
+            .then(argument("direction", direction())
+                .executes(context -> executeStackInDirection(getDirection(context, "direction"), 1, keywordArgsForDirections.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgsForDirections)
-                    .executes(context -> executeStackInDirection(getDirection(context, "direction"), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context))))
-            .then(literal("vector")
-                .then(argument("x", integer())
-                    .then(argument("y", integer())
-                        .then(argument("z", integer())
-                            .executes(context -> executeStack(new Vec3i(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z")), getInteger(context, "amount"), keywordArgsForVector.defaultArgs(), context))
-                            .then(argument("keyword_args", keywordArgsForVector)
-                                .executes(context -> executeStack(new Vec3i(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z")), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context)))))))
-            .build(),
-        context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, keywordArgsForDirections.defaultArgs(), context)
-    );
-    ModCommands.registerWithRegionArgumentModification(
-        dispatcher, registryAccess,
-        literalR2("stack"),
-        literalR2("/stack"),
-        argument("direction", direction())
-            .executes(context -> executeStackInDirection(getDirection(context, "direction"), 1, keywordArgsForDirections.defaultArgs(), context))
+                    .executes(context -> executeStackInDirection(getDirection(context, "direction"), 1, getKeywordArgs(context, "keyword_args"), context))))
             .then(argument("keyword_args", keywordArgsForDirections)
-                .executes(context -> executeStackInDirection(getDirection(context, "direction"), 1, getKeywordArgs(context, "keyword_args"), context)))
-    );
-    ModCommands.registerWithRegionArgumentModification(
-        dispatcher, registryAccess,
-        literal("stack"),
-        literalR2("/stack"),
-        argument("keyword_args", keywordArgsForDirections)
-            .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, getKeywordArgs(context, "keyword_args"), context))
+                .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, getKeywordArgs(context, "keyword_args"), context)))
+            .then(argument("amount", integer())
+                .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "amount"), keywordArgsForDirections.defaultArgs(), context))
+                .then(argument("keyword_args", keywordArgsForDirections)
+                    .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context)))
+                .then(argument("direction", DirectionArgumentType.direction())
+                    .executes(context -> executeStackInDirection(getDirection(context, "direction"), getInteger(context, "amount"), keywordArgsForDirections.defaultArgs(), context))
+                    .then(argument("keyword_args", keywordArgsForDirections)
+                        .executes(context -> executeStackInDirection(getDirection(context, "direction"), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context))))
+                .then(literal("vector")
+                    .then(argument("x", integer())
+                        .then(argument("y", integer())
+                            .then(argument("z", integer())
+                                .executes(context -> executeStack(new Vec3i(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z")), getInteger(context, "amount"), keywordArgsForVector.defaultArgs(), context))
+                                .then(argument("keyword_args", keywordArgsForVector)
+                                    .executes(context -> executeStack(new Vec3i(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z")), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context))))))))
+            .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, keywordArgsForDirections.defaultArgs(), context))
     );
   }
 

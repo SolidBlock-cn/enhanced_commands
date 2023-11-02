@@ -49,22 +49,27 @@ public enum RotateCommand implements CommandRegistrationCallback {
         .addOptionalArg("pivot", blockPos(), CURRENT_POS)
         .build();
 
-    ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess, literalR2("rotate"), literalR2("/rotate"), argument("rotation", AngleArgumentType.angle(false))
-        .executes(context -> executeRotate(null, keywordArgs.defaultArgs(), context))
-        .then(argument("keyword_args", keywordArgs)
-            .executes(context -> executeRotate(null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context)))
-        .then(literal("around")
-            .then(argument("around_direction", DirectionArgumentType.direction())
-                .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").getUnitVector()), keywordArgs.defaultArgs(), context))
+    ModCommands.registerWithRegionArgumentModification(
+        dispatcher,
+        literalR2("rotate"),
+        literalR2("/rotate"),
+        argument("region", RegionArgumentType.region(registryAccess))
+            .then(argument("rotation", AngleArgumentType.angle(false))
+                .executes(context -> executeRotate(null, keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").getUnitVector()), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
-            .then(literal("vector")
-                .then(argument("x", DoubleArgumentType.doubleArg())
-                    .then(argument("y", DoubleArgumentType.doubleArg())
-                        .then(argument("z", DoubleArgumentType.doubleArg())
-                            .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), keywordArgs.defaultArgs(), context))
-                            .then(argument("keyword_args", keywordArgs)
-                                .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context)))))))));
+                    .executes(context -> executeRotate(null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context)))
+                .then(literal("around")
+                    .then(argument("around_direction", DirectionArgumentType.direction())
+                        .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").getUnitVector()), keywordArgs.defaultArgs(), context))
+                        .then(argument("keyword_args", keywordArgs)
+                            .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").getUnitVector()), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
+                    .then(literal("vector")
+                        .then(argument("x", DoubleArgumentType.doubleArg())
+                            .then(argument("y", DoubleArgumentType.doubleArg())
+                                .then(argument("z", DoubleArgumentType.doubleArg())
+                                    .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), keywordArgs.defaultArgs(), context))
+                                    .then(argument("keyword_args", keywordArgs)
+                                        .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))))))));
   }
 
   public static int executeRotate(@Nullable AxisAngle4d axisAngle4d, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

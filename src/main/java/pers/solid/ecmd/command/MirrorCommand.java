@@ -40,16 +40,16 @@ public enum MirrorCommand implements CommandRegistrationCallback {
     final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
         .addOptionalArg("pivot", EnhancedPosArgumentType.blockPos(), EnhancedPosArgumentType.CURRENT_POS)
         .build();
-    ModCommands.registerWithRegionArgumentModificationDefaults(
+    ModCommands.registerWithRegionArgumentModification(
         dispatcher,
-        registryAccess,
         literalR2("mirror"),
         literalR2("/mirror"),
-        argument("axis", AxisArgumentType.axis(false))
-            .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
-            .then(argument("keyword_args", keywordArgs)
-                .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))).build(),
-        context -> executeMirror(AxisArgument.FRONT_BACK.apply(context.getSource()), keywordArgs.defaultArgs(), context)
+        argument("region", RegionArgumentType.region(registryAccess))
+            .then(argument("axis", AxisArgumentType.axis(false))
+                .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
+                .then(argument("keyword_args", keywordArgs)
+                    .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
+            .executes(context -> executeMirror(AxisArgument.FRONT_BACK.apply(context.getSource()), keywordArgs.defaultArgs(), context))
     );
   }
 

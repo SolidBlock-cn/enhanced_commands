@@ -13,7 +13,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import pers.solid.ecmd.argument.RegionArgumentType;
 import pers.solid.ecmd.mixin.CommandContextAccessor;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.mixin.EnhancedRedirectModifier;
@@ -49,10 +48,6 @@ public enum ModCommands implements CommandRegistrationCallback {
     TpRelCommand.INSTANCE.register(dispatcher, registryAccess, environment);
   }
 
-  public static <S> LiteralCommandNode<S> registerWithArgumentModification(CommandDispatcher<S> dispatcher, LiteralArgumentBuilder<S> directBuilder, LiteralArgumentBuilder<S> indirectBuilder, ArgumentBuilder<S, ?> then, RedirectModifier<S> redirectModifier) {
-    return registerWithArgumentModification(dispatcher, directBuilder, indirectBuilder, then.build(), redirectModifier);
-  }
-
   public static <S> LiteralCommandNode<S> registerWithArgumentModification(CommandDispatcher<S> dispatcher, LiteralArgumentBuilder<S> directBuilder, LiteralArgumentBuilder<S> indirectBuilder, CommandNode<S> then, RedirectModifier<S> redirectModifier) {
     final LiteralCommandNode<S> register = dispatcher.register(directBuilder.then(then));
     dispatcher.register(indirectBuilder.forward(then, redirectModifier, false));
@@ -65,18 +60,18 @@ public enum ModCommands implements CommandRegistrationCallback {
     arguments.put("region", new ParsedArgument<>(0, 0, regionArgument));
   };
 
-  public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, CommandNode<ServerCommandSource> then) {
-    return registerWithArgumentModification(dispatcher, directBuilder, indirectBuilder, CommandManager.argument("region", RegionArgumentType.region(commandRegistryAccess)).then(then), REGION_ARGUMENTS_MODIFIER);
+  public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, CommandNode<ServerCommandSource> regionArgument) {
+    final Command<ServerCommandSource> directCommand = regionArgument.getCommand();
+    if (directCommand != null && indirectBuilder.getCommand() == null) {
+      indirectBuilder.executes(context -> {
+        ((CommandContextAccessor<?>) context).getArguments().put("region", new ParsedArgument<>(0, 0, ((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow(context.getSource())));
+        return directCommand.run(context);
+      });
+    }
+    return registerWithArgumentModification(dispatcher, directBuilder, indirectBuilder, regionArgument, REGION_ARGUMENTS_MODIFIER);
   }
 
-  public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModificationDefaults(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, CommandNode<ServerCommandSource> then, Command<ServerCommandSource> executesWithoutArguments) {
-    return registerWithArgumentModification(dispatcher, directBuilder, indirectBuilder.executes(context -> {
-      ((CommandContextAccessor<?>) context).getArguments().put("region", new ParsedArgument<>(0, 0, ((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow(context.getSource())));
-      return executesWithoutArguments.run(context);
-    }), CommandManager.argument("region", RegionArgumentType.region(commandRegistryAccess)).then(then).executes(executesWithoutArguments), REGION_ARGUMENTS_MODIFIER);
-  }
-
-  public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, ArgumentBuilder<ServerCommandSource, ?> then) {
-    return registerWithRegionArgumentModification(dispatcher, commandRegistryAccess, directBuilder, indirectBuilder, then.build());
+  public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, ArgumentBuilder<ServerCommandSource, ?> regionArgument) {
+    return registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, regionArgument.build());
   }
 }

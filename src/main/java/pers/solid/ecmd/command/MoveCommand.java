@@ -29,6 +29,7 @@ import java.util.function.Function;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 import static pers.solid.ecmd.argument.DirectionArgumentType.getDirection;
 import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
@@ -41,44 +42,34 @@ public enum MoveCommand implements CommandRegistrationCallback {
     final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
         .build();
 
-    ModCommands.registerWithRegionArgumentModificationDefaults(
+    ModCommands.registerWithRegionArgumentModification(
         dispatcher,
-        registryAccess,
         literalR2("move"),
         literalR2("/move"),
-        argument("offset", integer())
-            .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "offset"), keywordArgs.defaultArgs(), context))
-            .then(argument("direction", DirectionArgumentType.direction())
-                .executes(context -> executeMoveFromDirection(getDirection(context, "direction"), getInteger(context, "offset"), keywordArgs.defaultArgs(), context))
-                .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeMoveFromDirection(getDirection(context, "direction"), getInteger(context, "offset"), getKeywordArgs(context, "keyword_args"), context))))
-            .then(argument("keyword_args", keywordArgs)
-                .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "offset"), getKeywordArgs(context, "keyword_args"), context)))
-            .build(),
-        context -> executeMove(Either.left(ObjectIntPair.of(DirectionArgument.FRONT.apply(context.getSource()), 1)), keywordArgs.defaultArgs(), context)
-    );
-    ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess,
-        literalR2("move"),
-        literalR2("/move"),
-        argument("x", integer())
-            .then(argument("y", integer())
-                .then(argument("z", integer())
-                    .executes(context -> executeMoveFromVectorArgs(keywordArgs.defaultArgs(), context))
+        argument("region", RegionArgumentType.region(registryAccess))
+            .then(argument("offset", integer())
+                .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "offset"), keywordArgs.defaultArgs(), context))
+                .then(argument("direction", DirectionArgumentType.direction())
+                    .executes(context -> executeMoveFromDirection(getDirection(context, "direction"), getInteger(context, "offset"), keywordArgs.defaultArgs(), context))
                     .then(argument("keyword_args", keywordArgs)
-                        .executes(context -> executeMoveFromVectorArgs(getKeywordArgs(context, "keyword_args"), context))))));
-    ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess,
-        literalR2("move"),
-        literalR2("/move"),
-        argument("direction", DirectionArgumentType.direction())
-            .executes(context -> executeMove(Either.left(ObjectIntPair.of(getDirection(context, "direction"), 1)), keywordArgs.defaultArgs(), context))
+                        .executes(context -> executeMoveFromDirection(getDirection(context, "direction"), getInteger(context, "offset"), getKeywordArgs(context, "keyword_args"), context))))
+                .then(argument("keyword_args", keywordArgs)
+                    .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "offset"), getKeywordArgs(context, "keyword_args"), context))))
+            .then(literal("vector")
+                .then(argument("x", integer())
+                    .then(argument("y", integer())
+                        .then(argument("z", integer())
+                            .executes(context -> executeMoveFromVectorArgs(keywordArgs.defaultArgs(), context))
+                            .then(argument("keyword_args", keywordArgs)
+                                .executes(context -> executeMoveFromVectorArgs(getKeywordArgs(context, "keyword_args"), context)))))))
+            .then(argument("direction", DirectionArgumentType.direction())
+                .executes(context -> executeMove(Either.left(ObjectIntPair.of(getDirection(context, "direction"), 1)), keywordArgs.defaultArgs(), context))
+                .then(argument("keyword_args", keywordArgs)
+                    .executes(context -> executeMove(Either.left(ObjectIntPair.of(getDirection(context, "direction"), 1)), getKeywordArgs(context, "keyword_args"), context))))
             .then(argument("keyword_args", keywordArgs)
-                .executes(context -> executeMove(Either.left(ObjectIntPair.of(getDirection(context, "direction"), 1)), getKeywordArgs(context, "keyword_args"), context)))
+                .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, getKeywordArgs(context, "keyword_args"), context)))
+            .executes(context -> executeMove(Either.left(ObjectIntPair.of(DirectionArgument.FRONT.apply(context.getSource()), 1)), keywordArgs.defaultArgs(), context))
     );
-    ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess,
-        literalR2("move"),
-        literalR2("/move"),
-        argument("keyword_args", keywordArgs)
-            .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, getKeywordArgs(context, "keyword_args"), context)));
   }
 
   public static int executeMoveFromDirection(Direction direction, int offset, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

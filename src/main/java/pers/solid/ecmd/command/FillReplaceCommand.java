@@ -3,6 +3,7 @@ package pers.solid.ecmd.command;
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
@@ -40,6 +41,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
+import static pers.solid.ecmd.argument.RegionArgumentType.region;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum FillReplaceCommand implements CommandRegistrationCallback {
@@ -66,16 +68,24 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final LiteralCommandNode<ServerCommandSource> fillNode = ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess, literalR2("fill"), literalR2("/fill"), argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-        .executes(context1 -> execute(context1, null))
-        .then(argument("kwargs", KEYWORD_ARGS)
-            .executes(context1 -> execute(context1, null, KeywordArgsArgumentType.getKeywordArgs(context1, "kwargs")))).build());
+    LiteralArgumentBuilder<ServerCommandSource> directBuilder = literalR2("fill");
+    LiteralArgumentBuilder<ServerCommandSource> indirectBuilder = literalR2("/fill");
+    final LiteralCommandNode<ServerCommandSource> fillNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(registryAccess)).then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+        .executes(context -> execute(context, null))
+        .then(argument("keyword_args", KEYWORD_ARGS)
+            .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build()).build());
+
     dispatcher.register(literalR2("/f").forward(fillNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
-    ModCommands.registerWithRegionArgumentModification(dispatcher, registryAccess, literalR2("replace"), literalR2("/replace"), argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
-        .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-            .executes(context -> execute(context, cachedBlockPosition -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition)))
-            .then(argument("kwargs", KEYWORD_ARGS)
-                .executes(context -> execute(context, cachedBlockPosition1 -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition1), KeywordArgsArgumentType.getKeywordArgs(context, "kwargs"))))));
+
+    ModCommands.registerWithRegionArgumentModification(dispatcher,
+        literalR2("replace"),
+        literalR2("/replace"),
+        argument("region", region(registryAccess))
+            .then(argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
+                .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+                    .executes(context -> execute(context, cachedBlockPosition -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition)))
+                    .then(argument("keyword_args", KEYWORD_ARGS)
+                        .executes(context -> execute(context, cachedBlockPosition1 -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition1), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))))));
   }
 
   /**
