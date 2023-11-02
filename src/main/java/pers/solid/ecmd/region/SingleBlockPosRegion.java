@@ -90,7 +90,7 @@ public record SingleBlockPosRegion(Vec3i vec3i) implements IntBackedRegion {
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.region.single");
+      return Text.translatable("enhanced_commands.argument.region.single");
     }
 
     @Override

@@ -55,7 +55,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     for (Direction direction : directions) {
       var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
       final boolean test = exposureType.test(offsetCachedBlockPosition, direction);
-      testResults.add(new TestResult(test, Text.translatable("enhancedCommands.argument.block_predicate.expose.side." + (test ? "pass" : "fail"), TextUtil.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
+      testResults.add(new TestResult(test, Text.translatable("enhanced_commands.argument.block_predicate.expose.side." + (test ? "pass" : "fail"), TextUtil.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
       if (test) {
         result = true;
       }
@@ -63,7 +63,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     if (testResults.size() == 1) {
       return testResults.get(0);
     } else {
-      return new TestResult(result, List.of(Text.translatable("enhancedCommands.argument.block_predicate.expose." + (result ? "pass" : "fail")).formatted(result ? Formatting.GREEN : Formatting.RED)), testResults);
+      return new TestResult(result, List.of(Text.translatable("enhanced_commands.argument.block_predicate.expose." + (result ? "pass" : "fail")).formatted(result ? Formatting.GREEN : Formatting.RED)), testResults);
     }
   }
 
@@ -143,7 +143,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     public abstract boolean test(CachedBlockPosition offsetCachedBlockPosition, Direction direction);
 
     public MutableText getDisplayName() {
-      return Text.translatable("enhancedCommands.exposureType." + name);
+      return Text.translatable("enhanced_commands.exposure_type." + name);
     }
   }
 
@@ -158,7 +158,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.block_predicate.expose");
+      return Text.translatable("enhanced_commands.argument.block_predicate.expose");
     }
 
     @Override
@@ -187,9 +187,9 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
           parser.reader.skipWhitespace();
           if (directions.isEmpty()) {
             parser.suggestionProviders.add((context, suggestionsBuilder) -> {
-              ParsingUtil.suggestString("all", Text.translatable("enhancedCommands.direction.all"), suggestionsBuilder);
-              ParsingUtil.suggestString("horizontal", Text.translatable("enhancedCommands.direction.horizontal"), suggestionsBuilder);
-              ParsingUtil.suggestString("vertical", Text.translatable("enhancedCommands.direction.vertical"), suggestionsBuilder);
+              ParsingUtil.suggestString("all", Text.translatable("enhanced_commands.direction.all"), suggestionsBuilder);
+              ParsingUtil.suggestString("horizontal", Text.translatable("enhanced_commands.direction.horizontal"), suggestionsBuilder);
+              ParsingUtil.suggestString("vertical", Text.translatable("enhanced_commands.direction.vertical"), suggestionsBuilder);
             });
           }
           parser.suggestionProviders.add((context, builder) -> ParsingUtil.suggestDirections(builder));

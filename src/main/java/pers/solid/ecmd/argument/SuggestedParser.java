@@ -80,7 +80,7 @@ public class SuggestedParser {
     return readAndSuggestValues(iterable, StringIdentifiable::asString, tooltip, valueGetter);
   }
 
-  public static final DynamicCommandExceptionType UNKNOWN_VALUE = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.unknown_value", o));
+  public static final DynamicCommandExceptionType UNKNOWN_VALUE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.unknown_value", o));
 
   public <T extends Enum<T> & StringIdentifiable> @NotNull T readAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip) throws CommandSyntaxException {
     return readAndSuggestEnums(iterable, tooltip, name -> Streams.stream(iterable).filter(t -> t.asString().equals(name)).findAny().orElseThrow(() -> UNKNOWN_VALUE.createWithContext(reader, name)));

@@ -42,6 +42,6 @@ public enum UnloadedPosBehavior implements StringIdentifiable {
   }
 
   public MutableText getDescription() {
-    return Text.translatable("enhancedCommands.argument.unloaded_pos_behavior." + name);
+    return Text.translatable("enhanced_commands.argument.unloaded_pos_behavior." + name);
   }
 }

@@ -38,8 +38,6 @@ import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.regionbuilder.RegionBuilder;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
@@ -67,8 +65,8 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 public enum StackCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  public static final SimpleCommandExceptionType UNLOADED_SOURCE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.commands.stack.rejected_source", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
-  public static final SimpleCommandExceptionType UNLOADED_TARGET = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.commands.stack.rejected_target", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
+  public static final SimpleCommandExceptionType UNLOADED_SOURCE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.stack.rejected_source", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
+  public static final SimpleCommandExceptionType UNLOADED_TARGET = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.stack.rejected_target", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
@@ -127,7 +125,7 @@ public enum StackCommand implements CommandRegistrationCallback {
     final BlockBox blockBox = region.minContainingBlockBox();
     final int offsetAmount;
     if (blockBox == null) {
-      throw new CommandException(Text.translatable("enhancedCommands.commands.stack.unsupported_box"));
+      throw new CommandException(Text.translatable("enhanced_commands.commands.stack.unsupported_box"));
     } else {
       final Direction.Axis axis = direction.getAxis();
       offsetAmount = axis.choose(blockBox.getMaxX(), blockBox.getMaxY(), blockBox.getMaxZ()) - axis.choose(blockBox.getMinX(), blockBox.getMinY(), blockBox.getMinZ()) + 1 + keywordArgs.getInt("gap");
@@ -146,19 +144,9 @@ public enum StackCommand implements CommandRegistrationCallback {
     final boolean transformsRegion = keywordArgs.getBoolean("select");
     final ServerPlayerEntity player = source.getPlayer();
 
-    RegionBuilder regionBuilder = null;
-    RegionArgument<?> activeRegion;
+    Region activeRegion;
     if (transformsRegion && player != null) {
-      try {
-        regionBuilder = ((ServerPlayerEntityExtension) player).ec$getRegionBuilder();
-        // TODO: 2023年11月1日 检查玩家有 regionBuilder 但它不是活动区域的情况！
-        if (regionBuilder != null) {
-          regionBuilder = regionBuilder.clone();
-          regionBuilder.move(relativeVec.multiply(stackAmount));
-        }
-      } catch (RuntimeException e) {
-        regionBuilder = null;
-      }
+      ((ServerPlayerEntityExtension) player).ec$setActiveRegion(targetRegion);
       activeRegion = targetRegion;
     } else {activeRegion = null;}
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
@@ -292,26 +280,22 @@ public enum StackCommand implements CommandRegistrationCallback {
     }).flatMap(Function.identity());
     iterators.add(IterateUtils.batchAndSkip(setBlocks.iterator(), 32767, 15));
 
-    RegionBuilder finalRegionBuilder = regionBuilder;
     Iterator<?> iterator = Iterators.concat(UnloadedPosException.catching(Iterators.concat(iterators.iterator())), IterateUtils.singletonPeekingIterator(() -> {
       if (hasUnloadedPos.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-          CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.broken").styled(TextUtil.STYLE_FOR_ACTUAL), false);
+          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.broken").styled(TextUtil.STYLE_FOR_ACTUAL), false);
         } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-          CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.skipped").styled(TextUtil.STYLE_FOR_ACTUAL), false);
+          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(TextUtil.STYLE_FOR_ACTUAL), false);
         }
       }
       if (affectEntities != null) {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.stack.complete_including_entities", blocksAffected, entitiesAffected), true);
+        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.stack.complete_including_entities", blocksAffected, entitiesAffected), true);
       } else {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.stack.complete", blocksAffected), true);
+        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
       }
       if (transformsRegion && player != null) {
         if (activeRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(activeRegion);
-        }
-        if (finalRegionBuilder != null) {
-          ((ServerPlayerEntityExtension) player).ec$switchRegionBuilder(finalRegionBuilder);
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
         }
       }
     }));
@@ -319,8 +303,8 @@ public enum StackCommand implements CommandRegistrationCallback {
     final boolean immediately = keywordArgs.getBoolean("immediately");
     if (!immediately && region.numberOfBlocksAffected() * stackAmount > 16384) {
       // The region is too large. Send a server task.
-      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhancedCommands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount)), UnloadedPosException.catching(iterator));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount)), UnloadedPosException.catching(iterator));
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

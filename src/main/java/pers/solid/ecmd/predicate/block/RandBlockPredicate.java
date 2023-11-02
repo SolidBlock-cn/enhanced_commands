@@ -51,9 +51,9 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(TextUtil.STYLE_FOR_ACTUAL);
     final MutableText o2 = Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_EXPECTED);
     if (nextFloat < value) {
-      return new TestResult(true, Text.translatable("enhancedCommands.argument.block_predicate.probability.pass", o1, o2).formatted(Formatting.GREEN));
+      return new TestResult(true, Text.translatable("enhanced_commands.argument.block_predicate.probability.pass", o1, o2).formatted(Formatting.GREEN));
     } else {
-      return new TestResult(false, Text.translatable("enhancedCommands.argument.block_predicate.probability.fail", o1, o2).formatted(Formatting.RED));
+      return new TestResult(false, Text.translatable("enhanced_commands.argument.block_predicate.probability.fail", o1, o2).formatted(Formatting.RED));
     }
   }
 
@@ -83,7 +83,7 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.block_predicate.probability");
+      return Text.translatable("enhanced_commands.argument.block_predicate.probability");
     }
 
     @Override

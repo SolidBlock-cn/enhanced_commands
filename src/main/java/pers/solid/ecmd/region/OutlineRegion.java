@@ -161,7 +161,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     public MutableText getDisplayName() {
-      return Text.translatable("enhancedCommands.outlineType." + name);
+      return Text.translatable("enhanced_commands.outline_type." + name);
     }
   }
 

@@ -28,8 +28,8 @@ import java.util.concurrent.CompletableFuture;
 import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCursorEnd;
 
 public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<@NotNull String, Object> defaultValues) implements ArgumentType<KeywordArgs> {
-  public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.keyword_args.unknown_argument_name", o));
-  public static final DynamicCommandExceptionType DUPLICATE_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.keyword_args.duplicate_argument_name", o));
+  public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.keyword_args.unknown_argument_name", o));
+  public static final DynamicCommandExceptionType DUPLICATE_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.keyword_args.duplicate_argument_name", o));
 
   public static Builder builder() {
     return new Builder(new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableMap.Builder<>());

@@ -148,7 +148,7 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.region.hollow_cylinder");
+      return Text.translatable("enhanced_commands.argument.region.hollow_cylinder");
     }
 
     @Override

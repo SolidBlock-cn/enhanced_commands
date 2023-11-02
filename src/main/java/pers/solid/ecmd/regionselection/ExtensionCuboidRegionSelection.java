@@ -1,6 +1,6 @@
-package pers.solid.ecmd.regionbuilder;
+package pers.solid.ecmd.regionselection;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandException;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
@@ -9,40 +9,39 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.region.BlockCuboidRegion;
-import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder, Cloneable {
+public class ExtensionCuboidRegionSelection extends AbstractRegionSelection<BlockCuboidRegion> implements IntBackedRegionSelection, Cloneable {
   public Vec3i firstPos;
   public Vec3i secondPos;
 
   @Override
-  public void clickFirstPoint(BlockPos point, PlayerEntity player) {
+  public Supplier<Text> clickFirstPoint(BlockPos point, PlayerEntity player) {
     firstPos = point;
     secondPos = null;
-    player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_first", TextUtil.wrapVector(firstPos).styled(TextUtil.STYLE_FOR_RESULT)));
-    BlockCuboidRegionBuilder.notifyStatistics(firstPos, secondPos, player);
+    resetCalculation();
+    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.argument.region_selection.cuboid.set_first", TextUtil.wrapVector(firstPos).styled(TextUtil.STYLE_FOR_RESULT)), BlockCuboidRegionSelection.notifyStatistics(firstPos, secondPos));
   }
 
   @Override
-  public void clickSecondPoint(BlockPos point, PlayerEntity player) {
+  public Supplier<Text> clickSecondPoint(BlockPos point, PlayerEntity player) {
     if (firstPos == null) {
       firstPos = point;
-      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.cuboid.set_first", TextUtil.wrapVector(firstPos).styled(TextUtil.STYLE_FOR_RESULT)));
+      return () -> (Text.translatable("enhanced_commands.argument.region_selection.cuboid.set_first", TextUtil.wrapVector(firstPos).styled(TextUtil.STYLE_FOR_RESULT)));
     } else if (secondPos == null) {
       secondPos = point;
-      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.include", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
+      resetCalculation();
+      return () -> (Text.translatable("enhanced_commands.argument.region_selection.extension.include", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
     } else {
       final BlockBox blockBox = BlockBox.create(firstPos, secondPos);
       if (blockBox.contains(point)) {
-        player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.not_infected", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
-        BlockCuboidRegionBuilder.notifyStatistics(firstPos, secondPos, player);
-        return;
+        return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.argument.region_selection.extension.not_infected", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)), BlockCuboidRegionSelection.notifyStatistics(firstPos, secondPos));
       }
       final BlockPos.Mutable mutable1 = new BlockPos.Mutable().set(firstPos);
       final BlockPos.Mutable mutable2 = new BlockPos.Mutable().set(secondPos);
@@ -70,8 +69,8 @@ public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder, Clo
       if (!mutable2.equals(secondPos)) {
         secondPos = mutable2.toImmutable();
       }
-      player.sendMessage(Text.translatable("enhancedCommands.argument.region_builder.extension.include", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
-      BlockCuboidRegionBuilder.notifyStatistics(firstPos, secondPos, player);
+      resetCalculation();
+      return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.argument.region_selection.extension.include", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)), BlockCuboidRegionSelection.notifyStatistics(firstPos, secondPos));
     }
   }
 
@@ -87,35 +86,34 @@ public class ExtensionCuboidRegionBuilder implements IntBackedRegionBuilder, Clo
       if (points.size() > 1) {
         secondPos = BlockPos.ofFloored(points.get(points.size() - 1));
       }
+      resetCalculation();
     }
   }
 
   @Override
-  public Region buildRegion() throws CommandSyntaxException {
+  public BlockCuboidRegion buildRegion() {
     if (firstPos == null || secondPos == null) {
-      throw NOT_COMPLETED.create();
+      throw new CommandException(NOT_COMPLETED);
     } else {
       return new BlockCuboidRegion(firstPos, secondPos);
     }
   }
 
   @Override
-  public @NotNull RegionBuilderType getType() {
-    return RegionBuilderTypes.EXTENSION;
+  public @NotNull RegionSelectionType getBuilderType() {
+    return RegionSelectionTypes.EXTENSION;
   }
 
   @Override
-  public void transformInt(Function<Vec3i, Vec3i> transformation) {
+  public @NotNull IntBackedRegionSelection transformedInt(Function<Vec3i, Vec3i> transformation) {
     firstPos = transformation.apply(firstPos);
     secondPos = transformation.apply(secondPos);
+    resetCalculation();
+    return this;
   }
 
   @Override
-  public ExtensionCuboidRegionBuilder clone() {
-    try {
-      return (ExtensionCuboidRegionBuilder) super.clone();
-    } catch (CloneNotSupportedException e) {
-      throw new RuntimeException(e);
-    }
+  public @NotNull ExtensionCuboidRegionSelection clone() {
+    return (ExtensionCuboidRegionSelection) super.clone();
   }
 }

@@ -24,8 +24,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   public final Set<Property<?>> mentionedProperties = new HashSet<>();
   public final List<PropertyNameFunction> propertyNameFunctions = new ArrayList<>();
   public final Set<String> mentionedPropertyNames = new HashSet<>();
-  public static final SimpleCommandExceptionType DUPLICATE_GENERAL_PROPERTY_FUNCTION = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_function.property.duplicate_general"));
-  public static final SimpleCommandExceptionType EXHAUSTED_GENERAL_PROPERTIES = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_function.property.exhausted_general_properties"));
+  public static final SimpleCommandExceptionType DUPLICATE_GENERAL_PROPERTY_FUNCTION = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.property.duplicate_general"));
+  public static final SimpleCommandExceptionType EXHAUSTED_GENERAL_PROPERTIES = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.property.exhausted_general_properties"));
   /**
    * 使用通用属性（<code>*</code> 或 <code>~</code> 不带具体的属性名称）时，此字段表示需要排除的属性（就是已经被其他属性函数使用了的）。没有使用通用属性时，则为 {@code null}。
    */
@@ -96,8 +96,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   private void addSpecialPropertyValueSuggestions() {
     suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
-        suggestionsBuilder.suggest("*", Text.translatable("enhancedCommands.argument.block_function.randomValue"));
-        suggestionsBuilder.suggest("~", Text.translatable("enhancedCommands.argument.block_function.originalValue"));
+        suggestionsBuilder.suggest("*", Text.translatable("enhanced_commands.argument.block_function.randomValue"));
+        suggestionsBuilder.suggest("~", Text.translatable("enhanced_commands.argument.block_function.originalValue"));
       }
     });
   }
@@ -157,8 +157,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
     if (exceptionForGeneralProperty == null) {
       if (!propertiesExhausted) {
         suggestionProviders.add((context, suggestionsBuilder) -> {
-          ParsingUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_function.property.all_random"), suggestionsBuilder);
-          ParsingUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.property.all_original"), suggestionsBuilder);
+          ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.argument.block_function.property.all_random"), suggestionsBuilder);
+          ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.argument.block_function.property.all_original"), suggestionsBuilder);
         });
       }
     }
@@ -185,8 +185,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   protected boolean parsePropertyNameEntry() throws CommandSyntaxException {
     if (exceptionForGeneralPropertyName == null) {
       suggestionProviders.add((context, suggestionsBuilder) -> {
-        ParsingUtil.suggestString("*", Text.translatable("enhancedCommands.argument.block_function.property.all_random"), suggestionsBuilder);
-        ParsingUtil.suggestString("~", Text.translatable("enhancedCommands.argument.block_function.property.all_original"), suggestionsBuilder);
+        ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.argument.block_function.property.all_random"), suggestionsBuilder);
+        ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.argument.block_function.property.all_original"), suggestionsBuilder);
       });
     }
     if (reader.canRead()) {

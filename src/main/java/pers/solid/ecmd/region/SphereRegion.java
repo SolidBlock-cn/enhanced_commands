@@ -74,7 +74,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.region.sphere");
+      return Text.translatable("enhanced_commands.argument.region.sphere");
     }
 
     @Override

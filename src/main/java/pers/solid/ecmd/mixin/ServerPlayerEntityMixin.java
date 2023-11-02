@@ -7,56 +7,42 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.regionbuilder.RegionBuilder;
-import pers.solid.ecmd.regionbuilder.RegionBuilderType;
-import pers.solid.ecmd.regionbuilder.RegionBuilderTypes;
+import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.regionselection.RegionSelectionType;
+import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin implements ServerPlayerEntityExtension {
   @Unique
-  private @Nullable RegionArgument<?> ec$activeRegion;
+  private @Nullable Region ec$activeRegion;
   @Unique
-  private @Nullable RegionBuilder ec$regionBuilder;
-  @Unique
-  private RegionBuilderType ec$regionBuilderType = RegionBuilderTypes.CUBOID;
+  private RegionSelectionType ec$regionSelectionType = RegionSelectionTypes.CUBOID;
 
   @Override
-  public @Nullable RegionArgument<?> ec$getActiveRegionArgument() {
+  public @Nullable Region ec$getActiveRegion() {
     return ec$activeRegion;
   }
 
   @Override
-  public void ec$setActiveRegionArgument(RegionArgument<?> regionArgument) {
-    ec$activeRegion = regionArgument;
+  public void ec$setActiveRegion(Region region) {
+    ec$activeRegion = region;
   }
 
   @Inject(method = "copyFrom", at = @At("TAIL"))
   public void injectedCopyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
     // 玩家重生时，需保留这些信息。
-    ec$setActiveRegionArgument(((ServerPlayerEntityExtension) oldPlayer).ec$getActiveRegionArgument());
-    ec$setRegionBuilder(((ServerPlayerEntityExtension) oldPlayer).ec$getRegionBuilder());
-    ec$setRegionBuilderType(((ServerPlayerEntityExtension) oldPlayer).ec$getRegionBuilderType());
+    ec$setActiveRegion(((ServerPlayerEntityExtension) oldPlayer).ec$getActiveRegion());
+    ec$setRegionSelectionType(((ServerPlayerEntityExtension) oldPlayer).ec$getRegionSelectionType());
   }
 
   @Override
-  public @Nullable RegionBuilder ec$getRegionBuilder() {
-    return ec$regionBuilder;
+  public RegionSelectionType ec$getRegionSelectionType() {
+    return this.ec$regionSelectionType;
   }
 
   @Override
-  public void ec$setRegionBuilder(RegionBuilder regionBuilder) {
-    this.ec$regionBuilder = regionBuilder;
-  }
-
-  @Override
-  public RegionBuilderType ec$getRegionBuilderType() {
-    return this.ec$regionBuilderType;
-  }
-
-  @Override
-  public void ec$setRegionBuilderType(RegionBuilderType regionBuilderType) {
-    this.ec$regionBuilderType = regionBuilderType;
+  public void ec$setRegionSelectionType(RegionSelectionType regionSelectionType) {
+    this.ec$regionSelectionType = regionSelectionType;
   }
 }

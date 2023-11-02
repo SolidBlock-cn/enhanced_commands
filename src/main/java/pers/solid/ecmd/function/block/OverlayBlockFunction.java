@@ -76,7 +76,7 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.block_function.overlay");
+      return Text.translatable("enhanced_commands.argument.block_function.overlay");
     }
 
     @Override

@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.regionbuilder.RegionBuilder;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
@@ -113,22 +112,17 @@ public enum MoveCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public void transformRegionBuilder(RegionBuilder regionBuilder) {
-        regionBuilder.move(relativeVector);
-      }
-
-      @Override
       public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
         if (affectedEntities == -1) {
-          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> TextUtil.enhancedTranslatable("enhancedCommands.commands.move.complete.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks)), vec3i -> TextUtil.enhancedTranslatable("enhancedCommands.commands.move.complete.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks))), true);
+          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> TextUtil.enhancedTranslatable("enhanced_commands.commands.move.complete.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks)), vec3i -> TextUtil.enhancedTranslatable("enhanced_commands.commands.move.complete.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks))), true);
         } else {
-          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> TextUtil.enhancedTranslatable("enhancedCommands.commands.move.complete_with_entities.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)), vec3i -> TextUtil.enhancedTranslatable("enhancedCommands.commands.move.complete_with_entities.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks), Integer.toString(affectedEntities))), true);
+          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> TextUtil.enhancedTranslatable("enhanced_commands.commands.move.complete_with_entities.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)), vec3i -> TextUtil.enhancedTranslatable("enhanced_commands.commands.move.complete_with_entities.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks), Integer.toString(affectedEntities))), true);
         }
       }
 
       @Override
       public @NotNull MutableText getIteratorTaskName(Region region) {
-        return relativePos.map(pair -> Text.translatable("enhancedCommands.commands.move.task.direction", region.asString(), Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left())), vec3i -> Text.translatable("enhancedCommands.commands.move.task.vector", region.asString(), TextUtil.wrapVector(vec3i)));
+        return relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.task.direction", region.asString(), Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left())), vec3i -> Text.translatable("enhanced_commands.commands.move.task.vector", region.asString(), TextUtil.wrapVector(vec3i)));
       }
     };
 

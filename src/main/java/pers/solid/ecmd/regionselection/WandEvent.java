@@ -1,4 +1,4 @@
-package pers.solid.ecmd.regionbuilder;
+package pers.solid.ecmd.regionselection;
 
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -16,12 +16,8 @@ public final class WandEvent {
       if (!player.isSpectator() && isWand(player.getStackInHand(hand))) {
         if (player instanceof ServerPlayerEntity) {
           final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
-          RegionBuilder regionBuilder = extension.ec$getRegionBuilder();
-          if (regionBuilder == null) {
-            extension.ec$setRegionBuilder(regionBuilder = extension.ec$getRegionBuilderType().createRegionBuilder());
-          }
-          regionBuilder.clickSecondPoint(hitResult.getBlockPos(), player);
-          extension.ec$requireUpdateRegionBuilder();
+          final Text text = extension.ec$getOrResetRegionSelection().clickSecondPoint(hitResult.getBlockPos(), player).get();
+          if (text != null) player.sendMessage(text);
         }
         return ActionResult.SUCCESS;
       }
@@ -31,12 +27,8 @@ public final class WandEvent {
       if (!player.isSpectator() && isWand(player.getMainHandStack())) {
         if (player instanceof ServerPlayerEntity) {
           final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
-          RegionBuilder regionBuilder = extension.ec$getRegionBuilder();
-          if (regionBuilder == null) {
-            extension.ec$setRegionBuilder(regionBuilder = extension.ec$getRegionBuilderType().createRegionBuilder());
-          }
-          regionBuilder.clickFirstPoint(pos, player);
-          extension.ec$requireUpdateRegionBuilder();
+          final Text text = extension.ec$getOrResetRegionSelection().clickFirstPoint(pos, player).get();
+          if (text != null) player.sendMessage(text);
         }
         return false;
       }
@@ -45,8 +37,8 @@ public final class WandEvent {
   }
 
   public static ItemStack setWand(ItemStack stack) {
-    stack.getOrCreateNbt().putBoolean("enhanced_commands:wand", true);
-    stack.setCustomName(Text.translatable("enhancedCommands.argument.region_builder.wand").styled(style -> style.withColor(0xc7f0a2).withItalic(Boolean.FALSE)));
+    stack.getOrCreateNbt().putBoolean("enhanced_commands:region_selection_tool", true);
+    stack.setCustomName(Text.translatable("item.enhanced_commands.region_selection_tool").styled(style -> style.withColor(0xc7f0a2).withItalic(Boolean.FALSE)));
     return stack;
   }
 
@@ -56,6 +48,6 @@ public final class WandEvent {
 
   public static boolean isWand(ItemStack stack) {
     final NbtCompound nbt = stack.getNbt();
-    return nbt != null && nbt.getBoolean("enhanced_commands:wand");
+    return nbt != null && nbt.getBoolean("enhanced_commands:region_selection_tool");
   }
 }

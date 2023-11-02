@@ -67,7 +67,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
     if (!inTag) {
       successes = false;
-      messages.add(Text.translatable("enhancedCommands.argument.block_predicate.not_in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      messages.add(Text.translatable("enhanced_commands.argument.block_predicate.not_in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
     }
     for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, cachedBlockPosition.getBlockPos());
@@ -77,7 +77,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
       }
     }
     if (successes) {
-      messages.add(Text.translatable("enhancedCommands.argument.block_predicate.in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), Text.literal("#" + blockTag.id().toString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
+      messages.add(Text.translatable("enhanced_commands.argument.block_predicate.in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), Text.literal("#" + blockTag.id().toString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
     }
     return new TestResult(successes, messages.build());
   }

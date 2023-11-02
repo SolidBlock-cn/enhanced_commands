@@ -1,12 +1,12 @@
 package pers.solid.ecmd.region;
 
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.function.Function;
 
 /**
@@ -81,6 +81,38 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
     return newRegion((R) region().expanded(offset, type));
   }
 
+  @Override
+  default boolean contains(@NotNull Vec3d vec3d) {
+    return region().contains(vec3d);
+  }
+
+  @Override
+  default long numberOfBlocksAffected() {
+    return region().numberOfBlocksAffected();
+  }
+
+  @Override
+  default double volume() {
+    return region().volume();
+  }
+
+  @Override
+  default @Nullable BlockBox minContainingBlockBox() {
+    return region().minContainingBlockBox();
+  }
+
+  @Override
+  @Nullable
+  default Box minContainingBox() {
+    return region().minContainingBox();
+  }
+
+  @Override
+  @NotNull
+  default Iterator<BlockPos> iterator() {
+    return region().iterator();
+  }
+
   interface IntBacked<T extends RegionBasedRegion<T, R>, R extends IntBackedRegion> extends IntBackedRegion, RegionBasedRegion<T, R> {
 
     @Override
@@ -96,22 +128,22 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
     }
 
     @Override
-    default Region expanded(int offset) {
+    default T expanded(int offset) {
       return newRegion((R) region().expanded(offset));
     }
 
     @Override
-    default Region expanded(int offset, Direction.Axis axis) {
+    default T expanded(int offset, Direction.Axis axis) {
       return newRegion((R) region().expanded(offset, axis));
     }
 
     @Override
-    default Region expanded(int offset, Direction direction) {
+    default T expanded(int offset, Direction direction) {
       return newRegion((R) region().expanded(offset, direction));
     }
 
     @Override
-    default Region expanded(int offset, Direction.Type type) {
+    default T expanded(int offset, Direction.Type type) {
       return newRegion((R) region().expanded(offset, type));
     }
 
@@ -159,6 +191,38 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
     @NotNull
     default T expanded(double offset, Direction.Type type) {
       return RegionBasedRegion.super.expanded(offset, type);
+    }
+
+    @Override
+    default boolean contains(@NotNull Vec3d vec3d) {
+      return IntBackedRegion.super.contains(vec3d);
+    }
+
+    @Override
+    default boolean contains(@NotNull Vec3i vec3i) {
+      return region().contains(vec3i);
+    }
+
+    @Override
+    default long numberOfBlocksAffected() {
+      return region().numberOfBlocksAffected();
+    }
+
+    @Override
+    @Nullable
+    default BlockBox minContainingBlockBox() {
+      return region().minContainingBlockBox();
+    }
+
+    @Override
+    @Nullable
+    default Box minContainingBox() {
+      return region().minContainingBox();
+    }
+
+    @Override
+    default double volume() {
+      return region().volume();
     }
   }
 }

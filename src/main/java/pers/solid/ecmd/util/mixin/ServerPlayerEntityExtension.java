@@ -2,73 +2,65 @@ package pers.solid.ecmd.util.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.regionbuilder.RegionBuilder;
-import pers.solid.ecmd.regionbuilder.RegionBuilderType;
+import pers.solid.ecmd.regionselection.RegionSelection;
+import pers.solid.ecmd.regionselection.RegionSelectionType;
 
 public interface ServerPlayerEntityExtension {
-  @Nullable RegionArgument<?> ec$getActiveRegionArgument();
+  @Nullable
+  Region ec$getActiveRegion();
 
   @Nullable
-  default Region ec$getOrEvaluateActiveRegion(ServerCommandSource source) throws CommandSyntaxException {
-    final RegionBuilder regionBuilder = ec$getRegionBuilder();
-    final RegionArgument<?> activeRegion = ec$getActiveRegionArgument();
-    if (activeRegion == null && regionBuilder != null) {
-      final Region buildRegion = regionBuilder.buildRegion();
-      ec$setActiveRegionArgument(buildRegion);
-      return buildRegion;
-    } else if (activeRegion != null) {
-      return activeRegion.toAbsoluteRegion(source);
+  default Region ec$getOrEvaluateActiveRegion() {
+    final Region activeRegion = ec$getActiveRegion();
+    if (activeRegion instanceof RegionSelection regionSelection) {
+      return regionSelection.region();
     } else {
-      return null;
+      return activeRegion;
     }
   }
 
-  DynamicCommandExceptionType PLAYER_HAS_NO_ACTIVE_REGION = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.region.no_active_region", o));
+  DynamicCommandExceptionType PLAYER_HAS_NO_ACTIVE_REGION = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.no_active_region", o));
 
-  default @NotNull RegionArgument<?> ec$getOrEvaluateActiveRegionArgumentOrThrow(ServerCommandSource source) throws CommandSyntaxException {
-    final RegionArgument<?> regionArgument = ec$getOrEvaluateActiveRegion(source);
-    if (regionArgument == null) {
+  default @NotNull Region ec$getOrEvaluateActiveRegionOrThrow() throws CommandSyntaxException {
+    final Region region = ec$getOrEvaluateActiveRegion();
+    if (region == null) {
       throw PLAYER_HAS_NO_ACTIVE_REGION.create(((ServerPlayerEntity) this).getName());
     }
-    return regionArgument;
+    return region;
   }
 
-  default @NotNull Region ec$getOrEvaluateActiveRegionOrThrow(ServerCommandSource source) throws CommandSyntaxException {
-    return ec$getOrEvaluateActiveRegionArgumentOrThrow(source).toAbsoluteRegion(source);
+  void ec$setActiveRegion(Region region);
+
+  default void ec$switchRegionSelection(RegionSelection regionSelection) {
+    ec$setActiveRegion(regionSelection);
+    ec$setRegionSelectionType(regionSelection.getBuilderType());
   }
 
-  void ec$setActiveRegionArgument(RegionArgument<?> regionArgument);
-
-  @Nullable RegionBuilder ec$getRegionBuilder();
-
-  default void ec$requireUpdateRegionBuilder() {
-    ec$setActiveRegionArgument(null);
-  }
-
-  void ec$setRegionBuilder(RegionBuilder regionBuilder);
-
-  default void ec$switchRegionBuilder(RegionBuilder regionBuilder) {
-    ec$setRegionBuilder(regionBuilder);
-    ec$setRegionBuilderType(regionBuilder.getType());
-  }
-
-  RegionBuilderType ec$getRegionBuilderType();
-
-  void ec$setRegionBuilderType(RegionBuilderType regionBuilderType);
-
-  default void ec$switchRegionBuilderType(RegionBuilderType regionBuilderType) {
-    final RegionBuilder regionBuilder = ec$getRegionBuilder();
-    if (regionBuilder != null) {
-      ec$setRegionBuilder(regionBuilderType.createRegionBuilderFrom(regionBuilder));
-      ec$requireUpdateRegionBuilder();
+  default RegionSelection ec$getOrResetRegionSelection() {
+    final Region region = ec$getActiveRegion();
+    if (region instanceof RegionSelection regionSelection) {
+      return regionSelection;
+    } else {
+      RegionSelection regionSelection = ec$getRegionSelectionType().createRegionSelection();
+      ec$setActiveRegion(regionSelection);
+      return regionSelection;
     }
-    ec$setRegionBuilderType(regionBuilderType);
+  }
+
+  RegionSelectionType ec$getRegionSelectionType();
+
+  void ec$setRegionSelectionType(RegionSelectionType regionSelectionType);
+
+  default void ec$switchRegionSelectionType(RegionSelectionType regionSelectionType) {
+    final Region activeRegion = ec$getActiveRegion();
+    if (activeRegion instanceof RegionSelection regionSelection) {
+      ec$setActiveRegion(regionSelectionType.createRegionSelectionFrom(regionSelection));
+    }
+    ec$setRegionSelectionType(regionSelectionType);
   }
 }

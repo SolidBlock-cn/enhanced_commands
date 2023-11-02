@@ -179,7 +179,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.curve.circle");
+      return Text.translatable("enhanced_commands.argument.curve.circle");
     }
 
     @Override

@@ -92,7 +92,7 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.block_function.filter");
+      return Text.translatable("enhanced_commands.argument.block_function.filter");
     }
 
     @Override

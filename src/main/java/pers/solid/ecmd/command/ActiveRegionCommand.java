@@ -3,7 +3,6 @@ package pers.solid.ecmd.command;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedArgument;
@@ -26,13 +25,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.regionbuilder.RegionBuilder;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.mixin.EnhancedRedirectModifier;
@@ -48,9 +45,6 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum ActiveRegionCommand implements CommandRegistrationCallback {
   INSTANCE;
-  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
-      .addOptionalArg("fixed", BoolArgumentType.bool(), true)
-      .build();
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
@@ -61,9 +55,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
                 .executes(context -> executeGet(EntityArgumentType.getPlayer(context, "players"), context)))
             .then(literal("set")
                 .then(argument("region", RegionArgumentType.region(registryAccess))
-                    .executes(context -> executeSet(EntityArgumentType.getPlayers(context, "players"), context, true))
-                    .then(argument("keyword_args", KEYWORD_ARGS)
-                        .executes(context -> executeSet(EntityArgumentType.getPlayers(context, "players"), context, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getBoolean("fixed"))))))
+                    .executes(context -> executeSet(EntityArgumentType.getPlayers(context, "players"), context))))
             .then(literal("remove")
                 .executes(context -> executeRemove(EntityArgumentType.getPlayers(context, "players"), context)))
             .then(literal("move")
@@ -119,34 +111,29 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
         .executes(slashExecution));
   }
 
-  public static int executeGet(ServerPlayerEntity player, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final Region region = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegion(context.getSource());
+  public static int executeGet(ServerPlayerEntity player, CommandContext<ServerCommandSource> context) {
+    final Region region = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegion();
     if (region == null) {
-      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhancedCommands.commands.activeregion.get_none", player.getName().copy().styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.activeregion.get_none", player.getName().copy().styled(TextUtil.STYLE_FOR_TARGET)), true);
       return 0;
     } else {
-      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhancedCommands.commands.activeregion.get", player.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.activeregion.get", player.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), true);
       return 1;
     }
   }
 
-  public static int executeSet(Collection<ServerPlayerEntity> players, CommandContext<ServerCommandSource> context, boolean fixed) throws CommandSyntaxException {
-    RegionArgument<?> region = context.getArgument("region", RegionArgument.class);
+  public static int executeSet(Collection<ServerPlayerEntity> players, CommandContext<ServerCommandSource> context) {
+    Region region = context.getArgument("region", RegionArgument.class).toAbsoluteRegion(context.getSource());
     int successes = 0;
     final ServerCommandSource source = context.getSource();
     for (ServerPlayerEntity player : players) {
-      if (fixed) {
-        final Region absoluteRegion = region.toAbsoluteRegion(source);
-        region = __ -> absoluteRegion;
-      }
-      ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(region);
-      ((ServerPlayerEntityExtension) player).ec$setRegionBuilder(null);
+      ((ServerPlayerEntityExtension) player).ec$setActiveRegion(region);
       successes++;
     }
     if (players.size() == 1) {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.activeregion.set.single", players.iterator().next().getName().copy().styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.activeregion.set.single", players.iterator().next().getName().copy().styled(TextUtil.STYLE_FOR_TARGET)), true);
     } else {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.activeregion.set.multiple", Integer.toString(players.size())), false);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.activeregion.set.multiple", Integer.toString(players.size())), false);
     }
     return successes;
   }
@@ -155,24 +142,23 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     int successes = 0;
     final ServerCommandSource source = context.getSource();
     for (ServerPlayerEntity player : players) {
-      ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(null);
-      ((ServerPlayerEntityExtension) player).ec$setRegionBuilder(null);
+      ((ServerPlayerEntityExtension) player).ec$setActiveRegion(null);
       successes++;
     }
     if (players.size() == 1) {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.activeregion.remove.single", players.iterator().next().getName().copy().styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.activeregion.remove.single", players.iterator().next().getName().copy().styled(TextUtil.STYLE_FOR_TARGET)), true);
     } else {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.activeregion.remove.multiple", Integer.toString(players.size())), false);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.activeregion.remove.multiple", Integer.toString(players.size())), false);
     }
     return successes;
   }
 
   public static final DynamicCommandExceptionType NO_ACTIVE_REGION = ServerPlayerEntityExtension.PLAYER_HAS_NO_ACTIVE_REGION;
-  public static final SimpleCommandExceptionType UNSUPPORTED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.commands.activeregion.unsupported"));
-  public static final DynamicCommandExceptionType UNSUPPORTED_WITH_REASON = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.commands.activeregion.unsupported_with_region", o));
+  public static final SimpleCommandExceptionType UNSUPPORTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.activeregion.unsupported"));
+  public static final DynamicCommandExceptionType UNSUPPORTED_WITH_REASON = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.activeregion.unsupported_with_region", o));
 
   public static @NotNull RegionArgument<?> getActiveRegionArgumentOrThrow(@NotNull ServerPlayerEntity serverPlayerEntity, ServerCommandSource source) throws CommandSyntaxException {
-    final RegionArgument<?> regionArgument = ((ServerPlayerEntityExtension) serverPlayerEntity).ec$getOrEvaluateActiveRegion(source);
+    final RegionArgument<?> regionArgument = ((ServerPlayerEntityExtension) serverPlayerEntity).ec$getOrEvaluateActiveRegion();
     if (regionArgument == null) {
       throw NO_ACTIVE_REGION.create(serverPlayerEntity.getName());
     }
@@ -196,7 +182,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   }
 
   public static int executeMoveDirection(double offset, Direction direction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.moved(Vec3d.of(direction.getVector()).multiply(offset)), rb -> rb.move(Vec3d.of(direction.getVector()).multiply(offset)), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.move.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.move.multiple", value), context);
+    return executeRegionModification(region -> region.moved(Vec3d.of(direction.getVector()).multiply(offset)), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.move.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.activeregion.move.multiple", value), context);
   }
 
   public static int executeMoveVector(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -208,36 +194,36 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   }
 
   public static int executeMoveVector(Vec3d vec3d, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.moved(vec3d), rb -> rb.move(vec3d), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.move.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.move.multiple", value), context);
+    return executeRegionModification(region -> region.moved(vec3d), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.move.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.activeregion.move.multiple", value), context);
   }
 
   public static int executeRotate(Vec3d pivot, BlockRotation blockRotation, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.rotated(blockRotation, pivot), rb -> rb.rotate(blockRotation, pivot), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.rotate.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.rotate.multiple", value), context);
+    return executeRegionModification(region -> region.rotated(blockRotation, pivot), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.rotate.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.activeregion.rotate.multiple", value), context);
   }
 
   public static int executeMirror(Vec3d pivot, Direction.Axis axis, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.mirrored(axis, pivot), rb -> rb.mirror(axis, pivot), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.mirror.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.mirror.multiple", value), context);
+    return executeRegionModification(region -> region.mirrored(axis, pivot), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.mirror.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.activeregion.mirror.multiple", value), context);
   }
 
 
   public static int executeExpandDirection(double offset, Direction direction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.expanded(offset, direction), rb -> rb.expand(offset, direction), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.expand.direction.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.wrapDirection(direction), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.expand.direction.single", value, TextUtil.literal(offset), TextUtil.wrapDirection(direction)), context);
+    return executeRegionModification(region -> region.expanded(offset, direction), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.expand.direction.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.wrapDirection(direction), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.activeregion.expand.direction.single", value, TextUtil.literal(offset), TextUtil.wrapDirection(direction)), context);
   }
 
   public static int executeExpandAxis(double offset, Direction.Axis axis, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.expanded(offset, axis), rb -> rb.expand(offset, axis), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.expand.axis.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.wrapAxis(axis), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.expand.axis.single", value, TextUtil.literal(offset), TextUtil.wrapAxis(axis)), context);
+    return executeRegionModification(region -> region.expanded(offset, axis), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.expand.axis.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.wrapAxis(axis), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.activeregion.expand.axis.single", value, TextUtil.literal(offset), TextUtil.wrapAxis(axis)), context);
   }
 
   public static int executeExpandDirectionType(double offset, Direction.Type type, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final MutableText adverb = Text.translatable("enhancedCommands.direction_type." + type.name().toLowerCase() + ".adverb");
-    return executeRegionModification(region -> region.expanded(offset, type), rb -> rb.expand(offset, type), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.expand.axis.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), adverb, TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.expand.axis.single", value, TextUtil.literal(offset), adverb), context);
+    final MutableText adverb = Text.translatable("enhanced_commands.direction_type." + type.name().toLowerCase() + ".adverb");
+    return executeRegionModification(region -> region.expanded(offset, type), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.expand.axis.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), adverb, TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.activeregion.expand.axis.single", value, TextUtil.literal(offset), adverb), context);
   }
 
   public static int executeExpandAllDirections(double offset, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.expanded(offset), rb -> rb.expand(offset), (serverPlayerEntity, region) -> Text.translatable("enhancedCommands.commands.activeregion.expand.all_directions.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhancedCommands.commands.activeregion.expand.all_directions.single", value, TextUtil.literal(offset)), context);
+    return executeRegionModification(region -> region.expanded(offset), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.expand.all_directions.single", serverPlayerEntity.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(offset), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.activeregion.expand.all_directions.single", value, TextUtil.literal(offset)), context);
   }
 
-  public static int executeRegionModification(FailableFunction<Region, Region, CommandSyntaxException> regionOperation, FailableConsumer<RegionBuilder, CommandSyntaxException> regionBuilderFunction, BiFunction<ServerPlayerEntity, Region, Text> messageSingle, IntFunction<Text> messageMultiple, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static int executeRegionModification(FailableFunction<Region, Region, CommandSyntaxException> regionOperation, BiFunction<ServerPlayerEntity, Region, Text> messageSingle, IntFunction<Text> messageMultiple, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "players");
     final ServerCommandSource source = context.getSource();
     if (players.size() == 1) {
@@ -245,14 +231,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
       final Region operatedRegion = invokeOperationOrThrow(regionOperation, getActiveAbsoluteRegionOrThrow(player, source));
 
       // 注意：当玩家有 regionBuilder 时，会自动生成 region，且理论上 regionBuilder 和 region 进行的操作应当是一致的。
-      ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(operatedRegion);
-      final RegionBuilder regionBuilder = ((ServerPlayerEntityExtension) player).ec$getRegionBuilder();
-      if (regionBuilder != null) {
-        invokeOperationOrThrow(input -> {
-          regionBuilderFunction.accept(input);
-          return null;
-        }, regionBuilder);
-      }
+      ((ServerPlayerEntityExtension) player).ec$setActiveRegion(operatedRegion);
       CommandBridge.sendFeedback(source, () -> messageSingle.apply(player, operatedRegion), true);
       return 1;
     } else {
@@ -260,14 +239,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
       for (ServerPlayerEntity player : players) {
         try {
           final Region movedRegion = invokeOperationOrThrow(regionOperation, getActiveAbsoluteRegionOrThrow(player, source));
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(movedRegion);
-          final RegionBuilder regionBuilder = ((ServerPlayerEntityExtension) player).ec$getRegionBuilder();
-          if (regionBuilder != null) {
-            invokeOperationOrThrow(input -> {
-              regionBuilderFunction.accept(input);
-              return null;
-            }, regionBuilder);
-          }
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(movedRegion);
           successes++;
         } catch (CommandSyntaxException ignored) {}
       }

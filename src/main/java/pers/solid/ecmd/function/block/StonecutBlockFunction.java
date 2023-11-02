@@ -99,7 +99,7 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
 
         @Override
         public Text tooltip() {
-          return Text.translatable("enhancedCommands.argument.block_function.stone_cut");
+          return Text.translatable("enhanced_commands.argument.block_function.stone_cut");
         }
 
         @Override

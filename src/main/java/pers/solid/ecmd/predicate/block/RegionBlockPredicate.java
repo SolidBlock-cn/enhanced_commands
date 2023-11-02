@@ -31,7 +31,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final BlockPos blockPos = cachedBlockPosition.getBlockPos();
     final boolean contains = region.contains(blockPos);
-    return new TestResult(contains, Text.translatable("enhancedCommands.argument.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_ACTUAL)));
+    return new TestResult(contains, Text.translatable("enhanced_commands.argument.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_ACTUAL)));
   }
 
   @Override
@@ -68,7 +68,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.block_predicate.region");
+      return Text.translatable("enhanced_commands.argument.block_predicate.region");
     }
 
     @Override

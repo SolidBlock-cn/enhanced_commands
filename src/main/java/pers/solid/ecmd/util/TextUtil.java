@@ -1,7 +1,10 @@
 package pers.solid.ecmd.util;
 
+import com.google.common.base.Predicates;
+import com.google.common.collect.Collections2;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.visitor.NbtOrderedStringFormatter;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -19,6 +22,7 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.UnaryOperator;
 
 /**
@@ -84,25 +88,25 @@ public final class TextUtil {
    * 将方块坐标表示为文本组件。
    */
   public static MutableText wrapVector(Vec3i blockPos) {
-    return Text.translatable("enhancedCommands.position", blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    return Text.translatable("enhanced_commands.position", blockPos.getX(), blockPos.getY(), blockPos.getZ());
   }
 
   /**
    * 将坐标表示为文本组件，以用于命令输出。
    */
   public static MutableText wrapVector(Position position) {
-    return Text.translatable("enhancedCommands.position", position.getX(), position.getY(), position.getZ());
+    return Text.translatable("enhanced_commands.position", position.getX(), position.getY(), position.getZ());
   }
 
   /**
    * 将方向表示为可翻译的文本组件。
    */
   public static MutableText wrapDirection(Direction direction) {
-    return Text.translatable("enhancedCommands.direction." + direction.asString());
+    return Text.translatable("enhanced_commands.direction." + direction.asString());
   }
 
   public static MutableText wrapAxis(Direction.Axis axis) {
-    return Text.translatable("enhancedCommands.axis." + axis.asString());
+    return Text.translatable("enhanced_commands.axis." + axis.asString());
   }
 
   /**
@@ -132,5 +136,25 @@ public final class TextUtil {
 
   public static MutableText enhancedTranslatableWithFallback(String key, @Nullable String fallback, Object... args) {
     return MutableText.of(new EnhancedTranslatableTextContent(key, fallback, args));
+  }
+
+  public static Text joinNullableLines(@Nullable Text text1, @Nullable Text text2) {
+    if (text1 == null) {
+      if (text2 == null) {
+        return Text.empty();
+      } else {
+        return text2;
+      }
+    } else {
+      if (text2 == null) {
+        return text1;
+      } else {
+        return Text.empty().append(text1).append(ScreenTexts.LINE_BREAK).append(text2);
+      }
+    }
+  }
+
+  public static Text joinNullableLines(@Nullable Text... texts) {
+    return ScreenTexts.joinLines(Collections2.filter(Arrays.asList(texts), Predicates.notNull()));
   }
 }

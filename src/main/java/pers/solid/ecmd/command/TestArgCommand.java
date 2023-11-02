@@ -183,15 +183,15 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             .executes(context -> {
               final NbtElement nbtElement = NbtElementArgumentType.getNbtElement(context, "nbt");
               final String s = TextUtil.toSpacedStringNbt(nbtElement);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(TextUtil.STYLE_FOR_RESULT)), false);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(TextUtil.STYLE_FOR_RESULT)), false);
               final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser(new StringReader(s)).parsePredicate(false, false);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(TextUtil.STYLE_FOR_RESULT)), false);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(TextUtil.STYLE_FOR_RESULT)), false);
               final NbtFunction reparsedFunction = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(TextUtil.STYLE_FOR_RESULT)), false);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(TextUtil.STYLE_FOR_RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
               final boolean reparsedFunctionEqual = reparsedFunction.apply(null).equals(nbtElement);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
               return (reparsedPredicateMatches ? 2 : 0) + (reparsedFunctionEqual ? 1 : 0);
             }))
     );
@@ -278,7 +278,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     final Command<ServerCommandSource> execution = context -> {
       final PosArgument pos = EnhancedPosArgumentType.getPosArgument(context, "pos");
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.pos.result"), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.pos.result"), true);
       CommandBridge.sendFeedback(context, () -> Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY), true);
       return 1;
     };
@@ -352,7 +352,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               }
               final int finalNumOfIteratedButNotMatch = numOfIteratedButNotMatch;
               final int finalNumOfNotIteratedButMatch = numOfNotIteratedButMatch;
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.testarg.region.verify.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), true);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.region.verify.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), true);
               return numOfIteratedButNotMatch;
             }))
     );

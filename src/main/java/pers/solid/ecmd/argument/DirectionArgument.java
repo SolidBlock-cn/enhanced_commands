@@ -63,6 +63,6 @@ public enum DirectionArgument implements StringIdentifiable, Function<@NotNull S
   }
 
   public MutableText getDisplayName() {
-    return Text.translatable("enhancedCommands.direction." + name);
+    return Text.translatable("enhanced_commands.direction." + name);
   }
 }

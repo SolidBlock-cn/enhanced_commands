@@ -36,7 +36,7 @@ import static net.minecraft.server.command.CommandManager.literal;
  */
 public enum RandCommand implements CommandRegistrationCallback {
   INSTANCE;
-  public static final Dynamic2CommandExceptionType MIN_MAX_WRONG = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.commands.rand.min_max_wrong", a, b));
+  public static final Dynamic2CommandExceptionType MIN_MAX_WRONG = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.commands.rand.min_max_wrong", a, b));
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
@@ -65,14 +65,14 @@ public enum RandCommand implements CommandRegistrationCallback {
   private static int executeRandBoolean(CommandContext<ServerCommandSource> context) {
     final Random random = context.getSource().getWorld().getRandom();
     final boolean value = random.nextBoolean();
-    CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.rand.boolean." + random.nextInt(10), Text.literal(Boolean.toString(value)).styled(TextUtil.STYLE_FOR_RESULT)), true);
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.boolean." + random.nextInt(10), Text.literal(Boolean.toString(value)).styled(TextUtil.STYLE_FOR_RESULT)), true);
     return BooleanUtils.toInteger(value);
   }
 
   private static int executeRandBoolean(CommandContext<ServerCommandSource> context, float probabilityOfTrue) {
     final Random random = context.getSource().getWorld().getRandom();
     final boolean value = random.nextFloat() < probabilityOfTrue;
-    CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.rand.boolean_with_probability." + random.nextInt(10), TextUtil.literal(probabilityOfTrue), Text.literal(Boolean.toString(value)).styled(TextUtil.STYLE_FOR_RESULT)), true);
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.boolean_with_probability." + random.nextInt(10), TextUtil.literal(probabilityOfTrue), Text.literal(Boolean.toString(value)).styled(TextUtil.STYLE_FOR_RESULT)), true);
     return BooleanUtils.toInteger(value);
   }
 
@@ -82,7 +82,7 @@ public enum RandCommand implements CommandRegistrationCallback {
     }
     final Random random = context.getSource().getWorld().getRandom();
     final float value = min + (max - min) * random.nextFloat();
-    CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.rand.number." + random.nextInt(10), Float.toString(min), Float.toString(max), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), true);
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Float.toString(min), Float.toString(max), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), true);
     return (int) value;
   }
 
@@ -92,7 +92,7 @@ public enum RandCommand implements CommandRegistrationCallback {
     }
     final Random random = context.getSource().getWorld().getRandom();
     final int value = random.nextBetween(min, max);
-    CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.rand.number." + random.nextInt(10), Integer.toString(min), Integer.toString(max), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), true);
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Integer.toString(min), Integer.toString(max), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), true);
     return value;
   }
 }

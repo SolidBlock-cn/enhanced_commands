@@ -14,8 +14,8 @@ import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunctionTypes;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
 import pers.solid.ecmd.region.RegionTypes;
-import pers.solid.ecmd.regionbuilder.RegionBuilderTypes;
-import pers.solid.ecmd.regionbuilder.WandEvent;
+import pers.solid.ecmd.regionselection.RegionSelectionTypes;
+import pers.solid.ecmd.regionselection.WandEvent;
 
 public class EnhancedCommands implements ModInitializer {
   public static final String MOD_ID = "enhanced_commands";
@@ -27,7 +27,7 @@ public class EnhancedCommands implements ModInitializer {
     BlockFunctionTypes.init();
     CurveTypes.init();
     RegionTypes.init();
-    RegionBuilderTypes.init();
+    RegionSelectionTypes.init();
     ModArgumentTypes.init();
 
     // 注册命令

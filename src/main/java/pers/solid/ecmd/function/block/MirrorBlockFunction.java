@@ -62,7 +62,7 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
 
         @Override
         public Text tooltip() {
-          return Text.translatable("enhancedCommands.argument.block_function.rotate");
+          return Text.translatable("enhanced_commands.argument.block_function.rotate");
         }
 
         @Override

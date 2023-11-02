@@ -118,7 +118,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.region.cuboid_wall");
+      return Text.translatable("enhanced_commands.argument.region.cuboid_wall");
     }
 
     @Override

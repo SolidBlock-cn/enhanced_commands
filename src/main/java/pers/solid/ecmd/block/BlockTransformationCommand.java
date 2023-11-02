@@ -29,8 +29,6 @@ import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunctionArgument;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.regionbuilder.RegionBuilder;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
@@ -63,8 +61,6 @@ public interface BlockTransformationCommand {
 
   Region transformRegion(Region region);
 
-  void transformRegionBuilder(RegionBuilder regionBuilder);
-
   /**
    * 完成操作时通知影响的方块和实体的数量。
    *
@@ -73,7 +69,8 @@ public interface BlockTransformationCommand {
    */
   void notifyCompletion(ServerCommandSource source, @Range(from = 0, to = Long.MAX_VALUE) int affectedBlocks, @Range(from = -1, to = Long.MAX_VALUE) int affectedEntities);
 
-  @NotNull MutableText getIteratorTaskName(Region region);
+  @NotNull
+  MutableText getIteratorTaskName(Region region);
 
   default int execute(Region region, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
@@ -109,22 +106,12 @@ public interface BlockTransformationCommand {
 
     final boolean immediately = keywordArgs.getBoolean("immediately");
 
-    RegionBuilder regionBuilder = null;
-    RegionArgument<?> activeRegion = null;
+    Region activeRegion = null;
     if (transformsRegion && player != null) {
       try {
-        regionBuilder = ((ServerPlayerEntityExtension) player).ec$getRegionBuilder();
-        if (regionBuilder != null) {
-          regionBuilder = regionBuilder.clone();
-          transformRegionBuilder(regionBuilder);
-        }
-      } catch (RuntimeException e) {
-        regionBuilder = null;
-      }
-      try {
-        activeRegion = ((ServerPlayerEntityExtension) player).ec$getActiveRegionArgument();
+        activeRegion = ((ServerPlayerEntityExtension) player).ec$getActiveRegion();
         if (activeRegion != null) {
-          activeRegion = transformRegion(activeRegion.toAbsoluteRegion(source));
+          activeRegion = transformRegion(activeRegion);
         }
       } catch (RuntimeException e) {
         activeRegion = null;
@@ -133,19 +120,15 @@ public interface BlockTransformationCommand {
 
     final BlockTransformationTask task = builder.build();
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      RegionBuilder finalRegionBuilder = regionBuilder;
-      RegionArgument<?> finalActiveRegion = activeRegion;
+      Region finalActiveRegion = activeRegion;
       ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
-        if (finalRegionBuilder != null) {
-          ((ServerPlayerEntityExtension) player).ec$switchRegionBuilder(finalRegionBuilder);
-        }
         if (finalActiveRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(finalActiveRegion);
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(finalActiveRegion);
         }
         notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
       })));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(task.transformBlocks().getImmediateTask());
@@ -155,10 +138,7 @@ public interface BlockTransformationCommand {
       notifyCompletion(source, affectedBlocks, entitiesToAffect == null ? -1 : affectedEntities);
       if (transformsRegion && player != null) {
         if (activeRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegionArgument(activeRegion);
-        }
-        if (regionBuilder != null) {
-          ((ServerPlayerEntityExtension) player).ec$switchRegionBuilder(regionBuilder);
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
         }
       }
       return affectedBlocks + affectedEntities;
@@ -168,9 +148,9 @@ public interface BlockTransformationCommand {
   private static void notifyUnloadedPos(BlockTransformationTask task, UnloadedPosBehavior unloadedPosBehavior, ServerCommandSource source) {
     if (task.hasUnloadedPos) {
       if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.broken").styled(TextUtil.STYLE_FOR_ACTUAL), false);
+        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.broken").styled(TextUtil.STYLE_FOR_ACTUAL), false);
       } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhancedCommands.commands.fill.skipped").styled(TextUtil.STYLE_FOR_ACTUAL), false);
+        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(TextUtil.STYLE_FOR_ACTUAL), false);
       }
     }
   }

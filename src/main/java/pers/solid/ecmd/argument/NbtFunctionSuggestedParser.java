@@ -31,16 +31,16 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
     super(reader, suggestions);
   }
 
-  public static final Text MERGE = Text.translatable("enhancedCommands.argument.nbt_function.merge");
-  public static final Text EQUAL = Text.translatable("enhancedCommands.argument.nbt_function.equal");
-  public static final Text SEMICOLON = Text.translatable("enhancedCommands.argument.nbt_function.semicolon");
-  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.nbt_function.sign_expected"));
-  public static final SimpleCommandExceptionType SIGN_UNEXPECTED_WHEN_REMOVING_KEY = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.nbt_function.sign_unexpected_when_removing_key"));
-  public static final Text REMOVE_KEY = Text.translatable("enhancedCommands.argument.nbt_function.remove_key");
-  public static final Text ECLIPSE = Text.translatable("enhancedCommands.argument.nbt_function.eclipse");
-  public static final SimpleCommandExceptionType DUPLICATE_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.nbt_function.duplicate_eclipse"));
-  public static final SimpleCommandExceptionType DUPLICATE_SEMICOLON = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.nbt_function.duplicate_semicolon"));
-  public static final SimpleCommandExceptionType UNEXPECTED_SEMICOLON_AFTER_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.nbt_function.unexpected_semicolon_after_eclipse"));
+  public static final Text MERGE = Text.translatable("enhanced_commands.argument.nbt_function.merge");
+  public static final Text EQUAL = Text.translatable("enhanced_commands.argument.nbt_function.equal");
+  public static final Text SEMICOLON = Text.translatable("enhanced_commands.argument.nbt_function.semicolon");
+  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.sign_expected"));
+  public static final SimpleCommandExceptionType SIGN_UNEXPECTED_WHEN_REMOVING_KEY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.sign_unexpected_when_removing_key"));
+  public static final Text REMOVE_KEY = Text.translatable("enhanced_commands.argument.nbt_function.remove_key");
+  public static final Text ECLIPSE = Text.translatable("enhanced_commands.argument.nbt_function.eclipse");
+  public static final SimpleCommandExceptionType DUPLICATE_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.duplicate_eclipse"));
+  public static final SimpleCommandExceptionType DUPLICATE_SEMICOLON = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.duplicate_semicolon"));
+  public static final SimpleCommandExceptionType UNEXPECTED_SEMICOLON_AFTER_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.unexpected_semicolon_after_eclipse"));
 
   public boolean parseSign(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     boolean isUsingEqual = equalsForDefault;

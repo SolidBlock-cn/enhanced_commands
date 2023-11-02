@@ -23,8 +23,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public interface BlockPredicateArgument extends Function<ServerCommandSource, BlockPredicate> {
-  Text INTERSECT_TOOLTIP = Text.translatable("enhancedCommands.argument.block_predicate.intersect.symbol_tooltip");
-  Text UNION_TOOLTIP = Text.translatable("enhancedCommands.argument.block_predicate.union.symbol_tooltip");
+  Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.intersect.symbol_tooltip");
+  Text UNION_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.union.symbol_tooltip");
 
   static @NotNull BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     return parse(commandRegistryAccess, parser, suggestionsOnly, true);

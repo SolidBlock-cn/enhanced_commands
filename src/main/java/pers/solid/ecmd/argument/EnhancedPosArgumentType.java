@@ -54,7 +54,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   public static final EnhancedPosArgument CURRENT_POS = new EnhancedPosArgument.DoublePos(0, 0, 0, true, true, true);
   public static final EnhancedPosArgument CURRENT_BLOCK_POS_CENTER = new EnhancedPosArgument.IntPos(0, 0, 0, true, true, true);
 
-  public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.pos.local_coordinates_not_allowed"));
+  public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.pos.local_coordinates_not_allowed"));
 
   public static EnhancedPosArgumentType blockPos() {
     return new EnhancedPosArgumentType(NumberType.INT_ONLY, IntAlignType.UNCHANGED);
@@ -107,11 +107,11 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     return context.getArgument(name, PosArgument.class).toAbsolutePos(context.getSource());
   }
 
-  public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.unloaded", pos));
-  public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.out_of_build_limit", pos));
-  public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhancedCommands.argument.pos.out_of_bounds", pos));
-  public static final Dynamic3CommandExceptionType OUT_OF_HEIGHT_LIMIT = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhancedCommands.argument.pos.out_of_height_limit", pos, lowest, highest));
-  public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhancedCommands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
+  public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.unloaded", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.out_of_build_limit", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.out_of_bounds", pos));
+  public static final Dynamic3CommandExceptionType OUT_OF_HEIGHT_LIMIT = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhanced_commands.argument.pos.out_of_height_limit", pos, lowest, highest));
+  public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhanced_commands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
 
   public static <T extends BlockPos> T checkChunkLoaded(ServerWorld world, T blockPos) throws CommandSyntaxException {
     if (!world.isChunkLoaded(blockPos)) {
@@ -260,7 +260,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     final StringReader reader = new StringReader(builder.getInput());
     reader.setCursor(builder.getStart());
     if (!reader.canRead()) {
-      builder.suggest("^^^", Text.translatable("enhancedCommands.argument.pos.local_coordinate"));
+      builder.suggest("^^^", Text.translatable("enhanced_commands.argument.pos.local_coordinate"));
     }
     if (reader.canRead() && reader.peek() == '^') {
       int i;
@@ -280,7 +280,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
         reader.skipWhitespace();
       }
       if (i < 3) {
-        builder.suggest("^".repeat(3 - i), Text.translatable("enhancedCommands.argument.pos.local_coordinate.remaining"));
+        builder.suggest("^".repeat(3 - i), Text.translatable("enhanced_commands.argument.pos.local_coordinate.remaining"));
       }
     } else {
       int i;
@@ -307,27 +307,27 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
         }
       }
       if (i < 3) {
-        builder.suggest("~".repeat(3 - i), i == 0 ? Text.translatable("enhancedCommands.argument.pos.relative_coordinate") : Text.translatable("enhancedCommands.argument.pos.relative_coordinate.remaining"));
+        builder.suggest("~".repeat(3 - i), i == 0 ? Text.translatable("enhanced_commands.argument.pos.relative_coordinate") : Text.translatable("enhanced_commands.argument.pos.relative_coordinate.remaining"));
         if (i == 0 || reader.canRead(-1) && Character.isWhitespace(reader.peek(-1))) {
           // 确保在建议数字时，前面必须已经是一个空格，或者还没有参数。
           if (crossHairBlockPos != null && !numberType.doubleOnly()) {
             switch (i) {
               case 0 ->
-                  builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int"));
+                  builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int"));
               case 1 ->
-                  builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int.remaining"));
+                  builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
               case 2 ->
-                  builder.suggest(crossHairBlockPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_int.remaining"));
+                  builder.suggest(crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
             }
           }
           if (crossHairPos != null && !numberType.intOnly()) {
             switch (i) {
               case 0 ->
-                  builder.suggest(crossHairPos.getX() + " " + crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_double"));
+                  builder.suggest(crossHairPos.getX() + " " + crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_double"));
               case 1 ->
-                  builder.suggest(crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhancedCommands.argument.pos.crosshair_double.remaining"));
+                  builder.suggest(crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
               case 2 ->
-                  builder.suggest(String.valueOf(crossHairPos.getZ()), Text.translatable("enhancedCommands.argument.pos.crosshair_double.remaining"));
+                  builder.suggest(String.valueOf(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
             }
           }
         }

@@ -24,7 +24,6 @@ import pers.solid.ecmd.api.FlipStateCallback;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.regionbuilder.RegionBuilder;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
@@ -106,22 +105,17 @@ public enum MirrorCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public void transformRegionBuilder(RegionBuilder regionBuilder) {
-        regionBuilder.mirror(axis, pivot.toCenterPos());
-      }
-
-      @Override
       public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
         if (affectedEntities == -1) {
-          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.mirror.complete", Integer.toString(affectedBlocks)), true);
+          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.mirror.complete", Integer.toString(affectedBlocks)), true);
         } else {
-          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.mirror.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)), true);
+          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.mirror.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)), true);
         }
       }
 
       @Override
       public @NotNull MutableText getIteratorTaskName(Region region) {
-        return Text.translatable("enhancedCommands.commands.mirror.task", region.asString());
+        return Text.translatable("enhanced_commands.commands.mirror.task", region.asString());
       }
     }.execute(region, keywordArgs, context);
   }

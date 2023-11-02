@@ -56,6 +56,6 @@ public enum AxisArgument implements StringIdentifiable, Function<@NotNull Server
   }
 
   public MutableText getDisplayName() {
-    return Text.translatable("enhancedCommands.axis." + name);
+    return Text.translatable("enhanced_commands.axis." + name);
   }
 }

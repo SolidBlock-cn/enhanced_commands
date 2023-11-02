@@ -86,7 +86,7 @@ public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBac
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.region.outwards");
+      return Text.translatable("enhanced_commands.argument.region.outwards");
     }
 
     @Override

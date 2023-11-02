@@ -67,9 +67,9 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).ec_getIteratorTasks();
     final int size = iteratorTasks.size();
     if (size == 0) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.count.none", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.count.none", size), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.tasks.count", size), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tasks.count", size), true);
     }
     return size;
   }
@@ -79,14 +79,14 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final int size = iteratorTasks.size();
     iteratorTasks.clear();
     if (size == 0) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.clear.none", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.clear.none", size), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhancedCommands.commands.tasks.clear", size), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tasks.clear", size), true);
     }
     return size;
   }
 
-  private static final DynamicCommandExceptionType TASK_UUID_DOES_NOT_EXIST = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.commands.tasks.not_exist", o));
+  private static final DynamicCommandExceptionType TASK_UUID_DOES_NOT_EXIST = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.tasks.not_exist", o));
 
   private static int executeRemoveTask(MinecraftServer server, CommandContext<ServerCommandSource> context, UUID uuid) throws CommandSyntaxException {
     final Map<UUID, WeakReference<IteratorTask<?>>> uuidToTasks = ((ThreadExecutorExtension) server).ec_getUUIDToIteratorTasks();
@@ -94,10 +94,10 @@ public enum TasksCommand implements CommandRegistrationCallback {
       final IteratorTask<?> remove = uuidToTasks.remove(uuid).get();
       ((ThreadExecutorExtension) server).ec_getIteratorTasks().remove(remove);
       if (remove != null) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.remove.success", remove.name), true);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.remove.success", remove.name), true);
         return 1;
       } else {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.remove.collected").formatted(Formatting.YELLOW), true);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.remove.collected").formatted(Formatting.YELLOW), true);
         return 0;
       }
     }
@@ -105,19 +105,19 @@ public enum TasksCommand implements CommandRegistrationCallback {
   }
 
   private static MutableText createSuspendButton(UUID uuid) {
-    return Text.translatable("enhancedCommands.commands.tasks.suspend").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks suspend " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhancedCommands.commands.tasks.suspend.tooltip"))));
+    return Text.translatable("enhanced_commands.commands.tasks.suspend").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks suspend " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.tasks.suspend.tooltip"))));
   }
 
   private static MutableText createContinueButton(UUID uuid) {
-    return Text.translatable("enhancedCommands.commands.tasks.continue").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks continue " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhancedCommands.commands.tasks.continue.tooltip"))));
+    return Text.translatable("enhanced_commands.commands.tasks.continue").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks continue " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.tasks.continue.tooltip"))));
   }
 
   private static MutableText createExhaustButton(UUID uuid) {
-    return Text.translatable("enhancedCommands.commands.tasks.exhaust").styled(style -> style.withUnderline(true).withColor(Formatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks exhaust " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhancedCommands.commands.tasks.exhaust.tooltip"))));
+    return Text.translatable("enhanced_commands.commands.tasks.exhaust").styled(style -> style.withUnderline(true).withColor(Formatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks exhaust " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.tasks.exhaust.tooltip"))));
   }
 
   private static MutableText createRemoveButton(UUID uuid) {
-    return Text.translatable("enhancedCommands.commands.tasks.remove").styled(style -> style.withUnderline(true).withColor(Formatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks remove " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhancedCommands.commands.tasks.remove.tooltip"))));
+    return Text.translatable("enhanced_commands.commands.tasks.remove").styled(style -> style.withUnderline(true).withColor(Formatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks remove " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.tasks.remove.tooltip"))));
   }
 
   private static int executeSetTaskSuspension(MinecraftServer server, CommandContext<ServerCommandSource> context, UUID uuid, boolean suspension) throws CommandSyntaxException {
@@ -127,19 +127,19 @@ public enum TasksCommand implements CommandRegistrationCallback {
       if (iteratorTask != null) {
         if (suspension) {
           if (iteratorTask.suspended) {
-            throw new CommandSyntaxException(null, Text.translatable("enhancedCommands.commands.tasks.suspend.already_suspended", iteratorTask.name));
+            throw new CommandSyntaxException(null, Text.translatable("enhanced_commands.commands.tasks.suspend.already_suspended", iteratorTask.name));
           } else {
             iteratorTask.suspended = true;
-            CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.suspend.success", iteratorTask.name).append("  ").append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(List.of(createContinueButton(uuid), createRemoveButton(uuid)), Text.literal("|"))).formatted(Formatting.GRAY)), true);
+            CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.suspend.success", iteratorTask.name).append("  ").append(Text.translatable("enhanced_commands.commands.tasks.buttons", Texts.join(List.of(createContinueButton(uuid), createRemoveButton(uuid)), Text.literal("|"))).formatted(Formatting.GRAY)), true);
             return 2;
           }
         } else {
           if (iteratorTask.suspended) {
             iteratorTask.suspended = false;
-            CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.continue.success", iteratorTask.name).append("  ").append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(List.of(createSuspendButton(uuid), createRemoveButton(uuid)), Text.literal("|"))).formatted(Formatting.GRAY)), true);
+            CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.continue.success", iteratorTask.name).append("  ").append(Text.translatable("enhanced_commands.commands.tasks.buttons", Texts.join(List.of(createSuspendButton(uuid), createRemoveButton(uuid)), Text.literal("|"))).formatted(Formatting.GRAY)), true);
             return 1;
           } else {
-            throw new CommandSyntaxException(null, Text.translatable("enhancedCommands.commands.tasks.continue.not_suspended", iteratorTask.name));
+            throw new CommandSyntaxException(null, Text.translatable("enhanced_commands.commands.tasks.continue.not_suspended", iteratorTask.name));
           }
         }
       } else {
@@ -154,7 +154,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
     if (uuidToTasks.containsKey(uuid)) {
       final IteratorTask<?> iteratorTask = uuidToTasks.get(uuid).get();
       if (iteratorTask != null) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.exhaust.start", iteratorTask.name), true);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.exhaust.start", iteratorTask.name), true);
         if (limit <= 0) {
           IterateUtils.exhaust(iteratorTask);
         } else {
@@ -164,7 +164,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
           uuidToTasks.remove(iteratorTask.uuid);
           ((ThreadExecutorExtension) server).ec_getIteratorTasks().remove(iteratorTask);
         }
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.exhaust.success", iteratorTask.name), true);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.exhaust.success", iteratorTask.name), true);
         return 1;
       } else {
         uuidToTasks.remove(uuid);
@@ -179,25 +179,25 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final int size = iteratorTasks.size();
 
     if (size == 0) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhancedCommands.commands.tasks.list.none").formatted(Formatting.RED), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.list.none").formatted(Formatting.RED), true);
       return 0;
     }
     CommandBridge.sendFeedback(context.getSource(), () -> {
-      final MutableText message = TextUtil.enhancedTranslatable("enhancedCommands.commands.tasks.list.summary", Integer.toString(size));
+      final MutableText message = TextUtil.enhancedTranslatable("enhanced_commands.commands.tasks.list.summary", Integer.toString(size));
       for (IteratorTask<?> iteratorTask : Iterables.limit(iteratorTasks, limit)) {
         final List<Text> list = new ArrayList<>();
         if (iteratorTask.suspended) {
-          list.add(Text.translatable("enhancedCommands.commands.tasks.buttons.suspended").formatted(Formatting.LIGHT_PURPLE));
+          list.add(Text.translatable("enhanced_commands.commands.tasks.buttons.suspended").formatted(Formatting.LIGHT_PURPLE));
           list.add(createContinueButton(iteratorTask.uuid));
         } else {
           list.add(createSuspendButton(iteratorTask.uuid));
         }
         list.add(createExhaustButton(iteratorTask.uuid));
         list.add(createRemoveButton(iteratorTask.uuid));
-        message.append(ScreenTexts.LINE_BREAK).append(Text.literal(" - ").formatted(Formatting.GRAY).append(Text.translatable("enhancedCommands.commands.tasks.buttons", Texts.join(list, Text.literal("|")))).append(ScreenTexts.SPACE).append(iteratorTask.name));
+        message.append(ScreenTexts.LINE_BREAK).append(Text.literal(" - ").formatted(Formatting.GRAY).append(Text.translatable("enhanced_commands.commands.tasks.buttons", Texts.join(list, Text.literal("|")))).append(ScreenTexts.SPACE).append(iteratorTask.name));
       }
       if (size > limit) {
-        message.append(ScreenTexts.LINE_BREAK).append(Text.translatable("enhancedCommands.commands.tasks.list.limit_note").styled(style -> style.withColor(0xffa960)));
+        message.append(ScreenTexts.LINE_BREAK).append(Text.translatable("enhanced_commands.commands.tasks.list.limit_note").styled(style -> style.withColor(0xffa960)));
       }
       return message;
     }, true);

@@ -77,7 +77,7 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.block_function.dry");
+      return Text.translatable("enhanced_commands.argument.block_function.dry");
     }
 
     @Override

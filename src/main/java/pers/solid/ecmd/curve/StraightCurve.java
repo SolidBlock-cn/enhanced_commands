@@ -151,7 +151,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.curve.straight");
+      return Text.translatable("enhanced_commands.argument.curve.straight");
     }
 
     @Override

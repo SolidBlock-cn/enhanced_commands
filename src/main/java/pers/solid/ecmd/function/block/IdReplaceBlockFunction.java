@@ -99,7 +99,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
 
         @Override
         public Text tooltip() {
-          return Text.translatable("enhancedCommands.argument.block_function.id_replace");
+          return Text.translatable("enhanced_commands.argument.block_function.id_replace");
         }
 
         @Override

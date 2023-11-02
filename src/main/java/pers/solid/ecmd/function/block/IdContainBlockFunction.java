@@ -103,7 +103,7 @@ public final class IdContainBlockFunction implements BlockFunction {
         @Override public int minParamsCount() {return 1;}
         @Override public int maxParamsCount() {return 1;}
         @Override public @NotNull String functionName() {return "idcontain";}
-        @Override public Text tooltip() {return Text.translatable("enhancedCommands.argument.block_function.id_contain");}
+        @Override public Text tooltip() {return Text.translatable("enhanced_commands.argument.block_function.id_contain");}
         // @formatter:one
         @Override
         public IdContainBlockFunction getParseResult(SuggestedParser parser) {

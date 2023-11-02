@@ -19,8 +19,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public interface BlockFunctionArgument extends Function<ServerCommandSource, BlockFunction> {
-  Text OVERLAY_TOOLTIP = Text.translatable("enhancedCommands.argument.block_function.overlay.symbol_tooltip");
-  Text PICK_TOOLTIP = Text.translatable("enhancedCommands.argument.block_function.pick.symbol_tooltip");
+  Text OVERLAY_TOOLTIP = Text.translatable("enhanced_commands.argument.block_function.overlay.symbol_tooltip");
+  Text PICK_TOOLTIP = Text.translatable("enhanced_commands.argument.block_function.pick.symbol_tooltip");
 
   static @NotNull BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     return parse(commandRegistryAccess, parser, suggestionsOnly, true);

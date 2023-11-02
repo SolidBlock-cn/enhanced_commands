@@ -21,8 +21,8 @@ import java.util.Optional;
  * @see net.minecraft.command.argument.BlockArgumentParser
  */
 public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedParser {
-  public static final Text MATCH_ANY_VALUE = Text.translatable("enhancedCommands.argument.block_predicate.anyValue");
-  public static final Text MATCH_NONE_VALUE = Text.translatable("enhancedCommands.argument.block_predicate.noneValue");
+  public static final Text MATCH_ANY_VALUE = Text.translatable("enhanced_commands.argument.block_predicate.anyValue");
+  public static final Text MATCH_NONE_VALUE = Text.translatable("enhanced_commands.argument.block_predicate.noneValue");
   public final List<PropertyPredicate<?>> propertyPredicates = new ArrayList<>();
   public final List<PropertyNamePredicate> propertyNamePredicates = new ArrayList<>();
 

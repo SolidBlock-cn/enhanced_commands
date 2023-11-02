@@ -25,23 +25,23 @@ import java.util.List;
 import java.util.Map;
 
 public class NbtPredicateSuggestedParser extends SuggestedParser {
-  public static final Text MATCH = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.match");
-  public static final Text EQUAL = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.equal");
-  public static final Text NOT_MATCH = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.not_match");
-  public static final Text NOT_EQUAL = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.not_equal");
-  public static final Text REGEX = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.regex");
-  public static final Text NOT_REGEX = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.not_regex");
-  public static final Text ANY_KEY = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.any_key");
-  public static final Text ANY_VALUE = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.any_value");
-  public static final Text SEPARATE = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.separate");
-  public static final Text START_OF_COMPOUND = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.start_of_compound");
-  public static final Text END_OF_COMPOUND = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.end_of_compound");
-  public static final Text START_OF_LIST = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.start_of_list");
-  public static final Text END_OF_LIST = Text.translatable("enhancedCommands.argument.nbt_predicate.tooltip.end_of_list");
+  public static final Text MATCH = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.match");
+  public static final Text EQUAL = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.equal");
+  public static final Text NOT_MATCH = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.not_match");
+  public static final Text NOT_EQUAL = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.not_equal");
+  public static final Text REGEX = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.regex");
+  public static final Text NOT_REGEX = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.not_regex");
+  public static final Text ANY_KEY = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.any_key");
+  public static final Text ANY_VALUE = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.any_value");
+  public static final Text SEPARATE = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.separate");
+  public static final Text START_OF_COMPOUND = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.start_of_compound");
+  public static final Text END_OF_COMPOUND = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.end_of_compound");
+  public static final Text START_OF_LIST = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.start_of_list");
+  public static final Text END_OF_LIST = Text.translatable("enhanced_commands.argument.nbt_predicate.tooltip.end_of_list");
 
-  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.nbt_predicate.sign_expected"));
-  public static final DynamicCommandExceptionType DUPLICATE_KEY = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.nbt_predicate.duplicate_key", o));
-  public static final DynamicCommandExceptionType MUST_BE_NUMBER_OR_STRING = new DynamicCommandExceptionType(actualType -> Text.translatable("enhancedCommands.argument.nbt_predicate.must_be_number_or_string", actualType));
+  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_predicate.sign_expected"));
+  public static final DynamicCommandExceptionType DUPLICATE_KEY = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.nbt_predicate.duplicate_key", o));
+  public static final DynamicCommandExceptionType MUST_BE_NUMBER_OR_STRING = new DynamicCommandExceptionType(actualType -> Text.translatable("enhanced_commands.argument.nbt_predicate.must_be_number_or_string", actualType));
 
   public NbtPredicateSuggestedParser(StringReader reader) {
     super(reader);

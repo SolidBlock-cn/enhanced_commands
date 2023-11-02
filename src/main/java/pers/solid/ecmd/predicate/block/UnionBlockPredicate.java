@@ -46,9 +46,9 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes > 0) {
-      return new TestResult(true, List.of(Text.translatable("enhancedCommands.argument.block_predicate.union.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
+      return new TestResult(true, List.of(Text.translatable("enhanced_commands.argument.block_predicate.union.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
     } else {
-      return new TestResult(false, List.of(Text.translatable("enhancedCommands.argument.block_predicate.union.fail", successes, build.size()).formatted(Formatting.RED)), build);
+      return new TestResult(false, List.of(Text.translatable("enhanced_commands.argument.block_predicate.union.fail", successes, build.size()).formatted(Formatting.RED)), build);
     }
   }
 
@@ -73,7 +73,7 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.block_predicate.union");
+      return Text.translatable("enhanced_commands.argument.block_predicate.union");
     }
 
     @Override

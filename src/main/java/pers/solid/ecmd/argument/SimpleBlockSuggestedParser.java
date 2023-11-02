@@ -31,11 +31,11 @@ import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 import java.util.stream.Stream;
 
 public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
-  public static final DynamicCommandExceptionType UNKNOWN_COMPARATOR = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.block_predicate.unknown_comparator", o));
-  public static final SimpleCommandExceptionType COMPARATOR_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.comparator_expected"));
-  public static final Text START_OF_PROPERTIES = Text.translatable("enhancedCommands.argument.block_predicate.start_of_properties");
-  public static final Text NEXT_PROPERTY = Text.translatable("enhancedCommands.argument.block_predicate.next_property");
-  public static final Text END_OF_PROPERTIES = Text.translatable("enhancedCommands.argument.block_predicate.end_of_properties");
+  public static final DynamicCommandExceptionType UNKNOWN_COMPARATOR = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.block_predicate.unknown_comparator", o));
+  public static final SimpleCommandExceptionType COMPARATOR_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.comparator_expected"));
+  public static final Text START_OF_PROPERTIES = Text.translatable("enhanced_commands.argument.block_predicate.start_of_properties");
+  public static final Text NEXT_PROPERTY = Text.translatable("enhanced_commands.argument.block_predicate.next_property");
+  public static final Text END_OF_PROPERTIES = Text.translatable("enhanced_commands.argument.block_predicate.end_of_properties");
   public final RegistryWrapper<Block> registryWrapper;
   protected final CommandRegistryAccess commandRegistryAccess;
   public Block block;
@@ -76,7 +76,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     } else {
       int cursorBeforeParsing = this.reader.getCursor();
       suggestionProviders.add((context, suggestionsBuilder) -> {
-        ParsingUtil.suggestString("@", Text.translatable("enhancedCommands.argument.block.ignore_feature_flag"), suggestionsBuilder);
+        ParsingUtil.suggestString("@", Text.translatable("enhanced_commands.argument.block.ignore_feature_flag"), suggestionsBuilder);
         CommandSource.forEachMatching(registryWrapper.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName()));
       });
       this.blockId = Identifier.fromCommandInput(this.reader);

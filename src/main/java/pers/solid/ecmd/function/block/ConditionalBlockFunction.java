@@ -84,7 +84,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.block_function.conditional");
+      return Text.translatable("enhanced_commands.argument.block_function.conditional");
     }
 
     @Override

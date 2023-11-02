@@ -38,7 +38,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     MoveCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     OutlineCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RandCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    RegionBuilderCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    RegionSelectionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RotateCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     SeparatedExecuteCommand.register(dispatcher, registryAccess);
     StackCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -56,7 +56,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   public static final EnhancedRedirectModifier.Constant<ServerCommandSource> REGION_ARGUMENTS_MODIFIER = (arguments, previousArguments, source) -> {
     final ServerPlayerEntity player = source.getPlayerOrThrow();
-    final RegionArgument<?> regionArgument = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegionOrThrow(source);
+    final RegionArgument<?> regionArgument = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegionOrThrow();
     arguments.put("region", new ParsedArgument<>(0, 0, regionArgument));
   };
 
@@ -64,7 +64,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     final Command<ServerCommandSource> directCommand = regionArgument.getCommand();
     if (directCommand != null && indirectBuilder.getCommand() == null) {
       indirectBuilder.executes(context -> {
-        ((CommandContextAccessor<?>) context).getArguments().put("region", new ParsedArgument<>(0, 0, ((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow(context.getSource())));
+        ((CommandContextAccessor<?>) context).getArguments().put("region", new ParsedArgument<>(0, 0, ((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow()));
         return directCommand.run(context);
       });
     }

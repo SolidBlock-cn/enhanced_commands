@@ -34,7 +34,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final String id = Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString();
     final boolean matches = pattern.matcher(id).matches();
-    return new TestResult(matches, Text.translatable("enhancedCommands.argument.block_predicate.id_contain." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(TextUtil.STYLE_FOR_EXPECTED), Text.literal(id).styled(TextUtil.STYLE_FOR_ACTUAL)).formatted(matches ? Formatting.GREEN : Formatting.RED));
+    return new TestResult(matches, Text.translatable("enhanced_commands.argument.block_predicate.id_contain." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(TextUtil.STYLE_FOR_EXPECTED), Text.literal(id).styled(TextUtil.STYLE_FOR_ACTUAL)).formatted(matches ? Formatting.GREEN : Formatting.RED));
   }
 
   @Override
@@ -77,7 +77,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
         @Override public int minParamsCount() {return 1;}
         @Override public int maxParamsCount() {return 1;}
         @Override public @NotNull String functionName() {return "idcontain";}
-        @Override public Text tooltip() {return Text.translatable("enhancedCommands.argument.block_predicate.id_contain");}
+        @Override public Text tooltip() {return Text.translatable("enhanced_commands.argument.block_predicate.id_contain");}
         @Override
         public IdContainBlockPredicate getParseResult(SuggestedParser parser) { // @formatter:on
           return new IdContainBlockPredicate(pattern);

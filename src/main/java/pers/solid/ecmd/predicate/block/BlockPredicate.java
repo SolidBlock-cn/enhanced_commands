@@ -17,7 +17,7 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 
 public interface BlockPredicate extends ExpressionConvertible, NbtConvertible, BlockPredicateArgument {
-  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhancedCommands.argument.block_predicate.cannotParse"));
+  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannotParse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
     return BlockPredicateArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).apply(source);

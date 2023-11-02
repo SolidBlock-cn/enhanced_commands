@@ -36,8 +36,8 @@ public final class SimpleEnumArgumentTypes {
   }
 
   public static final class DirectionTypeArgumentType extends SimpleEnumArgumentType<Direction.Type> {
-    public static final Text HORIZONTAL = Text.translatable("enhancedCommands.direction_type.horizontal");
-    public static final Text VERTICAL = Text.translatable("enhancedCommands.direction_type.vertical");
+    public static final Text HORIZONTAL = Text.translatable("enhanced_commands.direction_type.horizontal");
+    public static final Text VERTICAL = Text.translatable("enhanced_commands.direction_type.vertical");
 
     public DirectionTypeArgumentType() {
       super(ImmutableList.copyOf(Direction.Type.values()), type -> switch (type) {

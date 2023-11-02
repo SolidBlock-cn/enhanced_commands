@@ -24,8 +24,8 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) implements RegionBasedRegion.IntBacked<CuboidOutlineRegion, BlockCuboidRegion> {
-  public static final DynamicCommandExceptionType NON_POSITIVE_THICKNESS = new DynamicCommandExceptionType(o -> Text.translatable("enhancedCommands.argument.region.cuboid_outline.non_positive_thickness", o));
-  public static final Dynamic2CommandExceptionType TOO_THICK = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhancedCommands.argument.region.cuboid_outline.too_thick", a, b));
+  public static final DynamicCommandExceptionType NON_POSITIVE_THICKNESS = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.cuboid_outline.non_positive_thickness", o));
+  public static final Dynamic2CommandExceptionType TOO_THICK = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.argument.region.cuboid_outline.too_thick", a, b));
 
   public CuboidOutlineRegion {
     if (thickness <= 0) {
@@ -150,7 +150,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.region.cuboid_outline");
+      return Text.translatable("enhanced_commands.argument.region.cuboid_outline");
     }
 
     @Override

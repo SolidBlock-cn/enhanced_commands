@@ -96,7 +96,7 @@ public record UnionRegion(Collection<Region> regions) implements RegionsBasedReg
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhancedCommands.argument.region.union");
+      return Text.translatable("enhanced_commands.argument.region.union");
     }
 
     @Override
