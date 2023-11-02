@@ -1,6 +1,6 @@
 package pers.solid.ecmd.regionselection;
 
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -23,16 +23,19 @@ public final class WandEvent {
       }
       return ActionResult.PASS;
     });
-    PlayerBlockBreakEvents.BEFORE.register((world, player, pos, state, blockEntity) -> {
+    AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+      // 此方法在 ClientPlayerInteractionManager.updateBlockBreakingProgress 中不会调用，
+      // 因为 ClientPlayerInteractionManagerMixin 会在此情况下进行阻止，
+      // 从而避免点击一下左键却被多次调用的情况。
       if (!player.isSpectator() && isWand(player.getMainHandStack())) {
         if (player instanceof ServerPlayerEntity) {
           final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
           final Text text = extension.ec$getOrResetRegionSelection().clickFirstPoint(pos, player).get();
           if (text != null) player.sendMessage(text);
         }
-        return false;
+        return ActionResult.SUCCESS;
       }
-      return true;
+      return ActionResult.PASS;
     });
   }
 

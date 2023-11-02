@@ -250,7 +250,7 @@ public enum StackCommand implements CommandRegistrationCallback {
 
               final BlockEntity blockEntity = world.getBlockEntity(posToPlace);
               if (blockEntity != null) {
-                final NbtCompound nbtCompound = sourceBlockEntities.get(posToPlace.asLong());
+                final NbtCompound nbtCompound = sourceBlockEntities.get(entry.getLongKey());
                 if (nbtCompound != null) {
                   blockEntity.readNbt(nbtCompound);
                   modofied = true;

@@ -26,7 +26,8 @@
     "WorldChunkMixin"
   ],
   "client": [
-    "ClientCommandSourceAccessor"
+    "ClientCommandSourceAccessor",
+    "ClientPlayerInteractionManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
