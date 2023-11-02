@@ -13,6 +13,14 @@ public final class UnloadedPosException extends RuntimeException {
 
   public UnloadedPosException(BlockPos unloadedPos) {this.unloadedPos = unloadedPos;}
 
+  public static <T> Iterable<T> catching(Iterable<T> t) {
+    return () -> new CatchingIterator<>(t.iterator(), e -> {
+      if (!(e instanceof UnloadedPosException)) {
+        throw e;
+      }
+    });
+  }
+
   public static <T> CatchingIterator<T> catching(Iterator<T> t) {
     return new CatchingIterator<>(t, e -> {
       if (!(e instanceof UnloadedPosException)) {

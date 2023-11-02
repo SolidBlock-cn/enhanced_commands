@@ -15,7 +15,7 @@ public final class IterateUtils {
     return IterateUtils.<T>singletonNullStream().peek(o -> runnable.run());
   }
 
-  public static <T>Iterator<T> singletonPeekingIterator(Runnable runnable) {
+  public static <T> Iterator<T> singletonPeekingIterator(Runnable runnable) {
     return IterateUtils.<T>singletonPeekingStream(runnable).iterator();
   }
 
@@ -31,6 +31,10 @@ public final class IterateUtils {
    */
   public static void exhaust(Stream<?> stream) {
     stream.forEach(o -> {});
+  }
+
+  public static <E> Iterable<E> batchAndSkip(Iterable<E> forward, int batchSize, int skipTimes) {
+    return () -> new SkippingIterator<>(new BatchedIterator<>(forward.iterator(), batchSize), skipTimes);
   }
 
   public static <E> Iterator<E> batchAndSkip(Iterator<E> forward, int batchSize, int skipTimes) {

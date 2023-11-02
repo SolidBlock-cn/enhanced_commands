@@ -98,16 +98,16 @@ public enum MoveCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public void transformEntity(Entity entity) {
+      public void transformEntity(@NotNull Entity entity) {
       }
 
       @Override
-      public BlockState transformBlockState(BlockState original) {
+      public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
         return original;
       }
 
       @Override
-      public Region transformRegion(Region region) {
+      public @NotNull Region transformRegion(@NotNull Region region) {
         return region.moved(relativeVector);
       }
 

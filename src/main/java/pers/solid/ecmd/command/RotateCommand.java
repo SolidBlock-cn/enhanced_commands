@@ -150,7 +150,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public void transformEntity(Entity entity) {
+      public void transformEntity(@NotNull Entity entity) {
         final float newYaw;
         if (blockRotation != null) {
           newYaw = entity.applyRotation(blockRotation);
@@ -165,12 +165,12 @@ public enum RotateCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public BlockState transformBlockState(BlockState original) {
+      public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
         return original.rotate(nearestBlockRotation);
       }
 
       @Override
-      public Region transformRegion(Region region) {
+      public @NotNull Region transformRegion(@NotNull Region region) {
         return region.rotated(nearestBlockRotation, pivot.toCenterPos());
       }
 

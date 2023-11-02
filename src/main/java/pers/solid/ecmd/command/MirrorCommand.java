@@ -75,7 +75,7 @@ public enum MirrorCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public void transformEntity(Entity entity) {
+      public void transformEntity(@NotNull Entity entity) {
         final float newYaw = entity.applyMirror(switch (axis) {
           case X -> BlockMirror.FRONT_BACK;
           case Z -> BlockMirror.LEFT_RIGHT;
@@ -95,12 +95,12 @@ public enum MirrorCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public BlockState transformBlockState(BlockState original) {
+      public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
         return FlipStateCallback.getMirroredState(original, axis);
       }
 
       @Override
-      public Region transformRegion(Region region) {
+      public @NotNull Region transformRegion(@NotNull Region region) {
         return region.mirrored(axis, pivot.toCenterPos());
       }
 

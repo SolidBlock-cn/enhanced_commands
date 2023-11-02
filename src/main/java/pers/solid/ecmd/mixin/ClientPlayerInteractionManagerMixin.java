@@ -25,12 +25,12 @@ public abstract class ClientPlayerInteractionManagerMixin {
   @Shadow
   private GameMode gameMode;
 
-  @Inject(method = "updateBlockBreakingProgress", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;isCreative()Z", ordinal = 0), cancellable = true)
+  @Inject(method = "updateBlockBreakingProgress", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;isCreative()Z", ordinal = 0, shift = At.Shift.BEFORE), cancellable = true)
   public void suspendsUpdatingWand(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
     // 当玩家手持区域选择工具时，阻止其通过此方法调用 AttackBlockCallback
     // 参见 WandEvent
     if (gameMode != GameMode.SPECTATOR && client.player != null && WandEvent.isWand(client.player.getMainHandStack())) {
-      cir.cancel();
+      cir.setReturnValue(false);
     }
   }
 }

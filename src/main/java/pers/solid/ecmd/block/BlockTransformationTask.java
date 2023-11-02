@@ -1,8 +1,8 @@
 package pers.solid.ecmd.block;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import it.unimi.dsi.fastutil.longs.*;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -47,14 +47,14 @@ public class BlockTransformationTask {
   private final @Nullable BlockPredicate affectsOnly;
   private final @Nullable BlockPredicate transformsOnly;
   private final @Nullable BlockFunction remaining;
-  private @Nullable Stream<? extends Entity> entitiesToAffect;
+  private @Nullable Iterator<? extends Entity> entitiesToAffect;
   private int affectedBlocks = 0;
   private int affectedEntities = 0;
   public boolean hasUnloadedPos = false;
   private final boolean interpolation;
   private final @NotNull UnloadedPosBehavior unloadedPosBehavior;
 
-  private BlockTransformationTask(@NotNull Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3d, Vec3d> posTransformer, @Nullable Function<Vec3d, Vec3d> invertedPosTransformer, @NotNull Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @NotNull World world, @NotNull Region region, int flags, int modFlags, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Stream<? extends Entity> entitiesToAffect, boolean interpolation, @NotNull UnloadedPosBehavior unloadedPosBehavior) {
+  private BlockTransformationTask(@NotNull Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3d, Vec3d> posTransformer, @Nullable Function<Vec3d, Vec3d> invertedPosTransformer, @NotNull Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @NotNull World world, @NotNull Region region, int flags, int modFlags, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, @NotNull UnloadedPosBehavior unloadedPosBehavior) {
     this.blockPosTransformer = blockPosTransformer;
     this.posTransformer = posTransformer;
     this.invertedPosTransformer = invertedPosTransformer;
@@ -118,57 +118,61 @@ public class BlockTransformationTask {
     }
 
     // 被转换走的方块在转换前的坐标
-    final Map<BlockPos, BlockState> posTransformedOut = new HashMap<>();
+    final Long2ReferenceMap<BlockState> posTransformedOut = new Long2ReferenceOpenHashMap<>();
     // 转换后的坐标和转换后的方块
-    final Map<BlockPos, BlockState> transformedStates = new LinkedHashMap<>();
+    final Long2ReferenceMap<BlockState> transformedStates = new Long2ReferenceLinkedOpenHashMap<>();
     // 转换后的坐标和 NBT，NBT 一般不进行转换
-    final Map<BlockPos, NbtCompound> nbts = new HashMap<>();
+    final Long2ReferenceMap<NbtCompound> nbts = new Long2ReferenceOpenHashMap<>();
 
-
-    final Iterator<Void> storeTransformed = modifyStream(modifyStream(region.stream())
+    final BlockPos.Mutable mutable = new BlockPos.Mutable();
+    final Iterable<Void> storeTransformed = () -> modifyStream(modifyStream(region.stream())
         .map(blockPos -> {
           final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-          if (transformsOnly == null || transformsOnly.test(cachedBlockPosition) && world.isChunkLoaded(blockPos)) {
+          if ((transformsOnly == null || transformsOnly.test(cachedBlockPosition)) && cachedBlockPosition.getBlockState() != null) {
             final BlockState blockState = cachedBlockPosition.getBlockState();
-            posTransformedOut.put(blockPos.toImmutable(), blockState);
-            final BlockPos transformedBlockPos = new BlockPos(blockPosTransformer.apply(blockPos));
-            transformedStates.put(transformedBlockPos, blockStateTransformer.apply(blockState));
+            posTransformedOut.put(blockPos.asLong(), blockState);
+            final BlockPos transformedBlockPos = mutable.set(blockPosTransformer.apply(blockPos));
+            transformedStates.put(transformedBlockPos.asLong(), blockStateTransformer.apply(blockState));
             if (cachedBlockPosition.getBlockEntity() != null) {
-              nbts.put(transformedBlockPos, cachedBlockPosition.getBlockEntity().createNbt());
+              nbts.put(transformedBlockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt());
             }
 
             return transformedBlockPos;
           } else {
             // 充 null 值表示未匹配到值，或者是未加载的区块。
-            posTransformedOut.put(blockPos.toImmutable(), null);
+            posTransformedOut.put(blockPos.asLong(), null);
 
             return blockPos.toImmutable();
           }
         }))
         .map(blockPos -> (Void) null).iterator();
 
-    final Iterator<Void> collectMatchingTransformed;
-    final Set<BlockPos> matchingBlockPos;
+    final Iterable<Void> collectMatchingTransformed;
+    final LongSet matchingBlockPos;
     if (affectsOnly != null) {
-      matchingBlockPos = new LinkedHashSet<>();
-      collectMatchingTransformed = transformedStates.keySet().stream().map(blockPos -> {
-        if (affectsOnly.test(new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE))) {
-          matchingBlockPos.add(blockPos);
+      matchingBlockPos = new LongOpenHashSet();
+      collectMatchingTransformed = () -> transformedStates.keySet().longStream().mapToObj(longValue -> {
+        mutable.set(longValue);
+        if (affectsOnly.test(new CachedBlockPosition(world, mutable, unloadedPosBehavior == UnloadedPosBehavior.FORCE))) {
+          matchingBlockPos.add(longValue);
         }
         return (Void) null;
       }).iterator();
     } else {
       matchingBlockPos = transformedStates.keySet();
-      collectMatchingTransformed = Collections.emptyIterator();
+      collectMatchingTransformed = Collections.emptyList();
     }
 
-    final Iterator<Void> releaseTransformed = transformedStates.entrySet().stream()
-        .filter(affectsOnly == null ? Predicates.alwaysTrue() : entry -> matchingBlockPos.contains(entry.getKey()))
-        .map(entry -> {
-          final BlockPos transformedBlockPos = entry.getKey();
+    Iterable<Long2ReferenceMap.Entry<BlockState>> releaseTransformedPos = () -> transformedStates.long2ReferenceEntrySet().iterator();
+    if (affectsOnly != null) {
+      releaseTransformedPos = Iterables.filter(releaseTransformedPos, entry -> matchingBlockPos.contains(entry.getLongKey()));
+    }
+    final Iterable<Void> releaseTransformed = Iterables.transform(releaseTransformedPos,
+        entry -> {
+          final BlockPos transformedBlockPos = mutable.set(entry.getLongKey());
           final BlockState transformedState = entry.getValue();
           boolean affected = MixinSharedVariables.setBlockStateWithModFlags(world, transformedBlockPos, transformedState, flags, modFlags);
-          final NbtCompound nbtCompound = nbts.get(transformedBlockPos);
+          final NbtCompound nbtCompound = nbts.get(entry.getLongKey());
           final @Nullable BlockEntity transformedBlockEntity;
           if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(transformedBlockPos)) != null) {
             transformedBlockEntity.readNbt(nbtCompound);
@@ -176,91 +180,97 @@ public class BlockTransformationTask {
           }
           if (affected) affectedBlocks++;
 
-          return (Void) null;
-        }).iterator();
+          return null;
+        });
 
-    final Iterator<Void> transformEntities;
+    final Iterable<Void> transformEntities;
     if (entitiesToAffect != null) {
-      transformEntities = entitiesToAffect
-          .map(entity -> {
-            if (entityTransformer != null) {
-              entityTransformer.accept(entity);
-            }
-            if (posTransformer != null) {
-              final Vec3d transformedPos = posTransformer.apply(entity.getPos());
-              if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-                serverPlayerEntity.networkHandler.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYaw(), serverPlayerEntity.getPitch(), PositionFlag.VALUES);
-              } else {
-                entity.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z);
-              }
-            }
-            return (Void) null;
-          }).iterator();
+      transformEntities = Iterables.transform(() -> entitiesToAffect, entity -> {
+        if (entityTransformer != null) {
+          entityTransformer.accept(entity);
+        }
+        if (posTransformer != null) {
+          final Vec3d transformedPos = posTransformer.apply(entity.getPos());
+          if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
+            serverPlayerEntity.networkHandler.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYaw(), serverPlayerEntity.getPitch(), PositionFlag.VALUES);
+          } else {
+            entity.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z);
+          }
+        }
+        affectedEntities++;
+        return (Void) null;
+      });
     } else {
-      transformEntities = Collections.emptyIterator();
+      transformEntities = Collections.emptyList();
     }
 
-    final Iterator<Void> collectMatchingRemaining;
-    final Iterator<Void> setRemaining;
+    final Iterable<Void> collectMatchingRemaining;
+    final Iterable<Void> setRemaining;
     if (remaining != null) {
       if (affectsOnly != null) {
-        final List<BlockPos> affectedRemaining = new ArrayList<>();
-        collectMatchingRemaining = region.stream()
-            .filter(blockPos -> posTransformedOut.get(blockPos) != null && !transformedStates.containsKey(blockPos))
+        final LongList affectedRemaining = new LongArrayList();
+        collectMatchingRemaining = () -> region.stream()
+            .filter(blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong()))
             .map(blockPos -> {
               if (affectsOnly.test(new CachedBlockPosition(world, blockPos, false))) {
-                affectedRemaining.add(blockPos.toImmutable());
+                affectedRemaining.add(blockPos.asLong());
               }
               return (Void) null;
             }).iterator();
-        setRemaining = affectedRemaining.stream()
+        setRemaining = () -> affectedRemaining.longStream()
+            .mapToObj(blockPos -> {
+              if (remaining.setBlock(world, mutable.set(blockPos), flags, modFlags)) {
+                affectedBlocks++;
+              }
+              return (Void) null;
+            }).iterator();
+      } else {
+        collectMatchingRemaining = Collections.emptyList();
+        setRemaining = () -> region.stream()
+            .filter(blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong()))
             .map(blockPos -> {
               if (remaining.setBlock(world, blockPos, flags, modFlags)) {
                 affectedBlocks++;
               }
               return (Void) null;
             }).iterator();
-      } else {
-        collectMatchingRemaining = Collections.emptyIterator();
-        setRemaining = region.stream()
-            .filter(blockPos -> posTransformedOut.get(blockPos) != null && !transformedStates.containsKey(blockPos))
-            .map(blockPos -> {
-              remaining.setBlock(world, blockPos, flags, modFlags);
-              return (Void) null;
-            }).iterator();
       }
     } else {
-      collectMatchingRemaining = setRemaining = Collections.emptyIterator();
+      collectMatchingRemaining = setRemaining = Collections.emptyList();
     }
 
     final BlockBox untransformedBox;
-    final Iterator<Void> addInterpolation;
+    final Iterable<Void> addInterpolation;
     if (interpolation && posTransformer != null && invertedPosTransformer != null && (untransformedBox = region.minContainingBlockBox()) != null) {
       final List<BlockPos> transformedCorners = new ArrayList<>();
       untransformedBox.forEachVertex(blockPos -> transformedCorners.add(BlockPos.ofFloored(posTransformer.apply(blockPos.toCenterPos()))));
-      addInterpolation = BlockPos.stream(transformedCorners.stream().mapToInt(Vec3i::getX).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getX).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).max().orElseThrow()).filter(i -> {
-        final BlockPos invertedPos = BlockPos.ofFloored(invertedPosTransformer.apply(i.toCenterPos()));
-        if (region.contains(invertedPos) && !transformedStates.containsKey(i)) {
-          if (affectsOnly == null || affectsOnly.test(new CachedBlockPosition(world, i, false))) {
-            final Optional<BlockPos> nearestOriginal = BlockPos.streamOutwards(invertedPos, 1, 1, 1).filter(posTransformedOut::containsKey).map(BlockPos::toImmutable).min(Comparator.comparingInt(o -> o.getManhattanDistance(invertedPos)));
-            if (nearestOriginal.isPresent() && posTransformedOut.get(nearestOriginal.get()) != null) {
-              final BlockState state = posTransformedOut.get(nearestOriginal.get());
-              boolean affected = MixinSharedVariables.setBlockStateWithModFlags(world, i, state, flags, modFlags);
-              final NbtCompound nbtCompound = nbts.get(i);
-              final @Nullable BlockEntity transformedBlockEntity;
-              if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(i)) != null) {
-                transformedBlockEntity.readNbt(nbtCompound);
-                affected = true;
+      addInterpolation = () -> BlockPos.stream(transformedCorners.stream().mapToInt(Vec3i::getX).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getX).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).max().orElseThrow())
+          .filter(i -> {
+            final BlockPos invertedPos = BlockPos.ofFloored(invertedPosTransformer.apply(i.toCenterPos()));
+            if (region.contains(invertedPos) && !transformedStates.containsKey(i.asLong())) {
+              if (affectsOnly == null || affectsOnly.test(new CachedBlockPosition(world, i, false))) {
+                final Optional<BlockPos> nearestOriginal = BlockPos.streamOutwards(invertedPos, 1, 1, 1).mapToLong(BlockPos::asLong).filter(posTransformedOut::containsKey).mapToObj(BlockPos::fromLong).min(Comparator.comparingInt(o -> o.getManhattanDistance(invertedPos)));
+                if (nearestOriginal.isPresent()) {
+                  final long nearestOriginalLong = nearestOriginal.get().asLong();
+                  if (posTransformedOut.get(nearestOriginalLong) != null) {
+                    final BlockState state = posTransformedOut.get(nearestOriginalLong);
+                    boolean affected = MixinSharedVariables.setBlockStateWithModFlags(world, i, state, flags, modFlags);
+                    final NbtCompound nbtCompound = nbts.get(i.asLong());
+                    final @Nullable BlockEntity transformedBlockEntity;
+                    if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(i)) != null) {
+                      transformedBlockEntity.readNbt(nbtCompound);
+                      affected = true;
+                    }
+                    if (affected) affectedBlocks++;
+                    return true;
+                  }
+                }
               }
-              if (affected) affectedBlocks++;
-              return true;
             }
-          }
-        }
-        return false;
-      }).map(blockPos -> (Void) null).iterator();
+            return false;
+          }).map(blockPos -> (Void) null).iterator();
     } else {
-      addInterpolation = Collections.emptyIterator();
+      addInterpolation = Collections.emptyList();
     }
 
     return new TaskSeries(storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation);
@@ -270,21 +280,22 @@ public class BlockTransformationTask {
     return new Builder(world, region);
   }
 
-  public record TaskSeries(Iterator<Void> storeTransformed, Iterator<Void> collectMatchingTransformed, Iterator<Void> releaseTransformed, Iterator<Void> transformEntities, Iterator<Void> collectMatchingRemaining, Iterator<Void> setRemaining, Iterator<Void> addInterpolation) {
+  public record TaskSeries(Iterable<Void> storeTransformed, Iterable<Void> collectMatchingTransformed, Iterable<Void> releaseTransformed, Iterable<Void> transformEntities, Iterable<Void> collectMatchingRemaining, Iterable<Void> setRemaining, Iterable<Void> addInterpolation) {
+    // 使用 iterable 而非 iterator 是为了惰性计算，有些迭代器所使用的集合是在之前的迭代器中添加的，为了避免出现错误，应该在完成了添加集合元素之后，再调用集合的 iterator() 方法。
     public Iterator<Void> getSpeedAdjustedTask() {
-      return UnloadedPosException.catching(Iterators.concat(
-          IterateUtils.batchAndSkip(storeTransformed, 16384, 3),
-          IterateUtils.batchAndSkip(collectMatchingTransformed, 16384, 3),
+      return UnloadedPosException.catching(Iterables.concat(
+          IterateUtils.batchAndSkip(storeTransformed, 16384, 1),
+          IterateUtils.batchAndSkip(collectMatchingTransformed, 16384, 1),
           IterateUtils.batchAndSkip(releaseTransformed, 32768, 15),
           IterateUtils.batchAndSkip(transformEntities, 16384, 7),
-          IterateUtils.batchAndSkip(collectMatchingRemaining, 16384, 3),
+          IterateUtils.batchAndSkip(collectMatchingRemaining, 16384, 1),
           IterateUtils.batchAndSkip(setRemaining, 32768, 15),
           IterateUtils.batchAndSkip(addInterpolation, 32768, 15)
-      ));
+      ).iterator());
     }
 
     public Iterator<Void> getImmediateTask() {
-      return UnloadedPosException.catching(Iterators.concat(storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation));
+      return UnloadedPosException.catching(Iterables.concat(storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation).iterator());
     }
   }
 
@@ -300,7 +311,7 @@ public class BlockTransformationTask {
     private @Nullable BlockPredicate affectsOnly = null;
     private @Nullable BlockPredicate transformsOnly = null;
     private @Nullable BlockFunction remaining = DEFAULT_REMAINING_FUNCTION;
-    private @Nullable Stream<? extends Entity> entitiesToAffect = null;
+    private @Nullable Iterator<? extends Entity> entitiesToAffect = null;
     private Function<Vec3d, Vec3d> invertedPosTransformer;
     private boolean interpolation = false;
     private @NotNull UnloadedPosBehavior unloadedPosBehavior = UnloadedPosBehavior.REJECT;
@@ -365,7 +376,7 @@ public class BlockTransformationTask {
       return this;
     }
 
-    public Builder entitiesToAffect(@Nullable Stream<? extends Entity> entitiesToAffect) {
+    public Builder entitiesToAffect(@Nullable Iterator<? extends Entity> entitiesToAffect) {
       this.entitiesToAffect = entitiesToAffect;
       return this;
     }

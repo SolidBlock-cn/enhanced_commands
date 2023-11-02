@@ -55,11 +55,11 @@ public interface BlockTransformationCommand {
 
   Vec3d transformPosBack(Vec3d transformed);
 
-  void transformEntity(Entity entity);
+  void transformEntity(@NotNull Entity entity);
 
-  BlockState transformBlockState(BlockState original);
+  @NotNull BlockState transformBlockState(@NotNull BlockState original);
 
-  Region transformRegion(Region region);
+  @NotNull Region transformRegion(@NotNull Region region);
 
   /**
    * 完成操作时通知影响的方块和实体的数量。
@@ -98,7 +98,7 @@ public interface BlockTransformationCommand {
     final EntitySelector entitiesToAffect = keywordArgs.getArg("affect_entities");
     if (entitiesToAffect != null) {
       builder.entitiesToAffect(entitiesToAffect.getEntities(source)
-          .stream().filter(entity -> region.contains(entity.getPos())));
+          .stream().filter(entity -> region.contains(entity.getPos())).iterator());
     }
 
     final boolean transformsRegion = keywordArgs.getBoolean("select");
