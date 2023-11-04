@@ -13,6 +13,7 @@
     "CommandManagerMixin",
     "CommandSyntaxExceptionMixin",
     "EnumArgumentTypeMixin",
+    "FallingBlockEntityAccessor",
     "GameModeArgumentTypeMixin",
     "IdentifierMixin",
     "RegistryEntryArgumentTypeMixin",

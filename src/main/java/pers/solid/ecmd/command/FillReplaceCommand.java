@@ -1,5 +1,6 @@
 package pers.solid.ecmd.command;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -9,6 +10,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -34,9 +37,7 @@ import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -151,23 +152,24 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
           })
           .iterator();
     } else {
-      List<BlockPos> posThatMatch = new ArrayList<>();
+      LongList posThatMatch = new LongArrayList();
+      final BlockPos.Mutable mutable = new BlockPos.Mutable();
       Iterator<Void> testPosIterator = stream.<Void>map(blockPos -> {
             final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, true);
             if (predicate.test(cachedBlockPosition)) {
-              posThatMatch.add(blockPos.toImmutable());
+              posThatMatch.add(blockPos.asLong());
             }
             return null;
           })
           .iterator();
-      Iterator<Void> placingIterator = posThatMatch.stream().<Void>map(blockPos -> {
-            if (blockFunction.setBlock(world, blockPos, flags, modFlags)) {
+      Iterable<Void> placingIterator = () -> posThatMatch.longStream().<Void>mapToObj(blockPos -> {
+            if (blockFunction.setBlock(world, mutable.set(blockPos), flags, modFlags)) {
               numbersAffected.increment();
             }
             return null;
           })
           .iterator();
-      mainIterator = Iterators.concat(testPosIterator, placingIterator);
+      mainIterator = Iterables.concat(() -> testPosIterator, placingIterator).iterator();
     }
     final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> "enhanced_commands.commands.fill.complete_skipped";
@@ -210,7 +212,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
 
   public static int getModFlags(@NotNull KeywordArgs args) {
     int value = 0;
-    if (args.getBoolean("post_process")) {
+    if (args.supportsArg("post_process") && args.getBoolean("post_process")) {
       value |= POST_PROCESS_FLAG;
     }
     if (args.getBoolean("suppress_initial_check")) {

@@ -31,6 +31,8 @@ public enum ModCommands implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     ActiveRegionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    ConvertBlockCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    ConvertBlocksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     DrawCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     FillReplaceCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);

@@ -47,7 +47,7 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
     }
     final ItemStack output = allMatches.get(world.getRandom().nextInt(allMatches.size())).getOutput(world.getRegistryManager());
     if (output.getItem() instanceof BlockItem blockItem) {
-      BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), world.random);
+      BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), world.getRandom());
       for (Property<?> property : result.getProperties()) {
         if (blockState.contains(property)) {
           result = StateUtil.withPropertyOfValueFromAnother(result, blockState, property);

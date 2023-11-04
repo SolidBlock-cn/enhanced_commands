@@ -122,9 +122,9 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     @Override
     public @NotNull RandBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       if (nbtCompound.contains("predicate", NbtElement.COMPOUND_TYPE)) {
-        return new RandBlockPredicate(nbtCompound.getFloat("value"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world), Random.create());
+        return new RandBlockPredicate(nbtCompound.getFloat("value"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world), world.getRandom());
       } else {
-        return new RandBlockPredicate(nbtCompound.getFloat("value"), null, Random.create());
+        return new RandBlockPredicate(nbtCompound.getFloat("value"), null, world.getRandom());
       }
     }
 

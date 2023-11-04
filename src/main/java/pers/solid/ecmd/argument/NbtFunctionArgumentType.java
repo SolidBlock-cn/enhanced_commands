@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
+import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 
 import java.util.concurrent.CompletableFuture;
@@ -25,6 +26,10 @@ public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, Argume
 
   public static NbtFunction getNbtFunction(CommandContext<?> context, String name) {
     return context.getArgument(name, NbtFunction.class);
+  }
+
+  public static CompoundNbtFunction getCompoundNbtFunction(CommandContext<?> context, String name) {
+    return context.getArgument(name, CompoundNbtFunction.class);
   }
 
   @Override

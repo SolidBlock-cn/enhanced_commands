@@ -155,7 +155,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
         if (blockRotation != null) {
           newYaw = entity.applyRotation(blockRotation);
         } else {
-          newYaw = entity.getYaw() + (float) rotation;
+          newYaw = entity.getYaw() - (float) rotation;
         }
         if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
           serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getPitch(), PositionFlag.VALUES);
