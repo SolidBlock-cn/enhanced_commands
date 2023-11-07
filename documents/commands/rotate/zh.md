@@ -23,7 +23,7 @@
 
 ### `<方向>`
 
-旋转所需要围绕的轴的[方向](/documents/arguments/direction/zh.md)。如未指定，则默认为 y 轴正方向，即向上。
+旋转所需要围绕的轴的[方向](/documents/arguments/direction/zh.md)。如未指定，则默认为 y 轴正方向，即向上（`up`）。
 
 ### `<x> <y> <z>`
 

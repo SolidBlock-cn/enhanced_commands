@@ -38,9 +38,9 @@ public enum OutlineCommand implements CommandRegistrationCallback {
             .then(CommandManager.argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
                 .executes(context -> executeWithDefaultKeywordArgs(context, OutlineRegion.OutlineTypes.OUTLINE))
                 .then(outlineTypeArgumentNode = CommandManager.argument("outline_type", new SimpleEnumArgumentTypes.OutlineTypeArgumentType())
-                    .executes(context1 -> executeWithDefaultKeywordArgs(context1, context1.getArgument("outline_type", OutlineRegion.OutlineTypes.class)))
+                    .executes(context -> executeWithDefaultKeywordArgs(context, context.getArgument("outline_type", OutlineRegion.OutlineTypes.class)))
                     .then(CommandManager.argument("keyword_args", kwArgsType)
-                        .executes(context1 -> executeFromKeywordArgs(context1, context1.getArgument("outline_type", OutlineRegion.OutlineTypes.class), KeywordArgsArgumentType.getKeywordArgs(context1, "keyword_args")))).build())));
+                        .executes(context -> executeFromKeywordArgs(context, context.getArgument("outline_type", OutlineRegion.OutlineTypes.class), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build())));
     ModCommands.registerWithRegionArgumentModification(
         dispatcher, literalR2("wall"),
         literalR2("/wall"),

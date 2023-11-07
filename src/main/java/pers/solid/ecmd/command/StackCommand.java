@@ -126,9 +126,11 @@ public enum StackCommand implements CommandRegistrationCallback {
     final int offsetAmount;
     if (blockBox == null) {
       throw new CommandException(Text.translatable("enhanced_commands.commands.stack.unsupported_box"));
-    } else {
+    } else if (!keywordArgs.getBoolean("absolute")) {
       final Direction.Axis axis = direction.getAxis();
       offsetAmount = axis.choose(blockBox.getMaxX(), blockBox.getMaxY(), blockBox.getMaxZ()) - axis.choose(blockBox.getMinX(), blockBox.getMinY(), blockBox.getMinZ()) + 1 + keywordArgs.getInt("gap");
+    } else {
+      offsetAmount = keywordArgs.getInt("gap");
     }
     return executeStack(region, direction.getVector().multiply(offsetAmount), stackAmount, keywordArgs, context);
   }
@@ -144,11 +146,6 @@ public enum StackCommand implements CommandRegistrationCallback {
     final boolean transformsRegion = keywordArgs.getBoolean("select");
     final ServerPlayerEntity player = source.getPlayer();
 
-    Region activeRegion;
-    if (transformsRegion && player != null) {
-      ((ServerPlayerEntityExtension) player).ec$setActiveRegion(targetRegion);
-      activeRegion = targetRegion;
-    } else {activeRegion = null;}
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       final BlockBox blockBox = region.minContainingBlockBox();
@@ -294,9 +291,7 @@ public enum StackCommand implements CommandRegistrationCallback {
         CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
       }
       if (transformsRegion && player != null) {
-        if (activeRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
-        }
+        ((ServerPlayerEntityExtension) player).ec$setActiveRegion(targetRegion);
       }
     }));
 

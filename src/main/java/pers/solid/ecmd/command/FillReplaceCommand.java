@@ -154,7 +154,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     } else {
       LongList posThatMatch = new LongArrayList();
       final BlockPos.Mutable mutable = new BlockPos.Mutable();
-      Iterator<Void> testPosIterator = stream.<Void>map(blockPos -> {
+      Iterator<Void> testPosIteration = stream.<Void>map(blockPos -> {
             final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, true);
             if (predicate.test(cachedBlockPosition)) {
               posThatMatch.add(blockPos.asLong());
@@ -162,14 +162,14 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
             return null;
           })
           .iterator();
-      Iterable<Void> placingIterator = () -> posThatMatch.longStream().<Void>mapToObj(blockPos -> {
+      Iterable<Void> placingIteration = () -> posThatMatch.longStream().<Void>mapToObj(blockPos -> {
             if (blockFunction.setBlock(world, mutable.set(blockPos), flags, modFlags)) {
               numbersAffected.increment();
             }
             return null;
           })
           .iterator();
-      mainIterator = Iterables.concat(() -> testPosIterator, placingIterator).iterator();
+      mainIterator = Iterables.concat(() -> testPosIteration, placingIteration).iterator();
     }
     final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> "enhanced_commands.commands.fill.complete_skipped";
