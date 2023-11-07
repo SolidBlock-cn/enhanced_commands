@@ -149,6 +149,7 @@
   "enhanced_commands.argument.region.exception.move_must_int": "此区域的移动数量必须是整数，但得到了%s",
   "enhanced_commands.argument.region.exception.move_must_int_vector": "此区域的移动向量必须是整数向量，但得到了%s",
   "enhanced_commands.argument.region.exception.rotation_pivot_must_center": "此区域的旋转中心点必须是方块坐标的正中心，但得到了%s",
+  "enhanced_commands.argument.region.exception.sphere_cannot_expand": "无法扩展球形区域，除非一次往所有方向扩展",
   "enhanced_commands.argument.region.hollow_cylinder": "空心圆柱",
   "enhanced_commands.argument.region.intersect": "多个区域的交集",
   "enhanced_commands.argument.region.no_active_region": "玩家%s没有活动区域，无法完成当前操作",

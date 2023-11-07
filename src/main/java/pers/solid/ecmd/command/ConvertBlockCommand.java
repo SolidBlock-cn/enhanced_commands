@@ -49,7 +49,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
       .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
       .addOptionalArg("force", BoolArgumentType.bool(), false)
       .addOptionalArg("nbt", NbtFunctionArgumentType.COMPOUND, null)
-      .addOptionalArg("affect_fluid", BoolArgumentType.bool(), true)
+      .addOptionalArg("affect_fluid", BoolArgumentType.bool(), false)
       .build();
 
   @Override
@@ -88,18 +88,19 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
 
   public static FallingBlockEntity convertToFallingBlock(World world, BlockPos pos, int flags, int modFlags, boolean affectFluid) {
     BlockState state = world.getBlockState(pos);
+    MixinSharedVariables.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
     if (!affectFluid) state = state.withIfExists(Properties.WATERLOGGED, false);
     FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(EntityType.FALLING_BLOCK, world);
     fallingBlockEntity.setPosition(Vec3d.ofBottomCenter(pos));
     fallingBlockEntity.setFallingBlockPos(pos);
     ((FallingBlockEntityAccessor) fallingBlockEntity).setBlock(state);
-    MixinSharedVariables.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
     world.spawnEntity(fallingBlockEntity);
     return fallingBlockEntity;
   }
 
   public static DisplayEntity.BlockDisplayEntity convertToBlockDisplay(World world, BlockPos pos, int flags, int modFlags, boolean affectFluid) {
     BlockState state = world.getBlockState(pos);
+    MixinSharedVariables.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
     if (!affectFluid) state = state.withIfExists(Properties.WATERLOGGED, false);
     final DisplayEntity.BlockDisplayEntity blockDisplayEntity = EntityType.BLOCK_DISPLAY.create(world);
     if (blockDisplayEntity == null) {
@@ -107,7 +108,6 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
     }
     blockDisplayEntity.setPosition(Vec3d.of(pos));
     blockDisplayEntity.setBlockState(state);
-    MixinSharedVariables.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
     world.spawnEntity(blockDisplayEntity);
     return blockDisplayEntity;
   }

@@ -24,7 +24,7 @@ public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegi
   }
 
   default @NotNull RegionSelection expanded(double offset) {
-    RegionSelection.super.expanded(offset);
+    IntBackedRegion.super.expanded(offset);
     return this;
   }
 
@@ -34,7 +34,7 @@ public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegi
   }
 
   default @NotNull RegionSelection expanded(double offset, Direction.Axis axis) {
-    RegionSelection.super.expanded(offset, axis);
+    IntBackedRegion.super.expanded(offset, axis);
     return this;
   }
 
@@ -43,7 +43,7 @@ public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegi
   }
 
   default @NotNull RegionSelection expanded(double offset, Direction direction) {
-    RegionSelection.super.expanded(offset, direction);
+    IntBackedRegion.super.expanded(offset, direction);
     return this;
   }
 
@@ -53,7 +53,7 @@ public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegi
 
   @Override
   default @NotNull RegionSelection expanded(double offset, Direction.Type type) {
-    RegionSelection.super.expanded(offset, type);
+    IntBackedRegion.super.expanded(offset, type);
     return this;
   }
 

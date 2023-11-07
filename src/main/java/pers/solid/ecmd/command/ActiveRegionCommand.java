@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockRotationArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -123,6 +124,8 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     } catch (Throwable e) {
       if (e.getCause() instanceof CommandSyntaxException c) {
         throw UNSUPPORTED_WITH_REASON.create(c.getRawMessage());
+      } else if (e.getCause() instanceof CommandException c) {
+        throw UNSUPPORTED_WITH_REASON.create(c.getTextMessage());
       } else {
         throw UNSUPPORTED.create();
       }

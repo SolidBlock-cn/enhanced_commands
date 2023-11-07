@@ -106,24 +106,13 @@ public interface BlockTransformationCommand {
 
     final boolean immediately = keywordArgs.getBoolean("immediately");
 
-    Region activeRegion = null;
-    if (transformsRegion && player != null) {
-      try {
-        activeRegion = ((ServerPlayerEntityExtension) player).ec$getActiveRegion();
-        if (activeRegion != null) {
-          activeRegion = transformRegion(activeRegion);
-        }
-      } catch (RuntimeException e) {
-        activeRegion = null;
-      }
-    }
+    Region activeRegion = transformsRegion && player != null ? transformRegion(region) : null;
 
     final BlockTransformationTask task = builder.build();
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      Region finalActiveRegion = activeRegion;
       ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
-        if (finalActiveRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(finalActiveRegion);
+        if (activeRegion != null) {
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
         }
         notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());

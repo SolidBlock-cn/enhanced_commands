@@ -2,11 +2,13 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +39,28 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   @Override
   public @NotNull RegionType<?> getType() {
     return RegionTypes.SPHERE;
+  }
+
+  public static final SimpleCommandExceptionType EXPAND_FAILED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.region.exception.sphere_cannot_expand"));
+
+  @Override
+  public @NotNull SphereRegion expanded(double offset) {
+    return new SphereRegion(radius + offset, center);
+  }
+
+  @Override
+  public @NotNull SphereRegion expanded(double offset, Direction.Type type) {
+    throw new UnsupportedOperationException(EXPAND_FAILED.create());
+  }
+
+  @Override
+  public @NotNull SphereRegion expanded(double offset, Direction.Axis axis) {
+    throw new UnsupportedOperationException(EXPAND_FAILED.create());
+  }
+
+  @Override
+  public @NotNull SphereRegion expanded(double offset, Direction direction) {
+    throw new UnsupportedOperationException(EXPAND_FAILED.create());
   }
 
   @Override

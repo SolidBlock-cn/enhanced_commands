@@ -5,11 +5,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.BlockCuboidRegion;
+import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -71,6 +73,71 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
     } else {
       return new BlockCuboidRegion(first, second);
     }
+  }
+
+  @Override
+  public @NotNull RegionSelection expanded(int offset) {
+    int x1 = first.getX();
+    int y1 = first.getY();
+    int z1 = first.getZ();
+    int x2 = second.getX();
+    int y2 = second.getY();
+    int z2 = second.getZ();
+    final Vec3i pos1Offset = new Vec3i(x1 > x2 ? offset : -offset, y1 > y2 ? offset : -offset, z1 > z2 ? offset : -offset);
+    first = first.add(pos1Offset);
+    second = second.subtract(pos1Offset);
+    resetCalculation();
+    return this;
+  }
+
+  @Override
+  public @NotNull RegionSelection expanded(int offset, Direction direction) {
+    final boolean negative = direction.getDirection() == Direction.AxisDirection.NEGATIVE;
+    final Direction.Axis axis = direction.getAxis();
+    final int firstCoordination = first.getComponentAlongAxis(axis);
+    final int secondCoordination = second.getComponentAlongAxis(axis);
+
+    if (!negative) {
+      offset = -offset;
+    }
+    if (firstCoordination > secondCoordination == negative) {
+      switch (axis) {
+        case X -> first = first.add(offset, 0, 0);
+        case Y -> first = first.add(0, offset, 0);
+        case Z -> first = first.add(0, 0, offset);
+      }
+    } else {
+      switch (axis) {
+        case X -> second = second.add(offset, 0, 0);
+        case Y -> second = second.add(0, offset, 0);
+        case Z -> second = second.add(0, 0, offset);
+      }
+    }
+    resetCalculation();
+    return this;
+  }
+
+  @Override
+  public RegionSelection expanded(int offset, Direction.Axis axis) {
+    final Vec3i pos1Offset = new Vec3i(first.getX() > second.getX() ? offset : -offset, first.getY() > second.getY() ? offset : -offset, first.getZ() > second.getZ() ? offset : -offset);
+
+    first = first.add(pos1Offset);
+    second = second.subtract(pos1Offset);
+    resetCalculation();
+    return this;
+  }
+
+  @Override
+  public Region expanded(int offset, Direction.Type type) {
+    final Vec3i pos1Offset = switch (type) {
+      case VERTICAL -> new Vec3i(0, first.getY() > second.getY() ? offset : -offset, 0);
+      case HORIZONTAL ->
+          new Vec3i(first.getX() > second.getX() ? offset : -offset, 0, first.getZ() > second.getZ() ? offset : -offset);
+    };
+    first = first.add(pos1Offset);
+    second = second.subtract(pos1Offset);
+    resetCalculation();
+    return this;
   }
 
   @Override

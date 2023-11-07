@@ -5,6 +5,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.region.SphereRegion;
@@ -75,10 +76,36 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public RegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
+  public SphereRegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
     center = transformation.apply(center);
     updateRadius();
-    return null;
+    resetCalculation();
+    return this;
+  }
+
+  @Override
+  public @NotNull SphereRegionSelection expanded(double offset) {
+    final Vec3d radiusVector = radiusTarget.subtract(center);
+    final Vec3d newRadiusVector = radiusVector.multiply(1 + offset / radiusVector.length());
+    radiusTarget = center.add(newRadiusVector);
+    radius += offset;
+    resetCalculation();
+    return this;
+  }
+
+  @Override
+  public @NotNull SphereRegionSelection expanded(double offset, Direction direction) {
+    throw new UnsupportedOperationException(SphereRegion.EXPAND_FAILED.create());
+  }
+
+  @Override
+  public @NotNull SphereRegionSelection expanded(double offset, Direction.Type type) {
+    throw new UnsupportedOperationException(SphereRegion.EXPAND_FAILED.create());
+  }
+
+  @Override
+  public @NotNull SphereRegionSelection expanded(double offset, Direction.Axis axis) {
+    throw new UnsupportedOperationException(SphereRegion.EXPAND_FAILED.create());
   }
 
   @Override

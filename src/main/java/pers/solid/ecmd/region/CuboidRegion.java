@@ -101,6 +101,30 @@ public record CuboidRegion(Box box) implements Region {
   }
 
   @Override
+  public @NotNull Region expanded(double offset, Direction.Type type) {
+    if (offset == 0) {
+      return this;
+    }
+    switch (type) {
+      case HORIZONTAL -> {
+        if (offset > 0) {
+          return new CuboidRegion(box.stretch(offset, 0, offset));
+        } else {
+          return new CuboidRegion(box.shrink(-offset, 0, -offset));
+        }
+      }
+      case VERTICAL -> {
+        if (offset > 0) {
+          return new CuboidRegion(box.stretch(0, offset, 0));
+        } else {
+          return new CuboidRegion(box.shrink(0, -offset, 0));
+        }
+      }
+      default -> throw new IllegalStateException("Unexpected value: " + type);
+    }
+  }
+
+  @Override
   public @NotNull RegionType<?> getType() {
     return RegionTypes.CUBOID;
   }
