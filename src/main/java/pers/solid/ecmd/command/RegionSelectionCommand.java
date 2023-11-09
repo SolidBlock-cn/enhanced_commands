@@ -38,7 +38,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
     final Command<ServerCommandSource> executesWithoutParam = context -> {
       final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
       player.giveItemStack(WandEvent.createWandStack());
-      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.regionselection.build_now", Text.keybind("key.attack").formatted(Formatting.GRAY), Text.keybind("key.use").formatted(Formatting.GRAY)), true);
+      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.regionselection.build_now", Text.keybind("key.attack").formatted(Formatting.GRAY), Text.keybind("key.use").formatted(Formatting.GRAY)), false);
       return 1;
     };
     final LiteralCommandNode<ServerCommandSource> regionselection

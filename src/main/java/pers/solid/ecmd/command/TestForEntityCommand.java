@@ -30,13 +30,13 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
   private int executeShowEntities(Collection<? extends Entity> entities, CommandContext<ServerCommandSource> context) {
     final int size = entities.size();
     if (size == 0) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.none").formatted(Formatting.RED), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.none").formatted(Formatting.RED), false);
     } else if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.single", Text.empty().append(entities.iterator().next().getDisplayName()).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.single", Text.empty().append(entities.iterator().next().getDisplayName()).styled(TextUtil.STYLE_FOR_RESULT)), false);
     } else if (size < 9) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.several", Texts.join(entities, entity -> Text.empty().append(entity.getDisplayName()).styled(TextUtil.STYLE_FOR_RESULT)), TextUtil.literal(size).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.several", Texts.join(entities, entity -> Text.empty().append(entity.getDisplayName()).styled(TextUtil.STYLE_FOR_RESULT)), TextUtil.literal(size).styled(TextUtil.STYLE_FOR_RESULT)), false);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.many", Texts.join(ImmutableList.copyOf(Iterables.limit(entities, 10)), entity -> Text.empty().append(entity.getDisplayName()).styled(TextUtil.STYLE_FOR_RESULT)), TextUtil.literal(size).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.many", Texts.join(ImmutableList.copyOf(Iterables.limit(entities, 10)), entity -> Text.empty().append(entity.getDisplayName()).styled(TextUtil.STYLE_FOR_RESULT)), TextUtil.literal(size).styled(TextUtil.STYLE_FOR_RESULT)), false);
     }
     return size;
   }

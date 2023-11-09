@@ -72,7 +72,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final int value = function.applyAsInt(blockState, world, pos);
-    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), false);
     return value;
   }
 
@@ -83,7 +83,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
     final BlockState blockState = world.getBlockState(pos);
     final Direction direction = DirectionArgumentType.getDirection(context, "direction");
     final int value = function.applyAsInt(blockState, world, pos, direction);
-    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.wrapDirection(direction).styled(TextUtil.STYLE_FOR_TARGET)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.wrapDirection(direction).styled(TextUtil.STYLE_FOR_TARGET)), false);
     return value;
   }
 
@@ -93,7 +93,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final float value = function.applyAsFloat(blockState, world, pos);
-    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(translationKey, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_ACTUAL)), false);
     return value;
   }
 
@@ -103,7 +103,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
     final boolean value = predicate.test(blockState, world, pos);
-    CommandBridge.sendFeedback(source, () -> Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos)), true);
+    CommandBridge.sendFeedback(source, () -> Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos)), false);
     return value;
   }
 
@@ -147,10 +147,10 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
     final BlockState blockState = world.getBlockState(pos);
     final Vec3d modelOffset = blockState.getModelOffset(world, pos);
     if (modelOffset.equals(Vec3d.ZERO)) {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos)), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos)), false);
       return 0;
     } else {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), TextUtil.wrapVector(modelOffset)), true);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), TextUtil.wrapVector(modelOffset)), false);
       return 1;
     }
   }

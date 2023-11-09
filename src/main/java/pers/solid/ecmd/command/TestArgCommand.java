@@ -19,6 +19,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.visitor.NbtTextFormatter;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
@@ -278,8 +279,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     final Command<ServerCommandSource> execution = context -> {
       final PosArgument pos = EnhancedPosArgumentType.getPosArgument(context, "pos");
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.pos.result"), true);
-      CommandBridge.sendFeedback(context, () -> Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.pos.result").append(ScreenTexts.LINE_BREAK).append(Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY)), false);
       return 1;
     };
     for (final EnhancedPosArgumentType.NumberType numberType : EnhancedPosArgumentType.NumberType.values()) {
@@ -352,7 +352,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               }
               final int finalNumOfIteratedButNotMatch = numOfIteratedButNotMatch;
               final int finalNumOfNotIteratedButMatch = numOfNotIteratedButMatch;
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.region.verify.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), true);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.region.verify.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), false);
               return numOfIteratedButNotMatch;
             }))
     );

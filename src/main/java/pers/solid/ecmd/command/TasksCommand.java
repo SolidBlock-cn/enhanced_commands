@@ -67,9 +67,9 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).ec_getIteratorTasks();
     final int size = iteratorTasks.size();
     if (size == 0) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.count.none", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.count.none", size), false);
     } else {
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tasks.count", size), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tasks.count", size), false);
     }
     return size;
   }
@@ -179,7 +179,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
     final int size = iteratorTasks.size();
 
     if (size == 0) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.list.none").formatted(Formatting.RED), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.list.none").formatted(Formatting.RED), false);
       return 0;
     }
     CommandBridge.sendFeedback(context.getSource(), () -> {
@@ -200,7 +200,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
         message.append(ScreenTexts.LINE_BREAK).append(Text.translatable("enhanced_commands.commands.tasks.list.limit_note").styled(style -> style.withColor(0xffa960)));
       }
       return message;
-    }, true);
+    }, false);
     return size;
   }
 }

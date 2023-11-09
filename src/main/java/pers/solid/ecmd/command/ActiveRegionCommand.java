@@ -93,10 +93,10 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
     final Region region = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegion();
     if (region == null) {
-      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.activeregion.get_none", player.getName().copy().styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.activeregion.get_none", player.getName().copy().styled(TextUtil.STYLE_FOR_TARGET)), false);
       return 0;
     } else {
-      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.activeregion.get", player.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.activeregion.get", player.getName().copy().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_RESULT)), false);
       return 1;
     }
   }
