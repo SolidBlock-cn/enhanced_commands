@@ -11,27 +11,13 @@ public interface SuggestionProvider {
   void accept(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder);
 
   @FunctionalInterface
-  interface Modifying extends SuggestionProvider {
+  interface Offset extends SuggestionProvider {
     CompletableFuture<Suggestions> apply(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder);
 
     @Override
     default void accept(CommandContext<?> context, SuggestionsBuilder builder) {
       apply(context, builder);
     }
-  }
-
-  @FunctionalInterface
-  interface Offset extends SuggestionProvider {
-    SuggestionsBuilder apply(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder);
-
-    @Override
-    default void accept(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder) {
-      apply(context, suggestionsBuilder);
-    }
-  }
-
-  static Modifying modifying(Modifying value) {
-    return value;
   }
 
   static Offset offset(Offset value) {

@@ -196,7 +196,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 1) {
-        outlineType = parser.readAndSuggestEnums(OutlineTypes.values(), OutlineTypes::getDisplayName, OutlineTypes.CODEC);
+        outlineType = parser.parseAndSuggestEnums(OutlineTypes.values(), OutlineTypes::getDisplayName, OutlineTypes.CODEC);
       } else if (paramIndex == 0) {
         regionArgument = RegionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }

@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -118,19 +117,19 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
       if (paramIndex == 0) {
-        fromPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        fromPos = parser.parseAndSuggestArgument(type);
         if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {
           parser.reader.skipWhitespace();
           // 在有接受到空格后，可直接接受第二个参数
           if (parser.reader.canRead()) {
             final char peek = parser.reader.peek();
             if (peek != ',' && peek != ')') {
-              toPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
+              toPos = parser.parseAndSuggestArgument(type);
             }
           }
         }
       } else if (toPos == null && paramIndex == 1) {
-        toPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        toPos = parser.parseAndSuggestArgument(type);
       } else if (toPos != null) {
         final int cursorBeforeInt = parser.reader.getCursor();
         thickness = parser.reader.readInt();

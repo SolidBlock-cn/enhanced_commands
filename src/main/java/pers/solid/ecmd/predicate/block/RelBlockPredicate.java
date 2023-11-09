@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -15,10 +16,10 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
+import java.util.function.Function;
 
 public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate predicate) implements BlockPredicate {
 
@@ -52,7 +53,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
   }
 
   public static final class Parser implements FunctionLikeParser<BlockPredicateArgument> {
-    private Vec3i relPos;
+    private Function<ServerCommandSource, Vec3i> relPos;
     private BlockPredicateArgument blockPredicate;
 
     @Override
@@ -69,7 +70,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     public BlockPredicateArgument getParseResult(SuggestedParser parser) {
       Preconditions.checkNotNull(relPos, "relPos (argument 1)");
       Preconditions.checkNotNull(blockPredicate, "blockPredicate (argument 2)");
-      return source -> new RelBlockPredicate(relPos, blockPredicate.apply(source));
+      return source -> new RelBlockPredicate(relPos.apply(source), blockPredicate.apply(source));
     }
 
     @Override
@@ -85,7 +86,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        relPos = ParsingUtil.parseVec3i(parser);
+        relPos = parser.parseAndSuggestVec3i();
       } else if (paramIndex == 1) {
         blockPredicate = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }

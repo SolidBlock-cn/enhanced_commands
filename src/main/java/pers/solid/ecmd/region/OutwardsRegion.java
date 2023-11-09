@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
@@ -15,7 +16,6 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
 import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -99,7 +99,8 @@ public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBac
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        center = ParsingUtil.suggestParserFromType(EnhancedPosArgumentType.blockPos(), parser, suggestionsOnly);
+        ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
+        center = parser.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 1) {
         final StringReader reader = parser.reader;
         x = reader.readInt();

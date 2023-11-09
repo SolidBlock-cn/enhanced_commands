@@ -174,14 +174,14 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
           parser.suggestionProviders.clear();
           usingKeyword = true;
           ParsingUtil.expectAndSkipWhitespace(reader);
-          from = ParsingUtil.suggestParserFromType(argumentType, parser, suggestionsOnly);
+          from = parser.parseAndSuggestArgument(argumentType);
           ParsingUtil.expectAndSkipWhitespace(reader);
           final int cursorBeforeKeyword2 = reader.getCursor();
           parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("to", suggestionsBuilder));
           if (reader.readUnquotedString().equals("to")) {
             parser.suggestionProviders.clear();
             ParsingUtil.expectAndSkipWhitespace(reader);
-            to = ParsingUtil.suggestParserFromType(argumentType, parser, suggestionsOnly);
+            to = parser.parseAndSuggestArgument(argumentType);
           } else {
             reader.setCursor(cursorBeforeKeyword2);
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "to");
@@ -192,10 +192,10 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
             // 避免在输入了部分坐标后仍建议输入 “from” 的情况
             parser.suggestionProviders.clear();
           }
-          from = ParsingUtil.suggestParserFromType(argumentType, parser, suggestionsOnly);
+          from = parser.parseAndSuggestArgument(argumentType);
         }
       } else if (paramIndex == 1) {
-        to = ParsingUtil.suggestParserFromType(argumentType, parser, suggestionsOnly);
+        to = parser.parseAndSuggestArgument(argumentType);
       }
     }
 

@@ -4,7 +4,6 @@ import com.google.common.base.Functions;
 import com.google.common.base.Suppliers;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -12,15 +11,12 @@ import it.unimi.dsi.fastutil.chars.CharSet;
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,18 +114,6 @@ public final class ParsingUtil {
   }
 
   /**
-   * 通过指定的 {@link ArgumentType} 解析其对应的值并提供建议，用于使用 {@link SuggestedParser} 的情况。调用此函数时，会确保 {@link SuggestionsBuilder} 的位置合理。
-   */
-  public static <T> T suggestParserFromType(ArgumentType<T> argumentType, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    final int cursorBeforeParse = parser.reader.getCursor();
-    parser.suggestionProviders.add(SuggestionProvider.modifying((context, builder) -> {
-      final SuggestionsBuilder builderOffset = builder.createOffset(cursorBeforeParse);
-      return argumentType.listSuggestions(context, builderOffset);
-    }));
-    return argumentType.parse(parser.reader);
-  }
-
-  /**
    * 解析括号中的内容，并提供适当的建议。调用此方法前，parser 的 cursor 应当位于可能是括号的地方前面，当没有解析到括号时，返回 {@code null}。
    *
    * @param parseUnit 解析括号内的内容。
@@ -189,156 +173,6 @@ public final class ParsingUtil {
       reader.setCursor(cursorBeforeWhite);
       return first;
     }
-  }
-
-  /**
-   * 解析一个不同类型的角度时，并返回弧度值。角度值的单位可以是 {@code deg}、{@code rad} 或 {@code turn}。零值可以不提供单位，其他情况下不提供单位会抛出错误。输入完数值后会为单位提供建议。
-   *
-   * @param radians 返回的值是否为弧度值，若为 {@code false}，则返回角度值。
-   */
-  public static double parseAngle(SuggestedParser parser, boolean radians) throws CommandSyntaxException {
-    final StringReader reader = parser.reader;
-    final int cursorBeforeDouble = reader.getCursor();
-    while (reader.canRead()) {
-      final char peek = reader.peek();
-      if ((peek < '0' || peek > '9') && peek != '-') {
-        if (peek != '.') {
-          break; // 无效字符
-        } else if (reader.canRead(2) && reader.peek(1) == '.') {
-          break; // 后面两个字符都是小数点，无效
-        }
-      }
-      reader.skip();
-    }
-    final String substring = reader.getString().substring(cursorBeforeDouble, reader.getCursor());
-    if (substring.isEmpty()) {
-      parser.reader.setCursor(cursorBeforeDouble);
-      parser.reader.readUnquotedString();
-      final CommandSyntaxException exception = CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedDouble().createWithContext(reader);
-      if (parser.reader.getCursor() > cursorBeforeDouble) {
-        throw CommandSyntaxExceptionExtension.withCursorEnd(exception, parser.reader.getCursor());
-      } else {
-        throw exception;
-      }
-    }
-    final double v;
-    try {
-      v = Double.parseDouble(substring);
-    } catch (NumberFormatException e) {
-      final int cursorAfterNumber = reader.getCursor();
-      parser.reader.setCursor(cursorBeforeDouble);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidDouble().createWithContext(reader, substring), cursorAfterNumber);
-    }
-    parser.suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("deg", "rad", "turn"), suggestionsBuilder));
-    final int cursorBeforeUnit = reader.getCursor();
-    while (reader.canRead()) {
-      final char peek = reader.peek();
-      if (peek >= 'A' && peek <= 'Z' || peek >= 'a' && peek <= 'z') {
-        reader.skip();
-      } else {
-        break;
-      }
-    }
-    final String unit = reader.getString().substring(cursorBeforeUnit, reader.getCursor());
-    if (unit.isEmpty()) {
-      if (v == 0) {
-        return 0;
-      } else {
-        reader.setCursor(cursorBeforeUnit);
-        throw ModCommandExceptionTypes.ANGLE_UNIT_EXPECTED.createWithContext(reader, substring);
-      }
-    } else if ("deg".equals(unit)) {
-      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-      return radians ? Math.toRadians(v) : v;
-    } else if ("rad".equals(unit)) {
-      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-      return radians ? v : Math.toDegrees(v);
-    } else if ("turn".equals(unit)) {
-      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-      return (radians ? Math.PI * 2 : 360) * v;
-    } else {
-      final int cursorAfterUnit = reader.getCursor();
-      reader.setCursor(cursorBeforeUnit);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ANGLE_UNIT_UNKNOWN.createWithContext(reader, unit), cursorAfterUnit);
-    }
-  }
-
-  /**
-   * 解析双精度浮点数的向量。这不是代表一个坐标，因此也不支持绝对坐标和局部坐标。形式为 {@code (<x> <y> <z> | [length] <direction>)}。
-   */
-  public static Vec3d parseVec3d(SuggestedParser parser) throws CommandSyntaxException {
-    final StringReader reader = parser.reader;
-    {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestDirections(suggestionsBuilder));
-      final int cursorBeforeDirection = reader.getCursor();
-      final String unquotedString = reader.readUnquotedString();
-      final Direction byName = Direction.byName(unquotedString);
-      if (byName != null) {
-        parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-        return Vec3d.of(byName.getVector());
-      } else {
-        reader.setCursor(cursorBeforeDirection);
-      }
-    }
-    final double x = reader.readDouble();
-    parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-    expectAndSkipWhitespace(reader);
-    {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestDirections(suggestionsBuilder));
-      final int cursorBeforeDirection = reader.getCursor();
-      final String unquotedString = reader.readUnquotedString();
-      final Direction byName = Direction.byName(unquotedString);
-      if (byName != null) {
-        parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-        return Vec3d.of(byName.getVector()).multiply(x);
-      } else {
-        reader.setCursor(cursorBeforeDirection);
-      }
-    }
-    final double y = reader.readDouble();
-    parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-    expectAndSkipWhitespace(reader);
-    final double z = reader.readDouble();
-    return new Vec3d(x, y, z);
-  }
-
-  /**
-   * 解析整数的向量。这不是代表一个坐标，因此也不支持绝对坐标和局部坐标。
-   */
-  public static Vec3i parseVec3i(SuggestedParser parser) throws CommandSyntaxException {
-    final StringReader reader = parser.reader;
-    {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestDirections(suggestionsBuilder));
-      final int cursorBeforeDirection = reader.getCursor();
-      final String unquotedString = parser.reader.readUnquotedString();
-      final Direction byName = Direction.byName(unquotedString);
-      if (byName != null) {
-        parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-        return byName.getVector();
-      } else {
-        parser.reader.setCursor(cursorBeforeDirection);
-      }
-    }
-    final int x = reader.readInt();
-    parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-    expectAndSkipWhitespace(reader);
-    {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestDirections(suggestionsBuilder));
-      final int cursorBeforeDirection = reader.getCursor();
-      final String unquotedString = parser.reader.readUnquotedString();
-      final Direction byName = Direction.byName(unquotedString);
-      if (byName != null) {
-        parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-        return byName.getVector().multiply(x);
-      } else {
-        parser.reader.setCursor(cursorBeforeDirection);
-      }
-    }
-    final int y = reader.readInt();
-    parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-    expectAndSkipWhitespace(reader);
-    final int z = reader.readInt();
-    return new Vec3i(x, y, z);
   }
 
   /**

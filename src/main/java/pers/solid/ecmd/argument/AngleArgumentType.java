@@ -11,7 +11,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ArgumentHelper;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
-import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   @Override
   public Double parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeAngle = reader.getCursor();
-    final double result = ParsingUtil.parseAngle(new SuggestedParser(reader, new ArrayList<>()), returnRadians);
+    final double result = new SuggestedParser(reader, new ArrayList<>()).parseAndSuggestAngle(returnRadians);
     final int cursorAfterAngle = reader.getCursor();
     if (result < min) {
       reader.setCursor(cursorBeforeAngle);
@@ -54,7 +53,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      ParsingUtil.parseAngle(parser, returnRadians);
+      parser.parseAndSuggestAngle(returnRadians);
     } catch (CommandSyntaxException ignore) {}
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
     return parser.buildSuggestions(context, builderOffset);

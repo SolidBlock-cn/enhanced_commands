@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Streams;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
@@ -12,7 +13,6 @@ import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -173,9 +173,10 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, height);
         }
       } else if (paramIndex == 2) {
-        center = ParsingUtil.suggestParserFromType(EnhancedPosArgumentType.posPreferringCenteredInt(), parser, suggestionsOnly);
+        ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+        center = parser.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 3) {
-        type = parser.readAndSuggestEnums(OutlineRegion.OutlineTypes.values(), OutlineRegion.OutlineTypes::getDisplayName, OutlineRegion.OutlineTypes.CODEC);
+        type = parser.parseAndSuggestEnums(OutlineRegion.OutlineTypes.values(), OutlineRegion.OutlineTypes::getDisplayName, OutlineRegion.OutlineTypes.CODEC);
       }
     }
 

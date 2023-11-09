@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -112,7 +111,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
       if (paramIndex == 0) {
         radius = parser.reader.readDouble();
       } else if (paramIndex == 1) {
-        centerPos = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        centerPos = parser.parseAndSuggestArgument(type);
       }
     }
 

@@ -2,6 +2,7 @@ package pers.solid.ecmd.curve;
 
 import com.google.common.collect.AbstractIterator;
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.command.CommandRegistryAccess;
@@ -44,7 +45,7 @@ import java.util.function.Function;
  * </table>
  *
  * <p>{@code around <axisVector>} 等价于 {@code rotated <x> <y>} 或 {@code facing <targetPos>}。所有轴向量都会被单位化。
- * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code [length] <direction>}（参照 {@link ParsingUtil#parseVec3d(SuggestedParser)}。
+ * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code [length] <direction>}（参照 {@link SuggestedParser#parseVec3d(SuggestedParser)}。
  * <p>当半径指定为标量时，其方向为轴向量与 y 轴正方向的向量积的方向，若轴向量为 y 轴正方向或负方向，则其方向为 x 轴正方向或负方向。
  *
  * @param radius 圆的半径，是一个相对向量。
@@ -167,7 +168,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
    * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <axis>} 的默认值为 {@code 0 1 0}。当 {@code <radius>} 指定为标量时，其方向相当于 {@code <axis>} 与 y 轴正方向的向量积的方向。当 {@code <axis>} 正好指定为 y 轴正方向时，{@code <radius>} 方向为 x 正方向，若为 y 轴负方向，则 {@code <radius>} 方向为 x 负方向。
    */
   private static class Parser implements FunctionLikeParser<CurveArgument<CircleCurve>> {
-    private @Nullable Either<Double, Vec3d> radius;
+    private @Nullable Either<Double, Function<ServerCommandSource, Vec3d>> radius;
     private @Nullable PosArgument center;
     private @Nullable FailableBiFunction<ServerCommandSource, Vec3d, Vec3d, CommandSyntaxException> around;
     private @Nullable Range<Double> range;
@@ -199,7 +200,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
             crossProduct = crossProduct.multiply(1 / crossProduct.length());
           }
           return crossProduct.multiply(d);
-        }, Function.identity());
+        }, f -> f.apply(source));
         return new CircleCurve(radius, absoluteCenter, around, range == null ? FULL_TURN_RANGE : range);
       };
     }
@@ -231,7 +232,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
       if ("from".equals(unquotedString)) {
         parser.suggestionProviders.clear();
         ParsingUtil.expectAndSkipWhitespace(reader);
-        radius = Either.right(ParsingUtil.parseVec3d(parser));
+        radius = Either.right(parser.parseAndSuggestVec3d());
       } else {
         reader.setCursor(cursorBeforeKeyword);
         if (!CommandSource.shouldSuggest(reader.getRemaining(), "from")) parser.suggestionProviders.clear();
@@ -258,7 +259,8 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
         }
         parser.suggestionProviders.clear();
         ParsingUtil.expectAndSkipWhitespace(parser.reader);
-        center = ParsingUtil.suggestParserFromType(EnhancedPosArgumentType.posPreferringCenteredInt(), parser, suggestionsOnly);
+        ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+        center = parser.parseAndSuggestArgument(argumentType);
       } else if ("around".equals(unquotedString) || "rotated".equals(unquotedString) || "facing".equals(unquotedString)) {
         if (around != null) {
           parser.reader.setCursor(cursorBeforeKeyword);
@@ -268,18 +270,19 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
         ParsingUtil.expectAndSkipWhitespace(parser.reader);
         switch (unquotedString) {
           case "around" -> {
-            final Vec3d vec3d = ParsingUtil.parseVec3d(parser);
-            around = (source, ignored) -> vec3d;
+            final Function<ServerCommandSource, Vec3d> vec3d = parser.parseAndSuggestVec3d();
+            around = (source, ignored) -> vec3d.apply(source);
           }
           case "rotated" -> {
-            final PosArgument posArgument = ParsingUtil.suggestParserFromType(new RotationArgumentType(), parser, suggestionsOnly);
+            final PosArgument posArgument = parser.parseAndSuggestArgument(new RotationArgumentType());
             around = (source, ignored) -> {
               final Vec2f rotation = posArgument.toAbsoluteRotation(source);
               return new Vec3d(0, 0, 1).rotateX(-MathHelper.RADIANS_PER_DEGREE * rotation.x).rotateY(-MathHelper.RADIANS_PER_DEGREE * rotation.y);
             };
           }
           case "facing" -> {
-            final PosArgument posArgument = ParsingUtil.suggestParserFromType(EnhancedPosArgumentType.posPreferringCenteredInt(), parser, suggestionsOnly);
+            ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+            final PosArgument posArgument = parser.parseAndSuggestArgument(argumentType);
             around = (source, center) -> {
               final Vec3d facingTarget = posArgument.toAbsolutePos(source);
               return facingTarget.subtract(center).normalize();
@@ -302,7 +305,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
     }
 
     private Range<Double> parseAngleRange(SuggestedParser parser) throws CommandSyntaxException {
-      final double firstAngle = ParsingUtil.parseAngle(parser, true);
+      final double firstAngle = parser.parseAndSuggestAngle(true);
       parser.suggestionProviders.clear();
       final StringReader reader = parser.reader;
       final int cursorBeforeWhitespace = reader.getCursor();
@@ -310,7 +313,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
       if (reader.getString().startsWith("..", reader.getCursor())) {
         reader.setCursor(reader.getCursor() + "..".length());
         reader.skipWhitespace();
-        final double secondAngle = ParsingUtil.parseAngle(parser, true);
+        final double secondAngle = parser.parseAndSuggestAngle(true);
         parser.suggestionProviders.clear();
         return Range.between(firstAngle, secondAngle);
       } else {

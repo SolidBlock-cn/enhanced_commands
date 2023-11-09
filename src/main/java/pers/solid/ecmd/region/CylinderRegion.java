@@ -13,7 +13,6 @@ import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionLikeParser;
-import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -176,7 +175,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
         }
       } else if (paramIndex == 2) {
         final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
-        center = ParsingUtil.suggestParserFromType(type, parser, suggestionsOnly);
+        center = parser.parseAndSuggestArgument(type);
       }
     }
 

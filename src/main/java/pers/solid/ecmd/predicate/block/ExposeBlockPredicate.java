@@ -180,7 +180,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         parser.suggestionProviders.clear();
-        exposureType = parser.readAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
+        exposureType = parser.parseAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
       } else if (paramIndex == 1) {
         do {
           parser.suggestionProviders.clear();
