@@ -26,7 +26,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
-    return new TestResult(true, Text.translatable("enhanced_commands.argument.block_predicate.constant.pass"));
+    return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.constant.pass"));
   }
 
   @Override

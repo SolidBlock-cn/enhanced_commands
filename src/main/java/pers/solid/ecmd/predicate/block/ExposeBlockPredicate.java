@@ -55,7 +55,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     for (Direction direction : directions) {
       var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
       final boolean test = exposureType.test(offsetCachedBlockPosition, direction);
-      testResults.add(new TestResult(test, Text.translatable("enhanced_commands.argument.block_predicate.expose.side." + (test ? "pass" : "fail"), TextUtil.wrapDirection(direction)).formatted(test ? Formatting.GREEN : Formatting.RED)));
+      testResults.add(TestResult.of(test, Text.translatable("enhanced_commands.argument.block_predicate.expose.side." + (test ? "pass" : "fail"), TextUtil.wrapDirection(direction))));
       if (test) {
         result = true;
       }

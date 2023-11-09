@@ -7,7 +7,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +33,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final String id = Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString();
     final boolean matches = pattern.matcher(id).matches();
-    return new TestResult(matches, Text.translatable("enhanced_commands.argument.block_predicate.id_contain." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(TextUtil.STYLE_FOR_EXPECTED), Text.literal(id).styled(TextUtil.STYLE_FOR_ACTUAL)).formatted(matches ? Formatting.GREEN : Formatting.RED));
+    return TestResult.of(matches, Text.translatable("enhanced_commands.argument.block_predicate.id_contain." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(TextUtil.STYLE_FOR_EXPECTED), Text.literal(id).styled(TextUtil.STYLE_FOR_ACTUAL)));
   }
 
   @Override

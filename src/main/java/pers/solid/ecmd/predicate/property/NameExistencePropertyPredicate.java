@@ -3,7 +3,6 @@ package pers.solid.ecmd.predicate.property;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
@@ -26,8 +25,7 @@ public record NameExistencePropertyPredicate(String propertyName, boolean exists
     final boolean successes = actualExists == exists;
     final String string = successes ? "pass" : "fail";
     final String string2 = actualExists ? "exists" : "does_not_exist";
-    final Formatting formatting = successes ? Formatting.GREEN : Formatting.RED;
-    return new TestResult(successes, Text.translatable("enhanced_commands.argument.block_predicate.property_name_" + string + "_" + string2, Text.literal(propertyName).styled(TextUtil.STYLE_FOR_TARGET)).formatted(formatting));
+    return TestResult.of(successes, Text.translatable("enhanced_commands.argument.block_predicate.property_name_" + string + "_" + string2, Text.literal(propertyName).styled(TextUtil.STYLE_FOR_TARGET)));
   }
 
   @Override

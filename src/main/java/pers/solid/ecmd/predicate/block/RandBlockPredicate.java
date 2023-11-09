@@ -7,7 +7,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.RandomUtils;
@@ -51,9 +50,9 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(TextUtil.STYLE_FOR_ACTUAL);
     final MutableText o2 = Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_EXPECTED);
     if (nextFloat < value) {
-      return new TestResult(true, Text.translatable("enhanced_commands.argument.block_predicate.probability.pass", o1, o2).formatted(Formatting.GREEN));
+      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.probability.pass", o1, o2));
     } else {
-      return new TestResult(false, Text.translatable("enhanced_commands.argument.block_predicate.probability.fail", o1, o2).formatted(Formatting.RED));
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.probability.fail", o1, o2));
     }
   }
 

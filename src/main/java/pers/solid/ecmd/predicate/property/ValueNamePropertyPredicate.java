@@ -7,7 +7,6 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
@@ -33,16 +32,16 @@ public record ValueNamePropertyPredicate(String propertyName, Comparator compara
     final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) {
-      return new TestResult(false, Text.translatable(propertyName.isEmpty() ? "enhanced_commands.argument.block_predicate.no_property_this_name_empty" : "enhanced_commands.argument.block_predicate.no_property_this_name", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      return TestResult.of(false, Text.translatable(propertyName.isEmpty() ? "enhanced_commands.argument.block_predicate.no_property_this_name_empty" : "enhanced_commands.argument.block_predicate.no_property_this_name", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED)));
     }
     if (property.parse(valueName).isEmpty()) {
-      return new TestResult(false, Text.translatable(valueName.isEmpty() ? "enhanced_commands.argument.block_predicate.property_value_not_parsed_empty" : "enhanced_commands.argument.block_predicate.property_value_not_parsed", Text.literal(propertyName).styled(TextUtil.STYLE_FOR_TARGET), Text.literal(valueName).styled(TextUtil.STYLE_FOR_ACTUAL)).formatted(Formatting.RED));
+      return TestResult.of(false, Text.translatable(valueName.isEmpty() ? "enhanced_commands.argument.block_predicate.property_value_not_parsed_empty" : "enhanced_commands.argument.block_predicate.property_value_not_parsed", Text.literal(propertyName).styled(TextUtil.STYLE_FOR_TARGET), Text.literal(valueName).styled(TextUtil.STYLE_FOR_ACTUAL)));
     }
     final boolean test = comparator.parseAndTest(blockState, property, valueName);
     if (test) {
-      return new TestResult(true, Text.translatable("enhanced_commands.argument.block_predicate.property_test_pass", TextUtil.literal(ValueNamePropertyPredicate.this).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
+      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.property_test_pass", TextUtil.literal(ValueNamePropertyPredicate.this).styled(TextUtil.STYLE_FOR_EXPECTED)));
     } else {
-      return new TestResult(false, Text.translatable("enhanced_commands.argument.block_predicate.property_not_this_value", TextUtil.wrapVector(blockPos), propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(ValueNamePropertyPredicate.this).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.property_not_this_value", TextUtil.wrapVector(blockPos), propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(ValueNamePropertyPredicate.this).styled(TextUtil.STYLE_FOR_EXPECTED)));
     }
   }
 

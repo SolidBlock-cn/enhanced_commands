@@ -8,7 +8,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -27,11 +26,11 @@ public interface BlockPredicate extends ExpressionConvertible, NbtConvertible, B
   }
 
   static TestResult successResult(BlockPos blockPos) {
-    return new TestResult(true, Text.translatable("enhanced_commands.argument.block_predicate.pass", TextUtil.wrapVector(blockPos)).formatted(Formatting.GREEN));
+    return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.pass", TextUtil.wrapVector(blockPos)));
   }
 
   static TestResult failResult(BlockPos blockPos) {
-    return new TestResult(false, Text.translatable("enhanced_commands.argument.block_predicate.fail", TextUtil.wrapVector(blockPos)).formatted(Formatting.RED));
+    return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.fail", TextUtil.wrapVector(blockPos)));
   }
 
   static TestResult successOrFail(boolean successes, BlockPos blockPos) {
