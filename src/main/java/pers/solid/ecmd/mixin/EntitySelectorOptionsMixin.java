@@ -59,8 +59,7 @@ public abstract class EntitySelectorOptionsMixin {
     if (f != null) {
       final StringReader stringReader = reader.getReader();
       final int cursorAfterName = stringReader.getCursor();
-      stringReader.setCursor(restoreCursor);
-      final @Nullable var c = f.apply(reader);
+      final @Nullable var c = f.getReason(reader, option, restoreCursor);
       if (c != null) {
         throw CommandSyntaxExceptionExtension.withCursorEnd(c, cursorAfterName);
       } else {
