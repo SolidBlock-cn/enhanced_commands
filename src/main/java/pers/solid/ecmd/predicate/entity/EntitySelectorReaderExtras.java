@@ -21,6 +21,22 @@ public class EntitySelectorReaderExtras {
    * 指“@”后的内容的类型。
    */
   public @Nullable String atVariable;
+  /**
+   * 如果是通过 @r、@p 等选择器指定的实体类型，则为 {@code true}。在这种情况下，应该允许指定一个 type 参数来覆盖此设置。
+   */
+  public boolean implicitEntityType = false;
+  /**
+   * 如果是通过 @r、@p 等选择器指定的 {@link EntitySelectorReader#setIncludesNonPlayers(boolean)}，且没有通过 {@code gamemode} 等参数指定，则此字段为 true。
+   */
+  public boolean implicitNonPlayers = false;
+  /**
+   * 如果使用了 {@code r} 和 {@code rm} 指定的距离，而非{ @code distance} 选项，则为 {@code true}。
+   */
+  public boolean implicitDistance = false;
+  /**
+   * 如果使用了 {@code @p} 搭配负 {@code limit} 值，则为 {@code true}。
+   */
+  public boolean implicitNegativeLimit = false;
 
   public static EntitySelectorReaderExtras getOf(EntitySelectorReader entitySelectorReader) {
     return ((EntitySelectorReaderExtension) entitySelectorReader).ec$getExt();
