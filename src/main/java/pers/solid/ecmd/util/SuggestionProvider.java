@@ -5,13 +5,15 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 @FunctionalInterface
-public interface SuggestionProvider extends BiConsumer<CommandContext<?>, SuggestionsBuilder> {
+public interface SuggestionProvider {
+  void accept(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder);
+
   @FunctionalInterface
-  interface Modifying extends SuggestionProvider, BiFunction<CommandContext<?>, SuggestionsBuilder, CompletableFuture<Suggestions>> {
+  interface Modifying extends SuggestionProvider {
+    CompletableFuture<Suggestions> apply(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder);
+
     @Override
     default void accept(CommandContext<?> context, SuggestionsBuilder builder) {
       apply(context, builder);
@@ -19,7 +21,9 @@ public interface SuggestionProvider extends BiConsumer<CommandContext<?>, Sugges
   }
 
   @FunctionalInterface
-  interface Offset extends SuggestionProvider, BiFunction<CommandContext<?>, SuggestionsBuilder, SuggestionsBuilder> {
+  interface Offset extends SuggestionProvider {
+    SuggestionsBuilder apply(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder);
+
     @Override
     default void accept(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder) {
       apply(context, suggestionsBuilder);

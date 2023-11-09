@@ -66,7 +66,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
       }
     }
     if (matches) {
-      return TestResult.success(cachedBlockPosition.getBlockPos());
+      return BlockPredicate.successResult(cachedBlockPosition.getBlockPos());
     } else {
       return new TestResult(false, messages.build());
     }

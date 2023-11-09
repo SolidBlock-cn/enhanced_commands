@@ -1,8 +1,16 @@
 package pers.solid.ecmd.predicate.entity;
 
+import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.command.EntitySelectorReader;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * 这是在 {@link EntitySelectorReader} 中加入的一些额外的信息，用于本模组。
@@ -37,6 +45,16 @@ public class EntitySelectorReaderExtras {
    * 如果使用了 {@code @p} 搭配负 {@code limit} 值，则为 {@code true}。
    */
   public boolean implicitNegativeLimit = false;
+  /**
+   * 此参数会在 {@link EntitySelectorReader#build()} 中。
+   *
+   * @see pers.solid.ecmd.mixin.EntitySelectorReaderMixin
+   */
+  public final List<Function<ServerCommandSource, Predicate<Entity>>> predicateFunctions = new ArrayList<>();
+  /**
+   * 此 context 对象用于提供建议。在非提供建议的情景下，此字段有可能是 null。
+   */
+  public CommandContext<?> context = null;
 
   public static EntitySelectorReaderExtras getOf(EntitySelectorReader entitySelectorReader) {
     return ((EntitySelectorReaderExtension) entitySelectorReader).ec$getExt();

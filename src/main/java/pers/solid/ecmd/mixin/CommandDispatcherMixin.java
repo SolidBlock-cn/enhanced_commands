@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Slice;
-import pers.solid.ecmd.util.mixin.EnhancedRedirectModifier;
+import pers.solid.ecmd.util.EnhancedRedirectModifier;
 
 import java.util.Map;
 

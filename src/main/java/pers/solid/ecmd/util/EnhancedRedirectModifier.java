@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util.mixin;
+package pers.solid.ecmd.util;
 
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.context.CommandContext;
@@ -14,7 +14,8 @@ import java.util.Map;
 public interface EnhancedRedirectModifier<S> {
   void modifyArguments(Map<String, ParsedArgument<S, ?>> arguments, @Unmodifiable Map<String, ParsedArgument<S, ?>> previousArguments, S source) throws CommandSyntaxException;
 
-  interface Multiple<S> extends EnhancedRedirectModifier<S>, RedirectModifier<S> {}
+  interface Multiple<S> extends EnhancedRedirectModifier<S>, RedirectModifier<S> {
+  }
 
   interface Constant<S> extends Multiple<S> {
     @Override

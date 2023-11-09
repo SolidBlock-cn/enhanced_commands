@@ -3,12 +3,9 @@ package pers.solid.ecmd.command;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.ArrayList;
@@ -21,18 +18,6 @@ public record TestResult(boolean successes, @Unmodifiable List<Text> description
 
   public TestResult(boolean booleanValue, List<Text> descriptions) {
     this(booleanValue, descriptions, List.of());
-  }
-
-  public static TestResult success(BlockPos blockPos) {
-    return new TestResult(true, Text.translatable("enhanced_commands.argument.block_predicate.pass", TextUtil.wrapVector(blockPos)).formatted(Formatting.GREEN));
-  }
-
-  public static TestResult fail(BlockPos blockPos) {
-    return new TestResult(false, Text.translatable("enhanced_commands.argument.block_predicate.fail", TextUtil.wrapVector(blockPos)).formatted(Formatting.RED));
-  }
-
-  public static TestResult successOrFail(boolean successes, BlockPos blockPos) {
-    return successes ? success(blockPos) : fail(blockPos);
   }
 
   @Contract(mutates = "param1")

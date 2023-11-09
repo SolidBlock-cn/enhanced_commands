@@ -62,7 +62,7 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
     boolean isUsingEqual = equalsForDefault;
     boolean isNegated = false;
     final int cursorBeforeSign = reader.getCursor();
-    suggestionProviders.add((commandContext, suggestionsBuilder) -> {
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       ParsingUtil.suggestString(":", MATCH, suggestionsBuilder);
       ParsingUtil.suggestString("!:", NOT_MATCH, suggestionsBuilder);
       ParsingUtil.suggestString("=", EQUAL, suggestionsBuilder);

@@ -8,13 +8,16 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.TextUtil;
 
 public interface BlockPredicate extends ExpressionConvertible, NbtConvertible, BlockPredicateArgument {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannotParse"));
@@ -23,11 +26,23 @@ public interface BlockPredicate extends ExpressionConvertible, NbtConvertible, B
     return BlockPredicateArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).apply(source);
   }
 
+  static TestResult successResult(BlockPos blockPos) {
+    return new TestResult(true, Text.translatable("enhanced_commands.argument.block_predicate.pass", TextUtil.wrapVector(blockPos)).formatted(Formatting.GREEN));
+  }
+
+  static TestResult failResult(BlockPos blockPos) {
+    return new TestResult(false, Text.translatable("enhanced_commands.argument.block_predicate.fail", TextUtil.wrapVector(blockPos)).formatted(Formatting.RED));
+  }
+
+  static TestResult successOrFail(boolean successes, BlockPos blockPos) {
+    return successes ? successResult(blockPos) : failResult(blockPos);
+  }
+
   boolean test(CachedBlockPosition cachedBlockPosition);
 
   default TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final boolean test = test(cachedBlockPosition);
-    return TestResult.successOrFail(test, cachedBlockPosition.getBlockPos());
+    return successOrFail(test, cachedBlockPosition.getBlockPos());
   }
 
   @NotNull

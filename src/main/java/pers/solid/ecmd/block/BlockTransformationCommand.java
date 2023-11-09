@@ -7,7 +7,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.EntitySelector;
-import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,14 +19,12 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
-import pers.solid.ecmd.argument.BlockFunctionArgumentType;
-import pers.solid.ecmd.argument.BlockPredicateArgumentType;
-import pers.solid.ecmd.argument.KeywordArgs;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunctionArgument;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
+import pers.solid.ecmd.predicate.entity.EntitySelectors;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
@@ -40,7 +37,7 @@ import java.util.function.Function;
 public interface BlockTransformationCommand {
   static KeywordArgsArgumentType.Builder createKeywordArgs(CommandRegistryAccess registryAccess) {
     return KeywordArgsArgumentType.builder(FillReplaceCommand.KEYWORD_ARGS)
-        .addOptionalArg("affect_entities", EntityArgumentType.entities(), null)
+        .addOptionalArg("affect_entities", EntityPredicateArgumentType.entityPredicate(registryAccess), null)
         .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
         .addOptionalArg("keep_remaining", BoolArgumentType.bool(), false)
         .addOptionalArg("keep_state", BoolArgumentType.bool(), false)
@@ -97,8 +94,7 @@ public interface BlockTransformationCommand {
     }
     final EntitySelector entitiesToAffect = keywordArgs.getArg("affect_entities");
     if (entitiesToAffect != null) {
-      builder.entitiesToAffect(entitiesToAffect.getEntities(source)
-          .stream().filter(entity -> region.contains(entity.getPos())).iterator());
+      builder.entitiesToAffect(world.getEntitiesByClass(Entity.class, region.minContainingBox(), EntitySelectors.getEntityPredicate(entitiesToAffect, source)).iterator());
     }
 
     final boolean transformsRegion = keywordArgs.getBoolean("select");
@@ -126,9 +122,7 @@ public interface BlockTransformationCommand {
       final int affectedEntities = task.getAffectedEntities();
       notifyCompletion(source, affectedBlocks, entitiesToAffect == null ? -1 : affectedEntities);
       if (transformsRegion && player != null) {
-        if (activeRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
-        }
+        ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
       }
       return affectedBlocks + affectedEntities;
     }

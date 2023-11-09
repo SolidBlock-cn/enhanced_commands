@@ -45,7 +45,7 @@ public class NbtFunctionSuggestedParser extends SuggestedParser {
   public boolean parseSign(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     boolean isUsingEqual = equalsForDefault;
     final int cursorBeforeSign = reader.getCursor();
-    suggestionProviders.add((commandContext, suggestionsBuilder) -> {
+    suggestionProviders.add((context, suggestionsBuilder) -> {
       ParsingUtil.suggestString(":", MERGE, suggestionsBuilder);
       ParsingUtil.suggestString("=", EQUAL, suggestionsBuilder);
     });

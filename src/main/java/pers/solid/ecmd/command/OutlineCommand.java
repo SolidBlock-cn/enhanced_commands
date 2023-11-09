@@ -16,7 +16,7 @@ import pers.solid.ecmd.function.block.ConditionalBlockFunction;
 import pers.solid.ecmd.predicate.block.RegionBlockPredicate;
 import pers.solid.ecmd.region.OutlineRegion;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.util.mixin.EnhancedRedirectModifier;
+import pers.solid.ecmd.util.EnhancedRedirectModifier;
 
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 

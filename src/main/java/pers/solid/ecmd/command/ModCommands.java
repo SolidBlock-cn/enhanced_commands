@@ -15,7 +15,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import pers.solid.ecmd.mixin.CommandContextAccessor;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.util.mixin.EnhancedRedirectModifier;
+import pers.solid.ecmd.util.EnhancedRedirectModifier;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.function.Predicate;

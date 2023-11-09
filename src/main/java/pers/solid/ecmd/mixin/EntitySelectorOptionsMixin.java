@@ -236,7 +236,7 @@ public abstract class EntitySelectorOptionsMixin {
   /**
    * 当使用 {@code @p} 时，limit 的值应该允许为负值，从而表示选择最远的实体。
    */
-  @Inject(method = "method_9969", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;readInt()I"))
+  @Inject(method = "method_9969", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;readInt()I", remap = false))
   private static void acceptsImplicitNegativeLimit(EntitySelectorReader reader, CallbackInfo ci, @Local(ordinal = 0) int cursor, @Local(ordinal = 1) LocalIntRef readInt) throws CommandSyntaxException {
     final EntitySelectorReaderExtras extras = EntitySelectorReaderExtras.getOf(reader);
     if ("p".equals(extras.atVariable) && readInt.get() < 0) {

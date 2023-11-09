@@ -50,7 +50,8 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {}
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+  }
 
   @Override
   public @NotNull BlockFunctionType<RandomBlockFunction> getType() {

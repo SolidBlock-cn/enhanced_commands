@@ -1,19 +1,29 @@
 package pers.solid.ecmd.predicate.entity;
 
+import com.google.common.base.Predicates;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.EntitySelectorOptions;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.predicate.NumberRange;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public class EntitySelectionOptionExtension {
   /**
@@ -145,7 +155,7 @@ public class EntitySelectionOptionExtension {
   }
 
   private static void registerModOptions() {
-    EntitySelectorOptionsAccessor.callPutOption("r", reader -> {
+    putOption("r", reader -> {
       final NumberRange.FloatRange original = reader.getDistance();
       final StringReader stringReader = reader.getReader();
       final int cursorBeforeValue = stringReader.getCursor();
@@ -162,7 +172,7 @@ public class EntitySelectionOptionExtension {
         reader.setDistance(NumberRange.FloatRange.between(original.getMin(), value));
       }
     }, reader -> reader.getDistance().isDummy() || EntitySelectorReaderExtras.getOf(reader).implicitDistance && reader.getDistance().getMax() != null, Text.translatable("enhanced_commands.argument.entity.options.r.description"));
-    EntitySelectorOptionsAccessor.callPutOption("rm", reader -> {
+    putOption("rm", reader -> {
       final NumberRange.FloatRange original = reader.getDistance();
       final StringReader stringReader = reader.getReader();
       final int cursorBeforeValue = stringReader.getCursor();
@@ -179,6 +189,22 @@ public class EntitySelectionOptionExtension {
         reader.setDistance(NumberRange.FloatRange.between(value, original.getMax()));
       }
     }, reader -> reader.getDistance().isDummy() || EntitySelectorReaderExtras.getOf(reader).implicitDistance && reader.getDistance().getMax() != null, Text.translatable("enhanced_commands.argument.entity.options.rm.description"));
+
+    putOption("region", reader -> {
+      final SuggestedParser parser = new SuggestedParser(reader.getReader());
+      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
+      final CommandRegistryAccess registryAccess = CommandManager.createRegistryAccess(DynamicRegistryManager.of(Registries.REGISTRIES));
+      final RegionArgument<?> regionArgument = RegionArgument.parse(registryAccess, parser, false);
+
+      EntitySelectorReaderExtras.getOf(reader).predicateFunctions.add(source -> {
+        final Region region = regionArgument.toAbsoluteRegion(source);
+        return entity -> region.contains(entity.getPos());
+      });
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.region"));
+  }
+
+  private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {
+    EntitySelectorOptionsAccessor.callPutOption(id, handler, condition, description);
   }
 
   public static void init() {
