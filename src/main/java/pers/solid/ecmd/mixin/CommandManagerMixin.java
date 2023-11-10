@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
@@ -14,9 +15,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
 @Mixin(CommandManager.class)
 public abstract class CommandManagerMixin {
@@ -51,5 +54,10 @@ public abstract class CommandManagerMixin {
   @ModifyExpressionValue(method = "execute", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;isDebugEnabled()Z", remap = false))
   public boolean forceEnableDebugging(boolean original) {
     return true;
+  }
+
+  @Inject(method = "<init>", at = @At("TAIL"))
+  private void storeCommandRegistryAccess(CommandManager.RegistrationEnvironment environment, CommandRegistryAccess commandRegistryAccess, CallbackInfo ci) {
+    MixinSharedVariables.setWeakCommandRegistryAccess(commandRegistryAccess);
   }
 }

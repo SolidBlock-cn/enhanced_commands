@@ -25,9 +25,11 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.SuggestionProvider;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
@@ -42,10 +44,16 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   public Identifier blockId;
   public RegistryEntryList.Named<Block> tagId;
 
-  public SimpleBlockSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader, RegistryWrapper<Block> registryWrapper) {
+  public SimpleBlockSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
     super(reader);
     this.commandRegistryAccess = commandRegistryAccess;
-    this.registryWrapper = registryWrapper;
+    this.registryWrapper = commandRegistryAccess.createWrapper(RegistryKeys.BLOCK);
+  }
+
+  public SimpleBlockSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader, List<SuggestionProvider> suggestionProviders) {
+    super(reader, suggestionProviders);
+    this.commandRegistryAccess = commandRegistryAccess;
+    this.registryWrapper = commandRegistryAccess.createWrapper(RegistryKeys.BLOCK);
   }
 
   protected static <T extends Comparable<T>> void suggestValuesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder) {

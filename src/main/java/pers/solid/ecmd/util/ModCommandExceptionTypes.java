@@ -14,6 +14,7 @@ public final class ModCommandExceptionTypes {
   public static final Dynamic4CommandExceptionType EXPECTED_4_SYMBOLS = new Dynamic4CommandExceptionType((a, b, c, d) -> Text.translatable("enhanced_commands.parsing.expected.2", a, b, c, d));
   public static final DynamicCommandExceptionType UNKNOWN_KEYWORD = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.unknown_keyword", o));
   public static final DynamicCommandExceptionType DUPLICATE_KEYWORD = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.duplicate_keyword", o));
+  public static final DynamicCommandExceptionType DUPLICATE_VALUE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.duplicate_value", o));
   private static final Text VALID_UNITS = Text.translatable("enhanced_commands.parsing.angle_accepted_values");
   public static final DynamicCommandExceptionType ANGLE_UNIT_EXPECTED = new DynamicCommandExceptionType(number -> Text.translatable("enhanced_commands.parsing.angle_unit_expected", number, VALID_UNITS));
   public static final DynamicCommandExceptionType ANGLE_UNIT_UNKNOWN = new DynamicCommandExceptionType(actual -> Text.translatable("enhanced_commands.parsing.angle_unit_unknown", actual, VALID_UNITS));

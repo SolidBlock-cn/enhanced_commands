@@ -1,29 +1,39 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.EntitySelectorOptions;
-import net.minecraft.command.EntitySelectorReader;
+import net.minecraft.command.*;
 import net.minecraft.predicate.NumberRange;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.mixin.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class EntitySelectionOptionExtension {
   /**
@@ -193,7 +203,7 @@ public class EntitySelectionOptionExtension {
     putOption("region", reader -> {
       final SuggestedParser parser = new SuggestedParser(reader.getReader());
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
-      final CommandRegistryAccess registryAccess = CommandManager.createRegistryAccess(DynamicRegistryManager.of(Registries.REGISTRIES));
+      final CommandRegistryAccess registryAccess = MixinSharedVariables.getCommandRegistryAccess();
       final RegionArgument<?> regionArgument = RegionArgument.parse(registryAccess, parser, false);
 
       EntitySelectorReaderExtras.getOf(reader).predicateFunctions.add(source -> {
@@ -201,6 +211,71 @@ public class EntitySelectionOptionExtension {
         return entity -> region.contains(entity.getPos());
       });
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.region"));
+
+    putOption("alternatives", reader -> {
+      final StringReader stringReader = reader.getReader();
+      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest("[").buildFuture());
+      if (stringReader.canRead() && stringReader.peek() == '[') {
+        stringReader.skip();
+        stringReader.skipWhitespace();
+      } else {
+        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(stringReader, "[");
+      }
+
+      // 在左方括号的后面，开始解析实体谓词。
+      ImmutableList.Builder<EntitySelector> entitySelectors = new ImmutableList.Builder<>();
+      while (true) {
+        stringReader.skipWhitespace();
+        if (stringReader.canRead() && stringReader.peek() == ']') {
+          stringReader.skip();
+          break;
+        }
+
+        final EntitySelectorReader newReader = new EntitySelectorReader(stringReader);
+        final int cursorBeforeRead = stringReader.getCursor();
+        try {
+          final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
+          entitySelectors.add(entitySelector);
+        } catch (CommandSyntaxException e) {
+          reader.setSuggestionProvider((builder, consumer) -> newReader.listSuggestions(builder, suggestionsBuilder -> {
+            consumer.accept(suggestionsBuilder);
+            if (stringReader.getCursor() == cursorBeforeRead) {
+              suggestionsBuilder.suggest("]");
+            }
+          }));
+          throw e;
+        }
+
+        stringReader.skipWhitespace();
+        if (stringReader.canRead()) {
+          if (stringReader.peek() == ',') {
+            stringReader.skip();
+            continue;
+          } else if (stringReader.peek() == ']') {
+            stringReader.skip();
+            break;
+          }
+        }
+
+        // 如果读取到不完整的玩家名称，即使是没有出错的，也先暂缓调整建议。
+        // 可能作为不玩家的玩家的一部分的名称。
+
+        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
+          final SuggestionsBuilder prevSuggestionsBuilder = suggestionsBuilder.createOffset(cursorBeforeRead);
+          suggestionsBuilderConsumer.accept(prevSuggestionsBuilder);
+          final Suggestions prevSuggestions = prevSuggestionsBuilder.build();
+          if (!prevSuggestions.isEmpty()) {
+            return CompletableFuture.completedFuture(prevSuggestions);
+          } else {
+            return suggestionsBuilder.suggest(",").suggest("]").buildFuture();
+          }
+        });
+        throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "]");
+      }
+
+      final ImmutableList<EntitySelector> build = entitySelectors.build();
+      EntitySelectorReaderExtras.getOf(reader).predicateFunctions.add(source -> Predicates.or(ImmutableList.copyOf(Lists.transform(build, input -> EntitySelectors.getEntityPredicate(input, source)))));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {
@@ -213,6 +288,62 @@ public class EntitySelectionOptionExtension {
     registerModOptions();
     Validate.notEmpty(INAPPLICABLE_REASONS);
     Validate.notEmpty(OPTION_NAME_ALIASES);
+  }
+
+  /**
+   * 此方法用于 mixin。
+   *
+   * @return 如果为 {@code true}，则使用和原版一致的方法，否则需要在此方法中进行相应操作并抑制原版方法中的操作。
+   * @see EntitySelectorOptionsMixin#readMultipleGameModes(EntitySelectorReader, Predicate, boolean, GameMode)
+   */
+  @ApiStatus.Internal
+  public static boolean mixinReadMultipleGameModes(EntitySelectorReader reader, boolean hasNegation, @NotNull GameMode gameMode) throws CommandSyntaxException {
+    final StringReader stringReader = reader.getReader();
+    final int cursorBeforeWhite = stringReader.getCursor();
+    stringReader.skipWhitespace();
+
+    if (stringReader.canRead() && stringReader.peek() == '|') {
+      // 解析更多的游戏模式，例如：
+      // m = c <当前cursor> | a | sp
+      EnumSet<GameMode> parsedGameModes = EnumSet.of(gameMode);
+      while (stringReader.canRead() && stringReader.peek() == '|') {
+        stringReader.skip();
+        stringReader.skipWhitespace();
+        final int cursorBeforeNext = stringReader.getCursor();
+
+        // 提供游戏模式（包括本模组中提供的 a、1 等名称）的建议。
+        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestMatching(Stream.concat(Arrays.stream(GameMode.values()).filter(m -> !parsedGameModes.contains(m)).map(GameMode::getName), MixinSharedVariables.EXTENDED_GAME_MODE_NAMES.entrySet().stream().filter(entry -> !parsedGameModes.contains(entry.getValue())).map(Map.Entry::getKey)), suggestionsBuilder));
+
+        final String nextString = stringReader.readUnquotedString();
+        final GameMode next = GameMode.byName(nextString, null);
+        final int cursorAfterNext = stringReader.getCursor();
+        if (next == null) {
+          stringReader.setCursor(cursorBeforeNext);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.INVALID_MODE_EXCEPTION.createWithContext(stringReader, nextString), cursorAfterNext);
+        } else if (parsedGameModes.contains(next)) {
+          stringReader.setCursor(cursorBeforeNext);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, nextString), cursorAfterNext);
+        } else {
+          parsedGameModes.add(next);
+        }
+
+        stringReader.skipWhitespace();
+        // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
+      }
+
+      reader.setPredicate(entity -> {
+        if (entity instanceof final ServerPlayerEntity serverPlayerEntity) {
+          GameMode actualGameMode = serverPlayerEntity.interactionManager.getGameMode();
+          return hasNegation != parsedGameModes.contains(actualGameMode);
+        } else {
+          return false;
+        }
+      });
+      return false;
+    } else {
+      stringReader.setCursor(cursorBeforeWhite);
+      return true;
+    }
   }
 
   @FunctionalInterface

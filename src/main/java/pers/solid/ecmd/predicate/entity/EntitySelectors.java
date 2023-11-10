@@ -2,12 +2,16 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
+import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixin.EntitySelectorAccessor;
+import pers.solid.ecmd.mixin.EntitySelectorReaderAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,15 +23,24 @@ public final class EntitySelectors {
   private EntitySelectors() {
   }
 
-  public static Predicate<Entity> getEntityPredicate(EntitySelector entitySelector, ServerCommandSource source) throws CommandSyntaxException {
+  public static Predicate<Entity> getEntityPredicate(EntitySelector entitySelector, ServerCommandSource source) {
     EntitySelectorExtras.getOf(entitySelector).updateSource(source);
     if (entitySelector.getLimit() < Integer.MAX_VALUE) {
-      final List<? extends Entity> entities = entitySelector.getEntities(source);
-      return Predicates.in(entities);
+      try {
+        final List<? extends Entity> entities = entitySelector.getEntities(source);
+        // TODO: 2023年11月10日 check checkSourcePermission
+        return Predicates.in(entities);
+      } catch (CommandSyntaxException e) {
+        return Predicates.alwaysFalse();
+      }
     }
 
     final var accessor = (EntitySelectorAccessor) entitySelector;
-    accessor.callCheckSourcePermission(source);
+    try {
+      accessor.callCheckSourcePermission(source);
+    } catch (CommandSyntaxException e) {
+      return Predicates.alwaysFalse();
+    }
     List<Predicate<Entity>> predicates = new ArrayList<>();
     if (!entitySelector.includesNonPlayers()) {
       predicates.add(Entity::isPlayer);
@@ -47,5 +60,31 @@ public final class EntitySelectors {
 
     predicates.add(accessor.callGetPositionPredicate(accessor.getPositionOffset().apply(source.getPosition()))::test);
     return Predicates.and(predicates);
+  }
+
+  /**
+   * 类似于 {@link EntitySelectorReader#read()}，但是允许省略开头的“@e”等变量。
+   */
+  public static EntitySelector readOmittibleEntitySelector(@NotNull EntitySelectorReader entitySelectorReader) throws CommandSyntaxException {
+    final var accessor = (EntitySelectorReaderAccessor) entitySelectorReader;
+    final StringReader stringReader = entitySelectorReader.getReader();
+
+    entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
+      suggestionsBuilderConsumer.accept(suggestionsBuilder);
+      suggestionsBuilder.suggest("[");
+      return suggestionsBuilder.buildFuture();
+    });
+    if (stringReader.canRead() && stringReader.peek() == '[') {
+      stringReader.skip();
+      accessor.callReadArguments();
+      ((EntitySelectorReaderAccessor) entitySelectorReader).callBuildPredicate();
+      return entitySelectorReader.build();
+    } else {
+      return entitySelectorReader.read();
+    }
+  }
+
+  public static Predicate<Entity> readOmittibleEntityPredicate(@NotNull EntitySelectorReader entitySelectorReader, ServerCommandSource source) throws CommandSyntaxException {
+    return getEntityPredicate(readOmittibleEntitySelector(entitySelectorReader), source);
   }
 }

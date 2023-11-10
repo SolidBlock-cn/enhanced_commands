@@ -83,7 +83,7 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
         stringReader.setCursor(i);
         try {
           final String unquotedString = stringReader.readUnquotedString();
-          if ("plural".equals(unquotedString)) {
+          if ("plural".equals(unquotedString) || "many".equals(unquotedString)) {
             stringReader.expect('(');
             stringReader.skipWhitespace();
             final @NotNull String p1 = ParsingUtil.readRegexString(stringReader);
@@ -135,7 +135,7 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
             }
 
             final float pluralTestNumber = getFloatArg(pluralIndex);
-            if (pluralTestNumber == 1) {
+            if ("plural".equals(unquotedString) ? (pluralTestNumber == 1) : (pluralTestNumber == 2)) {
               forEachPart(singleTranslation, partsConsumer);
             } else {
               forEachPart(pluralTranslation, partsConsumer);

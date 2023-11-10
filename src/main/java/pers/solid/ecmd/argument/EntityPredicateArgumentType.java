@@ -71,7 +71,9 @@ public record EntityPredicateArgumentType(CommandRegistryAccess commandRegistryA
         Collection<String> collection = commandSource.getPlayerNames();
         Iterable<String> iterable = Iterables.concat(collection, commandSource.getEntitySuggestions());
         CommandSource.suggestMatching(iterable, builder1);
-        builder1.suggest("[");
+        if (builder1.getRemaining().isEmpty()) {
+          builder1.suggest("[");
+        }
       });
     } else {
       return Suggestions.empty();

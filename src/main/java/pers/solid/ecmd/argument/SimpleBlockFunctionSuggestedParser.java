@@ -1,12 +1,10 @@
 package pers.solid.ecmd.argument;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -37,13 +35,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   private boolean must = false;
   private int cursorBeforeGeneralFunction = -1;
 
-  public SimpleBlockFunctionSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
-    super(commandRegistryAccess, reader, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
-  }
-
   public SimpleBlockFunctionSuggestedParser(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-    this(commandRegistryAccess, parser.reader);
-    this.suggestionProviders = parser.suggestionProviders;
+    super(commandRegistryAccess, parser.reader, parser.suggestionProviders);
   }
 
   @NotNull

@@ -1,11 +1,9 @@
 package pers.solid.ecmd.argument;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -26,13 +24,8 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
   public final List<PropertyPredicate<?>> propertyPredicates = new ArrayList<>();
   public final List<PropertyNamePredicate> propertyNamePredicates = new ArrayList<>();
 
-  public SimpleBlockPredicateSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
-    super(commandRegistryAccess, reader, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
-  }
-
   public SimpleBlockPredicateSuggestedParser(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-    this(commandRegistryAccess, parser.reader);
-    this.suggestionProviders = parser.suggestionProviders;
+    super(commandRegistryAccess, parser.reader, parser.suggestionProviders);
   }
 
   @NotNull
