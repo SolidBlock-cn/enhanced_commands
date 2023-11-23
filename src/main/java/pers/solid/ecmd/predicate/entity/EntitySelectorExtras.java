@@ -6,17 +6,18 @@ import net.minecraft.command.EntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class EntitySelectorExtras {
   public ServerCommandSource source;
-  public final List<Function<ServerCommandSource, Predicate<Entity>>> predicateFunctions = new ArrayList<>();
+  public @Nullable List<Function<ServerCommandSource, Predicate<Entity>>> predicateFunctions = null;
+  public @Nullable List<Function<ServerCommandSource, EntityPredicateEntry>> predicateDescriptions = null;
   public Predicate<Entity> actualExtraPredicate = entity -> {
     EnhancedCommands.LOGGER.warn("Warning! There is no ServerCommandSource yet for {}!", EntitySelectorExtras.this);
     return false;
@@ -24,7 +25,7 @@ public class EntitySelectorExtras {
 
   public Predicate<Entity> createUpdatedPredicate(ServerCommandSource source) {
     // 这个 transform 过的 iterable 会被复制一遍。
-    return Predicates.and(Iterables.transform(predicateFunctions, predicateFunction -> predicateFunction.apply(source)::test));
+    return predicateFunctions == null ? Predicates.alwaysTrue() : Predicates.and(Iterables.transform(predicateFunctions, predicateFunction -> predicateFunction.apply(source)::test));
   }
 
   public void updateSource(@NotNull ServerCommandSource source) {

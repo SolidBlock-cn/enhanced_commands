@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import pers.solid.ecmd.predicate.entity.EntitySelectorExtras;
 import pers.solid.ecmd.predicate.entity.EntitySelectorReaderExtras;
 import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
 import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
@@ -61,7 +62,9 @@ public class EntitySelectorReaderMixin implements EntitySelectorReaderExtension 
   @Inject(method = "build", at = @At("RETURN"))
   private void buildExtraPredicate(CallbackInfoReturnable<EntitySelector> cir) {
     final EntitySelector returnValue = cir.getReturnValue();
-    ((EntitySelectorExtension) returnValue).ec$getExt().predicateFunctions.addAll(ec$ext.predicateFunctions);
+    final EntitySelectorExtras extras = ((EntitySelectorExtension) returnValue).ec$getExt();
+    extras.predicateFunctions = ec$ext.predicateFunctions;
+    extras.predicateDescriptions = ec$ext.predicateDescriptions;
   }
 
   /**

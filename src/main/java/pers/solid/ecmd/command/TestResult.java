@@ -29,6 +29,13 @@ public record TestResult(boolean successes, @Unmodifiable List<Text> description
     return new TestResult(successes, description.formatted(successes ? Formatting.GREEN : Formatting.RED));
   }
 
+  /**
+   * 创建 {@link TestResult} 对象，同时根据其 {@code successes} 的值给文本添加绿色或红色。注意会直接对此参数进行修改。
+   */
+  public static TestResult of(boolean successes, MutableText description, @Unmodifiable List<TestResult> attachments) {
+    return new TestResult(successes, List.of(description.formatted(successes ? Formatting.GREEN : Formatting.RED)), attachments);
+  }
+
   @Contract(mutates = "param1")
   public void appendTexts(List<Text> lines, int level) {
     for (Text text : descriptions) {

@@ -206,7 +206,7 @@ public class EntitySelectionOptionExtension {
       final CommandRegistryAccess registryAccess = MixinSharedVariables.getCommandRegistryAccess();
       final RegionArgument<?> regionArgument = RegionArgument.parse(registryAccess, parser, false);
 
-      EntitySelectorReaderExtras.getOf(reader).predicateFunctions.add(source -> {
+      EntitySelectorReaderExtras.getOf(reader).addFunction(source -> {
         final Region region = regionArgument.toAbsoluteRegion(source);
         return entity -> region.contains(entity.getPos());
       });
@@ -274,7 +274,7 @@ public class EntitySelectionOptionExtension {
       }
 
       final ImmutableList<EntitySelector> build = entitySelectors.build();
-      EntitySelectorReaderExtras.getOf(reader).predicateFunctions.add(source -> Predicates.or(ImmutableList.copyOf(Lists.transform(build, input -> EntitySelectors.getEntityPredicate(input, source)))));
+      EntitySelectorReaderExtras.getOf(reader).addFunction(source -> Predicates.or(ImmutableList.copyOf(Lists.transform(build, input -> SelectorEntityPredicate.asPredicate(input, source)))));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
   }
 
@@ -339,9 +339,11 @@ public class EntitySelectionOptionExtension {
           return false;
         }
       });
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new GameModePredicateEntry.Multiple(parsedGameModes, hasNegation));
       return false;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new GameModePredicateEntry.Single(gameMode, hasNegation));
       return true;
     }
   }

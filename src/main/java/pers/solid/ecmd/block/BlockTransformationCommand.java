@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.EntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -24,7 +23,7 @@ import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunctionArgument;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
-import pers.solid.ecmd.predicate.entity.EntitySelectors;
+import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
@@ -92,9 +91,9 @@ public interface BlockTransformationCommand {
     if (keywordArgs.getBoolean("keep_remaining")) {
       builder.keepRemaining();
     }
-    final EntitySelector entitiesToAffect = keywordArgs.getArg("affect_entities");
+    final EntityPredicateArgument entitiesToAffect = keywordArgs.getArg("affect_entities");
     if (entitiesToAffect != null) {
-      builder.entitiesToAffect(world.getEntitiesByClass(Entity.class, region.minContainingBox(), EntitySelectors.getEntityPredicate(entitiesToAffect, source)).iterator());
+      builder.entitiesToAffect(world.getEntitiesByClass(Entity.class, region.minContainingBox(), entitiesToAffect.apply(source)).iterator());
     }
 
     final boolean transformsRegion = keywordArgs.getBoolean("select");

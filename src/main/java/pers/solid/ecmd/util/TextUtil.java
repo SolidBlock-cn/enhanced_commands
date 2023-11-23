@@ -138,6 +138,13 @@ public final class TextUtil {
     return MutableText.of(new EnhancedTranslatableTextContent(key, fallback, args));
   }
 
+  /**
+   * 给文本添加样式，同时避免对文本自身进行复制。如果文本已经有样式，这些样式不会被覆盖。
+   */
+  public static MutableText styled(Text text, UnaryOperator<Style> styleUpdater) {
+    return Text.empty().styled(styleUpdater).append(text);
+  }
+
   public static Text joinNullableLines(@Nullable Text text1, @Nullable Text text2) {
     if (text1 == null) {
       if (text2 == null) {

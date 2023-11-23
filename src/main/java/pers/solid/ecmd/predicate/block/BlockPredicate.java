@@ -18,7 +18,9 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.TextUtil;
 
-public interface BlockPredicate extends ExpressionConvertible, NbtConvertible, BlockPredicateArgument {
+import java.util.function.Predicate;
+
+public interface BlockPredicate extends Predicate<CachedBlockPosition>, ExpressionConvertible, NbtConvertible, BlockPredicateArgument {
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannotParse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
@@ -37,6 +39,7 @@ public interface BlockPredicate extends ExpressionConvertible, NbtConvertible, B
     return successes ? successResult(blockPos) : failResult(blockPos);
   }
 
+  @Override
   boolean test(CachedBlockPosition cachedBlockPosition);
 
   default TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {

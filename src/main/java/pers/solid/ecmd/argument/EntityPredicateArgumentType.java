@@ -1,6 +1,5 @@
 package pers.solid.ecmd.argument;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -10,42 +9,37 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.EntitySelector;
 import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixin.EntitySelectorReaderAccessor;
-import pers.solid.ecmd.predicate.entity.EntitySelectors;
+import pers.solid.ecmd.predicate.entity.EntityPredicate;
+import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record EntityPredicateArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<EntitySelector> {
+public record EntityPredicateArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<EntityPredicateArgument> {
   private static final List<String> EXAMPLES = List.of("@a", "SolidBlock", "0123", "@r", "@e[distance=..5]", "[m=c]", "[gamemode=creative]");
 
   public static EntityPredicateArgumentType entityPredicate(CommandRegistryAccess commandRegistryAccess) {
     return new EntityPredicateArgumentType(commandRegistryAccess);
   }
 
-  public static EntitySelector getEntitySelector(CommandContext<?> context, String name) {
-    return context.getArgument(name, EntitySelector.class);
-  }
-
-  public static Predicate<Entity> getEntityPredicate(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return EntitySelectors.getEntityPredicate(getEntitySelector(context, name), context.getSource());
+  public static EntityPredicate getEntityPredicate(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, EntityPredicateArgument.class).apply(context.getSource());
   }
 
   @Override
-  public EntitySelector parse(StringReader reader) throws CommandSyntaxException {
+  public EntityPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
     final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader);
     if (reader.canRead() && reader.peek() == '[') {
       reader.skip();
       ((EntitySelectorReaderAccessor) entitySelectorReader).callReadArguments();
       ((EntitySelectorReaderAccessor) entitySelectorReader).callBuildPredicate();
-      return entitySelectorReader.build();
+      return EntityPredicateArgument.of(entitySelectorReader.build());
     } else {
-      return entitySelectorReader.read();
+      return EntityPredicateArgument.of(entitySelectorReader.read());
     }
   }
 

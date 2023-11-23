@@ -50,7 +50,11 @@ public class EntitySelectorReaderExtras {
    *
    * @see pers.solid.ecmd.mixin.EntitySelectorReaderMixin
    */
-  public final List<Function<ServerCommandSource, Predicate<Entity>>> predicateFunctions = new ArrayList<>();
+  public @Nullable List<Function<ServerCommandSource, Predicate<Entity>>> predicateFunctions = null;
+  /**
+   * 此参数会在 {@link EntitySelectorReader#build()} 中，用于帮助对实体谓词进行描述以及序列化。
+   */
+  public @Nullable List<Function<ServerCommandSource, EntityPredicateEntry>> predicateDescriptions = null;
   /**
    * 此 context 对象用于提供建议。在非提供建议的情景下，此字段有可能是 null。
    */
@@ -58,5 +62,15 @@ public class EntitySelectorReaderExtras {
 
   public static EntitySelectorReaderExtras getOf(EntitySelectorReader entitySelectorReader) {
     return ((EntitySelectorReaderExtension) entitySelectorReader).ec$getExt();
+  }
+
+  public void addFunction(Function<ServerCommandSource, Predicate<Entity>> predicateFunction) {
+    var predicateFunctions = this.predicateFunctions == null ? (this.predicateFunctions = new ArrayList<>()) : this.predicateFunctions;
+    predicateFunctions.add(predicateFunction);
+  }
+
+  public void addDescription(Function<ServerCommandSource, EntityPredicateEntry> predicateDescription) {
+    var predicateDescriptions = this.predicateDescriptions == null ? (this.predicateDescriptions = new ArrayList<>()) : this.predicateDescriptions;
+    predicateDescriptions.add(predicateDescription);
   }
 }

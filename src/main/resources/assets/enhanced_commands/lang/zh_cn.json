@@ -394,5 +394,19 @@
   "enhanced_commands.parsing.expected.4": "需要“%s”、“%s”、“%s”或“%s”",
   "enhanced_commands.parsing.unknown_keyword": "未知的关键字“%s”",
   "enhanced_commands.position": "(%s, %s, %s)",
-  "item.enhanced_commands.region_selection_tool": "区域选择工具"
+  "item.enhanced_commands.region_selection_tool": "区域选择工具",
+  "enhanced_commands.argument.entity_predicate.fail": "实体%s的测试失败",
+  "enhanced_commands.argument.entity_predicate.fail_selector": "实体%s的测试失败，因为以下测试中至少有一个失败",
+  "enhanced_commands.argument.entity_predicate.gamemode.negative_multiple": "%s的游戏模式是%s，这不属于以下任何一个：%s",
+  "enhanced_commands.argument.entity_predicate.gamemode.negative_single": "%s的游戏模式是%s，而不是%s",
+  "enhanced_commands.argument.entity_predicate.gamemode.not_player": "%s不是玩家，不能有游戏模式",
+  "enhanced_commands.argument.entity_predicate.gamemode.positive_multiple": "%s的游戏模式是%s，属于以下之一：%s",
+  "enhanced_commands.argument.entity_predicate.gamemode.positive_single": "%s的游戏模式是%s",
+  "enhanced_commands.argument.entity_predicate.pass": "实体%s通过了测试",
+  "enhanced_commands.argument.entity_predicate.pass_selector": "实体%s通过了测试，因为以下这些测试均通过：",
+  "enhanced_commands.argument.entity_predicate.player.true": "实体%s是玩家",
+  "enhanced_commands.argument.entity_predicate.player.false": "实体%s不是玩家",
+  "enhanced_commands.argument.entity_predicate.player_name.true": "%s的玩家名称是%s，与预期值相同",
+  "enhanced_commands.argument.entity_predicate.player_name.false": "%s的玩家名称是%s，而预期值是%s",
+  "enhanced_commands.argument.entity_predicate.player_name.not_player": "实体%s不是玩家，无法测试玩家名称"
 }
