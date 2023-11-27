@@ -4,8 +4,7 @@ import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.predicate.NumberRange;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
+import pers.solid.ecmd.util.StringUtil;
 
 public record RangeNbtPredicate(NumberRange<?> numberRange, boolean negated) implements NbtPredicate {
   @Override
@@ -15,7 +14,7 @@ public record RangeNbtPredicate(NumberRange<?> numberRange, boolean negated) imp
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + Objects.toString(numberRange.getMin(), "") + ".." + Objects.toString(numberRange.getMax(), "");
+    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + StringUtil.wrapRange(numberRange);
   }
 
   @Override

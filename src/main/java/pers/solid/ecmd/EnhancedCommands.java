@@ -13,7 +13,7 @@ import pers.solid.ecmd.curve.CurveTypes;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunctionTypes;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
-import pers.solid.ecmd.predicate.entity.EntitySelectionOptionExtension;
+import pers.solid.ecmd.predicate.entity.EntitySelectorOptionsExtension;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.regionselection.WandEvent;
@@ -30,7 +30,7 @@ public class EnhancedCommands implements ModInitializer {
     RegionTypes.init();
     RegionSelectionTypes.init();
     ModArgumentTypes.init();
-    EntitySelectionOptionExtension.init();
+    EntitySelectorOptionsExtension.init();
 
     // 注册命令
     CommandRegistrationCallback.EVENT.register(ModCommands.INSTANCE);

@@ -31,6 +31,8 @@ public final class EntitySelectors {
     });
     if (stringReader.canRead() && stringReader.peek() == '[') {
       stringReader.skip();
+      entitySelectorReader.setIncludesNonPlayers(true);
+      entitySelectorReader.setLimit(Integer.MAX_VALUE);
       accessor.callReadArguments();
       ((EntitySelectorReaderAccessor) entitySelectorReader).callBuildPredicate();
       return entitySelectorReader.build();

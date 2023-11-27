@@ -4,6 +4,9 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.brigadier.StringReader;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.EntitySelectorReader;
+import net.minecraft.command.FloatRangeArgument;
+import net.minecraft.entity.Entity;
+import net.minecraft.predicate.NumberRange;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,14 +19,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.predicate.entity.EntitySelectorExtras;
 import pers.solid.ecmd.predicate.entity.EntitySelectorReaderExtras;
+import pers.solid.ecmd.predicate.entity.LevelEntityPredicateEntry;
+import pers.solid.ecmd.predicate.entity.RotationPredicateEntry;
 import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
 import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 
+import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
+
 @Mixin(EntitySelectorReader.class)
-public class EntitySelectorReaderMixin implements EntitySelectorReaderExtension {
+public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderExtension {
   @Shadow
   @Final
   private StringReader reader;
+  @Shadow
+  private FloatRangeArgument pitchRange;
+  @Shadow
+  private FloatRangeArgument yawRange;
+  @Shadow
+  private NumberRange.IntRange levelRange;
+
+  @Shadow
+  protected abstract Predicate<Entity> rotationPredicate(FloatRangeArgument angleRange, ToDoubleFunction<Entity> entityToAngle);
+
   @Unique
   private final EntitySelectorReaderExtras ec$ext = new EntitySelectorReaderExtras();
 
@@ -53,6 +71,21 @@ public class EntitySelectorReaderMixin implements EntitySelectorReaderExtension 
     if (c != 'a') {
       ec$ext.implicitEntityType = true;
       ec$ext.implicitNonPlayers = true;
+    }
+  }
+
+  @Inject(method = "buildPredicate", at = @At("HEAD"))
+  private void buildPredicateDescriptions(CallbackInfo ci) {
+    if (pitchRange != FloatRangeArgument.ANY) {
+      ec$ext.addDescription(source -> new RotationPredicateEntry(pitchRange, "pitch", Entity::getPitch, rotationPredicate(pitchRange, Entity::getPitch)));
+    }
+
+    if (yawRange != FloatRangeArgument.ANY) {
+      ec$ext.addDescription(source -> new RotationPredicateEntry(yawRange, "yaw", Entity::getYaw, rotationPredicate(yawRange, Entity::getYaw)));
+    }
+
+    if (!levelRange.isDummy()) {
+      ec$ext.addDescription(source -> new LevelEntityPredicateEntry(levelRange));
     }
   }
 

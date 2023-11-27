@@ -56,6 +56,10 @@ public final class TextUtil {
     return new NbtOrderedStringFormatter(StringUtils.EMPTY, 0, new ArrayList<>()).apply(nbtElement);
   }
 
+  public static MutableText literal(boolean value) {
+    return Text.literal(Boolean.toString(value));
+  }
+
   public static MutableText literal(long value) {
     return Text.literal(Long.toString(value));
   }

@@ -4,16 +4,21 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
+import net.minecraft.advancement.Advancement;
 import net.minecraft.command.*;
 import net.minecraft.predicate.NumberRange;
+import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
@@ -24,18 +29,16 @@ import pers.solid.ecmd.mixin.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class EntitySelectionOptionExtension {
+public class EntitySelectorOptionsExtension {
   /**
    * 此映射用于对 {@link net.minecraft.command.EntitySelectorOptions#getHandler(EntitySelectorReader, String, int)} 中遇到不要应用的选项时进行扩展，如果遇到了不可应用的选项，会尝试从此映射中查找不可应用的原因，而非简单的某选项不适用的消息。如果为 {@code null}，则不影响原版的行为。
    */
@@ -178,6 +181,10 @@ public class EntitySelectionOptionExtension {
           final int cursorAfterValue = stringReader.getCursor();
           stringReader.setCursor(cursorBeforeValue);
           throw CommandSyntaxExceptionExtension.withCursorEnd(NumberRange.EXCEPTION_SWAPPED.createWithContext(stringReader), cursorAfterValue);
+        } else if (value < 0) {
+          final int cursorAfterValue = stringReader.getCursor();
+          stringReader.setCursor(cursorBeforeValue);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.NEGATIVE_DISTANCE_EXCEPTION.createWithContext(stringReader), cursorAfterValue);
         }
         reader.setDistance(NumberRange.FloatRange.between(original.getMin(), value));
       }
@@ -195,6 +202,10 @@ public class EntitySelectionOptionExtension {
           final int cursorAfterValue = stringReader.getCursor();
           stringReader.setCursor(cursorBeforeValue);
           throw CommandSyntaxExceptionExtension.withCursorEnd(NumberRange.EXCEPTION_SWAPPED.createWithContext(stringReader), cursorAfterValue);
+        } else if (value < 0) {
+          final int cursorAfterValue = stringReader.getCursor();
+          stringReader.setCursor(cursorBeforeValue);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.NEGATIVE_DISTANCE_EXCEPTION.createWithContext(stringReader), cursorAfterValue);
         }
         reader.setDistance(NumberRange.FloatRange.between(value, original.getMax()));
       }
@@ -291,7 +302,7 @@ public class EntitySelectionOptionExtension {
   }
 
   /**
-   * 此方法用于 mixin。
+   * 此方法用于 mixin。此方法同时还会添加游戏模式谓词描述。
    *
    * @return 如果为 {@code true}，则使用和原版一致的方法，否则需要在此方法中进行相应操作并抑制原版方法中的操作。
    * @see EntitySelectorOptionsMixin#readMultipleGameModes(EntitySelectorReader, Predicate, boolean, GameMode)
@@ -339,12 +350,60 @@ public class EntitySelectionOptionExtension {
           return false;
         }
       });
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new GameModePredicateEntry.Multiple(parsedGameModes, hasNegation));
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new GameModeEntityPredicateEntry.Multiple(parsedGameModes, hasNegation));
       return false;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new GameModePredicateEntry.Single(gameMode, hasNegation));
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new GameModeEntityPredicateEntry.Single(gameMode, hasNegation));
       return true;
+    }
+  }
+
+  /**
+   * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin。
+   */
+  @ApiStatus.Internal
+  public static void mixinGetScoreSuggestions(EntitySelectorReader entitySelectorReader, StringReader stringReader, @NotNull CommandContext<?> context) {
+    if (context.getSource() instanceof final ServerCommandSource serverCommandSource) {
+      final int cursor = stringReader.getCursor();
+      final ServerScoreboard scoreboard = serverCommandSource.getServer().getScoreboard();
+      final Collection<String> objectiveNames = scoreboard.getObjectiveNames();
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> ParsingUtil.suggestMatchingStringWithTooltip(objectiveNames, s -> scoreboard.getObjective(s).getDisplayName(), suggestionsBuilder.createOffset(cursor)));
+    } else if (context.getSource() instanceof final CommandSource commandSource) {
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> commandSource.getCompletions(context));
+    }
+  }
+
+  /**
+   * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin。
+   */
+  @ApiStatus.Internal
+  public static void mixinGetAdvancementIdSuggestions(EntitySelectorReader entitySelectorReader, StringReader stringReader, @NotNull CommandContext<?> context) {
+    if (context.getSource() instanceof final ServerCommandSource serverCommandSource) {
+      final int cursor = stringReader.getCursor();
+      final var advancementLoader = serverCommandSource.getServer().getAdvancementLoader();
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
+        final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursor);
+        String remainingLowerCase = offset.getRemainingLowerCase();
+        CommandSource.forEachMatching(advancementLoader.getAdvancements(), remainingLowerCase, Advancement::getId, advancement -> offset.suggest(advancement.getId().toString(), advancement.toHoverableText()));
+        return offset.buildFuture();
+      });
+    } else if (context.getSource() instanceof final CommandSource commandSource) {
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> commandSource.getCompletions(context));
+    }
+  }
+
+  /**
+   * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin。
+   */
+  @ApiStatus.Internal
+  public static void mixinGetLootConditionIdSuggestions(EntitySelectorReader entitySelectorReader, StringReader stringReader, @NotNull CommandContext<?> context) {
+    if (context.getSource() instanceof final ServerCommandSource serverCommandSource) {
+      final int cursor = stringReader.getCursor();
+      final var predicateManager = serverCommandSource.getServer().getPredicateManager();
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestMatching(predicateManager.getIds().stream().map(Identifier::toString), suggestionsBuilder.createOffset(cursor)));
+    } else if (context.getSource() instanceof final CommandSource commandSource) {
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> commandSource.getCompletions(context));
     }
   }
 

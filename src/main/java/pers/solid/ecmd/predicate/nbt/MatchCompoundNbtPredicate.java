@@ -3,7 +3,6 @@ package pers.solid.ecmd.predicate.nbt;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ParsingUtil;
@@ -43,11 +42,7 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull 
       if (key == null) {
         keyAsString = "*";
       } else {
-        if (ParsingUtil.isAllowedInUnquotedString(key)) {
-          keyAsString = key;
-        } else {
-          keyAsString = NbtString.escape(key);
-        }
+        keyAsString = ParsingUtil.quoteStringIfNeeded(key);
       }
       final String valueAsString = value.asString(true);
       if (valueAsString.startsWith(":")) {

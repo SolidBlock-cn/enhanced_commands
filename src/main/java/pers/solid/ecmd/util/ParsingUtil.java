@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.chars.CharSet;
 import net.minecraft.command.CommandSource;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.StringUtils;
@@ -187,6 +188,17 @@ public final class ParsingUtil {
         return false;
     }
     return true;
+  }
+
+  /**
+   * 尝试使用不带引号的形式示字符串，如果不行，则带上引号。
+   */
+  public static String quoteStringIfNeeded(final @NotNull String s) {
+    if (isAllowedInUnquotedString(s)) {
+      return s;
+    } else {
+      return NbtString.escape(s);
+    }
   }
 
   /**

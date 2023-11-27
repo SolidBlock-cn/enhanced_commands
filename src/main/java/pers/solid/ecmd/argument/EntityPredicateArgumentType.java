@@ -14,6 +14,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixin.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
+import pers.solid.ecmd.predicate.entity.EntitySelectorReaderExtras;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +36,8 @@ public record EntityPredicateArgumentType(CommandRegistryAccess commandRegistryA
     final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader);
     if (reader.canRead() && reader.peek() == '[') {
       reader.skip();
+      entitySelectorReader.setIncludesNonPlayers(true);
+      entitySelectorReader.setLimit(Integer.MAX_VALUE);
       ((EntitySelectorReaderAccessor) entitySelectorReader).callReadArguments();
       ((EntitySelectorReaderAccessor) entitySelectorReader).callBuildPredicate();
       return EntityPredicateArgument.of(entitySelectorReader.build());
@@ -49,11 +52,14 @@ public record EntityPredicateArgumentType(CommandRegistryAccess commandRegistryA
       StringReader stringReader = new StringReader(builder.getInput());
       stringReader.setCursor(builder.getStart());
       EntitySelectorReader entitySelectorReader = new EntitySelectorReader(stringReader, commandSource.hasPermissionLevel(2));
+      EntitySelectorReaderExtras.getOf(entitySelectorReader).context = context;
       final var accessor = (EntitySelectorReaderAccessor) entitySelectorReader;
 
       try {
         if (stringReader.canRead() && stringReader.peek() == '[') {
           stringReader.skip();
+          entitySelectorReader.setIncludesNonPlayers(true);
+          entitySelectorReader.setLimit(Integer.MAX_VALUE);
           accessor.callReadArguments();
         } else {
           entitySelectorReader.read();

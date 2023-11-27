@@ -2,7 +2,6 @@ package pers.solid.ecmd.predicate.nbt;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ParsingUtil;
 
@@ -21,11 +20,7 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
       final String key = entry.getKey();
       final String keyAsString;
       final NbtPredicate value = entry.getValue();
-      if (ParsingUtil.isAllowedInUnquotedString(key)) {
-        keyAsString = key;
-      } else {
-        keyAsString = NbtString.escape(key);
-      }
+      keyAsString = ParsingUtil.quoteStringIfNeeded(key);
       final String valueAsString = value.asString(true);
       if (valueAsString.startsWith(":")) {
         return keyAsString + valueAsString;
