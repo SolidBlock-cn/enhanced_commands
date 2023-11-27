@@ -13,6 +13,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.command.*;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.command.ServerCommandSource;
@@ -224,6 +225,7 @@ public class EntitySelectorOptionsExtension {
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.region"));
 
     putOption("alternatives", reader -> {
+      final boolean inverted = reader.readNegationCharacter();
       final StringReader stringReader = reader.getReader();
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest("[").buildFuture());
       if (stringReader.canRead() && stringReader.peek() == '[') {
@@ -285,8 +287,40 @@ public class EntitySelectorOptionsExtension {
       }
 
       final ImmutableList<EntitySelector> build = entitySelectors.build();
-      EntitySelectorReaderExtras.getOf(reader).addFunction(source -> Predicates.or(ImmutableList.copyOf(Lists.transform(build, input -> SelectorEntityPredicate.asPredicate(input, source)))));
+      EntitySelectorReaderExtras.getOf(reader).addFunction(source -> {
+        final var predicate = Predicates.or(ImmutableList.copyOf(Lists.transform(build, input -> SelectorEntityPredicate.asPredicate(input, source))));
+        return inverted ? Predicates.not(predicate) : predicate;
+      });
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AlternativesEntityPredicateEntry(build, source, inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
+
+    putOption("health", reader -> {
+      final StringReader stringReader = reader.getReader();
+      final boolean inverted = reader.readNegationCharacter();
+      final int cursorBefore = stringReader.getCursor();
+      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> ParsingUtil.suggestString("max", suggestionsBuilder).buildFuture());
+      final String unquotedString = stringReader.readUnquotedString();
+      if ("max".equals(unquotedString)) {
+        reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
+        reader.setPredicate(entity -> entity instanceof LivingEntity livingEntity && (livingEntity.getHealth() == livingEntity.getMaxHealth()) != inverted);
+        EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new HealthMaxEntityPredicateEntry(inverted));
+      } else {
+        stringReader.setCursor(cursorBefore);
+        final NumberRange.FloatRange floatRange = NumberRange.FloatRange.parse(stringReader);
+        reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
+        reader.setPredicate(entity -> entity instanceof LivingEntity livingEntity && floatRange.test(livingEntity.getHealth()) != inverted);
+        EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new HealthEntityPredicateEntry(floatRange, inverted));
+      }
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.health"));
+
+    putOption("fire", reader -> {
+      final StringReader stringReader = reader.getReader();
+      final boolean inverted = reader.readNegationCharacter();
+      final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
+      reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
+      reader.setPredicate(entity -> intRange.test(entity.getFireTicks()) != inverted);
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new FireEntityPredicateEntry(intRange, inverted));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.fire"));
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {

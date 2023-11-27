@@ -84,24 +84,28 @@ public final class ParsingUtil {
    *
    * @param candidate 需要建议的字符串。
    * @param tooltip   该字符串对应的提示文本。
+   * @return
    */
-  public static void suggestString(String candidate, Supplier<Message> tooltip, SuggestionsBuilder builder) {
+  public static SuggestionsBuilder suggestString(String candidate, Supplier<Message> tooltip, SuggestionsBuilder builder) {
     String remaining = builder.getRemainingLowerCase();
     if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase())) {
       builder.suggest(candidate, tooltip.get());
     }
+    return builder;
   }
 
   /**
    * 提供单个字符串的建议（仅在字符串与输入的内容匹配时才建议），不提供提示文本。
    *
    * @param candidate 需要建议的字符串。
+   * @return
    */
-  public static void suggestString(String candidate, SuggestionsBuilder builder) {
+  public static SuggestionsBuilder suggestString(String candidate, SuggestionsBuilder builder) {
     String remaining = builder.getRemainingLowerCase();
     if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase())) {
       builder.suggest(candidate);
     }
+    return builder;
   }
 
   /**
@@ -109,9 +113,10 @@ public final class ParsingUtil {
    *
    * @param candidate 需要建议的字符串。
    * @param tooltip   该字符串对应的提示文本。
+   * @return
    */
-  public static void suggestString(String candidate, Message tooltip, SuggestionsBuilder builder) {
-    suggestString(candidate, Suppliers.ofInstance(tooltip), builder);
+  public static SuggestionsBuilder suggestString(String candidate, Message tooltip, SuggestionsBuilder builder) {
+    return suggestString(candidate, Suppliers.ofInstance(tooltip), builder);
   }
 
   /**
