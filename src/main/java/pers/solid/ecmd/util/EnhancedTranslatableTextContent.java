@@ -128,10 +128,10 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
               if (matcher1.matches() && matcher1.group(1) != null) {
                 pluralIndex = Integer.parseInt(matcher1.group(1)) - 1;
               } else {
-                pluralIndex = implicitIndex - 1;
+                pluralIndex = Math.max(0, implicitIndex - 1);
               }
             } else {
-              pluralIndex = implicitIndex - 1;
+              pluralIndex = Math.max(0, implicitIndex - 1);
             }
 
             final float pluralTestNumber = getFloatArg(pluralIndex);

@@ -16,6 +16,7 @@ public class ModArgumentTypes {
     register("axis", AxisArgumentType.class, new AxisArgumentType.Serializer());
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
+    register("concentration_type", ConcentrationTypeArgumentType.class, ConstantArgumentSerializer.of(ConcentrationTypeArgumentType::new));
     register("curve", CurveArgumentType.class, ConstantArgumentSerializer.of(CurveArgumentType::new));
     register("direction", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::direction));
     register("direction_type", SimpleEnumArgumentTypes.DirectionTypeArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.DirectionTypeArgumentType::new));
