@@ -14,14 +14,13 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.StateUtil;
 
 import java.util.List;
@@ -86,42 +85,29 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
     public @NotNull StonecutBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new StonecutBlockFunction(nbtCompound.contains("function", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("function"), world) : null);
     }
+  }
+
+  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
+    private BlockFunctionArgument blockFunction = null;
 
     @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new FunctionLikeParser<BlockFunctionArgument>() {
-        private BlockFunctionArgument blockFunction = null;
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+      return source -> new StonecutBlockFunction(blockFunction == null ? null : blockFunction.apply(source));
+    }
 
-        @Override
-        public @NotNull String functionName() {
-          return "stonecut";
-        }
+    @Override
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      blockFunction = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+    }
 
-        @Override
-        public Text tooltip() {
-          return Text.translatable("enhanced_commands.argument.block_function.stone_cut");
-        }
+    @Override
+    public int minParamsCount() {
+      return 0;
+    }
 
-        @Override
-        public BlockFunctionArgument getParseResult(SuggestedParser parser) {
-          return source -> new StonecutBlockFunction(blockFunction == null ? null : blockFunction.apply(source));
-        }
-
-        @Override
-        public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-          blockFunction = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
-        }
-
-        @Override
-        public int minParamsCount() {
-          return 0;
-        }
-
-        @Override
-        public int maxParamsCount() {
-          return 1;
-        }
-      }.parse(commandRegistryAccess, parser, suggestionsOnly);
+    @Override
+    public int maxParamsCount() {
+      return 1;
     }
   }
 }

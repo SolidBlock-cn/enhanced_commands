@@ -9,10 +9,9 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -69,25 +68,29 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
       return new IdContainBlockPredicate(Pattern.compile(nbtCompound.getString("pattern")));
     }
 
-    @Override
-    public @Nullable IdContainBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new FunctionLikeParser<IdContainBlockPredicate>() {// @formatter:off
-        Pattern pattern;
-        @Override public int minParamsCount() {return 1;}
-        @Override public int maxParamsCount() {return 1;}
-        @Override public @NotNull String functionName() {return "idcontain";}
-        @Override public Text tooltip() {return Text.translatable("enhanced_commands.argument.block_predicate.id_contain");}
-        @Override
-        public IdContainBlockPredicate getParseResult(SuggestedParser parser) { // @formatter:on
-          return new IdContainBlockPredicate(pattern);
-        }
+    public static class Parser implements FunctionParamsParser<IdContainBlockPredicate> {
+      private Pattern pattern;
 
-        @Override
-        public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-          parser.suggestionProviders.clear();
-          pattern = ParsingUtil.readRegex(parser.reader);
-        }
-      }.parse(commandRegistryAccess, parser, suggestionsOnly);
+      @Override
+      public int minParamsCount() {
+        return 1;
+      }
+
+      @Override
+      public int maxParamsCount() {
+        return 1;
+      }
+
+      @Override
+      public IdContainBlockPredicate getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) { // @formatter:on
+        return new IdContainBlockPredicate(pattern);
+      }
+
+      @Override
+      public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+        parser.suggestionProviders.clear();
+        pattern = ParsingUtil.readRegex(parser.reader);
+      }
     }
   }
 }

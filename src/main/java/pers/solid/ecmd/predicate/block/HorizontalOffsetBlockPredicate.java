@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -65,7 +66,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     nbtCompound.put("predicate", blockPredicate.createNbt());
   }
 
-  public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate> {
+  public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate>, Parser<BlockPredicateArgument> {
     HORIZONTAL_OFFSET_TYPE;
 
     @Override

@@ -12,7 +12,7 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -96,16 +96,7 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
     INTERSECT_TYPE;
 
     @Override
-    public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
-  }
-
-  public static final class Parser implements FunctionLikeParser<RegionArgument<IntersectRegion>> {
-    private final List<RegionArgument<?>> regions = new ArrayList<>();
-
-    @Override
-    public @NotNull String functionName() {
+    public String functionName() {
       return "intersect";
     }
 
@@ -115,8 +106,17 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
     }
 
     @Override
-    public RegionArgument<IntersectRegion> getParseResult(SuggestedParser parser) {
-      return source -> new IntersectRegion(regions.stream().map(regionArgument -> (Region) regionArgument.toAbsoluteRegion(source)).collect(ImmutableList.toImmutableList()));
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return new Parser();
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<RegionArgument> {
+    private final List<RegionArgument> regions = new ArrayList<>();
+
+    @Override
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+      return source -> new IntersectRegion(regions.stream().map(regionArgument -> regionArgument.toAbsoluteRegion(source)).collect(ImmutableList.toImmutableList()));
     }
 
     @Override

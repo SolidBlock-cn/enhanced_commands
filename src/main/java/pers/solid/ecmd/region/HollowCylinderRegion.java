@@ -8,11 +8,10 @@ import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -130,19 +129,7 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
     HOLLOW_CYLINDER_TYPE;
 
     @Override
-    public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
-  }
-
-  public static final class Parser implements FunctionLikeParser<RegionArgument<HollowCylinderRegion>> {
-    private double radius;
-    private double height = 1;
-    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
-    private OutlineRegion.OutlineTypes type = OutlineRegion.OutlineTypes.WALL;
-
-    @Override
-    public @NotNull String functionName() {
+    public String functionName() {
       return "hcyl";
     }
 
@@ -152,7 +139,19 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
     }
 
     @Override
-    public RegionArgument<HollowCylinderRegion> getParseResult(SuggestedParser parser) {
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return new Parser();
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<RegionArgument> {
+    private double radius;
+    private double height = 1;
+    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
+    private OutlineRegion.OutlineTypes type = OutlineRegion.OutlineTypes.WALL;
+
+    @Override
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new HollowCylinderRegion(new CylinderRegion(radius, height, center.toAbsolutePos(source)), type);
     }
 

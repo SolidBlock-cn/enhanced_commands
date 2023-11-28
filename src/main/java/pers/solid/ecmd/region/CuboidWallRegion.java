@@ -1,13 +1,13 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -105,14 +105,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     CUBOID_WALL_TYPE;
 
     @Override
-    public @Nullable RegionArgument<CuboidWallRegion> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
-  }
-
-  public static final class Parser extends CuboidOutlineRegion.AbstractParser<CuboidWallRegion> {
-    @Override
-    public @NotNull String functionName() {
+    public String functionName() {
       return "cuboid_wall";
     }
 
@@ -122,7 +115,15 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     }
 
     @Override
-    public RegionArgument<CuboidWallRegion> getParseResult(SuggestedParser parser) {
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return new Parser();
+    }
+  }
+
+  public static final class Parser extends CuboidOutlineRegion.AbstractParser {
+
+    @Override
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new CuboidWallRegion(new BlockCuboidRegion(fromPos.toAbsoluteBlockPos(source), toPos.toAbsoluteBlockPos(source)), thickness);
     }
   }

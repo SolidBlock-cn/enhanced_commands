@@ -216,7 +216,7 @@ public class EntitySelectorOptionsExtension {
       final SuggestedParser parser = new SuggestedParser(reader.getReader());
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
       final CommandRegistryAccess registryAccess = MixinSharedVariables.getCommandRegistryAccess();
-      final RegionArgument<?> regionArgument = RegionArgument.parse(registryAccess, parser, false);
+      final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, false);
 
       EntitySelectorReaderExtras.getOf(reader).addFunction(source -> {
         final Region region = regionArgument.toAbsoluteRegion(source);

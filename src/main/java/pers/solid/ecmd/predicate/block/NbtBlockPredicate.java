@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {
@@ -36,7 +37,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     nbtCompound.putString("nbtPredicate", nbtPredicate.asString());
   }
 
-  public enum Type implements BlockPredicateType<NbtBlockPredicate> {
+  public enum Type implements BlockPredicateType<NbtBlockPredicate>, Parser<BlockPredicateArgument> {
     NBT_TYPE;
 
     @Override

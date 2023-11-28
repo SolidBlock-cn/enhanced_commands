@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -147,22 +147,12 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
   }
 
-  public static final class Parser implements FunctionLikeParser<ExposeBlockPredicate> {
+  public static final class Parser implements FunctionParamsParser<ExposeBlockPredicate> {
     private ExposureType exposureType;
     private final Set<@NotNull Direction> directions = new TreeSet<>();
 
     @Override
-    public @NotNull String functionName() {
-      return "expose";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_predicate.expose");
-    }
-
-    @Override
-    public ExposeBlockPredicate getParseResult(SuggestedParser parser) {
+    public ExposeBlockPredicate getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return new ExposeBlockPredicate(exposureType, directions.isEmpty() ? List.of(Direction.values()) : List.copyOf(directions));
     }
 
@@ -242,11 +232,6 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
         directions = nbtCompound.getList("directions", NbtElement.STRING_TYPE).stream().map(nbtElement -> Direction.byName(nbtElement.asString())).filter(Objects::nonNull).toList();
       }
       return new ExposeBlockPredicate(type, directions);
-    }
-
-    @Override
-    public @NotNull ExposeBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

@@ -5,16 +5,16 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
-public enum ActiveRegionType implements RegionType<Region> {
+public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgument> {
   TYPE;
 
   @Override
-  public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public RegionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
     parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.argument.region.active_region"), suggestionsBuilder));
     if (parser.reader.canRead() && parser.reader.peek() == '$') {
       parser.reader.skip();

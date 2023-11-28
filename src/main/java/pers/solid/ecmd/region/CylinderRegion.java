@@ -7,12 +7,11 @@ import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -132,18 +131,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     CYLINDER_TYPE;
 
     @Override
-    public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
-  }
-
-  public static final class Parser implements FunctionLikeParser<RegionArgument<CylinderRegion>> {
-    private double radius;
-    private double height = 1;
-    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
-
-    @Override
-    public @NotNull String functionName() {
+    public String functionName() {
       return "cyl";
     }
 
@@ -153,7 +141,18 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
 
     @Override
-    public RegionArgument<CylinderRegion> getParseResult(SuggestedParser parser) {
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return new Parser();
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<RegionArgument> {
+    private double radius;
+    private double height = 1;
+    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
+
+    @Override
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new CylinderRegion(radius, height, center.toAbsolutePos(source));
     }
 

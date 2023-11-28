@@ -16,6 +16,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.StateUtil;
 
 import java.util.function.Supplier;
@@ -75,7 +76,7 @@ public final class RandomBlockFunction implements BlockFunction {
     return "RandomBlockFunction{}";
   }
 
-  public enum Type implements BlockFunctionType<RandomBlockFunction> {
+  public enum Type implements BlockFunctionType<RandomBlockFunction>, Parser<BlockFunctionArgument> {
     RANDOM_TYPE;
 
     @Override

@@ -5,12 +5,12 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.List;
@@ -30,9 +30,9 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition);
     if (testResult.successes()) {
-      return new TestResult(false, List.of(Text.translatable("enhanced_commands.argument.block_predicate.negation.fail").formatted(Formatting.RED)), List.of(testResult));
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.negation.fail"), List.of(testResult));
     } else {
-      return new TestResult(true, List.of(Text.translatable("enhanced_commands.argument.block_predicate.negation.pass").formatted(Formatting.GREEN)), List.of(testResult));
+      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.negation.pass"), List.of(testResult));
     }
   }
 
@@ -47,7 +47,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
   }
 
 
-  public enum Type implements BlockPredicateType<NegatingBlockPredicate> {
+  public enum Type implements BlockPredicateType<NegatingBlockPredicate>, Parser<BlockPredicateArgument> {
     NEGATING_TYPE;
 
     @Override

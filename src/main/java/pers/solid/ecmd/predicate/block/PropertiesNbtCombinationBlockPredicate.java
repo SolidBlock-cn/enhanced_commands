@@ -1,14 +1,12 @@
 package pers.solid.ecmd.predicate.block;
 
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
@@ -73,11 +71,6 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
           nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertiesNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), world) : null,
           nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockPredicate.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), world) : null
       );
-    }
-
-    @Override
-    public @Nullable PropertiesNbtCombinationBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
-      return null;
     }
   }
 }

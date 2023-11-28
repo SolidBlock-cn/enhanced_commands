@@ -9,14 +9,12 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,28 +57,13 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
     public @NotNull OverlayBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE), nbtElement -> BlockFunction.fromNbt((NbtCompound) nbtElement, world))));
     }
-
-    @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
   }
 
-  private static final class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+  public static final class Parser implements FunctionParamsParser<BlockFunctionArgument> {
     private final List<BlockFunctionArgument> blockFunctions = new ArrayList<>();
 
     @Override
-    public @NotNull String functionName() {
-      return "overlay";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_function.overlay");
-    }
-
-    @Override
-    public BlockFunctionArgument getParseResult(SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> {
         final ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
         for (BlockFunctionArgument blockFunction : blockFunctions) {

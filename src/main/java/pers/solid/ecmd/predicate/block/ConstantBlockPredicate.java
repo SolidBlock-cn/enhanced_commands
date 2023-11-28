@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 public enum ConstantBlockPredicate implements BlockPredicate {
@@ -39,7 +40,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
 
   }
 
-  public enum Type implements BlockPredicateType<ConstantBlockPredicate> {
+  public enum Type implements BlockPredicateType<ConstantBlockPredicate>, Parser<BlockPredicateArgument> {
     CONSTANT_TYPE;
 
     @Override

@@ -23,6 +23,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
@@ -91,7 +92,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     }
   }
 
-  public enum Type implements BlockPredicateType<SimpleBlockPredicate> {
+  public enum Type implements BlockPredicateType<SimpleBlockPredicate>, Parser<BlockPredicateArgument> {
     SIMPLE_TYPE;
 
     @Override

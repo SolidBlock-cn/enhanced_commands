@@ -8,14 +8,12 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.regex.Pattern;
@@ -28,7 +26,9 @@ public final class IdContainBlockFunction implements BlockFunction {
   private transient World world;
   private transient Block[] blocks;
 
-  public IdContainBlockFunction(@NotNull Pattern pattern) {this.pattern = pattern;}
+  public IdContainBlockFunction(@NotNull Pattern pattern) {
+    this.pattern = pattern;
+  }
 
   public @NotNull Block[] getBlocks(@NotNull World world) {
     if (!world.equals(this.world)) {
@@ -84,7 +84,9 @@ public final class IdContainBlockFunction implements BlockFunction {
         '}';
   }
 
-  public @NotNull Pattern pattern() {return pattern;}
+  public @NotNull Pattern pattern() {
+    return pattern;
+  }
 
 
   public enum Type implements BlockFunctionType<IdContainBlockFunction> {
@@ -94,28 +96,30 @@ public final class IdContainBlockFunction implements BlockFunction {
     public @NotNull IdContainBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new IdContainBlockFunction(Pattern.compile(nbtCompound.getString("pattern")));
     }
+  }
+
+  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
+    private Pattern pattern;
 
     @Override
-    public @Nullable IdContainBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new FunctionLikeParser<IdContainBlockFunction>() {
-        // @formatter:off
-        Pattern pattern;
-        @Override public int minParamsCount() {return 1;}
-        @Override public int maxParamsCount() {return 1;}
-        @Override public @NotNull String functionName() {return "idcontain";}
-        @Override public Text tooltip() {return Text.translatable("enhanced_commands.argument.block_function.id_contain");}
-        // @formatter:one
-        @Override
-        public IdContainBlockFunction getParseResult(SuggestedParser parser) {
-          return new IdContainBlockFunction(pattern);
-        }
+    public int minParamsCount() {
+      return 1;
+    }
 
-        @Override
-        public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-          parser.suggestionProviders.clear();
-          pattern = ParsingUtil.readRegex(parser.reader);
-        }
-      }.parse(commandRegistryAccess, parser, suggestionsOnly);
+    @Override
+    public int maxParamsCount() {
+      return 1;
+    }
+
+    @Override
+    public IdContainBlockFunction getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+      return new IdContainBlockFunction(pattern);
+    }
+
+    @Override
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      parser.suggestionProviders.clear();
+      pattern = ParsingUtil.readRegex(parser.reader);
     }
   }
 }

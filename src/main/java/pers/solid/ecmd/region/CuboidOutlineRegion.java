@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -103,12 +103,22 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     CUBOID_OUTLINE_TYPE;
 
     @Override
-    public @Nullable RegionArgument<CuboidOutlineRegion> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
+    public String functionName() {
+      return "cuboid_outline";
+    }
+
+    @Override
+    public Text tooltip() {
+      return Text.translatable("enhanced_commands.argument.region.cuboid_outline");
+    }
+
+    @Override
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return new Parser();
     }
   }
 
-  public static abstract sealed class AbstractParser<T extends Region> implements FunctionLikeParser<RegionArgument<T>> permits Parser, CuboidWallRegion.Parser {
+  public static abstract sealed class AbstractParser implements FunctionParamsParser<RegionArgument> permits Parser, CuboidWallRegion.Parser {
     protected PosArgument fromPos, toPos;
     protected int thickness = 1;
 
@@ -141,19 +151,10 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
   }
 
-  public static final class Parser extends AbstractParser<CuboidOutlineRegion> {
-    @Override
-    public @NotNull String functionName() {
-      return "cuboid_outline";
-    }
+  public static final class Parser extends AbstractParser {
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.region.cuboid_outline");
-    }
-
-    @Override
-    public RegionArgument<CuboidOutlineRegion> getParseResult(SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new CuboidOutlineRegion(new BlockCuboidRegion(fromPos.toAbsoluteBlockPos(source), toPos.toAbsoluteBlockPos(source)), thickness);
     }
   }

@@ -506,6 +506,7 @@
   "enhanced_commands.parsing.expected.2": "需要“%s”或“%s”",
   "enhanced_commands.parsing.expected.3": "需要“%s”、“%s”或“%s”",
   "enhanced_commands.parsing.expected.4": "需要“%s”、“%s”、“%s”或“%s”",
+  "enhanced_commands.parsing.unknown_function": "未知的函数“%s”",
   "enhanced_commands.parsing.unknown_keyword": "未知的关键字“%s”",
   "enhanced_commands.position": "(%s, %s, %s)",
   "item.enhanced_commands.region_selection_tool": "区域选择工具"

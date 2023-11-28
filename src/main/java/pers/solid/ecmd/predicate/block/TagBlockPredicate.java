@@ -26,6 +26,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
@@ -97,7 +98,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     }
   }
 
-  public enum Type implements BlockPredicateType<TagBlockPredicate> {
+  public enum Type implements BlockPredicateType<TagBlockPredicate>, Parser<BlockPredicateArgument> {
     TAG_TYPE;
 
     @Override

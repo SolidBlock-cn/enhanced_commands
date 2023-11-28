@@ -10,6 +10,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 public enum UseOriginalBlockFunction implements BlockFunction {
@@ -34,7 +35,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     return BlockFunctionTypes.USE_ORIGINAL;
   }
 
-  public enum Type implements BlockFunctionType<UseOriginalBlockFunction> {
+  public enum Type implements BlockFunctionType<UseOriginalBlockFunction>, Parser<BlockFunctionArgument> {
     USE_ORIGINAL_TYPE;
 
     @Override

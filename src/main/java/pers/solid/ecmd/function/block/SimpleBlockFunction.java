@@ -19,6 +19,7 @@ import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyFunction;
+import pers.solid.ecmd.util.Parser;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +62,7 @@ public record SimpleBlockFunction(Block block, Collection<PropertyFunction<?>> p
     return BlockFunctionTypes.SIMPLE;
   }
 
-  public enum Type implements BlockFunctionType<SimpleBlockFunction> {
+  public enum Type implements BlockFunctionType<SimpleBlockFunction>, Parser<BlockFunctionArgument> {
     SIMPLE_TYPE;
 
     @Override

@@ -3,9 +3,9 @@ package pers.solid.ecmd.predicate.block;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -15,12 +15,12 @@ import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public interface BlockPredicateArgument extends Function<ServerCommandSource, BlockPredicate> {
   Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.intersect.symbol_tooltip");
@@ -80,18 +80,17 @@ public interface BlockPredicateArgument extends Function<ServerCommandSource, Bl
 
   @NotNull
   static BlockPredicateArgument parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    final int cursorOnStart = parser.reader.getCursor();
-    final Stream<BlockPredicateType<?>> stream = commandRegistryAccess.createWrapper(BlockPredicateType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
-    Iterable<BlockPredicateType<?>> iterable = Iterables.concat(stream.filter(type -> type != BlockPredicateTypes.SIMPLE)::iterator, Collections.singleton(BlockPredicateTypes.SIMPLE));
-    for (BlockPredicateType<?> type : iterable) {
-      parser.reader.setCursor(cursorOnStart);
-      final BlockPredicateArgument parse = type.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
+    final StringReader reader = parser.reader;
+    final int cursorOnStart = reader.getCursor();
+    // 刻意将 simple 调整到最后面
+    for (Parser<BlockPredicateArgument> argumentParser : Iterables.concat(BlockPredicateTypes.PARSERS, Collections.singleton(SimpleBlockPredicate.Type.SIMPLE_TYPE))) {
+      reader.setCursor(cursorOnStart);
+      final BlockPredicateArgument parse = argumentParser.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
       if (parse != null) {
-        // keep the current position of the cursor
         return parse;
       }
     }
-    parser.reader.setCursor(cursorOnStart);
-    throw BlockPredicate.CANNOT_PARSE.createWithContext(parser.reader);
+    reader.setCursor(cursorOnStart);
+    throw BlockPredicate.CANNOT_PARSE.createWithContext(reader);
   }
 }

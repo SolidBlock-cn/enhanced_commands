@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.TextUtil;
 
 /**
@@ -71,22 +71,12 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
   }
 
-  public static final class Parser implements FunctionLikeParser<BlockPredicateArgument> {
+  public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
     private float value;
     private @Nullable BlockPredicateArgument predicate;
 
     @Override
-    public @NotNull String functionName() {
-      return "rand";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_predicate.probability");
-    }
-
-    @Override
-    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new RandBlockPredicate(value, predicate == null ? null : predicate.apply(source), source.getWorld().getRandom());
     }
 
@@ -125,11 +115,6 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
       } else {
         return new RandBlockPredicate(nbtCompound.getFloat("value"), null, world.getRandom());
       }
-    }
-
-    @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

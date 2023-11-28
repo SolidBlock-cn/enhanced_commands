@@ -11,10 +11,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -64,19 +63,24 @@ public record SingleBlockPosRegion(Vec3i vec3i) implements IntBackedRegion {
     INSTANCE;
 
     @Override
-    public @Nullable RegionArgument<SingleBlockPosRegion> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return Parser.INSTANCE.parse(commandRegistryAccess, parser, suggestionsOnly);
+    public String functionName() {
+      return "single";
+    }
+
+    @Override
+    public Text tooltip() {
+      return Text.translatable("enhanced_commands.argument.region.single");
+    }
+
+    @Override
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return Parser.INSTANCE;
     }
   }
 
-  public enum Parser implements FunctionLikeParser<RegionArgument<SingleBlockPosRegion>> {
+  public enum Parser implements FunctionParamsParser<RegionArgument> {
     INSTANCE;
     private PosArgument posArgument;
-
-    @Override
-    public @NotNull String functionName() {
-      return "single";
-    }
 
     @Override
     public int minParamsCount() {
@@ -89,12 +93,7 @@ public record SingleBlockPosRegion(Vec3i vec3i) implements IntBackedRegion {
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.region.single");
-    }
-
-    @Override
-    public RegionArgument<SingleBlockPosRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
       final PosArgument posArgument1 = posArgument;
       posArgument = null;
       return source -> new SingleBlockPosRegion(posArgument1.toAbsoluteBlockPos(source));

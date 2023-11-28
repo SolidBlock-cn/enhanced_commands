@@ -17,9 +17,8 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,29 +127,14 @@ public interface PickBlockFunction extends BlockFunction {
         return new Uniform(nbtList.stream().map(nbtElement -> BlockFunction.fromNbt(((NbtCompound) nbtElement), world)).collect(ImmutableList.toImmutableList()));
       }
     }
-
-    @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
   }
 
-  class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+  class Parser implements FunctionParamsParser<BlockFunctionArgument> {
     boolean weighted = false;
     final List<ObjectDoublePair<BlockFunctionArgument>> pairs = new ArrayList<>();
 
     @Override
-    public @NotNull String functionName() {
-      return "pick";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_function.pick");
-    }
-
-    @Override
-    public BlockFunctionArgument getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
       if (weighted) {
         final double sum = pairs.stream().mapToDouble(ObjectDoublePair::rightDouble).sum();
         if (sum == 0) {

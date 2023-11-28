@@ -18,6 +18,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collection;
@@ -50,7 +51,7 @@ public record PropertyNamesBlockFunction(@NotNull Collection<PropertyNameFunctio
     return BlockFunctionTypes.PROPERTY_NAMES;
   }
 
-  public enum Type implements BlockFunctionType<PropertyNamesBlockFunction> {
+  public enum Type implements BlockFunctionType<PropertyNamesBlockFunction>, Parser<BlockFunctionArgument> {
     PROPERTY_NAMES_TYPE;
 
     @Override

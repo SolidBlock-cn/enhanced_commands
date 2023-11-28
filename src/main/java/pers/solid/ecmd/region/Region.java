@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  * 表示一个区域，每个区域需要包含多个方块坐标，并且能够判断坐标是否在区域内。区域使用的坐标是精确的，不一定是方块坐标，如果所有的操作都是基于方块的，则可以使用 {@link IntBackedRegion}。
  */
 @Unmodifiable
-public interface Region extends Iterable<BlockPos>, ExpressionConvertible, RegionArgument<Region> {
+public interface Region extends Iterable<BlockPos>, ExpressionConvertible, RegionArgument {
   /**
    * 判断方块坐标是否在该区域内。其默认的实现方式是判断方块坐标的中心位置。
    */
@@ -114,7 +114,9 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
    * 区域往水平或者竖直方向上延伸浮点数值后的区域。
    */
   @NotNull
-  default Region expanded(double offset, Direction.Type type) {throw new UnsupportedOperationException();}
+  default Region expanded(double offset, Direction.Type type) {
+    throw new UnsupportedOperationException();
+  }
 
   @NotNull RegionType<?> getType();
 

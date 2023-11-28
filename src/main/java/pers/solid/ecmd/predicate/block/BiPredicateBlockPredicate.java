@@ -8,10 +8,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.List;
 
@@ -49,7 +48,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     nbtCompound.put("predicate2", blockPredicate2.createNbt());
   }
 
-  public static final class Parser implements FunctionLikeParser<BlockPredicateArgument> {
+  public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
     private final String functionName;
     private final Text tooltip;
     private final boolean same;
@@ -63,17 +62,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public @NotNull String functionName() {
-      return functionName;
-    }
-
-    @Override
-    public Text tooltip() {
-      return tooltip;
-    }
-
-    @Override
-    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new BiPredicateBlockPredicate(value1.apply(source), value2.apply(source), same);
     }
 
@@ -109,16 +98,6 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
       final BlockPredicate predicate1 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate1"), world);
       final BlockPredicate predicate2 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate2"), world);
       return new BiPredicateBlockPredicate(predicate1, predicate2, same);
-    }
-
-    @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      CommandSyntaxException exception = null;
-      final BlockPredicateArgument parse1 = new Parser("same", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_same"), true).parse(commandRegistryAccess, parser, suggestionsOnly);
-      if (parse1 != null) {
-        return parse1;
-      }
-      return new Parser("diff", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_diff"), false).parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

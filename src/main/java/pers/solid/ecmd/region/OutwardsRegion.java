@@ -11,10 +11,9 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.Iterator;
@@ -69,19 +68,8 @@ public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBac
     INSTANCE;
 
     @Override
-    public @Nullable RegionArgument<OutwardsRegion> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
-  }
-
-  public static final class Parser implements FunctionLikeParser<RegionArgument<OutwardsRegion>> {
-    private PosArgument center;
-    private int x, y, z;
-    private int dimensionNumber = 0;
-
-    @Override
-    public @NotNull String functionName() {
-      return "outwards";
+    public String functionName() {
+      return "outline";
     }
 
     @Override
@@ -90,7 +78,18 @@ public record OutwardsRegion(Vec3i vec3i, int x, int y, int z) implements IntBac
     }
 
     @Override
-    public RegionArgument<OutwardsRegion> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return new Parser();
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<RegionArgument> {
+    private PosArgument center;
+    private int x, y, z;
+    private int dimensionNumber = 0;
+
+    @Override
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
       final int paramY = dimensionNumber < 2 ? x : y;
       final int paramZ = dimensionNumber < 3 ? x : z;
       return source -> new OutwardsRegion(center.toAbsoluteBlockPos(source), x, paramY, paramZ);

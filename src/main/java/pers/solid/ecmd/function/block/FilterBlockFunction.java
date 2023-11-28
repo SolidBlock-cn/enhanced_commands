@@ -6,7 +6,6 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -16,7 +15,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixin.CachedBlockPositionAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 /**
  * 一种特殊的方块函数，当指定的方块函数的结果只有符合指定的谓词时，才会应用。例如：
@@ -73,30 +72,15 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
           nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else"), world) : null
       );
     }
-
-    @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
   }
 
-  private static final class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+  public static final class Parser implements FunctionParamsParser<BlockFunctionArgument> {
     private BlockPredicateArgument blockPredicate;
     private BlockFunctionArgument blockFunction;
     private @Nullable BlockFunctionArgument elseFunction;
 
     @Override
-    public @NotNull String functionName() {
-      return "filter";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_function.filter");
-    }
-
-    @Override
-    public BlockFunctionArgument getParseResult(SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? null : elseFunction.apply(source));
     }
 

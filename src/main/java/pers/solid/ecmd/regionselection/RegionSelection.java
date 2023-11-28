@@ -1,7 +1,5 @@
 package pers.solid.ecmd.regionselection;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
@@ -11,9 +9,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.region.*;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.List;
@@ -139,7 +136,7 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
     INSTANCE;
 
     @Override
-    public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
       return null;
     }
   }

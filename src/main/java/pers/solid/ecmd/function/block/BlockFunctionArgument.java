@@ -2,21 +2,21 @@ package pers.solid.ecmd.function.block;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public interface BlockFunctionArgument extends Function<ServerCommandSource, BlockFunction> {
   Text OVERLAY_TOOLTIP = Text.translatable("enhanced_commands.argument.block_function.overlay.symbol_tooltip");
@@ -88,20 +88,18 @@ public interface BlockFunctionArgument extends Function<ServerCommandSource, Blo
 
   @NotNull
   static BlockFunctionArgument parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    final int cursorOnStart = parser.reader.getCursor();
+    final StringReader reader = parser.reader;
+    final int cursorOnStart = reader.getCursor();
 
-    final Stream<BlockFunctionType<?>> stream = commandRegistryAccess.createWrapper(BlockFunctionType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
     // 强制将 simple 调整到最后再去使用
-    Iterable<BlockFunctionType<?>> iterable = Iterables.concat(stream.filter(type -> type != BlockFunctionTypes.SIMPLE)::iterator, Collections.singleton(BlockFunctionTypes.SIMPLE));
-    for (BlockFunctionType<?> type : iterable) {
-      parser.reader.setCursor(cursorOnStart);
-      final BlockFunctionArgument parse = type.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
+    for (Parser<BlockFunctionArgument> argumentParser : Iterables.concat(BlockFunctionTypes.PARSERS, Collections.singleton(SimpleBlockFunction.Type.SIMPLE_TYPE))) {
+      reader.setCursor(cursorOnStart);
+      final BlockFunctionArgument parse = argumentParser.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
       if (parse != null) {
-        // keep the current position of the cursor
         return parse;
       }
     }
-    parser.reader.setCursor(cursorOnStart);
-    throw BlockFunction.CANNOT_PARSE.createWithContext(parser.reader);
+    reader.setCursor(cursorOnStart);
+    throw BlockFunction.CANNOT_PARSE.createWithContext(reader);
   }
 }

@@ -7,14 +7,13 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 /**
  * 去除方块函数中的流体，并将 waterlogged 设为 false。这不一定总是能够成功。
@@ -60,28 +59,13 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
         return new DryBlockFunction(null);
       }
     }
-
-    @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
   }
 
-  public static class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
     BlockFunctionArgument blockFunction = null;
 
     @Override
-    public @NotNull String functionName() {
-      return "dry";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_function.dry");
-    }
-
-    @Override
-    public BlockFunctionArgument getParseResult(SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new DryBlockFunction(blockFunction == null ? null : blockFunction.apply(source));
     }
 

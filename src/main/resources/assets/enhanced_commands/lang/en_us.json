@@ -506,6 +506,7 @@
   "enhanced_commands.parsing.expected.2": "Expected '%s' or '%s'",
   "enhanced_commands.parsing.expected.3": "Expected '%s', '%s' or '%s'",
   "enhanced_commands.parsing.expected.4": "Expected '%s', '%s', '%s' or '%s'",
+  "enhanced_commands.parsing.unknown_function": "Unknown function '%s'",
   "enhanced_commands.parsing.unknown_keyword": "Unknown keyword '%s'",
   "enhanced_commands.position": "(%s, %s, %s)",
   "item.enhanced_commands.region_selection_tool": "Region selection tool"

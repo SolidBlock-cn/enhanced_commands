@@ -13,11 +13,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,20 +63,13 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     nbtList.addAll(Collections2.transform(blockPredicates, BlockPredicate::createNbt));
   }
 
-  public record Parser(List<BlockPredicateArgument> blockPredicates) implements FunctionLikeParser<BlockPredicateArgument> {
-
-    @Override
-    public @NotNull String functionName() {
-      return "all";
+  public record Parser(List<BlockPredicateArgument> blockPredicates) implements FunctionParamsParser<BlockPredicateArgument> {
+    public Parser() {
+      this(new ArrayList<>());
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_predicate.intersect");
-    }
-
-    @Override
-    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new IntersectBlockPredicate(ImmutableList.copyOf(Lists.transform(blockPredicates, x -> x.apply(source))));
     }
 
@@ -93,11 +85,6 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     @Override
     public @NotNull IntersectBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new IntersectBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement, world)).toList());
-    }
-
-    @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser(new ArrayList<>()).parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

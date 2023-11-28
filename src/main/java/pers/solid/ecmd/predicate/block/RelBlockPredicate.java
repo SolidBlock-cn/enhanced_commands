@@ -12,10 +12,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -52,22 +51,12 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     nbtCompound.put("predicate", predicate.createNbt());
   }
 
-  public static final class Parser implements FunctionLikeParser<BlockPredicateArgument> {
+  public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
     private Function<ServerCommandSource, Vec3i> relPos;
     private BlockPredicateArgument blockPredicate;
 
     @Override
-    public @NotNull String functionName() {
-      return "rel";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_predicate.rel");
-    }
-
-    @Override
-    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       Preconditions.checkNotNull(relPos, "relPos (argument 1)");
       Preconditions.checkNotNull(blockPredicate, "blockPredicate (argument 2)");
       return source -> new RelBlockPredicate(relPos.apply(source), blockPredicate.apply(source));
@@ -104,11 +93,6 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
       } else {
         return new RelBlockPredicate(new Vec3i(intArray[0], intArray[1], intArray[2]), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world));
       }
-    }
-
-    @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
     }
   }
 }

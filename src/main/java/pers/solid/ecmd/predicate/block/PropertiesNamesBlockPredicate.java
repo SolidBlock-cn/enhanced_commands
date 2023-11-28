@@ -20,6 +20,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collection;
@@ -72,7 +73,7 @@ public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePred
     nbtList.addAll(Collections2.transform(propertyNamePredicates, NbtConvertible::createNbt));
   }
 
-  public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate> {
+  public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate>, Parser<BlockPredicateArgument> {
     PROPERTY_NAMES_TYPE;
 
     @Override

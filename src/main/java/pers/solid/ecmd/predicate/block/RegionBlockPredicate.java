@@ -8,12 +8,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.TextUtil;
 
 public record RegionBlockPredicate(Region region) implements BlockPredicate {
@@ -51,28 +50,13 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
     public @NotNull RegionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       throw new UnsupportedOperationException();
     }
-
-    @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
   }
 
-  private static final class Parser implements FunctionLikeParser<BlockPredicateArgument> {
-    private RegionArgument<?> regionArgument;
+  public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
+    private RegionArgument regionArgument;
 
     @Override
-    public @NotNull String functionName() {
-      return "region";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_predicate.region");
-    }
-
-    @Override
-    public BlockPredicateArgument getParseResult(SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return serverCommandSource -> new RegionBlockPredicate(regionArgument.toAbsoluteRegion(serverCommandSource));
     }
 

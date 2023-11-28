@@ -6,17 +6,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.StringUtil;
@@ -133,29 +131,14 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
 
   public enum Type implements CurveType<StraightCurve> {
     INSTANCE;
-
-    @Override
-    public @Nullable CurveArgument<StraightCurve> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
   }
 
-  private static final class Parser implements FunctionLikeParser<CurveArgument<StraightCurve>> {
+  private static final class Parser implements FunctionParamsParser<CurveArgument<StraightCurve>> {
     private PosArgument from, to;
     private boolean usingKeyword = false;
 
     @Override
-    public @NotNull String functionName() {
-      return "straight";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.curve.straight");
-    }
-
-    @Override
-    public CurveArgument<StraightCurve> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public CurveArgument<StraightCurve> getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
       if (from == null || to == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
       }

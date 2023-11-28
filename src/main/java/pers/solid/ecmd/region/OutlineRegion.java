@@ -9,7 +9,7 @@ import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.Iterator;
 import java.util.List;
@@ -169,27 +169,27 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     OUTLINE_TYPE;
 
     @Override
-    public @Nullable RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
-  }
-
-  public static final class Parser implements FunctionLikeParser<RegionArgument<OutlineRegion>> {
-    private OutlineType outlineType = OutlineTypes.OUTLINE;
-    private RegionArgument<?> regionArgument;
-
-    @Override
-    public @NotNull String functionName() {
+    public String functionName() {
       return "outline";
     }
 
     @Override
     public Text tooltip() {
-      return null;
+      return Text.translatable("enhanced_commands.argument.region.outline");
     }
 
     @Override
-    public RegionArgument<OutlineRegion> getParseResult(SuggestedParser parser) {
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return new Parser();
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<RegionArgument> {
+    private OutlineType outlineType = OutlineTypes.OUTLINE;
+    private RegionArgument regionArgument;
+
+    @Override
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new OutlineRegion(outlineType, regionArgument.toAbsoluteRegion(source));
     }
 

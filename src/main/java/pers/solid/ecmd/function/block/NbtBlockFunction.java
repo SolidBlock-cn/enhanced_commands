@@ -14,6 +14,7 @@ import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
+import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) implements BlockFunction {
@@ -39,7 +40,7 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
   }
 
 
-  public enum Type implements BlockFunctionType<NbtBlockFunction> {
+  public enum Type implements BlockFunctionType<NbtBlockFunction>, Parser<BlockFunctionArgument> {
     NBT_TYPE;
 
     @Override

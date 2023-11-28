@@ -2,24 +2,21 @@ package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-
-import java.util.stream.Stream;
+import pers.solid.ecmd.util.Parser;
 
 /**
  * @see net.minecraft.command.argument.PosArgument
  */
-public interface RegionArgument<T extends Region> {
+public interface RegionArgument {
   @NotNull
-  static RegionArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static RegionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final int cursorOnStart = parser.reader.getCursor();
-    final Stream<RegionType<?>> stream = commandRegistryAccess.createWrapper(RegionType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
-    for (RegionType<?> type : (Iterable<RegionType<?>>) stream::iterator) {
+    for (Parser<RegionArgument> argumentParser : RegionTypes.PARSERS) {
       parser.reader.setCursor(cursorOnStart);
-      final RegionArgument<?> parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);
+      final RegionArgument parse = argumentParser.parse(commandRegistryAccess, parser, suggestionsOnly, true);
       if (parse != null) {
         // keep the current position of the cursor
         return parse;
@@ -29,5 +26,5 @@ public interface RegionArgument<T extends Region> {
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
   }
 
-  T toAbsoluteRegion(ServerCommandSource source);
+  Region toAbsoluteRegion(ServerCommandSource source);
 }

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -153,17 +153,7 @@ public record CuboidRegion(Box box) implements Region {
     CUBOID_TYPE;
 
     @Override
-    public @Nullable RegionArgument<Region> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
-  }
-
-  public static final class Parser implements FunctionLikeParser<RegionArgument<Region>> {
-    private PosArgument from;
-    private PosArgument to;
-
-    @Override
-    public @NotNull String functionName() {
+    public String functionName() {
       return "cuboid";
     }
 
@@ -173,7 +163,17 @@ public record CuboidRegion(Box box) implements Region {
     }
 
     @Override
-    public RegionArgument<Region> getParseResult(SuggestedParser parser) {
+    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+      return new Parser();
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<RegionArgument> {
+    private PosArgument from;
+    private PosArgument to;
+
+    @Override
+    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       if (EnhancedPosArgument.isInt(from) && EnhancedPosArgument.isInt(to)) {
         return source -> new BlockCuboidRegion(from.toAbsoluteBlockPos(source), to.toAbsoluteBlockPos(source));
       }

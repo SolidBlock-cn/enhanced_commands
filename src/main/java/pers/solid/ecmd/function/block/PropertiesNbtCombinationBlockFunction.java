@@ -1,7 +1,6 @@
 package pers.solid.ecmd.function.block;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.math.BlockPos;
@@ -10,7 +9,6 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 
 import java.util.Objects;
@@ -75,11 +73,6 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction first
           nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), world) : null,
           nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockFunction.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), world) : null
       );
-    }
-
-    @Override
-    public @Nullable PropertiesNbtCombinationBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
-      return null;
     }
   }
 }

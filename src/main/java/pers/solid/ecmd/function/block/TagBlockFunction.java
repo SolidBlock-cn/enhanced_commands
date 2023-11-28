@@ -22,6 +22,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.Parser;
 
 import java.util.Collection;
 import java.util.List;
@@ -110,7 +111,7 @@ public final class TagBlockFunction implements BlockFunction {
         '}';
   }
 
-  public enum Type implements BlockFunctionType<TagBlockFunction> {
+  public enum Type implements BlockFunctionType<TagBlockFunction>, Parser<BlockFunctionArgument> {
     TAG_TYPE;
 
     @Override

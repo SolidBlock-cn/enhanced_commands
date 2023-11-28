@@ -60,7 +60,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   public static final EnhancedRedirectModifier.Constant<ServerCommandSource> REGION_ARGUMENTS_MODIFIER = (arguments, previousArguments, source) -> {
     final ServerPlayerEntity player = source.getPlayerOrThrow();
-    final RegionArgument<?> regionArgument = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegionOrThrow();
+    final RegionArgument regionArgument = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegionOrThrow();
     arguments.put("region", new ParsedArgument<>(0, 0, regionArgument));
   };
 

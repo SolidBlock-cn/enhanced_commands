@@ -6,7 +6,6 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -15,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
-import pers.solid.ecmd.util.FunctionLikeParser;
+import pers.solid.ecmd.util.FunctionParamsParser;
 
 /**
  * 当原先的方块符合方块谓词时，应用函数 1，否则应用函数 2。例如：
@@ -66,29 +65,14 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
           nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else"), world) : null
       );
     }
-
-    @Override
-    public @Nullable BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
   }
 
-  private static class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
     private BlockPredicateArgument condition;
     private BlockFunctionArgument valueIfTrue, valueIfFalse;
 
     @Override
-    public @NotNull String functionName() {
-      return "if";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.block_function.conditional");
-    }
-
-    @Override
-    public BlockFunctionArgument getParseResult(SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? null : valueIfFalse.apply(source));
     }
 

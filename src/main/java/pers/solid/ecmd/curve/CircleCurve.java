@@ -10,7 +10,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -45,7 +44,7 @@ import java.util.function.Function;
  * </table>
  *
  * <p>{@code around <axisVector>} 等价于 {@code rotated <x> <y>} 或 {@code facing <targetPos>}。所有轴向量都会被单位化。
- * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code [length] <direction>}（参照 {@link SuggestedParser#parseVec3d(SuggestedParser)}。
+ * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code [length] <direction>}。
  * <p>当半径指定为标量时，其方向为轴向量与 y 轴正方向的向量积的方向，若轴向量为 y 轴正方向或负方向，则其方向为 x 轴正方向或负方向。
  *
  * @param radius 圆的半径，是一个相对向量。
@@ -146,11 +145,6 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
 
   public enum Type implements CurveType<CircleCurve> {
     INSTANCE;
-
-    @Override
-    public @Nullable CurveArgument<CircleCurve> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return new Parser().parse(commandRegistryAccess, parser, suggestionsOnly);
-    }
   }
 
   /**
@@ -167,24 +161,14 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
    * <p>
    * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <axis>} 的默认值为 {@code 0 1 0}。当 {@code <radius>} 指定为标量时，其方向相当于 {@code <axis>} 与 y 轴正方向的向量积的方向。当 {@code <axis>} 正好指定为 y 轴正方向时，{@code <radius>} 方向为 x 正方向，若为 y 轴负方向，则 {@code <radius>} 方向为 x 负方向。
    */
-  private static class Parser implements FunctionLikeParser<CurveArgument<CircleCurve>> {
+  private static class Parser implements FunctionParamsParser<CurveArgument<CircleCurve>> {
     private @Nullable Either<Double, Function<ServerCommandSource, Vec3d>> radius;
     private @Nullable PosArgument center;
     private @Nullable FailableBiFunction<ServerCommandSource, Vec3d, Vec3d, CommandSyntaxException> around;
     private @Nullable Range<Double> range;
 
     @Override
-    public @NotNull String functionName() {
-      return "circle";
-    }
-
-    @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.curve.circle");
-    }
-
-    @Override
-    public CurveArgument<CircleCurve> getParseResult(SuggestedParser parser) throws CommandSyntaxException {
+    public CurveArgument<CircleCurve> getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
       if (this.radius == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, "radius");
       }
