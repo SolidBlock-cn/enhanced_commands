@@ -57,7 +57,7 @@ public final class BlockPredicateTypes {
     map.put("any", UnionBlockPredicate.Parser::new);
     map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_diff"), false));
     map.put("expose", ExposeBlockPredicate.Parser::new);
-    map.put("idcontain", IdContainBlockPredicate.Type.Parser::new);
+    map.put("idcontain", IdContainBlockPredicate.Parser::new);
     map.put("rand", RandBlockPredicate.Parser::new);
     map.put("region", RegionBlockPredicate.Parser::new);
     map.put("rel", RelBlockPredicate.Parser::new);

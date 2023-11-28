@@ -67,30 +67,30 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     public @NotNull IdContainBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new IdContainBlockPredicate(Pattern.compile(nbtCompound.getString("pattern")));
     }
+  }
 
-    public static class Parser implements FunctionParamsParser<IdContainBlockPredicate> {
-      private Pattern pattern;
+  public static class Parser implements FunctionParamsParser<IdContainBlockPredicate> {
+    private Pattern pattern;
 
-      @Override
-      public int minParamsCount() {
-        return 1;
-      }
+    @Override
+    public int minParamsCount() {
+      return 1;
+    }
 
-      @Override
-      public int maxParamsCount() {
-        return 1;
-      }
+    @Override
+    public int maxParamsCount() {
+      return 1;
+    }
 
-      @Override
-      public IdContainBlockPredicate getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) { // @formatter:on
-        return new IdContainBlockPredicate(pattern);
-      }
+    @Override
+    public IdContainBlockPredicate getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) { // @formatter:on
+      return new IdContainBlockPredicate(pattern);
+    }
 
-      @Override
-      public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-        parser.suggestionProviders.clear();
-        pattern = ParsingUtil.readRegex(parser.reader);
-      }
+    @Override
+    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      parser.suggestionProviders.clear();
+      pattern = ParsingUtil.readRegex(parser.reader);
     }
   }
 }

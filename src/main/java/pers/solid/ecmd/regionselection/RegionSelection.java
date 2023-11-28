@@ -1,16 +1,22 @@
 package pers.solid.ecmd.regionselection;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.region.*;
-import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.region.RegionBasedRegion;
+import pers.solid.ecmd.region.RegionType;
+import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.List;
@@ -25,15 +31,11 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
 
   /**
    * 设置第一个点时的操作。有可能是直接设置的特定的点，也有可能是重新开始一个全新的区域。
-   *
-   * @return
    */
   Supplier<Text> clickFirstPoint(BlockPos point, PlayerEntity player);
 
   /**
    * 设置第二个点时的操作。有可能是直接设置的特定的点，也有可能是在多个点的列表中增加一个点。
-   *
-   * @return
    */
   Supplier<Text> clickSecondPoint(BlockPos point, PlayerEntity player);
 
@@ -51,7 +53,6 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
   default void popLastOperation(PlayerEntity player) {
     throw new UnsupportedOperationException();
   }
-
 
   /**
    * 移动选区自身，并通常返回自身。
@@ -102,7 +103,7 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
   /**
    * 对区域对象自身进行修改并返回自身。
    */
-  RegionSelection transformed(Function<Vec3d, Vec3d> transformation);
+  @NotNull RegionSelection transformed(Function<Vec3d, Vec3d> transformation);
 
   /**
    * 转换为具体的 Region 对象，该对象通常不应该是 RegionBuilder 对象。一般来说，它应该是缓存在对象的字段中的，如果自身有修改，则该字段清除，下次调用时再重新计算。
@@ -130,14 +131,27 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
   }
 
   @NotNull
-  RegionSelectionType getBuilderType();
+  RegionSelectionType getSelectionType();
+
+  @Contract(mutates = "this")
+  void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world);
+
+  @Override
+  default void writeIdentifyingData(@NotNull NbtCompound nbtCompound) {
+    RegionBasedRegion.super.writeIdentifyingData(nbtCompound);
+    nbtCompound.putString("selection_type", Preconditions.checkNotNull(RegionSelectionType.REGISTRY.getId(getSelectionType()), "not registered").toString());
+  }
 
   enum Type implements RegionType<RegionSelection> {
     INSTANCE;
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
-      return null;
+    public @NotNull RegionSelection fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      final Identifier identifier = new Identifier(nbtCompound.getString("selection_type"));
+      final RegionSelectionType regionSelectionType = RegionSelectionType.REGISTRY.getOrEmpty(identifier).orElseThrow();
+      final RegionSelection regionSelection = regionSelectionType.createRegionSelection();
+      regionSelection.fromNbt(nbtCompound, world);
+      return regionSelection;
     }
   }
 }

@@ -2,10 +2,12 @@ package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.*;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -95,6 +97,12 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     return new OutlineRegion(outlineType, region);
   }
 
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.putString("outline_type", outlineType.asString());
+    nbtCompound.put("region", region.createNbt());
+  }
+
   public interface OutlineType extends StringIdentifiable {
     boolean modifiedTest(Predicate<BlockPos> predicate, BlockPos blockPos);
 
@@ -181,6 +189,14 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     @Override
     public FunctionParamsParser<RegionArgument> functionParamsParser() {
       return new Parser();
+    }
+
+    @Override
+    public @NotNull OutlineRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new OutlineRegion(
+          OutlineTypes.CODEC.byId(nbtCompound.getString("outline_type"), OutlineTypes.OUTLINE),
+          Region.fromNbt(nbtCompound.getCompound("region"), world)
+      );
     }
   }
 

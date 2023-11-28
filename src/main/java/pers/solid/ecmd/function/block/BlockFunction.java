@@ -73,13 +73,11 @@ public interface BlockFunction extends ExpressionConvertible, NbtConvertible, Bl
   BlockFunctionType<?> getType();
 
   @Override
-  default NbtCompound createNbt() {
-    NbtCompound nbtCompound = new NbtCompound();
+  default void writeIdentifyingData(@NotNull NbtCompound nbtCompound) {
     final BlockFunctionType<?> type = getType();
     final Identifier id = BlockFunctionType.REGISTRY.getId(type);
     nbtCompound.putString("type", Preconditions.checkNotNull(id, "Unknown block function type: %s", type).toString());
     writeNbt(nbtCompound);
-    return nbtCompound;
   }
 
   static @NotNull BlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {

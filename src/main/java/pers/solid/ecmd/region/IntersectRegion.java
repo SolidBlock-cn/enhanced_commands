@@ -4,15 +4,19 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.NbtUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -92,6 +96,11 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
     return new IntersectRegion(regions);
   }
 
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.put("regions", NbtUtil.fromIterable(regions, Region::createNbt));
+  }
+
   public enum Type implements RegionType<IntersectRegion> {
     INTERSECT_TYPE;
 
@@ -108,6 +117,11 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
     @Override
     public FunctionParamsParser<RegionArgument> functionParamsParser() {
       return new Parser();
+    }
+
+    @Override
+    public @NotNull IntersectRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new IntersectRegion(NbtUtil.toImmutableList(nbtCompound.getList("regions", NbtElement.COMPOUND_TYPE), nbtCompound1 -> Region.fromNbt(nbtCompound1, world)));
     }
   }
 

@@ -40,7 +40,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
 
   @Override
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("region", region.asString());
+    nbtCompound.put("region", region.createNbt());
   }
 
   public enum Type implements BlockPredicateType<RegionBlockPredicate> {
@@ -48,7 +48,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
 
     @Override
     public @NotNull RegionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      throw new UnsupportedOperationException();
+      return new RegionBlockPredicate(Region.fromNbt(nbtCompound.getCompound("region"), world));
     }
   }
 

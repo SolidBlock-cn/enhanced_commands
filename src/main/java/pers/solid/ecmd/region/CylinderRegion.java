@@ -4,14 +4,17 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.NbtUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -60,7 +63,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public CylinderRegion transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull CylinderRegion transformed(Function<Vec3d, Vec3d> transformation) {
     return new CylinderRegion(radius, height, transformation.apply(center));
   }
 
@@ -127,6 +130,13 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     return new Box(center.x - radius, center.y - height / 2, center.z - radius, center.x + radius, center.y + height / 2, center.z + radius);
   }
 
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.putDouble("radius", radius);
+    nbtCompound.putDouble("height", height);
+    nbtCompound.put("center", NbtUtil.fromVec3d(center));
+  }
+
   public enum Type implements RegionType<CylinderRegion> {
     CYLINDER_TYPE;
 
@@ -143,6 +153,15 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     @Override
     public FunctionParamsParser<RegionArgument> functionParamsParser() {
       return new Parser();
+    }
+
+    @Override
+    public @NotNull CylinderRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new CylinderRegion(
+          nbtCompound.getDouble("radius"),
+          nbtCompound.getDouble("height"),
+          NbtUtil.toVec3d(nbtCompound.getCompound("center"))
+      );
     }
   }
 

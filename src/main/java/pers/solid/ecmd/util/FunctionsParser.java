@@ -40,6 +40,8 @@ public class FunctionsParser<T> implements Parser<T> {
     if (!unquotedString.isEmpty() && reader.canRead() && reader.peek() == '(') {
       final FunctionParamsParser<? extends T> functionParamsParser = parserFactory.apply(unquotedString);
       if (functionParamsParser != null) {
+        functionParamsParser.setFunctionName(unquotedString);
+        functionParamsParser.setCursorBeforeFunctionName(cursorOnStart);
         return functionParamsParser.parseAfterLeftParenthesis(commandRegistryAccess, parser, suggestionsOnly);
       } else {
         final int cursorAfterFunctionName = reader.getCursor();

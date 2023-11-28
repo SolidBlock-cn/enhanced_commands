@@ -1,12 +1,13 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
-import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.Iterator;
@@ -101,6 +102,12 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     );
   }
 
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    region.writeNbt(nbtCompound);
+    nbtCompound.putInt("thickness", thickness);
+  }
+
   public enum Type implements RegionType<CuboidWallRegion> {
     CUBOID_WALL_TYPE;
 
@@ -118,13 +125,21 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     public FunctionParamsParser<RegionArgument> functionParamsParser() {
       return new Parser();
     }
+
+    @Override
+    public @NotNull CuboidWallRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      final Region region1 = RegionTypes.CUBOID.fromNbt(nbtCompound, world);
+      if (region1 instanceof BlockCuboidRegion blockCuboidRegion) {
+        return new CuboidWallRegion(blockCuboidRegion, nbtCompound.getInt("thickness"));
+      }
+      throw new IllegalArgumentException("Cannot parse cuboid wall region: NBT does not contain a BlockCuboidRegion ({type=cuboid, block=true})");
+    }
   }
 
   public static final class Parser extends CuboidOutlineRegion.AbstractParser {
-
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new CuboidWallRegion(new BlockCuboidRegion(fromPos.toAbsoluteBlockPos(source), toPos.toAbsoluteBlockPos(source)), thickness);
+    protected Region createParsedResult(ServerCommandSource source) {
+      return new CuboidWallRegion(new BlockCuboidRegion(fromPos.toAbsoluteBlockPos(source), toPos.toAbsoluteBlockPos(source)), thickness);
     }
   }
 }

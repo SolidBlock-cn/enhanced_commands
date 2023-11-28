@@ -7,17 +7,21 @@ import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -99,6 +103,12 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     return region.minContainingBox();
   }
 
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    region.writeNbt(nbtCompound);
+    nbtCompound.putInt("thickness", thickness);
+  }
+
   public enum Type implements RegionType<CuboidOutlineRegion> {
     CUBOID_OUTLINE_TYPE;
 
@@ -116,12 +126,33 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     public FunctionParamsParser<RegionArgument> functionParamsParser() {
       return new Parser();
     }
+
+    @Override
+    public @NotNull CuboidOutlineRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      final Region region1 = RegionTypes.CUBOID.fromNbt(nbtCompound, world);
+      if (region1 instanceof BlockCuboidRegion blockCuboidRegion) {
+        return new CuboidOutlineRegion(blockCuboidRegion, nbtCompound.getInt("thickness"));
+      }
+      throw new IllegalArgumentException("Cannot parse cuboid wall region: NBT does not contain a BlockCuboidRegion ({type=cuboid, block=true})");
+    }
   }
 
   public static abstract sealed class AbstractParser implements FunctionParamsParser<RegionArgument> permits Parser, CuboidWallRegion.Parser {
     protected PosArgument fromPos, toPos;
     protected int thickness = 1;
+    protected int cursorBefore = 0, cursorAfter = 0;
 
+    @Override
+    public void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
+      this.cursorBefore = cursorBeforeFunctionName;
+    }
+
+    @Override
+    public RegionArgument parseAfterLeftParenthesis(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      final RegionArgument parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(commandRegistryAccess, parser, suggestionsOnly);
+      cursorAfter = parser.reader.getCursor();
+      return parsed;
+    }
 
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
@@ -143,19 +174,40 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
       } else if (toPos != null) {
         final int cursorBeforeInt = parser.reader.getCursor();
         thickness = parser.reader.readInt();
-        if (thickness < 0) {
+        if (thickness <= 0) {
+          final int cursorAfterThickness = parser.reader.getCursor();
           parser.reader.setCursor(cursorBeforeInt);
-          throw NON_POSITIVE_THICKNESS.createWithContext(parser.reader, thickness);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(NON_POSITIVE_THICKNESS.createWithContext(parser.reader, thickness), cursorAfterThickness);
         }
       }
     }
-  }
-
-  public static final class Parser extends AbstractParser {
 
     @Override
     public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new CuboidOutlineRegion(new BlockCuboidRegion(fromPos.toAbsoluteBlockPos(source), toPos.toAbsoluteBlockPos(source)), thickness);
+      return source -> {
+        try {
+          return createParsedResult(source);
+        } catch (Exception e) {
+          if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
+            if (commandSyntaxException.getInput() != null) {
+              throw new IllegalArgumentException(commandSyntaxException);
+            } else {
+              throw new IllegalArgumentException(CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), parser.reader.getString(), cursorBefore), cursorAfter));
+            }
+          } else {
+            throw e;
+          }
+        }
+      };
+    }
+
+    protected abstract Region createParsedResult(ServerCommandSource source);
+  }
+
+  public static final class Parser extends AbstractParser {
+    @Override
+    protected Region createParsedResult(ServerCommandSource source) {
+      return new CuboidOutlineRegion(new BlockCuboidRegion(fromPos.toAbsoluteBlockPos(source), toPos.toAbsoluteBlockPos(source)), thickness);
     }
   }
 }

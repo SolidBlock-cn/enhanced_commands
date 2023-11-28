@@ -93,7 +93,9 @@ public interface IntBackedRegion extends Region {
     }
   }
 
-  default Region expanded(int offset, Direction.Type type) {throw new UnsupportedOperationException();}
+  default Region expanded(int offset, Direction.Type type) {
+    throw new UnsupportedOperationException();
+  }
 
   DynamicCommandExceptionType ROTATION_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.exception.rotation_pivot_must_center", o));
 
@@ -111,7 +113,7 @@ public interface IntBackedRegion extends Region {
   Region transformedInt(Function<Vec3i, Vec3i> transformation);
 
   @Override
-  default Region transformed(Function<Vec3d, Vec3d> transformation) {
+  default @NotNull Region transformed(Function<Vec3d, Vec3d> transformation) {
     throw new UnsupportedOperationException();
   }
 

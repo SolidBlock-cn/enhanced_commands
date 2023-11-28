@@ -6,20 +6,23 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.util.BlockRotation;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.GeoUtil;
+import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Iterator;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -105,32 +108,41 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
   }
 
   @Override
-  public @NotNull Curve moved(@NotNull Vec3d relativePos) {
-    return new StraightCurve(from.add(relativePos), to.add(relativePos));
-  }
-
-  @Override
-  public @NotNull Curve rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
-    return new StraightCurve(GeoUtil.rotate(from, blockRotation, pivot), GeoUtil.rotate(to, blockRotation, pivot));
-  }
-
-  @Override
-  public @NotNull Curve mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
-    return new StraightCurve(GeoUtil.mirror(from, axis, pivot), GeoUtil.mirror(to, axis, pivot));
+  public @NotNull StraightCurve transformed(Function<Vec3d, Vec3d> transformation) {
+    return new StraightCurve(transformation.apply(from), transformation.apply(to));
   }
 
   @Override
   public @NotNull String asString() {
-    return "line(%s, %s)".formatted(StringUtil.wrapPosition(from), StringUtil.wrapPosition(to));
+    return "straight(%s, %s)".formatted(StringUtil.wrapPosition(from), StringUtil.wrapPosition(to));
   }
 
   @Override
-  public @NotNull CurveType<StraightCurve> getCurveType() {
+  public @NotNull Box minContainingBox() {
+    return new Box(from, to);
+  }
+
+  @Override
+  public @NotNull CurveType<StraightCurve> getType() {
     return Type.INSTANCE;
+  }
+
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.put("from", NbtUtil.fromVec3d(from));
+    nbtCompound.put("to", NbtUtil.fromVec3d(to));
   }
 
   public enum Type implements CurveType<StraightCurve> {
     INSTANCE;
+
+    @Override
+    public @NotNull StraightCurve fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new StraightCurve(
+          NbtUtil.toVec3d(nbtCompound.getCompound("from")),
+          NbtUtil.toVec3d(nbtCompound.getCompound("to"))
+      );
+    }
   }
 
   private static final class Parser implements FunctionParamsParser<CurveArgument<StraightCurve>> {

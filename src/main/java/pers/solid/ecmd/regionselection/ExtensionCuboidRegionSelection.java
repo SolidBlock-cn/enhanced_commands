@@ -77,7 +77,7 @@ public class ExtensionCuboidRegionSelection extends BlockCuboidRegionSelection {
   }
 
   @Override
-  public @NotNull RegionSelectionType getBuilderType() {
+  public @NotNull RegionSelectionType getSelectionType() {
     return RegionSelectionTypes.EXTENSION;
   }
 

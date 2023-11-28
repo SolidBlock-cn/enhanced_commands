@@ -1,25 +1,30 @@
 package pers.solid.ecmd.region;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.GeoUtil;
+import pers.solid.ecmd.util.NbtConvertible;
 
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
- * 表示一个区域，每个区域需要包含多个方块坐标，并且能够判断坐标是否在区域内。区域使用的坐标是精确的，不一定是方块坐标，如果所有的操作都是基于方块的，则可以使用 {@link IntBackedRegion}。
+ * 区域是指一系列坐标的抽象集合，每个区域需要能够遍历区域中的方块坐标，并且能够判断精确坐标或方块坐标是否在区域内。区域使用的坐标是精确的，不一定是方块坐标，如果所有的操作都是基于方块的，则可以使用 {@link IntBackedRegion}。
  */
 @Unmodifiable
-public interface Region extends Iterable<BlockPos>, ExpressionConvertible, RegionArgument {
+public interface Region extends Iterable<BlockPos>, ExpressionConvertible, RegionArgument, NbtConvertible {
   /**
    * 判断方块坐标是否在该区域内。其默认的实现方式是判断方块坐标的中心位置。
    */
@@ -84,7 +89,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
     return transformed(vec3d -> GeoUtil.mirror(vec3d, axis, pivot));
   }
 
-  Region transformed(Function<Vec3d, Vec3d> transformation);
+  @NotNull Region transformed(Function<Vec3d, Vec3d> transformation);
 
   /**
    * 区域向各方向延伸浮点数值后的区域。
@@ -137,6 +142,13 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
   @Override
   @NotNull String asString();
 
+  @Override
+  default void writeIdentifyingData(@NotNull NbtCompound nbtCompound) {
+    final RegionType<?> type = getType();
+    final Identifier id = RegionType.REGISTRY.getId(type);
+    nbtCompound.putString("type", Preconditions.checkNotNull(id, "Unknown region type: %s", type).toString());
+  }
+
   /**
    * 包含该区域内所有坐标的最小长方体区域。
    */
@@ -154,5 +166,16 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
   @Override
   default Region toAbsoluteRegion(ServerCommandSource source) {
     return this;
+  }
+
+  /**
+   * 将 NBT 转化为一个 {@link Region} 对象。此过程会首先读取 NBT 中的 {@code type} 字段，获取对应的类型，如果类型不存在则抛出错误。然后，再调用 {@link RegionType#fromNbt} 以进行各自的处理。返回的 {@link Region} 对象所使用的坐标都是绝对的。
+   *
+   * @return 根据 {@code nbtCompound} 转换成的 {@link Region} 对象。
+   */
+  static @NotNull Region fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+    final RegionType<?> type = RegionType.REGISTRY.get(new Identifier(nbtCompound.getString("type")));
+    Preconditions.checkNotNull(type, "Unknown region type: %s", type);
+    return type.fromNbt(nbtCompound, world);
   }
 }

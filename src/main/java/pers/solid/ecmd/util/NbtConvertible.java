@@ -11,9 +11,14 @@ public interface NbtConvertible {
   @Contract(mutates = "param1")
   void writeNbt(@NotNull NbtCompound nbtCompound);
 
+  @Contract(mutates = "param1")
+  default void writeIdentifyingData(@NotNull NbtCompound nbtCompound) {
+  }
+
   @Contract(pure = true)
   default NbtCompound createNbt() {
     final NbtCompound nbt = new NbtCompound();
+    writeIdentifyingData(nbt);
     writeNbt(nbt);
     return nbt;
   }

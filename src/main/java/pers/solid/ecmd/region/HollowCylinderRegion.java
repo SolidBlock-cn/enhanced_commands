@@ -5,8 +5,10 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
@@ -125,6 +127,12 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
     return region.minContainingBox();
   }
 
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    region.writeNbt(nbtCompound);
+    nbtCompound.putString("outline_type", outlineType.asString());
+  }
+
   public enum Type implements RegionType<HollowCylinderRegion> {
     HOLLOW_CYLINDER_TYPE;
 
@@ -141,6 +149,11 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
     @Override
     public FunctionParamsParser<RegionArgument> functionParamsParser() {
       return new Parser();
+    }
+
+    @Override
+    public @NotNull HollowCylinderRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new HollowCylinderRegion(RegionTypes.CYLINDER.fromNbt(nbtCompound, world), OutlineRegion.OutlineTypes.CODEC.byId(nbtCompound.getString("outline_type"), OutlineRegion.OutlineTypes.OUTLINE));
     }
   }
 

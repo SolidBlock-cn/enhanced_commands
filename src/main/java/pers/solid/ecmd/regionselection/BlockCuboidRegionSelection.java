@@ -2,16 +2,20 @@ package pers.solid.ecmd.regionselection;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.BlockCuboidRegion;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -131,8 +135,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   public Region expanded(int offset, Direction.Type type) {
     final Vec3i pos1Offset = switch (type) {
       case VERTICAL -> new Vec3i(0, first.getY() > second.getY() ? offset : -offset, 0);
-      case HORIZONTAL ->
-          new Vec3i(first.getX() > second.getX() ? offset : -offset, 0, first.getZ() > second.getZ() ? offset : -offset);
+      case HORIZONTAL -> new Vec3i(first.getX() > second.getX() ? offset : -offset, 0, first.getZ() > second.getZ() ? offset : -offset);
     };
     first = first.add(pos1Offset);
     second = second.subtract(pos1Offset);
@@ -141,7 +144,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelectionType getBuilderType() {
+  public @NotNull RegionSelectionType getSelectionType() {
     return RegionSelectionTypes.CUBOID;
   }
 
@@ -156,5 +159,16 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   @Override
   public @NotNull IntBackedRegionSelection clone() {
     return (IntBackedRegionSelection) super.clone();
+  }
+
+  public void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+    first = nbtCompound.contains("first", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3i(nbtCompound.getCompound("first")) : null;
+    second = nbtCompound.contains("second", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3i(nbtCompound.getCompound("second")) : null;
+  }
+
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.put("first", NbtUtil.fromVec3i(first));
+    nbtCompound.put("second", NbtUtil.fromVec3i(second));
   }
 }

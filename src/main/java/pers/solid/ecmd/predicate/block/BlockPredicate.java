@@ -51,12 +51,10 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
   BlockPredicateType<?> getType();
 
   @Override
-  default NbtCompound createNbt() {
-    final NbtCompound nbt = NbtConvertible.super.createNbt();
+  default void writeIdentifyingData(@NotNull NbtCompound nbtCompound) {
     final BlockPredicateType<?> type = getType();
     final Identifier id = BlockPredicateType.REGISTRY.getId(type);
-    nbt.putString("type", Preconditions.checkNotNull(id, "Unknown block predicate type: %s", type).toString());
-    return nbt;
+    nbtCompound.putString("type", Preconditions.checkNotNull(id, "Unknown block predicate type: %s", type).toString());
   }
 
   /**

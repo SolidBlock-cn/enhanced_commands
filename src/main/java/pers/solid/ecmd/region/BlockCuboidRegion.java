@@ -1,6 +1,8 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.base.Preconditions;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
@@ -100,7 +102,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public Region transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull Region transformed(Function<Vec3d, Vec3d> transformation) {
     return asCuboidRegion().transformed(transformation);
   }
 
@@ -206,5 +208,12 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return contains(BlockPos.ofFloored(vec3d));
+  }
+
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.put("from", NbtHelper.fromBlockPos(new BlockPos(minX, minY, minZ)));
+    nbtCompound.put("to", NbtHelper.fromBlockPos(new BlockPos(maxX, maxY, maxZ)));
+    nbtCompound.putBoolean("block", true);
   }
 }

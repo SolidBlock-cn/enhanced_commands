@@ -53,7 +53,7 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
   }
 
   @Override
-  default T transformed(Function<Vec3d, Vec3d> transformation) {
+  default @NotNull T transformed(Function<Vec3d, Vec3d> transformation) {
     return newRegion((R) region().transformed(transformation));
   }
 
@@ -160,7 +160,7 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
     }
 
     @Override
-    default T transformed(Function<Vec3d, Vec3d> transformation) {
+    default @NotNull T transformed(Function<Vec3d, Vec3d> transformation) {
       return (T) IntBackedRegion.super.transformed(transformation);
     }
 

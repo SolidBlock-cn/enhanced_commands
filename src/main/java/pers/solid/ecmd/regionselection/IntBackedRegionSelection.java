@@ -79,7 +79,7 @@ public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegi
   }
 
   @Override
-  default IntBackedRegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
+  default @NotNull IntBackedRegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
     IntBackedRegion.super.transformed(transformation);
     return this;
   }

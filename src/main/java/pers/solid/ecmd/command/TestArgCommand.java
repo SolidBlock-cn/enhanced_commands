@@ -308,10 +308,22 @@ public enum TestArgCommand implements CommandRegistrationCallback {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addRegionProperties(T argumentBuilder, CommandRegistryAccess commandRegistryAccess) {
     return argumentBuilder.then(argument("region", RegionArgumentType.region(commandRegistryAccess))
+        .executes(context -> {
+          final Region region = RegionArgumentType.getRegion(context, "region");
+          CommandBridge.sendFeedback(context, () -> TextUtil.literal(region), false);
+          CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(region.createNbt()), false);
+          return 1;
+        })
         .then(literal("string")
             .executes(context -> {
               final Region region = RegionArgumentType.getRegion(context, "region");
               CommandBridge.sendFeedback(context, () -> TextUtil.literal(region), false);
+              return 1;
+            }))
+        .then(literal("nbt")
+            .executes(context -> {
+              final Region region = RegionArgumentType.getRegion(context, "region");
+              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(region.createNbt()), false);
               return 1;
             }))
         .then(literal("reparse")
@@ -323,6 +335,21 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final boolean b = reparse.equals(region);
               CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
               return BooleanUtils.toInteger(b);
+            }))
+        .then(literal("redeserialize")
+            .executes(context -> {
+              final Region region = RegionArgumentType.getRegion(context, "region");
+              final NbtCompound nbt = region.createNbt();
+              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
+              try {
+                final Region reDeserialize = Region.fromNbt(nbt, context.getSource().getWorld());
+                final boolean b = region.equals(reDeserialize);
+                CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
+                return BooleanUtils.toInteger(b);
+              } catch (Throwable e) {
+                EnhancedCommands.LOGGER.error("Parsing region from NBT:", e);
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
+              }
             }))
         .then(literal("illustrate")
             .executes(context -> {

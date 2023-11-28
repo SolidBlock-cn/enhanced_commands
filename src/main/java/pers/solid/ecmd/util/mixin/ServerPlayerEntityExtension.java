@@ -38,7 +38,7 @@ public interface ServerPlayerEntityExtension {
 
   default void ec$switchRegionSelection(RegionSelection regionSelection) {
     ec$setActiveRegion(regionSelection);
-    ec$setRegionSelectionType(regionSelection.getBuilderType());
+    ec$setRegionSelectionType(regionSelection.getSelectionType());
   }
 
   default RegionSelection ec$getOrResetRegionSelection() {

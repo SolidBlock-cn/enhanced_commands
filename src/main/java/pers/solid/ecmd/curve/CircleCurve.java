@@ -9,12 +9,12 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.RotationArgumentType;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.*;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.function.FailableBiFunction;
 import org.jetbrains.annotations.NotNull;
@@ -81,17 +81,22 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
   }
 
   @Override
-  public @NotNull Curve moved(@NotNull Vec3d relativePos) {
+  public @NotNull CircleCurve transformed(Function<Vec3d, Vec3d> transformation) {
+    return new CircleCurve(radius, transformation.apply(center), axis, range);
+  }
+
+  @Override
+  public @NotNull CircleCurve moved(@NotNull Vec3d relativePos) {
     return new CircleCurve(radius, center.add(relativePos), axis, range);
   }
 
   @Override
-  public @NotNull Curve rotated(@NotNull Vec3d pivot, @NotNull BlockRotation blockRotation) {
+  public @NotNull CircleCurve rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
     return new CircleCurve(GeoUtil.rotate(radius, blockRotation, Vec3d.ZERO), GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(axis, blockRotation, Vec3d.ZERO), range);
   }
 
   @Override
-  public @NotNull Curve mirrored(@NotNull Vec3d pivot, Direction.@NotNull Axis axis) {
+  public @NotNull CircleCurve mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
     return new CircleCurve(GeoUtil.mirror(radius, axis, Vec3d.ZERO), GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.axis, axis, Vec3d.ZERO), range);
   }
 
@@ -123,7 +128,29 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
   }
 
   @Override
-  public @NotNull CurveType<CircleCurve> getCurveType() {
+  public @Nullable Box minContainingBox() {
+    double minX, minY, minZ, maxX, maxY, maxZ;
+    minX = minY = minZ = maxX = maxY = maxZ = 0;
+    final Iterator<Vec3d> vec3dIterator = iteratePoints(1);
+    if (!vec3dIterator.hasNext()) {
+      // 含有零个点时，返回空。
+      return null;
+    }
+    while (vec3dIterator.hasNext()) {
+      final Vec3d next = vec3dIterator.next();
+      minX = Math.min(minX, next.x);
+      minY = Math.min(minY, next.y);
+      minZ = Math.min(minZ, next.z);
+      maxX = Math.max(maxX, next.x);
+      maxY = Math.max(maxY, next.y);
+      maxZ = Math.max(maxZ, next.z);
+    }
+
+    return new Box(minX, minY, minZ, maxX, maxY, maxZ);
+  }
+
+  @Override
+  public @NotNull CurveType<CircleCurve> getType() {
     return Type.INSTANCE;
   }
 
@@ -143,8 +170,30 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
     return StringUtil.wrapPosition(vec3d);
   }
 
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.put("radius", NbtUtil.fromVec3d(radius));
+    nbtCompound.put("center", NbtUtil.fromVec3d(center));
+    nbtCompound.put("axis", NbtUtil.fromVec3d(axis));
+    nbtCompound.put("range", Util.make(new NbtCompound(), c -> {
+      c.putDouble("min", range.getMinimum());
+      c.putDouble("max", range.getMaximum());
+    }));
+  }
+
   public enum Type implements CurveType<CircleCurve> {
     INSTANCE;
+
+    @Override
+    public @NotNull CircleCurve fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      final NbtCompound range = nbtCompound.getCompound("range");
+      return new CircleCurve(
+          NbtUtil.toVec3d(nbtCompound.getCompound("radius")),
+          NbtUtil.toVec3d(nbtCompound.getCompound("center")),
+          NbtUtil.toVec3d(nbtCompound.getCompound("axis")),
+          Range.between(range.getDouble("min"), range.getDouble("max"))
+      );
+    }
   }
 
   /**

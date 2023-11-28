@@ -1,7 +1,5 @@
 package pers.solid.ecmd.region;
 
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -17,8 +15,8 @@ public interface RegionsBasedRegion<T extends RegionsBasedRegion<T, R>, R extend
 
   T newRegion(Collection<R> regions);
 
-  default T newRegionWithTransformation(com.google.common.base.Function<R, R> transformation) {
-    return newRegion(ImmutableList.copyOf(Collections2.transform(regions(), transformation)));
+  default T newRegionWithTransformation(Function<R, R> transformation) {
+    return newRegion(regions().stream().map(transformation).toList());
   }
 
   @Override
@@ -46,7 +44,7 @@ public interface RegionsBasedRegion<T extends RegionsBasedRegion<T, R>, R extend
   }
 
   @Override
-  default T transformed(Function<Vec3d, Vec3d> transformation) {
+  default @NotNull T transformed(Function<Vec3d, Vec3d> transformation) {
     return newRegionWithTransformation(input -> (R) input.transformed(transformation));
   }
 

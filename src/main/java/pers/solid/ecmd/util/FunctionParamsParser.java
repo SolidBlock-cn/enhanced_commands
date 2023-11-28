@@ -114,4 +114,10 @@ public interface FunctionParamsParser<T> extends Parser<T> {
   T getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException;
 
   void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
+
+  default void setFunctionName(String functionName) {
+  }
+
+  default void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
+  }
 }

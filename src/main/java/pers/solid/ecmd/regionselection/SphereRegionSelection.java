@@ -2,13 +2,17 @@ package pers.solid.ecmd.regionselection;
 
 import net.minecraft.command.CommandException;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.region.SphereRegion;
+import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -23,7 +27,11 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   public double radius;
 
   public void updateRadius() {
-    radius = center.distanceTo(radiusTarget);
+    if (center != null && radiusTarget != null) {
+      radius = center.distanceTo(radiusTarget);
+    } else {
+      radius = 0;
+    }
   }
 
   @Override
@@ -76,7 +84,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public SphereRegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull SphereRegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
     center = transformation.apply(center);
     updateRadius();
     resetCalculation();
@@ -109,12 +117,25 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull RegionSelectionType getBuilderType() {
+  public @NotNull RegionSelectionType getSelectionType() {
     return RegionSelectionTypes.SPHERE;
+  }
+
+  @Override
+  public void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+    center = nbtCompound.contains("center", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3d(nbtCompound.getCompound("center")) : null;
+    radiusTarget = nbtCompound.contains("radius_target", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3d(nbtCompound.getCompound("radius_target")) : null;
+    updateRadius();
   }
 
   @Override
   public SphereRegionSelection clone() {
     return (SphereRegionSelection) super.clone();
+  }
+
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.put("center", NbtUtil.fromVec3d(center));
+    nbtCompound.put("radius_target", NbtUtil.fromVec3d(radiusTarget));
   }
 }

@@ -3,17 +3,21 @@ package pers.solid.ecmd.region;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.NbtUtil;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -70,7 +74,7 @@ public record CuboidRegion(Box box) implements Region {
   }
 
   @Override
-  public CuboidRegion transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull CuboidRegion transformed(Function<Vec3d, Vec3d> transformation) {
     return new CuboidRegion(transformation.apply(new Vec3d(box.minX, box.minY, box.minZ)), transformation.apply(new Vec3d(box.maxX, box.maxY, box.maxZ)));
   }
 
@@ -149,7 +153,14 @@ public record CuboidRegion(Box box) implements Region {
     return box;
   }
 
-  public enum Type implements RegionType<CuboidRegion> {
+  @Override
+  public void writeNbt(@NotNull NbtCompound nbtCompound) {
+    nbtCompound.put("from", NbtUtil.fromVec3d(new Vec3d(box.minX, box.minY, box.minZ)));
+    nbtCompound.put("to", NbtUtil.fromVec3d(new Vec3d(box.maxX, box.maxY, box.maxZ)));
+    nbtCompound.putBoolean("block", true);
+  }
+
+  public enum Type implements RegionType<Region> {
     CUBOID_TYPE;
 
     @Override
@@ -165,6 +176,16 @@ public record CuboidRegion(Box box) implements Region {
     @Override
     public FunctionParamsParser<RegionArgument> functionParamsParser() {
       return new Parser();
+    }
+
+    @Override
+    public @NotNull Region fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      final boolean block = nbtCompound.getBoolean("block");
+      if (block) {
+        return new BlockCuboidRegion(NbtHelper.toBlockPos(nbtCompound.getCompound("from")), NbtHelper.toBlockPos(nbtCompound.getCompound("to")));
+      } else {
+        return new CuboidRegion(NbtUtil.toVec3d(nbtCompound.getCompound("from")), NbtUtil.toVec3d(nbtCompound.getCompound("to")));
+      }
     }
   }
 
