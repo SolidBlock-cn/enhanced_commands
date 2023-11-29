@@ -1,5 +1,6 @@
 package pers.solid.ecmd.util.mixin;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.argument.BlockPredicateArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
@@ -12,7 +13,9 @@ public class ForwardingBlockPredicateArgument implements BlockPredicateArgumentT
   private final BlockPredicateArgument modBlockPredicate;
   private BlockPredicate sourcedBlockPredicate = null;
 
-  public ForwardingBlockPredicateArgument(BlockPredicateArgument modBlockPredicate) {this.modBlockPredicate = modBlockPredicate;}
+  public ForwardingBlockPredicateArgument(BlockPredicateArgument modBlockPredicate) {
+    this.modBlockPredicate = modBlockPredicate;
+  }
 
   @Override
   public boolean hasNbt() {
@@ -27,7 +30,7 @@ public class ForwardingBlockPredicateArgument implements BlockPredicateArgumentT
     return false;
   }
 
-  public void setSource(ServerCommandSource source) {
+  public void setSource(ServerCommandSource source) throws CommandSyntaxException {
     this.sourcedBlockPredicate = modBlockPredicate.apply(source);
   }
 }

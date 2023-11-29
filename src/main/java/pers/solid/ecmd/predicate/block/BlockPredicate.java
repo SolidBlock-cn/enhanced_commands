@@ -67,7 +67,7 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
   }
 
   @Override
-  default BlockPredicate apply(ServerCommandSource source) {
+  default BlockPredicate apply(ServerCommandSource source) throws CommandSyntaxException {
     return this;
   }
 }

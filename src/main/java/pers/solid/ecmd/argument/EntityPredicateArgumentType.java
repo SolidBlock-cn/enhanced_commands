@@ -27,7 +27,7 @@ public record EntityPredicateArgumentType(CommandRegistryAccess commandRegistryA
     return new EntityPredicateArgumentType(commandRegistryAccess);
   }
 
-  public static EntityPredicate getEntityPredicate(CommandContext<ServerCommandSource> context, String name) {
+  public static EntityPredicate getEntityPredicate(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     return context.getArgument(name, EntityPredicateArgument.class).apply(context.getSource());
   }
 

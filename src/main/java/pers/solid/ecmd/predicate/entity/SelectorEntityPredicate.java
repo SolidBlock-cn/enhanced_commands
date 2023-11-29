@@ -27,13 +27,13 @@ public class SelectorEntityPredicate implements EntityPredicate {
   public final Predicate<Entity> backingPredicate;
   protected final ServerCommandSource source;
 
-  public SelectorEntityPredicate(EntitySelector entitySelector, ServerCommandSource source) {
+  public SelectorEntityPredicate(EntitySelector entitySelector, ServerCommandSource source) throws CommandSyntaxException {
     this.entitySelector = entitySelector;
     this.backingPredicate = asPredicate(entitySelector, source);
     this.source = source;
   }
 
-  public static com.google.common.base.Predicate<Entity> asPredicate(EntitySelector entitySelector, ServerCommandSource source) {
+  public static com.google.common.base.Predicate<Entity> asPredicate(EntitySelector entitySelector, ServerCommandSource source) throws CommandSyntaxException {
     EntitySelectorExtras.getOf(entitySelector).updateSource(source);
     if (entitySelector.getLimit() < Integer.MAX_VALUE) {
       try {
@@ -78,7 +78,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
   }
 
   @Override
-  public TestResult testAndDescribe(Entity entity) {
+  public TestResult testAndDescribe(Entity entity) throws CommandSyntaxException {
     List<TestResult> descriptions = new ArrayList<>();
     final var accessor = (EntitySelectorAccessor) entitySelector;
 

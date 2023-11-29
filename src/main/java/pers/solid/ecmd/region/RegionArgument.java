@@ -26,5 +26,5 @@ public interface RegionArgument {
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
   }
 
-  Region toAbsoluteRegion(ServerCommandSource source);
+  Region toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException;
 }

@@ -80,7 +80,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
 
     @Override
     public String functionName() {
-      return "outline";
+      return "outwards";
     }
 
     @Override

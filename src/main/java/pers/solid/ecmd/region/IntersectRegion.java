@@ -1,7 +1,6 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -17,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.NbtUtil;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -130,7 +130,7 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
 
     @Override
     public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new IntersectRegion(regions.stream().map(regionArgument -> regionArgument.toAbsoluteRegion(source)).collect(ImmutableList.toImmutableList()));
+      return source -> new IntersectRegion(IterateUtils.transformFailableImmutableList(regions, regionArgument -> regionArgument.toAbsoluteRegion(source)));
     }
 
     @Override

@@ -190,9 +190,9 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
         } catch (Exception e) {
           if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
             if (commandSyntaxException.getInput() != null) {
-              throw new IllegalArgumentException(commandSyntaxException);
+              throw commandSyntaxException;
             } else {
-              throw new IllegalArgumentException(CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), parser.reader.getString(), cursorBefore), cursorAfter));
+              throw CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), parser.reader.getString(), cursorBefore), cursorAfter);
             }
           } else {
             throw e;

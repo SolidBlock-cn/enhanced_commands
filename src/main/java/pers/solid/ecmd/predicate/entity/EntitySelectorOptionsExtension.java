@@ -2,7 +2,6 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -31,6 +30,7 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
@@ -219,7 +219,8 @@ public class EntitySelectorOptionsExtension {
       final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, false);
 
       EntitySelectorReaderExtras.getOf(reader).addFunction(source -> {
-        final Region region = regionArgument.toAbsoluteRegion(source);
+        final Region region;
+        region = regionArgument.toAbsoluteRegion(source);
         return entity -> region.contains(entity.getPos());
       });
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.region"));
@@ -288,7 +289,7 @@ public class EntitySelectorOptionsExtension {
 
       final ImmutableList<EntitySelector> build = entitySelectors.build();
       EntitySelectorReaderExtras.getOf(reader).addFunction(source -> {
-        final var predicate = Predicates.or(ImmutableList.copyOf(Lists.transform(build, input -> SelectorEntityPredicate.asPredicate(input, source))));
+        final var predicate = Predicates.or(IterateUtils.transformFailableImmutableList(build, input -> SelectorEntityPredicate.asPredicate(input, source)));
         return inverted ? Predicates.not(predicate) : predicate;
       });
       EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AlternativesEntityPredicateEntry(build, source, inverted));
@@ -312,6 +313,24 @@ public class EntitySelectorOptionsExtension {
         EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new HealthEntityPredicateEntry(floatRange, inverted));
       }
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.health"));
+    putOption("air", reader -> {
+      final StringReader stringReader = reader.getReader();
+      final boolean inverted = reader.readNegationCharacter();
+      final int cursorBefore = stringReader.getCursor();
+      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> ParsingUtil.suggestString("max", suggestionsBuilder).buildFuture());
+      final String unquotedString = stringReader.readUnquotedString();
+      if ("max".equals(unquotedString)) {
+        reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
+        reader.setPredicate(entity -> (entity.getAir() == entity.getMaxAir()) != inverted);
+        EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AirMaxEntityPredicateEntry(inverted));
+      } else {
+        stringReader.setCursor(cursorBefore);
+        final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
+        reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
+        reader.setPredicate(entity -> intRange.test(entity.getAir()) != inverted);
+        EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AirEntityPredicateEntry(intRange, inverted));
+      }
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.air"));
 
     putOption("fire", reader -> {
       final StringReader stringReader = reader.getReader();

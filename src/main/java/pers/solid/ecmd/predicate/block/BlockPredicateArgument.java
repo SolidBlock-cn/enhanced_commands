@@ -1,13 +1,12 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
@@ -17,12 +16,12 @@ import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
-public interface BlockPredicateArgument extends Function<ServerCommandSource, BlockPredicate> {
+public interface BlockPredicateArgument extends FailableFunction<ServerCommandSource, BlockPredicate, CommandSyntaxException> {
   Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.intersect.symbol_tooltip");
   Text UNION_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.union.symbol_tooltip");
 
@@ -35,11 +34,11 @@ public interface BlockPredicateArgument extends Function<ServerCommandSource, Bl
   }
 
   static @NotNull BlockPredicateArgument parseUnion(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseIntersect(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new UnionBlockPredicate(ImmutableList.copyOf(Lists.transform(predicates, input -> input.apply(source)))), "|", UNION_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseIntersect(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new UnionBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "|", UNION_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockPredicateArgument parseIntersect(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new IntersectBlockPredicate(ImmutableList.copyOf(Lists.transform(predicates, input -> input.apply(source)))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new IntersectBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockPredicateArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
@@ -93,4 +92,7 @@ public interface BlockPredicateArgument extends Function<ServerCommandSource, Bl
     reader.setCursor(cursorOnStart);
     throw BlockPredicate.CANNOT_PARSE.createWithContext(reader);
   }
+
+  @Override
+  BlockPredicate apply(ServerCommandSource source) throws CommandSyntaxException;
 }

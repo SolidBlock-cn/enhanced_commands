@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Streams;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.BlockRotation;
@@ -164,7 +165,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
 
   @Deprecated
   @Override
-  default Region toAbsoluteRegion(ServerCommandSource source) {
+  default Region toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException {
     return this;
   }
 

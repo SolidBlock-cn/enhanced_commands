@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
@@ -16,9 +17,8 @@ import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
-public interface BlockFunctionArgument extends Function<ServerCommandSource, BlockFunction> {
+public interface BlockFunctionArgument extends FailableFunction<ServerCommandSource, BlockFunction, CommandSyntaxException> {
   Text OVERLAY_TOOLTIP = Text.translatable("enhanced_commands.argument.block_function.overlay.symbol_tooltip");
   Text PICK_TOOLTIP = Text.translatable("enhanced_commands.argument.block_function.pick.symbol_tooltip");
 
@@ -102,4 +102,7 @@ public interface BlockFunctionArgument extends Function<ServerCommandSource, Blo
     reader.setCursor(cursorOnStart);
     throw BlockFunction.CANNOT_PARSE.createWithContext(reader);
   }
+
+  @Override
+  BlockFunction apply(ServerCommandSource source) throws CommandSyntaxException;
 }

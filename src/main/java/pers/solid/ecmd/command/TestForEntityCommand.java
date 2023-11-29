@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
@@ -33,7 +34,7 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
                 .executes(context -> executeTestPredicate(EntityArgumentType.getOptionalEntities(context, "entities"), EntityPredicateArgumentType.getEntityPredicate(context, "predicate"), context)))));
   }
 
-  private int executeTestPredicate(Collection<? extends Entity> entities, EntityPredicate predicate, CommandContext<ServerCommandSource> context) {
+  private int executeTestPredicate(Collection<? extends Entity> entities, EntityPredicate predicate, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final int size = entities.size();
     if (size == 0) {
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.none").formatted(Formatting.RED), false);

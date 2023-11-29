@@ -47,7 +47,7 @@ public abstract class BlockPredicateArgumentTypeMixin implements ArgumentTypeExt
   }
 
   @Inject(method = "getBlockPredicate", at = @At("RETURN"))
-  private static void injectedGetBlockPredicate(CommandContext<ServerCommandSource> context, String name, CallbackInfoReturnable<Predicate<CachedBlockPosition>> cir) {
+  private static void injectedGetBlockPredicate(CommandContext<ServerCommandSource> context, String name, CallbackInfoReturnable<Predicate<CachedBlockPosition>> cir) throws CommandSyntaxException {
     final Predicate<CachedBlockPosition> returnValue = cir.getReturnValue();
     if (returnValue instanceof ForwardingBlockPredicateArgument forwardedBlockStateArgument) {
       forwardedBlockStateArgument.setSource(context.getSource());

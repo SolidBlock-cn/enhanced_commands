@@ -1,5 +1,9 @@
 package pers.solid.ecmd.util.iterator;
 
+import com.google.common.collect.ImmutableList;
+import org.apache.commons.lang3.function.FailableFunction;
+
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
@@ -39,5 +43,21 @@ public final class IterateUtils {
 
   public static <E> Iterator<E> batchAndSkip(Iterator<E> forward, int batchSize, int skipTimes) {
     return new SkippingIterator<>(new BatchedIterator<>(forward, batchSize), skipTimes);
+  }
+
+  public static <T, R, E extends Throwable> ArrayList<R> transformFailableArrayList(Iterable<T> iterable, FailableFunction<T, R, E> failableFunction) throws E {
+    final ArrayList<R> list = new ArrayList<>();
+    for (T t : iterable) {
+      list.add(failableFunction.apply(t));
+    }
+    return list;
+  }
+
+  public static <T, R, E extends Throwable> ImmutableList<R> transformFailableImmutableList(Iterable<T> iterable, FailableFunction<T, R, E> failableFunction) throws E {
+    final ImmutableList.Builder<R> builder = new ImmutableList.Builder<>();
+    for (T t : iterable) {
+      builder.add(failableFunction.apply(t));
+    }
+    return builder.build();
   }
 }

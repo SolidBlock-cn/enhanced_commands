@@ -1,9 +1,11 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 
@@ -50,7 +52,7 @@ public class EntitySelectorReaderExtras {
    *
    * @see pers.solid.ecmd.mixin.EntitySelectorReaderMixin
    */
-  public @Nullable List<Function<ServerCommandSource, Predicate<Entity>>> predicateFunctions = null;
+  public @Nullable List<FailableFunction<ServerCommandSource, Predicate<Entity>, CommandSyntaxException>> predicateFunctions = null;
   /**
    * 此参数会在 {@link EntitySelectorReader#build()} 中，用于帮助对实体谓词进行描述以及序列化。
    */
@@ -64,7 +66,7 @@ public class EntitySelectorReaderExtras {
     return ((EntitySelectorReaderExtension) entitySelectorReader).ec$getExt();
   }
 
-  public void addFunction(Function<ServerCommandSource, Predicate<Entity>> predicateFunction) {
+  public void addFunction(FailableFunction<ServerCommandSource, Predicate<Entity>, CommandSyntaxException> predicateFunction) {
     var predicateFunctions = this.predicateFunctions == null ? (this.predicateFunctions = new ArrayList<>()) : this.predicateFunctions;
     predicateFunctions.add(predicateFunction);
   }

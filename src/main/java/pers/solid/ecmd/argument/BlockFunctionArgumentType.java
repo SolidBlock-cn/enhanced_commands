@@ -18,7 +18,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAcc
     return new BlockFunctionArgumentType(commandRegistryAccess);
   }
 
-  public static BlockFunction getBlockFunction(CommandContext<ServerCommandSource> context, String name) {
+  public static BlockFunction getBlockFunction(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     return context.getArgument(name, BlockFunctionArgument.class).apply(context.getSource());
   }
 

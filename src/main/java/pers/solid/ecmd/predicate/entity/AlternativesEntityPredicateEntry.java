@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -11,7 +12,7 @@ import java.util.Collection;
 
 public record AlternativesEntityPredicateEntry(Collection<EntitySelector> entitySelectors, ServerCommandSource serverCommandSource, boolean inverted) implements EntityPredicateEntry {
   @Override
-  public TestResult testAndDescribe(Entity entity, Text displayName) {
+  public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     boolean result = false;
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
     for (EntitySelector entitySelector : entitySelectors) {

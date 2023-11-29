@@ -21,7 +21,7 @@ public record BlockPredicateArgumentType(CommandRegistryAccess commandRegistryAc
     return new BlockPredicateArgumentType(commandRegistryAccess);
   }
 
-  public static BlockPredicate getBlockPredicate(CommandContext<ServerCommandSource> context, String name) {
+  public static BlockPredicate getBlockPredicate(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     return context.getArgument(name, BlockPredicateArgument.class).apply(context.getSource());
   }
 

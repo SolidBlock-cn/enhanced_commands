@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.entity;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import pers.solid.ecmd.command.TestResult;
@@ -23,7 +24,7 @@ public interface EntityPredicate extends Predicate<Entity> {
     return successes ? successResult(entity) : failResult(entity);
   }
 
-  default TestResult testAndDescribe(Entity entity) {
+  default TestResult testAndDescribe(Entity entity) throws CommandSyntaxException {
     final boolean test = test(entity);
     return successOrFail(test, entity);
   }

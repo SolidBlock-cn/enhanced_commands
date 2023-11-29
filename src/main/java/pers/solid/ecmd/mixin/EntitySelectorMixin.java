@@ -2,6 +2,7 @@ package pers.solid.ecmd.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -41,7 +42,7 @@ public class EntitySelectorMixin implements EntitySelectorExtension {
   }
 
   @Inject(method = {"getEntity", "getUnfilteredEntities", "getPlayer", "getPlayers"}, at = @At("HEAD"))
-  private void setSource(ServerCommandSource source, CallbackInfoReturnable<Entity> cir) {
+  private void setSource(ServerCommandSource source, CallbackInfoReturnable<Entity> cir) throws CommandSyntaxException {
     ec$ext.updateSource(source);
   }
 }

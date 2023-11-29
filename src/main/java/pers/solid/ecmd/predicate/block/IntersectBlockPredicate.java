@@ -2,7 +2,6 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -17,6 +16,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,7 +70,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
 
     @Override
     public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new IntersectBlockPredicate(ImmutableList.copyOf(Lists.transform(blockPredicates, x -> x.apply(source))));
+      return source -> new IntersectBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, x -> x.apply(source)));
     }
 
     @Override

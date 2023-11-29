@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.TextUtil;
@@ -84,9 +85,15 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
         argument("region", region(registryAccess))
             .then(argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
                 .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
-                    .executes(context -> execute(context, cachedBlockPosition -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition)))
+                    .executes(context -> {
+                      final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "predicate");
+                      return execute(context, blockPredicate);
+                    })
                     .then(argument("keyword_args", KEYWORD_ARGS)
-                        .executes(context -> execute(context, cachedBlockPosition1 -> BlockPredicateArgumentType.getBlockPredicate(context, "predicate").test(cachedBlockPosition1), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))))));
+                        .executes(context -> {
+                          final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "predicate");
+                          return execute(context, blockPredicate, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"));
+                        })))));
   }
 
   /**
