@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.command.*;
@@ -23,6 +24,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -33,6 +35,7 @@ import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
 import java.util.*;
@@ -52,11 +55,10 @@ public class EntitySelectorOptionsExtension {
 
 
   public static final DynamicCommandExceptionType DUPLICATE_OPTION = new DynamicCommandExceptionType(optionName -> Text.translatable("enhanced_commands.argument.entity.options.duplicate_option", optionName));
-  public static final SimpleCommandExceptionType MIXED_NAME = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.mixed_name"));
+  public static final DynamicCommandExceptionType DUPLICATE_OPTION_WITHOUT_INVERSION = new DynamicCommandExceptionType(optionName -> Text.translatable("enhanced_commands.argument.entity.options.duplicate_option_without_inversion", optionName));
+  public static final DynamicCommandExceptionType MIXED_OPTION_INVERSION = new DynamicCommandExceptionType(optionName -> Text.translatable("enhanced_commands.argument.entity.options.mixed_option_inversion", optionName));
   public static final SimpleCommandExceptionType INVALID_LIMIT_FOR_AT_S = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.invalid_limit_for_@s"));
   public static final SimpleCommandExceptionType INVALID_SORT_FOR_AT_S = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.invalid_sort_for_@s"));
-  public static final SimpleCommandExceptionType MIXED_GAME_MODE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.mixed_game_mode"));
-  public static final SimpleCommandExceptionType MIXED_TYPE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.mixed_type"));
   public static final DynamicCommandExceptionType INVALID_TYPE_FOR_SELECTOR = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.entity.options.invalid_type_for_selector", o));
   public static final DynamicCommandExceptionType DISTANCE_ALREADY_EXPLICIT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.entity.options.distance_already_explicit", o));
   public static final SimpleCommandExceptionType DISTANCE_ALREADY_IMPLICIT = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.distance_already_implicit"));
@@ -65,17 +67,7 @@ public class EntitySelectorOptionsExtension {
 
   private static void registerInapplicableReasons() {
     final var map = INAPPLICABLE_REASONS;
-    map.put("name", (reader, option, restoreCursor) -> {
-      final StringReader stringReader = reader.getReader();
-      stringReader.skipWhitespace();
-      if (stringReader.canRead() && stringReader.read() == EntitySelectorReader.ARGUMENT_DEFINER == reader.readNegationCharacter()) {
-        stringReader.setCursor(restoreCursor);
-        return MIXED_NAME.createWithContext(stringReader);
-      } else {
-        stringReader.setCursor(restoreCursor);
-        return DUPLICATE_OPTION.createWithContext(stringReader, option);
-      }
-    });
+    markRequiringUniqueNoMixture("name");
     map.put("distance", (reader, option, restoreCursor) -> {
       reader.getReader().setCursor(restoreCursor);
       if (EntitySelectorReaderExtras.getOf(reader).implicitDistance) {
@@ -84,15 +76,15 @@ public class EntitySelectorOptionsExtension {
         return DUPLICATE_OPTION.createWithContext(reader.getReader(), option);
       }
     });
-    ensureSingle("level");
-    ensureSingle("x");
-    ensureSingle("y");
-    ensureSingle("z");
-    ensureSingle("dx");
-    ensureSingle("dy");
-    ensureSingle("dz");
-    ensureSingle("x_rotation");
-    ensureSingle("y_rotation");
+    markRequiringUnique("level");
+    markRequiringUnique("x");
+    markRequiringUnique("y");
+    markRequiringUnique("z");
+    markRequiringUnique("dx");
+    markRequiringUnique("dy");
+    markRequiringUnique("dz");
+    markRequiringUnique("x_rotation");
+    markRequiringUnique("y_rotation");
     map.put("limit", (reader, option, restoreCursor) -> {
       reader.getReader().setCursor(restoreCursor);
       return reader.isSenderOnly() ? INVALID_LIMIT_FOR_AT_S.createWithContext(reader.getReader()) : DUPLICATE_OPTION.createWithContext(reader.getReader(), "limit");
@@ -105,18 +97,8 @@ public class EntitySelectorOptionsExtension {
       }
       return reader.isSenderOnly() ? INVALID_SORT_FOR_AT_S.createWithContext(stringReader) : DUPLICATE_OPTION.createWithContext(stringReader, "sort");
     });
-    map.put("gamemode", (reader, option, restoreCursor) -> {
-      final StringReader stringReader = reader.getReader();
-      stringReader.skipWhitespace();
-      if (stringReader.canRead() && stringReader.read() == EntitySelectorReader.ARGUMENT_DEFINER == reader.readNegationCharacter()) {
-        stringReader.setCursor(restoreCursor);
-        return MIXED_GAME_MODE.createWithContext(stringReader);
-      } else {
-        stringReader.setCursor(restoreCursor);
-        return DUPLICATE_OPTION.createWithContext(stringReader, option);
-      }
-    });
-    ensureSingle("team");
+    markRequiringUniqueNoMixture("gamemode");
+    markRequiringUnique("team");
     map.put("type", (reader, option, restoreCursor) -> {
       if (reader.selectsEntityType()) {
         final EntitySelectorReaderExtras entitySelectorReaderExtras = EntitySelectorReaderExtras.getOf(reader);
@@ -133,7 +115,7 @@ public class EntitySelectorOptionsExtension {
         stringReader.skipWhitespace();
         if (stringReader.canRead() && stringReader.read() == EntitySelectorReader.ARGUMENT_DEFINER && reader.readNegationCharacter()) {
           stringReader.setCursor(restoreCursor);
-          return MIXED_TYPE.createWithContext(stringReader);
+          return MIXED_OPTION_INVERSION.createWithContext(stringReader, option);
         } else {
           stringReader.setCursor(restoreCursor);
           return DUPLICATE_OPTION.createWithContext(stringReader, option);
@@ -141,8 +123,8 @@ public class EntitySelectorOptionsExtension {
       }
       return null;
     });
-    ensureSingle("scores");
-    ensureSingle("advancements");
+    markRequiringUnique("scores");
+    markRequiringUnique("advancements");
     final InapplicableReasonProvider providerForR = (reader, option, restoreCursor) -> {
       if (EntitySelectorReaderExtras.getOf(reader).implicitDistance) {
         reader.getReader().setCursor(restoreCursor);
@@ -156,10 +138,32 @@ public class EntitySelectorOptionsExtension {
     map.put("rm", providerForR);
   }
 
-  private static void ensureSingle(String optionName) {
+  /**
+   * 将选择名称表示为只允许出现一次。此方法不会实际进行限制，而是会在当选择因 inapplicable 而无法使用时，直接视为是因为重复使用了参数。
+   */
+  private static void markRequiringUnique(String optionName) {
     INAPPLICABLE_REASONS.put(optionName, (reader, option, restoreCursor) -> {
       reader.getReader().setCursor(restoreCursor);
       return DUPLICATE_OPTION.createWithContext(reader.getReader(), option);
+    });
+  }
+
+  /**
+   * 将选择器名称表示为此允许出现一次，以及不能用时使用反向和正向的用法。反向用法的判断标准为，在等号后面（跳过空格）是否存在感叹号。
+   */
+  private static void markRequiringUniqueNoMixture(String optionName) {
+    INAPPLICABLE_REASONS.put(optionName, (reader, option, restoreCursor) -> {
+      final StringReader stringReader = reader.getReader();
+      stringReader.skipWhitespace();
+      if (stringReader.canRead() && stringReader.read() == EntitySelectorReader.ARGUMENT_DEFINER) {
+        stringReader.skipWhitespace();
+        if (reader.readNegationCharacter()) {
+          stringReader.setCursor(restoreCursor);
+          return MIXED_OPTION_INVERSION.createWithContext(stringReader, option);
+        }
+      }
+      stringReader.setCursor(restoreCursor);
+      return DUPLICATE_OPTION_WITHOUT_INVERSION.createWithContext(stringReader, option);
     });
   }
 
@@ -299,6 +303,7 @@ public class EntitySelectorOptionsExtension {
     putOption("health", reader -> {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
+      checkNoInversionMix(reader, "health", inverted);
       final int cursorBefore = stringReader.getCursor();
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> ParsingUtil.suggestString("max", suggestionsBuilder).buildFuture());
       final String unquotedString = stringReader.readUnquotedString();
@@ -313,10 +318,13 @@ public class EntitySelectorOptionsExtension {
         reader.setPredicate(entity -> entity instanceof LivingEntity livingEntity && floatRange.isInRange(livingEntity.getHealth()) != inverted);
         EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new HealthEntityPredicateEntry(floatRange, inverted));
       }
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.health"));
+      markParamAsUsed(reader, "health", inverted);
+    }, reader -> isNeverPositivelyUsed(reader, "health"), Text.translatable("enhanced_commands.argument.entity.options.health"));
+    markRequiringUniqueNoMixture("health");
     putOption("air", reader -> {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
+      checkNoInversionMix(reader, "air", inverted);
       final int cursorBefore = stringReader.getCursor();
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> ParsingUtil.suggestString("max", suggestionsBuilder).buildFuture());
       final String unquotedString = stringReader.readUnquotedString();
@@ -331,43 +339,86 @@ public class EntitySelectorOptionsExtension {
         reader.setPredicate(entity -> intRange.test(entity.getAir()) != inverted);
         EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AirEntityPredicateEntry(intRange, inverted));
       }
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.air"));
+      markParamAsUsed(reader, "air", inverted);
+    }, reader -> isNeverPositivelyUsed(reader, "air"), Text.translatable("enhanced_commands.argument.entity.options.air"));
+    markRequiringUniqueNoMixture("air");
     putOption("food", reader -> {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
+      checkNoInversionMix(reader, "food", inverted);
       final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
       reader.setPredicate(entity -> entity instanceof final PlayerEntity player && intRange.test(player.getHungerManager().getFoodLevel()) != inverted);
       EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new FoodEntityPredicateEntry(intRange, inverted));
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.food"));
+      if (!inverted) markParamAsUsed(reader, "food", inverted);
+    }, reader -> isNeverPositivelyUsed(reader, "food"), Text.translatable("enhanced_commands.argument.entity.options.food"));
+    markRequiringUniqueNoMixture("food");
     putOption("saturation", reader -> {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
+      checkNoInversionMix(reader, "saturation", inverted);
       final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
       reader.setIncludesNonPlayers(false);
       reader.setPredicate(entity -> entity instanceof final PlayerEntity player && floatRange.isInRange(player.getHungerManager().getFoodLevel()) != inverted);
       EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new SaturationEntityPredicateEntry(floatRange, inverted));
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.saturation"));
+      markParamAsUsed(reader, "saturation", inverted);
+    }, reader -> isNeverPositivelyUsed(reader, "saturation"), Text.translatable("enhanced_commands.argument.entity.options.saturation"));
+    markRequiringUniqueNoMixture("saturation");
     putOption("exhaustion", reader -> {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
+      checkNoInversionMix(reader, "exhaustion", inverted);
       final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
       reader.setIncludesNonPlayers(false);
       reader.setPredicate(entity -> entity instanceof final PlayerEntity player && floatRange.isInRange(player.getHungerManager().getExhaustion()) != inverted);
       EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new ExhaustionEntityPredicateEntry(floatRange, inverted));
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.exhaustion"));
-
+      markParamAsUsed(reader, "exhaustion", inverted);
+    }, reader -> isNeverPositivelyUsed(reader, "exhaustion"), Text.translatable("enhanced_commands.argument.entity.options.exhaustion"));
+    markRequiringUniqueNoMixture("exhaustion");
     putOption("fire", reader -> {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
+      checkNoInversionMix(reader, "fire", inverted);
       final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
       reader.setPredicate(entity -> intRange.test(entity.getFireTicks()) != inverted);
       EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new FireEntityPredicateEntry(intRange, inverted));
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.fire"));
+      markParamAsUsed(reader, "fire", inverted);
+    }, reader -> isNeverPositivelyUsed(reader, "fire"), Text.translatable("enhanced_commands.argument.entity.options.fire"));
+    markRequiringUniqueNoMixture("fire");
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {
     EntitySelectorOptionsAccessor.callPutOption(id, handler, condition, description);
+  }
+
+  private static boolean markParamAsUsed(EntitySelectorReader reader, String option, boolean inverted) {
+    return ((EntitySelectorReaderExtension) reader).ec$getExt().usedParams.put(option, inverted);
+  }
+
+  /**
+   * 参数从未被以非反向的方式使用过。如果参数是以反向的方式使用的，则没有影响。
+   */
+  private static boolean isNeverPositivelyUsed(EntitySelectorReader reader, String option) {
+    return ((EntitySelectorReaderExtension) reader).ec$getExt().usedParams.getOrDefault(option, true);
+  }
+
+  /**
+   * 检查选择器中是否存在混合使用正向和反向的用法，例如，如果有 {@code key=!value1,key=value2}，那么解析到value2时就应该报错，因为这种情况下只能接受反向的用法。其他情况则不进行操作。
+   *
+   * @throws CommandSyntaxException 如果此前使用了反向的用法而当前不是反向的。
+   */
+  @Contract(pure = true)
+  private static void checkNoInversionMix(EntitySelectorReader reader, String option, boolean inverted) throws CommandSyntaxException {
+    final EntitySelectorReaderExtras extras = ((EntitySelectorReaderExtension) reader).ec$getExt();
+    final Object2BooleanMap<String> usedParams = extras.usedParams;
+    if (usedParams.getOrDefault(option, false)) {
+      // 此前使用了反向的用法，则此时也必须要求使用反向的用法。
+      if (!inverted) {
+        final StringReader stringReader = reader.getReader();
+        stringReader.setCursor(extras.cursorBeforeOptionName);
+        throw CommandSyntaxExceptionExtension.withCursorEnd(MIXED_OPTION_INVERSION.createWithContext(stringReader, option), extras.cursorAfterOptionName);
+      }
+    }
   }
 
   public static void init() {

@@ -136,9 +136,9 @@ public abstract class EntitySelectorOptionsMixin {
 
   @Inject(method = "method_9982", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static void tweakExcludingNameException(EntitySelectorReader reader, CallbackInfo ci) throws CommandSyntaxException {
-    final StringReader reader1 = reader.getReader();
-    reader1.setCursor(EntitySelectorReaderExtras.getOf(reader).cursorBeforeOptionName);
-    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_NAME.createWithContext(reader1), EntitySelectorReaderExtras.getOf(reader).cursorAfterOptionName);
+    final StringReader stringReader = reader.getReader();
+    stringReader.setCursor(EntitySelectorReaderExtras.getOf(reader).cursorBeforeOptionName);
+    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "name"), EntitySelectorReaderExtras.getOf(reader).cursorAfterOptionName);
   }
 
   @Inject(method = "method_9982", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
@@ -229,7 +229,7 @@ public abstract class EntitySelectorOptionsMixin {
   private static void tweakInapplicableGameModeException(EntitySelectorReader reader, CallbackInfo ci) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
     stringReader.setCursor(EntitySelectorReaderExtras.getOf(reader).cursorBeforeOptionName);
-    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_GAME_MODE.createWithContext(stringReader), EntitySelectorReaderExtras.getOf(reader).cursorAfterOptionName);
+    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "gamemode"), EntitySelectorReaderExtras.getOf(reader).cursorAfterOptionName);
   }
 
   @ModifyExpressionValue(method = "method_9948", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", ordinal = 0, remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorOptions;INVALID_MODE_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
@@ -252,7 +252,7 @@ public abstract class EntitySelectorOptionsMixin {
   private static void tweakInapplicableTypeException(EntitySelectorReader reader, CallbackInfo ci) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
     stringReader.setCursor(EntitySelectorReaderExtras.getOf(reader).cursorBeforeOptionName);
-    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_TYPE.createWithContext(stringReader), EntitySelectorReaderExtras.getOf(reader).cursorAfterOptionName);
+    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "type"), EntitySelectorReaderExtras.getOf(reader).cursorAfterOptionName);
   }
 
   @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT, slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;readTagCharacter()Z"), to = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")))

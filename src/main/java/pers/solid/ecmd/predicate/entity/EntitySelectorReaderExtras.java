@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
@@ -61,6 +63,10 @@ public class EntitySelectorReaderExtras {
    * 此 context 对象用于提供建议。在非提供建议的情景下，此字段有可能是 null。
    */
   public CommandContext<?> context = null;
+  /**
+   * 此集合包含本模组中已经使用了的参数名称，只有当此参数禁止重复使用时才会加入到这个里面，并表示为之外的参数检测重复。值为是否是表示为反向的（即 {@code option=!value}，因为一些参数允许多次使用反向的用法（如 {@code option=!value1,option=!value2}），但是不允许混合使用反向和未反向用法（如 {@code option=!value1,option=value2} 或 {@code option=value1,option=!value2}）或多次使用非反向的用法（如 {@code option=value1,option=value2}）。
+   */
+  public Object2BooleanMap<String> usedParams = new Object2BooleanOpenHashMap<>();
 
   public static EntitySelectorReaderExtras getOf(EntitySelectorReader entitySelectorReader) {
     return ((EntitySelectorReaderExtension) entitySelectorReader).ec$getExt();
