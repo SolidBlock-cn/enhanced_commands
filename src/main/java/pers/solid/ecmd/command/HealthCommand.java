@@ -109,7 +109,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.set.multiple", TextUtil.literal(finalSuccesses).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.set.multiple", TextUtil.literal(finalSuccesses).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), true);
       return successes;
     }
   }
@@ -121,7 +121,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING.create(entity.getDisplayName());
       }
       livingEntity.setHealth(livingEntity.getHealth() + value);
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.add.single", TextUtil.styled(livingEntity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(livingEntity.getHealth()).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.add.single", TextUtil.styled(livingEntity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT), TextUtil.literal(livingEntity.getHealth()).styled(TextUtil.STYLE_FOR_RESULT)), true);
       return 1;
     } else {
       int successes = 0;
@@ -135,7 +135,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.add.multiple", TextUtil.literal(finalSuccesses).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.add.multiple", TextUtil.literal(finalSuccesses).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), true);
       return successes;
     }
   }
@@ -173,7 +173,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING.create(entity.getDisplayName());
       }
       livingEntity.setHealth(livingEntity.getHealth() - value);
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.remove.single", TextUtil.styled(livingEntity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(livingEntity.getHealth()).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.remove.single", TextUtil.styled(livingEntity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT), TextUtil.literal(livingEntity.getHealth()).styled(TextUtil.STYLE_FOR_RESULT)), true);
       return 1;
     } else {
       int successes = 0;
@@ -187,7 +187,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.remove.multiple", TextUtil.literal(finalSuccesses).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.remove.multiple", TextUtil.literal(finalSuccesses).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), true);
       return successes;
     }
   }

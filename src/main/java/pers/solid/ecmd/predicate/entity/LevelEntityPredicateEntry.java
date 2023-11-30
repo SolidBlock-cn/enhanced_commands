@@ -6,21 +6,21 @@ import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.Text;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
-import pers.solid.ecmd.util.TextUtil;
 
-public record LevelEntityPredicateEntry(NumberRange.IntRange intRange) implements EntityPredicateEntry {
+public record LevelEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
+  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.level");
+
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof PlayerEntity player)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.level.not_player", displayName));
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_player", CRITERION_NAME, displayName));
     } else {
-      final boolean inRange = intRange.test(player.experienceLevel);
-      return TestResult.of(inRange, Text.translatable("enhanced_commands.argument.entity_predicate.level." + inRange, displayName, TextUtil.literal(player.experienceLevel).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(StringUtil.wrapRange(intRange)).styled(TextUtil.STYLE_FOR_EXPECTED)));
+      return EntityPredicateEntry.testInt(player, player.experienceLevel, intRange, CRITERION_NAME, displayName, inverted);
     }
   }
 
   @Override
   public String toOptionEntry() {
-    return "level=" + StringUtil.wrapRange(intRange);
+    return "level=" + (inverted ? "!" : "") + StringUtil.wrapRange(intRange);
   }
 }

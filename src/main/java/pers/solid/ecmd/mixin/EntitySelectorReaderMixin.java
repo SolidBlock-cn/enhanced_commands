@@ -85,7 +85,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
     }
 
     if (!levelRange.isDummy()) {
-      ec$ext.addDescription(source -> new LevelEntityPredicateEntry(levelRange));
+      ec$ext.addDescription(source -> new LevelEntityPredicateEntry(levelRange, false));
     }
   }
 

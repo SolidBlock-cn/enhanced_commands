@@ -37,6 +37,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     DrawCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     FillReplaceCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     FireCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    FoodCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     HealthCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     MirrorCommand.INSTANCE.register(dispatcher, registryAccess, environment);

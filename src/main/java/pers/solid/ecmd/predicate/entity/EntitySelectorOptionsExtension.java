@@ -13,6 +13,7 @@ import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.command.*;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.command.ServerCommandSource;
@@ -307,9 +308,9 @@ public class EntitySelectorOptionsExtension {
         EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new HealthMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
-        final NumberRange.FloatRange floatRange = NumberRange.FloatRange.parse(stringReader);
+        final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.setPredicate(entity -> entity instanceof LivingEntity livingEntity && floatRange.test(livingEntity.getHealth()) != inverted);
+        reader.setPredicate(entity -> entity instanceof LivingEntity livingEntity && floatRange.isInRange(livingEntity.getHealth()) != inverted);
         EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new HealthEntityPredicateEntry(floatRange, inverted));
       }
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.health"));
@@ -331,12 +332,35 @@ public class EntitySelectorOptionsExtension {
         EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AirEntityPredicateEntry(intRange, inverted));
       }
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.air"));
+    putOption("food", reader -> {
+      final StringReader stringReader = reader.getReader();
+      final boolean inverted = reader.readNegationCharacter();
+      final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
+      reader.setIncludesNonPlayers(false);
+      reader.setPredicate(entity -> entity instanceof final PlayerEntity player && intRange.test(player.getHungerManager().getFoodLevel()) != inverted);
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new FoodEntityPredicateEntry(intRange, inverted));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.food"));
+    putOption("saturation", reader -> {
+      final StringReader stringReader = reader.getReader();
+      final boolean inverted = reader.readNegationCharacter();
+      final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
+      reader.setIncludesNonPlayers(false);
+      reader.setPredicate(entity -> entity instanceof final PlayerEntity player && floatRange.isInRange(player.getHungerManager().getFoodLevel()) != inverted);
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new SaturationEntityPredicateEntry(floatRange, inverted));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.saturation"));
+    putOption("exhaustion", reader -> {
+      final StringReader stringReader = reader.getReader();
+      final boolean inverted = reader.readNegationCharacter();
+      final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
+      reader.setIncludesNonPlayers(false);
+      reader.setPredicate(entity -> entity instanceof final PlayerEntity player && floatRange.isInRange(player.getHungerManager().getExhaustion()) != inverted);
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new ExhaustionEntityPredicateEntry(floatRange, inverted));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.exhaustion"));
 
     putOption("fire", reader -> {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
       final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
-      reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
       reader.setPredicate(entity -> intRange.test(entity.getFireTicks()) != inverted);
       EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new FireEntityPredicateEntry(intRange, inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.fire"));
