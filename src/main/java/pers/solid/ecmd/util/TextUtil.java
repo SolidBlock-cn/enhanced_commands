@@ -16,6 +16,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.nbt.NbtFunction;
@@ -109,6 +110,9 @@ public final class TextUtil {
     return Text.translatable("enhanced_commands.direction." + direction.asString());
   }
 
+  /**
+   * 将坐标轴表示为可翻译的文本组件。
+   */
   public static MutableText wrapAxis(Direction.Axis axis) {
     return Text.translatable("enhanced_commands.axis." + axis.asString());
   }
@@ -134,10 +138,16 @@ public final class TextUtil {
     return MutableText.of(new EnhancedTranslatableTextContent(key, null, args));
   }
 
+  /**
+   * 可翻译并使用增强功能的文本组件，相比 {@link Text#translatable} 有增强的功能。
+   */
   public static MutableText enhancedTranslatableWithFallback(String key, @Nullable String fallback) {
     return MutableText.of(new EnhancedTranslatableTextContent(key, fallback, TranslatableTextContent.EMPTY_ARGUMENTS));
   }
 
+  /**
+   * 可翻译并使用增强功能的文本组件，相比 {@link Text#translatable} 有增强的功能。
+   */
   public static MutableText enhancedTranslatableWithFallback(String key, @Nullable String fallback, Object... args) {
     return MutableText.of(new EnhancedTranslatableTextContent(key, fallback, args));
   }
@@ -149,6 +159,10 @@ public final class TextUtil {
     return Text.empty().styled(styleUpdater).append(text);
   }
 
+  /**
+   * 组合两部分可能为 {@code null｝ 的文本。如果一个为 {@code null} 另一个未 {@code null}，则直接返回其中的非 ｛@code null} 值。如果两个都不是 {@code null}，将其组合。如果 两个都是 {@code null}，返回空文本。
+   */
+  @Contract(value = "null, null -> !null; null, !null -> param2; !null, null -> param1", pure = true)
   public static Text joinNullableLines(@Nullable Text text1, @Nullable Text text2) {
     if (text1 == null) {
       if (text2 == null) {

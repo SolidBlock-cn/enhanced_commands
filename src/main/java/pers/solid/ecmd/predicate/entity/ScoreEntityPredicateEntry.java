@@ -1,6 +1,8 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.scoreboard.ScoreboardObjective;
@@ -8,24 +10,30 @@ import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.tuple.Triple;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TextUtil;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expectedScore) implements EntityPredicateEntry {
+public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expectedScore, List<Pair<String, NumberRange.IntRange>> invertedScores) implements EntityPredicateEntry {
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     boolean result = true;
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
     final ServerScoreboard scoreboard = entity.getServer().getScoreboard();
     String entityName = entity.getEntityName();
-    for (Map.Entry<String, NumberRange.IntRange> entry : expectedScore.entrySet()) {
-      ScoreboardObjective objective = scoreboard.getNullableObjective(entry.getKey());
+    for (var triple : Iterables.concat(
+        Iterables.transform(expectedScore.entrySet(), entry -> Triple.of(entry.getKey(), entry.getValue(), false)),
+        Iterables.transform(invertedScores, input -> Triple.of(input.left(), input.right(), true))
+    )) {
+      ScoreboardObjective objective = scoreboard.getNullableObjective(triple.getLeft());
       if (objective == null) {
-        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.score.no_objective", Text.literal(entry.getKey()).styled(TextUtil.STYLE_FOR_TARGET))));
+        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.score.no_objective", Text.literal(triple.getLeft()).styled(TextUtil.STYLE_FOR_TARGET))));
         result = false;
         continue;
       }
@@ -39,15 +47,17 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
 
       ScoreboardPlayerScore score = scoreboard.getPlayerScore(entityName, objective);
       int scoreValue = score.getScore();
-      final boolean test = entry.getValue().test(scoreValue);
+      final boolean inverted = triple.getRight();
+      final NumberRange.IntRange intRange = triple.getMiddle();
+      final boolean test = intRange.test(scoreValue);
       final MutableText actualValueText = TextUtil.literal(scoreValue).styled(TextUtil.STYLE_FOR_ACTUAL);
-      final MutableText expectedRangeText = Text.literal(StringUtil.wrapRange(entry.getValue())).styled(TextUtil.STYLE_FOR_EXPECTED);
+      final MutableText expectedRangeText = Text.literal(StringUtil.wrapRange(intRange)).styled(TextUtil.STYLE_FOR_EXPECTED);
       if (test) {
-        attachments.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.score.entry.pass", displayName, objectiveText, actualValueText, expectedRangeText)));
+        attachments.add(TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.score.entry.in_range", displayName, objectiveText, actualValueText, expectedRangeText)));
       } else {
-        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.score.entry.fail", displayName, objectiveText, actualValueText, expectedRangeText)));
-        result = false;
+        attachments.add(TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.score.entry.out_of_range", displayName, objectiveText, actualValueText, expectedRangeText)));
       }
+      result &= (test != inverted);
     }
     if (result) {
       return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.score.pass", displayName), attachments.build());
@@ -58,6 +68,9 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
 
   @Override
   public String toOptionEntry() {
-    return "scores={" + expectedScore.entrySet().stream().map(entry -> entry.getKey() + "=" + StringUtil.wrapRange(entry.getValue())).collect(Collectors.joining(", ")) + "}";
+    return "scores={" + Stream.concat(
+        expectedScore.entrySet().stream().map(entry -> entry.getKey() + "=" + StringUtil.wrapRange(entry.getValue())),
+        invertedScores.stream().map(pair -> pair.left() + "=!" + StringUtil.wrapRange(pair.right()))
+    ).collect(Collectors.joining(", ")) + "}";
   }
 }

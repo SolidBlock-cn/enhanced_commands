@@ -2,6 +2,7 @@ package pers.solid.ecmd.util;
 
 import com.google.common.base.Functions;
 import com.google.common.base.Suppliers;
+import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -17,10 +18,13 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,7 +32,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 /**
- * 和命令解析和建议有关的实用方法。
+ * 此类包含与命令解析和建议有关的静态实用方法。
  */
 public final class ParsingUtil {
   private static final CharSet EXTENDED_ALLOWED_STRINGS = CharSet.of('!', '@', '#', '$', '%', '^', '&', '*', '?', '\\');
@@ -47,7 +51,7 @@ public final class ParsingUtil {
     final String remaining = builder.getRemainingLowerCase();
     for (T t : iterable) {
       final String candidate = suggestion.apply(t);
-      if (CommandSource.shouldSuggest(remaining, candidate)) {
+      if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase(Locale.ROOT))) {
         builder.suggest(candidate, tooltip.apply(t));
       }
     }
@@ -88,7 +92,7 @@ public final class ParsingUtil {
    */
   public static SuggestionsBuilder suggestString(String candidate, Supplier<Message> tooltip, SuggestionsBuilder builder) {
     String remaining = builder.getRemainingLowerCase();
-    if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase())) {
+    if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase(Locale.ROOT))) {
       builder.suggest(candidate, tooltip.get());
     }
     return builder;
@@ -102,7 +106,7 @@ public final class ParsingUtil {
    */
   public static SuggestionsBuilder suggestString(String candidate, SuggestionsBuilder builder) {
     String remaining = builder.getRemainingLowerCase();
-    if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase())) {
+    if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase(Locale.ROOT))) {
       builder.suggest(candidate);
     }
     return builder;
@@ -264,5 +268,16 @@ public final class ParsingUtil {
       throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, " ");
     }
     reader.skipWhitespace();
+  }
+
+  public static int _reflectGetPos(JsonReader jsonReader) {
+    try {
+      final Field field = JsonReader.class.getDeclaredField("pos");
+      field.setAccessible(true);
+      return (int) field.get(jsonReader);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      EnhancedCommands.LOGGER.error("Unexpected error while in reflection", e);
+      return 0;
+    }
   }
 }

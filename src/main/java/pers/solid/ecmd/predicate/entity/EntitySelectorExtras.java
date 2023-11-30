@@ -8,6 +8,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
@@ -17,6 +19,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class EntitySelectorExtras {
+  public static final Logger LOGGER = LoggerFactory.getLogger(EntitySelectorExtras.class);
   public ServerCommandSource source;
   public @Nullable List<FailableFunction<ServerCommandSource, Predicate<Entity>, CommandSyntaxException>> predicateFunctions = null;
   public @Nullable List<Function<ServerCommandSource, EntityPredicateEntry>> predicateDescriptions = null;
@@ -32,6 +35,9 @@ public class EntitySelectorExtras {
 
   public void updateSource(@NotNull ServerCommandSource source) throws CommandSyntaxException {
     if (!source.equals(this.source)) {
+      if (this.source != null) {
+        LOGGER.warn("Changing source for a same entity selector object ({}) from {} to {}!", this, this.source, source);
+      }
       this.source = source;
       actualExtraPredicate = createUpdatedPredicate(source);
     }

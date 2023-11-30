@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,16 +11,27 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.command.*;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.loot.LootGsons;
+import net.minecraft.loot.condition.LootCondition;
+import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.predicate.NumberRange;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
@@ -76,7 +89,7 @@ public class EntitySelectorOptionsExtension {
         return DUPLICATE_OPTION.createWithContext(reader.getReader(), option);
       }
     });
-    markRequiringUnique("level");
+    markRequiringUniqueNoMixture("level");
     markRequiringUnique("x");
     markRequiringUnique("y");
     markRequiringUnique("z");
@@ -350,7 +363,7 @@ public class EntitySelectorOptionsExtension {
       reader.setIncludesNonPlayers(false);
       reader.setPredicate(entity -> entity instanceof final PlayerEntity player && intRange.test(player.getHungerManager().getFoodLevel()) != inverted);
       EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new FoodEntityPredicateEntry(intRange, inverted));
-      if (!inverted) markParamAsUsed(reader, "food", inverted);
+      markParamAsUsed(reader, "food", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "food"), Text.translatable("enhanced_commands.argument.entity.options.food"));
     markRequiringUniqueNoMixture("food");
     putOption("saturation", reader -> {
@@ -533,6 +546,68 @@ public class EntitySelectorOptionsExtension {
     } else if (context.getSource() instanceof final CommandSource commandSource) {
       entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> commandSource.getCompletions(context));
     }
+  }
+
+  /**
+   * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin，返回的谓词仅测试被反向的分数条件。
+   */
+  @NotNull
+  public static Predicate<Entity> mixinInvertedScoredPredicate(List<Pair<String, NumberRange.IntRange>> invertedScores) {
+    return entity -> {
+      final Scoreboard scoreboard = entity.getServer().getScoreboard();
+      final String entityName = entity.getEntityName();
+      for (Pair<String, NumberRange.IntRange> pair : invertedScores) {
+        ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(pair.left());
+        if (scoreboardObjective == null) {
+          return false;
+        }
+        if (!scoreboard.playerHasObjective(entityName, scoreboardObjective)) {
+          return false;
+        }
+        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(entityName, scoreboardObjective);
+        int i = scoreboardPlayerScore.getScore();
+        if (pair.right().test(i)) {
+          return false;
+        }
+      }
+      return true;
+    };
+  }
+
+  private static final Gson LOOT_CONDITION_GSON = LootGsons.getConditionGsonBuilder().setLenient().create();
+
+  public static boolean mixinReadLiteralPredicate(EntitySelectorReader reader, boolean bl, StringReader stringReader, boolean cancel) throws CommandSyntaxException {
+    if (stringReader.canRead() && stringReader.peek() == '{') {
+      final int cursorBeforeJson = stringReader.getCursor();
+      final java.io.StringReader reader1 = new java.io.StringReader(stringReader.getString());
+      final JsonReader jsonReader = new JsonReader(reader1);
+      try {
+        reader1.skip(cursorBeforeJson);
+        final LootCondition lootCondition = LOOT_CONDITION_GSON.fromJson(jsonReader, LootCondition.class);
+        reader.setPredicate(entity -> {
+          if (!(entity.world instanceof ServerWorld serverWorld)) {
+            return false;
+          } else {
+            if (lootCondition == null) {
+              return false;
+            } else {
+              LootContext lootContext = new LootContext.Builder(serverWorld)
+                  .parameter(LootContextParameters.THIS_ENTITY, entity)
+                  .parameter(LootContextParameters.ORIGIN, entity.getPos())
+                  .build(LootContextTypes.SELECTOR);
+              return bl ^ lootCondition.test(lootContext);
+            }
+          }
+        });
+        cancel = true;
+      } catch (Exception e) {
+        final int cursorAfterJson = cursorBeforeJson + ParsingUtil._reflectGetPos(jsonReader);
+        throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.CANNOT_PARSE.createWithContext(stringReader, e.getMessage()), cursorAfterJson);
+      }
+
+      stringReader.setCursor(cursorBeforeJson + ParsingUtil._reflectGetPos(jsonReader));
+    }
+    return cancel;
   }
 
   @FunctionalInterface

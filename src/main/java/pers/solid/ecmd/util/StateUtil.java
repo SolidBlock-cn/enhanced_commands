@@ -9,6 +9,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
+/**
+ * 此类包含与方块状态有关的实用方法。
+ */
 public final class StateUtil {
   private StateUtil() {
   }

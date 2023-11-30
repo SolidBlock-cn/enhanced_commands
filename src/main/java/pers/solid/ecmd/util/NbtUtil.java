@@ -19,6 +19,9 @@ import java.util.stream.Stream;
  * 与 NBT 有关的一些实用方法，包括常见的 NBT 对象与其他各类对象之间的转换。
  */
 public final class NbtUtil {
+  private NbtUtil() {
+  }
+
   /**
    * 将 {@link Vec3d} 对象转换为 {@link NbtCompound}。如果传入的参数为 {@code null}，则返回 {@code null}。
    *
@@ -112,8 +115,5 @@ public final class NbtUtil {
   public static <T> @Nullable List<T> toImmutableList(@Nullable NbtList nbtList, @NotNull java.util.function.Function<@NotNull NbtCompound, T> function) {
     if (nbtList == null) return null;
     return nbtList.stream().filter(nbtElement -> nbtElement instanceof NbtCompound).map(nbtElement -> (NbtCompound) nbtElement).map(function).toList();
-  }
-
-  private NbtUtil() {
   }
 }

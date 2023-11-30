@@ -13,7 +13,7 @@ public record LevelEntityPredicateEntry(NumberRange.IntRange intRange, boolean i
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof PlayerEntity player)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_player", CRITERION_NAME, displayName));
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
       return EntityPredicateEntry.testInt(player, player.experienceLevel, intRange, CRITERION_NAME, displayName, inverted);
     }

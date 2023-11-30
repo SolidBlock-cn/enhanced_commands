@@ -19,6 +19,7 @@ public final class ModCommandExceptionTypes {
   private static final Text VALID_UNITS = Text.translatable("enhanced_commands.parsing.angle_accepted_values");
   public static final DynamicCommandExceptionType ANGLE_UNIT_EXPECTED = new DynamicCommandExceptionType(number -> Text.translatable("enhanced_commands.parsing.angle_unit_expected", number, VALID_UNITS));
   public static final DynamicCommandExceptionType ANGLE_UNIT_UNKNOWN = new DynamicCommandExceptionType(actual -> Text.translatable("enhanced_commands.parsing.angle_unit_unknown", actual, VALID_UNITS));
+  public static final DynamicCommandExceptionType CANNOT_PARSE = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.cannot_parse", reason));
 
   private ModCommandExceptionTypes() {
   }

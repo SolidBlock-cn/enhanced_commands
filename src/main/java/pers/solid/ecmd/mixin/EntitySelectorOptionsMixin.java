@@ -9,6 +9,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.brigadier.ImmutableStringReader;
@@ -18,6 +19,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Either;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.advancement.Advancement;
@@ -26,6 +28,7 @@ import net.minecraft.command.EntitySelectorOptions;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.registry.tag.TagKey;
@@ -47,10 +50,7 @@ import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinSharedVariables;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -167,6 +167,34 @@ public abstract class EntitySelectorOptionsMixin {
   @ModifyExpressionValue(method = "method_9980", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static CommandSyntaxException tweakNegativeLevelException2(CommandSyntaxException commandSyntaxException, @Share("cursorAfterParse") LocalIntRef cursorAfterParse) {
     return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
+  }
+
+  @Inject(method = "method_9980", at = @At(value = "INVOKE", target = "Lnet/minecraft/predicate/NumberRange$IntRange;parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/predicate/NumberRange$IntRange;", shift = At.Shift.BEFORE))
+  private static void acceptNegativeLevel(EntitySelectorReader reader, CallbackInfo ci, @Share("inverted") LocalBooleanRef ref) throws CommandSyntaxException {
+    final boolean inverted = reader.readNegationCharacter();
+    ref.set(inverted);
+    final EntitySelectorReaderExtras extras = EntitySelectorReaderExtras.getOf(reader);
+    final StringReader stringReader = reader.getReader();
+    if (inverted) {
+      stringReader.skipWhitespace();
+      extras.usedParams.put("level", true);
+    } else if (extras.usedParams.getOrDefault("level", false)) {
+      // 此前使用过 leve=!xxx，但此处没有使用否定
+      // 此时会报错
+      stringReader.setCursor(extras.cursorBeforeOptionName);
+      throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "level"), extras.cursorAfterOptionName);
+    }
+  }
+
+  @WrapWithCondition(method = "method_9980", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setLevelRange(Lnet/minecraft/predicate/NumberRange$IntRange;)V"))
+  private static boolean applyNegativeLevel(EntitySelectorReader instance, NumberRange.IntRange levelRange, @Share("inverted") LocalBooleanRef ref) {
+    if (ref.get()) {
+      instance.setPredicate(entity -> entity instanceof final PlayerEntity player && !levelRange.test(player.experienceLevel));
+      EntitySelectorReaderExtras.getOf(instance).addDescription(source -> new LevelEntityPredicateEntry(levelRange, true));
+      return false;
+    } else {
+      return true;
+    }
   }
 
   @Inject(method = "method_9969", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;setCursor(I)V", remap = false, shift = At.Shift.BEFORE))
@@ -333,9 +361,50 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
+  @Inject(method = "method_9975", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Maps;newHashMap()Ljava/util/HashMap;", remap = false))
+  private static void initInvertedScoreSet(EntitySelectorReader reader, CallbackInfo ci, @Share("invertedScores") LocalRef<List<Pair<String, NumberRange.IntRange>>> invertedScores) {
+    invertedScores.set(new ArrayList<>());
+  }
+
+  @Inject(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/predicate/NumberRange$IntRange;parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/predicate/NumberRange$IntRange;", shift = At.Shift.BEFORE))
+  private static void acceptScoreNegation(EntitySelectorReader reader, CallbackInfo ci, @Local String unquotedString, @Share("inverted") LocalBooleanRef localBooleanRef) {
+    if (reader.readNegationCharacter()) {
+      reader.getReader().skipWhitespace();
+      localBooleanRef.set(true);
+    } else {
+      localBooleanRef.set(false);
+    }
+  }
+
+  @WrapWithCondition(method = "method_9975", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/predicate/NumberRange$IntRange;parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/predicate/NumberRange$IntRange;")))
+  private static boolean prepareScoreNegations(Map<String, NumberRange.IntRange> map, Object key, Object value, @Share("inverted") LocalBooleanRef localBooleanRef, @Share("invertedScores") LocalRef<List<Pair<String, NumberRange.IntRange>>> invertedScores) {
+    if (localBooleanRef.get()) {
+      invertedScores.get().add(Pair.of((String) key, (NumberRange.IntRange) value));
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  @ModifyExpressionValue(method = "method_9975", at = @At(value = "INVOKE", target = "Ljava/util/Map;isEmpty()Z"))
+  private static boolean applyScoreNegationsToPredicate1(boolean original, @Share("invertedScores") LocalRef<List<Pair<String, NumberRange.IntRange>>> invertedScores) {
+    // 由于在判断添加谓词时会检测 map.isEmpty()，如果仅使用了反向的分数谓词，那么 map 也会是 empty
+    return original && invertedScores.get().isEmpty();
+  }
+
+  @ModifyArg(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"))
+  private static Predicate<Entity> applyScoreNegationsToPredicate2(Predicate<Entity> predicate, @Share("invertedScores") LocalRef<List<Pair<String, NumberRange.IntRange>>> ref) {
+    final List<Pair<String, NumberRange.IntRange>> invertedScores = ref.get();
+    if (!invertedScores.isEmpty()) {
+      return predicate.and(EntitySelectorOptionsExtension.mixinInvertedScoredPredicate(invertedScores));
+    } else {
+      return predicate;
+    }
+  }
+
   @Inject(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-  private static void addScoreInformation(EntitySelectorReader reader, CallbackInfo ci, StringReader stringReader, Map<String, NumberRange.IntRange> expectedScore) {
-    EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new ScoreEntityPredicateEntry(expectedScore));
+  private static void addScoreInformation(EntitySelectorReader reader, CallbackInfo ci, StringReader stringReader, Map<String, NumberRange.IntRange> expectedScore, @Share("invertedScores") LocalRef<List<Pair<String, NumberRange.IntRange>>> invertedScores) {
+    EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new ScoreEntityPredicateEntry(expectedScore, invertedScores.get()));
   }
 
   @Inject(method = "method_9974", at = {@At(value = "INVOKE", target = "Lcom/google/common/collect/Maps;newHashMap()Ljava/util/HashMap;", remap = false)}, slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;fromCommandInput(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/util/Identifier;")))
@@ -443,6 +512,14 @@ public abstract class EntitySelectorOptionsMixin {
       reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
     }
     return fromCommandInput;
+  }
+
+  @Inject(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;fromCommandInput(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/util/Identifier;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  private static void acceptLiteralPredicateInput(EntitySelectorReader reader, CallbackInfo ci, boolean bl) throws CommandSyntaxException {
+    final StringReader stringReader = reader.getReader();
+    boolean cancel = false;
+    cancel = EntitySelectorOptionsExtension.mixinReadLiteralPredicate(reader, bl, stringReader, cancel);
+    if (cancel) ci.cancel();
   }
 
   @Inject(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
