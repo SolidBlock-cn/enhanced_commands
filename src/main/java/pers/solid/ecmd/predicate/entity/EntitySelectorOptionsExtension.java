@@ -3,7 +3,6 @@ package pers.solid.ecmd.predicate.entity;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -21,6 +20,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.loot.LootGsons;
 import net.minecraft.loot.condition.LootCondition;
+import net.minecraft.loot.condition.LootConditionManager;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
@@ -574,40 +574,42 @@ public class EntitySelectorOptionsExtension {
     };
   }
 
-  private static final Gson LOOT_CONDITION_GSON = LootGsons.getConditionGsonBuilder().setLenient().create();
+  protected static final Gson LOOT_CONDITION_GSON = LootGsons.getConditionGsonBuilder().setLenient().create();
 
-  public static boolean mixinReadLiteralPredicate(EntitySelectorReader reader, boolean bl, StringReader stringReader, boolean cancel) throws CommandSyntaxException {
+  public static boolean mixinReadLiteralPredicate(EntitySelectorReader reader, boolean hasNegation, StringReader stringReader) throws CommandSyntaxException {
+    reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
+      final CommandContext<?> context = EntitySelectorReaderExtras.getOf(reader).context;
+      if (context != null && context.getSource() instanceof ServerCommandSource source) {
+        LootConditionManager lootConditionManager = source.getServer().getPredicateManager();
+        return CommandSource.suggestIdentifiers(lootConditionManager.getIds(), suggestionsBuilder);
+      } else if (context != null && context.getSource() instanceof CommandSource commandSource) {
+        return commandSource.getCompletions(context);
+      } else {
+        return Suggestions.empty();
+      }
+    });
     if (stringReader.canRead() && stringReader.peek() == '{') {
-      final int cursorBeforeJson = stringReader.getCursor();
-      final java.io.StringReader reader1 = new java.io.StringReader(stringReader.getString());
-      final JsonReader jsonReader = new JsonReader(reader1);
-      try {
-        reader1.skip(cursorBeforeJson);
-        final LootCondition lootCondition = LOOT_CONDITION_GSON.fromJson(jsonReader, LootCondition.class);
-        reader.setPredicate(entity -> {
-          if (!(entity.world instanceof ServerWorld serverWorld)) {
+      reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
+      final LootCondition lootCondition = ParsingUtil.parseJson(stringReader, input -> LOOT_CONDITION_GSON.fromJson(input, LootCondition.class), ModCommandExceptionTypes.INVALID_LOOT_TABLE_JSON);
+      reader.setPredicate(entity -> {
+        if (!(entity.world instanceof ServerWorld serverWorld)) {
+          return false;
+        } else {
+          if (lootCondition == null) {
             return false;
           } else {
-            if (lootCondition == null) {
-              return false;
-            } else {
-              LootContext lootContext = new LootContext.Builder(serverWorld)
-                  .parameter(LootContextParameters.THIS_ENTITY, entity)
-                  .parameter(LootContextParameters.ORIGIN, entity.getPos())
-                  .build(LootContextTypes.SELECTOR);
-              return bl ^ lootCondition.test(lootContext);
-            }
+            LootContext lootContext = new LootContext.Builder(serverWorld)
+                .parameter(LootContextParameters.THIS_ENTITY, entity)
+                .parameter(LootContextParameters.ORIGIN, entity.getPos())
+                .build(LootContextTypes.SELECTOR);
+            return hasNegation ^ lootCondition.test(lootContext);
           }
-        });
-        cancel = true;
-      } catch (Exception e) {
-        final int cursorAfterJson = cursorBeforeJson + ParsingUtil._reflectGetPos(jsonReader);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.CANNOT_PARSE.createWithContext(stringReader, e.getMessage()), cursorAfterJson);
-      }
-
-      stringReader.setCursor(cursorBeforeJson + ParsingUtil._reflectGetPos(jsonReader));
+        }
+      });
+      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new LootTablePredicateAnonymousEntityPredicateEntry(lootCondition, hasNegation));
+      return true;
     }
-    return cancel;
+    return false;
   }
 
   @FunctionalInterface

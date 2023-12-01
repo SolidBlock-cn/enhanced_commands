@@ -40,6 +40,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<ExposeBlockPredicate> EXPOSE = register(ExposeBlockPredicate.Type.EXPOSE_TYPE, "expose");
   public static final BlockPredicateType<IdContainBlockPredicate> ID_CONTAIN = register(IdContainBlockPredicate.Type.ID_CONTAIN_TYPE, "id_contain");
   public static final BlockPredicateType<RegionBlockPredicate> REGION = register(RegionBlockPredicate.Type.REGION_TYPE, "region");
+  public static final LootConditionBlockPredicate.Type LOOT_CONDITION = register(LootConditionBlockPredicate.Type.LOOT_CONDITION_TYPE, "loot_condition");
 
   private BlockPredicateTypes() {
   }
@@ -58,6 +59,7 @@ public final class BlockPredicateTypes {
     map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_diff"), false));
     map.put("expose", ExposeBlockPredicate.Parser::new);
     map.put("idcontain", IdContainBlockPredicate.Parser::new);
+    map.put("predicate", LootConditionBlockPredicate.Parser::new);
     map.put("rand", RandBlockPredicate.Parser::new);
     map.put("region", RegionBlockPredicate.Parser::new);
     map.put("rel", RelBlockPredicate.Parser::new);
@@ -70,6 +72,7 @@ public final class BlockPredicateTypes {
     map.put("diff", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_diff"));
     map.put("expose", Text.translatable("enhanced_commands.argument.block_predicate.expose"));
     map.put("idcontain", Text.translatable("enhanced_commands.argument.block_predicate.id_contain"));
+    map.put("predicate", Text.translatable("enhanced_commands.argument.block_predicate.loot_condition"));
     map.put("rand", Text.translatable("enhanced_commands.argument.block_predicate.probability"));
     map.put("region", Text.translatable("enhanced_commands.argument.block_predicate.region"));
     map.put("rel", Text.translatable("enhanced_commands.argument.block_predicate.rel"));

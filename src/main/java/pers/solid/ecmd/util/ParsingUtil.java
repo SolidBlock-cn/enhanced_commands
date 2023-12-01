@@ -2,10 +2,13 @@ package pers.solid.ecmd.util;
 
 import com.google.common.base.Functions;
 import com.google.common.base.Suppliers;
+import com.google.gson.JsonParseException;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.chars.CharSet;
@@ -18,10 +21,11 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.mixin.TextSerializerAccessor;
+import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
-import java.lang.reflect.Field;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -270,14 +274,33 @@ public final class ParsingUtil {
     reader.skipWhitespace();
   }
 
-  public static int _reflectGetPos(JsonReader jsonReader) {
+  /**
+   * 通过反射的方式，从 {@link JsonReader} 中读取位置信息。
+   */
+  public static int getPos(@NotNull JsonReader jsonReader) {
+    return TextSerializerAccessor.invokeGetPosition(jsonReader) - 1;
+  }
+
+  public static <T> T parseJson(StringReader reader, FailableFunction<JsonReader, T, JsonParseException> readFunction, DynamicCommandExceptionType exceptionType) throws CommandSyntaxException {
+    final java.io.StringReader in = new java.io.StringReader(reader.getString());
+    final int cursorBeforeJson = reader.getCursor();
     try {
-      final Field field = JsonReader.class.getDeclaredField("pos");
-      field.setAccessible(true);
-      return (int) field.get(jsonReader);
-    } catch (NoSuchFieldException | IllegalAccessException e) {
-      EnhancedCommands.LOGGER.error("Unexpected error while in reflection", e);
-      return 0;
+      in.skip(cursorBeforeJson);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    final JsonReader jsonReader = new JsonReader(in);
+    try {
+      final T apply = readFunction.apply(jsonReader);
+      reader.setCursor(cursorBeforeJson + getPos(jsonReader));
+      return apply;
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof MalformedJsonException malformedJsonException) {
+        reader.setCursor(cursorBeforeJson + getPos(jsonReader) - 1);
+        throw ModCommandExceptionTypes.MALFORMED_JSON.createWithContext(reader, malformedJsonException.getMessage());
+      } else {
+        throw CommandSyntaxExceptionExtension.withCursorEnd(exceptionType.createWithContext(reader, e.getMessage()), cursorBeforeJson + getPos(jsonReader));
+      }
     }
   }
 }

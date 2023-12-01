@@ -28,6 +28,7 @@
     "ServerCommandSourceAccessor",
     "ServerPlayerEntityMixin",
     "StringReaderMixin",
+    "TextSerializerAccessor",
     "TextSerializerMixin",
     "ThreadExecutorMixin",
     "Vec3ArgumentTypeMixin",

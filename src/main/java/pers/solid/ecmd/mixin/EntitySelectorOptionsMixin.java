@@ -517,13 +517,28 @@ public abstract class EntitySelectorOptionsMixin {
   @Inject(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;fromCommandInput(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/util/Identifier;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   private static void acceptLiteralPredicateInput(EntitySelectorReader reader, CallbackInfo ci, boolean bl) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
-    boolean cancel = false;
-    cancel = EntitySelectorOptionsExtension.mixinReadLiteralPredicate(reader, bl, stringReader, cancel);
+    boolean cancel = EntitySelectorOptionsExtension.mixinReadLiteralPredicate(reader, bl, stringReader);
     if (cancel) ci.cancel();
   }
 
   @Inject(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-  private static void addPredicateInformation(EntitySelectorReader reader, CallbackInfo ci, boolean bl, Identifier identifier) {
+  private static void addPredicateInformation(EntitySelectorReader reader, CallbackInfo ci, boolean bl, Identifier identifier) throws CommandSyntaxException {
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new LootTablePredicateEntityPredicateEntry(identifier, bl));
+
+    // 如果 reader 后面没有内容，那么提前抛出异常，这是为了避免在输入了不完整的 id 时，由于进行了后面的解析，导致建议的内容被覆盖。
+    if (!reader.getReader().canRead() && EntitySelectorReaderExtras.getOf(reader).context != null) {
+      final var prev = ((EntitySelectorReaderAccessor) reader).getSuggestionProvider();
+      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
+        final CompletableFuture<Suggestions> prevResult = prev.apply(suggestionsBuilder, suggestionsBuilderConsumer);
+        return prevResult.thenCompose(suggestions -> {
+          if (suggestions.isEmpty()) {
+            return ((EntitySelectorReaderAccessor) reader).callSuggestEndNext(suggestionsBuilder, suggestionsBuilderConsumer);
+          } else {
+            return CompletableFuture.completedFuture(suggestions);
+          }
+        });
+      });
+      throw EntitySelectorReader.UNTERMINATED_EXCEPTION.createWithContext(reader.getReader());
+    }
   }
 }

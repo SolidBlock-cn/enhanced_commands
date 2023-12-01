@@ -28,7 +28,7 @@ public class FunctionsParser<T> implements Parser<T> {
   public FunctionsParser(Map<String, Supplier<FunctionParamsParser<? extends T>>> functions, Map<String, Text> functionNames) {
     this.functions = functions.keySet();
     this.parserFactory = s -> Nullables.map(functions.get(s), Supplier::get);
-    this.tooltipProvider = Functions.forMap(functionNames);
+    this.tooltipProvider = Functions.forMap(functionNames, null);
   }
 
   @Override

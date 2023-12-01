@@ -87,7 +87,7 @@ public final class SeparatedExecuteCommand {
     consumer.onCommandComplete(context, success, result);
     consumer2.onCommandComplete(context, success, result);
   };
-  private static final SuggestionProvider<ServerCommandSource> LOOT_CONDITIONS = (context, builder) -> {
+  public static final SuggestionProvider<ServerCommandSource> LOOT_CONDITIONS = (context, builder) -> {
     LootConditionManager lootConditionManager = context.getSource().getServer().getPredicateManager();
     return CommandSource.suggestIdentifiers(lootConditionManager.getIds(), builder);
   };

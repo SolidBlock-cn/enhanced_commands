@@ -20,6 +20,9 @@ public final class ModCommandExceptionTypes {
   public static final DynamicCommandExceptionType ANGLE_UNIT_EXPECTED = new DynamicCommandExceptionType(number -> Text.translatable("enhanced_commands.parsing.angle_unit_expected", number, VALID_UNITS));
   public static final DynamicCommandExceptionType ANGLE_UNIT_UNKNOWN = new DynamicCommandExceptionType(actual -> Text.translatable("enhanced_commands.parsing.angle_unit_unknown", actual, VALID_UNITS));
   public static final DynamicCommandExceptionType CANNOT_PARSE = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.cannot_parse", reason));
+  public static final DynamicCommandExceptionType MALFORMED_JSON = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.malformed_json", reason));
+  public static final DynamicCommandExceptionType UNKNOWN_LOOT_TABLE_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.unknown_loot_table_predicate", reason));
+  public static final DynamicCommandExceptionType INVALID_LOOT_TABLE_JSON = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.invalid_loot_table_json", reason));
 
   private ModCommandExceptionTypes() {
   }
