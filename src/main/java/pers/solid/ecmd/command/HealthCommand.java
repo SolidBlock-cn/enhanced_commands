@@ -1,7 +1,6 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -40,8 +39,8 @@ public enum HealthCommand implements CommandRegistrationCallback {
                 .executes(context -> executeGetHealth(context, EntityArgumentType.getEntities(context, "entities"), ConcentrationType.AVERAGE, 1))
                 .then(argument("concentration_type", ConcentrationTypeArgumentType.concentrationType())
                     .executes(context -> executeGetHealth(context, EntityArgumentType.getEntities(context, "entities"), ConcentrationTypeArgumentType.getConcentrationType(context, "concentration_type"), 1))
-                    .then(argument("multiplier", DoubleArgumentType.doubleArg())
-                        .executes(context -> executeGetHealth(context, EntityArgumentType.getEntities(context, "entities"), ConcentrationTypeArgumentType.getConcentrationType(context, "concentration_type"), DoubleArgumentType.getDouble(context, "multiplier")))))))
+                    .then(argument("multiplier", FloatArgumentType.floatArg())
+                        .executes(context -> executeGetHealth(context, EntityArgumentType.getEntities(context, "entities"), ConcentrationTypeArgumentType.getConcentrationType(context, "concentration_type"), FloatArgumentType.getFloat(context, "multiplier")))))))
         .then(literal("set")
             .then(argument("entities", EntityArgumentType.entities())
                 .then(argument("value", FloatArgumentType.floatArg())

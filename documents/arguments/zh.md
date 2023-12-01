@@ -6,6 +6,8 @@
 - [方块谓词](block_predicate/zh.md)
 - [曲线](curve/zh.md)
 - [方向](direction/zh.md)
+- [实体谓词](entity_predicate/zh.md)
+- [实体选择器](entity_selector/zh.md)
 - [NBT 函数](nbt_function/zh.md)
 - [NBT 谓词](nbt_predicate/zh.md)
 - [关键字参数](keyword_args/zh.md)

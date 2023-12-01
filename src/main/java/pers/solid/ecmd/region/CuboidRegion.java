@@ -195,6 +195,11 @@ public record CuboidRegion(Box box) implements Region {
 
     @Override
     public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+      if (to == null) {
+        if (EnhancedPosArgument.isInt(from)) {
+          return source -> new SingleBlockPosRegion(from.toAbsoluteBlockPos(source));
+        }
+      }
       if (EnhancedPosArgument.isInt(from) && EnhancedPosArgument.isInt(to)) {
         return source -> new BlockCuboidRegion(from.toAbsoluteBlockPos(source), to.toAbsoluteBlockPos(source));
       }
@@ -223,7 +228,7 @@ public record CuboidRegion(Box box) implements Region {
 
     @Override
     public int minParamsCount() {
-      return to != null ? 1 : 2;
+      return (to != null || EnhancedPosArgument.isInt(from)) ? 1 : 2;
     }
 
     @Override
