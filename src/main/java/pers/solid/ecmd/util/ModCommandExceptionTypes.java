@@ -1,9 +1,6 @@
 package pers.solid.ecmd.util;
 
-import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
-import com.mojang.brigadier.exceptions.Dynamic3CommandExceptionType;
-import com.mojang.brigadier.exceptions.Dynamic4CommandExceptionType;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.*;
 import net.minecraft.text.Text;
 
 public final class ModCommandExceptionTypes {
@@ -23,6 +20,7 @@ public final class ModCommandExceptionTypes {
   public static final DynamicCommandExceptionType MALFORMED_JSON = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.malformed_json", reason));
   public static final DynamicCommandExceptionType UNKNOWN_LOOT_TABLE_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.unknown_loot_table_predicate", reason));
   public static final DynamicCommandExceptionType INVALID_LOOT_TABLE_JSON = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.invalid_loot_table_json", reason));
+  public static final SimpleCommandExceptionType EXPECTED_WHITESPACE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.parsing.expected_whitespace"));
 
   private ModCommandExceptionTypes() {
   }

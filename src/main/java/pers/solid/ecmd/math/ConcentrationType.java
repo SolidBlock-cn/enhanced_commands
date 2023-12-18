@@ -9,6 +9,10 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongIterable;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minecraft.command.CommandException;
+import net.minecraft.nbt.AbstractNbtNumber;
+import net.minecraft.nbt.NbtDouble;
+import net.minecraft.nbt.NbtFloat;
+import net.minecraft.nbt.NbtLong;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 
@@ -70,7 +74,8 @@ public enum ConcentrationType implements StringIdentifiable {
 
     @Override
     public double concentrateFloat(FloatIterable values) {
-      if (values instanceof FloatList floatList && !floatList.isEmpty()) return floatList.getFloat(floatList.size() - 1);
+      if (values instanceof FloatList floatList && !floatList.isEmpty())
+        return floatList.getFloat(floatList.size() - 1);
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       float value = 0;
@@ -80,7 +85,8 @@ public enum ConcentrationType implements StringIdentifiable {
 
     @Override
     public double concentrateDouble(DoubleIterable values) {
-      if (values instanceof DoubleList doubleList && !doubleList.isEmpty()) return doubleList.getDouble(doubleList.size() - 1);
+      if (values instanceof DoubleList doubleList && !doubleList.isEmpty())
+        return doubleList.getDouble(doubleList.size() - 1);
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       double value = 0;
@@ -280,10 +286,24 @@ public enum ConcentrationType implements StringIdentifiable {
   }
 
   /**
+   * 对于求平均值的情况，以 double 的方式呈现结果，在其他情况下则以 long 的方式呈现结果（此时 NBT 为 long 值）。
+   */
+  public AbstractNbtNumber longToNbt(double result) {
+    return forcesDouble ? NbtDouble.of(result) : NbtLong.of((long) result);
+  }
+
+  /**
    * 对于求平均值的情况，以 double 的方式呈现结果，在其他情况下则以 float 的方式呈现结果（此时显示的精度会低一些）。
    */
   public String floatToString(double result) {
-    return forcesDouble ? Double.toString(result) : Float.toString((long) result);
+    return forcesDouble ? Double.toString(result) : Float.toString((float) result);
+  }
+
+  /**
+   * 对于求平均值的情况，以 double 的方式呈现结果，在其他情况下则以 float 的方式呈现结果（此时 NBT 为 float 值）。
+   */
+  public AbstractNbtNumber floatToNbt(double result) {
+    return forcesDouble ? NbtDouble.of(result) : NbtFloat.of((float) result);
   }
 
   private static void ensureHasNext(Iterator<?> iterator) {

@@ -269,7 +269,7 @@ public final class ParsingUtil {
    */
   public static void expectAndSkipWhitespace(StringReader reader) throws CommandSyntaxException {
     if (!reader.canRead() || !Character.isWhitespace(reader.peek())) {
-      throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, " ");
+      throw ModCommandExceptionTypes.EXPECTED_WHITESPACE.createWithContext(reader);
     }
     reader.skipWhitespace();
   }

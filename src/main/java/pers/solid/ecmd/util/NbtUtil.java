@@ -2,9 +2,13 @@ package pers.solid.ecmd.util;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.argument.NbtPathArgumentType;
+import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -115,5 +119,17 @@ public final class NbtUtil {
   public static <T> @Nullable List<T> toImmutableList(@Nullable NbtList nbtList, @NotNull java.util.function.Function<@NotNull NbtCompound, T> function) {
     if (nbtList == null) return null;
     return nbtList.stream().filter(nbtElement -> nbtElement instanceof NbtCompound).map(nbtElement -> (NbtCompound) nbtElement).map(function).toList();
+  }
+
+  /**
+   * 如果 NBT 元素为数字，则直接返回这个值，否则抛出错误。
+   */
+  @Contract(value = "_, _ -> param1", pure = true)
+  public static @NotNull AbstractNbtNumber toNumberOrThrow(@NotNull NbtElement nbtElement, @NotNull NbtPathArgumentType.NbtPath path) {
+    if (nbtElement instanceof AbstractNbtNumber number) {
+      return number;
+    } else {
+      throw new CommandException(Text.translatable("commands.data.get.invalid", path.toString()));
+    }
   }
 }
