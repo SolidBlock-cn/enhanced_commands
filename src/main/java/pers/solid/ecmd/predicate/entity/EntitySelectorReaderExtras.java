@@ -21,6 +21,7 @@ import java.util.function.Predicate;
  */
 public class EntitySelectorReaderExtras {
 
+  private final EntitySelectorReader self;
   /**
    * 在解析过程中，最近一次解析到的选项名称之前的位置所在的 cursor。
    */
@@ -68,6 +69,10 @@ public class EntitySelectorReaderExtras {
    */
   public Object2BooleanMap<String> usedParams = new Object2BooleanOpenHashMap<>();
 
+  public EntitySelectorReaderExtras(EntitySelectorReader self) {
+    this.self = self;
+  }
+
   public static EntitySelectorReaderExtras getOf(EntitySelectorReader entitySelectorReader) {
     return ((EntitySelectorReaderExtension) entitySelectorReader).ec$getExt();
   }
@@ -77,8 +82,22 @@ public class EntitySelectorReaderExtras {
     predicateFunctions.add(predicateFunction);
   }
 
+  public void addDescription(EntityPredicateEntry predicateDescription) {
+    addDescription(source -> predicateDescription);
+  }
+
   public void addDescription(Function<ServerCommandSource, EntityPredicateEntry> predicateDescription) {
     var predicateDescriptions = this.predicateDescriptions == null ? (this.predicateDescriptions = new ArrayList<>()) : this.predicateDescriptions;
     predicateDescriptions.add(predicateDescription);
+  }
+
+  public void addPredicateAndDescription(EntityPredicateEntry predicateDescription) {
+    self.setPredicate(predicateDescription);
+    addDescription(predicateDescription);
+  }
+
+  public void addPredicateAndDescription(Function<ServerCommandSource, EntityPredicateEntry> predicateDescription) {
+    addFunction(predicateDescription::apply);
+    addDescription(predicateDescription);
   }
 }

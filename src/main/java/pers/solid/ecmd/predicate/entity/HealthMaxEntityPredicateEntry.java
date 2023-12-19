@@ -9,6 +9,11 @@ import pers.solid.ecmd.util.TextUtil;
 
 public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry {
   @Override
+  public boolean test(Entity entity) {
+    return entity instanceof LivingEntity livingEntity && (livingEntity.getHealth() == livingEntity.getMaxHealth()) != inverted;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof LivingEntity livingEntity)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.commands.health.get.single.not_living", displayName));

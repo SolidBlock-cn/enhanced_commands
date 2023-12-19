@@ -15,7 +15,7 @@ import pers.solid.ecmd.nbt.NbtTargetArgument;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtTargetArgument> {
@@ -64,8 +64,10 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
     return suggestedParser.buildSuggestions(context, builder.createOffset(reader.getCursor()));
   }
 
+  private static final Collection<String> EXAMPLES = List.of("block ~ ~1 ~", "blocks sphere(5)", "entity @s", "entity Solid", "entity @e[type=pig,limit=1]", "entities @a", "entities @e", "store x");
+
   @Override
   public Collection<String> getExamples() {
-    return Collections.emptySet();
+    return EXAMPLES;
   }
 }

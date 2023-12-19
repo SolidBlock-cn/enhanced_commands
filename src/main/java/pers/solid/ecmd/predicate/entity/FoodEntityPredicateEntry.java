@@ -12,6 +12,11 @@ public record FoodEntityPredicateEntry(NumberRange.IntRange intRange, boolean in
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.food");
 
   @Override
+  public boolean test(Entity entity) {
+    return entity instanceof final PlayerEntity player && intRange.test(player.getHungerManager().getFoodLevel()) != inverted;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     if (!(entity instanceof final PlayerEntity player)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_player", displayName, CRITERION_NAME));

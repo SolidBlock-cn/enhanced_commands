@@ -43,7 +43,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   protected abstract Predicate<Entity> rotationPredicate(FloatRangeArgument angleRange, ToDoubleFunction<Entity> entityToAngle);
 
   @Unique
-  private final EntitySelectorReaderExtras ec$ext = new EntitySelectorReaderExtras();
+  private final EntitySelectorReaderExtras ec$ext = new EntitySelectorReaderExtras((EntitySelectorReader) (Object) this);
 
   @Override
   public EntitySelectorReaderExtras ec$getExt() {

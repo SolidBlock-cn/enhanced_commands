@@ -16,8 +16,8 @@ import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.command.*;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.loot.LootGsons;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.condition.LootConditionManager;
@@ -310,7 +310,6 @@ public class EntitySelectorOptionsExtension {
         final var predicate = Predicates.or(IterateUtils.transformFailableImmutableList(build, input -> SelectorEntityPredicate.asPredicate(input, source)));
         return inverted ? Predicates.not(predicate) : predicate;
       });
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AlternativesEntityPredicateEntry(build, source, inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
 
     putOption("health", reader -> {
@@ -322,14 +321,12 @@ public class EntitySelectorOptionsExtension {
       final String unquotedString = stringReader.readUnquotedString();
       if ("max".equals(unquotedString)) {
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.setPredicate(entity -> entity instanceof LivingEntity livingEntity && (livingEntity.getHealth() == livingEntity.getMaxHealth()) != inverted);
-        EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new HealthMaxEntityPredicateEntry(inverted));
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new HealthMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
         final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.setPredicate(entity -> entity instanceof LivingEntity livingEntity && floatRange.isInRange(livingEntity.getHealth()) != inverted);
-        EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new HealthEntityPredicateEntry(floatRange, inverted));
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new HealthEntityPredicateEntry(floatRange, inverted));
       }
       markParamAsUsed(reader, "health", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "health"), Text.translatable("enhanced_commands.argument.entity.options.health"));
@@ -343,14 +340,12 @@ public class EntitySelectorOptionsExtension {
       final String unquotedString = stringReader.readUnquotedString();
       if ("max".equals(unquotedString)) {
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.setPredicate(entity -> (entity.getAir() == entity.getMaxAir()) != inverted);
-        EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AirMaxEntityPredicateEntry(inverted));
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new AirMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
         final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.setPredicate(entity -> intRange.test(entity.getAir()) != inverted);
-        EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AirEntityPredicateEntry(intRange, inverted));
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new AirEntityPredicateEntry(intRange, inverted));
       }
       markParamAsUsed(reader, "air", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "air"), Text.translatable("enhanced_commands.argument.entity.options.air"));
@@ -361,8 +356,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "food", inverted);
       final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
-      reader.setPredicate(entity -> entity instanceof final PlayerEntity player && intRange.test(player.getHungerManager().getFoodLevel()) != inverted);
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new FoodEntityPredicateEntry(intRange, inverted));
+      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new FoodEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "food", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "food"), Text.translatable("enhanced_commands.argument.entity.options.food"));
     markRequiringUniqueNoMixture("food");
@@ -372,8 +366,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "saturation", inverted);
       final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
       reader.setIncludesNonPlayers(false);
-      reader.setPredicate(entity -> entity instanceof final PlayerEntity player && floatRange.isInRange(player.getHungerManager().getFoodLevel()) != inverted);
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new SaturationEntityPredicateEntry(floatRange, inverted));
+      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new SaturationEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "saturation", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "saturation"), Text.translatable("enhanced_commands.argument.entity.options.saturation"));
     markRequiringUniqueNoMixture("saturation");
@@ -383,8 +376,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "exhaustion", inverted);
       final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
       reader.setIncludesNonPlayers(false);
-      reader.setPredicate(entity -> entity instanceof final PlayerEntity player && floatRange.isInRange(player.getHungerManager().getExhaustion()) != inverted);
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new ExhaustionEntityPredicateEntry(floatRange, inverted));
+      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new ExhaustionEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "exhaustion", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "exhaustion"), Text.translatable("enhanced_commands.argument.entity.options.exhaustion"));
     markRequiringUniqueNoMixture("exhaustion");
@@ -393,15 +385,56 @@ public class EntitySelectorOptionsExtension {
       final boolean inverted = reader.readNegationCharacter();
       checkNoInversionMix(reader, "fire", inverted);
       final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
-      reader.setPredicate(entity -> intRange.test(entity.getFireTicks()) != inverted);
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new FireEntityPredicateEntry(intRange, inverted));
+      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new FireEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "fire", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "fire"), Text.translatable("enhanced_commands.argument.entity.options.fire"));
     markRequiringUniqueNoMixture("fire");
+
+    putOption("pose", reader -> {
+      final boolean inverted = reader.readNegationCharacter();
+      checkNoInversionMix(reader, "pose", inverted);
+      final int cursorBefore = reader.getReader().getCursor();
+      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestMatching(PoseEntityPredicateEntry.ENTITY_POSE_NAMES.values(), suggestionsBuilder));
+      final String s = reader.getReader().readUnquotedString();
+      final EntityPose entityPose = PoseEntityPredicateEntry.ENTITY_POSE_NAMES.inverse().get(s);
+      if (entityPose != null) {
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new PoseEntityPredicateEntry(entityPose, inverted));
+        markParamAsUsed(reader, "pose", inverted);
+      } else {
+        final int cursorAfter = reader.getReader().getCursor();
+        reader.getReader().setCursor(cursorBefore);
+        throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader.getReader()), cursorAfter);
+      }
+    }, reader -> isNeverPositivelyUsed(reader, "pose"), Text.translatable("enhanced_commands.argument.entity_predicate.pose"));
+    markRequiringUniqueNoMixture("pose");
+
+    // 以下对应 EntityFlags 部分
+
+    putSimpleBooleanOption("on_fire", Entity::isOnFire);
+    // 注意：这里的 isSneaking 于 EntityFlagsPredicate 所使用的 isInSneakingPose 不同
+    putSimpleBooleanOption("sneaking", Entity::isSneaking);
+    putSimpleBooleanOption("sprinting", Entity::isSprinting);
+    putSimpleBooleanOption("swimming", Entity::isSwimming);
+    putSimpleBooleanOption("baby", entity -> entity instanceof LivingEntity livingEntity && livingEntity.isBaby());
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {
     EntitySelectorOptionsAccessor.callPutOption(id, handler, condition, description);
+  }
+
+  private static void putSimpleBooleanOption(String id, Predicate<Entity> predicate) {
+    putSimpleBooleanOption(id, predicate, "enhanced_commands.argument.entity_predicate." + id);
+    markRequiringUnique(id);
+  }
+
+  private static void putSimpleBooleanOption(String id, Predicate<Entity> predicate, String baseTranslationKey) {
+    putOption(id, reader -> {
+      final boolean inverted = reader.readNegationCharacter();
+      final boolean expected = inverted != reader.getReader().readBoolean();
+      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new SimpleBooleanEntityPredicateEntry(predicate, expected, baseTranslationKey + "." + true, baseTranslationKey + "." + false, id));
+      // 对于布尔值，使用否定的直接替换其效果，仍视为未被取反的谓词
+      markParamAsUsed(reader, id, false);
+    }, reader -> isNeverPositivelyUsed(reader, id), Text.translatable(baseTranslationKey));
   }
 
   private static boolean markParamAsUsed(EntitySelectorReader reader, String option, boolean inverted) {

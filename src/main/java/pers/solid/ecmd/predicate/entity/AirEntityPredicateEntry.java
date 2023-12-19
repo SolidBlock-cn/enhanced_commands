@@ -8,6 +8,11 @@ import pers.solid.ecmd.util.StringUtil;
 
 public record AirEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
   @Override
+  public boolean test(Entity entity) {
+    return intRange.test(entity.getAir()) != inverted;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     return EntityPredicateEntry.testInt(entity, entity.getAir(), intRange, Text.translatable("enhanced_commands.argument.entity_predicate.air"), displayName, inverted);
   }

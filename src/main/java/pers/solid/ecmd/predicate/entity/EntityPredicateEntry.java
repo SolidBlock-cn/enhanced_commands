@@ -14,7 +14,12 @@ import pers.solid.ecmd.util.TextUtil;
 /**
  * 测试实体的某一特定属性的谓词信息，可在测试时提供详细的文本描述，以及对应的字符串内的表示形式。
  */
-public interface EntityPredicateEntry {
+public interface EntityPredicateEntry extends EntityPredicate {
+  @Override
+  default boolean test(Entity entity) {
+    return false;
+  }
+
   /**
    * 测试实体并返回描述信息。调用时请使用此类，但覆盖时请覆盖 {@link #testAndDescribe(Entity, Text)}。
    */

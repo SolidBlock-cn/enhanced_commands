@@ -47,6 +47,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     dispatcher.register(literalR2("health")
+        .executes(context -> executeGetHealth(context, Collections.singleton(context.getSource().getEntityOrThrow()), null, 1))
         .then(literal("get")
             .executes(context -> executeGetHealth(context, Collections.singleton(context.getSource().getEntityOrThrow()), null, 1))
             .then(argument("entities", entities())
@@ -63,7 +64,8 @@ public enum HealthCommand implements CommandRegistrationCallback {
             .then(argument("entities", entities())
                 .then(argument("value", floatArg())
                     .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getFloat(context, "value"))))
-                .then(literal("from").then(literal("result")
+                .then(literal("from")
+                    .then(literal("result")
                         .redirect(dispatcher.getRoot(), context -> {
                           final Collection<? extends Entity> entities = getEntities(context, "entities");
                           return context.getSource().mergeConsumers((context1, success, result) -> {

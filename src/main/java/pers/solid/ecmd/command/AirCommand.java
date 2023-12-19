@@ -1,27 +1,44 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtInt;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.argument.ConcentrationTypeArgumentType;
+import org.apache.commons.lang3.function.FailableConsumer;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.ConcentrationType;
+import pers.solid.ecmd.nbt.NbtTarget;
+import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 import java.util.Collections;
 
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static net.minecraft.command.argument.EntityArgumentType.entities;
+import static net.minecraft.command.argument.EntityArgumentType.getEntities;
+import static net.minecraft.command.argument.NbtPathArgumentType.getNbtPath;
+import static net.minecraft.command.argument.NbtPathArgumentType.nbtPath;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static pers.solid.ecmd.argument.ConcentrationTypeArgumentType.concentrationType;
+import static pers.solid.ecmd.argument.ConcentrationTypeArgumentType.getConcentrationType;
+import static pers.solid.ecmd.argument.NbtSourceArgumentType.getNbtSource;
+import static pers.solid.ecmd.argument.NbtSourceArgumentType.nbtSource;
+import static pers.solid.ecmd.argument.NbtTargetArgumentType.getNbtTarget;
+import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum AirCommand implements CommandRegistrationCallback {
@@ -32,33 +49,74 @@ public enum AirCommand implements CommandRegistrationCallback {
     dispatcher.register(literalR2("air")
         .then(literal("get")
             .executes(context -> executeGetAir(context, Collections.singleton(context.getSource().getEntityOrThrow()), null))
-            .then(argument("entities", EntityArgumentType.entities())
-                .executes(context -> executeGetAir(context, EntityArgumentType.getEntities(context, "entities"), ConcentrationType.AVERAGE))
-                .then(argument("concentration_type", ConcentrationTypeArgumentType.concentrationType())
-                    .executes(context -> executeGetAir(context, EntityArgumentType.getEntities(context, "entities"), ConcentrationTypeArgumentType.getConcentrationType(context, "concentration_type"))))))
+            .then(argument("entities", entities())
+                .executes(context -> executeGetAir(context, getEntities(context, "entities"), ConcentrationType.AVERAGE))
+                .then(argument("concentration_type", concentrationType())
+                    .executes(context -> executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type")))
+                    .then(literal("store")
+                        .then(argument("target", nbtTarget(registryAccess))
+                            .then(argument("path", nbtPath())
+                                .executes(context -> {
+                                  final NbtTarget target = getNbtTarget(context, "target");
+                                  final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
+                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.modifyNbt(path, nbt));
+                                })))))))
         .then(literal("set")
-            .then(argument("entities", EntityArgumentType.entities())
-                .then(argument("value", IntegerArgumentType.integer())
-                    .executes(context -> executeSetAir(context, EntityArgumentType.getEntities(context, "entities"), IntegerArgumentType.getInteger(context, "value"))))))
+            .then(argument("entities", entities())
+                .then(argument("value", integer())
+                    .executes(context -> executeSetAir(context, getEntities(context, "entities"), getInteger(context, "value"))))
+                .then(literal("from")
+                    .then(literal("result")
+                        .redirect(dispatcher.getRoot(), context -> {
+                          final Collection<? extends Entity> entities = getEntities(context, "entities");
+                          return context.getSource().mergeConsumers((context1, success, result) -> {
+                            for (Entity entity : entities) {
+                              entity.setAir(result);
+                            }
+                          }, SeparatedExecuteCommand.BINARY_RESULT_CONSUMER);
+                        }))
+                    .then(literal("success").redirect(dispatcher.getRoot(), context -> {
+                      final Collection<? extends Entity> entities = getEntities(context, "entities");
+                      return context.getSource().mergeConsumers((context1, success, result) -> {
+                        for (Entity entity : entities) {
+                          entity.setAir(success ? 1 : 0);
+                        }
+                      }, SeparatedExecuteCommand.BINARY_RESULT_CONSUMER);
+                    }))
+                    .then(literal("of").then(argument("source_entities", entities())
+                        .executes(context -> executeSetAir(context, getEntities(context, "entities"), getSourceEntityAir(context, ConcentrationType.AVERAGE)))
+                        .then(argument("source_concentration_type", concentrationType())
+                            .executes(context -> executeSetAir(context, getEntities(context, "entities"), getSourceEntityAir(context, getConcentrationType(context, "source_concentration_type")))))))
+                    .then(argument("source", nbtSource(registryAccess))
+                        .then(argument("path", nbtPath())
+                            .executes(context -> {
+                              final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
+                              return executeSetAir(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path), path).intValue());
+                            }))))))
         .then(literal("add")
             .executes(context -> executeAddAir(context, Collections.singleton(context.getSource().getEntityOrThrow())))
-            .then(argument("entities", EntityArgumentType.entities())
-                .executes(context -> executeAddAir(context, EntityArgumentType.getEntities(context, "entities")))
-                .then(argument("value", IntegerArgumentType.integer())
-                    .executes(context -> executeAddAir(context, EntityArgumentType.getEntities(context, "entities"), IntegerArgumentType.getInteger(context, "value"))))))
+            .then(argument("entities", entities())
+                .executes(context -> executeAddAir(context, getEntities(context, "entities")))
+                .then(argument("value", integer())
+                    .executes(context -> executeAddAir(context, getEntities(context, "entities"), getInteger(context, "value"))))))
         .then(literal("remove")
             .executes(context -> executeRemoveAir(context, Collections.singleton(context.getSource().getEntityOrThrow())))
-            .then(argument("entities", EntityArgumentType.entities())
-                .executes(context -> executeRemoveAir(context, EntityArgumentType.getEntities(context, "entities")))
-                .then(argument("value", IntegerArgumentType.integer())
-                    .executes(context -> executeRemoveAir(context, EntityArgumentType.getEntities(context, "entities"), IntegerArgumentType.getInteger(context, "value")))))));
+            .then(argument("entities", entities())
+                .executes(context -> executeRemoveAir(context, getEntities(context, "entities")))
+                .then(argument("value", integer())
+                    .executes(context -> executeRemoveAir(context, getEntities(context, "entities"), getInteger(context, "value")))))));
   }
 
-  private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) {
+  private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) {return executeGetAir(context, entities, concentrationType, null);}
+
+  private static <T extends Throwable> int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, @Nullable FailableConsumer<NbtElement, T> nbtElementConsumer) throws T {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       final int air = entity.getAir();
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.get.single", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(air).styled(TextUtil.STYLE_FOR_RESULT)), false);
+      if (nbtElementConsumer != null) {
+        nbtElementConsumer.accept(NbtInt.of(air));
+      }
       return air;
     } else {
       final IntList integers = new IntArrayList();
@@ -67,6 +125,9 @@ public enum AirCommand implements CommandRegistrationCallback {
       }
       final double result = concentrationType.concentrateInt(integers);
       CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.get.multiple", integers.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.longToString(result)).styled(TextUtil.STYLE_FOR_RESULT)), false);
+      if (nbtElementConsumer != null) {
+        nbtElementConsumer.accept(concentrationType.longToNbt(result));
+      }
       return (int) result;
     }
   }
@@ -148,6 +209,20 @@ public enum AirCommand implements CommandRegistrationCallback {
       }
       CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.remove_all.multiple", TextUtil.literal(size).styled(TextUtil.STYLE_FOR_TARGET)), true);
       return size;
+    }
+  }
+
+  private static int getSourceEntityAir(CommandContext<ServerCommandSource> context, ConcentrationType concentrationType) throws CommandSyntaxException {
+    final Collection<? extends Entity> sourceEntities = getEntities(context, "source_entities");
+    if (sourceEntities.size() == 1) {
+      final Entity entity = sourceEntities.iterator().next();
+      return entity.getAir();
+    } else {
+      IntList ints = new IntArrayList();
+      for (Entity sourceEntity : sourceEntities) {
+        ints.add(sourceEntity.getAir());
+      }
+      return (int) concentrationType.concentrateInt(ints);
     }
   }
 }

@@ -11,6 +11,11 @@ public record HealthEntityPredicateEntry(FloatRangeArgument floatRange, boolean 
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.health");
 
   @Override
+  public boolean test(Entity entity) {
+    return entity instanceof LivingEntity livingEntity && (livingEntity.getHealth() == livingEntity.getMaxHealth()) != inverted;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof LivingEntity livingEntity)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_living_entity", displayName, CRITERION_NAME));

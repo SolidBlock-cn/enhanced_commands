@@ -10,6 +10,11 @@ public record FireEntityPredicateEntry(NumberRange.IntRange intRange, boolean in
   public static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.fire");
 
   @Override
+  public boolean test(Entity entity) {
+    return intRange.test(entity.getFireTicks()) != inverted;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     return EntityPredicateEntry.testInt(entity, entity.getFireTicks(), intRange, CRITERION_NAME, displayName, inverted);
   }

@@ -8,6 +8,11 @@ import pers.solid.ecmd.util.TextUtil;
 
 public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry {
   @Override
+  public boolean test(Entity entity) {
+    return (entity.getAir() == entity.getMaxAir()) != inverted;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     final int actualAir = entity.getAir();
     final MutableText actualHealthText = TextUtil.literal(actualAir).styled(TextUtil.STYLE_FOR_ACTUAL);

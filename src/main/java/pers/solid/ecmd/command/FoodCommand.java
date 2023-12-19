@@ -44,6 +44,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     dispatcher.register(literalR2("food")
+        .executes(context -> executeGetAll(context, Collections.singleton(context.getSource().getPlayerOrThrow()), null))
         .then(literal("get")
             .executes(context -> executeGetAll(context, Collections.singleton(context.getSource().getPlayerOrThrow()), null))
             .then(argument("players", players())
@@ -79,7 +80,13 @@ public enum FoodCommand implements CommandRegistrationCallback {
                 .then(literal("from")
                     .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))
                     .then(argument("slot", itemSlot())
-                        .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), getItemSlot(context, "slot"))))))));
+                        .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), getItemSlot(context, "slot")))))))
+        .then(literal("tick")
+            .executes(context -> executeTick(context, Collections.singleton(context.getSource().getPlayerOrThrow()), 1))
+            .then(argument("players", players())
+                .executes(context -> executeTick(context, getPlayers(context, "players"), 1))
+                .then(argument("times", integer(0, 32767))
+                    .executes(context -> executeTick(context, getPlayers(context, "players"), getInteger(context, "times")))))));
   }
 
   public static int executeGetAll(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, ConcentrationType concentrationType) {
@@ -246,5 +253,23 @@ public enum FoodCommand implements CommandRegistrationCallback {
       }
       return successes;
     }
+  }
+
+  private int executeTick(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, int times) {
+    int updated = 0;
+    for (PlayerEntity player : players) {
+      for (int i = 0; i < times; i++) {
+        player.getHungerManager().update(player);
+        updated++;
+      }
+    }
+    CommandBridge.sendFeedback(context, () -> {
+      if (players.size() == 1) {
+        return TextUtil.enhancedTranslatable("enhanced_commands.commands.food.tick.single", TextUtil.styled(players.iterator().next().getDisplayName(), TextUtil.STYLE_FOR_TARGET), times);
+      } else {
+        return TextUtil.enhancedTranslatable("enhanced_commands.commands.food.tick.single", TextUtil.literal(players.size()).styled(TextUtil.STYLE_FOR_TARGET), times);
+      }
+    }, true);
+    return updated;
   }
 }
