@@ -4,6 +4,7 @@
 
 - [方块函数](block_function/zh.md)
 - [方块谓词](block_predicate/zh.md)
+- [聚合类型](concentration_type/zh.md)
 - [曲线](curve/zh.md)
 - [方向](direction/zh.md)
 - [实体谓词](entity_predicate/zh.md)

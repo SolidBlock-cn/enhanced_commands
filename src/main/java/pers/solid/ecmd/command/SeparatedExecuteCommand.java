@@ -131,7 +131,7 @@ public final class SeparatedExecuteCommand {
           }
           return list;
         })));
-    dispatcher.register(literalR2("for_region")
+    dispatcher.register(literalR2("inregion")
         .then(argument("region", RegionArgumentType.region(commandRegistryAccess))
             .fork(literalCommandNode, context -> {
               final Region region = RegionArgumentType.getRegion(context, "region");

@@ -114,6 +114,15 @@
 - `@a[alternatives=[Player1, Player2]]`：选择 Player1 和 Player2。
 - `@e[type=sheep, alternatives=[[tag=a], [tag=b]]]`：在所有的羊中，选择有 a 或 b 标签的。
 
+### baby
+
+测试实体是否为幼年实体。如果实体类型不存在幼年实体，则视为未幼年实体。
+
+- `@e[baby=true]`：选择所有幼年实体。
+- `@e[baby=false]`：选择所有非幼年（包括不存在幼年状态）的实体。
+
+此参数可以取反。例如，`@e[baby=!true]` 等价于 `@e[baby=false]`、
+
 ### exhaustion
 
 测试实体的消耗度。可以接受浮点数范围。可以取反。和 [`food`](#food) 类似，加入此参数将只能选择玩家。
@@ -152,6 +161,22 @@
 
 参见 [`/health` 命令](/documents/commands/health/zh.md)。
 
+### on_fire
+
+测试实体是否存在着火。接一个布尔值。如果实体本身是对火免疫的，则一律视为未着火的。
+
+- `@e[on_fire=true]`：选择所有正在着火（且不能免疫火）的实体。
+- `@e[on_fire=false]`：选择所有未着火（或对火免疫）的实体。
+
+此选择支持取反，例如，`@e[on_fire=true]` 与 `@e[on_fire=!false]` 等价。
+
+### pose
+
+选择指定姿势的实体。
+
+- `@e[pose=crouching]`：选择所有正在爬行的实体。
+- `@a[pose=!swimming]`：选择所有未在游泳的实体。
+
 ### region
 
 选择指定的[区域](/documents/arguments/region/zh.md)内的实体。支持使用相对坐标和局部坐标，会根据命令源的位置和朝向（而不是被选择的实体的位置和朝向）来计算。
@@ -166,3 +191,26 @@
 - `@e[saturation=!0]`：选择饱和度不为 0 的玩家。
 
 参见 [`/food` 命令](/documents/commands/food/zh.md)。
+
+### sneaking
+
+测试实体是否正在潜行。飞行模式下玩家下降时也会被选中。此选项与战利品表中的谓词不同。
+
+- `@e[sneaking=true]`：选择所有正在潜行的实体。
+- `@e[sneaking=false]`：选择所有未在潜行的实体。
+
+此参数可以取反，但是通常没有必要。例如，`@e[sneaking=!true]` 等价于 `@e[sneaking=false]`。
+
+### sprinting
+
+测试实体是否存在疾跑。此参数可以取反。
+
+- `@e[sprinting=true]`：选择正在疾跑的实体。
+- `@a[sprinting=false]`：选择未在疾跑的玩家。
+
+### swimming
+
+测试实体是否存在游泳。此参数可以取反。
+
+- `@e[swimming=true]`：选择正在游泳的实体。
+- `@a[swimming=false]`：选择未在游泳的玩家。

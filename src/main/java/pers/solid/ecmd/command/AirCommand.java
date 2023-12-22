@@ -66,15 +66,14 @@ public enum AirCommand implements CommandRegistrationCallback {
                 .then(argument("value", integer())
                     .executes(context -> executeSetAir(context, getEntities(context, "entities"), getInteger(context, "value"))))
                 .then(literal("from")
-                    .then(literal("result")
-                        .redirect(dispatcher.getRoot(), context -> {
-                          final Collection<? extends Entity> entities = getEntities(context, "entities");
-                          return context.getSource().mergeConsumers((context1, success, result) -> {
-                            for (Entity entity : entities) {
-                              entity.setAir(result);
-                            }
-                          }, SeparatedExecuteCommand.BINARY_RESULT_CONSUMER);
-                        }))
+                    .then(literal("result").redirect(dispatcher.getRoot(), context -> {
+                      final Collection<? extends Entity> entities = getEntities(context, "entities");
+                      return context.getSource().mergeConsumers((context1, success, result) -> {
+                        for (Entity entity : entities) {
+                          entity.setAir(result);
+                        }
+                      }, SeparatedExecuteCommand.BINARY_RESULT_CONSUMER);
+                    }))
                     .then(literal("success").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
                       return context.getSource().mergeConsumers((context1, success, result) -> {

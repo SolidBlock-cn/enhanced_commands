@@ -65,17 +65,16 @@ public enum HealthCommand implements CommandRegistrationCallback {
                 .then(argument("value", floatArg())
                     .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getFloat(context, "value"))))
                 .then(literal("from")
-                    .then(literal("result")
-                        .redirect(dispatcher.getRoot(), context -> {
-                          final Collection<? extends Entity> entities = getEntities(context, "entities");
-                          return context.getSource().mergeConsumers((context1, success, result) -> {
-                            for (Entity entity : entities) {
-                              if (entity instanceof LivingEntity livingEntity) {
-                                livingEntity.setHealth(result);
-                              }
-                            }
-                          }, SeparatedExecuteCommand.BINARY_RESULT_CONSUMER);
-                        }))
+                    .then(literal("result").redirect(dispatcher.getRoot(), context -> {
+                      final Collection<? extends Entity> entities = getEntities(context, "entities");
+                      return context.getSource().mergeConsumers((context1, success, result) -> {
+                        for (Entity entity : entities) {
+                          if (entity instanceof LivingEntity livingEntity) {
+                            livingEntity.setHealth(result);
+                          }
+                        }
+                      }, SeparatedExecuteCommand.BINARY_RESULT_CONSUMER);
+                    }))
                     .then(literal("success").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
                       return context.getSource().mergeConsumers((context1, success, result) -> {

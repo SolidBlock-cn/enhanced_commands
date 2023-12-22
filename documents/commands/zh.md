@@ -52,9 +52,9 @@
     - `/anchored`
     - `/in`
     - `/summon`
-    - [`/silenced`](silenced/zh.md)（本模组添加）：执行命令，但是不会在聊天或者控制台产生任何反馈。
-    - [`/for_region`](for_region/zh.md)（本模组添加）
-    - [`/for`](for/zh.md)（本模组添加）
+    - [`/inregion`](inregion/zh.md)（本模组添加）：在一个区域内的所有方块坐标中分别执行命令。
+        - [`/silenced`](silenced/zh.md)（本模组添加）：执行命令，但是不会在聊天或者控制台产生任何反馈。
+        - [`/for`](for/zh.md)（本模组添加）
 - 存储子命令：
     - `/store`
 

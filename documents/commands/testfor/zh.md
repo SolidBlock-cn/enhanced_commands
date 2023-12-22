@@ -7,4 +7,4 @@
 ## 子命令列表
 
 - [`/testfor block`](block/zh.md)
-- [`/testfor block_info`](block_info/zh.md)
+- [`/testfor blockinfo`](blockinfo/zh.md)

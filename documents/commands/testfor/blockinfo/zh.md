@@ -4,7 +4,7 @@
 
 ## 语法
 
-- `/testfor block_info <坐标> ...`：检测指定位置的方块的……
+- `/testfor blockinfo <坐标> ...`：检测指定位置的方块的……
     - `... hardness [倍率]`：硬度；返回的值会乘以 `[倍率]`，默认为 1。
     - `... luminance`：发光强度。仅限方块自身的发光。
     - `... strong_redstone_power <方向>`：指定[方向](/documents/arguments/direction/zh.md)上的强红石能量。
@@ -30,8 +30,8 @@
 
 ## 示例
 
-- `/testfor block_info 1 2 3`：获取 (1, 2, 3) 位置的方块的硬度。
-- `/testfor block_info ~~-1~ strong_redstone_power up`：执行源的位置下方一格位置的方块是否存在往上的强红石信号。
+- `/testfor blockinfo 1 2 3`：获取 (1, 2, 3) 位置的方块的硬度。
+- `/testfor blockinfo ~~-1~ strong_redstone_power up`：执行源的位置下方一格位置的方块是否存在往上的强红石信号。
 
 ## 参见
 

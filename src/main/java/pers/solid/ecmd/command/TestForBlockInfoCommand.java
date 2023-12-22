@@ -108,36 +108,36 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
   }
 
   private static int executeGetHardness(CommandContext<ServerCommandSource> context, float scale) throws CommandSyntaxException {
-    final double hardness = getFloatBlockInfo(context, "enhanced_commands.commands.testfor.block_info.hardness", AbstractBlock.AbstractBlockState::getHardness);
+    final double hardness = getFloatBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.hardness", AbstractBlock.AbstractBlockState::getHardness);
     return (int) (hardness * scale);
   }
 
   private static int executeGetLuminance(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return getIntBlockInfo(context, "enhanced_commands.commands.testfor.block_info.luminance", (blockState, serverWorld, blockPos) -> blockState.getLuminance());
+    return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.luminance", (blockState, serverWorld, blockPos) -> blockState.getLuminance());
   }
 
   private static int executeGetStrongRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return getIntBlockInfoWithDirection(context, "enhanced_commands.commands.testfor.block_info.strong_redstone_power", AbstractBlock.AbstractBlockState::getStrongRedstonePower);
+    return getIntBlockInfoWithDirection(context, "enhanced_commands.commands.testfor.blockinfo.strong_redstone_power", AbstractBlock.AbstractBlockState::getStrongRedstonePower);
   }
 
   private static int executeGetWeakRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return getIntBlockInfoWithDirection(context, "enhanced_commands.commands.testfor.block_info.weak_redstone_power", AbstractBlock.AbstractBlockState::getWeakRedstonePower);
+    return getIntBlockInfoWithDirection(context, "enhanced_commands.commands.testfor.blockinfo.weak_redstone_power", AbstractBlock.AbstractBlockState::getWeakRedstonePower);
   }
 
   private static int executeGetLight(CommandContext<ServerCommandSource> context, @Nullable LightType lightType) throws CommandSyntaxException {
     if (lightType == null) {
-      return getIntBlockInfo(context, "enhanced_commands.commands.testfor.block_info.light", (blockState, serverWorld, blockPos) -> serverWorld.getLightLevel(blockPos));
+      return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.light", (blockState, serverWorld, blockPos) -> serverWorld.getLightLevel(blockPos));
     } else {
-      return getIntBlockInfo(context, "enhanced_commands.commands.testfor.block_info." + (lightType == LightType.BLOCK ? "block" : "sky") + "_light", (blockState, serverWorld, blockPos) -> serverWorld.getLightLevel(lightType, blockPos));
+      return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo." + (lightType == LightType.BLOCK ? "block" : "sky") + "_light", (blockState, serverWorld, blockPos) -> serverWorld.getLightLevel(lightType, blockPos));
     }
   }
 
   private static int executeGetEmitsRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.block_info.emits_redstone_power.false", "enhanced_commands.commands.testfor.block_info.emits_redstone_power.true", (blockState, serverWorld, blockPos) -> blockState.emitsRedstonePower()));
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.emits_redstone_power.false", "enhanced_commands.commands.testfor.blockinfo.emits_redstone_power.true", (blockState, serverWorld, blockPos) -> blockState.emitsRedstonePower()));
   }
 
   private static int executeGetOpaque(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.block_info.opaque.false", "enhanced_commands.commands.testfor.block_info.opaque.true", (blockState, serverWorld, blockPos) -> blockState.isOpaque()));
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.opaque.false", "enhanced_commands.commands.testfor.blockinfo.opaque.true", (blockState, serverWorld, blockPos) -> blockState.isOpaque()));
   }
 
   private static int executeGetModelOffset(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -147,32 +147,32 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
     final BlockState blockState = world.getBlockState(pos);
     final Vec3d modelOffset = blockState.getModelOffset(world, pos);
     if (modelOffset.equals(Vec3d.ZERO)) {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.testfor.block_info.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos)), false);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.testfor.blockinfo.model_offset.false", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos)), false);
       return 0;
     } else {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.testfor.block_info.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), TextUtil.wrapVector(modelOffset)), false);
+      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.testfor.blockinfo.model_offset.true", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), TextUtil.wrapVector(pos), TextUtil.wrapVector(modelOffset)), false);
       return 1;
     }
   }
 
   private static int executeGetSuffocate(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.block_info.suffocate.false", "enhanced_commands.commands.testfor.block_info.suffocate.true", AbstractBlock.AbstractBlockState::shouldSuffocate));
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.suffocate.false", "enhanced_commands.commands.testfor.blockinfo.suffocate.true", AbstractBlock.AbstractBlockState::shouldSuffocate));
   }
 
   private static int executeGetBlockVision(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.block_info.block_vision.false", "enhanced_commands.commands.testfor.block_info.block_vision.true", AbstractBlock.AbstractBlockState::shouldBlockVision));
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.block_vision.false", "enhanced_commands.commands.testfor.blockinfo.block_vision.true", AbstractBlock.AbstractBlockState::shouldBlockVision));
   }
 
   private static int executeGetReplaceable(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.block_info.replaceable.false", "enhanced_commands.commands.testfor.block_info.replaceable.true", (blockState, serverWorld, blockPos) -> blockState.isReplaceable()));
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.replaceable.false", "enhanced_commands.commands.testfor.blockinfo.replaceable.true", (blockState, serverWorld, blockPos) -> blockState.isReplaceable()));
   }
 
   private static int executeGetRandomTicks(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.block_info.random_ticks.false", "enhanced_commands.commands.testfor.block_info.random_ticks.true", (blockState, serverWorld, blockPos) -> blockState.hasRandomTicks()));
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.random_ticks.false", "enhanced_commands.commands.testfor.blockinfo.random_ticks.true", (blockState, serverWorld, blockPos) -> blockState.hasRandomTicks()));
   }
 
   @Override
   public void addArguments(LiteralArgumentBuilder<ServerCommandSource> testForBuilder, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    testForBuilder.then(addBlockInfoCommandProperties(CommandManager.literal("block_info")));
+    testForBuilder.then(addBlockInfoCommandProperties(CommandManager.literal("blockinfo")));
   }
 }
