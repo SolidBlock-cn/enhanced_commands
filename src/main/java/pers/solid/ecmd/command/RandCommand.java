@@ -38,7 +38,7 @@ import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
 import static pers.solid.ecmd.command.ModCommands.consumerOf;
 
 /**
- * <p>The command used to generate random values. Some usages:</p>
+ * <p>The command used to generate random valueNames. Some usages:</p>
  * <ul>
  *   <li><code>/rand</code> - rand float value between 0 and 1.</li>
  *   <li><code>/rand boolean</code> - rand boolean with 0.5 probability of true.</li>

@@ -22,8 +22,7 @@ public record ValueNamePropertyPredicate(String propertyName, Comparator compara
   public boolean test(BlockState blockState) {
     final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
     final Property<?> property = stateManager.getProperty(propertyName);
-    if (property == null)
-      return false;
+    if (property == null) return false;
     return comparator.parseAndTest(blockState, property, valueName);
   }
 
@@ -46,7 +45,7 @@ public record ValueNamePropertyPredicate(String propertyName, Comparator compara
   }
 
   @NotNull
-  private static <T extends Comparable<T>> MutableText propertyAndValue(BlockState blockState, Property<T> property) {
+  static <T extends Comparable<T>> MutableText propertyAndValue(BlockState blockState, Property<T> property) {
     return Text.literal(property.getName() + "=" + property.name(blockState.get(property)));
   }
 

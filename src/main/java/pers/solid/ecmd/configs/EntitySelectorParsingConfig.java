@@ -35,6 +35,16 @@ public class EntitySelectorParsingConfig {
   public boolean allowMultipleGameModes = true;
 
   /**
+   * 在显示实体类型 id 时，应当同时显示其实体名称。
+   */
+  public boolean improveEntityTypeSuggestion = true;
+
+  /**
+   * 允许使用像 {@code type=cat|dog} 这样的方式选择多个类型。
+   */
+  public boolean allowMultipleTypes = true;
+
+  /**
    * 输入实体类型标签时，避免未输入完成就解析进入下一步导致的建议不显示的问题。
    */
   public boolean fixEntityTypeTagSuggestions = true;

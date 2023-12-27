@@ -37,6 +37,12 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   public static final Text START_OF_PROPERTIES = Text.translatable("enhanced_commands.argument.block_predicate.start_of_properties");
   public static final Text NEXT_PROPERTY = Text.translatable("enhanced_commands.argument.block_predicate.next_property");
   public static final Text END_OF_PROPERTIES = Text.translatable("enhanced_commands.argument.block_predicate.end_of_properties");
+  public static final SuggestionProvider PROPERTY_FINISHED = (context, suggestionsBuilder) -> {
+    if (suggestionsBuilder.getRemaining().isEmpty()) {
+      suggestionsBuilder.suggest(",", NEXT_PROPERTY);
+      suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
+    }
+  };
   public final RegistryWrapper<Block> registryWrapper;
   protected final CommandRegistryAccess commandRegistryAccess;
   public Block block;
@@ -56,12 +62,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   }
 
   protected static <T extends Comparable<T>> void suggestValuesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder) {
-    for (T value : property.getValues()) {
-      final String valueName = property.name(value);
-      if (valueName.startsWith(suggestionsBuilder.getRemainingLowerCase())) {
-        suggestionsBuilder.suggest(valueName);
-      }
-    }
+    CommandSource.suggestMatching(property.getValues().stream().map(property::name), suggestionsBuilder);
   }
 
   protected static <T extends Comparable<T>> Stream<String> getPropertyValueNameStream(Property<T> property) {
@@ -131,8 +132,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       if (suggestionProviders.isEmpty()) {
         addPropertiesFinishedSuggestions();
       }
-      if (parsePropertyEntryEnd())
-        return;
+      if (parsePropertyEntryEnd()) return;
     }
     throw BlockArgumentParser.UNCLOSED_PROPERTIES_EXCEPTION.createWithContext(this.reader);
   }
@@ -206,12 +206,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   protected abstract Comparator parseComparator() throws CommandSyntaxException;
 
   protected void addPropertiesFinishedSuggestions() {
-    suggestionProviders.add((context, suggestionsBuilder) -> {
-      if (suggestionsBuilder.getRemaining().isEmpty()) {
-        suggestionsBuilder.suggest(",", NEXT_PROPERTY);
-        suggestionsBuilder.suggest("]", END_OF_PROPERTIES);
-      }
-    });
+    suggestionProviders.add(PROPERTY_FINISHED);
   }
 
   protected abstract void addComparatorTypeSuggestions();
@@ -268,17 +263,15 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     }
 
     while (this.reader.canRead(-1)) {
-      if (parsePropertyNameEntry())
-        break;
+      parsePropertyNameEntry();
       reader.skipWhitespace();
 
-      if (parsePropertyEntryEnd())
-        return;
+      if (parsePropertyEntryEnd()) return;
     }
     throw BlockArgumentParser.UNCLOSED_PROPERTIES_EXCEPTION.createWithContext(this.reader);
   }
 
-  protected boolean parsePropertyNameEntry() throws CommandSyntaxException {
+  protected void parsePropertyNameEntry() throws CommandSyntaxException {
     // parse a property name
     addTagPropertiesNameSuggestions();
     final int cursorBeforePropertyName = reader.getCursor();
@@ -309,12 +302,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     reader.skipWhitespace();
 
     // parse valueName
-    final int cursorBeforeUnfinishedValue = parsePropertyNameValue(propertyName, comparator);
-    if (cursorBeforeUnfinishedValue >= 0) {
-      reader.setCursor(cursorBeforeUnfinishedValue);
-      return true;
-    }
-    return false;
+    parsePropertyNameValue(propertyName, comparator);
   }
 
   private void addTagPropertiesNameSuggestions() {
@@ -348,5 +336,5 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
 
   protected abstract <T extends Comparable<T>> void parsePropertyNameValue(Property<T> property, Comparator comparator) throws CommandSyntaxException;
 
-  protected abstract int parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException;
+  protected abstract void parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException;
 }

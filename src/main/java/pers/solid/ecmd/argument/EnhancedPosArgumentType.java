@@ -44,7 +44,7 @@ import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCur
 /**
  * Similar to {@link net.minecraft.command.argument.BlockPosArgumentType} and {@link Vec3ArgumentType}, with some slight modifications.
  *
- * @param numberType   The behavior of the argument type when accepting different values.
+ * @param numberType   The behavior of the argument type when accepting different valueNames.
  * @param intAlignType
  * @see PosArgument
  * @see net.minecraft.command.argument.BlockPosArgumentType
@@ -312,22 +312,16 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
           // 确保在建议数字时，前面必须已经是一个空格，或者还没有参数。
           if (crossHairBlockPos != null && !numberType.doubleOnly()) {
             switch (i) {
-              case 0 ->
-                  builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int"));
-              case 1 ->
-                  builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
-              case 2 ->
-                  builder.suggest(crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
+              case 0 -> builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int"));
+              case 1 -> builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
+              case 2 -> builder.suggest(crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
             }
           }
           if (crossHairPos != null && !numberType.intOnly()) {
             switch (i) {
-              case 0 ->
-                  builder.suggest(crossHairPos.getX() + " " + crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_double"));
-              case 1 ->
-                  builder.suggest(crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
-              case 2 ->
-                  builder.suggest(String.valueOf(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+              case 0 -> builder.suggest(crossHairPos.getX() + " " + crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_double"));
+              case 1 -> builder.suggest(crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+              case 2 -> builder.suggest(String.valueOf(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
             }
           }
         }
@@ -386,11 +380,11 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
    */
   public enum NumberType {
     /**
-     * Only accepts integer values. Tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
+     * Only accepts integer valueNames. Tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative valueNames.
      */
     INT_ONLY,
     /**
-     * Accepts both integer and double value. Pure tilde "~ ~ ~" and tilde with integer values (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
+     * Accepts both integer and double value. Pure tilde "~ ~ ~" and tilde with integer valueNames (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative valueNames.
      */
     PREFER_INT,
     /**
@@ -398,7 +392,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
      */
     PREFER_DOUBLE,
     /**
-     * Accepts double values only. Integer values will be interpreted as doubles.
+     * Accepts double valueNames only. Integer valueNames will be interpreted as doubles.
      */
     DOUBLE_ONLY;
 

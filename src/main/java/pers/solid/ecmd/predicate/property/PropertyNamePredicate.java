@@ -24,6 +24,11 @@ public interface PropertyNamePredicate extends ExpressionConvertible, NbtConvert
       return new NameExistencePropertyPredicate(propertyName, nbtCompound.getBoolean("exists"));
     } else {
       final Comparator comparator = Comparator.NAME_TO_VALUE.getOrDefault(nbtCompound.getString("comparator"), Comparator.EQ);
+      if (comparator == Comparator.EQ || comparator == Comparator.NE) {
+        if (nbtCompound.contains("value", NbtElement.LIST_TYPE)) {
+          return new ValueNamesPropertyPredicate(propertyName, nbtCompound.getList("value", NbtElement.STRING_TYPE).stream().map(NbtElement::asString).toList(), comparator == Comparator.NE);
+        }
+      }
       return new ValueNamePropertyPredicate(propertyName, comparator, nbtCompound.getString("value"));
     }
   }

@@ -2,6 +2,7 @@ package pers.solid.ecmd.argument;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockArgumentParser;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.property.*;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.SuggestionProvider;
 
 import java.util.*;
 
@@ -72,17 +74,17 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
         suggestionProviders.clear();
         return;
       }
-      final int cursorBeforeParseValue = reader.getCursor();
-      final String valueName = reader.readString();
-      final Optional<T> parse = property.parse(valueName);
-      if (parse.isPresent()) {
-        propertyFunctions.add(new SimplePropertyFunction<>(property, parse.get(), must));
-        suggestionProviders.clear();
-      } else {
-        final int cursorAfterParseValue = reader.getCursor();
-        this.reader.setCursor(cursorBeforeParseValue);
-        throw withCursorEnd(BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(this.reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
-      }
+    }
+    final int cursorBeforeParseValue = reader.getCursor();
+    final String valueName = reader.readString();
+    final Optional<T> parse = property.parse(valueName);
+    if (parse.isPresent()) {
+      propertyFunctions.add(new SimplePropertyFunction<>(property, parse.get(), must));
+      suggestionProviders.clear();
+    } else {
+      final int cursorAfterParseValue = reader.getCursor();
+      this.reader.setCursor(cursorBeforeParseValue);
+      throw withCursorEnd(BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(this.reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
     }
   }
 
@@ -109,7 +111,7 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   }
 
   @Override
-  protected int parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException {
+  protected void parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException {
     mentionedPropertyNames.add(propertyName);
     suggestionProviders.clear();
     addSpecialPropertyValueSuggestions();
@@ -118,25 +120,32 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
         propertyNameFunctions.add(new RandomPropertyNameFunction(propertyName, must));
         reader.skip();
         suggestionProviders.clear();
-        return -1;
       } else if (reader.peek() == '~') {
         propertyNameFunctions.add(new BypassingPropertyNameFunction(propertyName, must));
         reader.skip();
         suggestionProviders.clear();
-        return -1;
       }
     }
     final int cursorBeforeValue = reader.getCursor();
     final String valueName = this.reader.readString();
+    final int cursorAfterValue = reader.getCursor();
     addTagPropertiesValueSuggestions(propertyName);
-    final boolean expectEndOfValue = tagId == null || reader.canRead() || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream().filter(property -> property.getName().equals(propertyName))).flatMap(SimpleBlockPredicateSuggestedParser::getPropertyValueNameStream).noneMatch(value -> value.startsWith(valueName) && !value.equals(valueName));
-    if (expectEndOfValue && !valueName.isEmpty()) {
+    if (tagId != null) {
+      final SuggestionProvider tagPropertiesValueSuggestion = suggestionProviders.get(suggestionProviders.size() - 1);
       suggestionProviders.clear();
+      suggestionProviders.add(SuggestionProvider.offset((context, suggestionsBuilder) -> {
+        final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursorBeforeValue);
+        tagPropertiesValueSuggestion.accept(context, offset);
+        final SuggestionsBuilder offset2 = suggestionsBuilder.createOffset(cursorAfterValue);
+        PROPERTY_FINISHED.accept(context, offset2);
+        return offset.buildFuture().thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
+      }));
+    } else {
+      suggestionProviders.clear();
+      addPropertiesFinishedSuggestions();
     }
-    addPropertiesFinishedSuggestions();
     propertyNameFunctions.add(new SimplePropertyNameFunction(propertyName, valueName, must));
     reader.skipWhitespace();
-    return expectEndOfValue ? -1 : cursorBeforeValue;
   }
 
   @Override
@@ -175,7 +184,7 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   }
 
   @Override
-  protected boolean parsePropertyNameEntry() throws CommandSyntaxException {
+  protected void parsePropertyNameEntry() throws CommandSyntaxException {
     if (exceptionForGeneralPropertyName == null) {
       suggestionProviders.add((context, suggestionsBuilder) -> {
         ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.argument.block_function.property.all_random"), suggestionsBuilder);
@@ -192,9 +201,9 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
         suggestionProviders.clear();
         exceptionForGeneralPropertyName = mentionedPropertyNames;
         propertyNameFunctions.add(peek == '*' ? new AllRandomPropertyNameFunction(exceptionForGeneralPropertyName) : new AllOriginalPropertyNameFunctions(exceptionForGeneralPropertyName));
-        return false;
+        return;
       }
     }
-    return super.parsePropertyNameEntry();
+    super.parsePropertyNameEntry();
   }
 }

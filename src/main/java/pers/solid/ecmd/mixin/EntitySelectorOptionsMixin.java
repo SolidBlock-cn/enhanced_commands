@@ -31,6 +31,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.NumberRange;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.command.ServerCommandSource;
@@ -312,6 +313,39 @@ public abstract class EntitySelectorOptionsMixin {
       if (!stringReader.canRead()) {
         throw EntitySelectorReader.UNTERMINATED_EXCEPTION.create();
       }
+    }
+  }
+
+  /**
+   * 在提供实体类型 id 的建议时，同时显示其名称。
+   */
+  @WrapOperation(method = "method_9921", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/CommandSource;suggestIdentifiers(Ljava/lang/Iterable;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;"))
+  private static CompletableFuture<Suggestions> improveEntityTypeSuggestion(Iterable<Identifier> candidates, SuggestionsBuilder builder, Operation<CompletableFuture<Suggestions>> original) {
+    if (EntitySelectorParsingConfig.CURRENT.improveEntityTypeSuggestion) {
+      return CommandSource.suggestFromIdentifier(Registries.ENTITY_TYPE.streamEntries(), builder, r -> r.registryKey().getValue(), r -> r.value().getName());
+    } else {
+      return original.call(candidates, builder);
+    }
+  }
+
+  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V", ordinal = 0, shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/registry/tag/TagKey;of(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/util/Identifier;)Lnet/minecraft/registry/tag/TagKey;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  private static void acceptMultipleTypesOnEntry(EntitySelectorReader reader, CallbackInfo ci, int cursorBeforeNegation, boolean hasNegation, TagKey<EntityType<?>> tagKey) throws CommandSyntaxException {
+    if (!EntitySelectorParsingConfig.CURRENT.allowMultipleTypes) {
+      return;
+    }
+    if (EntitySelectorOptionsExtension.mixinReadMultipleTypes(reader, hasNegation, Either.right(tagKey))) {
+      ci.cancel();
+    }
+  }
+
+  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V", shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  private static void acceptMultipleTypesOnTag(EntitySelectorReader reader, CallbackInfo ci, int cursorBeforeNegation, boolean hasNegation, Identifier identifier, EntityType<?> entityType) throws CommandSyntaxException {
+    if (!EntitySelectorParsingConfig.CURRENT.allowMultipleTypes) {
+      return;
+    }
+    if (EntitySelectorOptionsExtension.mixinReadMultipleTypes(reader, hasNegation, Either.left(entityType))) {
+      reader.setIncludesNonPlayers(true);
+      ci.cancel();
     }
   }
 

@@ -3,6 +3,7 @@ package pers.solid.ecmd.predicate.entity;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
@@ -11,6 +12,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
@@ -20,6 +22,7 @@ import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.loot.LootGsons;
@@ -30,8 +33,10 @@ import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.predicate.entity.EntityEffectPredicate;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
@@ -40,6 +45,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
@@ -49,6 +55,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixin.EntitySelectorOptionsMixin;
+import pers.solid.ecmd.mixin.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.region.Region;
@@ -607,6 +614,73 @@ public class EntitySelectorOptionsExtension {
     registerModOptions();
     Validate.notEmpty(INAPPLICABLE_REASONS);
     Validate.notEmpty(OPTION_NAME_ALIASES);
+  }
+
+  /**
+   * 此方法用于 mixin。此方法同时还会添加游戏模式谓词描述。
+   */
+  @ApiStatus.Internal
+  public static boolean mixinReadMultipleTypes(EntitySelectorReader reader, boolean hasNegation, @NotNull Either<EntityType<?>, TagKey<EntityType<?>>> already) throws CommandSyntaxException {
+    final StringReader stringReader = reader.getReader();
+    final int cursorBeforeWhite = stringReader.getCursor();
+    stringReader.skipWhitespace();
+
+    if (stringReader.canRead() && stringReader.peek() == '|') {
+      Set<EntityType<?>> parsedTypes = new HashSet<>();
+      Set<TagKey<EntityType<?>>> parsedTypeKeys = new HashSet<>();
+      already.ifLeft(parsedTypes::add);
+      already.ifRight(parsedTypeKeys::add);
+      List<Either<EntityType<?>, TagKey<EntityType<?>>>> values = Lists.newArrayList(already);
+      while (stringReader.canRead() && stringReader.peek() == '|') {
+        stringReader.skip();
+        stringReader.skipWhitespace();
+        final int cursorBeforeNext = stringReader.getCursor();
+
+        // 提供游戏模式（包括本模组中提供的 a、1 等名称）的建议。
+        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
+          CommandSource.suggestFromIdentifier(Registries.ENTITY_TYPE.streamEntries().filter(r -> !parsedTypes.contains(r.value())), suggestionsBuilder, r -> r.registryKey().getValue(), r -> r.value().getName());
+          return CommandSource.suggestIdentifiers(Registries.ENTITY_TYPE.streamTags().filter(tagKey -> !parsedTypeKeys.contains(tagKey)).map(TagKey::id), suggestionsBuilder, "#");
+        });
+
+        if (reader.readTagCharacter()) {
+          TagKey<EntityType<?>> tagKey = TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier.fromCommandInput(reader.getReader()));
+          final var suggestionProvider = ((EntitySelectorReaderAccessor) reader).getSuggestionProvider();
+          reader.setSuggestionProvider((builder, suggestionsBuilderConsumer) -> suggestionProvider.apply(builder.createOffset(cursorBeforeNext), suggestionsBuilderConsumer).thenCombine(builder.suggest(",").suggest("]").buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions));
+          if (!stringReader.canRead()) {
+            throw EntitySelectorReader.UNTERMINATED_EXCEPTION.create();
+          }
+          if (parsedTypeKeys.contains(tagKey)) {
+            final int cursorAfterNext = stringReader.getCursor();
+            stringReader.setCursor(cursorBeforeNext);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, "#" + tagKey.id()), cursorAfterNext);
+          }
+          parsedTypeKeys.add(tagKey);
+          values.add(Either.right(tagKey));
+        } else {
+          Identifier identifier = Identifier.fromCommandInput(reader.getReader());
+          final int cursorAfterNext = stringReader.getCursor();
+          EntityType<?> entityType = Registries.ENTITY_TYPE.getOrEmpty(identifier).orElseThrow(() -> {
+            stringReader.setCursor(cursorBeforeNext);
+            return CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.INVALID_TYPE_EXCEPTION.createWithContext(stringReader, identifier.toString()), cursorAfterNext);
+          });
+          if (parsedTypes.contains(entityType)) {
+            stringReader.setCursor(cursorBeforeNext);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, entityType.getName()), cursorAfterNext);
+          }
+          parsedTypes.add(entityType);
+          values.add(Either.left(entityType));
+        }
+
+        stringReader.skipWhitespace();
+        // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
+      }
+
+      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new TypesEntityPredicateEntry(values, hasNegation));
+      return true;
+    } else {
+      stringReader.setCursor(cursorBeforeWhite);
+      return false;
+    }
   }
 
   /**
