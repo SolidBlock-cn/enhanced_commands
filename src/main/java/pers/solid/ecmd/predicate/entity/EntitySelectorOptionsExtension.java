@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
@@ -15,9 +16,12 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.command.*;
+import net.minecraft.command.argument.PosArgument;
+import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.loot.LootGsons;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.condition.LootConditionManager;
@@ -25,6 +29,9 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.predicate.NumberRange;
+import net.minecraft.predicate.entity.EntityEffectPredicate;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
@@ -40,8 +47,11 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixin.EntitySelectorOptionsMixin;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
@@ -416,6 +426,133 @@ public class EntitySelectorOptionsExtension {
     putSimpleBooleanOption("sprinting", Entity::isSprinting);
     putSimpleBooleanOption("swimming", Entity::isSwimming);
     putSimpleBooleanOption("baby", entity -> entity instanceof LivingEntity livingEntity && livingEntity.isBaby());
+
+    // 检测实体所在的方块
+    putOption("block", reader -> {
+      final StringReader stringReader = reader.getReader();
+      stringReader.skipWhitespace();
+      final SuggestedParser parser = new SuggestedParser(stringReader);
+      if (stringReader.canRead() && stringReader.peek() == '{') {
+        stringReader.skip();
+        stringReader.skipWhitespace();
+        final Map<PosArgument, BlockPredicateArgument> map = new LinkedHashMap<>();
+        while (true) {
+          if (stringReader.canRead() && stringReader.peek() == '}') {
+            stringReader.skip();
+            break;
+          }
+          parser.suggestionProviders.clear();
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
+          final PosArgument posArgument = parser.parseAndSuggestArgument(EnhancedPosArgumentType.blockPos());
+
+          stringReader.skipWhitespace();
+          if (stringReader.canRead() && stringReader.peek() == '=') {
+            stringReader.skip();
+            stringReader.skipWhitespace();
+          } else {
+            reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest("=").buildFuture());
+            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(stringReader, "=");
+          }
+
+          parser.suggestionProviders.clear();
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
+          final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(MixinSharedVariables.getCommandRegistryAccess(), parser, false);
+
+          map.put(posArgument, blockPredicateArgument);
+          stringReader.skipWhitespace();
+
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest(",").suggest("}").buildFuture());
+          if (stringReader.canRead() && stringReader.peek() == ',') {
+            stringReader.skip();
+            stringReader.skipWhitespace();
+          } else if (stringReader.canRead() && stringReader.peek() == '}') {
+            stringReader.skip();
+            break;
+          } else {
+            throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "}");
+          }
+        }
+
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> {
+          final ImmutableMap.Builder<PosArgument, BlockPredicate> newMapBuilder = new ImmutableMap.Builder<>();
+          for (final var entry : map.entrySet()) {
+            final var posArgument = entry.getKey();
+            final var blockPredicateArgument = entry.getValue();
+            newMapBuilder.put(posArgument, blockPredicateArgument.apply(source));
+          }
+          return new BlockPredicatesEntityPredicateEntry(newMapBuilder.build());
+        });
+      } else {
+        parser.suggestionProviders.clear();
+        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
+        final BlockPredicateArgument parse = BlockPredicateArgument.parse(MixinSharedVariables.getCommandRegistryAccess(), parser, false);
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
+      }
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity_predicate.block"));
+
+    // 检测实体所拥有的效果
+    putOption("effect", reader -> {
+      final StringReader stringReader = reader.getReader();
+      stringReader.skipWhitespace();
+      final RegistryWrapper<StatusEffect> wrapper = MixinSharedVariables.getCommandRegistryAccess().createWrapper(RegistryKeys.STATUS_EFFECT);
+      final var type = new RegistryEntryArgumentType<>(MixinSharedVariables.getCommandRegistryAccess(), RegistryKeys.STATUS_EFFECT);
+      if (stringReader.canRead() && stringReader.peek() == '{') {
+        stringReader.skip();
+        stringReader.skipWhitespace();
+        final LinkedHashMap<StatusEffect, EntityEffectPredicate.EffectData> effects = new LinkedHashMap<>();
+        final HashSet<StatusEffect> inverted = new HashSet<>();
+        final EffectsEntityPredicateEntry entry = new EffectsEntityPredicateEntry(effects, inverted);
+        while (true) {
+          if (stringReader.canRead() && stringReader.peek() == '}') {
+            stringReader.skip();
+            break;
+          }
+
+          final int cursorBeforeEffectEntry = stringReader.getCursor();
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.filter(effect -> !effects.containsKey(effect)).streamEntries()::iterator, suggestionsBuilder, ref -> ref.registryKey().getValue(), ref1 -> ref1.value().getName()));
+          final var effect = type.parse(stringReader).value();
+          if (effects.containsKey(effect)) {
+            final int cursorAfterEffectId = stringReader.getCursor();
+            stringReader.setCursor(cursorBeforeEffectEntry);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, effect.getName()), cursorAfterEffectId);
+          }
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest("=").buildFuture());
+          stringReader.skipWhitespace();
+          stringReader.expect('=');
+          final boolean isInverted = reader.readNegationCharacter();
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestMatching(new String[]{"true", "false"}, suggestionsBuilder));
+
+          // 这里暂时只允许读布尔值。
+          final boolean expected = stringReader.readBoolean();
+          effects.put(effect, new EntityEffectPredicate.EffectData());
+          if (isInverted == expected) {
+            inverted.add(effect);
+          }
+
+          stringReader.skipWhitespace();
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest(",").suggest("}").buildFuture());
+          if (stringReader.canRead() && stringReader.peek() == ',') {
+            stringReader.skip();
+            stringReader.skipWhitespace();
+          } else if (stringReader.canRead() && stringReader.peek() == '}') {
+            stringReader.skip();
+            break;
+          } else {
+            throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "}");
+          }
+        }
+
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(entry);
+      } else {
+        final boolean inverted = reader.readNegationCharacter();
+        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries(), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref -> ref.value().getName()));
+        final StatusEffect value = type.parse(stringReader).value();
+
+        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new EffectEntityPredicateEntry(value, inverted));
+        markParamAsUsed(reader, "effect", inverted);
+      }
+    }, reader -> isNeverPositivelyUsed(reader, "effect"), Text.translatable("enhanced_commands.argument.entity_predicate.effect"));
+    markRequiringUniqueNoMixture("effect");
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {

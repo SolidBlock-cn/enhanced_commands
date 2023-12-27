@@ -597,5 +597,19 @@
   "enhanced_commands.parsing.unknown_keyword": "未知的关键字“%s”",
   "enhanced_commands.parsing.unknown_loot_table_predicate": "未知的战利品表谓词id：%s",
   "enhanced_commands.position": "(%s, %s, %s)",
-  "item.enhanced_commands.region_selection_tool": "区域选择工具"
+  "item.enhanced_commands.region_selection_tool": "区域选择工具",
+  "enhanced_commands.argument.entity_predicate.block": "测试实体所处的方块",
+  "enhanced_commands.argument.entity_predicate.block.fail": "位于%2$s的%1$s测试失败，因为以下方块谓词失败：",
+  "enhanced_commands.argument.entity_predicate.block.fail_multiple": "%s测试失败，因为以下测试中有一个失败：",
+  "enhanced_commands.argument.entity_predicate.block.pass": "位于%2$s的%1$s测试通过，因为以下方块谓词通过：",
+  "enhanced_commands.argument.entity_predicate.block.pass_multiple": "%s测试通过，因为以下测试均通过：",
+  "enhanced_commands.argument.entity_predicate.effect": "状态效果",
+  "enhanced_commands.argument.entity_predicate.effect.fail": "%s的效果测试失败，因为以下测试失败：",
+  "enhanced_commands.argument.entity_predicate.effect.false_advanced": "%s拥有状态效果%s，因为不符合要求",
+  "enhanced_commands.argument.entity_predicate.effect.false_advanced_no_effect": "%s没有状态效果%s，无法满足要求",
+  "enhanced_commands.argument.entity_predicate.effect.false_dummy": "%s没有状态效果%s",
+  "enhanced_commands.argument.entity_predicate.effect.not_living": "%s不是生物实体，无法拥有状态效果",
+  "enhanced_commands.argument.entity_predicate.effect.pass": "%s的效果测试通过，因为以下测试通过：",
+  "enhanced_commands.argument.entity_predicate.effect.true_advanced": "%s拥有状态效果%s，且符合要求",
+  "enhanced_commands.argument.entity_predicate.effect.true_dummy": "%s拥有状态效果%s"
 }

@@ -247,7 +247,7 @@ public class SuggestedParser {
 
   public <T> @NotNull T parseAndSuggestValues(Iterable<@Nullable T> iterable, Function<T, String> suggestions, Function<T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     final int cursorBeforeRead = reader.getCursor();
-    this.suggestionProviders.add((context, builder) -> ParsingUtil.suggestMatchingWithTooltip(iterable, suggestions, tooltip, builder));
+    this.suggestionProviders.add((context, builder) -> CommandSource.suggestMatching(iterable, builder, suggestions, tooltip));
     final String name = reader.readString();
     final T value = valueGetter.apply(name);
     if (value == null) {

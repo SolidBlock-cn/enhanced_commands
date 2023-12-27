@@ -45,28 +45,10 @@ public final class ParsingUtil {
   }
 
   /**
-   * 提供基于指定值的建议。这个值可以是任何类型，通过函数映射到字符串（提供建议）和文本组件（提供建议的提示，即 tooltip）。
-   *
-   * @param iterable   需要提供的值，可以是任何值。
-   * @param suggestion 将值映射到字符串的函数，用于提供建议内容。
-   * @param tooltip    将值映射到 {@link Message} 的函数，用于提供建议内容。
-   */
-  public static <T> CompletableFuture<Suggestions> suggestMatchingWithTooltip(Iterable<T> iterable, Function<T, String> suggestion, Function<T, Message> tooltip, SuggestionsBuilder builder) {
-    final String remaining = builder.getRemainingLowerCase();
-    for (T t : iterable) {
-      final String candidate = suggestion.apply(t);
-      if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase(Locale.ROOT))) {
-        builder.suggest(candidate, tooltip.apply(t));
-      }
-    }
-    return builder.buildFuture();
-  }
-
-  /**
    * 提供基于指定的枚举值的建议，其中建议的内容由 {@link StringIdentifiable#asString()} 提供。
    */
   public static <T extends StringIdentifiable> CompletableFuture<Suggestions> suggestMatchingEnumWithTooltip(Iterable<T> enumIterable, Function<T, Message> tooltip, SuggestionsBuilder builder) {
-    return suggestMatchingWithTooltip(enumIterable, StringIdentifiable::asString, tooltip, builder);
+    return CommandSource.suggestMatching(enumIterable, builder, StringIdentifiable::asString, tooltip);
   }
 
   /**
@@ -76,7 +58,7 @@ public final class ParsingUtil {
    * @param tooltip    将字符串映射到 {@link Message} 以提供提示文本的函数。
    */
   public static CompletableFuture<Suggestions> suggestMatchingStringWithTooltip(Iterable<String> candidates, Function<String, Message> tooltip, SuggestionsBuilder builder) {
-    return suggestMatchingWithTooltip(candidates, Functions.identity(), tooltip, builder);
+    return CommandSource.suggestMatching(candidates, builder, Functions.identity(), tooltip);
   }
 
   public static CompletableFuture<Suggestions> suggestDirections(Iterable<Direction> directions, SuggestionsBuilder builder) {

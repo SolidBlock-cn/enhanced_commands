@@ -8,10 +8,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.command.CommandSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.EnumOrRandom;
-import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.Collection;
@@ -48,7 +48,7 @@ public class SimpleEnumArgumentType<E extends Enum<E>> implements ArgumentType<E
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-    return ParsingUtil.suggestMatchingWithTooltip(values, toString, tooltip, builder);
+    return CommandSource.suggestMatching(values, builder, toString, tooltip);
   }
 
   @Override

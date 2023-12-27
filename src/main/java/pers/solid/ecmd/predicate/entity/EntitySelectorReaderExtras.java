@@ -13,7 +13,6 @@ import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -59,7 +58,7 @@ public class EntitySelectorReaderExtras {
   /**
    * 此参数会在 {@link EntitySelectorReader#build()} 中，用于帮助对实体谓词进行描述以及序列化。
    */
-  public @Nullable List<Function<ServerCommandSource, EntityPredicateEntry>> predicateDescriptions = null;
+  public @Nullable List<FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException>> predicateDescriptions = null;
   /**
    * 此 context 对象用于提供建议。在非提供建议的情景下，此字段有可能是 null。
    */
@@ -86,7 +85,7 @@ public class EntitySelectorReaderExtras {
     addDescription(source -> predicateDescription);
   }
 
-  public void addDescription(Function<ServerCommandSource, EntityPredicateEntry> predicateDescription) {
+  public void addDescription(FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException> predicateDescription) {
     var predicateDescriptions = this.predicateDescriptions == null ? (this.predicateDescriptions = new ArrayList<>()) : this.predicateDescriptions;
     predicateDescriptions.add(predicateDescription);
   }
@@ -96,7 +95,7 @@ public class EntitySelectorReaderExtras {
     addDescription(predicateDescription);
   }
 
-  public void addPredicateAndDescription(Function<ServerCommandSource, EntityPredicateEntry> predicateDescription) {
+  public void addPredicateAndDescription(FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException> predicateDescription) {
     addFunction(predicateDescription::apply);
     addDescription(predicateDescription);
   }

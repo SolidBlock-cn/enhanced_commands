@@ -5,6 +5,7 @@ import com.google.common.base.Supplier;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Nullables;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -35,7 +36,7 @@ public class FunctionsParser<T> implements Parser<T> {
   public T parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
     final StringReader reader = parser.reader;
     final int cursorOnStart = reader.getCursor();
-    parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestMatchingWithTooltip(functions, s -> s + "(", tooltipProvider::apply, suggestionsBuilder));
+    parser.suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(functions, suggestionsBuilder, s -> s + "(", tooltipProvider::apply));
     final String unquotedString = reader.readUnquotedString();
     if (!unquotedString.isEmpty() && reader.canRead() && reader.peek() == '(') {
       final FunctionParamsParser<? extends T> functionParamsParser = parserFactory.apply(unquotedString);
