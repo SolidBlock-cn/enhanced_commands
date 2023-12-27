@@ -26,7 +26,7 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.IterateUtils;
-import pers.solid.ecmd.util.mixin.MixinSharedVariables;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -171,7 +171,7 @@ public class BlockTransformationTask {
         entry -> {
           final BlockPos transformedBlockPos = mutable.set(entry.getLongKey());
           final BlockState transformedState = entry.getValue();
-          boolean affected = MixinSharedVariables.setBlockStateWithModFlags(world, transformedBlockPos, transformedState, flags, modFlags);
+          boolean affected = MixinShared.setBlockStateWithModFlags(world, transformedBlockPos, transformedState, flags, modFlags);
           final NbtCompound nbtCompound = nbts.get(entry.getLongKey());
           final @Nullable BlockEntity transformedBlockEntity;
           if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(transformedBlockPos)) != null) {
@@ -254,7 +254,7 @@ public class BlockTransformationTask {
                   final long nearestOriginalLong = nearestOriginal.get().asLong();
                   if (posTransformedOut.get(nearestOriginalLong) != null) {
                     final BlockState state = posTransformedOut.get(nearestOriginalLong);
-                    boolean affected = MixinSharedVariables.setBlockStateWithModFlags(world, i, state, flags, modFlags);
+                    boolean affected = MixinShared.setBlockStateWithModFlags(world, i, state, flags, modFlags);
                     final NbtCompound nbtCompound = nbts.get(i.asLong());
                     final @Nullable BlockEntity transformedBlockEntity;
                     if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(i)) != null) {

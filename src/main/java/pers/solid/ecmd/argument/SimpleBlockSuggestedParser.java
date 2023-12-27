@@ -26,7 +26,6 @@ import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.SuggestionProvider;
-import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.List;
@@ -74,7 +73,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       reader.skip();
       int cursorBeforeParsing = this.reader.getCursor();
       suggestionProviders.clear();
-      suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.forEachMatching(Registries.BLOCK.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName())));
+      suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestFromIdentifier(Registries.BLOCK.streamEntries(), suggestionsBuilder, reference -> reference.registryKey().getValue(), reference -> reference.value().getName()));
       blockId = Identifier.fromCommandInput(reader);
       block = Registries.BLOCK.getOrEmpty(blockId).orElseThrow(() -> {
         final int cursorAfterParsing = reader.getCursor();
@@ -85,7 +84,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
       int cursorBeforeParsing = this.reader.getCursor();
       suggestionProviders.add((context, suggestionsBuilder) -> {
         ParsingUtil.suggestString("@", Text.translatable("enhanced_commands.argument.block.ignore_feature_flag"), suggestionsBuilder);
-        CommandSource.forEachMatching(registryWrapper.streamEntries()::iterator, suggestionsBuilder.getRemaining().toLowerCase(), reference -> reference.registryKey().getValue(), reference -> suggestionsBuilder.suggest(reference.registryKey().getValue().toString(), reference.value().getName()));
+        CommandSource.suggestFromIdentifier(registryWrapper.streamEntries(), suggestionsBuilder, r -> r.registryKey().getValue(), r -> r.value().getName());
       });
       this.blockId = Identifier.fromCommandInput(this.reader);
       this.block = this.registryWrapper.getOptional(RegistryKey.of(RegistryKeys.BLOCK, this.blockId)).orElseThrow(() -> {
@@ -93,9 +92,10 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
         this.reader.setCursor(cursorBeforeParsing);
         if (Registries.BLOCK.containsId(blockId)) {
           final Block block1 = Registries.BLOCK.get(blockId);
-          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.FEATURE_REQUIRED.createWithContext(reader, TextUtil.literal(blockId).styled(TextUtil.STYLE_FOR_ACTUAL), block1.getName().styled(TextUtil.STYLE_FOR_TARGET)), cursorAfterParsing);
+          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(reader, blockId, block1.getName()), cursorAfterParsing);
+        } else {
+          return CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString()), cursorAfterParsing);
         }
-        return CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString()), cursorAfterParsing);
       }).value();
     }
   }

@@ -11,6 +11,7 @@
     "CommandContextAccessor",
     "CommandDispatcherMixin",
     "CommandManagerMixin",
+    "CommandSourceMixin",
     "CommandSyntaxExceptionMixin",
     "EffectDataAccessor",
     "EntityArgumentTypeMixin",

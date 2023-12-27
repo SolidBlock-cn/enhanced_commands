@@ -9,18 +9,18 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import pers.solid.ecmd.util.mixin.MixinSharedVariables;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 @Mixin(WorldChunk.class)
 public abstract class WorldChunkMixin {
   @WrapWithCondition(method = "setBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onBlockAdded(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Z)V"))
   public boolean wrappedOnBlockAdded(BlockState instance, World world, BlockPos blockPos, BlockState blockState, boolean moved) {
-    return !MixinSharedVariables.suppressOnBlockAdded;
+    return !MixinShared.suppressOnBlockAdded;
   }
 
   @WrapOperation(method = "setBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onStateReplaced(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Z)V"))
   public void wrappedOnStateReplaced(BlockState instance, World world, BlockPos blockPos, BlockState newState, boolean moved, Operation<Void> operation) {
-    if (MixinSharedVariables.suppressOnStateReplaced) {
+    if (MixinShared.suppressOnStateReplaced) {
       // 相当于 onStateReplaced 的基本的方法，必须先移除原有的方块实体以免出错
       if (instance.hasBlockEntity() && !instance.isOf(newState.getBlock())) {
         world.removeBlockEntity(blockPos);

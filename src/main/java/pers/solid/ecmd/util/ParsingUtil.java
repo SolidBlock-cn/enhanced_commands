@@ -12,8 +12,17 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.chars.CharSet;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import net.minecraft.block.Block;
 import net.minecraft.command.CommandSource;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.StringUtils;
@@ -283,6 +292,34 @@ public final class ParsingUtil {
       } else {
         throw CommandSyntaxExceptionExtension.withCursorEnd(exceptionType.createWithContext(reader, e.getMessage()), cursorBeforeJson + getPos(jsonReader));
       }
+    }
+  }
+
+  private static final Reference2ReferenceMap<RegistryKey<? extends Registry<?>>, Function<?, ? extends Message>> NAME_SUGGESTION_PROVIDERS = new Reference2ReferenceOpenHashMap<>();
+
+  public static <T> void registerNameSuggestionProvider(RegistryKey<? extends Registry<T>> registryKey, Function<? super T, ? extends Message> function) {
+    NAME_SUGGESTION_PROVIDERS.put(registryKey, function);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Function<? super T, ? extends Message> getNameSuggestionProvider(RegistryKey<? extends Registry<T>> registryKey) {
+    NameSuggestionsInitHolder.makeSureInitialized();
+    return (Function<? super T, ? extends Message>) NAME_SUGGESTION_PROVIDERS.get(registryKey);
+  }
+
+  private static void initDefaultSuggestionProviders() {
+    registerNameSuggestionProvider(RegistryKeys.BLOCK, Block::getName);
+    registerNameSuggestionProvider(RegistryKeys.ITEM, Item::getName);
+    registerNameSuggestionProvider(RegistryKeys.ENTITY_TYPE, EntityType::getName);
+    registerNameSuggestionProvider(RegistryKeys.STATUS_EFFECT, StatusEffect::getName);
+  }
+
+  private static class NameSuggestionsInitHolder {
+    private static void makeSureInitialized() {
+    }
+
+    static {
+      initDefaultSuggestionProviders();
     }
   }
 }

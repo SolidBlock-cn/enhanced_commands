@@ -1,4 +1,5 @@
 {
+  "enhanced_commands.argument.biome.feature_required": "The biome id %s (%s) exists, but it cannot be used because required feature flags are not enabled (usually experimental features)",
   "enhanced_commands.argument.block.feature_required": "The block id %s (%s) exists, but it cannot be used because required feature flags are not enabled (usually experimental features)",
   "enhanced_commands.argument.block.ignore_feature_flag": "Ignore required feature flag",
   "enhanced_commands.argument.block_function.cannotParse": "Cannot parse block function",
@@ -241,6 +242,8 @@
   "enhanced_commands.argument.entity_predicate.uuid.true": "The UUID of %s is %s, which is the same as expected value",
   "enhanced_commands.argument.entity_predicate.yaw.in_range": "The yaw of %s is %s, within range %s",
   "enhanced_commands.argument.entity_predicate.yaw.out_of_range": "The yaw of %s is %s, out of range %s",
+  "enhanced_commands.argument.entity_type.feature_required": "The entity type id %s (%s) exists, but it cannot be used because required feature flags are not enabled (usually experimental features)",
+  "enhanced_commands.argument.item.feature_required": "The item id %s (%s) exists, but it cannot be used because required feature flags are not enabled (usually experimental features)",
   "enhanced_commands.argument.keyword_args.duplicate_argument_name": "Duplicate argument name: %s",
   "enhanced_commands.argument.keyword_args.unknown_argument_name": "Unknown argument name: %s",
   "enhanced_commands.argument.nbt_function.duplicate_eclipse": "Duplicate eclipse",
@@ -610,6 +613,8 @@
   "enhanced_commands.parsing.unknown_function": "Unknown function '%s'",
   "enhanced_commands.parsing.unknown_keyword": "Unknown keyword '%s'",
   "enhanced_commands.parsing.unknown_loot_table_predicate": "Unknown loot table predicate id: %s",
+  "enhanced_commands.parsing.unknown_registry_entry.biome": "Unknown biome id: %s",
+  "enhanced_commands.parsing.unknown_registry_entry.effect": "Unknown status effect id: %s",
   "enhanced_commands.position": "(%s, %s, %s)",
   "item.enhanced_commands.region_selection_tool": "Region selection tool"
 }

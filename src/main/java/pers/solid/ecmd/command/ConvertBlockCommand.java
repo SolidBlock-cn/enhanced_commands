@@ -29,7 +29,7 @@ import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.mixin.FallingBlockEntityAccessor;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
-import pers.solid.ecmd.util.mixin.MixinSharedVariables;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.function.Function;
 
@@ -88,7 +88,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
 
   public static FallingBlockEntity convertToFallingBlock(World world, BlockPos pos, int flags, int modFlags, boolean affectFluid) {
     BlockState state = world.getBlockState(pos);
-    MixinSharedVariables.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
+    MixinShared.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
     if (!affectFluid) state = state.withIfExists(Properties.WATERLOGGED, false);
     FallingBlockEntity fallingBlockEntity = new FallingBlockEntity(EntityType.FALLING_BLOCK, world);
     fallingBlockEntity.setPosition(Vec3d.ofBottomCenter(pos));
@@ -100,7 +100,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
 
   public static DisplayEntity.BlockDisplayEntity convertToBlockDisplay(World world, BlockPos pos, int flags, int modFlags, boolean affectFluid) {
     BlockState state = world.getBlockState(pos);
-    MixinSharedVariables.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
+    MixinShared.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
     if (!affectFluid) state = state.withIfExists(Properties.WATERLOGGED, false);
     final DisplayEntity.BlockDisplayEntity blockDisplayEntity = EntityType.BLOCK_DISPLAY.create(world);
     if (blockDisplayEntity == null) {

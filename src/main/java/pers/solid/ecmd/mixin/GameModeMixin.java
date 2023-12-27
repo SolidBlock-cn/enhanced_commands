@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.util.mixin.MixinSharedVariables;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 @Mixin(GameMode.class)
 public abstract class GameModeMixin {
@@ -14,8 +14,8 @@ public abstract class GameModeMixin {
    */
   @Inject(method = "byName(Ljava/lang/String;Lnet/minecraft/world/GameMode;)Lnet/minecraft/world/GameMode;", at = @At("HEAD"), cancellable = true)
   private static void acceptAdditionalNames(String name, GameMode defaultMode, CallbackInfoReturnable<GameMode> cir) {
-    if (MixinSharedVariables.EXTENDED_GAME_MODE_NAMES.containsKey(name)) {
-      cir.setReturnValue(MixinSharedVariables.EXTENDED_GAME_MODE_NAMES.get(name));
+    if (MixinShared.EXTENDED_GAME_MODE_NAMES.containsKey(name)) {
+      cir.setReturnValue(MixinShared.EXTENDED_GAME_MODE_NAMES.get(name));
     }
   }
 }

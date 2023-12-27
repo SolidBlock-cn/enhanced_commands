@@ -43,7 +43,7 @@ import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
-import pers.solid.ecmd.util.mixin.MixinSharedVariables;
+import pers.solid.ecmd.util.mixin.MixinShared;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.ArrayList;
@@ -243,7 +243,7 @@ public enum StackCommand implements CommandRegistrationCallback {
       final Stream<Void> affectBlocksStream = targetPosStream
           .map(entry -> {
             if (affectOnly == null || affectOnly.test(new CachedBlockPosition(world, posToPlace, false))) {
-              boolean modofied = MixinSharedVariables.setBlockStateWithModFlags(world, posToPlace, entry.getValue(), FillReplaceCommand.getFlags(keywordArgs), FillReplaceCommand.getModFlags(keywordArgs));
+              boolean modofied = MixinShared.setBlockStateWithModFlags(world, posToPlace, entry.getValue(), FillReplaceCommand.getFlags(keywordArgs), FillReplaceCommand.getModFlags(keywordArgs));
 
               final BlockEntity blockEntity = world.getBlockEntity(posToPlace);
               if (blockEntity != null) {

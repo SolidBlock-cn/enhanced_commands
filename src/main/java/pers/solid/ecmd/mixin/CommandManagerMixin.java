@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.mixin.MixinSharedVariables;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 @Mixin(CommandManager.class)
 public abstract class CommandManagerMixin {
@@ -58,6 +58,6 @@ public abstract class CommandManagerMixin {
 
   @Inject(method = "<init>", at = @At("TAIL"))
   private void storeCommandRegistryAccess(CommandManager.RegistrationEnvironment environment, CommandRegistryAccess commandRegistryAccess, CallbackInfo ci) {
-    MixinSharedVariables.setWeakCommandRegistryAccess(commandRegistryAccess);
+    MixinShared.setWeakCommandRegistryAccess(commandRegistryAccess);
   }
 }

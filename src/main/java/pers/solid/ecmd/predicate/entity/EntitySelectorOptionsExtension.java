@@ -40,7 +40,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
@@ -59,7 +58,7 @@ import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
-import pers.solid.ecmd.util.mixin.MixinSharedVariables;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -243,7 +242,7 @@ public class EntitySelectorOptionsExtension {
     putOption("region", reader -> {
       final SuggestedParser parser = new SuggestedParser(reader.getReader());
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
-      final CommandRegistryAccess registryAccess = MixinSharedVariables.getCommandRegistryAccess();
+      final CommandRegistryAccess registryAccess = MixinShared.getCommandRegistryAccess();
       final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, false);
 
       EntitySelectorReaderExtras.getOf(reader).addFunction(source -> {
@@ -456,7 +455,7 @@ public class EntitySelectorOptionsExtension {
 
           parser.suggestionProviders.clear();
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
-          final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(MixinSharedVariables.getCommandRegistryAccess(), parser, false);
+          final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(MixinShared.getCommandRegistryAccess(), parser, false);
 
           map.put(posArgument, blockPredicateArgument);
           stringReader.skipWhitespace();
@@ -485,7 +484,7 @@ public class EntitySelectorOptionsExtension {
       } else {
         parser.suggestionProviders.clear();
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
-        final BlockPredicateArgument parse = BlockPredicateArgument.parse(MixinSharedVariables.getCommandRegistryAccess(), parser, false);
+        final BlockPredicateArgument parse = BlockPredicateArgument.parse(MixinShared.getCommandRegistryAccess(), parser, false);
         EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
       }
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity_predicate.block"));
@@ -494,8 +493,8 @@ public class EntitySelectorOptionsExtension {
     putOption("effect", reader -> {
       final StringReader stringReader = reader.getReader();
       stringReader.skipWhitespace();
-      final RegistryWrapper<StatusEffect> wrapper = MixinSharedVariables.getCommandRegistryAccess().createWrapper(RegistryKeys.STATUS_EFFECT);
-      final var type = new RegistryEntryArgumentType<>(MixinSharedVariables.getCommandRegistryAccess(), RegistryKeys.STATUS_EFFECT);
+      final RegistryWrapper<StatusEffect> wrapper = MixinShared.getCommandRegistryAccess().createWrapper(RegistryKeys.STATUS_EFFECT);
+      final var type = new RegistryEntryArgumentType<>(MixinShared.getCommandRegistryAccess(), RegistryKeys.STATUS_EFFECT);
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
@@ -549,10 +548,8 @@ public class EntitySelectorOptionsExtension {
         final StatusEffect value = type.parse(stringReader).value();
 
         EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new EffectEntityPredicateEntry(value, inverted));
-        markParamAsUsed(reader, "effect", inverted);
       }
     }, reader -> isNeverPositivelyUsed(reader, "effect"), Text.translatable("enhanced_commands.argument.entity_predicate.effect"));
-    markRequiringUniqueNoMixture("effect");
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {
@@ -634,7 +631,7 @@ public class EntitySelectorOptionsExtension {
         final int cursorBeforeNext = stringReader.getCursor();
 
         // 提供游戏模式（包括本模组中提供的 a、1 等名称）的建议。
-        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestMatching(Stream.concat(Arrays.stream(GameMode.values()).filter(m -> !parsedGameModes.contains(m)).map(GameMode::getName), MixinSharedVariables.EXTENDED_GAME_MODE_NAMES.entrySet().stream().filter(entry -> !parsedGameModes.contains(entry.getValue())).map(Map.Entry::getKey)), suggestionsBuilder));
+        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestMatching(Stream.concat(Arrays.stream(GameMode.values()).filter(m -> !parsedGameModes.contains(m)).map(GameMode::getName), MixinShared.EXTENDED_GAME_MODE_NAMES.entrySet().stream().filter(entry -> !parsedGameModes.contains(entry.getValue())).map(Map.Entry::getKey)), suggestionsBuilder));
 
         final String nextString = stringReader.readUnquotedString();
         final GameMode next = GameMode.byName(nextString, null);
@@ -695,8 +692,7 @@ public class EntitySelectorOptionsExtension {
       final var advancementLoader = serverCommandSource.getServer().getAdvancementLoader();
       entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
         final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursor);
-        String remainingLowerCase = offset.getRemainingLowerCase();
-        CommandSource.forEachMatching(advancementLoader.getAdvancements(), remainingLowerCase, Advancement::getId, advancement -> offset.suggest(advancement.getId().toString(), advancement.toHoverableText()));
+        CommandSource.suggestFromIdentifier(advancementLoader.getAdvancements(), offset, Advancement::getId, Advancement::toHoverableText);
         return offset.buildFuture();
       });
     } else if (context.getSource() instanceof final CommandSource commandSource) {
@@ -712,7 +708,7 @@ public class EntitySelectorOptionsExtension {
     if (context.getSource() instanceof final ServerCommandSource serverCommandSource) {
       final int cursor = stringReader.getCursor();
       final var predicateManager = serverCommandSource.getServer().getPredicateManager();
-      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestMatching(predicateManager.getIds().stream().map(Identifier::toString), suggestionsBuilder.createOffset(cursor)));
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestIdentifiers(predicateManager.getIds(), suggestionsBuilder.createOffset(cursor)));
     } else if (context.getSource() instanceof final CommandSource commandSource) {
       entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> commandSource.getCompletions(context));
     }
