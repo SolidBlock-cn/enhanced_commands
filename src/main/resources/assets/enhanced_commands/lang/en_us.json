@@ -159,7 +159,7 @@
   "enhanced_commands.block_predicate.probability.fail": "Probability test failed: random value %s exceeds expected %s",
   "enhanced_commands.block_predicate.probability.pass": "Probability test passes: random value %s is lower than %s",
   "enhanced_commands.block_predicate.property_names.fail": "The block at %s has failed the block state property test",
-  "enhanced_commands.block_predicate.property_names.pass": "The block at %s has tested the block state property test",
+  "enhanced_commands.block_predicate.property_names.pass": "The block at %s has passed the block state property test",
   "enhanced_commands.block_predicate.region": "Blocks in the region",
   "enhanced_commands.block_predicate.region.fail": "The block at %s is not in the region %s",
   "enhanced_commands.block_predicate.region.pass": "The block at %s is in the region",
