@@ -32,8 +32,8 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<PropertiesNbtCombinationBlockPredicate> PROPERTIES_NBT_COMBINATION = register(PropertiesNbtCombinationBlockPredicate.Type.PROPERTIES_NBT_COMBINATION_TYPE, "properties_nbt_combination");
   public static final BlockPredicateType<ConstantBlockPredicate> CONSTANT = register(ConstantBlockPredicate.Type.CONSTANT_TYPE, "constant");
   public static final BlockPredicateType<TagBlockPredicate> TAG = register(TagBlockPredicate.Type.TAG_TYPE, "tag");
-  public static final BlockPredicateType<UnionBlockPredicate> UNION = register(UnionBlockPredicate.Type.UNION_TYPE, "union");
-  public static final BlockPredicateType<IntersectBlockPredicate> INTERSECT = register(IntersectBlockPredicate.Type.INTERSECT_TYPE, "intersect");
+  public static final BlockPredicateType<AnyBlockPredicate> ANY = register(AnyBlockPredicate.Type.ANY_TYPE, "any");
+  public static final BlockPredicateType<AllBlockPredicate> ALL = register(AllBlockPredicate.Type.ALL_TYPE, "all");
   public static final BlockPredicateType<RandBlockPredicate> RAND = register(RandBlockPredicate.Type.RAND_TYPE, "rand");
   public static final BlockPredicateType<BiPredicateBlockPredicate> BI_PREDICATE = register(BiPredicateBlockPredicate.Type.BI_PREDICATE_TYPE, "bi_predicate");
   public static final BlockPredicateType<RelBlockPredicate> REL = register(RelBlockPredicate.Type.REL_TYPE, "rel");
@@ -54,8 +54,8 @@ public final class BlockPredicateTypes {
   }
 
   private static void registerFunctions(Map<String, Supplier<FunctionParamsParser<? extends BlockPredicateArgument>>> map) {
-    map.put("all", IntersectBlockPredicate.Parser::new);
-    map.put("any", UnionBlockPredicate.Parser::new);
+    map.put("all", AllBlockPredicate.Parser::new);
+    map.put("any", AnyBlockPredicate.Parser::new);
     map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_diff"), false));
     map.put("expose", ExposeBlockPredicate.Parser::new);
     map.put("idcontain", IdContainBlockPredicate.Parser::new);
@@ -67,8 +67,8 @@ public final class BlockPredicateTypes {
   }
 
   private static void registerFunctionNames(Map<String, Text> map) {
-    map.put("all", Text.translatable("enhanced_commands.argument.block_predicate.intersect"));
-    map.put("any", Text.translatable("enhanced_commands.argument.block_predicate.union"));
+    map.put("all", Text.translatable("enhanced_commands.argument.block_predicate.all"));
+    map.put("any", Text.translatable("enhanced_commands.argument.block_predicate.any"));
     map.put("diff", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_diff"));
     map.put("expose", Text.translatable("enhanced_commands.argument.block_predicate.expose"));
     map.put("idcontain", Text.translatable("enhanced_commands.argument.block_predicate.id_contain"));

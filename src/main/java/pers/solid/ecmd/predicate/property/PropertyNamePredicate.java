@@ -21,15 +21,15 @@ public interface PropertyNamePredicate extends ExpressionConvertible, NbtConvert
     Preconditions.checkArgument(nbtCompound.contains("property", NbtElement.STRING_TYPE), "In the nbt, string value named 'property' is required!");
     final String propertyName = nbtCompound.getString("property");
     if (nbtCompound.contains("exists")) {
-      return new NameExistencePropertyPredicate(propertyName, nbtCompound.getBoolean("exists"));
+      return new ExistencePropertyNamePredicate(propertyName, nbtCompound.getBoolean("exists"));
     } else {
       final Comparator comparator = Comparator.NAME_TO_VALUE.getOrDefault(nbtCompound.getString("comparator"), Comparator.EQ);
       if (comparator == Comparator.EQ || comparator == Comparator.NE) {
         if (nbtCompound.contains("value", NbtElement.LIST_TYPE)) {
-          return new ValueNamesPropertyPredicate(propertyName, nbtCompound.getList("value", NbtElement.STRING_TYPE).stream().map(NbtElement::asString).toList(), comparator == Comparator.NE);
+          return new MultiValuePropertyNamePredicate(propertyName, nbtCompound.getList("value", NbtElement.STRING_TYPE).stream().map(NbtElement::asString).toList(), comparator == Comparator.NE);
         }
       }
-      return new ValueNamePropertyPredicate(propertyName, comparator, nbtCompound.getString("value"));
+      return new ComparisonPropertyNamePredicate(propertyName, comparator, nbtCompound.getString("value"));
     }
   }
 }

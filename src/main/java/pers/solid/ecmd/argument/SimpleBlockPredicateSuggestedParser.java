@@ -40,22 +40,21 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     while (reader.canRead()) {
       final char peek = reader.peek();
       if (peek == '=' || peek == '<' || peek == '!' || peek == '>') {
-        if (!stringBuilder.isEmpty() && stringBuilder.charAt(stringBuilder.length() - 1) == '=' && peek == '!') {
-          break;
-        }
         stringBuilder.append(peek);
         reader.skip();
-      } else
+      } else {
         break;
+      }
     }
     final String comparatorName = stringBuilder.toString();
     comparator = Comparator.fromName(comparatorName);
     if (comparator == null) {
+      final int cursorAfterComparator = reader.getCursor();
       reader.setCursor(cursorBeforeComparator);
       if (comparatorName.isEmpty()) {
         throw COMPARATOR_EXPECTED.createWithContext(reader);
       } else {
-        throw UNKNOWN_COMPARATOR.createWithContext(reader, comparatorName);
+        throw CommandSyntaxExceptionExtension.withCursorEnd(UNKNOWN_COMPARATOR.createWithContext(reader, comparatorName), cursorAfterComparator);
       }
     }
     reader.skipWhitespace();
@@ -108,9 +107,9 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
       }
     }
     if (values.size() == 1) {
-      propertyPredicates.add(new ValuePropertyPredicate<>(property, comparator, values.iterator().next()));
+      propertyPredicates.add(new ComparisonPropertyPredicate<>(property, comparator, values.iterator().next()));
     } else {
-      propertyPredicates.add(new ValuesPropertiesPredicate<>(property, values, comparator == Comparator.NE));
+      propertyPredicates.add(new MultiValuePropertyPredicate<>(property, values, comparator == Comparator.NE));
     }
   }
 
@@ -145,7 +144,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     if (reader.canRead()) {
       if (usingEqual) {
         if (reader.peek() == '*') {
-          propertyNamePredicates.add(new NameExistencePropertyPredicate(propertyName, comparator == Comparator.EQ));
+          propertyNamePredicates.add(new ExistencePropertyNamePredicate(propertyName, comparator == Comparator.EQ));
           reader.skip();
           suggestionProviders.clear();
           return;
@@ -182,6 +181,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
         PROPERTY_FINISHED.accept(context, offset2);
         return offset.buildFuture().thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
       }));
+      if (!usingEqual) break;
 
       reader.skipWhitespace();
       if (reader.canRead() && reader.peek() == '|') {
@@ -194,9 +194,9 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     }
 
     if (values.size() == 1) {
-      propertyNamePredicates.add(new ValueNamePropertyPredicate(propertyName, comparator, values.iterator().next()));
+      propertyNamePredicates.add(new ComparisonPropertyNamePredicate(propertyName, comparator, values.iterator().next()));
     } else {
-      propertyNamePredicates.add(new ValueNamesPropertyPredicate(propertyName, values, comparator == Comparator.NE));
+      propertyNamePredicates.add(new MultiValuePropertyNamePredicate(propertyName, values, comparator == Comparator.NE));
     }
     reader.skipWhitespace();
   }

@@ -9,7 +9,6 @@ import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * 此类包含与方块状态有关的实用方法。
@@ -19,10 +18,10 @@ public final class StateUtil {
   }
 
   /**
-   * 获取方块状态的某个属性的值，并对这个值应用函数。这是为了规避泛型问题。
+   * 获取方块状态的某个属性的值。这会调用 {@link Property#name(Comparable)}，借助此方法以规避泛型问题。
    */
-  public static <T extends Comparable<T>, R> R mapPropertyValue(@NotNull State<?, ?> blockState, @NotNull Property<T> property, Function<? super T, ? extends R> function) {
-    return function.apply(blockState.get(property));
+  public static <T extends Comparable<T>> String namePropertyValue(@NotNull State<?, ?> state, @NotNull Property<T> property) {
+    return property.name(state.get(property));
   }
 
   /**

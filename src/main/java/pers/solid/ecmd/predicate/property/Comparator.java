@@ -1,10 +1,10 @@
 package pers.solid.ecmd.predicate.property;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.Util;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -18,7 +18,7 @@ public enum Comparator implements StringIdentifiable {
   LE("<=", (actual, expected) -> actual.compareTo(expected) <= 0),
   NE("!=", (actual, expected) -> !actual.equals(expected));
 
-  public static final Map<String, Comparator> NAME_TO_VALUE = Arrays.stream(values()).collect(ImmutableMap.toImmutableMap(Comparator::asString, Functions.identity()));
+  public static final Map<String, Comparator> NAME_TO_VALUE = Util.make(new ImmutableMap.Builder<String, Comparator>(), builder -> Arrays.stream(values()).forEach(comparator -> builder.put(comparator.asString(), comparator))).put("=!", NE).build();
 
   private final String name;
   private final BiPredicate biPredicate;
@@ -60,6 +60,7 @@ public enum Comparator implements StringIdentifiable {
       case NE -> actual != expected;
     };
   }
+
   public boolean compareFloat(float actual, float expected) {
     return switch (this) {
       case EQ -> actual == expected;
@@ -70,6 +71,7 @@ public enum Comparator implements StringIdentifiable {
       case NE -> actual != expected;
     };
   }
+
   public boolean compareLong(long actual, long expected) {
     return switch (this) {
       case EQ -> actual == expected;
@@ -80,6 +82,7 @@ public enum Comparator implements StringIdentifiable {
       case NE -> actual != expected;
     };
   }
+
   public boolean compareInt(int actual, int expected) {
     return switch (this) {
       case EQ -> actual == expected;
@@ -90,6 +93,7 @@ public enum Comparator implements StringIdentifiable {
       case NE -> actual != expected;
     };
   }
+
   public boolean compareShort(short actual, short expected) {
     return switch (this) {
       case EQ -> actual == expected;
@@ -100,6 +104,7 @@ public enum Comparator implements StringIdentifiable {
       case NE -> actual != expected;
     };
   }
+
   public boolean compareByte(byte actual, byte expected) {
     return switch (this) {
       case EQ -> actual == expected;

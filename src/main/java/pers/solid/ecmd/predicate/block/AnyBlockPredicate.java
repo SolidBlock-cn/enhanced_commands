@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
+public record AnyBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     return "any(" + String.join(", ", Collections2.transform(blockPredicates, ExpressionConvertible::asString)) + ")";
@@ -45,15 +45,15 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes > 0) {
-      return new TestResult(true, List.of(Text.translatable("enhanced_commands.argument.block_predicate.union.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
+      return new TestResult(true, List.of(Text.translatable("enhanced_commands.argument.block_predicate.any.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
     } else {
-      return new TestResult(false, List.of(Text.translatable("enhanced_commands.argument.block_predicate.union.fail", successes, build.size()).formatted(Formatting.RED)), build);
+      return new TestResult(false, List.of(Text.translatable("enhanced_commands.argument.block_predicate.any.fail", successes, build.size()).formatted(Formatting.RED)), build);
     }
   }
 
   @Override
   public @NotNull BlockPredicateType<?> getType() {
-    return BlockPredicateTypes.UNION;
+    return BlockPredicateTypes.ANY;
   }
 
   @Override
@@ -76,16 +76,16 @@ public record UnionBlockPredicate(Collection<BlockPredicate> blockPredicates) im
 
     @Override
     public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new UnionBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, input -> input.apply(source)));
+      return source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, input -> input.apply(source)));
     }
   }
 
-  public enum Type implements BlockPredicateType<UnionBlockPredicate> {
-    UNION_TYPE;
+  public enum Type implements BlockPredicateType<AnyBlockPredicate> {
+    ANY_TYPE;
 
     @Override
-    public @NotNull UnionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new UnionBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement, world)).toList());
+    public @NotNull AnyBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new AnyBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement, world)).toList());
     }
   }
 }

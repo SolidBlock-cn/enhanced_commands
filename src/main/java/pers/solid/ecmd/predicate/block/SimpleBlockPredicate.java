@@ -1,7 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -11,11 +10,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
-import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
@@ -26,6 +25,7 @@ import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.TextUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,31 +50,25 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     boolean matches = true;
     final BlockState blockState = cachedBlockPosition.getBlockState();
-    ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
+    final List<Text> messages = new ArrayList<>();
+    final BlockPos blockPos = cachedBlockPosition.getBlockPos();
+    final MutableText posText = TextUtil.wrapVector(blockPos);
+    final MutableText actualText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL);
     if (!blockState.isOf(block)) {
-      messages.add(Text.translatable("enhanced_commands.argument.block_predicate.not_the_block", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), block.getName().styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      final MutableText expectedText = block.getName().styled(TextUtil.STYLE_FOR_EXPECTED);
+      messages.add(Text.translatable("enhanced_commands.argument.block_predicate.simple.not_the_block", posText, actualText, expectedText).formatted(Formatting.RED));
       matches = false;
+    } else {
+      messages.add(Text.translatable("enhanced_commands.argument.block_predicate.simple.is_the_block", posText, actualText).formatted(Formatting.GREEN));
     }
     for (PropertyPredicate<?> propertyPredicate : propertyEntries) {
-      if (!propertyPredicate.test(blockState)) {
-        final Property<?> property = propertyPredicate.property();
-        if (blockState.contains(property)) {
-          messages.add(Text.translatable("enhanced_commands.argument.block_predicate.property_not_this_value", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), expressPropertyValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(propertyPredicate).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
-        } else {
-          messages.add(Text.translatable("enhanced_commands.argument.block_predicate.expected_property_does_not_exist", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), Text.literal(property.getName()).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(propertyPredicate).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
-        }
+      final TestResult propertyResult = propertyPredicate.testAndDescribe(blockState, blockPos);
+      messages.addAll(propertyResult.descriptions());
+      if (!propertyResult.successes()) {
         matches = false;
       }
     }
-    if (matches) {
-      return BlockPredicate.successResult(cachedBlockPosition.getBlockPos());
-    } else {
-      return new TestResult(false, messages.build());
-    }
-  }
-
-  private <T extends Comparable<T>> MutableText expressPropertyValue(BlockState blockState, Property<T> property) {
-    return Text.literal(property.getName() + "=" + (blockState.contains(property) ? property.name(blockState.get(property)) : "!"));
+    return new TestResult(matches, messages);
   }
 
   @Override

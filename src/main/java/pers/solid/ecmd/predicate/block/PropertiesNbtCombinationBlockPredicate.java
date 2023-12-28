@@ -1,15 +1,20 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.google.common.collect.Iterables;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -43,6 +48,26 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     return firstBlockPredicate.test(cachedBlockPosition) && (propertyNamesPredicate == null || propertyNamesPredicate.test(cachedBlockPosition)) && (nbtBlockPredicate == null || nbtBlockPredicate.test(cachedBlockPosition));
+  }
+
+  @Override
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+    final List<TestResult> attachements = new ArrayList<>(3);
+    attachements.add(firstBlockPredicate.testAndDescribe(cachedBlockPosition));
+    if (propertyNamesPredicate != null) {
+      attachements.add(propertyNamesPredicate.testAndDescribe(cachedBlockPosition));
+    }
+    if (nbtBlockPredicate != null) {
+      attachements.add(nbtBlockPredicate.testAndDescribe(cachedBlockPosition));
+    }
+
+    if (attachements.size() == 1) {
+      return attachements.get(0);
+    } else if (Iterables.all(attachements, TestResult::successes)) {
+      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.all.pass"), attachements);
+    } else {
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.all.fail"), attachements);
+    }
   }
 
   @Override

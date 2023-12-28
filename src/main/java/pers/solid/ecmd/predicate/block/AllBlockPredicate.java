@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
+public record AllBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     return "all(" + String.join(", ", Collections2.transform(blockPredicates, ExpressionConvertible::asString)) + ")";
@@ -45,15 +45,15 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes < build.size()) {
-      return new TestResult(true, List.of(Text.translatable("enhanced_commands.argument.block_predicate.intersect.fail", successes, build.size()).formatted(Formatting.RED)), build);
+      return new TestResult(true, List.of(Text.translatable("enhanced_commands.argument.block_predicate.all.fail", successes, build.size()).formatted(Formatting.RED)), build);
     } else {
-      return new TestResult(false, List.of(Text.translatable("enhanced_commands.argument.block_predicate.intersect.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
+      return new TestResult(false, List.of(Text.translatable("enhanced_commands.argument.block_predicate.all.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
     }
   }
 
   @Override
   public @NotNull BlockPredicateType<?> getType() {
-    return BlockPredicateTypes.INTERSECT;
+    return BlockPredicateTypes.ALL;
   }
 
   @Override
@@ -70,7 +70,7 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
 
     @Override
     public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new IntersectBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, x -> x.apply(source)));
+      return source -> new AllBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, x -> x.apply(source)));
     }
 
     @Override
@@ -79,12 +79,12 @@ public record IntersectBlockPredicate(Collection<BlockPredicate> blockPredicates
     }
   }
 
-  public enum Type implements BlockPredicateType<IntersectBlockPredicate> {
-    INTERSECT_TYPE;
+  public enum Type implements BlockPredicateType<AllBlockPredicate> {
+    ALL_TYPE;
 
     @Override
-    public @NotNull IntersectBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new IntersectBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement, world)).toList());
+    public @NotNull AllBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+      return new AllBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement, world)).toList());
     }
   }
 }

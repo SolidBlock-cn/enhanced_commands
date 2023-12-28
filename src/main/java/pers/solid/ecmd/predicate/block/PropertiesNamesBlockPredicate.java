@@ -1,7 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -10,6 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,11 +18,9 @@ import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.NbtConvertible;
-import pers.solid.ecmd.util.Parser;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,15 +48,22 @@ public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePred
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
     boolean successes = true;
-    ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
+    List<TestResult> attachments = new ArrayList<>();
+    final BlockPos blockPos = cachedBlockPosition.getBlockPos();
     for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
-      final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, cachedBlockPosition.getBlockPos());
+      final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, blockPos);
+      attachments.add(testResult);
       if (!testResult.successes()) {
-        messages.addAll(testResult.descriptions());
         successes = false;
       }
     }
-    return new TestResult(successes, messages.build());
+    if (attachments.size() == 1) {
+      return attachments.get(0);
+    } else if (successes) {
+      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.property_names.pass", TextUtil.wrapVector(blockPos)), attachments);
+    } else {
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.property_names.fail", TextUtil.wrapVector(blockPos)), attachments);
+    }
   }
 
   @Override

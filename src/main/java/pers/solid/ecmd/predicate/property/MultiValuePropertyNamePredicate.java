@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.util.math.BlockPos;
@@ -20,13 +21,14 @@ import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
 
-public record ValueNamesPropertyPredicate(String propertyName, Collection<String> valueNames, boolean inverted) implements PropertyNamePredicate {
+public record MultiValuePropertyNamePredicate(String propertyName, Collection<String> valueNames, boolean inverted) implements PropertyNamePredicate {
   @Override
   public boolean test(BlockState blockState) {
     final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) return false;
-    return Iterables.any(valueNames, value -> value.equals(StateUtil.mapPropertyValue(blockState, property, Object::toString))) != inverted;
+    final String actualValue = StateUtil.namePropertyValue(blockState, property);
+    return Iterables.any(valueNames, value -> value.equals(actualValue)) != inverted;
   }
 
   @Override
@@ -34,22 +36,29 @@ public record ValueNamesPropertyPredicate(String propertyName, Collection<String
     final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) {
-      return TestResult.of(false, Text.translatable(propertyName.isEmpty() ? "enhanced_commands.argument.block_predicate.no_property_this_name_empty" : "enhanced_commands.argument.block_predicate.no_property_this_name", blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED)));
+      final MutableText nameText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET);
+      final MutableText propertyNameText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED);
+      if (propertyName.isEmpty()) {
+        return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.no_property_this_name_empty", nameText));
+      } else {
+        return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.no_property_this_name", nameText, propertyNameText));
+      }
     }
     final Text pos = TextUtil.wrapVector(blockPos);
-    final Text actual = ValueNamePropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
+    final Text actual = PropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
     final Text expected = Texts.join(valueNames, Texts.DEFAULT_SEPARATOR_TEXT, string -> Text.literal(string).styled(TextUtil.STYLE_FOR_EXPECTED));
-    if (Iterables.any(valueNames, value -> value.equals(StateUtil.mapPropertyValue(blockState, property, Object::toString)))) {
+    final String actualValue = StateUtil.namePropertyValue(blockState, property);
+    if (Iterables.any(valueNames, value -> value.equals(actualValue))) {
       if (inverted) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.property_value_match_inverted", pos, actual, expected));
+        return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.value_match_inverted", pos, actual, expected));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.property_value_match", pos, actual, expected));
+        return TestResult.of(true, Text.translatable("enhanced_commands.argument.property_predicate.value_match", pos, actual, expected));
       }
     } else {
       if (inverted) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.property_value_mismatch_inverted", pos, actual, expected));
+        return TestResult.of(true, Text.translatable("enhanced_commands.argument.property_predicate.value_mismatch_inverted", pos, actual, expected));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.property_value_mismatch", pos, actual, expected));
+        return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.value_mismatch", pos, actual, expected));
       }
     }
   }

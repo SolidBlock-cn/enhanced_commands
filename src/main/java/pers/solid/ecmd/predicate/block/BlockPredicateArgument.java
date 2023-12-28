@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.List;
 
 public interface BlockPredicateArgument extends FailableFunction<ServerCommandSource, BlockPredicate, CommandSyntaxException> {
-  Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.intersect.symbol_tooltip");
-  Text UNION_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.union.symbol_tooltip");
+  Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.all.symbol_tooltip");
+  Text UNION_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.any.symbol_tooltip");
 
   static @NotNull BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     return parse(commandRegistryAccess, parser, suggestionsOnly, true);
@@ -34,11 +34,11 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
   }
 
   static @NotNull BlockPredicateArgument parseUnion(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseIntersect(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new UnionBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "|", UNION_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseIntersect(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "|", UNION_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockPredicateArgument parseIntersect(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new IntersectBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
+    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new AllBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
   }
 
   static @NotNull BlockPredicateArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {

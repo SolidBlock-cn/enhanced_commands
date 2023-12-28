@@ -6,14 +6,18 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.TextUtil;
 
 public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {
   @Override
@@ -25,6 +29,20 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     final BlockEntity blockEntity = cachedBlockPosition.getBlockEntity();
     return blockEntity != null && nbtPredicate.test(blockEntity.createNbt());
+  }
+
+  @Override
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+    final BlockEntity blockEntity = cachedBlockPosition.getBlockEntity();
+    final MutableText nameText = cachedBlockPosition.getBlockState().getBlock().getName();
+    final MutableText posText = TextUtil.wrapVector(cachedBlockPosition.getBlockPos());
+    if (blockEntity == null) {
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.nbt.not_block_entity", nameText, posText));
+    } else if (nbtPredicate.test(blockEntity.createNbt())) {
+      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.nbt.pass", nameText, posText));
+    } else {
+      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.nbt.fail"));
+    }
   }
 
   @Override
