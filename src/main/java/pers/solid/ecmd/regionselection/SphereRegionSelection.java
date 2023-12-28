@@ -38,20 +38,20 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   public Supplier<Text> clickFirstPoint(BlockPos point, PlayerEntity player) {
     center = point.toCenterPos();
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.argument.region_selection.sphere.set_center", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)), notifySphereStatistics());
+    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.sphere.set_center", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)), notifySphereStatistics());
   }
 
   @Override
   public Supplier<Text> clickSecondPoint(BlockPos point, PlayerEntity player) {
     radiusTarget = point.toCenterPos();
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.argument.region_selection.sphere.set_radius", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)), notifySphereStatistics());
+    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.sphere.set_radius", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)), notifySphereStatistics());
   }
 
   public Text notifySphereStatistics() {
     if (center != null && radiusTarget != null) {
       updateRadius();
-      return (Text.translatable("enhanced_commands.argument.region_selection.sphere.statistics", TextUtil.literal(radius).styled(TextUtil.STYLE_FOR_RESULT)).formatted(Formatting.GRAY));
+      return (Text.translatable("enhanced_commands.region_selection.sphere.statistics", TextUtil.literal(radius).styled(TextUtil.STYLE_FOR_RESULT)).formatted(Formatting.GRAY));
     } else {
       return null;
     }

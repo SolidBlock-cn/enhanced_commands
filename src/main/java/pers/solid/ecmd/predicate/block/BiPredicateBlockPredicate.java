@@ -33,7 +33,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     final boolean result = actual == same;
     final String passOfFail = result ? "pass" : "fail";
     final String sameOrDiff = actual ? "same" : "diff";
-    return new TestResult(result, List.of(Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_" + sameOrDiff + "_" + passOfFail).formatted(result ? Formatting.GREEN : Formatting.RED)), List.of(testResult1, testResult2));
+    return new TestResult(result, List.of(Text.translatable("enhanced_commands.block_predicate.bi_predicate_" + sameOrDiff + "_" + passOfFail).formatted(result ? Formatting.GREEN : Formatting.RED)), List.of(testResult1, testResult2));
   }
 
   @Override

@@ -9,7 +9,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
 
 public record FoodEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
-  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.food");
+  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.food");
 
   @Override
   public boolean test(Entity entity) {
@@ -19,7 +19,7 @@ public record FoodEntityPredicateEntry(NumberRange.IntRange intRange, boolean in
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     if (!(entity instanceof final PlayerEntity player)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_player", displayName, CRITERION_NAME));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
       return EntityPredicateEntry.testInt(player, player.getHungerManager().getFoodLevel(), intRange, CRITERION_NAME, displayName, inverted);
     }

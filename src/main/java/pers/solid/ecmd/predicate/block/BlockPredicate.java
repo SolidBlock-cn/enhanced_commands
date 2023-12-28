@@ -21,18 +21,18 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.function.Predicate;
 
 public interface BlockPredicate extends Predicate<CachedBlockPosition>, ExpressionConvertible, NbtConvertible, BlockPredicateArgument {
-  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannotParse"));
+  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
     return BlockPredicateArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).apply(source);
   }
 
   static TestResult successResult(BlockPos blockPos) {
-    return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.pass", TextUtil.wrapVector(blockPos)));
+    return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.pass", TextUtil.wrapVector(blockPos)));
   }
 
   static TestResult failResult(BlockPos blockPos) {
-    return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.fail", TextUtil.wrapVector(blockPos)));
+    return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.fail", TextUtil.wrapVector(blockPos)));
   }
 
   static TestResult successOrFail(boolean successes, BlockPos blockPos) {

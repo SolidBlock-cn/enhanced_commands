@@ -20,9 +20,9 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate blockPredicate) 
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     final TestResult testResult = blockPredicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false));
     if (testResult.successes()) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.block.pass", displayName, TextUtil.wrapVector(entity.getBlockPos())), List.of(testResult));
+      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.block.pass", displayName, TextUtil.wrapVector(entity.getBlockPos())), List.of(testResult));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.block.fail", displayName, TextUtil.wrapVector(entity.getBlockPos())), List.of(testResult));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.block.fail", displayName, TextUtil.wrapVector(entity.getBlockPos())), List.of(testResult));
     }
   }
 

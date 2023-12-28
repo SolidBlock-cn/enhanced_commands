@@ -12,9 +12,9 @@ public record NameEntityPredicateEntry(String expectedName, boolean hasNegation)
     final String actualName = entity.getName().getString();
     final MutableText actualNameText = Text.literal(actualName).styled(TextUtil.STYLE_FOR_ACTUAL);
     if (actualName.equals(expectedName)) {
-      return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.name.equal", displayName, actualNameText));
+      return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.name.equal", displayName, actualNameText));
     } else {
-      return TestResult.of(hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.name.not_equal", displayName, actualNameText, Text.literal(expectedName).styled(TextUtil.STYLE_FOR_EXPECTED)));
+      return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.name.not_equal", displayName, actualNameText, Text.literal(expectedName).styled(TextUtil.STYLE_FOR_EXPECTED)));
     }
   }
 

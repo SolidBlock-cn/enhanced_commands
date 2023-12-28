@@ -101,45 +101,45 @@ public class SelectorEntityPredicate implements EntityPredicate {
     if (!entitySelector.includesNonPlayers()) {
       final boolean isPlayer = entity.isPlayer();
       if (isPlayer) {
-        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.player.true", displayName)));
+        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.player.true", displayName)));
       } else {
-        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.player.false", displayName)));
+        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.player.false", displayName)));
       }
     }
     if (accessor.getPlayerName() != null) {
       if (entity instanceof PlayerEntity player) {
         final boolean matches = player.getGameProfile().getName().equalsIgnoreCase(accessor.getPlayerName());
-        descriptions.add(TestResult.of(matches, matches ? Text.translatable("enhanced_commands.argument.entity_predicate.player_name.true", displayName, Text.empty().append(accessor.getPlayerName()).styled(TextUtil.STYLE_FOR_ACTUAL)) : Text.translatable("enhanced_commands.argument.entity_predicate.player_name.false", displayName, Text.empty().append(player.getGameProfile().getName()).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(accessor.getPlayerName()).styled(TextUtil.STYLE_FOR_EXPECTED))));
+        descriptions.add(TestResult.of(matches, matches ? Text.translatable("enhanced_commands.entity_predicate.player_name.true", displayName, Text.empty().append(accessor.getPlayerName()).styled(TextUtil.STYLE_FOR_ACTUAL)) : Text.translatable("enhanced_commands.entity_predicate.player_name.false", displayName, Text.empty().append(player.getGameProfile().getName()).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(accessor.getPlayerName()).styled(TextUtil.STYLE_FOR_EXPECTED))));
       } else {
-        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.player_name.not_player", entity.getDisplayName())));
+        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.player_name.not_player", entity.getDisplayName())));
       }
     }
     if (accessor.getUuid() != null) {
       final UUID actual = entity.getUuid();
       final UUID expected = accessor.getUuid();
       if (expected.equals(actual)) {
-        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.uuid.true", displayName, actual)));
+        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.uuid.true", displayName, actual)));
       } else {
-        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.uuid.false", displayName, TextUtil.styled(Text.literal(actual.toString()), TextUtil.STYLE_FOR_ACTUAL), TextUtil.styled(Text.literal(expected.toString()), TextUtil.STYLE_FOR_EXPECTED))));
+        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.uuid.false", displayName, TextUtil.styled(Text.literal(actual.toString()), TextUtil.STYLE_FOR_ACTUAL), TextUtil.styled(Text.literal(expected.toString()), TextUtil.STYLE_FOR_EXPECTED))));
       }
     }
     if (entitySelector.isSenderOnly()) {
       final Entity realSender = source.getEntity();
       if (entity.equals(realSender)) {
-        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.sender.true", displayName)));
+        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.sender.true", displayName)));
       } else if (realSender != null) {
-        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.sender.false", displayName, TextUtil.styled(realSender.getDisplayName(), TextUtil.STYLE_FOR_EXPECTED))));
+        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sender.false", displayName, TextUtil.styled(realSender.getDisplayName(), TextUtil.STYLE_FOR_EXPECTED))));
       } else {
-        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.sender.false_without_sender", displayName)));
+        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sender.false_without_sender", displayName)));
       }
     }
     if (entitySelector.isLocalWorldOnly()) {
       final World world = entity.getWorld();
       final ServerWorld expectedWorld = source.getWorld();
       if (world.equals(expectedWorld)) {
-        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.local_world.true", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_ACTUAL))));
+        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.local_world.true", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_ACTUAL))));
       } else {
-        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.local_world.false", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(expectedWorld.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_EXPECTED))));
+        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.local_world.false", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(expectedWorld.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_EXPECTED))));
 
       }
     }
@@ -149,7 +149,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
     if (accessor.getBox() != null) {
       final Box box = accessor.getBox().offset(positionOffset);
       final boolean intersects = box.intersects(entity.getBoundingBox());
-      descriptions.add(TestResult.of(intersects, Text.translatable("enhanced_commands.argument.entity_predicate.box." + intersects, displayName, Text.literal(String.format("(%s %s %s, %s %s %s)", box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ)).styled(TextUtil.STYLE_FOR_EXPECTED))));
+      descriptions.add(TestResult.of(intersects, Text.translatable("enhanced_commands.entity_predicate.box." + intersects, displayName, Text.literal(String.format("(%s %s %s, %s %s %s)", box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ)).styled(TextUtil.STYLE_FOR_EXPECTED))));
     }
 
     final NumberRange.FloatRange distance = accessor.getDistance();
@@ -157,7 +157,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
       final String distanceAsString = StringUtil.wrapRange(distance);
       final double squaredDistance = entity.squaredDistanceTo(positionOffset);
       final boolean inRange = distance.testSqrt(squaredDistance);
-      descriptions.add(TestResult.of(inRange, Text.translatable("enhanced_commands.argument.entity_predicate.distance." + inRange, displayName, TextUtil.literal(Math.sqrt(squaredDistance)).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(distanceAsString).styled(TextUtil.STYLE_FOR_EXPECTED))));
+      descriptions.add(TestResult.of(inRange, Text.translatable("enhanced_commands.entity_predicate.distance." + inRange, displayName, TextUtil.literal(Math.sqrt(squaredDistance)).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(distanceAsString).styled(TextUtil.STYLE_FOR_EXPECTED))));
     }
 
     // 以下部分为 EntitySelectorOptions 中的原版部分
@@ -173,7 +173,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
     if (descriptions.isEmpty()) {
       return EntityPredicate.successOrFail(result, entity);
     } else {
-      return TestResult.of(result, result ? Text.translatable("enhanced_commands.argument.entity_predicate.pass_selector", displayName) : Text.translatable("enhanced_commands.argument.entity_predicate.fail_selector", displayName), descriptions);
+      return TestResult.of(result, result ? Text.translatable("enhanced_commands.entity_predicate.pass_selector", displayName) : Text.translatable("enhanced_commands.entity_predicate.fail_selector", displayName), descriptions);
     }
   }
 }

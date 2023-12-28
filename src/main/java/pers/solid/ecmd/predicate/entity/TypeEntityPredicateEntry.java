@@ -17,9 +17,9 @@ public record TypeEntityPredicateEntry(EntityType<?> expectedType, boolean hasNe
     final boolean equals = Objects.equals(actualType, expectedType);
     final MutableText actualText = TextUtil.styled(actualType.getName(), TextUtil.STYLE_FOR_ACTUAL);
     if (equals) {
-      return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.type.equal", displayName, actualText));
+      return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.type.equal", displayName, actualText));
     } else {
-      return TestResult.of(hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.type.not_equal", displayName, actualText, TextUtil.styled(expectedType.getName(), TextUtil.STYLE_FOR_EXPECTED)));
+      return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.type.not_equal", displayName, actualText, TextUtil.styled(expectedType.getName(), TextUtil.STYLE_FOR_EXPECTED)));
     }
   }
 

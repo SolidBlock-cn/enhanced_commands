@@ -85,7 +85,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.region.outwards");
+      return Text.translatable("enhanced_commands.region.outwards");
     }
 
     @Override

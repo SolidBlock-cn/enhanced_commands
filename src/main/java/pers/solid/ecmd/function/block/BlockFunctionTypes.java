@@ -71,15 +71,15 @@ public final class BlockFunctionTypes {
   }
 
   private static void registerFunctionNames(Map<String, Text> map) {
-    map.put("pick", Text.translatable("enhanced_commands.argument.block_function.pick"));
-    map.put("dry", Text.translatable("enhanced_commands.argument.block_function.dry"));
-    map.put("overlay", Text.translatable("enhanced_commands.argument.block_function.overlay"));
-    map.put("filter", Text.translatable("enhanced_commands.argument.block_function.filter"));
-    map.put("idcontain", Text.translatable("enhanced_commands.argument.block_function.id_contain"));
-    map.put("stonecut", Text.translatable("enhanced_commands.argument.block_function.stone_cut"));
-    map.put("if", Text.translatable("enhanced_commands.argument.block_function.conditional"));
-    map.put("idreplace", Text.translatable("enhanced_commands.argument.block_function.id_replace"));
-    map.put("rotate", Text.translatable("enhanced_commands.argument.block_function.rotate"));
-    map.put("mirror", Text.translatable("enhanced_commands.argument.block_function.mirror"));
+    map.put("pick", Text.translatable("enhanced_commands.block_function.pick"));
+    map.put("dry", Text.translatable("enhanced_commands.block_function.dry"));
+    map.put("overlay", Text.translatable("enhanced_commands.block_function.overlay"));
+    map.put("filter", Text.translatable("enhanced_commands.block_function.filter"));
+    map.put("idcontain", Text.translatable("enhanced_commands.block_function.id_contain"));
+    map.put("stonecut", Text.translatable("enhanced_commands.block_function.stone_cut"));
+    map.put("if", Text.translatable("enhanced_commands.block_function.conditional"));
+    map.put("idreplace", Text.translatable("enhanced_commands.block_function.id_replace"));
+    map.put("rotate", Text.translatable("enhanced_commands.block_function.rotate"));
+    map.put("mirror", Text.translatable("enhanced_commands.block_function.mirror"));
   }
 }

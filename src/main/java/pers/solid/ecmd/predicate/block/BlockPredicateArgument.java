@@ -22,8 +22,8 @@ import java.util.Collections;
 import java.util.List;
 
 public interface BlockPredicateArgument extends FailableFunction<ServerCommandSource, BlockPredicate, CommandSyntaxException> {
-  Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.all.symbol_tooltip");
-  Text UNION_TOOLTIP = Text.translatable("enhanced_commands.argument.block_predicate.any.symbol_tooltip");
+  Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.all.symbol_tooltip");
+  Text UNION_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.any.symbol_tooltip");
 
   static @NotNull BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     return parse(commandRegistryAccess, parser, suggestionsOnly, true);

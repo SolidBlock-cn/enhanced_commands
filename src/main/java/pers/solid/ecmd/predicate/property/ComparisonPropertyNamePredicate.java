@@ -34,18 +34,18 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
       final MutableText stateText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET);
       final MutableText propertyText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED);
       if (propertyName.isEmpty()) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.no_property_this_name_empty", stateText));
+        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name_empty", stateText));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.no_property_this_name", stateText, propertyText));
+        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name", stateText, propertyText));
       }
     }
     if (property.parse(valueName).isEmpty()) {
       final MutableText propertyText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_TARGET);
       final MutableText actualValueText = Text.literal(valueName).styled(TextUtil.STYLE_FOR_ACTUAL);
       if (valueName.isEmpty()) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.value_not_parsed_empty", propertyText));
+        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.value_not_parsed_empty", propertyText));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.value_not_parsed", propertyText, actualValueText));
+        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.value_not_parsed", propertyText, actualValueText));
       }
     }
     final boolean test = comparator.parseAndTest(blockState, property, valueName);
@@ -53,9 +53,9 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
     final MutableText expectedText = TextUtil.literal(this).styled(TextUtil.STYLE_FOR_EXPECTED);
     final MutableText actualText = PropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
     if (test) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.property_predicate.pass", posText, actualText, expectedText));
+      return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.pass", posText, actualText, expectedText));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.fail", posText, actualText, expectedText));
+      return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.fail", posText, actualText, expectedText));
     }
   }
 

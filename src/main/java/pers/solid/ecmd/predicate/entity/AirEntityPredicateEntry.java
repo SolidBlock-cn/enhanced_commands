@@ -14,7 +14,7 @@ public record AirEntityPredicateEntry(NumberRange.IntRange intRange, boolean inv
 
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
-    return EntityPredicateEntry.testInt(entity, entity.getAir(), intRange, Text.translatable("enhanced_commands.argument.entity_predicate.air"), displayName, inverted);
+    return EntityPredicateEntry.testInt(entity, entity.getAir(), intRange, Text.translatable("enhanced_commands.entity_predicate.air"), displayName, inverted);
   }
 
   @Override

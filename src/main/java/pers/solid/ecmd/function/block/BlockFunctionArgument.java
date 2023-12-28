@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 public interface BlockFunctionArgument extends FailableFunction<ServerCommandSource, BlockFunction, CommandSyntaxException> {
-  Text OVERLAY_TOOLTIP = Text.translatable("enhanced_commands.argument.block_function.overlay.symbol_tooltip");
-  Text PICK_TOOLTIP = Text.translatable("enhanced_commands.argument.block_function.pick.symbol_tooltip");
+  Text OVERLAY_TOOLTIP = Text.translatable("enhanced_commands.block_function.overlay.symbol_tooltip");
+  Text PICK_TOOLTIP = Text.translatable("enhanced_commands.block_function.pick.symbol_tooltip");
 
   static @NotNull BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     return parse(commandRegistryAccess, parser, suggestionsOnly, true);

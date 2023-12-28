@@ -8,7 +8,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
 
 public record HealthEntityPredicateEntry(FloatRangeArgument floatRange, boolean inverted) implements EntityPredicateEntry {
-  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.health");
+  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.health");
 
   @Override
   public boolean test(Entity entity) {
@@ -18,7 +18,7 @@ public record HealthEntityPredicateEntry(FloatRangeArgument floatRange, boolean 
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof LivingEntity livingEntity)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_living_entity", displayName, CRITERION_NAME));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.general.not_living_entity", displayName, CRITERION_NAME));
     } else {
       return EntityPredicateEntry.testFloat(livingEntity, livingEntity.getHealth(), floatRange, CRITERION_NAME, displayName, inverted);
     }

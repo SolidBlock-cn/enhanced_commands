@@ -67,7 +67,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     return new CylinderRegion(radius, height, transformation.apply(center));
   }
 
-  public static final SimpleCommandExceptionType MUST_EXPAND_VERTICALLY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.region.exception.cylinder_must_expand_vertically"));
+  public static final SimpleCommandExceptionType MUST_EXPAND_VERTICALLY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.cylinder_must_expand_vertically"));
 
   @Override
   public @NotNull Region expanded(double offset) {
@@ -147,7 +147,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.region.cylinder");
+      return Text.translatable("enhanced_commands.region.cylinder");
     }
 
     @Override

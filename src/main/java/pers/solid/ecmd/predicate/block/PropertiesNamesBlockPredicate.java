@@ -60,9 +60,9 @@ public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePred
     if (attachments.size() == 1) {
       return attachments.get(0);
     } else if (successes) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.property_names.pass", TextUtil.wrapVector(blockPos)), attachments);
+      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.property_names.pass", TextUtil.wrapVector(blockPos)), attachments);
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.property_names.fail", TextUtil.wrapVector(blockPos)), attachments);
+      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.property_names.fail", TextUtil.wrapVector(blockPos)), attachments);
     }
   }
 

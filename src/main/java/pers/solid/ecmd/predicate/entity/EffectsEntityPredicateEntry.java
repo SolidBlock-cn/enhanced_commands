@@ -36,7 +36,7 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     if (!(entity instanceof final LivingEntity livingEntity)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.effect.not_living"));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
     final var actualEffects = livingEntity.getActiveStatusEffects();
     boolean result = true;
@@ -53,24 +53,24 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
       final EffectDataAccessor accessor = (EffectDataAccessor) entry.getValue();
       if (accessor.getAmplifier().isDummy() && accessor.getDuration().isDummy() && accessor.getAmbient() == null && accessor.getVisible() == null) {
         if (testResult) {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.argument.entity_predicate.effect.true_dummy", displayName, statusEffect.getName())));
+          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.true_dummy", displayName, statusEffect.getName())));
         } else {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.argument.entity_predicate.effect.false_dummy", displayName, statusEffect.getName())));
+          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.false_dummy", displayName, statusEffect.getName())));
         }
       } else {
         if (testResult) {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.argument.entity_predicate.effect.true_advanced", displayName, statusEffect.getName())));
+          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.true_advanced", displayName, statusEffect.getName())));
         } else if (statusEffectInstance != null) {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.argument.entity_predicate.effect.false_advanced", displayName, statusEffect.getName())));
+          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.false_advanced", displayName, statusEffect.getName())));
         } else {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.argument.entity_predicate.effect.false_advanced_no_effect", displayName, statusEffect.getName())));
+          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.false_advanced_no_effect", displayName, statusEffect.getName())));
         }
       }
     }
     if (result) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.effect.pass", displayName), attachments);
+      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.effect.pass", displayName), attachments);
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.effect.fail", displayName), attachments);
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.fail", displayName), attachments);
     }
   }
 

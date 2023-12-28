@@ -38,9 +38,9 @@ public record PoseEntityPredicateEntry(@NotNull EntityPose expected, boolean inv
     final EntityPose actual = entity.getPose();
     final boolean equals = actual == expected;
     if (equals) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.pose.true", displayName, Text.translatable(ENTITY_POSE_NAMES.get(actual)).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.pose.true", displayName, Text.translatable(ENTITY_POSE_NAMES.get(actual)).styled(TextUtil.STYLE_FOR_ACTUAL)));
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.pose.false", displayName, Text.translatable(ENTITY_POSE_NAMES.get(actual)).styled(TextUtil.STYLE_FOR_ACTUAL), Text.translatable(ENTITY_POSE_NAMES.get(expected)).styled(TextUtil.STYLE_FOR_EXPECTED)));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.pose.false", displayName, Text.translatable(ENTITY_POSE_NAMES.get(actual)).styled(TextUtil.STYLE_FOR_ACTUAL), Text.translatable(ENTITY_POSE_NAMES.get(expected)).styled(TextUtil.STYLE_FOR_EXPECTED)));
     }
   }
 

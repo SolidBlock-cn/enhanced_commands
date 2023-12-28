@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * 允许零值，但总和不能为零。
  */
 public interface PickBlockFunction extends BlockFunction {
-  SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.pick.zero_sum"));
+  SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.pick.zero_sum"));
 
   @Override
   default @NotNull BlockFunctionType<PickBlockFunction> getType() {

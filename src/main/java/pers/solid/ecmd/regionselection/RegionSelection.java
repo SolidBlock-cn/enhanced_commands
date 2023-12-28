@@ -27,7 +27,7 @@ import java.util.function.Supplier;
  * 区域选择可用于玩家在游戏内通过交互式的操作来建立一个区域。这个区域会在服务器和客户端之间进行同步，因此需要实现与 NBRegionBuilder 之间的转换。
  */
 public interface RegionSelection extends RegionBasedRegion<RegionSelection, Region> {
-  Text NOT_COMPLETED = Text.translatable("enhanced_commands.argument.region_selection.not_completed");
+  Text NOT_COMPLETED = Text.translatable("enhanced_commands.region_selection.not_completed");
 
   /**
    * 设置第一个点时的操作。有可能是直接设置的特定的点，也有可能是重新开始一个全新的区域。

@@ -8,12 +8,12 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
 
 public record LevelEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
-  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.level");
+  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.level");
 
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof PlayerEntity player)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_player", displayName, CRITERION_NAME));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
       return EntityPredicateEntry.testInt(player, player.experienceLevel, intRange, CRITERION_NAME, displayName, inverted);
     }

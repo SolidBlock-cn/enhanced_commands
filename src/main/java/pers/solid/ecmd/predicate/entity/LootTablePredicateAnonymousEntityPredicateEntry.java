@@ -15,7 +15,7 @@ public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition loot
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     if (!(entity.world instanceof final ServerWorld serverWorld)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.predicate.not_on_server", displayName));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.not_on_server", displayName));
     } else {
       LootContext lootContext = new LootContext.Builder(serverWorld)
           .parameter(LootContextParameters.THIS_ENTITY, entity)
@@ -23,9 +23,9 @@ public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition loot
           .build(LootContextTypes.SELECTOR);
       final boolean test = lootCondition.test(lootContext);
       if (hasNegation ^ test) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.predicate.pass_anonymous", displayName, TextUtil.literal(test).styled(TextUtil.STYLE_FOR_ACTUAL)));
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.predicate.pass_anonymous", displayName, TextUtil.literal(test).styled(TextUtil.STYLE_FOR_ACTUAL)));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.predicate.fail_anonymous", displayName, TextUtil.literal(test).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(!hasNegation).styled(TextUtil.STYLE_FOR_EXPECTED)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail_anonymous", displayName, TextUtil.literal(test).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(!hasNegation).styled(TextUtil.STYLE_FOR_EXPECTED)));
       }
     }
   }

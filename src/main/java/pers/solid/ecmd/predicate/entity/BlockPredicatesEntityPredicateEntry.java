@@ -37,9 +37,9 @@ public record BlockPredicatesEntityPredicateEntry(Map<PosArgument, BlockPredicat
       result &= testResult.successes();
     }
     if (result) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.block.pass_multiple", displayName), attachments);
+      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.block.pass_multiple", displayName), attachments);
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.block.fail_multiple", displayName), attachments);
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.block.fail_multiple", displayName), attachments);
     }
   }
 

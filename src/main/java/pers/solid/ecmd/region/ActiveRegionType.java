@@ -18,7 +18,7 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgumen
 
   @Override
   public RegionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
-    parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.argument.region.active_region"), suggestionsBuilder));
+    parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.region.active_region"), suggestionsBuilder));
     if (parser.reader.canRead() && parser.reader.peek() == '$') {
       parser.reader.skip();
       parser.suggestionProviders.clear();

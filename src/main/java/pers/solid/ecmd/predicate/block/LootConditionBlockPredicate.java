@@ -70,9 +70,9 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
     @Override
     public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
       if (test(cachedBlockPosition)) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.loot_condition.anonymous.pass", TextUtil.wrapVector(cachedBlockPosition.getBlockPos())));
+        return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.loot_condition.anonymous.pass", TextUtil.wrapVector(cachedBlockPosition.getBlockPos())));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.loot_condition.anonymous.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos())));
+        return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.loot_condition.anonymous.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos())));
       }
     }
   }
@@ -91,9 +91,9 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
     @Override
     public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
       if (test(cachedBlockPosition)) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.loot_condition.named.pass", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(TextUtil.STYLE_FOR_EXPECTED)));
+        return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.loot_condition.named.pass", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(TextUtil.STYLE_FOR_EXPECTED)));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.loot_condition.named.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(TextUtil.STYLE_FOR_EXPECTED)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.loot_condition.named.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(TextUtil.STYLE_FOR_EXPECTED)));
       }
     }
   }

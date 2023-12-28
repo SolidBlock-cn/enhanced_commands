@@ -42,7 +42,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     return RegionTypes.SPHERE;
   }
 
-  public static final SimpleCommandExceptionType EXPAND_FAILED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.region.exception.sphere_cannot_expand"));
+  public static final SimpleCommandExceptionType EXPAND_FAILED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.sphere_cannot_expand"));
 
   @Override
   public @NotNull SphereRegion expanded(double offset) {
@@ -95,7 +95,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.region.sphere");
+      return Text.translatable("enhanced_commands.region.sphere");
     }
 
     @Override

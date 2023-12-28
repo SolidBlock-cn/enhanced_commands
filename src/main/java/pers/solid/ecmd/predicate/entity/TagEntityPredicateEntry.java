@@ -16,17 +16,17 @@ public record TagEntityPredicateEntry(@NotNull String tagName, boolean hasNegati
     if (tagName.isEmpty()) {
       // 检测实体是否没有任何标签
       if (commandTags.isEmpty()) {
-        return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.tag.empty", displayName));
+        return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.tag.empty", displayName));
       } else {
-        return TestResult.of(hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.tag.any", displayName));
+        return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.tag.any", displayName));
       }
     } else {
       // 检测实体是否拥有指定的标签
       final MutableText tagNameText = Text.literal(tagName).styled(TextUtil.STYLE_FOR_EXPECTED);
       if (commandTags.contains(tagName)) {
-        return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.tag.contains", displayName, tagNameText));
+        return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.tag.contains", displayName, tagNameText));
       } else {
-        return TestResult.of(hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.tag.not_contains", displayName, tagNameText));
+        return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.tag.not_contains", displayName, tagNameText));
       }
     }
   }

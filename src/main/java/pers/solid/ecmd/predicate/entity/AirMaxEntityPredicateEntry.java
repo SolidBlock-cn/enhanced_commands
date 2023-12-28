@@ -19,9 +19,9 @@ public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPred
     final int maxAir = entity.getMaxAir();
     final MutableText maxHealthText = TextUtil.literal(maxAir);
     if (maxAir == actualAir) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.air.is_max", displayName, actualHealthText));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.air.is_max", displayName, actualHealthText));
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.air.is_not_max", displayName, actualHealthText, maxHealthText));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.air.is_not_max", displayName, actualHealthText, maxHealthText));
     }
   }
 

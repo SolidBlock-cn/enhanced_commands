@@ -28,14 +28,14 @@ public record ExistencePropertyNamePredicate(String propertyName, boolean exists
     final MutableText propertyNameText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_TARGET);
     if (successes) {
       if (actualExists) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.property_predicate.name_pass_exists", blockText, propertyNameText));
+        return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.name_pass_exists", blockText, propertyNameText));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.property_predicate.name_pass_absent", blockText, propertyNameText));
+        return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.name_pass_absent", blockText, propertyNameText));
       }
     } else if (actualExists) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.name_fail_exists", blockText, propertyNameText));
+      return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.name_fail_exists", blockText, propertyNameText));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.name_fail_absent", blockText, propertyNameText));
+      return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.name_fail_absent", blockText, propertyNameText));
     }
   }
 

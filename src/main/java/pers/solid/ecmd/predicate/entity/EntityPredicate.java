@@ -31,11 +31,11 @@ public interface EntityPredicate extends Predicate<Entity> {
   boolean test(Entity entity);
 
   static TestResult successResult(Entity entity) {
-    return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET)));
+    return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET)));
   }
 
   static TestResult failResult(Entity entity) {
-    return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.fail", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET)));
+    return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.fail", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET)));
   }
 
   static TestResult successOrFail(boolean successes, Entity entity) {

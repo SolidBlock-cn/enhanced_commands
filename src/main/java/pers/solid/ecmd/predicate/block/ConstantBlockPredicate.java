@@ -27,7 +27,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
-    return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.constant.pass"));
+    return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.constant.pass"));
   }
 
   @Override
@@ -50,7 +50,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
 
     @Override
     public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.argument.block_predicate.constant"), suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_predicate.constant"), suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();
         parser.suggestionProviders.clear();

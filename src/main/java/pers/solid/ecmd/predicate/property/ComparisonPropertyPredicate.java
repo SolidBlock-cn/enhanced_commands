@@ -27,16 +27,16 @@ public record ComparisonPropertyPredicate<T extends Comparable<T>>(Property<T> p
       final MutableText stateText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET);
       final String propertyName = property.getName();
       final MutableText propertyText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED);
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.no_property", stateText, propertyText));
+      return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property", stateText, propertyText));
     }
     final boolean test = comparator.test(blockState.get(property), value);
     final MutableText posText = TextUtil.wrapVector(blockPos);
     final MutableText expectedText = TextUtil.literal(this).styled(TextUtil.STYLE_FOR_EXPECTED);
     final MutableText actualText = PropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
     if (test) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.property_predicate.pass", posText, actualText, expectedText));
+      return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.pass", posText, actualText, expectedText));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.property_predicate.fail", posText, actualText, expectedText));
+      return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.fail", posText, actualText, expectedText));
     }
   }
 

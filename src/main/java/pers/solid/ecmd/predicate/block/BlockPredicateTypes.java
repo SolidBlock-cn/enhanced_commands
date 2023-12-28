@@ -56,27 +56,27 @@ public final class BlockPredicateTypes {
   private static void registerFunctions(Map<String, Supplier<FunctionParamsParser<? extends BlockPredicateArgument>>> map) {
     map.put("all", AllBlockPredicate.Parser::new);
     map.put("any", AnyBlockPredicate.Parser::new);
-    map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_diff"), false));
+    map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), false));
     map.put("expose", ExposeBlockPredicate.Parser::new);
     map.put("idcontain", IdContainBlockPredicate.Parser::new);
     map.put("predicate", LootConditionBlockPredicate.Parser::new);
     map.put("rand", RandBlockPredicate.Parser::new);
     map.put("region", RegionBlockPredicate.Parser::new);
     map.put("rel", RelBlockPredicate.Parser::new);
-    map.put("same", () -> new BiPredicateBlockPredicate.Parser("same", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_same"), true));
+    map.put("same", () -> new BiPredicateBlockPredicate.Parser("same", Text.translatable("enhanced_commands.block_predicate.bi_predicate_same"), true));
   }
 
   private static void registerFunctionNames(Map<String, Text> map) {
-    map.put("all", Text.translatable("enhanced_commands.argument.block_predicate.all"));
-    map.put("any", Text.translatable("enhanced_commands.argument.block_predicate.any"));
-    map.put("diff", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_diff"));
-    map.put("expose", Text.translatable("enhanced_commands.argument.block_predicate.expose"));
-    map.put("idcontain", Text.translatable("enhanced_commands.argument.block_predicate.id_contain"));
-    map.put("predicate", Text.translatable("enhanced_commands.argument.block_predicate.loot_condition"));
-    map.put("rand", Text.translatable("enhanced_commands.argument.block_predicate.probability"));
-    map.put("region", Text.translatable("enhanced_commands.argument.block_predicate.region"));
-    map.put("rel", Text.translatable("enhanced_commands.argument.block_predicate.rel"));
-    map.put("same", Text.translatable("enhanced_commands.argument.block_predicate.bi_predicate_same"));
+    map.put("all", Text.translatable("enhanced_commands.block_predicate.all"));
+    map.put("any", Text.translatable("enhanced_commands.block_predicate.any"));
+    map.put("diff", Text.translatable("enhanced_commands.block_predicate.bi_predicate_diff"));
+    map.put("expose", Text.translatable("enhanced_commands.block_predicate.expose"));
+    map.put("idcontain", Text.translatable("enhanced_commands.block_predicate.id_contain"));
+    map.put("predicate", Text.translatable("enhanced_commands.block_predicate.loot_condition"));
+    map.put("rand", Text.translatable("enhanced_commands.block_predicate.probability"));
+    map.put("region", Text.translatable("enhanced_commands.block_predicate.region"));
+    map.put("rel", Text.translatable("enhanced_commands.block_predicate.rel"));
+    map.put("same", Text.translatable("enhanced_commands.block_predicate.bi_predicate_same"));
   }
 
   public static void init() {

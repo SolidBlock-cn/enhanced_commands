@@ -55,9 +55,9 @@ public interface EntityPredicateEntry extends EntityPredicate {
     final MutableText actualText = TextUtil.literal(actual).styled(TextUtil.STYLE_FOR_ACTUAL);
     final MutableText expectedText = Text.literal(StringUtil.wrapRange(expected)).styled(TextUtil.STYLE_FOR_EXPECTED);
     if (expected.test(actual)) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.general.out_of_range", criterionName, entityName, actualText, expectedText));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.general.out_of_range", criterionName, entityName, actualText, expectedText));
     }
   }
 
@@ -75,9 +75,9 @@ public interface EntityPredicateEntry extends EntityPredicate {
     final MutableText actualText = TextUtil.literal(actual).styled(TextUtil.STYLE_FOR_ACTUAL);
     final MutableText expectedText = Text.literal(StringUtil.wrapRange(expected)).styled(TextUtil.STYLE_FOR_EXPECTED);
     if (expected.isInRange(actual)) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.general.out_of_range", criterionName, entityName, actualText, expectedText));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.general.out_of_range", criterionName, entityName, actualText, expectedText));
     }
   }
 
@@ -95,9 +95,9 @@ public interface EntityPredicateEntry extends EntityPredicate {
     final MutableText actualText = TextUtil.literal(actual).styled(TextUtil.STYLE_FOR_ACTUAL);
     final MutableText expectedText = Text.literal(StringUtil.wrapRange(expected)).styled(TextUtil.STYLE_FOR_EXPECTED);
     if (expected.test(actual)) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.general.out_of_range", criterionName, entityName, actualText, expectedText));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.general.out_of_range", criterionName, entityName, actualText, expectedText));
     }
   }
 }

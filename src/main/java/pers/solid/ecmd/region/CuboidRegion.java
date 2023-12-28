@@ -170,7 +170,7 @@ public record CuboidRegion(Box box) implements Region {
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.region.cuboid");
+      return Text.translatable("enhanced_commands.region.cuboid");
     }
 
     @Override

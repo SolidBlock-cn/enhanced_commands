@@ -9,7 +9,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
 
 public record ExhaustionEntityPredicateEntry(FloatRangeArgument floatRange, boolean inverted) implements EntityPredicateEntry {
-  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.exhaustion");
+  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.exhaustion");
 
   @Override
   public boolean test(Entity entity) {
@@ -19,7 +19,7 @@ public record ExhaustionEntityPredicateEntry(FloatRangeArgument floatRange, bool
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     if (!(entity instanceof final PlayerEntity player)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.general.not_player", displayName, CRITERION_NAME));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
       return EntityPredicateEntry.testFloat(player, player.getHungerManager().getExhaustion(), floatRange, CRITERION_NAME, displayName, inverted);
     }

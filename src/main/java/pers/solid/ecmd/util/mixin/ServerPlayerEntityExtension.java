@@ -24,7 +24,7 @@ public interface ServerPlayerEntityExtension {
     }
   }
 
-  DynamicCommandExceptionType PLAYER_HAS_NO_ACTIVE_REGION = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.no_active_region", o));
+  DynamicCommandExceptionType PLAYER_HAS_NO_ACTIVE_REGION = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.no_active_region", o));
 
   default @NotNull Region ec$getOrEvaluateActiveRegionOrThrow() throws CommandSyntaxException {
     final Region region = ec$getOrEvaluateActiveRegion();

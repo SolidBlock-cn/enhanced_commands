@@ -421,7 +421,7 @@ public class EntitySelectorOptionsExtension {
         reader.getReader().setCursor(cursorBefore);
         throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader.getReader()), cursorAfter);
       }
-    }, reader -> isNeverPositivelyUsed(reader, "pose"), Text.translatable("enhanced_commands.argument.entity_predicate.pose"));
+    }, reader -> isNeverPositivelyUsed(reader, "pose"), Text.translatable("enhanced_commands.entity_predicate.pose"));
     markRequiringUniqueNoMixture("pose");
 
     // 以下对应 EntityFlags 部分
@@ -494,7 +494,7 @@ public class EntitySelectorOptionsExtension {
         final BlockPredicateArgument parse = BlockPredicateArgument.parse(MixinShared.getCommandRegistryAccess(), parser, false);
         EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
       }
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity_predicate.block"));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.block"));
 
     // 检测实体所拥有的效果
     putOption("effect", reader -> {
@@ -556,7 +556,7 @@ public class EntitySelectorOptionsExtension {
 
         EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new EffectEntityPredicateEntry(value, inverted));
       }
-    }, reader -> isNeverPositivelyUsed(reader, "effect"), Text.translatable("enhanced_commands.argument.entity_predicate.effect"));
+    }, reader -> isNeverPositivelyUsed(reader, "effect"), Text.translatable("enhanced_commands.entity_predicate.effect"));
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {
@@ -564,7 +564,7 @@ public class EntitySelectorOptionsExtension {
   }
 
   private static void putSimpleBooleanOption(String id, Predicate<Entity> predicate) {
-    putSimpleBooleanOption(id, predicate, "enhanced_commands.argument.entity_predicate." + id);
+    putSimpleBooleanOption(id, predicate, "enhanced_commands.entity_predicate." + id);
     markRequiringUnique(id);
   }
 
@@ -854,6 +854,7 @@ public class EntitySelectorOptionsExtension {
 
   @FunctionalInterface
   public interface InapplicableReasonProvider {
-    @Nullable CommandSyntaxException getReason(EntitySelectorReader reader, String option, int restoreCursor);
+    @Nullable
+    CommandSyntaxException getReason(EntitySelectorReader reader, String option, int restoreCursor);
   }
 }

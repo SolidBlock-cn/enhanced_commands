@@ -7,7 +7,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
 
 public record FireEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
-  public static final Text CRITERION_NAME = Text.translatable("enhanced_commands.argument.entity_predicate.fire");
+  public static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.fire");
 
   @Override
   public boolean test(Entity entity) {

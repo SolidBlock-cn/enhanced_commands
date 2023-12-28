@@ -50,9 +50,9 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(TextUtil.STYLE_FOR_ACTUAL);
     final MutableText o2 = Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_EXPECTED);
     if (nextFloat < value) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.probability.pass", o1, o2));
+      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.probability.pass", o1, o2));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.probability.fail", o1, o2));
+      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.probability.fail", o1, o2));
     }
   }
 

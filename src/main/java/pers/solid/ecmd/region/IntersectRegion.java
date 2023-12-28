@@ -111,7 +111,7 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.region.intersect");
+      return Text.translatable("enhanced_commands.region.intersect");
     }
 
     @Override

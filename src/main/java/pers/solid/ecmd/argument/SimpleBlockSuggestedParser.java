@@ -33,10 +33,10 @@ import java.util.stream.Stream;
 
 public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   public static final DynamicCommandExceptionType UNKNOWN_COMPARATOR = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.block_predicate.unknown_comparator", o));
-  public static final SimpleCommandExceptionType COMPARATOR_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.comparator_expected"));
-  public static final Text START_OF_PROPERTIES = Text.translatable("enhanced_commands.argument.block_predicate.start_of_properties");
-  public static final Text NEXT_PROPERTY = Text.translatable("enhanced_commands.argument.block_predicate.next_property");
-  public static final Text END_OF_PROPERTIES = Text.translatable("enhanced_commands.argument.block_predicate.end_of_properties");
+  public static final SimpleCommandExceptionType COMPARATOR_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_predicate.comparator_expected"));
+  public static final Text START_OF_PROPERTIES = Text.translatable("enhanced_commands.block_predicate.start_of_properties");
+  public static final Text NEXT_PROPERTY = Text.translatable("enhanced_commands.block_predicate.next_property");
+  public static final Text END_OF_PROPERTIES = Text.translatable("enhanced_commands.block_predicate.end_of_properties");
   public static final SuggestionProvider PROPERTY_FINISHED = (context, suggestionsBuilder) -> {
     if (suggestionsBuilder.getRemaining().isEmpty()) {
       suggestionsBuilder.suggest(",", NEXT_PROPERTY);

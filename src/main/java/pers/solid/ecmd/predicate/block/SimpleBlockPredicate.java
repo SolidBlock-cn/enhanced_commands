@@ -56,10 +56,10 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     final MutableText actualText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL);
     if (!blockState.isOf(block)) {
       final MutableText expectedText = block.getName().styled(TextUtil.STYLE_FOR_EXPECTED);
-      messages.add(Text.translatable("enhanced_commands.argument.block_predicate.simple.not_the_block", posText, actualText, expectedText).formatted(Formatting.RED));
+      messages.add(Text.translatable("enhanced_commands.block_predicate.simple.not_the_block", posText, actualText, expectedText).formatted(Formatting.RED));
       matches = false;
     } else {
-      messages.add(Text.translatable("enhanced_commands.argument.block_predicate.simple.is_the_block", posText, actualText).formatted(Formatting.GREEN));
+      messages.add(Text.translatable("enhanced_commands.block_predicate.simple.is_the_block", posText, actualText).formatted(Formatting.GREEN));
     }
     for (PropertyPredicate<?> propertyPredicate : propertyEntries) {
       final TestResult propertyResult = propertyPredicate.testAndDescribe(blockState, blockPos);

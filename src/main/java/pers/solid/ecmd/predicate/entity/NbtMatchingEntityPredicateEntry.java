@@ -19,7 +19,7 @@ public record NbtMatchingEntityPredicateEntry(NbtCompound nbtCompound, boolean h
       }
     }
     boolean matches = NbtHelper.matches(nbtCompound, actualNbt, true);
-    return TestResult.of(matches != hasNegation, Text.translatable("enhanced_commands.argument.entity_predicate.nbt." + (matches ? "pass" : "fail"), entity));
+    return TestResult.of(matches != hasNegation, Text.translatable("enhanced_commands.entity_predicate.nbt." + (matches ? "pass" : "fail"), entity));
   }
 
   @Override

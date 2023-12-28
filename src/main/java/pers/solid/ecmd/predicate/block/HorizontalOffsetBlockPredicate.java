@@ -20,8 +20,8 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.List;
 
 public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPredicate) implements BlockPredicate {
-  public static final Text ABOVE_BLOCK = Text.translatable("enhanced_commands.argument.block_predicate.above_block");
-  public static final Text BENEATH_BLOCK = Text.translatable("enhanced_commands.argument.block_predicate.beneath_block");
+  public static final Text ABOVE_BLOCK = Text.translatable("enhanced_commands.block_predicate.above_block");
+  public static final Text BENEATH_BLOCK = Text.translatable("enhanced_commands.block_predicate.beneath_block");
 
   @Override
   public @NotNull String asString() {
@@ -48,9 +48,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     final String string = successes ? "pass" : "fail";
     final Formatting formatting = successes ? Formatting.GREEN : Formatting.RED;
     if (offset > 0) {
-      description = Text.translatable("enhanced_commands.argument.block_predicate.test_relative_above_" + string, offset, TextUtil.wrapVector(cachedBlockPosition.getBlockPos())).formatted(formatting);
+      description = Text.translatable("enhanced_commands.block_predicate.horizontal_offset.above_" + string, offset, TextUtil.wrapVector(cachedBlockPosition.getBlockPos())).formatted(formatting);
     } else {
-      description = Text.translatable("enhanced_commands.argument.block_predicate.test_relative_below_" + string, -offset, TextUtil.wrapVector(cachedBlockPosition.getBlockPos())).formatted(formatting);
+      description = Text.translatable("enhanced_commands.block_predicate.horizontal_offset.below_" + string, -offset, TextUtil.wrapVector(cachedBlockPosition.getBlockPos())).formatted(formatting);
     }
     return new TestResult(successes, List.of(description), List.of(attachment));
   }

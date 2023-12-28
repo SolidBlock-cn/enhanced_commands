@@ -64,9 +64,9 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
     if (attachements.size() == 1) {
       return attachements.get(0);
     } else if (Iterables.all(attachements, TestResult::successes)) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.all.pass"), attachements);
+      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.all.pass"), attachements);
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.all.fail"), attachements);
+      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.all.fail"), attachements);
     }
   }
 

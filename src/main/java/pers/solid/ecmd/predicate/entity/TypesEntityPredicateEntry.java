@@ -28,9 +28,9 @@ public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<Entity
     final MutableText actualText = TextUtil.styled(entity.getType().getName(), TextUtil.STYLE_FOR_ACTUAL);
     final MutableText expectedText = Texts.join(values, Texts.DEFAULT_SEPARATOR_TEXT, either -> either.map(type -> TextUtil.styled(type.getName(), TextUtil.STYLE_FOR_EXPECTED), tag -> Text.literal("#" + tag.id()).styled(TextUtil.STYLE_FOR_EXPECTED)));
     if (anyMatch) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.type.true_multiple", displayName, actualText, expectedText));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.type.true_multiple", displayName, actualText, expectedText));
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.type.false_multiple", displayName, actualText, expectedText));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.type.false_multiple", displayName, actualText, expectedText));
     }
   }
 

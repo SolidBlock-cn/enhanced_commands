@@ -27,7 +27,7 @@ import pers.solid.ecmd.util.mixin.MixinShared;
  * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockStateArgument} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
  */
 public interface BlockFunction extends ExpressionConvertible, NbtConvertible, BlockFunctionArgument {
-  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannotParse"));
+  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));
 
   static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
     return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).apply(source);

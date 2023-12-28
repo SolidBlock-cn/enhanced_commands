@@ -23,15 +23,15 @@ public record AlternativesEntityPredicateEntry(Collection<EntitySelector> entity
     }
     if (inverted) {
       if (result) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.alternatives.fail_inverted", displayName), attachments.build());
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.alternatives.fail_inverted", displayName), attachments.build());
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.alternatives.pass_inverted", displayName), attachments.build());
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.alternatives.pass_inverted", displayName), attachments.build());
       }
     } else {
       if (result) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.alternatives.pass", displayName), attachments.build());
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.alternatives.pass", displayName), attachments.build());
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.alternatives.fail", displayName), attachments.build());
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.alternatives.fail", displayName), attachments.build());
       }
     }
   }

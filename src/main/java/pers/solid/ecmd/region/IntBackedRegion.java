@@ -23,7 +23,7 @@ public interface IntBackedRegion extends Region {
     return contains(BlockPos.ofFloored(vec3d));
   }
 
-  DynamicCommandExceptionType MOVE_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.exception.move_must_int", o));
+  DynamicCommandExceptionType MOVE_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.move_must_int", o));
 
   @Override
   @NotNull
@@ -31,7 +31,7 @@ public interface IntBackedRegion extends Region {
     return transformedInt(vec3i -> vec3i.add(relativePos));
   }
 
-  DynamicCommandExceptionType MOVE_MUST_INT_VECTOR = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.exception.move_must_int_vector", o));
+  DynamicCommandExceptionType MOVE_MUST_INT_VECTOR = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.move_must_int_vector", o));
 
   @Override
   @NotNull
@@ -39,7 +39,7 @@ public interface IntBackedRegion extends Region {
     return moved(toFlooredIntOrThrow(relativePos, MOVE_MUST_INT_VECTOR));
   }
 
-  DynamicCommandExceptionType EXPAND_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.exception.expand_must_int", o));
+  DynamicCommandExceptionType EXPAND_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.expand_must_int", o));
 
   @Override
   @NotNull
@@ -97,7 +97,7 @@ public interface IntBackedRegion extends Region {
     throw new UnsupportedOperationException();
   }
 
-  DynamicCommandExceptionType ROTATION_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.exception.rotation_pivot_must_center", o));
+  DynamicCommandExceptionType ROTATION_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.rotation_pivot_must_center", o));
 
   @Override
   @NotNull
@@ -117,7 +117,7 @@ public interface IntBackedRegion extends Region {
     throw new UnsupportedOperationException();
   }
 
-  DynamicCommandExceptionType MIRROR_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.region.exception.mirror_pivot_must_center", o));
+  DynamicCommandExceptionType MIRROR_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.mirror_pivot_must_center", o));
 
   @Override
   @NotNull

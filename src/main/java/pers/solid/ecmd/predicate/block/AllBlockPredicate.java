@@ -45,9 +45,9 @@ public record AllBlockPredicate(Collection<BlockPredicate> blockPredicates) impl
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes < build.size()) {
-      return new TestResult(true, List.of(Text.translatable("enhanced_commands.argument.block_predicate.all.fail", successes, build.size()).formatted(Formatting.RED)), build);
+      return new TestResult(true, List.of(Text.translatable("enhanced_commands.block_predicate.all.fail", successes, build.size()).formatted(Formatting.RED)), build);
     } else {
-      return new TestResult(false, List.of(Text.translatable("enhanced_commands.argument.block_predicate.all.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
+      return new TestResult(false, List.of(Text.translatable("enhanced_commands.block_predicate.all.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
     }
   }
 

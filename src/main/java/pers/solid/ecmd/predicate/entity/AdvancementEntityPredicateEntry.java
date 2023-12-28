@@ -24,7 +24,7 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof final ServerPlayerEntity player)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.not_player", displayName));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.not_player", displayName));
     }
     PlayerAdvancementTracker advancementTracker = player.getAdvancementTracker();
     ServerAdvancementLoader advancementLoader = player.getServer().getAdvancementLoader();
@@ -39,7 +39,7 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
       final Advancement advancement = advancementLoader.get(advancementId);
       if (advancement == null) {
         // the advancement does not exist -> false
-        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.no_advancement", TextUtil.literal(advancementId).styled(TextUtil.STYLE_FOR_TARGET))));
+        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.no_advancement", TextUtil.literal(advancementId).styled(TextUtil.STYLE_FOR_TARGET))));
         result = false;
         continue;
       }
@@ -58,31 +58,31 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
           if (criterionProgress == null) {
             // the criterion does not exist -> false
             progressResult = false;
-            progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.criterion.no_criterion", TextUtil.styled(advancementText, TextUtil.STYLE_FOR_EXPECTED), criterionText)));
+            progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.criterion.no_criterion", TextUtil.styled(advancementText, TextUtil.STYLE_FOR_EXPECTED), criterionText)));
             continue;
           }
           final boolean expectedValue = progressEntry.getBooleanValue();
           final boolean actualValue = criterionProgress.isObtained();
           if (expectedValue == actualValue) {
             if (actualValue) {
-              progressAttachments.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.criterion.completed_expected", displayName, criterionText)));
+              progressAttachments.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.advancements.criterion.completed_expected", displayName, criterionText)));
             } else {
-              progressAttachments.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.criterion.not_completed_expected", displayName, criterionText)));
+              progressAttachments.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.advancements.criterion.not_completed_expected", displayName, criterionText)));
             }
           } else {
             if (actualValue) {
-              progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.criterion.completed_unexpected", displayName, criterionText)));
+              progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.criterion.completed_unexpected", displayName, criterionText)));
             } else {
-              progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.criterion.not_completed_unexpected", displayName, criterionText)));
+              progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.criterion.not_completed_unexpected", displayName, criterionText)));
             }
             progressResult = false;
           }
         }
 
         if (progressResult) {
-          attachments.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.pass_with_criteria", displayName, advancementText), progressAttachments.build()));
+          attachments.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.advancements.pass_with_criteria", displayName, advancementText), progressAttachments.build()));
         } else {
-          attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.fail_with_criteria", displayName, advancementText), progressAttachments.build()));
+          attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.fail_with_criteria", displayName, advancementText), progressAttachments.build()));
           result = false;
         }
       }
@@ -91,15 +91,15 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
         final boolean actualValue = progress.isDone();
         if (expectedValue == actualValue) {
           if (actualValue) {
-            attachments.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.completed_expected", displayName, advancementText)));
+            attachments.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.advancements.completed_expected", displayName, advancementText)));
           } else {
-            attachments.add(TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.not_completed_expected", displayName, advancementText)));
+            attachments.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.advancements.not_completed_expected", displayName, advancementText)));
           }
         } else {
           if (actualValue) {
-            attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.completed_unexpected", displayName, advancementText)));
+            attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.completed_unexpected", displayName, advancementText)));
           } else {
-            attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.not_completed_unexpected", displayName, advancementText)));
+            attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.not_completed_unexpected", displayName, advancementText)));
           }
           result = false;
         }
@@ -107,9 +107,9 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
     }
 
     if (result) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.pass", displayName), attachments.build());
+      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.advancements.pass", displayName), attachments.build());
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.advancements.fail", displayName), attachments.build());
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.fail", displayName), attachments.build());
     }
   }
 

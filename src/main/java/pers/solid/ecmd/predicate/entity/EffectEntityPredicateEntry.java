@@ -21,14 +21,14 @@ public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     if (!(entity instanceof final LivingEntity livingEntity)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.effect.not_living"));
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
     final var actualEffects = livingEntity.getActiveStatusEffects();
     final var actual = actualEffects.containsKey(expected);
     if (actual) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.effect.true_dummy", displayName, expected.getName()));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.effect.true_dummy", displayName, expected.getName()));
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.effect.false_dummy", displayName, expected.getName()));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.effect.false_dummy", displayName, expected.getName()));
     }
   }
 

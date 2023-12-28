@@ -183,7 +183,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
 
     @Override
     public Text tooltip() {
-      return Text.translatable("enhanced_commands.argument.region.outline");
+      return Text.translatable("enhanced_commands.region.outline");
     }
 
     @Override

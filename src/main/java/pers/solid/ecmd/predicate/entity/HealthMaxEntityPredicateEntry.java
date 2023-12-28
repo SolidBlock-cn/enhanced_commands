@@ -23,9 +23,9 @@ public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityP
       final float maxHealth = livingEntity.getMaxHealth();
       final MutableText maxHealthText = TextUtil.literal(maxHealth);
       if (maxHealth == actualHealth) {
-        return TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.health.is_max", displayName, actualHealthText));
+        return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.health.is_max", displayName, actualHealthText));
       } else {
-        return TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.health.is_not_max", displayName, actualHealthText, maxHealthText));
+        return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.health.is_not_max", displayName, actualHealthText, maxHealthText));
       }
     }
   }

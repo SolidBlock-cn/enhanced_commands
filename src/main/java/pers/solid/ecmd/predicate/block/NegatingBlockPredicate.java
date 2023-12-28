@@ -30,9 +30,9 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition);
     if (testResult.successes()) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.negation.fail"), List.of(testResult));
+      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.negation.fail"), List.of(testResult));
     } else {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.negation.pass"), List.of(testResult));
+      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.negation.pass"), List.of(testResult));
     }
   }
 
@@ -57,7 +57,7 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
 
     @Override
     public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.argument.block_predicate.negation"), suggestionsBuilder));
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder));
       boolean negates = false;
       boolean suffixed = false;
       while (parser.reader.canRead() && parser.reader.peek() == '!') {

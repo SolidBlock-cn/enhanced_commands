@@ -23,8 +23,8 @@ import java.util.function.Predicate;
  * @see net.minecraft.command.argument.BlockArgumentParser
  */
 public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedParser {
-  public static final Text MATCH_ANY_VALUE = Text.translatable("enhanced_commands.argument.block_predicate.anyValue");
-  public static final Text MATCH_NONE_VALUE = Text.translatable("enhanced_commands.argument.block_predicate.noneValue");
+  public static final Text MATCH_ANY_VALUE = Text.translatable("enhanced_commands.block_predicate.any_value");
+  public static final Text MATCH_NONE_VALUE = Text.translatable("enhanced_commands.block_predicate.none_value");
   public final List<PropertyPredicate<?>> propertyPredicates = new ArrayList<>();
   public final List<PropertyNamePredicate> propertyNamePredicates = new ArrayList<>();
 
@@ -121,7 +121,8 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
   private void addSpecialPropertyValueSuggestions() {
     suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
-        if (suggestionsBuilder.getInput().endsWith("!=")) {
+        final String input = suggestionsBuilder.getInput().stripTrailing();
+        if (input.endsWith("!=") || input.endsWith("=!")) {
           suggestionsBuilder.suggest("*", MATCH_NONE_VALUE);
         } else {
           suggestionsBuilder.suggest("*", MATCH_ANY_VALUE);

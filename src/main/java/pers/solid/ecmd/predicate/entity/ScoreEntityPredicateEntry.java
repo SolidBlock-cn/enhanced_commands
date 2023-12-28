@@ -33,14 +33,14 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
     )) {
       ScoreboardObjective objective = scoreboard.getNullableObjective(triple.getLeft());
       if (objective == null) {
-        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.score.no_objective", Text.literal(triple.getLeft()).styled(TextUtil.STYLE_FOR_TARGET))));
+        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.score.no_objective", Text.literal(triple.getLeft()).styled(TextUtil.STYLE_FOR_TARGET))));
         result = false;
         continue;
       }
 
       final MutableText objectiveText = TextUtil.styled(objective.getDisplayName(), TextUtil.STYLE_FOR_TARGET);
       if (!scoreboard.playerHasObjective(entityName, objective)) {
-        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.score.no_player_score", displayName, objectiveText)));
+        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.score.no_player_score", displayName, objectiveText)));
         result = false;
         continue;
       }
@@ -53,16 +53,16 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
       final MutableText actualValueText = TextUtil.literal(scoreValue).styled(TextUtil.STYLE_FOR_ACTUAL);
       final MutableText expectedRangeText = Text.literal(StringUtil.wrapRange(intRange)).styled(TextUtil.STYLE_FOR_EXPECTED);
       if (test) {
-        attachments.add(TestResult.of(!inverted, Text.translatable("enhanced_commands.argument.entity_predicate.score.entry.in_range", displayName, objectiveText, actualValueText, expectedRangeText)));
+        attachments.add(TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.score.entry.in_range", displayName, objectiveText, actualValueText, expectedRangeText)));
       } else {
-        attachments.add(TestResult.of(inverted, Text.translatable("enhanced_commands.argument.entity_predicate.score.entry.out_of_range", displayName, objectiveText, actualValueText, expectedRangeText)));
+        attachments.add(TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.score.entry.out_of_range", displayName, objectiveText, actualValueText, expectedRangeText)));
       }
       result &= (test != inverted);
     }
     if (result) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.entity_predicate.score.pass", displayName), attachments.build());
+      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.score.pass", displayName), attachments.build());
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.entity_predicate.score.fail", displayName), attachments.build());
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.score.fail", displayName), attachments.build());
     }
   }
 

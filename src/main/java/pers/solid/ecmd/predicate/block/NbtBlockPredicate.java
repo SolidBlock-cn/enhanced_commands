@@ -37,11 +37,11 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     final MutableText nameText = cachedBlockPosition.getBlockState().getBlock().getName();
     final MutableText posText = TextUtil.wrapVector(cachedBlockPosition.getBlockPos());
     if (blockEntity == null) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.nbt.not_block_entity", nameText, posText));
+      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.nbt.not_block_entity", nameText, posText));
     } else if (nbtPredicate.test(blockEntity.createNbt())) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.argument.block_predicate.nbt.pass", nameText, posText));
+      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.nbt.pass", nameText, posText));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.argument.block_predicate.nbt.fail"));
+      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.nbt.fail"));
     }
   }
 
