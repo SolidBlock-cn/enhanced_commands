@@ -20,7 +20,8 @@
 - `oak_planks`：当方块是橡木木板时通过。
 - `stone_planks`：无效的方块谓词，因为这个 ID 根本不存在。
 - `oak_stairs[facing=east]`：当方块是朝向东边的橡木楼梯时通过。
-- `oak_stairs[facing!=east]`：当方块是橡木楼梯且不是朝向东边时通过。
+- `oak_stairs[facing=east|west]`：当方块是朝向东边或西边的橡木楼梯时通过。
+- `oak_stairs[facing!=east]` 或 `oak_stairs[facing=!east]`：当方块是橡木楼梯且不是朝向东边时通过。
 - `oak_planks[facing=east]`：无效的方块谓词，因为木板没有 `facing` 属性。
 - `cherry_planks`：当方块是樱花木板时通过，但如果游戏版本在 1.20 之前，且世界没有启用实验性功能，那么这个方块谓词是无效的。
 - `@cherry_planks`：当方块是樱花木板时通过，即使是在 1.19.4 且没有启用实验性功能，这个方块谓词也是有效的；但在 1.19.3 或更早的版本中樱花木板根本不存在，方块谓词无效。
