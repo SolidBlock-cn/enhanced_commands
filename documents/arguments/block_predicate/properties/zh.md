@@ -21,15 +21,13 @@
 - `[facing=east]`：方块的 `facing` 属性的值为 `east` 时通过。（更准确的说法是，方块有 `facing` 属性，且该属性支持 `east` 值，且其值为 `east` 时通过。）
 - `[facing=east|west]`：方块有 `facing` 属性，且该属性的值为 `east` 或 `west` 时通过。
 - `[facing=east|east]`：无效，因为值有重复。
-- `[facing!=east]`：方块有 `facing` 属性，且该属性支持 `east` 值，且其值不为 `east` 时通过。
-- `[facing!=east|west]`：方块有 `facing` 属性，且该属性的值不为 `east` 或 `west` 时通过。
+- `[facing!=east]`：方块有 `facing` 属性，且其值不为 `east` 时通过。
+- `[facing!=east|west]`：方块有 `facing` 属性，且其值不为 `east` 或 `west` 时通过。
 - `[facing>east]`：方块有 `facing` 属性，且该属性支持 `east` 值，且其值大于 `east` 时通过。
 - `[facing=*]`：方块有 `facing` 属性时通过，无论其值是什么。
 - `[facing!=*]`：方块没有 `facing` 属性时通过。
 - `[facing=east, type=top]`：方块的 `facing` 属性的值为 `east`，且 `type` 属性的值为 `top` 时通过。
 - `[]`：不检查属性，始终通过。
-
-从上面的例子可以看出，相反的比较不一定代表着相反的谓词。例如，`[facing!=east]` 并不等同于 `![facing=east]`，因为当方块没有 `facing` 属性，或者拥有该属性但不支持 `east` 值时，前者仍不通过，但后者会通过。
 
 ## 参见
 

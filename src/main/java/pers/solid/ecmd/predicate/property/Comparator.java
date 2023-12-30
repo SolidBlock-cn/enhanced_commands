@@ -47,6 +47,9 @@ public enum Comparator implements StringIdentifiable {
 
   public <T extends Comparable<T>> boolean parseAndTest(BlockState actual, Property<T> property, String name) {
     final Optional<T> parse = property.parse(name);
+    if (this == NE && parse.isEmpty()) {
+      return true;
+    }
     return parse.filter(t -> biPredicate.test(actual.get(property), t)).isPresent();
   }
 

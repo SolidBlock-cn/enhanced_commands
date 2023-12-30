@@ -39,7 +39,13 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
         return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name", stateText, propertyText));
       }
     }
-    if (property.parse(valueName).isEmpty()) {
+    final boolean test = comparator.parseAndTest(blockState, property, valueName);
+    final MutableText posText = TextUtil.wrapVector(blockPos);
+    final MutableText expectedText = TextUtil.literal(this).styled(TextUtil.STYLE_FOR_EXPECTED);
+    final MutableText actualText = PropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
+    if (test) {
+      return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.pass", posText, actualText, expectedText));
+    } else if (property.parse(valueName).isEmpty()) {
       final MutableText propertyText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_TARGET);
       final MutableText actualValueText = Text.literal(valueName).styled(TextUtil.STYLE_FOR_ACTUAL);
       if (valueName.isEmpty()) {
@@ -47,13 +53,6 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
       } else {
         return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.value_not_parsed", propertyText, actualValueText));
       }
-    }
-    final boolean test = comparator.parseAndTest(blockState, property, valueName);
-    final MutableText posText = TextUtil.wrapVector(blockPos);
-    final MutableText expectedText = TextUtil.literal(this).styled(TextUtil.STYLE_FOR_EXPECTED);
-    final MutableText actualText = PropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
-    if (test) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.pass", posText, actualText, expectedText));
     } else {
       return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.fail", posText, actualText, expectedText));
     }
