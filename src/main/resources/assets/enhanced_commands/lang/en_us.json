@@ -4,6 +4,7 @@
   "enhanced_commands.argument.block.ignore_feature_flag": "Ignore required feature flag",
   "enhanced_commands.argument.block_function.cannot_parse": "Cannot parse block function",
   "enhanced_commands.argument.block_predicate.cannot_parse": "Cannot parse block predicate",
+  "enhanced_commands.argument.registry_entry_predicate.multiple": "This argument is with multiple value",
   "enhanced_commands.argument.block_predicate.unknown_comparator": "Unknown comparator: %s",
   "enhanced_commands.argument.entity.options.air": "Air level",
   "enhanced_commands.argument.entity.options.alternatives": "Entity predicates of which the selected entities must match one",

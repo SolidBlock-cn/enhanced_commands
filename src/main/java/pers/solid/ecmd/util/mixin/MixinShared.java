@@ -24,9 +24,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeKeys;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.configs.RegistryParsingConfig;
-import pers.solid.ecmd.mixin.RegistryEntryArgumentTypeMixin;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
 
@@ -137,32 +137,36 @@ public final class MixinShared {
       final int cursorBeforeId = localIntRef.get();
       stringReader.setCursor(cursorBeforeId);
 
-      if (RegistryKeys.BLOCK.equals(registryRef)) {
-        final Optional<Block> block = Registries.BLOCK.getOrEmpty(identifier);
-        if (block.isPresent()) {
-          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, block.get().getName()), cursorAfterId);
-        }
-      } else if (RegistryKeys.ITEM.equals(registryRef)) {
-        final Optional<Item> item = Registries.ITEM.getOrEmpty(identifier);
-        if (item.isPresent()) {
-          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getName()), cursorAfterId);
-        }
-      } else if (RegistryKeys.ENTITY_TYPE.equals(registryRef)) {
-        final Optional<EntityType<?>> entityType = Registries.ENTITY_TYPE.getOrEmpty(identifier);
-        if (entityType.isPresent()) {
-          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, entityType.get().getName()), cursorAfterId);
-        }
-      } else if (RegistryKeys.BIOME.equals(registryRef)) {
-        if (BiomeKeys.CHERRY_GROVE.getValue().equals(identifier)) {
-          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BIOME_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, Text.translatable("biome.minecraft.cherry_grove")), cursorAfterId);
-        }
-      }
-
-      if (ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.containsKey(registryRef)) {
-        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.get(registryRef).createWithContext(stringReader, identifier), cursorAfterId);
-      } else {
-        return CommandSyntaxExceptionExtension.withCursorEnd(RegistryEntryArgumentTypeMixin.NOT_FOUND_EXCEPTION.createWithContext(stringReader, identifier, registryRef.getValue()), cursorAfterId);
-      }
+      return modifiedRegistryEntryException(registryRef, stringReader, identifier, cursorAfterId);
     };
+  }
+
+  public static <T> CommandSyntaxException modifiedRegistryEntryException(RegistryKey<? extends Registry<T>> registryRef, StringReader stringReader, Identifier identifier, int cursorAfterId) {
+    if (RegistryKeys.BLOCK.equals(registryRef)) {
+      final Optional<Block> block = Registries.BLOCK.getOrEmpty(identifier);
+      if (block.isPresent()) {
+        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, block.get().getName()), cursorAfterId);
+      }
+    } else if (RegistryKeys.ITEM.equals(registryRef)) {
+      final Optional<Item> item = Registries.ITEM.getOrEmpty(identifier);
+      if (item.isPresent()) {
+        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getName()), cursorAfterId);
+      }
+    } else if (RegistryKeys.ENTITY_TYPE.equals(registryRef)) {
+      final Optional<EntityType<?>> entityType = Registries.ENTITY_TYPE.getOrEmpty(identifier);
+      if (entityType.isPresent()) {
+        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, entityType.get().getName()), cursorAfterId);
+      }
+    } else if (RegistryKeys.BIOME.equals(registryRef)) {
+      if (BiomeKeys.CHERRY_GROVE.getValue().equals(identifier)) {
+        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BIOME_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, Text.translatable("biome.minecraft.cherry_grove")), cursorAfterId);
+      }
+    }
+
+    if (ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.containsKey(registryRef)) {
+      return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.get(registryRef).createWithContext(stringReader, identifier), cursorAfterId);
+    } else {
+      return CommandSyntaxExceptionExtension.withCursorEnd(EnhancedEntryPredicate.NOT_FOUND_EXCEPTION.createWithContext(stringReader, identifier, registryRef.getValue()), cursorAfterId);
+    }
   }
 }

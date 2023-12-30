@@ -6,7 +6,6 @@ import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.argument.RegistryEntryArgumentType;
@@ -29,9 +28,6 @@ import java.util.function.Supplier;
 
 @Mixin(RegistryEntryArgumentType.class)
 public abstract class RegistryEntryArgumentTypeMixin<T> {
-  @Shadow
-  @Final
-  public static Dynamic2CommandExceptionType NOT_FOUND_EXCEPTION;
 
   @Shadow
   @Final

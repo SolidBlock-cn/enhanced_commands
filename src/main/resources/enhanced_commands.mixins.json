@@ -25,6 +25,7 @@
     "GameModeArgumentTypeMixin",
     "GameModeMixin",
     "IdentifierMixin",
+    "LocateCommandMixin",
     "RegistryEntryArgumentTypeMixin",
     "RegistryEntryPredicateArgumentTypeMixin",
     "ServerCommandSourceAccessor",
