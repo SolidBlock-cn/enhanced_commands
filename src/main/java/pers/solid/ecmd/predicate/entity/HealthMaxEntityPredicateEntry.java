@@ -5,6 +5,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry {
@@ -19,7 +20,7 @@ public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityP
       return TestResult.of(false, Text.translatable("enhanced_commands.commands.health.get.single.not_living", displayName));
     } else {
       final float actualHealth = livingEntity.getHealth();
-      final MutableText actualHealthText = TextUtil.literal(actualHealth).styled(TextUtil.STYLE_FOR_ACTUAL);
+      final MutableText actualHealthText = TextUtil.literal(actualHealth).styled(Styles.ACTUAL);
       final float maxHealth = livingEntity.getMaxHealth();
       final MutableText maxHealthText = TextUtil.literal(maxHealth);
       if (maxHealth == actualHealth) {

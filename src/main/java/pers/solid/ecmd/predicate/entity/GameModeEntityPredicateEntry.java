@@ -8,6 +8,7 @@ import net.minecraft.text.Texts;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.StringUtils;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
@@ -34,8 +35,8 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
     public TestResult testAndDescribe(ServerPlayerEntity player, Text displayName) {
       final GameMode actualMode = player.interactionManager.getGameMode();
       final boolean gameModeMatches = actualMode == gameMode;
-      final Text actualText = TextUtil.styled(actualMode.getTranslatableName(), TextUtil.STYLE_FOR_ACTUAL);
-      return TestResult.of(gameModeMatches != hasNegation, gameModeMatches ? Text.translatable("enhanced_commands.entity_predicate.gamemode.positive_single", displayName, actualText) : Text.translatable("enhanced_commands.entity_predicate.gamemode.negative_single", displayName, actualText, TextUtil.styled(gameMode.getTranslatableName(), TextUtil.STYLE_FOR_EXPECTED)));
+      final Text actualText = TextUtil.styled(actualMode.getTranslatableName(), Styles.ACTUAL);
+      return TestResult.of(gameModeMatches != hasNegation, gameModeMatches ? Text.translatable("enhanced_commands.entity_predicate.gamemode.positive_single", displayName, actualText) : Text.translatable("enhanced_commands.entity_predicate.gamemode.negative_single", displayName, actualText, TextUtil.styled(gameMode.getTranslatableName(), Styles.EXPECTED)));
     }
   }
 
@@ -50,7 +51,7 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
       final GameMode actualMode = player.interactionManager.getGameMode();
       final boolean gameModeMatches = gameModes.contains(actualMode);
       final Text actualText = actualMode.getTranslatableName();
-      final Text expectedText = Texts.join(gameModes, Texts.DEFAULT_SEPARATOR_TEXT, gameMode -> TextUtil.styled(gameMode.getTranslatableName(), TextUtil.STYLE_FOR_EXPECTED));
+      final Text expectedText = Texts.join(gameModes, Texts.DEFAULT_SEPARATOR_TEXT, gameMode -> TextUtil.styled(gameMode.getTranslatableName(), Styles.EXPECTED));
       return TestResult.of(gameModeMatches != hasNegation, gameModeMatches ? Text.translatable("enhanced_commands.entity_predicate.gamemode.positive_multiple", displayName, actualText, expectedText) : Text.translatable("enhanced_commands.entity_predicate.gamemode.negative_single", displayName, actualText, expectedText));
     }
   }

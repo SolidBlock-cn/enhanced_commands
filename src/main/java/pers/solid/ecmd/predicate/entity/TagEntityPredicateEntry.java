@@ -5,7 +5,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.Styles;
 
 import java.util.Set;
 
@@ -22,7 +22,7 @@ public record TagEntityPredicateEntry(@NotNull String tagName, boolean hasNegati
       }
     } else {
       // 检测实体是否拥有指定的标签
-      final MutableText tagNameText = Text.literal(tagName).styled(TextUtil.STYLE_FOR_EXPECTED);
+      final MutableText tagNameText = Text.literal(tagName).styled(Styles.EXPECTED);
       if (commandTags.contains(tagName)) {
         return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.tag.contains", displayName, tagNameText));
       } else {

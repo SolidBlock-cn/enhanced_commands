@@ -21,6 +21,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
@@ -57,8 +58,8 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     final Collection<Property<?>> properties = blockState.getProperties();
     CommandBridge.sendFeedback(source, () -> {
       final MutableText posText = TextUtil.wrapVector(blockPos);
-      final MutableText resultText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_RESULT);
-      final MutableText idText = TextUtil.literal(Registries.BLOCK.getId(blockState.getBlock())).styled(TextUtil.STYLE_FOR_RESULT);
+      final MutableText resultText = blockState.getBlock().getName().styled(Styles.RESULT);
+      final MutableText idText = TextUtil.literal(Registries.BLOCK.getId(blockState.getBlock())).styled(Styles.RESULT);
       if (properties.isEmpty()) {
         return Text.translatable("enhanced_commands.commands.testfor.block.info", posText, resultText, idText);
       } else {

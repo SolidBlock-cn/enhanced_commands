@@ -12,6 +12,7 @@ import net.minecraft.text.Texts;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
@@ -27,8 +28,8 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
   public TestResult testAndDescribe(BlockState blockState, BlockPos blockPos) {
     final String propertyName = property.getName();
     if (!blockState.contains(property)) {
-      final MutableText nameText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET);
-      final MutableText propertyNameText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED);
+      final MutableText nameText = blockState.getBlock().getName().styled(Styles.TARGET);
+      final MutableText propertyNameText = Text.literal(propertyName).styled(Styles.EXPECTED);
       if (propertyName.isEmpty()) {
         return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name_empty", nameText));
       } else {
@@ -36,8 +37,8 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
       }
     }
     final Text pos = TextUtil.wrapVector(blockPos);
-    final Text actual = PropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
-    final Text expected = Texts.join(values, Texts.DEFAULT_SEPARATOR_TEXT, value -> Text.literal(property.name(value)).styled(TextUtil.STYLE_FOR_EXPECTED));
+    final Text actual = PropertyPredicate.propertyAndValue(blockState, property).styled(Styles.ACTUAL);
+    final Text expected = Texts.join(values, Texts.DEFAULT_SEPARATOR_TEXT, value -> Text.literal(property.name(value)).styled(Styles.EXPECTED));
     final T actualValue = blockState.get(property);
     if (values.contains(actualValue)) {
       if (inverted) {

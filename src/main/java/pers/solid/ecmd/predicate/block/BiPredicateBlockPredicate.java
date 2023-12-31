@@ -5,7 +5,6 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -33,7 +32,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     final boolean result = actual == same;
     final String passOfFail = result ? "pass" : "fail";
     final String sameOrDiff = actual ? "same" : "diff";
-    return new TestResult(result, List.of(Text.translatable("enhanced_commands.block_predicate.bi_predicate_" + sameOrDiff + "_" + passOfFail).formatted(result ? Formatting.GREEN : Formatting.RED)), List.of(testResult1, testResult2));
+    return TestResult.of(result, Text.translatable("enhanced_commands.block_predicate.bi_predicate_" + sameOrDiff + "_" + passOfFail), List.of(testResult1, testResult2));
   }
 
   @Override

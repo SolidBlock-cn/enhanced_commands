@@ -91,9 +91,9 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
     @Override
     public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
       if (test(cachedBlockPosition)) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.loot_condition.named.pass", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(TextUtil.STYLE_FOR_EXPECTED)));
+        return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.loot_condition.named.pass", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(Styles.EXPECTED)));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.loot_condition.named.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(TextUtil.STYLE_FOR_EXPECTED)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.loot_condition.named.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(Styles.EXPECTED)));
       }
     }
   }

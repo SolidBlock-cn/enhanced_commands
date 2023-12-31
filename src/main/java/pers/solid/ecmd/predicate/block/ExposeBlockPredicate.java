@@ -11,7 +11,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.Direction;
@@ -63,7 +62,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     if (testResults.size() == 1) {
       return testResults.get(0);
     } else {
-      return new TestResult(result, List.of(Text.translatable("enhanced_commands.block_predicate.expose." + (result ? "pass" : "fail")).formatted(result ? Formatting.GREEN : Formatting.RED)), testResults);
+      return TestResult.of(result, Text.translatable("enhanced_commands.block_predicate.expose." + (result ? "pass" : "fail")), testResults);
     }
   }
 

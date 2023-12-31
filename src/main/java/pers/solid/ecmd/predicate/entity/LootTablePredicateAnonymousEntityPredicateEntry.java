@@ -9,6 +9,7 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition lootCondition, boolean hasNegation) implements EntityPredicateEntry {
@@ -23,9 +24,9 @@ public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition loot
           .build(LootContextTypes.SELECTOR);
       final boolean test = lootCondition.test(lootContext);
       if (hasNegation ^ test) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.predicate.pass_anonymous", displayName, TextUtil.literal(test).styled(TextUtil.STYLE_FOR_ACTUAL)));
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.predicate.pass_anonymous", displayName, TextUtil.literal(test).styled(Styles.ACTUAL)));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail_anonymous", displayName, TextUtil.literal(test).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(!hasNegation).styled(TextUtil.STYLE_FOR_EXPECTED)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail_anonymous", displayName, TextUtil.literal(test).styled(Styles.ACTUAL), TextUtil.literal(!hasNegation).styled(Styles.EXPECTED)));
       }
     }
   }

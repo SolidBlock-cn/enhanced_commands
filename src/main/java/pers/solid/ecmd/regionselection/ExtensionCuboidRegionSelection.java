@@ -6,6 +6,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -17,22 +18,22 @@ public class ExtensionCuboidRegionSelection extends BlockCuboidRegionSelection {
     first = point;
     second = null;
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(TextUtil.STYLE_FOR_RESULT)), BlockCuboidRegionSelection.notifyStatistics(first, second));
+    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(Styles.RESULT)), BlockCuboidRegionSelection.notifyStatistics(first, second));
   }
 
   @Override
   public Supplier<Text> clickSecondPoint(BlockPos point, PlayerEntity player) {
     if (first == null) {
       first = point;
-      return () -> (Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(TextUtil.STYLE_FOR_RESULT)));
+      return () -> (Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(Styles.RESULT)));
     } else if (second == null) {
       second = point;
       resetCalculation();
-      return () -> (Text.translatable("enhanced_commands.region_selection.extension.include", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)));
+      return () -> (Text.translatable("enhanced_commands.region_selection.extension.include", TextUtil.wrapVector(point).styled(Styles.RESULT)));
     } else {
       final BlockBox blockBox = BlockBox.create(first, second);
       if (blockBox.contains(point)) {
-        return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.extension.not_infected", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)), BlockCuboidRegionSelection.notifyStatistics(first, second));
+        return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.extension.not_infected", TextUtil.wrapVector(point).styled(Styles.RESULT)), BlockCuboidRegionSelection.notifyStatistics(first, second));
       }
       final BlockPos.Mutable mutable1 = new BlockPos.Mutable().set(first);
       final BlockPos.Mutable mutable2 = new BlockPos.Mutable().set(second);
@@ -61,7 +62,7 @@ public class ExtensionCuboidRegionSelection extends BlockCuboidRegionSelection {
         second = mutable2.toImmutable();
       }
       resetCalculation();
-      return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.extension.include", TextUtil.wrapVector(point).styled(TextUtil.STYLE_FOR_RESULT)), BlockCuboidRegionSelection.notifyStatistics(first, second));
+      return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.extension.include", TextUtil.wrapVector(point).styled(Styles.RESULT)), BlockCuboidRegionSelection.notifyStatistics(first, second));
     }
   }
 

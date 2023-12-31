@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record ComparisonPropertyPredicate<T extends Comparable<T>>(Property<T> property, Comparator comparator, T value) implements PropertyPredicate<T> {
@@ -24,15 +25,15 @@ public record ComparisonPropertyPredicate<T extends Comparable<T>>(Property<T> p
   @Override
   public TestResult testAndDescribe(BlockState blockState, BlockPos blockPos) {
     if (!blockState.contains(property)) {
-      final MutableText stateText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET);
+      final MutableText stateText = blockState.getBlock().getName().styled(Styles.TARGET);
       final String propertyName = property.getName();
-      final MutableText propertyText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED);
+      final MutableText propertyText = Text.literal(propertyName).styled(Styles.EXPECTED);
       return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property", stateText, propertyText));
     }
     final boolean test = comparator.test(blockState.get(property), value);
     final MutableText posText = TextUtil.wrapVector(blockPos);
-    final MutableText expectedText = TextUtil.literal(this).styled(TextUtil.STYLE_FOR_EXPECTED);
-    final MutableText actualText = PropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
+    final MutableText expectedText = TextUtil.literal(this).styled(Styles.EXPECTED);
+    final MutableText actualText = PropertyPredicate.propertyAndValue(blockState, property).styled(Styles.ACTUAL);
     if (test) {
       return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.pass", posText, actualText, expectedText));
     } else {

@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry {
@@ -15,7 +16,7 @@ public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPred
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     final int actualAir = entity.getAir();
-    final MutableText actualHealthText = TextUtil.literal(actualAir).styled(TextUtil.STYLE_FOR_ACTUAL);
+    final MutableText actualHealthText = TextUtil.literal(actualAir).styled(Styles.ACTUAL);
     final int maxAir = entity.getMaxAir();
     final MutableText maxHealthText = TextUtil.literal(maxAir);
     if (maxAir == actualAir) {

@@ -17,6 +17,7 @@ import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.BooleanUtils;
 import pers.solid.ecmd.argument.EntityPredicateArgumentType;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
@@ -46,13 +47,13 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
       return BooleanUtils.toInteger(testResult.successes());
     } else {
       final int passes = Iterables.size(Iterables.filter(entities, predicate::test));
-      final MutableText exampleEntity = TextUtil.styled(entities.iterator().next().getDisplayName(), TextUtil.STYLE_FOR_TARGET);
+      final MutableText exampleEntity = TextUtil.styled(entities.iterator().next().getDisplayName(), Styles.TARGET);
       if (passes == size) {
-        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.all_pass", size, exampleEntity).formatted(Formatting.GREEN), false);
+        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.all_pass", size, exampleEntity).styled(Styles.TRUE), false);
       } else if (passes == 0) {
-        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.none_pass", size, exampleEntity).formatted(Formatting.RED), false);
+        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.none_pass", size, exampleEntity).styled(Styles.FALSE), false);
       } else {
-        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.partially_pass", size, exampleEntity, passes).formatted(Formatting.YELLOW), false);
+        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.partially_pass", size, exampleEntity, passes).styled(Styles.MEDIUM), false);
       }
       return passes;
     }
@@ -63,11 +64,11 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
     if (size == 0) {
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.none").formatted(Formatting.RED), false);
     } else if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.single", TextUtil.styled(entities.iterator().next().getDisplayName(), TextUtil.STYLE_FOR_RESULT)), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.single", TextUtil.styled(entities.iterator().next().getDisplayName(), Styles.RESULT)), false);
     } else if (size < 9) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.several", Texts.join(entities, entity -> TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_RESULT)), TextUtil.literal(size).styled(TextUtil.STYLE_FOR_RESULT)), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.several", Texts.join(entities, entity -> TextUtil.styled(entity.getDisplayName(), Styles.RESULT)), TextUtil.literal(size).styled(Styles.RESULT)), false);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.many", Texts.join(ImmutableList.copyOf(Iterables.limit(entities, 10)), entity -> TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_RESULT)), TextUtil.literal(size).styled(TextUtil.STYLE_FOR_RESULT)), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.many", Texts.join(ImmutableList.copyOf(Iterables.limit(entities, 10)), entity -> TextUtil.styled(entity.getDisplayName(), Styles.RESULT)), TextUtil.literal(size).styled(Styles.RESULT)), false);
     }
     return size;
   }

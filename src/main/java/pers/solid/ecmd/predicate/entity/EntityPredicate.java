@@ -7,6 +7,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.function.Predicate;
@@ -31,11 +32,11 @@ public interface EntityPredicate extends Predicate<Entity> {
   boolean test(Entity entity);
 
   static TestResult successResult(Entity entity) {
-    return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET)));
+    return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
 
   static TestResult failResult(Entity entity) {
-    return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.fail", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET)));
+    return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.fail", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
 
   static TestResult successOrFail(boolean successes, Entity entity) {

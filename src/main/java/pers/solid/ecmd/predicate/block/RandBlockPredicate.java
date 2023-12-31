@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.Styles;
 
 /**
  * <p>The predicate that passes only a probability test is passed.</p>
@@ -47,8 +47,8 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final float nextFloat = RandomUtils.nextFloat(0, 1);
-    final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(TextUtil.STYLE_FOR_ACTUAL);
-    final MutableText o2 = Text.literal(String.valueOf(value)).styled(TextUtil.STYLE_FOR_EXPECTED);
+    final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(Styles.ACTUAL);
+    final MutableText o2 = Text.literal(String.valueOf(value)).styled(Styles.EXPECTED);
     if (nextFloat < value) {
       return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.probability.pass", o1, o2));
     } else {

@@ -13,6 +13,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record RegionBlockPredicate(Region region) implements BlockPredicate {
@@ -30,7 +31,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final BlockPos blockPos = cachedBlockPosition.getBlockPos();
     final boolean contains = region.contains(blockPos);
-    return TestResult.of(contains, Text.translatable("enhanced_commands.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).styled(TextUtil.STYLE_FOR_ACTUAL)));
+    return TestResult.of(contains, Text.translatable("enhanced_commands.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).styled(Styles.ACTUAL)));
   }
 
   @Override

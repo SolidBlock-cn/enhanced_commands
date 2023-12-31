@@ -22,6 +22,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixin.CommandContextAccessor;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
@@ -89,7 +90,7 @@ public enum RandCommand implements CommandRegistrationCallback {
   private static <T extends Throwable> int executeRandBoolean(CommandContext<ServerCommandSource> context, @Nullable FailableConsumer<NbtElement, T> nbtConsumer) throws T {
     final Random random = context.getSource().getWorld().getRandom();
     final boolean value = random.nextBoolean();
-    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.boolean." + random.nextInt(10), Text.literal(Boolean.toString(value)).styled(TextUtil.STYLE_FOR_RESULT)), false);
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.boolean." + random.nextInt(10), Text.literal(Boolean.toString(value)).styled(Styles.RESULT)), false);
     if (nbtConsumer != null) {
       nbtConsumer.accept(NbtByte.of(value));
     }
@@ -103,7 +104,7 @@ public enum RandCommand implements CommandRegistrationCallback {
   private static <T extends Throwable> int executeRandBoolean(CommandContext<ServerCommandSource> context, float probabilityOfTrue, @Nullable FailableConsumer<NbtElement, T> nbtConsumer) throws T {
     final Random random = context.getSource().getWorld().getRandom();
     final boolean value = random.nextFloat() < probabilityOfTrue;
-    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.boolean_with_probability." + random.nextInt(10), TextUtil.literal(probabilityOfTrue), Text.literal(Boolean.toString(value)).styled(TextUtil.STYLE_FOR_RESULT)), false);
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.boolean_with_probability." + random.nextInt(10), TextUtil.literal(probabilityOfTrue), Text.literal(Boolean.toString(value)).styled(Styles.RESULT)), false);
     if (nbtConsumer != null) {
       nbtConsumer.accept(NbtByte.of(value));
     }
@@ -120,7 +121,7 @@ public enum RandCommand implements CommandRegistrationCallback {
     }
     final Random random = context.getSource().getWorld().getRandom();
     final float value = min + (max - min) * random.nextFloat();
-    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Float.toString(min), Float.toString(max), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), false);
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Float.toString(min), Float.toString(max), TextUtil.literal(value).styled(Styles.RESULT)), false);
     if (nbtConsumer != null) {
       nbtConsumer.accept(NbtFloat.of(value));
     }
@@ -137,7 +138,7 @@ public enum RandCommand implements CommandRegistrationCallback {
     }
     final Random random = context.getSource().getWorld().getRandom();
     final int value = random.nextBetween(min, max);
-    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Integer.toString(min), Integer.toString(max), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_RESULT)), false);
+    CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Integer.toString(min), Integer.toString(max), TextUtil.literal(value).styled(Styles.RESULT)), false);
     if (nbtConsumer != null) {
       nbtConsumer.accept(NbtInt.of(value));
     }

@@ -6,8 +6,8 @@ import joptsimple.internal.Strings;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,18 +41,17 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
-    final Text description;
+    final MutableText description;
     final CachedBlockPosition offsetPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().up(offset), false);
     final TestResult attachment = blockPredicate.testAndDescribe(offsetPosition);
     final boolean successes = attachment.successes();
     final String string = successes ? "pass" : "fail";
-    final Formatting formatting = successes ? Formatting.GREEN : Formatting.RED;
     if (offset > 0) {
-      description = Text.translatable("enhanced_commands.block_predicate.horizontal_offset.above_" + string, offset, TextUtil.wrapVector(cachedBlockPosition.getBlockPos())).formatted(formatting);
+      description = Text.translatable("enhanced_commands.block_predicate.horizontal_offset.above_" + string, offset, TextUtil.wrapVector(cachedBlockPosition.getBlockPos()));
     } else {
-      description = Text.translatable("enhanced_commands.block_predicate.horizontal_offset.below_" + string, -offset, TextUtil.wrapVector(cachedBlockPosition.getBlockPos())).formatted(formatting);
+      description = Text.translatable("enhanced_commands.block_predicate.horizontal_offset.below_" + string, -offset, TextUtil.wrapVector(cachedBlockPosition.getBlockPos()));
     }
-    return new TestResult(successes, List.of(description), List.of(attachment));
+    return TestResult.of(successes, description, List.of(attachment));
   }
 
   @Override

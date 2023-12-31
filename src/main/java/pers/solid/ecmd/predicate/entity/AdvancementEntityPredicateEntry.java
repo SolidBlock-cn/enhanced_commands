@@ -15,6 +15,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Map;
@@ -39,13 +40,13 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
       final Advancement advancement = advancementLoader.get(advancementId);
       if (advancement == null) {
         // the advancement does not exist -> false
-        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.no_advancement", TextUtil.literal(advancementId).styled(TextUtil.STYLE_FOR_TARGET))));
+        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.no_advancement", TextUtil.literal(advancementId).styled(Styles.TARGET))));
         result = false;
         continue;
       }
       final AdvancementProgress progress = advancementTracker.getProgress(advancement);
 
-      final MutableText advancementText = TextUtil.styled(advancement.toHoverableText(), TextUtil.STYLE_FOR_TARGET);
+      final MutableText advancementText = TextUtil.styled(advancement.toHoverableText(), Styles.TARGET);
       if (value.left().isPresent()) {
         boolean progressResult = true;
         final ImmutableList.Builder<TestResult> progressAttachments = new ImmutableList.Builder<>();
@@ -54,11 +55,11 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
         for (var progressEntry : expectedProgress.object2BooleanEntrySet()) {
           final String criterionName = progressEntry.getKey();
           final CriterionProgress criterionProgress = progress.getCriterionProgress(criterionName);
-          final MutableText criterionText = Text.literal(criterionName).styled(TextUtil.STYLE_FOR_TARGET);
+          final MutableText criterionText = Text.literal(criterionName).styled(Styles.TARGET);
           if (criterionProgress == null) {
             // the criterion does not exist -> false
             progressResult = false;
-            progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.criterion.no_criterion", TextUtil.styled(advancementText, TextUtil.STYLE_FOR_EXPECTED), criterionText)));
+            progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.criterion.no_criterion", TextUtil.styled(advancementText, Styles.EXPECTED), criterionText)));
             continue;
           }
           final boolean expectedValue = progressEntry.getBooleanValue();

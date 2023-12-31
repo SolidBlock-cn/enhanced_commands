@@ -22,6 +22,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
@@ -57,7 +58,7 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
       throw TEST_FOR_BIOME_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final RegistryEntry<Biome> biome = world.getBiome(blockPos);
-    CommandBridge.sendFeedback(source, () -> biome.getKeyOrValue().map(key -> Text.translatable("enhanced_commands.commands.testfor.biome.info", TextUtil.wrapVector(blockPos), TextUtil.biome(key).styled(TextUtil.STYLE_FOR_RESULT), TextUtil.literal(key.getValue()).styled(TextUtil.STYLE_FOR_RESULT)), value -> Text.translatable("enhanced_commands.commands.testfor.biome.info_unregistered", TextUtil.wrapVector(blockPos), Text.literal(value.toString()).styled(TextUtil.STYLE_FOR_RESULT))), false);
+    CommandBridge.sendFeedback(source, () -> biome.getKeyOrValue().map(key -> Text.translatable("enhanced_commands.commands.testfor.biome.info", TextUtil.wrapVector(blockPos), TextUtil.biome(key).styled(Styles.RESULT), TextUtil.literal(key.getValue()).styled(Styles.RESULT)), value -> Text.translatable("enhanced_commands.commands.testfor.biome.info_unregistered", TextUtil.wrapVector(blockPos), Text.literal(value.toString()).styled(Styles.RESULT))), false);
     return 1;
   }
 
@@ -73,27 +74,27 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
     final boolean test = predicate.test(actualBiome);
     CommandBridge.sendFeedback(source, () -> {
       final MutableText posText = TextUtil.wrapVector(blockPos);
-      final MutableText actualText = actualBiome.getKeyOrValue().map(TextUtil::biome, biome1 -> Text.literal(biome1.toString())).styled(TextUtil.STYLE_FOR_ACTUAL);
+      final MutableText actualText = actualBiome.getKeyOrValue().map(TextUtil::biome, biome1 -> Text.literal(biome1.toString())).styled(Styles.ACTUAL);
       if (predicate instanceof EnhancedEntryPredicate.AnyOf<Biome> anyOf) {
-        final MutableText expectedText = Texts.join(Collections2.transform(anyOf.predicates, element -> element instanceof EnhancedEntryPredicate.TagBased<Biome> tagBased ? TextUtil.literal(tagBased.tag().getTag().id()) : element instanceof EnhancedEntryPredicate.EntryBased<Biome> entryBased ? TextUtil.biome(entryBased.value().registryKey()) : Text.literal(element.toString())), Texts.DEFAULT_SEPARATOR_TEXT, text -> text.styled(TextUtil.STYLE_FOR_EXPECTED));
+        final MutableText expectedText = Texts.join(Collections2.transform(anyOf.predicates, element -> element instanceof EnhancedEntryPredicate.TagBased<Biome> tagBased ? TextUtil.literal(tagBased.tag().getTag().id()) : element instanceof EnhancedEntryPredicate.EntryBased<Biome> entryBased ? TextUtil.biome(entryBased.value().registryKey()) : Text.literal(element.toString())), Texts.DEFAULT_SEPARATOR_TEXT, text -> text.styled(Styles.EXPECTED));
         if (test) {
-          return Text.translatable("enhanced_commands.commands.testfor.biome.multiple.true", posText, actualText, expectedText);
+          return Text.translatable("enhanced_commands.commands.testfor.biome.multiple.true", posText, actualText, expectedText).styled(Styles.TRUE);
         } else {
-          return Text.translatable("enhanced_commands.commands.testfor.biome.multiple.false", posText, actualText, expectedText);
+          return Text.translatable("enhanced_commands.commands.testfor.biome.multiple.false", posText, actualText, expectedText).styled(Styles.FALSE);
         }
       } else {
         return predicate.getEntry().map(ref -> {
           if (test) {
-            return Text.translatable("enhanced_commands.commands.testfor.biome.entry.true", posText, actualText);
+            return Text.translatable("enhanced_commands.commands.testfor.biome.entry.true", posText, actualText).styled(Styles.TRUE);
           } else {
-            return Text.translatable("enhanced_commands.commands.testfor.biome.entry.false", posText, actualText, TextUtil.biome(ref.registryKey()).styled(TextUtil.STYLE_FOR_EXPECTED));
+            return Text.translatable("enhanced_commands.commands.testfor.biome.entry.false", posText, actualText, TextUtil.biome(ref.registryKey()).styled(Styles.EXPECTED)).styled(Styles.FALSE);
           }
         }, named -> {
-          final MutableText expectedText = Text.literal("#" + named.getTag().id()).styled(TextUtil.STYLE_FOR_EXPECTED);
+          final MutableText expectedText = Text.literal("#" + named.getTag().id()).styled(Styles.EXPECTED);
           if (test) {
-            return Text.translatable("enhanced_commands.commands.testfor.biome.tag.true", posText, actualText, expectedText);
+            return Text.translatable("enhanced_commands.commands.testfor.biome.tag.true", posText, actualText, expectedText).styled(Styles.TRUE);
           } else {
-            return Text.translatable("enhanced_commands.commands.testfor.biome.tag.false", posText, actualText, expectedText);
+            return Text.translatable("enhanced_commands.commands.testfor.biome.tag.false", posText, actualText, expectedText).styled(Styles.FALSE);
           }
         });
       }

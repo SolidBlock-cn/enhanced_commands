@@ -25,7 +25,7 @@ import pers.solid.ecmd.function.block.BlockFunctionArgument;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -53,9 +53,11 @@ public interface BlockTransformationCommand {
 
   void transformEntity(@NotNull Entity entity);
 
-  @NotNull BlockState transformBlockState(@NotNull BlockState original);
+  @NotNull
+  BlockState transformBlockState(@NotNull BlockState original);
 
-  @NotNull Region transformRegion(@NotNull Region region);
+  @NotNull
+  Region transformRegion(@NotNull Region region);
 
   /**
    * 完成操作时通知影响的方块和实体的数量。
@@ -130,9 +132,9 @@ public interface BlockTransformationCommand {
   private static void notifyUnloadedPos(BlockTransformationTask task, UnloadedPosBehavior unloadedPosBehavior, ServerCommandSource source) {
     if (task.hasUnloadedPos) {
       if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.broken").styled(TextUtil.STYLE_FOR_ACTUAL), false);
+        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
       } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(TextUtil.STYLE_FOR_ACTUAL), false);
+        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
       }
     }
   }

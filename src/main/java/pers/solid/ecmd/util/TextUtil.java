@@ -33,22 +33,6 @@ import java.util.function.UnaryOperator;
  * 和{@linkplain Text 文本组件}有关的实用方法。
  */
 public final class TextUtil {
-  /**
-   * 命令输出结果中的目标部分的样式。
-   */
-  public static final UnaryOperator<Style> STYLE_FOR_TARGET = style -> style.withColor(0x30f5c5);
-  /**
-   * 命令输出结果中获得到的实际值部分的样式。
-   */
-  public static final UnaryOperator<Style> STYLE_FOR_ACTUAL = style -> style.withColor(0xf5c255);
-  /**
-   * 命令输出结果中的预期值（可能与实际值不同）的部分的样式。
-   */
-  public static final UnaryOperator<Style> STYLE_FOR_EXPECTED = style -> style.withColor(0xb8f530);
-  /**
-   * 命令输出结果中表示计算或者运行的结果中的部分的样式。
-   */
-  public static final UnaryOperator<Style> STYLE_FOR_RESULT = style -> style.withColor(0x7cf3a0);
 
   private TextUtil() {
   }

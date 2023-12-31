@@ -9,6 +9,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record LootTablePredicateEntityPredicateEntry(Identifier predicateId, boolean hasNegation) implements EntityPredicateEntry {
@@ -19,7 +20,7 @@ public record LootTablePredicateEntityPredicateEntry(Identifier predicateId, boo
     } else {
       LootCondition lootCondition = serverWorld.getServer().getPredicateManager().get(predicateId);
       if (lootCondition == null) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.unknown_predicate", TextUtil.literal(predicateId).styled(TextUtil.STYLE_FOR_TARGET)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.unknown_predicate", TextUtil.literal(predicateId).styled(Styles.TARGET)));
       } else {
         LootContext lootContext = new LootContext.Builder(serverWorld)
             .parameter(LootContextParameters.THIS_ENTITY, entity)
@@ -27,9 +28,9 @@ public record LootTablePredicateEntityPredicateEntry(Identifier predicateId, boo
             .build(LootContextTypes.SELECTOR);
         final boolean test = lootCondition.test(lootContext);
         if (hasNegation ^ test) {
-          return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.predicate.pass", displayName, TextUtil.literal(predicateId).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(test).styled(TextUtil.STYLE_FOR_ACTUAL)));
+          return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.predicate.pass", displayName, TextUtil.literal(predicateId).styled(Styles.TARGET), TextUtil.literal(test).styled(Styles.ACTUAL)));
         } else {
-          return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail", displayName, TextUtil.literal(predicateId).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(test).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(!hasNegation).styled(TextUtil.STYLE_FOR_EXPECTED)));
+          return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail", displayName, TextUtil.literal(predicateId).styled(Styles.TARGET), TextUtil.literal(test).styled(Styles.ACTUAL), TextUtil.literal(!hasNegation).styled(Styles.EXPECTED)));
         }
       }
     }

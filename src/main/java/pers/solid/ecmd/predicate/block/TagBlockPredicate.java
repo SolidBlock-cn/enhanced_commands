@@ -14,7 +14,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -24,10 +23,7 @@ import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.NbtConvertible;
-import pers.solid.ecmd.util.Parser;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -68,7 +64,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
     if (!inTag) {
       successes = false;
-      messages.add(Text.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.RED));
+      messages.add(Text.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(Styles.ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(Styles.EXPECTED)).styled(Styles.FALSE));
     }
     for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, cachedBlockPosition.getBlockPos());
@@ -78,7 +74,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
       }
     }
     if (successes) {
-      messages.add(Text.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET), Text.literal("#" + blockTag.id().toString()).styled(TextUtil.STYLE_FOR_EXPECTED)).formatted(Formatting.GREEN));
+      messages.add(Text.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(Styles.TARGET), Text.literal("#" + blockTag.id().toString()).styled(Styles.EXPECTED)).styled(Styles.TRUE));
     }
     return new TestResult(successes, messages.build());
   }

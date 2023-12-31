@@ -9,7 +9,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -45,9 +44,9 @@ public record AllBlockPredicate(Collection<BlockPredicate> blockPredicates) impl
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes < build.size()) {
-      return new TestResult(true, List.of(Text.translatable("enhanced_commands.block_predicate.all.fail", successes, build.size()).formatted(Formatting.RED)), build);
+      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.all.fail", successes, build.size()), build);
     } else {
-      return new TestResult(false, List.of(Text.translatable("enhanced_commands.block_predicate.all.pass", successes, build.size()).formatted(Formatting.GREEN)), build);
+      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.all.pass", successes, build.size()), build);
     }
   }
 

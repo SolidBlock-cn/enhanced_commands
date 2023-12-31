@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.BlockCuboidRegion;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.NbtUtil;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -32,14 +33,14 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   public Supplier<Text> clickFirstPoint(BlockPos point, PlayerEntity player) {
     first = point;
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(TextUtil.STYLE_FOR_RESULT)), notifyStatistics(first, second));
+    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(Styles.RESULT)), notifyStatistics(first, second));
   }
 
   @Override
   public Supplier<Text> clickSecondPoint(BlockPos point, PlayerEntity player) {
     second = point;
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_second", TextUtil.wrapVector(second).styled(TextUtil.STYLE_FOR_RESULT)), notifyStatistics(first, second));
+    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_second", TextUtil.wrapVector(second).styled(Styles.RESULT)), notifyStatistics(first, second));
   }
 
   public static Text notifyStatistics(@Nullable Vec3i first, @Nullable Vec3i second) {
@@ -48,7 +49,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
       final int dx = Math.abs(subtract.getX()) + 1;
       final int dy = Math.abs(subtract.getY()) + 1;
       final int dz = Math.abs(subtract.getZ()) + 1;
-      return (Text.translatable("enhanced_commands.region_selection.cuboid.statistics", Text.literal(dx + "×" + dy + "×" + dz).styled(TextUtil.STYLE_FOR_RESULT), TextUtil.literal(dx * dy * dz).styled(TextUtil.STYLE_FOR_RESULT)).formatted(Formatting.GRAY));
+      return (Text.translatable("enhanced_commands.region_selection.cuboid.statistics", Text.literal(dx + "×" + dy + "×" + dz).styled(Styles.RESULT), TextUtil.literal(dx * dy * dz).styled(Styles.RESULT)).formatted(Formatting.GRAY));
     } else {
       return null;
     }

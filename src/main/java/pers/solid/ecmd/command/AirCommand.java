@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.util.NbtUtil;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
@@ -106,13 +107,15 @@ public enum AirCommand implements CommandRegistrationCallback {
                     .executes(context -> executeRemoveAir(context, getEntities(context, "entities"), getInteger(context, "value")))))));
   }
 
-  private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) {return executeGetAir(context, entities, concentrationType, null);}
+  private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) {
+    return executeGetAir(context, entities, concentrationType, null);
+  }
 
   private static <T extends Throwable> int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, @Nullable FailableConsumer<NbtElement, T> nbtElementConsumer) throws T {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       final int air = entity.getAir();
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.get.single", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(air).styled(TextUtil.STYLE_FOR_RESULT)), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(air).styled(Styles.RESULT)), false);
       if (nbtElementConsumer != null) {
         nbtElementConsumer.accept(NbtInt.of(air));
       }
@@ -123,7 +126,7 @@ public enum AirCommand implements CommandRegistrationCallback {
         integers.add(entity.getAir());
       }
       final double result = concentrationType.concentrateInt(integers);
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.get.multiple", integers.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.longToString(result)).styled(TextUtil.STYLE_FOR_RESULT)), false);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.get.multiple", integers.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.longToString(result)).styled(Styles.RESULT)), false);
       if (nbtElementConsumer != null) {
         nbtElementConsumer.accept(concentrationType.longToNbt(result));
       }
@@ -136,13 +139,13 @@ public enum AirCommand implements CommandRegistrationCallback {
     if (size == 1) {
       final Entity entity = entities.iterator().next();
       entity.setAir(value);
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.set.single", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(entity.getAir()).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.set.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(entity.getAir()).styled(Styles.RESULT)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
         entity.setAir(value);
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.set.multiple", TextUtil.literal(size).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.set.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)), true);
       return size;
     }
   }
@@ -152,13 +155,13 @@ public enum AirCommand implements CommandRegistrationCallback {
     if (size == 1) {
       final Entity entity = entities.iterator().next();
       entity.setAir(entity.getAir() + value);
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.add.single", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(entity.getAir()).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.add.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET), TextUtil.literal(entity.getAir()).styled(Styles.RESULT)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
         entity.setAir(entity.getAir() + value);
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.add.multiple", TextUtil.literal(size).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.add.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)), true);
       return size;
     }
   }
@@ -168,13 +171,13 @@ public enum AirCommand implements CommandRegistrationCallback {
     if (size == 1) {
       final Entity entity = entities.iterator().next();
       entity.setAir(entity.getMaxAir());
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.add_to_max.single", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(entity.getAir()).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.add_to_max.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(entity.getAir()).styled(Styles.RESULT)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
         entity.setAir(entity.getMaxAir());
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.add_to_max.multiple", TextUtil.literal(size).styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.add_to_max.multiple", TextUtil.literal(size).styled(Styles.TARGET)), true);
       return size;
     }
   }
@@ -184,13 +187,13 @@ public enum AirCommand implements CommandRegistrationCallback {
     if (size == 1) {
       final Entity entity = entities.iterator().next();
       entity.setAir(entity.getAir() - value);
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.remove.single", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(entity.getAir()).styled(TextUtil.STYLE_FOR_RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.remove.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET), TextUtil.literal(entity.getAir()).styled(Styles.RESULT)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
         entity.setAir(entity.getAir() - value);
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.remove.multiple", TextUtil.literal(size).styled(TextUtil.STYLE_FOR_TARGET), TextUtil.literal(value).styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.remove.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)), true);
       return size;
     }
   }
@@ -200,13 +203,13 @@ public enum AirCommand implements CommandRegistrationCallback {
     if (size == 1) {
       final Entity entity = entities.iterator().next();
       entity.setAir(0);
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.remove_all.single", TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.remove_all.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
         entity.setAir(0);
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.remove_all.multiple", TextUtil.literal(size).styled(TextUtil.STYLE_FOR_TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.remove_all.multiple", TextUtil.literal(size).styled(Styles.TARGET)), true);
       return size;
     }
   }

@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.mixin.EntitySelectorAccessor;
 import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.ArrayList;
@@ -97,7 +98,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
     List<TestResult> descriptions = new ArrayList<>();
     final var accessor = (EntitySelectorAccessor) entitySelector;
 
-    final Text displayName = TextUtil.styled(entity.getDisplayName(), TextUtil.STYLE_FOR_TARGET);
+    final Text displayName = TextUtil.styled(entity.getDisplayName(), Styles.TARGET);
     if (!entitySelector.includesNonPlayers()) {
       final boolean isPlayer = entity.isPlayer();
       if (isPlayer) {
@@ -109,7 +110,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
     if (accessor.getPlayerName() != null) {
       if (entity instanceof PlayerEntity player) {
         final boolean matches = player.getGameProfile().getName().equalsIgnoreCase(accessor.getPlayerName());
-        descriptions.add(TestResult.of(matches, matches ? Text.translatable("enhanced_commands.entity_predicate.player_name.true", displayName, Text.empty().append(accessor.getPlayerName()).styled(TextUtil.STYLE_FOR_ACTUAL)) : Text.translatable("enhanced_commands.entity_predicate.player_name.false", displayName, Text.empty().append(player.getGameProfile().getName()).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(accessor.getPlayerName()).styled(TextUtil.STYLE_FOR_EXPECTED))));
+        descriptions.add(TestResult.of(matches, matches ? Text.translatable("enhanced_commands.entity_predicate.player_name.true", displayName, Text.empty().append(accessor.getPlayerName()).styled(Styles.ACTUAL)) : Text.translatable("enhanced_commands.entity_predicate.player_name.false", displayName, Text.empty().append(player.getGameProfile().getName()).styled(Styles.ACTUAL), Text.literal(accessor.getPlayerName()).styled(Styles.EXPECTED))));
       } else {
         descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.player_name.not_player", entity.getDisplayName())));
       }
@@ -120,7 +121,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
       if (expected.equals(actual)) {
         descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.uuid.true", displayName, actual)));
       } else {
-        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.uuid.false", displayName, TextUtil.styled(Text.literal(actual.toString()), TextUtil.STYLE_FOR_ACTUAL), TextUtil.styled(Text.literal(expected.toString()), TextUtil.STYLE_FOR_EXPECTED))));
+        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.uuid.false", displayName, TextUtil.styled(Text.literal(actual.toString()), Styles.ACTUAL), TextUtil.styled(Text.literal(expected.toString()), Styles.EXPECTED))));
       }
     }
     if (entitySelector.isSenderOnly()) {
@@ -128,7 +129,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
       if (entity.equals(realSender)) {
         descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.sender.true", displayName)));
       } else if (realSender != null) {
-        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sender.false", displayName, TextUtil.styled(realSender.getDisplayName(), TextUtil.STYLE_FOR_EXPECTED))));
+        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sender.false", displayName, TextUtil.styled(realSender.getDisplayName(), Styles.EXPECTED))));
       } else {
         descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sender.false_without_sender", displayName)));
       }
@@ -137,9 +138,9 @@ public class SelectorEntityPredicate implements EntityPredicate {
       final World world = entity.getWorld();
       final ServerWorld expectedWorld = source.getWorld();
       if (world.equals(expectedWorld)) {
-        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.local_world.true", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_ACTUAL))));
+        descriptions.add(TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.local_world.true", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(Styles.ACTUAL))));
       } else {
-        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.local_world.false", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_ACTUAL), TextUtil.literal(expectedWorld.getRegistryKey().getValue()).styled(TextUtil.STYLE_FOR_EXPECTED))));
+        descriptions.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.local_world.false", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(Styles.ACTUAL), TextUtil.literal(expectedWorld.getRegistryKey().getValue()).styled(Styles.EXPECTED))));
 
       }
     }
@@ -149,7 +150,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
     if (accessor.getBox() != null) {
       final Box box = accessor.getBox().offset(positionOffset);
       final boolean intersects = box.intersects(entity.getBoundingBox());
-      descriptions.add(TestResult.of(intersects, Text.translatable("enhanced_commands.entity_predicate.box." + intersects, displayName, Text.literal(String.format("(%s %s %s, %s %s %s)", box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ)).styled(TextUtil.STYLE_FOR_EXPECTED))));
+      descriptions.add(TestResult.of(intersects, Text.translatable("enhanced_commands.entity_predicate.box." + intersects, displayName, Text.literal(String.format("(%s %s %s, %s %s %s)", box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ)).styled(Styles.EXPECTED))));
     }
 
     final NumberRange.FloatRange distance = accessor.getDistance();
@@ -157,7 +158,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
       final String distanceAsString = StringUtil.wrapRange(distance);
       final double squaredDistance = entity.squaredDistanceTo(positionOffset);
       final boolean inRange = distance.testSqrt(squaredDistance);
-      descriptions.add(TestResult.of(inRange, Text.translatable("enhanced_commands.entity_predicate.distance." + inRange, displayName, TextUtil.literal(Math.sqrt(squaredDistance)).styled(TextUtil.STYLE_FOR_ACTUAL), Text.literal(distanceAsString).styled(TextUtil.STYLE_FOR_EXPECTED))));
+      descriptions.add(TestResult.of(inRange, Text.translatable("enhanced_commands.entity_predicate.distance." + inRange, displayName, TextUtil.literal(Math.sqrt(squaredDistance)).styled(Styles.ACTUAL), Text.literal(distanceAsString).styled(Styles.EXPECTED))));
     }
 
     // 以下部分为 EntitySelectorOptions 中的原版部分

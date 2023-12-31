@@ -7,7 +7,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.Styles;
 
 public record ExistencePropertyNamePredicate(String propertyName, boolean exists) implements PropertyNamePredicate {
   @Override
@@ -24,8 +24,8 @@ public record ExistencePropertyNamePredicate(String propertyName, boolean exists
   public TestResult testAndDescribe(BlockState blockState, BlockPos blockPos) {
     final boolean actualExists = blockState.getBlock().getStateManager().getProperty(propertyName) != null;
     final boolean successes = actualExists == exists;
-    final MutableText blockText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET);
-    final MutableText propertyNameText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_TARGET);
+    final MutableText blockText = blockState.getBlock().getName().styled(Styles.TARGET);
+    final MutableText propertyNameText = Text.literal(propertyName).styled(Styles.TARGET);
     if (successes) {
       if (actualExists) {
         return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.name_pass_exists", blockText, propertyNameText));

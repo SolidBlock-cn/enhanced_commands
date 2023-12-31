@@ -7,6 +7,7 @@ import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.GeoUtil;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.function.Function;
@@ -47,7 +48,7 @@ public interface IntBackedRegion extends Region {
     if (offset == (int) offset) {
       return expanded((int) offset);
     } else {
-      throw new UnsupportedOperationException(EXPAND_MUST_INT.create(TextUtil.literal(offset).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      throw new UnsupportedOperationException(EXPAND_MUST_INT.create(TextUtil.literal(offset).styled(Styles.ACTUAL)));
     }
   }
 
@@ -61,7 +62,7 @@ public interface IntBackedRegion extends Region {
     if (offset == (int) offset) {
       return expanded((int) offset, axis);
     } else {
-      throw new UnsupportedOperationException(EXPAND_MUST_INT.create(TextUtil.literal(offset).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      throw new UnsupportedOperationException(EXPAND_MUST_INT.create(TextUtil.literal(offset).styled(Styles.ACTUAL)));
     }
   }
 
@@ -75,7 +76,7 @@ public interface IntBackedRegion extends Region {
     if (offset == (int) offset) {
       return expanded((int) offset, direction);
     } else {
-      throw new UnsupportedOperationException(EXPAND_MUST_INT.create(TextUtil.literal(offset).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      throw new UnsupportedOperationException(EXPAND_MUST_INT.create(TextUtil.literal(offset).styled(Styles.ACTUAL)));
     }
   }
 
@@ -89,7 +90,7 @@ public interface IntBackedRegion extends Region {
     if (offset == (int) offset) {
       return expanded((int) offset, type);
     } else {
-      throw new UnsupportedOperationException(EXPAND_MUST_INT.create(TextUtil.literal(offset).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      throw new UnsupportedOperationException(EXPAND_MUST_INT.create(TextUtil.literal(offset).styled(Styles.ACTUAL)));
     }
   }
 
@@ -143,7 +144,7 @@ public interface IntBackedRegion extends Region {
     if (vec3d.equals(Vec3d.of(vec3i))) {
       return vec3i;
     } else {
-      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(Styles.ACTUAL)));
     }
   }
 
@@ -152,7 +153,7 @@ public interface IntBackedRegion extends Region {
     if (vec3d.equals(Vec3d.ofCenter(vec3i))) {
       return vec3i;
     } else {
-      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(TextUtil.STYLE_FOR_ACTUAL)));
+      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(Styles.ACTUAL)));
     }
   }
 

@@ -13,6 +13,7 @@ import net.minecraft.text.Text;
 import org.apache.commons.lang3.tuple.Triple;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -33,12 +34,12 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
     )) {
       ScoreboardObjective objective = scoreboard.getNullableObjective(triple.getLeft());
       if (objective == null) {
-        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.score.no_objective", Text.literal(triple.getLeft()).styled(TextUtil.STYLE_FOR_TARGET))));
+        attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.score.no_objective", Text.literal(triple.getLeft()).styled(Styles.TARGET))));
         result = false;
         continue;
       }
 
-      final MutableText objectiveText = TextUtil.styled(objective.getDisplayName(), TextUtil.STYLE_FOR_TARGET);
+      final MutableText objectiveText = TextUtil.styled(objective.getDisplayName(), Styles.TARGET);
       if (!scoreboard.playerHasObjective(entityName, objective)) {
         attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.score.no_player_score", displayName, objectiveText)));
         result = false;
@@ -50,8 +51,8 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
       final boolean inverted = triple.getRight();
       final NumberRange.IntRange intRange = triple.getMiddle();
       final boolean test = intRange.test(scoreValue);
-      final MutableText actualValueText = TextUtil.literal(scoreValue).styled(TextUtil.STYLE_FOR_ACTUAL);
-      final MutableText expectedRangeText = Text.literal(StringUtil.wrapRange(intRange)).styled(TextUtil.STYLE_FOR_EXPECTED);
+      final MutableText actualValueText = TextUtil.literal(scoreValue).styled(Styles.ACTUAL);
+      final MutableText expectedRangeText = Text.literal(StringUtil.wrapRange(intRange)).styled(Styles.EXPECTED);
       if (test) {
         attachments.add(TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.score.entry.in_range", displayName, objectiveText, actualValueText, expectedRangeText)));
       } else {

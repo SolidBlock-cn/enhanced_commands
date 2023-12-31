@@ -37,6 +37,7 @@ import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
@@ -184,11 +185,11 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             .executes(context -> {
               final NbtElement nbtElement = NbtElementArgumentType.getNbtElement(context, "nbt");
               final String s = TextUtil.toSpacedStringNbt(nbtElement);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(TextUtil.STYLE_FOR_RESULT)), false);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(Styles.RESULT)), false);
               final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser(new StringReader(s)).parsePredicate(false, false);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(TextUtil.STYLE_FOR_RESULT)), false);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(Styles.RESULT)), false);
               final NbtFunction reparsedFunction = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(TextUtil.STYLE_FOR_RESULT)), false);
+              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
               CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
               final boolean reparsedFunctionEqual = reparsedFunction.apply(null).equals(nbtElement);

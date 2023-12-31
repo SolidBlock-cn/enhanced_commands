@@ -19,6 +19,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
 import pers.solid.ecmd.regionselection.WandEvent;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
@@ -59,7 +60,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
                   final RegistryEntry.Reference<RegionSelectionType> registryEntry = RegistryEntryArgumentType.getRegistryEntry(context, "type", RegionSelectionType.REGISTRY_KEY);
                   final RegionSelectionType type = registryEntry.value();
                   ((ServerPlayerEntityExtension) player).ec$switchRegionSelectionType(type);
-                  CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.regionselection.changed", TextUtil.literal(registryEntry.registryKey().getValue()).styled(TextUtil.STYLE_FOR_RESULT)), true);
+                  CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.regionselection.changed", TextUtil.literal(registryEntry.registryKey().getValue()).styled(Styles.RESULT)), true);
                   return 1;
                 }))));
     dispatcher.register(literalR2("rs")

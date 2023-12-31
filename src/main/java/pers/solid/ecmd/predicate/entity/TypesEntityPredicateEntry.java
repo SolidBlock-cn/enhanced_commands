@@ -11,6 +11,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
@@ -25,8 +26,8 @@ public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<Entity
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     final boolean anyMatch = values.stream().anyMatch(either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().isIn(tag)));
-    final MutableText actualText = TextUtil.styled(entity.getType().getName(), TextUtil.STYLE_FOR_ACTUAL);
-    final MutableText expectedText = Texts.join(values, Texts.DEFAULT_SEPARATOR_TEXT, either -> either.map(type -> TextUtil.styled(type.getName(), TextUtil.STYLE_FOR_EXPECTED), tag -> Text.literal("#" + tag.id()).styled(TextUtil.STYLE_FOR_EXPECTED)));
+    final MutableText actualText = TextUtil.styled(entity.getType().getName(), Styles.ACTUAL);
+    final MutableText expectedText = Texts.join(values, Texts.DEFAULT_SEPARATOR_TEXT, either -> either.map(type -> TextUtil.styled(type.getName(), Styles.EXPECTED), tag -> Text.literal("#" + tag.id()).styled(Styles.EXPECTED)));
     if (anyMatch) {
       return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.type.true_multiple", displayName, actualText, expectedText));
     } else {

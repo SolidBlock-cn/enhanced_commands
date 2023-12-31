@@ -12,7 +12,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -23,6 +22,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
 import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.Parser;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.ArrayList;
@@ -53,13 +53,13 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     final List<Text> messages = new ArrayList<>();
     final BlockPos blockPos = cachedBlockPosition.getBlockPos();
     final MutableText posText = TextUtil.wrapVector(blockPos);
-    final MutableText actualText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_ACTUAL);
+    final MutableText actualText = blockState.getBlock().getName().styled(Styles.ACTUAL);
     if (!blockState.isOf(block)) {
-      final MutableText expectedText = block.getName().styled(TextUtil.STYLE_FOR_EXPECTED);
-      messages.add(Text.translatable("enhanced_commands.block_predicate.simple.not_the_block", posText, actualText, expectedText).formatted(Formatting.RED));
+      final MutableText expectedText = block.getName().styled(Styles.EXPECTED);
+      messages.add(Text.translatable("enhanced_commands.block_predicate.simple.not_the_block", posText, actualText, expectedText).styled(Styles.FALSE));
       matches = false;
     } else {
-      messages.add(Text.translatable("enhanced_commands.block_predicate.simple.is_the_block", posText, actualText).formatted(Formatting.GREEN));
+      messages.add(Text.translatable("enhanced_commands.block_predicate.simple.is_the_block", posText, actualText).styled(Styles.TRUE));
     }
     for (PropertyPredicate<?> propertyPredicate : propertyEntries) {
       final TestResult propertyResult = propertyPredicate.testAndDescribe(blockState, blockPos);

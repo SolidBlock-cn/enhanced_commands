@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StateUtil;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
@@ -36,8 +37,8 @@ public record MultiValuePropertyNamePredicate(String propertyName, Collection<St
     final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) {
-      final MutableText nameText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_TARGET);
-      final MutableText propertyNameText = Text.literal(propertyName).styled(TextUtil.STYLE_FOR_EXPECTED);
+      final MutableText nameText = blockState.getBlock().getName().styled(Styles.TARGET);
+      final MutableText propertyNameText = Text.literal(propertyName).styled(Styles.EXPECTED);
       if (propertyName.isEmpty()) {
         return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name_empty", nameText));
       } else {
@@ -45,8 +46,8 @@ public record MultiValuePropertyNamePredicate(String propertyName, Collection<St
       }
     }
     final Text pos = TextUtil.wrapVector(blockPos);
-    final Text actual = PropertyPredicate.propertyAndValue(blockState, property).styled(TextUtil.STYLE_FOR_ACTUAL);
-    final Text expected = Texts.join(valueNames, Texts.DEFAULT_SEPARATOR_TEXT, string -> Text.literal(string).styled(TextUtil.STYLE_FOR_EXPECTED));
+    final Text actual = PropertyPredicate.propertyAndValue(blockState, property).styled(Styles.ACTUAL);
+    final Text expected = Texts.join(valueNames, Texts.DEFAULT_SEPARATOR_TEXT, string -> Text.literal(string).styled(Styles.EXPECTED));
     final String actualValue = StateUtil.namePropertyValue(blockState, property);
     if (Iterables.any(valueNames, value -> value.equals(actualValue))) {
       if (inverted) {
