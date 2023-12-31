@@ -77,7 +77,7 @@ public interface EnhancedEntryPredicate<T> extends RegistryEntryPredicateArgumen
   }
 
   final class AnyOf<T> implements EnhancedEntryPredicate<T> {
-    private final Collection<EnhancedEntryPredicate<T>> predicates;
+    public final Collection<EnhancedEntryPredicate<T>> predicates;
     private final RegistryEntryList<T> entries;
     private final List<EnhancedEntryPredicate<T>> others;
 

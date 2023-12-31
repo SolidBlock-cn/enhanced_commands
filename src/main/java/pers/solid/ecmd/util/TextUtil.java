@@ -4,6 +4,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.visitor.NbtOrderedStringFormatter;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -12,9 +13,11 @@ import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.biome.Biome;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -181,5 +184,10 @@ public final class TextUtil {
 
   public static Text joinNullableLines(@Nullable Text... texts) {
     return ScreenTexts.joinLines(Collections2.filter(Arrays.asList(texts), Predicates.notNull()));
+  }
+
+  @NotNull
+  public static MutableText biome(RegistryKey<Biome> key) {
+    return Text.translatableWithFallback(Util.createTranslationKey("biome", key.getValue()), key.getValue().getPath().replace('_', ' '));
   }
 }

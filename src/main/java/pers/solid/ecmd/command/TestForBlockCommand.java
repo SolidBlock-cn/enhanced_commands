@@ -55,7 +55,16 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     }
     final BlockState blockState = world.getBlockState(blockPos);
     final Collection<Property<?>> properties = blockState.getProperties();
-    CommandBridge.sendFeedback(source, () -> Text.translatable(properties.isEmpty() ? "enhanced_commands.commands.testfor.block.info" : "enhanced_commands.commands.testfor.block.info_with_properties", TextUtil.wrapVector(blockPos), blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_RESULT), TextUtil.literal(Registries.BLOCK.getId(blockState.getBlock())).styled(TextUtil.STYLE_FOR_RESULT)), false);
+    CommandBridge.sendFeedback(source, () -> {
+      final MutableText posText = TextUtil.wrapVector(blockPos);
+      final MutableText resultText = blockState.getBlock().getName().styled(TextUtil.STYLE_FOR_RESULT);
+      final MutableText idText = TextUtil.literal(Registries.BLOCK.getId(blockState.getBlock())).styled(TextUtil.STYLE_FOR_RESULT);
+      if (properties.isEmpty()) {
+        return Text.translatable("enhanced_commands.commands.testfor.block.info", posText, resultText, idText);
+      } else {
+        return Text.translatable("enhanced_commands.commands.testfor.block.info_with_properties", posText, resultText, idText);
+      }
+    }, false);
     for (Property<?> property : properties) {
       CommandBridge.sendFeedback(source, () -> expressPropertyValue(blockState, property), false);
     }

@@ -13,6 +13,7 @@ public enum TestForCommands implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     final LiteralArgumentBuilder<ServerCommandSource> literal = ModCommands.literalR2("testfor");
+    TestForBiomeCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlockCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlockInfoCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForEntityCommand.INSTANCE.addArguments(literal, registryAccess, environment);
