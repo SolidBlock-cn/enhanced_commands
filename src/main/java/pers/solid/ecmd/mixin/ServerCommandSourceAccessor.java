@@ -12,4 +12,7 @@ public interface ServerCommandSourceAccessor {
 
   @Accessor
   CommandOutput getOutput();
+
+  @Accessor
+  int getLevel();
 }

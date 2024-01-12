@@ -39,7 +39,9 @@ public enum ModCommands implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+      DebugDeOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
       DebugOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+      DebugPermissionLevelCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     }
 
     ActiveRegionCommand.INSTANCE.register(dispatcher, registryAccess, environment);

@@ -24,7 +24,7 @@ public enum DebugOpCommand implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     dispatcher.register(
-        CommandManager.literal("enhanced_command:op")
+        CommandManager.literal("debug:op")
             .executes(context -> op(context.getSource(), Collections.singleton(context.getSource().getPlayerOrThrow().getGameProfile())))
             .then(CommandManager.argument("targets", GameProfileArgumentType.gameProfile())
                 .suggests((context, builder) -> {
