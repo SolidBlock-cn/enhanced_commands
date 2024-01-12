@@ -47,7 +47,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builder(ConvertBlockCommand.KEYWORD_ARGS)
+    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, registryAccess)
         .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
         .addOptionalArg("immediately", BoolArgumentType.bool(), false)
         .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)

@@ -1,7 +1,6 @@
 package pers.solid.ecmd.block;
 
 import com.google.common.collect.Iterators;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.BlockState;
@@ -18,7 +17,9 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
-import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.argument.KeywordArgs;
+import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunctionArgument;
@@ -35,14 +36,7 @@ import java.util.function.Function;
 
 public interface BlockTransformationCommand {
   static KeywordArgsArgumentType.Builder createKeywordArgs(CommandRegistryAccess registryAccess) {
-    return KeywordArgsArgumentType.builder(FillReplaceCommand.KEYWORD_ARGS)
-        .addOptionalArg("affect_entities", EntityPredicateArgumentType.entityPredicate(registryAccess), null)
-        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
-        .addOptionalArg("keep_remaining", BoolArgumentType.bool(), false)
-        .addOptionalArg("keep_state", BoolArgumentType.bool(), false)
-        .addOptionalArg("remaining", BlockFunctionArgumentType.blockFunction(registryAccess), BlockTransformationTask.DEFAULT_REMAINING_FUNCTION)
-        .addOptionalArg("select", BoolArgumentType.bool(), false)
-        .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null);
+    return KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.BLOCK_TRANSFORMATION, registryAccess);
   }
 
   Vec3i transformBlockPos(Vec3i original);

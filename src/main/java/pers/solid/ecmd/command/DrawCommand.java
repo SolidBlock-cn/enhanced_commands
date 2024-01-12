@@ -16,10 +16,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.mutable.MutableInt;
-import pers.solid.ecmd.argument.BlockFunctionArgumentType;
-import pers.solid.ecmd.argument.CurveArgumentType;
-import pers.solid.ecmd.argument.KeywordArgs;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
@@ -36,19 +33,19 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum DrawCommand implements CommandRegistrationCallback {
   INSTANCE;
-  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
-      .addAll(FillReplaceCommand.KEYWORD_ARGS)
-      .addOptionalArg("interval", DoubleArgumentType.doubleArg(0d), 0d)
-      .addOptionalArg("thickness", DoubleArgumentType.doubleArg(0d, 64d), 0d)
-      .build();
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builder()
+        .addShared(KeywordArgsCommon.FILLING, registryAccess)
+        .addOptionalArg("interval", DoubleArgumentType.doubleArg(0d), 0d)
+        .addOptionalArg("thickness", DoubleArgumentType.doubleArg(0d, 64d), 0d)
+        .build();
     dispatcher.register(literalR2("draw")
         .then(argument("curve", CurveArgumentType.curve(registryAccess))
             .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
                 .executes(context -> execute(context, false, false, 0, Block.NOTIFY_ALL, 0, 0))
-                .then(argument("kwargs", KEYWORD_ARGS)
+                .then(argument("kwargs", keywordArgs)
                     .executes(context -> {
                       final KeywordArgs kwargs = KeywordArgsArgumentType.getKeywordArgs(context, "kwargs");
                       return execute(context, kwargs.getBoolean("immediately"), kwargs.getBoolean("bypass_limit"), kwargs.getDouble("interval"), FillReplaceCommand.getFlags(kwargs), FillReplaceCommand.getModFlags(kwargs), kwargs.getDouble("thickness"));

@@ -25,7 +25,7 @@ public enum OutlineCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final KeywordArgsArgumentType kwArgsType = KeywordArgsArgumentType.builder(FillReplaceCommand.KEYWORD_ARGS)
+    final KeywordArgsArgumentType kwArgsType = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess)
         .addOptionalArg("inner", BlockFunctionArgumentType.blockFunction(registryAccess), null)
         .build();
 

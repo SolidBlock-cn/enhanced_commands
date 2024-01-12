@@ -1,7 +1,6 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.BlockState;
@@ -24,7 +23,7 @@ import net.minecraft.world.World;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
-import pers.solid.ecmd.argument.NbtFunctionArgumentType;
+import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.mixin.FallingBlockEntityAccessor;
 import pers.solid.ecmd.util.TextUtil;
@@ -40,32 +39,22 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 public enum ConvertBlockCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  final static KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
-      .addOptionalArg("skip_light_update", BoolArgumentType.bool(), false)
-      .addOptionalArg("notify_listeners", BoolArgumentType.bool(), true)
-      .addOptionalArg("notify_neighbors", BoolArgumentType.bool(), false)
-      .addOptionalArg("force_state", BoolArgumentType.bool(), true)
-      .addOptionalArg("suppress_initial_check", BoolArgumentType.bool(), false)
-      .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
-      .addOptionalArg("force", BoolArgumentType.bool(), false)
-      .addOptionalArg("nbt", NbtFunctionArgumentType.COMPOUND, null)
-      .addOptionalArg("affect_fluid", BoolArgumentType.bool(), false)
-      .build();
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, registryAccess).build();
 
     final Function<BlockPos, Text> fallingBlockFeedback = blockPos -> Text.translatable("enhanced_commands.commands.convertblock.falling_block.complete", TextUtil.wrapVector(blockPos));
     final Function<BlockPos, Text> blockDisplayFeedback = blockPos -> Text.translatable("enhanced_commands.commands.convertblock.block_display.complete", TextUtil.wrapVector(blockPos));
     dispatcher.register(literalR2("convertblock")
         .then(argument("pos", EnhancedPosArgumentType.blockPos())
             .then(literal("falling_block")
-                .executes(context -> executeConvert(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), KEYWORD_ARGS.defaultArgs(), context))
-                .then(argument("keyword_args", KEYWORD_ARGS)
+                .executes(context -> executeConvert(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), keywordArgs.defaultArgs(), context))
+                .then(argument("keyword_args", keywordArgs)
                     .executes(context -> executeConvert(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
             .then(literal("block_display")
-                .executes(context -> executeConvert(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), KEYWORD_ARGS.defaultArgs(), context))
-                .then(argument("keyword_args", KEYWORD_ARGS)
+                .executes(context -> executeConvert(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), keywordArgs.defaultArgs(), context))
+                .then(argument("keyword_args", keywordArgs)
                     .executes(context -> executeConvert(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))));
   }
 

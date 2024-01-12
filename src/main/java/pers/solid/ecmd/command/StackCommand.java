@@ -70,7 +70,7 @@ public enum StackCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final KeywordArgsArgumentType keywordArgsForVector = KeywordArgsArgumentType.builder(FillReplaceCommand.KEYWORD_ARGS)
+    final KeywordArgsArgumentType keywordArgsForVector = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess)
         // 是否一并对实体进行堆叠
         .addOptionalArg("affect_entities", EntityArgumentType.entities(), null)
         // 仅允许对符合此谓词的方块进行修改
@@ -80,7 +80,7 @@ public enum StackCommand implements CommandRegistrationCallback {
         // 只堆叠符合指定的谓词的方块
         .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
         .build();
-    final KeywordArgsArgumentType keywordArgsForDirections = KeywordArgsArgumentType.builder(keywordArgsForVector)
+    final KeywordArgsArgumentType keywordArgsForDirections = KeywordArgsArgumentType.builder().addAll(keywordArgsForVector)
         // 表示不通过检测区域的边界大小来推断偏移值。
         .addOptionalArg("absolute", BoolArgumentType.bool(), false)
         // 每次向该方向堆叠之前的间隔。默认为 0，可以是负数。

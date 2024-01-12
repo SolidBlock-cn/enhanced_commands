@@ -3,7 +3,6 @@ package pers.solid.ecmd.command;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -52,19 +51,6 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final int SUPPRESS_INITIAL_CHECK_FLAG = 2;
   public static final int SUPPRESS_REPLACED_CHECK_FLAG = 4;
 
-  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
-      .addOptionalArg("immediately", BoolArgumentType.bool(), false)
-      .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)
-      .addOptionalArg("skip_light_update", BoolArgumentType.bool(), false)
-      .addOptionalArg("notify_listeners", BoolArgumentType.bool(), true)
-      .addOptionalArg("notify_neighbors", BoolArgumentType.bool(), false)
-      .addOptionalArg("force_state", BoolArgumentType.bool(), false)
-      .addOptionalArg("post_process", BoolArgumentType.bool(), false)
-      .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgumentType(), UnloadedPosBehavior.REJECT)
-      .addOptionalArg("suppress_initial_check", BoolArgumentType.bool(), false)
-      .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
-      .addOptionalArg("force", BoolArgumentType.bool(), false)
-      .build();
   public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.commands.fill.region_too_large", a, b));
   public static final int REGION_SIZE_LIMIT = 16777215;
 
@@ -72,9 +58,10 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     LiteralArgumentBuilder<ServerCommandSource> directBuilder = literalR2("fill");
     LiteralArgumentBuilder<ServerCommandSource> indirectBuilder = literalR2("/fill");
+    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess).build();
     final LiteralCommandNode<ServerCommandSource> fillNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(registryAccess)).then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
         .executes(context -> execute(context, null))
-        .then(argument("keyword_args", KEYWORD_ARGS)
+        .then(argument("keyword_args", keywordArgs)
             .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build()).build());
 
     dispatcher.register(literalR2("/f").forward(fillNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
@@ -89,7 +76,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
                       final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "predicate");
                       return execute(context, blockPredicate);
                     })
-                    .then(argument("keyword_args", KEYWORD_ARGS)
+                    .then(argument("keyword_args", keywordArgs)
                         .executes(context -> {
                           final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "predicate");
                           return execute(context, blockPredicate, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"));

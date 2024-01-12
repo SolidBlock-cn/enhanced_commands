@@ -1,10 +1,7 @@
 package pers.solid.ecmd.argument;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -13,8 +10,10 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,19 +23,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCursorEnd;
 
-public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<@NotNull String, Object> defaultValues) implements ArgumentType<KeywordArgs> {
+public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<@NotNull String, Object> defaultValues, Set<Identifier> shared, Set<String> argumentsFromShared) implements ArgumentType<KeywordArgs> {
   public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.keyword_args.unknown_argument_name", o));
   public static final DynamicCommandExceptionType DUPLICATE_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.keyword_args.duplicate_argument_name", o));
 
   public static Builder builder() {
-    return new Builder(new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableMap.Builder<>());
+    return new Builder(new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableSet.Builder<>());
   }
 
-  public static Builder builder(@NotNull KeywordArgsArgumentType copyFrom) {
-    return builder().addAll(copyFrom);
+  public static Builder builderFromShared(@NotNull Function<CommandRegistryAccess, KeywordArgsArgumentType> source, CommandRegistryAccess registryAccess) {
+    return builder().addShared(source, registryAccess);
   }
 
   public static KeywordArgs getKeywordArgs(CommandContext<?> context, String name) {
@@ -124,11 +124,15 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
     private final ImmutableMap.Builder<String, ArgumentType<?>> arguments;
     private final ImmutableSet.Builder<String> requiredArguments;
     private final ImmutableMap.Builder<String, Object> defaultValues;
+    private final ImmutableSet.Builder<Identifier> shared;
+    private final ImmutableSet.Builder<String> argumentsFromShared;
 
-    private Builder(ImmutableMap.Builder<String, ArgumentType<?>> arguments, ImmutableSet.Builder<String> requiredArgs, ImmutableMap.Builder<String, Object> defaultValues) {
+    Builder(ImmutableMap.Builder<String, ArgumentType<?>> arguments, ImmutableSet.Builder<String> requiredArgs, ImmutableMap.Builder<String, Object> defaultValues, ImmutableSet.Builder<Identifier> shared, ImmutableSet.Builder<String> argumentsFromShared) {
       this.arguments = arguments;
       this.requiredArguments = requiredArgs;
       this.defaultValues = defaultValues;
+      this.shared = shared;
+      this.argumentsFromShared = argumentsFromShared;
     }
 
     public Builder addRequiredArg(@NotNull String name, @NotNull ArgumentType<?> type) {
@@ -146,21 +150,26 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
     }
 
     public Builder addAll(KeywordArgsArgumentType source) {
+      shared.addAll(source.shared);
       arguments.putAll(source.arguments);
       requiredArguments.addAll(source.requiredArguments);
       defaultValues.putAll(source.defaultValues);
+      argumentsFromShared.addAll(source.argumentsFromShared);
       return this;
     }
 
-    public Builder addAll(KeywordArgsArgumentType source, Predicate<String> filterName) {
-      arguments.putAll(Maps.filterKeys(source.arguments, filterName));
-      requiredArguments.addAll(Sets.filter(source.requiredArguments, filterName));
-      defaultValues.putAll(Maps.filterKeys(source.defaultValues, filterName));
+    public Builder addShared(Function<CommandRegistryAccess, KeywordArgsArgumentType> source, CommandRegistryAccess registryAccess) {
+      shared.add(KeywordArgsCommon.getIdOrThrow(source));
+      final KeywordArgsArgumentType apply = source.apply(registryAccess);
+      arguments.putAll(apply.arguments);
+      argumentsFromShared.addAll(apply.arguments.keySet());
+      requiredArguments.addAll(apply.requiredArguments);
+      defaultValues.putAll(apply.defaultValues);
       return this;
     }
 
     public KeywordArgsArgumentType build() {
-      return new KeywordArgsArgumentType(arguments.build(), requiredArguments.build(), defaultValues.build());
+      return new KeywordArgsArgumentType(arguments.build(), requiredArguments.build(), defaultValues.build(), shared.build(), argumentsFromShared.build());
     }
   }
 }

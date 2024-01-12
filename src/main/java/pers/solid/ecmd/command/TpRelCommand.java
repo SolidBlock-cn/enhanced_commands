@@ -160,7 +160,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
           true
       );
     } else if (!targets.isEmpty()) {
-      source.sendFeedback(Text.translatable("commands.teleport.success.location.multiple", targets.size(), formatFloat(vec3d.x), formatFloat(vec3d.y), formatFloat(vec3d.z)), true
+      source.sendFeedback(Text.translatable("enhanced_commands.commands.tprel.multiple", targets.size()), true
       );
     }
 
