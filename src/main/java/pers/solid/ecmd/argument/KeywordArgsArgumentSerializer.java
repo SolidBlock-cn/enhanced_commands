@@ -20,8 +20,14 @@ import java.util.Objects;
 import java.util.Set;
 
 public class KeywordArgsArgumentSerializer implements ArgumentSerializer<KeywordArgsArgumentType, KeywordArgsArgumentSerializer.Properties> {
+  public static final KeywordArgsArgumentSerializer INSTANCE = new KeywordArgsArgumentSerializer();
+
+  private KeywordArgsArgumentSerializer() {
+  }
+
   @Override
   public void writePacket(Properties properties, PacketByteBuf buf) {
+    if (true) return;
     NbtCompound nbtCompound = new NbtCompound();
     NbtList arguments = new NbtList();
     NbtList requiredArguments = new NbtList();
@@ -43,6 +49,7 @@ public class KeywordArgsArgumentSerializer implements ArgumentSerializer<Keyword
 
   @Override
   public Properties fromPacket(PacketByteBuf buf) {
+    if (true) return new Properties(Map.of(), Set.of(), Map.of());
     final NbtCompound nbtCompound = buf.readNbt();
     Objects.requireNonNull(nbtCompound, "nbtCompound from buf");
     final NbtList arguments = nbtCompound.getList("arguments", NbtElement.STRING_TYPE);
@@ -83,7 +90,7 @@ public class KeywordArgsArgumentSerializer implements ArgumentSerializer<Keyword
 
     @Override
     public ArgumentSerializer<KeywordArgsArgumentType, ?> getSerializer() {
-      return new KeywordArgsArgumentSerializer();
+      return KeywordArgsArgumentSerializer.INSTANCE;
     }
   }
 }

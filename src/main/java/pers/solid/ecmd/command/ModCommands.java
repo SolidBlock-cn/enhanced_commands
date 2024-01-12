@@ -11,6 +11,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtElement;
@@ -37,6 +38,10 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+      DebugOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    }
+
     ActiveRegionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     AirCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     ConvertBlockCommand.INSTANCE.register(dispatcher, registryAccess, environment);

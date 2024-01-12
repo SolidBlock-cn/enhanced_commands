@@ -26,6 +26,7 @@
     "GameModeMixin",
     "IdentifierMixin",
     "LocateCommandMixin",
+    "PacketByteBufMixin",
     "RegistryEntryArgumentTypeMixin",
     "RegistryEntryPredicateArgumentTypeMixin",
     "ServerCommandSourceAccessor",

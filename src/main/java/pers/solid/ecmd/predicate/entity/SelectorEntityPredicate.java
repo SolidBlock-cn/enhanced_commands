@@ -51,22 +51,14 @@ public class SelectorEntityPredicate implements EntityPredicate {
    */
   public static com.google.common.base.Predicate<Entity> asPredicate(EntitySelector entitySelector, ServerCommandSource source) throws CommandSyntaxException {
     EntitySelectorExtras.getOf(entitySelector).updateSource(source);
-    if (entitySelector.getLimit() < Integer.MAX_VALUE) {
-      try {
-        final List<? extends Entity> entities = entitySelector.getEntities(source);
-        // TODO: 2023年11月10日 check checkSourcePermission
-        return Predicates.in(entities);
-      } catch (CommandSyntaxException e) {
-        return Predicates.alwaysFalse();
-      }
-    }
-
     final var accessor = (EntitySelectorAccessor) entitySelector;
-    try {
-      accessor.callCheckSourcePermission(source);
-    } catch (CommandSyntaxException e) {
-      return Predicates.alwaysFalse();
+
+    if (entitySelector.getLimit() < Integer.MAX_VALUE) {
+      final List<? extends Entity> entities = entitySelector.getEntities(source);
+      return Predicates.in(entities);
     }
+    accessor.callCheckSourcePermission(source);
+
     List<com.google.common.base.Predicate<Entity>> predicates = new ArrayList<>();
     if (!entitySelector.includesNonPlayers()) {
       predicates.add(Entity::isPlayer);

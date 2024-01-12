@@ -395,6 +395,7 @@
   "enhanced_commands.commands.testfor.entity.pass": "实体%s的谓词测试通过",
   "enhanced_commands.commands.testfor.entity.several": "找到实体：%s，共计%s个实体",
   "enhanced_commands.commands.testfor.entity.single": "找到一个实体：%s",
+  "enhanced_commands.commands.tprel.multiple": "已将%s个实体传送至其各自的相对位置",
   "enhanced_commands.concentration_type.average": "平均值",
   "enhanced_commands.concentration_type.first": "第一个值",
   "enhanced_commands.concentration_type.last": "最后一个值",

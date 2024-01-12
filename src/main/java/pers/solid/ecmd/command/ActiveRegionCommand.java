@@ -87,7 +87,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
                 .then(argument("offset", DoubleArgumentType.doubleArg())
                     .executes(context -> executeExpandAllDirections(DoubleArgumentType.getDouble(context, "offset"), context)))))
     );
-    dispatcher.register(literal("ar").redirect(literalCommandNode));
+    dispatcher.register(literalR2("ar").redirect(literalCommandNode));
   }
 
   public static int executeGet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

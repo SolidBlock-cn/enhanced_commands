@@ -48,7 +48,7 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
 
   public static class Serializer<T, F extends ArgumentType<T>, FP extends ArgumentSerializer.ArgumentTypeProperties<F>> implements ArgumentSerializer<VanillaWrappedArgumentType<T, F>, Properties<T, F, FP>> {
     @SuppressWarnings("rawtypes")
-    public static final Serializer INSTANCE = new Serializer();
+    public static final Serializer<?, ?, ?> INSTANCE = new Serializer();
 
     @SuppressWarnings("unchecked")
     @Override
@@ -91,9 +91,10 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
       return new VanillaWrappedArgumentType<>(forwardProperties.createType(commandRegistryAccess));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Serializer<T, F, FP> getSerializer() {
-      return new Serializer<>();
+      return (Serializer<T, F, FP>) Serializer.INSTANCE;
     }
   }
 }

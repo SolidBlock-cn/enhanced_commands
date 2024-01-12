@@ -76,7 +76,7 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
       final MutableText posText = TextUtil.wrapVector(blockPos);
       final MutableText actualText = actualBiome.getKeyOrValue().map(TextUtil::biome, biome1 -> Text.literal(biome1.toString())).styled(Styles.ACTUAL);
       if (predicate instanceof EnhancedEntryPredicate.AnyOf<Biome> anyOf) {
-        final MutableText expectedText = Texts.join(Collections2.transform(anyOf.predicates, element -> element instanceof EnhancedEntryPredicate.TagBased<Biome> tagBased ? TextUtil.literal(tagBased.tag().getTag().id()) : element instanceof EnhancedEntryPredicate.EntryBased<Biome> entryBased ? TextUtil.biome(entryBased.value().registryKey()) : Text.literal(element.toString())), Texts.DEFAULT_SEPARATOR_TEXT, text -> text.styled(Styles.EXPECTED));
+        final MutableText expectedText = Texts.join(Collections2.transform(anyOf.predicates, element -> element instanceof EnhancedEntryPredicate.TagBased<Biome> tagBased ? Text.literal("#" + tagBased.tag().getTag().id()) : element instanceof EnhancedEntryPredicate.EntryBased<Biome> entryBased ? TextUtil.biome(entryBased.value().registryKey()) : Text.literal(element.toString())), Texts.DEFAULT_SEPARATOR_TEXT, text -> text.styled(Styles.EXPECTED));
         if (test) {
           return Text.translatable("enhanced_commands.commands.testfor.biome.multiple.true", posText, actualText, expectedText).styled(Styles.TRUE);
         } else {

@@ -347,11 +347,16 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   }
 
   @Override
-  public ArgumentSerializer<EnhancedPosArgumentType, ?> getSerializer() {
-    return new Serializer();
+  public ArgumentSerializer<EnhancedPosArgumentType, EnhancedPosArgumentType> getSerializer() {
+    return Serializer.INSTANCE;
   }
 
   public static class Serializer implements ArgumentSerializer<EnhancedPosArgumentType, EnhancedPosArgumentType> {
+    public static final Serializer INSTANCE = new Serializer();
+
+    private Serializer() {
+    }
+
     @Override
     public void writePacket(EnhancedPosArgumentType properties, PacketByteBuf buf) {
       buf.writeEnumConstant(properties.numberType);

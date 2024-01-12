@@ -31,10 +31,15 @@ public class AxisArgumentType extends SimpleEnumArgumentTypes.StringIdentifiable
 
   @Override
   public ArgumentSerializer<AxisArgumentType, ?> getSerializer() {
-    return new Serializer();
+    return Serializer.INSTANCE;
   }
 
   public static class Serializer implements ArgumentSerializer<AxisArgumentType, AxisArgumentType> {
+    public static final Serializer INSTANCE = new Serializer();
+
+    private Serializer() {
+    }
+
     @Override
     public void writePacket(AxisArgumentType properties, PacketByteBuf buf) {
       buf.writeBoolean(properties.excludeRandom);

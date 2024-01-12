@@ -37,6 +37,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
 import static pers.solid.ecmd.command.ModCommands.consumerOf;
+import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 /**
  * <p>The command used to generate random valueNames. Some usages:</p>
@@ -75,7 +76,7 @@ public enum RandCommand implements CommandRegistrationCallback {
                     .executes(context -> executeRandFloat(context, getFloat(context, "min"), getFloat(context, "max"))))))
         .then(literal("boolean")
             .executes(RandCommand::executeRandBoolean)
-            .then(literal("store")
+            .then(literalR2("store")
                 .then(argument("target", nbtTarget(registryAccess))
                     .then(argument("path", nbtPath())
                         .executes(context -> executeRandBoolean(context, consumerOf(context))))))

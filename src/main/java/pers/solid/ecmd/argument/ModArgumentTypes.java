@@ -12,8 +12,8 @@ import pers.solid.ecmd.EnhancedCommands;
  */
 public class ModArgumentTypes {
   public static void init() {
-    register("angle", AngleArgumentType.class, new AngleArgumentType.Serializer());
-    register("axis", AxisArgumentType.class, new AxisArgumentType.Serializer());
+    register("angle", AngleArgumentType.class, AngleArgumentType.Serializer.INSTANCE);
+    register("axis", AxisArgumentType.class, AxisArgumentType.Serializer.INSTANCE);
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
     register("concentration_type", ConcentrationTypeArgumentType.class, ConstantArgumentSerializer.of(ConcentrationTypeArgumentType::new));
@@ -25,17 +25,25 @@ public class ModArgumentTypes {
     register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
     register("nbt_source", NbtSourceArgumentType.class, ConstantArgumentSerializer.of(NbtSourceArgumentType::new));
     register("nbt_target", NbtTargetArgumentType.class, ConstantArgumentSerializer.of(NbtTargetArgumentType::new));
-    register("keyword_args", KeywordArgsArgumentType.class, new KeywordArgsArgumentSerializer());
-    register("omitted_registry_entry", OmittedRegistryEntryArgumentType.class, new OmittedRegistryEntryArgumentType.Serializer());
+    register("keyword_args", KeywordArgsArgumentType.class, KeywordArgsArgumentSerializer.INSTANCE);
+    registerTrustingType("omitted_registry_entry", OmittedRegistryEntryArgumentType.class, OmittedRegistryEntryArgumentType.Serializer.INSTANCE);
     register("outline_type", SimpleEnumArgumentTypes.OutlineTypeArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.OutlineTypeArgumentType::new));
-    register("pos", EnhancedPosArgumentType.class, new EnhancedPosArgumentType.Serializer());
+    register("pos", EnhancedPosArgumentType.class, EnhancedPosArgumentType.Serializer.INSTANCE);
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));
     register("unloaded_pos_behavior", UnloadedPosBehaviorArgumentType.class, ConstantArgumentSerializer.of(UnloadedPosBehaviorArgumentType::new));
-    register("vanilla_wrapped", VanillaWrappedArgumentType.class, VanillaWrappedArgumentType.Serializer.INSTANCE);
+    registerTrustingType("vanilla_wrapped", VanillaWrappedArgumentType.class, VanillaWrappedArgumentType.Serializer.INSTANCE);
   }
 
   private static <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void register(
       String name, Class<? extends A> clazz, ArgumentSerializer<A, T> serializer) {
     ArgumentTypeRegistry.registerArgumentType(new Identifier(EnhancedCommands.MOD_ID, name), clazz, serializer);
+  }
+
+
+  @SuppressWarnings("unchecked")
+  private static <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerTrustingType(
+      // 此方法用于需要使用特殊泛型的方法，和 register 类似，但是为了在特殊情况下编译通过。
+      String name, Class<?> clazz, ArgumentSerializer<A, T> serializer) {
+    ArgumentTypeRegistry.registerArgumentType(new Identifier(EnhancedCommands.MOD_ID, name), (Class<? extends A>) clazz, serializer);
   }
 }

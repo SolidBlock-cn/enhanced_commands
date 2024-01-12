@@ -76,10 +76,15 @@ public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, Regis
   }
 
   public static final class Serializer<T> implements ArgumentSerializer<OmittedRegistryEntryArgumentType<T>, Serializer.Properties<T>> {
+    public static final Serializer<?> INSTANCE = new Serializer<>();
+
+    private Serializer() {
+    }
+
     @Override
     public void writePacket(Properties properties, PacketByteBuf buf) {
-      buf.writeIdentifier(properties.registryRef.getValue());
       buf.writeString(properties.omittedNamespace);
+      buf.writeIdentifier(properties.registryRef.getValue());
     }
 
     @Override
@@ -104,9 +109,10 @@ public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, Regis
         return omittedRegistryEntry(omittedNamespace, commandRegistryAccess, this.registryRef);
       }
 
+      @SuppressWarnings("unchecked")
       @Override
       public ArgumentSerializer<OmittedRegistryEntryArgumentType<T>, Properties<T>> getSerializer() {
-        return new Serializer<>();
+        return (Serializer<T>) Serializer.INSTANCE;
       }
     }
   }

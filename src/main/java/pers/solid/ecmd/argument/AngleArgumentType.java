@@ -79,11 +79,16 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   }
 
   @Override
-  public ArgumentSerializer<AngleArgumentType, ?> getSerializer() {
-    return new Serializer();
+  public Serializer getSerializer() {
+    return Serializer.INSTANCE;
   }
 
   public static class Serializer implements ArgumentSerializer<AngleArgumentType, AngleArgumentType> {
+    public static final Serializer INSTANCE = new Serializer();
+
+    private Serializer() {
+    }
+
     @Override
     public void writePacket(AngleArgumentType properties, PacketByteBuf buf) {
       buf.writeBoolean(properties.returnRadians);

@@ -395,6 +395,7 @@
   "enhanced_commands.commands.testfor.entity.pass": "Entity %s passes the test of predicate",
   "enhanced_commands.commands.testfor.entity.several": "Found entities: %s, amounting to %s entities",
   "enhanced_commands.commands.testfor.entity.single": "Found one entity: %s",
+  "enhanced_commands.commands.tprel.multiple": "Teleported %s entities to their relative positions",
   "enhanced_commands.concentration_type.average": "average value",
   "enhanced_commands.concentration_type.first": "first value",
   "enhanced_commands.concentration_type.last": "last value",
