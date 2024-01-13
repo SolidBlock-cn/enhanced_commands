@@ -2,7 +2,7 @@ package pers.solid.ecmd.configs;
 
 public class EntitySelectorParsingConfig {
   public static final EntitySelectorParsingConfig DEFAULT = new EntitySelectorParsingConfig();
-  public static final EntitySelectorParsingConfig CURRENT = DEFAULT;
+  public static EntitySelectorParsingConfig CURRENT = DEFAULT;
 
   /**
    * 在读取实体选择器时，如果遇到可识别但因某些原因不可应用的选项名称，则尝试详细描述其原因，而非仅表明某选项不适用于这里。

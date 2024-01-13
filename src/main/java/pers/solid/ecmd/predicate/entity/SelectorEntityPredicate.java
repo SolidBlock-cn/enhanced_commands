@@ -50,14 +50,12 @@ public class SelectorEntityPredicate implements EntityPredicate {
    * 将实体选择器转换为谓词（非 {@link EntityPredicate} 对象。考虑到选择器中会有一些依赖 {@link ServerCommandSource} 的地方，因此需要提供 {@link ServerCommandSource}。
    */
   public static com.google.common.base.Predicate<Entity> asPredicate(EntitySelector entitySelector, ServerCommandSource source) throws CommandSyntaxException {
-    EntitySelectorExtras.getOf(entitySelector).updateSource(source);
-    final var accessor = (EntitySelectorAccessor) entitySelector;
-
     if (entitySelector.getLimit() < Integer.MAX_VALUE) {
-      final List<? extends Entity> entities = entitySelector.getEntities(source);
+      final List<? extends Entity> entities = entitySelector.getEntities(source.hasPermissionLevel(2) ? source : source.withLevel(2));
       return Predicates.in(entities);
     }
-    accessor.callCheckSourcePermission(source);
+    EntitySelectorExtras.getOf(entitySelector).updateSource(source);
+    final var accessor = (EntitySelectorAccessor) entitySelector;
 
     List<com.google.common.base.Predicate<Entity>> predicates = new ArrayList<>();
     if (!entitySelector.includesNonPlayers()) {

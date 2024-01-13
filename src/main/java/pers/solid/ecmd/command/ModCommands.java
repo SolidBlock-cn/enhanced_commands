@@ -11,7 +11,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtElement;
@@ -20,6 +19,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.commons.lang3.function.FailableConsumer;
 import pers.solid.ecmd.argument.NbtTargetArgumentType;
+import pers.solid.ecmd.configs.CommandsConfig;
 import pers.solid.ecmd.mixin.CommandContextAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.region.RegionArgument;
@@ -38,7 +38,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+    if (CommandsConfig.CURRENT.enableDebugCommands) {
       DebugDeOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
       DebugOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
       DebugPermissionLevelCommand.INSTANCE.register(dispatcher, registryAccess, environment);

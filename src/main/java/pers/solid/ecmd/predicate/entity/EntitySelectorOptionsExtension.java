@@ -62,7 +62,6 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
@@ -322,10 +321,7 @@ public class EntitySelectorOptionsExtension {
       }
 
       final ImmutableList<EntitySelector> build = entitySelectors.build();
-      EntitySelectorReaderExtras.getOf(reader).addFunction(source -> {
-        final var predicate = Predicates.or(IterateUtils.transformFailableImmutableList(build, input -> SelectorEntityPredicate.asPredicate(input, source)));
-        return inverted ? Predicates.not(predicate) : predicate;
-      });
+      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> new AlternativesEntityPredicateEntry(build, source, inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
 
     putOption("health", reader -> {

@@ -211,6 +211,7 @@
   "enhanced_commands.commands.convertblocks.block_display.complete": "已将%s个方块转换为方块展示实体",
   "enhanced_commands.commands.convertblocks.falling_block.complete": "已将%s个方块转换为下落的方块",
   "enhanced_commands.commands.convertblocks.task_name": "转换方块（区域%s）",
+  "enhanced_commands.commands.debug:permissionlevel.result": "你当前的权限等级是%s",
   "enhanced_commands.commands.draw.task_name": "绘制曲线（曲线%s）",
   "enhanced_commands.commands.fill.broken": "方块操作被中断，因为遇到了没有加载的位置",
   "enhanced_commands.commands.fill.complete": "区域内的方块操作已完成，共影响%s个方块",

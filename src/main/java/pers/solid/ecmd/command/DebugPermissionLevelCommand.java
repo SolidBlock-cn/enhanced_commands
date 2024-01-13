@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import pers.solid.ecmd.mixin.ServerCommandSourceAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
@@ -20,7 +21,7 @@ public enum DebugPermissionLevelCommand implements CommandRegistrationCallback {
         .executes(context -> {
           final ServerCommandSource source = context.getSource();
           final int level = ((ServerCommandSourceAccessor) source).getLevel();
-          CommandBridge.sendFeedback(source, () -> TextUtil.literal(level).styled(Styles.RESULT), false);
+          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.debug:permissionlevel.result", TextUtil.literal(level).styled(Styles.RESULT)), false);
           return level;
         })
         .then(CommandManager.argument("level", IntegerArgumentType.integer())
