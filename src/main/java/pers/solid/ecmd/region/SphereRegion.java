@@ -3,20 +3,19 @@ package pers.solid.ecmd.region;
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.NbtUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -79,11 +78,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     return Box.of(center, 2 * radius, 2 * radius, 2 * radius);
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putDouble("radius", radius);
-    nbtCompound.put("center", NbtUtil.fromVec3d(center));
-  }
+  public static final Codec<SphereRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(SphereRegion::radius), Vec3d.CODEC.fieldOf("center").forGetter(SphereRegion::center)).apply(i, SphereRegion::new));
 
   public enum Type implements RegionType<SphereRegion> {
     SPHERE_TYPE;
@@ -104,11 +99,8 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     }
 
     @Override
-    public @NotNull SphereRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new SphereRegion(
-          nbtCompound.getDouble("radius"),
-          NbtUtil.toVec3d(nbtCompound.getCompound("center"))
-      );
+    public @NotNull Codec<SphereRegion> getCodec() {
+      return CODEC;
     }
   }
 

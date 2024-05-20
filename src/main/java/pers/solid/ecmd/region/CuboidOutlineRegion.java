@@ -5,16 +5,16 @@ import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,11 +103,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     return region.minContainingBox();
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    region.writeNbt(nbtCompound);
-    nbtCompound.putInt("thickness", thickness);
-  }
+  public static final Codec<CuboidOutlineRegion> CODEC = RecordCodecBuilder.create(i -> i.group(BlockCuboidRegion.CODEC.fieldOf("region").forGetter(CuboidOutlineRegion::region), Codec.INT.optionalFieldOf("thickness", 1).forGetter(CuboidOutlineRegion::thickness)).apply(i, CuboidOutlineRegion::new));
 
   public enum Type implements RegionType<CuboidOutlineRegion> {
     CUBOID_OUTLINE_TYPE;
@@ -128,12 +124,8 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public @NotNull CuboidOutlineRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final Region region1 = RegionTypes.CUBOID.fromNbt(nbtCompound, world);
-      if (region1 instanceof BlockCuboidRegion blockCuboidRegion) {
-        return new CuboidOutlineRegion(blockCuboidRegion, nbtCompound.getInt("thickness"));
-      }
-      throw new IllegalArgumentException("Cannot parse cuboid wall region: NBT does not contain a BlockCuboidRegion ({type=cuboid, block=true})");
+    public @NotNull Codec<CuboidOutlineRegion> getCodec() {
+      return CODEC;
     }
   }
 

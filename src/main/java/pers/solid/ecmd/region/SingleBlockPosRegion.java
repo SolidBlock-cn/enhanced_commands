@@ -3,20 +3,19 @@ package pers.solid.ecmd.region;
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.NbtUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -62,10 +61,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     return Iterators.singletonIterator(new BlockPos(pos));
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("pos", NbtUtil.fromVec3i(pos));
-  }
+  public static final Codec<SingleBlockPosRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3i.CODEC.fieldOf("pos").forGetter(SingleBlockPosRegion::pos)).apply(i, SingleBlockPosRegion::new));
 
   public enum Type implements RegionType<SingleBlockPosRegion> {
     INSTANCE;
@@ -86,8 +82,8 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     }
 
     @Override
-    public @NotNull SingleBlockPosRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new SingleBlockPosRegion(NbtUtil.toVec3i(nbtCompound.getCompound("pos")));
+    public @NotNull Codec<SingleBlockPosRegion> getCodec() {
+      return CODEC;
     }
   }
 

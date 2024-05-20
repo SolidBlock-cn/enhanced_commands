@@ -3,12 +3,12 @@ package pers.solid.ecmd.region;
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineTypes outlineType) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
+public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, CylinderRegion region) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return contains(BlockPos.ofFloored(vec3d));
@@ -31,13 +31,13 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
   public boolean contains(@NotNull Vec3i vec3i) {
     final long topHeight = region.getTopHeight();
     final long bottomHeight = region.getBottomHeight();
-    if (outlineType == OutlineRegion.OutlineTypes.OUTLINE || outlineType == OutlineRegion.OutlineTypes.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
+    if (outlineType == OutlineRegion.OutlineType.OUTLINE || outlineType == OutlineRegion.OutlineType.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineType.FLOOR_AND_CEIL) {
       // match the top or bottom ceiling
       if (vec3i.getY() == bottomHeight || vec3i.getY() == topHeight) {
         return horizontallyWithinCylinder(region, Vec3d.ofCenter(vec3i));
       }
     }
-    if (outlineType != OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
+    if (outlineType != OutlineRegion.OutlineType.FLOOR_AND_CEIL) {
       // match the walls
       if (vec3i.getY() >= bottomHeight && vec3i.getY() <= topHeight) {
         return horizontallyWithinHollowCylinder(region, outlineType, new BlockPos(vec3i));
@@ -50,10 +50,10 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
     return Vector2d.distance(vec3d.x, vec3d.z, cylinderRegion.center().x, cylinderRegion.center().z) <= cylinderRegion.radius();
   }
 
-  public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineRegion.OutlineTypes outlineType, BlockPos testPos) {
+  public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineRegion.OutlineType outlineType, BlockPos testPos) {
     outlineType = switch (outlineType) {
-      case OUTLINE -> OutlineRegion.OutlineTypes.WALL;
-      case OUTLINE_CONNECTED -> OutlineRegion.OutlineTypes.WALL_CONNECTED;
+      case OUTLINE -> OutlineRegion.OutlineType.WALL;
+      case OUTLINE_CONNECTED -> OutlineRegion.OutlineType.WALL_CONNECTED;
       default -> outlineType;
     };
     return outlineType.modifiedTest(blockPos -> {
@@ -76,7 +76,7 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
 
     final Iterable<BlockPos> iterable = BlockPos.iterate(MathHelper.ceil(center.x - radius - 0.5), 0, MathHelper.ceil(center.z - radius - 0.5), MathHelper.floor(center.x + radius - 0.5), 0, MathHelper.floor(center.z + radius - 0.5));
     final Stream<BlockPos> flatOutlineRoundStream = Streams.stream(iterable).filter(blockPos -> horizontallyWithinHollowCylinder(region, outlineType, blockPos));
-    if (outlineType == OutlineRegion.OutlineTypes.OUTLINE || outlineType == OutlineRegion.OutlineTypes.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineTypes.FLOOR_AND_CEIL) {
+    if (outlineType == OutlineRegion.OutlineType.OUTLINE || outlineType == OutlineRegion.OutlineType.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineType.FLOOR_AND_CEIL) {
       if (topHeight == bottomHeight) {
         return Streams.stream(iterable).map(blockPos -> blockPos.withY(bottomHeight));
       } else if (topHeight < bottomHeight) {
@@ -86,7 +86,7 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
       // add top and bottom ceiling
       parts.add(Streams.stream(iterable).filter(blockPos -> horizontallyWithinCylinder(region, Vec3d.ofCenter(blockPos))).flatMap(blockPos -> Stream.of(blockPos.withY(topHeight), blockPos.withY(bottomHeight))));
       // add walls that excluded the top and bottom ceiling
-      if (outlineType != OutlineRegion.OutlineTypes.FLOOR_AND_CEIL && topHeight - 1 > bottomHeight + 1) {
+      if (outlineType != OutlineRegion.OutlineType.FLOOR_AND_CEIL && topHeight - 1 > bottomHeight + 1) {
         parts.add(flatOutlineRoundStream.flatMap(blockPos -> BlockPos.stream(blockPos.getX(), bottomHeight + 1, blockPos.getZ(), blockPos.getX(), topHeight - 1, blockPos.getZ()).map(BlockPos::toImmutable)));
       }
       return parts.stream().flatMap(Function.identity());
@@ -98,7 +98,7 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
 
   @Override
   public HollowCylinderRegion newRegion(CylinderRegion region) {
-    return new HollowCylinderRegion(region, outlineType);
+    return new HollowCylinderRegion(outlineType, region);
   }
 
   @Override
@@ -127,11 +127,7 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
     return region.minContainingBox();
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    region.writeNbt(nbtCompound);
-    nbtCompound.putString("outline_type", outlineType.asString());
-  }
+  public static final Codec<HollowCylinderRegion> CODEC = RecordCodecBuilder.create(i -> i.group(OutlineRegion.OutlineType.CODEC.fieldOf("outline_type").forGetter(HollowCylinderRegion::outlineType), CylinderRegion.CODEC.fieldOf("region").forGetter(HollowCylinderRegion::region)).apply(i, HollowCylinderRegion::new));
 
   public enum Type implements RegionType<HollowCylinderRegion> {
     HOLLOW_CYLINDER_TYPE;
@@ -152,8 +148,8 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
     }
 
     @Override
-    public @NotNull HollowCylinderRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new HollowCylinderRegion(RegionTypes.CYLINDER.fromNbt(nbtCompound, world), OutlineRegion.OutlineTypes.CODEC.byId(nbtCompound.getString("outline_type"), OutlineRegion.OutlineTypes.OUTLINE));
+    public @NotNull Codec<HollowCylinderRegion> getCodec() {
+      return CODEC;
     }
   }
 
@@ -161,11 +157,11 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
     private double radius;
     private double height = 1;
     private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
-    private OutlineRegion.OutlineTypes type = OutlineRegion.OutlineTypes.WALL;
+    private OutlineRegion.OutlineType type = OutlineRegion.OutlineType.WALL;
 
     @Override
     public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new HollowCylinderRegion(new CylinderRegion(radius, height, center.toAbsolutePos(source)), type);
+      return source -> new HollowCylinderRegion(type, new CylinderRegion(radius, height, center.toAbsolutePos(source)));
     }
 
     @Override
@@ -188,7 +184,7 @@ public record HollowCylinderRegion(CylinderRegion region, OutlineRegion.OutlineT
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
         center = parser.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 3) {
-        type = parser.parseAndSuggestEnums(OutlineRegion.OutlineTypes.values(), OutlineRegion.OutlineTypes::getDisplayName, OutlineRegion.OutlineTypes.CODEC);
+        type = parser.parseAndSuggestEnums(OutlineRegion.OutlineType.values(), OutlineRegion.OutlineType::getDisplayName, OutlineRegion.OutlineType.CODEC);
       }
     }
 

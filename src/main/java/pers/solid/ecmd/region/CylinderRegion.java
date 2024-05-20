@@ -2,19 +2,18 @@ package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.NbtUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -130,12 +129,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     return new Box(center.x - radius, center.y - height / 2, center.z - radius, center.x + radius, center.y + height / 2, center.z + radius);
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putDouble("radius", radius);
-    nbtCompound.putDouble("height", height);
-    nbtCompound.put("center", NbtUtil.fromVec3d(center));
-  }
+  public static final Codec<CylinderRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CylinderRegion::radius), Codec.DOUBLE.fieldOf("height").forGetter(CylinderRegion::height), Vec3d.CODEC.fieldOf("center").forGetter(CylinderRegion::center)).apply(i, CylinderRegion::new));
 
   public enum Type implements RegionType<CylinderRegion> {
     CYLINDER_TYPE;
@@ -156,12 +150,8 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
 
     @Override
-    public @NotNull CylinderRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new CylinderRegion(
-          nbtCompound.getDouble("radius"),
-          nbtCompound.getDouble("height"),
-          NbtUtil.toVec3d(nbtCompound.getCompound("center"))
-      );
+    public @NotNull Codec<CylinderRegion> getCodec() {
+      return CODEC;
     }
   }
 

@@ -1,8 +1,8 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
@@ -210,10 +210,12 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     return contains(BlockPos.ofFloored(vec3d));
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("from", NbtHelper.fromBlockPos(new BlockPos(minX, minY, minZ)));
-    nbtCompound.put("to", NbtHelper.fromBlockPos(new BlockPos(maxX, maxY, maxZ)));
-    nbtCompound.putBoolean("block", true);
-  }
+  public static final Codec<BlockCuboidRegion> CODEC = RecordCodecBuilder.create(i -> i.group(
+      Codec.INT.fieldOf("minX").forGetter(BlockCuboidRegion::minX),
+      Codec.INT.fieldOf("minY").forGetter(BlockCuboidRegion::minY),
+      Codec.INT.fieldOf("minZ").forGetter(BlockCuboidRegion::minZ),
+      Codec.INT.fieldOf("maxX").forGetter(BlockCuboidRegion::maxX),
+      Codec.INT.fieldOf("maxY").forGetter(BlockCuboidRegion::maxY),
+      Codec.INT.fieldOf("maxZ").forGetter(BlockCuboidRegion::maxZ)
+  ).apply(i, BlockCuboidRegion::new));
 }

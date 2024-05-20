@@ -1,13 +1,13 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.*;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -19,22 +19,22 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public record OutlineRegion(OutlineType outlineType, Region region) implements RegionBasedRegion<OutlineRegion, Region> {
-  public static Region of(Region region, OutlineTypes outlineType) throws CommandSyntaxException {
+  public static Region of(Region region, OutlineType outlineType) throws CommandSyntaxException {
     try {
       if (region instanceof BlockCuboidRegion cuboidRegion) {
-        if (outlineType == OutlineTypes.FLOOR_AND_CEIL) {
+        if (outlineType == OutlineType.FLOOR_AND_CEIL) {
           if (cuboidRegion.minY() == cuboidRegion.maxY() || cuboidRegion.minY() == cuboidRegion.maxY() + 1) {
             return cuboidRegion;
           } else {
             return new UnionRegion(List.of(new BlockCuboidRegion(cuboidRegion.minX(), cuboidRegion.minY(), cuboidRegion.minZ(), cuboidRegion.maxX(), cuboidRegion.minY(), cuboidRegion.maxZ()), new BlockCuboidRegion(cuboidRegion.minX(), cuboidRegion.maxY(), cuboidRegion.minZ(), cuboidRegion.maxX(), cuboidRegion.maxY(), cuboidRegion.maxZ())));
           }
-        } else if (outlineType == OutlineTypes.WALL || outlineType == OutlineTypes.WALL_CONNECTED) {
+        } else if (outlineType == OutlineType.WALL || outlineType == OutlineType.WALL_CONNECTED) {
           return new CuboidWallRegion(cuboidRegion, 1);
         } else {
           return new CuboidOutlineRegion(cuboidRegion, 1);
         }
       } else if (region instanceof CylinderRegion cylinderRegion) {
-        return new HollowCylinderRegion(cylinderRegion, outlineType);
+        return new HollowCylinderRegion(outlineType, cylinderRegion);
       } else {
         return new OutlineRegion(outlineType, region);
       }
@@ -92,36 +92,15 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     return region.minContainingBox();
   }
 
+  public static final Codec<OutlineRegion> CODEC = RecordCodecBuilder.create(i -> i.group(OutlineType.CODEC.fieldOf("outline_type").forGetter(OutlineRegion::outlineType), Region.CODEC.fieldOf("region").forGetter(OutlineRegion::region)).apply(i, OutlineRegion::new));
+
   @Override
   public OutlineRegion newRegion(Region region) {
     return new OutlineRegion(outlineType, region);
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("outline_type", outlineType.asString());
-    nbtCompound.put("region", region.createNbt());
-  }
+  public enum OutlineType implements StringIdentifiable {
 
-  public interface OutlineType extends StringIdentifiable {
-    boolean modifiedTest(Predicate<BlockPos> predicate, BlockPos blockPos);
-
-    @Override
-    default String asString() {
-      return toString();
-    }
-  }
-
-  public interface BasicOutlineType extends OutlineType {
-    Stream<BlockPos> streamNearbyPos(BlockPos blockPos);
-
-    @Override
-    default boolean modifiedTest(Predicate<BlockPos> predicate, BlockPos blockPos) {
-      return predicate.test(blockPos) && streamNearbyPos(blockPos).anyMatch(modifiedPos -> !predicate.test(modifiedPos));
-    }
-  }
-
-  public enum OutlineTypes implements BasicOutlineType {
     /**
      * The pos itself is in the region, but one if its near pos is not in the region.
      */
@@ -157,10 +136,16 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     };
 
     private final String name;
-    public static final Codec<OutlineTypes> CODEC = StringIdentifiable.createCodec(OutlineTypes::values);
+    public static final Codec<OutlineType> CODEC = StringIdentifiable.createCodec(OutlineType::values);
 
-    OutlineTypes(String name) {
+    OutlineType(String name) {
       this.name = name;
+    }
+
+    public abstract Stream<BlockPos> streamNearbyPos(BlockPos blockPos);
+
+    public boolean modifiedTest(Predicate<BlockPos> predicate, BlockPos blockPos) {
+      return predicate.test(blockPos) && streamNearbyPos(blockPos).anyMatch(modifiedPos -> !predicate.test(modifiedPos));
     }
 
     @Override
@@ -192,16 +177,13 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public @NotNull OutlineRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new OutlineRegion(
-          OutlineTypes.CODEC.byId(nbtCompound.getString("outline_type"), OutlineTypes.OUTLINE),
-          Region.fromNbt(nbtCompound.getCompound("region"), world)
-      );
+    public @NotNull Codec<OutlineRegion> getCodec() {
+      return CODEC;
     }
   }
 
   public static final class Parser implements FunctionParamsParser<RegionArgument> {
-    private OutlineType outlineType = OutlineTypes.OUTLINE;
+    private OutlineType outlineType = OutlineType.OUTLINE;
     private RegionArgument regionArgument;
 
     @Override
@@ -212,7 +194,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 1) {
-        outlineType = parser.parseAndSuggestEnums(OutlineTypes.values(), OutlineTypes::getDisplayName, OutlineTypes.CODEC);
+        outlineType = parser.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
       } else if (paramIndex == 0) {
         regionArgument = RegionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }

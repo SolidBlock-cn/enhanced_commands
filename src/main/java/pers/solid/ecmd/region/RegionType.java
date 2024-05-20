@@ -1,12 +1,11 @@
 package pers.solid.ecmd.region;
 
+import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.FunctionParamsParser;
@@ -36,8 +35,6 @@ public interface RegionType<R extends Region> {
     return null;
   }
 
-  /**
-   * 从 NBT 中读取数据，并返回符合该类型的 {@link Region} 对象。
-   */
-  @NotNull R fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world);
+  @NotNull
+  Codec<R> getCodec();
 }

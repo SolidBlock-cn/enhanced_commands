@@ -3,21 +3,20 @@ package pers.solid.ecmd.region;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.util.NbtUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -67,13 +66,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     return "outwards(%s %s %s, %s %s %s)".formatted(Integer.toString(center.getX()), Integer.toString(center.getY()), Integer.toString(center.getZ()), Integer.toString(x), Integer.toString(y), Integer.toString(z));
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("center", NbtUtil.fromVec3i(center));
-    nbtCompound.putInt("x", x);
-    nbtCompound.putInt("y", y);
-    nbtCompound.putInt("z", z);
-  }
+  public static final Codec<OutwardsRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3i.CODEC.fieldOf("center").forGetter(OutwardsRegion::center), Codec.INT.fieldOf("x").forGetter(OutwardsRegion::x), Codec.INT.fieldOf("y").forGetter(OutwardsRegion::y), Codec.INT.fieldOf("z").forGetter(OutwardsRegion::z)).apply(i, OutwardsRegion::new));
 
   public enum Type implements RegionType<OutwardsRegion> {
     INSTANCE;
@@ -94,13 +87,8 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public @NotNull OutwardsRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new OutwardsRegion(
-          NbtUtil.toVec3i(nbtCompound.getCompound("center")),
-          nbtCompound.getInt("x"),
-          nbtCompound.getInt("y"),
-          nbtCompound.getInt("z")
-      );
+    public @NotNull Codec<OutwardsRegion> getCodec() {
+      return CODEC;
     }
   }
 

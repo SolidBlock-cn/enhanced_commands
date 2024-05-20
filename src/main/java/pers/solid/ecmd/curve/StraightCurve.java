@@ -3,21 +3,20 @@ package pers.solid.ecmd.curve;
 import com.google.common.collect.AbstractIterator;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.StringUtil;
 
@@ -127,21 +126,14 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     return Type.INSTANCE;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("from", NbtUtil.fromVec3d(from));
-    nbtCompound.put("to", NbtUtil.fromVec3d(to));
-  }
+  public static final Codec<StraightCurve> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(StraightCurve::from), Vec3d.CODEC.fieldOf("to").forGetter(StraightCurve::to)).apply(i, StraightCurve::new));
 
   public enum Type implements CurveType<StraightCurve> {
     INSTANCE;
 
     @Override
-    public @NotNull StraightCurve fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new StraightCurve(
-          NbtUtil.toVec3d(nbtCompound.getCompound("from")),
-          NbtUtil.toVec3d(nbtCompound.getCompound("to"))
-      );
+    public @NotNull Codec<StraightCurve> getCodec() {
+      return CODEC;
     }
   }
 

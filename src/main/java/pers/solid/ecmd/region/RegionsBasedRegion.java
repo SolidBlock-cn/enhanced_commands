@@ -1,19 +1,22 @@
 package pers.solid.ecmd.region;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public interface RegionsBasedRegion<T extends RegionsBasedRegion<T, R>, R extends Region> extends Region {
-  Collection<R> regions();
+  @NotNull
+  List<R> regions();
 
-  T newRegion(Collection<R> regions);
+  T newRegion(@NotNull List<R> regions);
 
   default T newRegionWithTransformation(Function<R, R> transformation) {
     return newRegion(regions().stream().map(transformation).toList());
@@ -70,5 +73,9 @@ public interface RegionsBasedRegion<T extends RegionsBasedRegion<T, R>, R extend
   @NotNull
   default T expanded(double offset, Direction.Type type) {
     return newRegionWithTransformation(input -> (R) input.expanded(offset, type));
+  }
+
+  static <R extends Region, T extends RegionsBasedRegion<T, R>> RecordCodecBuilder<T, List<R>> regionsCodecField(Codec<R> codec) {
+    return codec.listOf().fieldOf("regions").forGetter(RegionsBasedRegion::regions);
   }
 }

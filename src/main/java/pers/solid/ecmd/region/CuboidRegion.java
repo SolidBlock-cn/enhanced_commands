@@ -1,23 +1,21 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.NbtUtil;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -153,12 +151,7 @@ public record CuboidRegion(Box box) implements Region {
     return box;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("from", NbtUtil.fromVec3d(new Vec3d(box.minX, box.minY, box.minZ)));
-    nbtCompound.put("to", NbtUtil.fromVec3d(new Vec3d(box.maxX, box.maxY, box.maxZ)));
-    nbtCompound.putBoolean("block", true);
-  }
+  public static final Codec<CuboidRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(r -> new Vec3d(r.box.minX, r.box.minY, r.box.minZ)), Vec3d.CODEC.fieldOf("to").forGetter(r -> new Vec3d(r.box.maxX, r.box.maxY, r.box.maxZ))).apply(i, CuboidRegion::new));
 
   public enum Type implements RegionType<Region> {
     CUBOID_TYPE;
@@ -179,13 +172,8 @@ public record CuboidRegion(Box box) implements Region {
     }
 
     @Override
-    public @NotNull Region fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final boolean block = nbtCompound.getBoolean("block");
-      if (block) {
-        return new BlockCuboidRegion(NbtHelper.toBlockPos(nbtCompound.getCompound("from")), NbtHelper.toBlockPos(nbtCompound.getCompound("to")));
-      } else {
-        return new CuboidRegion(NbtUtil.toVec3d(nbtCompound.getCompound("from")), NbtUtil.toVec3d(nbtCompound.getCompound("to")));
-      }
+    public @NotNull Codec<Region> getCodec() {
+      return Codec.BOOL.dispatch("block", r -> r instanceof BlockCuboidRegion, isBlock -> isBlock ? BlockCuboidRegion.CODEC : CuboidRegion.CODEC);
     }
   }
 

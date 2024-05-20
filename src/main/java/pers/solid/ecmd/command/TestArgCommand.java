@@ -340,10 +340,10 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("redeserialize")
             .executes(context -> {
               final Region region = RegionArgumentType.getRegion(context, "region");
-              final NbtCompound nbt = region.createNbt();
+              final NbtElement nbt = region.createNbt();
               CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
               try {
-                final Region reDeserialize = Region.fromNbt(nbt, context.getSource().getWorld());
+                final Region reDeserialize = Region.fromNbt(nbt);
                 final boolean b = region.equals(reDeserialize);
                 CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
                 return BooleanUtils.toInteger(b);

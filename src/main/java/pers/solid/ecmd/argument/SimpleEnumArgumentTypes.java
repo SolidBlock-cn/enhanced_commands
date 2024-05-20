@@ -29,9 +29,9 @@ public final class SimpleEnumArgumentTypes {
     }
   }
 
-  public static final class OutlineTypeArgumentType extends StringIdentifiableArgumentType<OutlineRegion.OutlineTypes> {
+  public static final class OutlineTypeArgumentType extends StringIdentifiableArgumentType<OutlineRegion.OutlineType> {
     public OutlineTypeArgumentType() {
-      super(ImmutableList.copyOf(OutlineRegion.OutlineTypes.values()), OutlineRegion.OutlineTypes.CODEC, OutlineRegion.OutlineTypes::getDisplayName);
+      super(ImmutableList.copyOf(OutlineRegion.OutlineType.values()), OutlineRegion.OutlineType.CODEC, OutlineRegion.OutlineType::getDisplayName);
     }
   }
 

@@ -2,26 +2,27 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
-public record UnionRegion(Collection<Region> regions) implements RegionsBasedRegion<UnionRegion, Region> {
+public record UnionRegion(@NotNull List<Region> regions) implements RegionsBasedRegion<UnionRegion, Region> {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return regions.stream().anyMatch(region -> region.contains(vec3d));
@@ -77,14 +78,11 @@ public record UnionRegion(Collection<Region> regions) implements RegionsBasedReg
   }
 
   @Override
-  public UnionRegion newRegion(Collection<Region> regions) {
+  public UnionRegion newRegion(@NotNull List<Region> regions) {
     return new UnionRegion(regions);
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("regions", NbtUtil.fromIterable(regions, Region::createNbt));
-  }
+  public static final Codec<UnionRegion> CODEC = RecordCodecBuilder.create(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, UnionRegion::new));
 
   public enum Type implements RegionType<UnionRegion> {
     UNION_TYPE;
@@ -105,8 +103,8 @@ public record UnionRegion(Collection<Region> regions) implements RegionsBasedReg
     }
 
     @Override
-    public @NotNull UnionRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new UnionRegion(NbtUtil.toImmutableList(nbtCompound.getList("regions", NbtElement.COMPOUND_TYPE), nbtCompound1 -> Region.fromNbt(nbtCompound1, world)));
+    public @NotNull Codec<UnionRegion> getCodec() {
+      return CODEC;
     }
   }
 

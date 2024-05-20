@@ -5,17 +5,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.RotationArgumentType;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.*;
-import net.minecraft.world.World;
-import org.apache.commons.lang3.Range;
 import org.apache.commons.lang3.function.FailableBiFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,21 +49,22 @@ import java.util.function.Function;
  * @param radius 圆的半径，是一个相对向量。
  * @param center 圆的中心。
  * @param axis   旋转轴，通常应该要和 {@code radius} 垂直。
- * @param range  弧的范围，使用弧度制。完整的圆即为 0 到 2π。
+ * @param minAngle 初始旋转角。
+ * @param maxAngle 终止旋转角。
  */
-public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range<Double> range) implements Curve {
-  public static final Range<Double> FULL_TURN_RANGE = Range.between(0d, Math.PI * 2d);
-
+public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngle, double maxAngle) implements Curve {
+  public static final double FULL_MIN = 0;
+  public static final double FULL_MAX = 2d * Math.PI;
   @Override
   public @NotNull Iterator<Vec3d> iteratePoints(Number interval) {
     return new AbstractIterator<>() {
       final double c = 2 * Math.PI * radius.length();
       private final Vector3d radiusVec = new Vector3d(radius.x, radius.y, radius.z);
-      private final AxisAngle4d axisAngle4d = new AxisAngle4d(range.getMinimum(), axis.x, axis.y, axis.z);
+      private final AxisAngle4d axisAngle4d = new AxisAngle4d(minAngle, axis.x, axis.y, axis.z);
 
       @Override
       protected Vec3d computeNext() {
-        if (axisAngle4d.angle > range.getMaximum()) {
+        if (axisAngle4d.angle > maxAngle) {
           return endOfData();
         }
         radiusVec.set(radius.x, radius.y, radius.z);
@@ -77,27 +77,27 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
 
   @Override
   public double length() {
-    return radius.length() * (range.getMaximum() - range.getMinimum());
+    return radius.length() * (maxAngle - minAngle);
   }
 
   @Override
   public @NotNull CircleCurve transformed(Function<Vec3d, Vec3d> transformation) {
-    return new CircleCurve(radius, transformation.apply(center), axis, range);
+    return new CircleCurve(radius, transformation.apply(center), axis, minAngle, maxAngle);
   }
 
   @Override
   public @NotNull CircleCurve moved(@NotNull Vec3d relativePos) {
-    return new CircleCurve(radius, center.add(relativePos), axis, range);
+    return new CircleCurve(radius, center.add(relativePos), axis, minAngle, maxAngle);
   }
 
   @Override
   public @NotNull CircleCurve rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
-    return new CircleCurve(GeoUtil.rotate(radius, blockRotation, Vec3d.ZERO), GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(axis, blockRotation, Vec3d.ZERO), range);
+    return new CircleCurve(GeoUtil.rotate(radius, blockRotation, Vec3d.ZERO), GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(axis, blockRotation, Vec3d.ZERO), minAngle,maxAngle);
   }
 
   @Override
   public @NotNull CircleCurve mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
-    return new CircleCurve(GeoUtil.mirror(radius, axis, Vec3d.ZERO), GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.axis, axis, Vec3d.ZERO), range);
+    return new CircleCurve(GeoUtil.mirror(radius, axis, Vec3d.ZERO), GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.axis, axis, Vec3d.ZERO), minAngle,maxAngle);
   }
 
   @Override
@@ -105,16 +105,16 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
     if (axis.subtract(0, 1, 0).equals(Vec3d.ZERO)) {
       // axis 是 y 轴上的单位向量
       if (radius.subtract(1, 0, 0).equals(Vec3d.ZERO)) {
-        if (range.equals(FULL_TURN_RANGE)) {
+        if (minAngle == FULL_MIN && maxAngle == FULL_MAX) {
           // 表示一个最简单的旋转，绕 y 轴正方向，从 x 正方向开始旋转一周
           return "circle(%s at %s)".formatted(radius.y, StringUtil.wrapPosition(center));
         } else {
           // 表示绕 y 轴正方向，从 x 正方向开始旋转一个特定的范围
-          return "circle(%s at %s ranging %s)".formatted(radius.y, StringUtil.wrapPosition(center), wrapRadRange(range));
+          return "circle(%s at %s ranging %s)".formatted(radius.y, StringUtil.wrapPosition(center), wrapRadRange(minAngle, maxAngle));
         }
       }
     }
-    if (range.equals(FULL_TURN_RANGE)) {
+    if (minAngle == FULL_MIN && maxAngle == FULL_MAX) {
       // 这种情况下，由于本来就是旋转一整周，因此没有必要指定开始坐标。
       if (radius.dotProduct(axis) == 0) {
         // 半径向量和轴向量垂直。
@@ -123,7 +123,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
         return "circle(from %s at %s around %s)".formatted(wrapRadius(radius), StringUtil.wrapPosition(center), wrapVector(axis));
       }
     } else {
-      return "circle(from %s at %s around %s ranging %s)".formatted(wrapRadius(radius), StringUtil.wrapPosition(center), wrapVector(axis), wrapRadRange(range));
+      return "circle(from %s at %s around %s ranging %s)".formatted(wrapRadius(radius), StringUtil.wrapPosition(center), wrapVector(axis), wrapRadRange(minAngle, maxAngle));
     }
   }
 
@@ -154,11 +154,11 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
     return Type.INSTANCE;
   }
 
-  public static String wrapRadRange(Range<? extends Number> range) {
-    if (range.getMinimum().doubleValue() == 0) {
-      return range.getMaximum().toString() + "rad";
+  public static String wrapRadRange(double minAngle, double maxAngle) {
+    if (minAngle == 0) {
+      return maxAngle + "rad";
     } else {
-      return range.getMinimum().toString() + "rad.." + range.getMinimum().toString() + "rad";
+      return minAngle + "rad.." + minAngle + "rad";
     }
   }
 
@@ -170,29 +170,15 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
     return StringUtil.wrapPosition(vec3d);
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("radius", NbtUtil.fromVec3d(radius));
-    nbtCompound.put("center", NbtUtil.fromVec3d(center));
-    nbtCompound.put("axis", NbtUtil.fromVec3d(axis));
-    nbtCompound.put("range", Util.make(new NbtCompound(), c -> {
-      c.putDouble("min", range.getMinimum());
-      c.putDouble("max", range.getMaximum());
-    }));
-  }
+
+  public static final Codec<CircleCurve> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3d.CODEC.fieldOf("radius").forGetter(CircleCurve::radius), Vec3d.CODEC.fieldOf("center").forGetter(CircleCurve::center), Vec3d.CODEC.fieldOf("axis").forGetter(CircleCurve::axis), Codec.DOUBLE.fieldOf("minAngle").forGetter(CircleCurve::minAngle), Codec.DOUBLE.fieldOf("maxAngle").forGetter(CircleCurve::maxAngle)).apply(i, CircleCurve::new));
 
   public enum Type implements CurveType<CircleCurve> {
     INSTANCE;
 
     @Override
-    public @NotNull CircleCurve fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final NbtCompound range = nbtCompound.getCompound("range");
-      return new CircleCurve(
-          NbtUtil.toVec3d(nbtCompound.getCompound("radius")),
-          NbtUtil.toVec3d(nbtCompound.getCompound("center")),
-          NbtUtil.toVec3d(nbtCompound.getCompound("axis")),
-          Range.between(range.getDouble("min"), range.getDouble("max"))
-      );
+    public @NotNull Codec<CircleCurve> getCodec() {
+      return CODEC;
     }
   }
 
@@ -214,7 +200,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
     private @Nullable Either<Double, Function<ServerCommandSource, Vec3d>> radius;
     private @Nullable PosArgument center;
     private @Nullable FailableBiFunction<ServerCommandSource, Vec3d, Vec3d, CommandSyntaxException> around;
-    private @Nullable Range<Double> range;
+    private @Nullable DoubleDoublePair range;
 
     @Override
     public CurveArgument<CircleCurve> getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
@@ -234,7 +220,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
           }
           return crossProduct.multiply(d);
         }, f -> f.apply(source));
-        return new CircleCurve(radius, absoluteCenter, around, range == null ? FULL_TURN_RANGE : range);
+        return new CircleCurve(radius, absoluteCenter, around, range == null ? FULL_MIN:range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
       };
     }
 
@@ -323,7 +309,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
           }
         }
       } else if ("ranging".equals(unquotedString)) {
-        if (range != null) {
+        if (range == null) {
           parser.reader.setCursor(cursorBeforeKeyword);
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
         }
@@ -337,7 +323,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
       return false;
     }
 
-    private Range<Double> parseAngleRange(SuggestedParser parser) throws CommandSyntaxException {
+    private DoubleDoublePair parseAngleRange(SuggestedParser parser) throws CommandSyntaxException {
       final double firstAngle = parser.parseAndSuggestAngle(true);
       parser.suggestionProviders.clear();
       final StringReader reader = parser.reader;
@@ -348,10 +334,10 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, @NotNull Range
         reader.skipWhitespace();
         final double secondAngle = parser.parseAndSuggestAngle(true);
         parser.suggestionProviders.clear();
-        return Range.between(firstAngle, secondAngle);
+        return DoubleDoublePair.of(firstAngle, secondAngle);
       } else {
         reader.setCursor(cursorBeforeWhitespace);
-        return Range.between(0d, firstAngle);
+        return DoubleDoublePair.of(0d, firstAngle);
       }
     }
 

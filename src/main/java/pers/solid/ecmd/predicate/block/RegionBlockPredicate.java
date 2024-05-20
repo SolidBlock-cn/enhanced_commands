@@ -49,7 +49,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
 
     @Override
     public @NotNull RegionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new RegionBlockPredicate(Region.fromNbt(nbtCompound.getCompound("region"), world));
+      return new RegionBlockPredicate(Region.fromNbt(nbtCompound.getCompound("region")));
     }
   }
 

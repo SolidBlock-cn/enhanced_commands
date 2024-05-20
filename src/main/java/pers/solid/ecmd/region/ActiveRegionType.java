@@ -1,12 +1,13 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Decoder;
+import com.mojang.serialization.Encoder;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.Parser;
@@ -34,8 +35,10 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgumen
     }
   }
 
+  private static final Codec<Region> CODEC = Codec.of(Encoder.error("Cannot encode"), Decoder.error("Region NBT cannot hold this type of region"));
+
   @Override
-  public @NotNull Region fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-    throw new UnsupportedOperationException("Region NBT cannot hold this type of region");
+  public @NotNull Codec<Region> getCodec() {
+    return CODEC;
   }
 }

@@ -2,29 +2,26 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record IntersectRegion(Collection<Region> regions) implements RegionsBasedRegion<IntersectRegion, Region> {
+public record IntersectRegion(@NotNull List<Region> regions) implements RegionsBasedRegion<IntersectRegion, Region> {
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return regions.stream().allMatch(region -> region.contains(vec3d));
@@ -72,7 +69,7 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
 
   @Override
   public @NotNull String asString() {
-    return "intersect(" + String.join(", ", Collections2.transform(regions, Region::asString) + ")");
+    return "intersect(" + String.join(", ", Collections2.transform(regions, Region::asString))+ ")";
   }
 
   @Override
@@ -92,14 +89,11 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
   }
 
   @Override
-  public IntersectRegion newRegion(Collection<Region> regions) {
+  public IntersectRegion newRegion(@NotNull List<Region> regions) {
     return new IntersectRegion(regions);
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("regions", NbtUtil.fromIterable(regions, Region::createNbt));
-  }
+  public static final Codec<IntersectRegion> CODEC = RecordCodecBuilder.create(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, IntersectRegion::new));
 
   public enum Type implements RegionType<IntersectRegion> {
     INTERSECT_TYPE;
@@ -120,8 +114,8 @@ public record IntersectRegion(Collection<Region> regions) implements RegionsBase
     }
 
     @Override
-    public @NotNull IntersectRegion fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new IntersectRegion(NbtUtil.toImmutableList(nbtCompound.getList("regions", NbtElement.COMPOUND_TYPE), nbtCompound1 -> Region.fromNbt(nbtCompound1, world)));
+    public @NotNull Codec<IntersectRegion> getCodec() {
+      return CODEC;
     }
   }
 

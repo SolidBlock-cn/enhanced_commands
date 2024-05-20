@@ -1,6 +1,7 @@
 package pers.solid.ecmd.regionselection;
 
-import com.google.common.base.Preconditions;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Decoder;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -136,22 +137,24 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
   @Contract(mutates = "this")
   void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world);
 
-  @Override
-  default void writeIdentifyingData(@NotNull NbtCompound nbtCompound) {
-    RegionBasedRegion.super.writeIdentifyingData(nbtCompound);
-    nbtCompound.putString("selection_type", Preconditions.checkNotNull(RegionSelectionType.REGISTRY.getId(getSelectionType()), "not registered").toString());
-  }
+  void writeNbt(@NotNull NbtCompound nbtCompound);
+
+  Codec<RegionSelection> CODEC = Codec.of(Region.CODEC.comap(RegionSelection::region), Decoder.error("Decoding region selection is not supported"));
 
   enum Type implements RegionType<RegionSelection> {
     INSTANCE;
 
-    @Override
     public @NotNull RegionSelection fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final Identifier identifier = new Identifier(nbtCompound.getString("selection_type"));
       final RegionSelectionType regionSelectionType = RegionSelectionType.REGISTRY.getOrEmpty(identifier).orElseThrow();
       final RegionSelection regionSelection = regionSelectionType.createRegionSelection();
       regionSelection.fromNbt(nbtCompound, world);
       return regionSelection;
+    }
+
+    @Override
+    public @NotNull Codec<RegionSelection> getCodec() {
+      return CODEC;
     }
   }
 }
