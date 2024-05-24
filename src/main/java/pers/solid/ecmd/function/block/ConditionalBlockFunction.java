@@ -60,7 +60,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     @Override
     public @NotNull ConditionalBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new ConditionalBlockFunction(
-          BlockPredicate.fromNbt(nbtCompound.getCompound("if"), world),
+          BlockPredicate.fromNbt(nbtCompound.getCompound("if")),
           BlockFunction.fromNbt(nbtCompound.getCompound("then"), world),
           nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else"), world) : null
       );

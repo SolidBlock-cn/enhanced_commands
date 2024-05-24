@@ -1,8 +1,9 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -10,7 +11,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
@@ -23,33 +23,36 @@ import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.Parser;
+import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TextUtil;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * @see BlockArgumentParser#parseTagId()
  */
-public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @UnmodifiableView Collection<PropertyNamePredicate> propertyNamePredicates) implements BlockPredicate {
+public record TagBlockPredicate(@NotNull TagKey<Block> tags, @NotNull @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    if (propertyNamePredicates.isEmpty()) {
-      return "#" + blockTag.id().toString();
+    if (properties.isEmpty()) {
+      return "#" + tags.id().toString();
     } else {
-      return "#" + blockTag.id().toString() + "[" + propertyNamePredicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + "]";
+      return "#" + tags.id().toString() + "[" + properties.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + "]";
     }
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
-    final boolean inTag = blockState.isIn(blockTag);
+    final boolean inTag = blockState.isIn(tags);
     if (!inTag) {
       return false;
     }
-    for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
+    for (PropertyNamePredicate propertyNamePredicate : properties) {
       if (!propertyNamePredicate.test(blockState))
         return false;
     }
@@ -59,14 +62,14 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
-    final boolean inTag = blockState.isIn(blockTag);
+    final boolean inTag = blockState.isIn(tags);
     boolean successes = true;
     ImmutableList.Builder<Text> messages = new ImmutableList.Builder<>();
     if (!inTag) {
       successes = false;
-      messages.add(Text.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(Styles.ACTUAL), Text.literal("#" + blockTag.id().toString()).styled(Styles.EXPECTED)).styled(Styles.FALSE));
+      messages.add(Text.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(Styles.ACTUAL), Text.literal("#" + tags.id().toString()).styled(Styles.EXPECTED)).styled(Styles.FALSE));
     }
-    for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
+    for (PropertyNamePredicate propertyNamePredicate : properties) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, cachedBlockPosition.getBlockPos());
       messages.addAll(testResult.descriptions());
       if (!testResult.successes()) {
@@ -74,7 +77,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
       }
     }
     if (successes) {
-      messages.add(Text.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(Styles.TARGET), Text.literal("#" + blockTag.id().toString()).styled(Styles.EXPECTED)).styled(Styles.TRUE));
+      messages.add(Text.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), blockState.getBlock().getName().styled(Styles.TARGET), Text.literal("#" + tags.id().toString()).styled(Styles.EXPECTED)).styled(Styles.TRUE));
     }
     return new TestResult(successes, messages.build());
   }
@@ -84,15 +87,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
     return BlockPredicateTypes.TAG;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("tag", blockTag.id().toString());
-    if (!propertyNamePredicates.isEmpty()) {
-      final NbtList nbtList = new NbtList();
-      nbtCompound.put("properties", nbtList);
-      nbtList.addAll(Collections2.transform(propertyNamePredicates, NbtConvertible::createNbt));
-    }
-  }
+  public static final Codec<TagBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(TagBlockPredicate::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockPredicate::tags), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
 
   public enum Type implements BlockPredicateType<TagBlockPredicate>, Parser<BlockPredicateArgument> {
     TAG_TYPE;
@@ -105,6 +100,11 @@ public record TagBlockPredicate(@NotNull TagKey<Block> blockTag, @NotNull @Unmod
           .map(nbtElement -> PropertyNamePredicate.fromNbt((NbtCompound) nbtElement))
           .toList();
       return new TagBlockPredicate(tag, predicates);
+    }
+
+    @Override
+    public @NotNull Codec<TagBlockPredicate> getCodec() {
+      return CODEC;
     }
 
     @Override

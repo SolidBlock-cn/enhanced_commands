@@ -1,6 +1,8 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -39,10 +41,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
     return BlockPredicateTypes.REGION;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("region", region.createNbt());
-  }
+  public static final Codec<RegionBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(RegionBlockPredicate::new, Region.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
 
   public enum Type implements BlockPredicateType<RegionBlockPredicate> {
     REGION_TYPE;
@@ -50,6 +49,11 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
     @Override
     public @NotNull RegionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new RegionBlockPredicate(Region.fromNbt(nbtCompound.getCompound("region")));
+    }
+
+    @Override
+    public @NotNull Codec<RegionBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 

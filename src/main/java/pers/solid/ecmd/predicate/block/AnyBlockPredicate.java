@@ -3,11 +3,12 @@ package pers.solid.ecmd.predicate.block;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -18,10 +19,9 @@ import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-public record AnyBlockPredicate(Collection<BlockPredicate> blockPredicates) implements BlockPredicate {
+public record AnyBlockPredicate(List<BlockPredicate> blockPredicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     return "any(" + String.join(", ", Collections2.transform(blockPredicates, ExpressionConvertible::asString)) + ")";
@@ -55,13 +55,6 @@ public record AnyBlockPredicate(Collection<BlockPredicate> blockPredicates) impl
     return BlockPredicateTypes.ANY;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    final NbtList nbtList = new NbtList();
-    nbtCompound.put("predicates", nbtList);
-    nbtList.addAll(Collections2.transform(blockPredicates, BlockPredicate::createNbt));
-  }
-
   public record Parser(List<BlockPredicateArgument> blockPredicates) implements FunctionParamsParser<BlockPredicateArgument> {
     public Parser() {
       this(new ArrayList<>());
@@ -79,12 +72,19 @@ public record AnyBlockPredicate(Collection<BlockPredicate> blockPredicates) impl
     }
   }
 
+  public static final Codec<AnyBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("block_predicates").forGetter(AnyBlockPredicate::blockPredicates)).apply(i, AnyBlockPredicate::new));
+
   public enum Type implements BlockPredicateType<AnyBlockPredicate> {
     ANY_TYPE;
 
     @Override
     public @NotNull AnyBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new AnyBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement, world)).toList());
+      return new AnyBlockPredicate(nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE).stream().map(nbtElement -> BlockPredicate.fromNbt((NbtCompound) nbtElement)).toList());
+    }
+
+    @Override
+    public @NotNull Codec<AnyBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 }

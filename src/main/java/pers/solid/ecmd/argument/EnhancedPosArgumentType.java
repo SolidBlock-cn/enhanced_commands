@@ -177,7 +177,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
       Arrays.fill(isRelatives, false);
       boolean[] omitsNumber = new boolean[3];
 
-      // the initial value, which may be modified later
+      // the initial probability, which may be modified later
       boolean isDoublePos = numberType.doubleOnly();
       for (int i = 0; i < 3; i++) {
         if (!reader.canRead()) {
@@ -389,11 +389,11 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
      */
     INT_ONLY,
     /**
-     * Accepts both integer and double value. Pure tilde "~ ~ ~" and tilde with integer valueNames (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative valueNames.
+     * Accepts both integer and double probability. Pure tilde "~ ~ ~" and tilde with integer valueNames (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative valueNames.
      */
     PREFER_INT,
     /**
-     * Accepts both integer and double value. Tilde "~ ~ ~" and local coordinates "^ ^ ^" will be interpreted as double pos.
+     * Accepts both integer and double probability. Tilde "~ ~ ~" and local coordinates "^ ^ ^" will be interpreted as double pos.
      */
     PREFER_DOUBLE,
     /**

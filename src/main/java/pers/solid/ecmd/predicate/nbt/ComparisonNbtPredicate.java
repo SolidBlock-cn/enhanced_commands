@@ -16,6 +16,7 @@ import pers.solid.ecmd.util.TextUtil;
  * </pre>
  */
 public record ComparisonNbtPredicate(Comparator comparator, NbtElement expected) implements NbtPredicate {
+
   @Override
   public @NotNull String asString() {
     return comparator.asString() + " " + TextUtil.toSpacedStringNbt(expected);
@@ -46,5 +47,10 @@ public record ComparisonNbtPredicate(Comparator comparator, NbtElement expected)
     } else {
       return false;
     }
+  }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.COMPARISON;
   }
 }

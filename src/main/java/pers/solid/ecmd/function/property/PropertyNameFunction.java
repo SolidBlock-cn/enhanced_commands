@@ -22,7 +22,7 @@ public interface PropertyNameFunction extends ExpressionConvertible, NbtConverti
     } else if ("~".equals(property)) {
       return new AllOriginalPropertyNameFunctions(new HashSet<>());
     }
-    final String value = nbtCompound.getString("value");
+    final String value = nbtCompound.getString("probability");
     final boolean must = nbtCompound.getBoolean("must");
     if ("~".equals(value)) {
       return new BypassingPropertyNameFunction(property, must);

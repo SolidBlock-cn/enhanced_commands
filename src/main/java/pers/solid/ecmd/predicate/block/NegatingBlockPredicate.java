@@ -1,6 +1,8 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -18,7 +20,11 @@ import java.util.List;
 public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "!" + blockPredicate.asString();
+    if (blockPredicate instanceof NegatingBlockPredicate) {
+      return "!(" + blockPredicate.asString() + ")";
+    } else {
+      return "!" + blockPredicate.asString();
+    }
   }
 
   @Override
@@ -41,18 +47,19 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
     return BlockPredicateTypes.NEGATING;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("predicate", blockPredicate.createNbt());
-  }
-
+  public static final Codec<NegatingBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(NegatingBlockPredicate::new, BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(NegatingBlockPredicate::blockPredicate)));
 
   public enum Type implements BlockPredicateType<NegatingBlockPredicate>, Parser<BlockPredicateArgument> {
     NEGATING_TYPE;
 
     @Override
     public @NotNull NegatingBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new NegatingBlockPredicate(BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world));
+      return new NegatingBlockPredicate(BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
+    }
+
+    @Override
+    public @NotNull Codec<NegatingBlockPredicate> getCodec() {
+      return CODEC;
     }
 
     @Override

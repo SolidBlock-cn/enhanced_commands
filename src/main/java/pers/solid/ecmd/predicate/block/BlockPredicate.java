@@ -1,26 +1,27 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.function.Predicate;
 
-public interface BlockPredicate extends Predicate<CachedBlockPosition>, ExpressionConvertible, NbtConvertible, BlockPredicateArgument {
+public interface BlockPredicate extends Predicate<CachedBlockPosition>, ExpressionConvertible, BlockPredicateArgument {
+  Codec<BlockPredicate> CODEC = BlockPredicateType.REGISTRY.getCodec().dispatch(BlockPredicate::getType, BlockPredicateType::getCodec);
+
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
@@ -50,20 +51,15 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
   @NotNull
   BlockPredicateType<?> getType();
 
-  @Override
-  default void writeIdentifyingData(@NotNull NbtCompound nbtCompound) {
-    final BlockPredicateType<?> type = getType();
-    final Identifier id = BlockPredicateType.REGISTRY.getId(type);
-    nbtCompound.putString("type", Preconditions.checkNotNull(id, "Unknown block predicate type: %s", type).toString());
-  }
-
   /**
    * 从 NBT 中获取一个 BlockPredicate 对象。会先从这个 NBT 中获取 type，并从注册表中获取。如果这个 type 不正确，或者里面的参数不正确，会直接抛出错误。
    */
-  static @NotNull BlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-    final BlockPredicateType<?> type = BlockPredicateType.REGISTRY.get(new Identifier(nbtCompound.getString("type")));
-    Preconditions.checkNotNull(type, "Unknown block predicate type: %s", type);
-    return type.fromNbt(nbtCompound, world);
+  static @NotNull BlockPredicate fromNbt(@NotNull NbtElement nbtCompound) {
+    return Util.getResult(CODEC.decode(NbtOps.INSTANCE, nbtCompound), IllegalStateException::new).getFirst();
+  }
+
+  default NbtElement createNbt() {
+    return Util.getResult(CODEC.encodeStart(NbtOps.INSTANCE, this), IllegalStateException::new);
   }
 
   @Override

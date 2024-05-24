@@ -52,7 +52,7 @@ public final class StateUtil {
     final Optional<T> parse = property.parse(valueName);
     if (parse.isEmpty()) {
       if (must) {
-        throw new IllegalArgumentException("property value");
+        throw new IllegalArgumentException("property probability");
       } else {
         return state;
       }

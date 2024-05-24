@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -50,10 +52,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     return BlockPredicateTypes.NBT;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("nbtPredicate", nbtPredicate.asString());
-  }
+  public static final Codec<NbtBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt_predicate").forGetter(NbtBlockPredicate::nbtPredicate)));
 
   public enum Type implements BlockPredicateType<NbtBlockPredicate>, Parser<BlockPredicateArgument> {
     NBT_TYPE;
@@ -66,6 +65,11 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
       } catch (CommandSyntaxException e) {
         throw new IllegalArgumentException("Cannot parse nbt: " + s, e);
       }
+    }
+
+    @Override
+    public @NotNull Codec<NbtBlockPredicate> getCodec() {
+      return CODEC;
     }
 
     @Override

@@ -42,15 +42,15 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 /**
  * <p>The command used to generate random valueNames. Some usages:</p>
  * <ul>
- *   <li><code>/rand</code> - rand float value between 0 and 1.</li>
+ *   <li><code>/rand</code> - rand float probability between 0 and 1.</li>
  *   <li><code>/rand boolean</code> - rand boolean with 0.5 probability of true.</li>
  *   <li><code>/rand boolean <var>probability</var></code> - rand boolean with a specified probability of true.</li>
- *   <li><code>/rand float</code> - rand float value between 0 and 1.</li>
- *   <li><code>/rand float <var>max</var></code> - rand float value between 0 and <var>max</var>.</li>
- *   <li><code>/rand float <var>min</var> <var>max</var></code> - rand float value between <var>min</var> and <var>max</var>.</li>
- *   <li><code>/rand int</code> - rand int value between 0 and 15.</li>
- *   <li><code>/rand int <var>max</var></code> - rand int value between 0 and <var>max</var>.</li>
- *   <li><code>/rand int <var>min</var> <var>max</var></code> - rand int value between <var>min</var> and <var>max</var>.</li>
+ *   <li><code>/rand float</code> - rand float probability between 0 and 1.</li>
+ *   <li><code>/rand float <var>max</var></code> - rand float probability between 0 and <var>max</var>.</li>
+ *   <li><code>/rand float <var>min</var> <var>max</var></code> - rand float probability between <var>min</var> and <var>max</var>.</li>
+ *   <li><code>/rand int</code> - rand int probability between 0 and 15.</li>
+ *   <li><code>/rand int <var>max</var></code> - rand int probability between 0 and <var>max</var>.</li>
+ *   <li><code>/rand int <var>min</var> <var>max</var></code> - rand int probability between <var>min</var> and <var>max</var>.</li>
  */
 public enum RandCommand implements CommandRegistrationCallback {
   INSTANCE;

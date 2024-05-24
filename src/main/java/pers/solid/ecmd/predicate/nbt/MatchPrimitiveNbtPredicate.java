@@ -28,4 +28,9 @@ public record MatchPrimitiveNbtPredicate(NbtElement expected, boolean negated) i
   public boolean test(@NotNull NbtElement nbtElement) {
     return NbtHelper.matches(nbtElement, expected, true) != negated;
   }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.MATCH_PRIMITIVE;
+  }
 }

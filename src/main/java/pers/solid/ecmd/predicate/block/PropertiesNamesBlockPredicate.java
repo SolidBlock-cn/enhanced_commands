@@ -1,13 +1,13 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,26 +18,29 @@ import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.Parser;
+import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @see TagBlockPredicate#propertyNamePredicates
+ * @see TagBlockPredicate#properties
  */
-public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePredicate> propertyNamePredicates) implements BlockPredicate {
+public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate> predicates) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return "[" + propertyNamePredicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(",")) + "]";
+    return predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(",", "[", "]"));
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
-    for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
+    for (PropertyNamePredicate propertyNamePredicate : predicates) {
       if (!propertyNamePredicate.test(blockState))
         return false;
     }
@@ -50,7 +53,7 @@ public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePred
     boolean successes = true;
     List<TestResult> attachments = new ArrayList<>();
     final BlockPos blockPos = cachedBlockPosition.getBlockPos();
-    for (PropertyNamePredicate propertyNamePredicate : propertyNamePredicates) {
+    for (PropertyNamePredicate propertyNamePredicate : predicates) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, blockPos);
       attachments.add(testResult);
       if (!testResult.successes()) {
@@ -71,12 +74,7 @@ public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePred
     return BlockPredicateTypes.PROPERTY_NAMES;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    final NbtList nbtList = new NbtList();
-    nbtCompound.put("predicates", nbtList);
-    nbtList.addAll(Collections2.transform(propertyNamePredicates, NbtConvertible::createNbt));
-  }
+  public static final Codec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("predicate", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
 
   public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate>, Parser<BlockPredicateArgument> {
     PROPERTY_NAMES_TYPE;
@@ -88,6 +86,11 @@ public record PropertiesNamesBlockPredicate(@NotNull Collection<PropertyNamePred
           .map(nbtElement -> PropertyNamePredicate.fromNbt((NbtCompound) nbtElement))
           .toList();
       return new PropertiesNamesBlockPredicate(predicates);
+    }
+
+    @Override
+    public @NotNull Codec<PropertiesNamesBlockPredicate> getCodec() {
+      return CODEC;
     }
 
     @Override

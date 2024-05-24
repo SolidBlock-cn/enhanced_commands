@@ -63,8 +63,8 @@ public enum HealthCommand implements CommandRegistrationCallback {
                                 .executes(context -> executeGetHealth(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), 1, getNbtTarget(context, "target"), getNbtPath(context, "path")))))))))
         .then(literal("set")
             .then(argument("entities", entities())
-                .then(argument("value", floatArg())
-                    .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getFloat(context, "value"))))
+                .then(argument("probability", floatArg())
+                    .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getFloat(context, "probability"))))
                 .then(literal("from")
                     .then(literal("result").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
@@ -100,14 +100,14 @@ public enum HealthCommand implements CommandRegistrationCallback {
             .executes(context -> executeAddHealth(context, Collections.singleton(context.getSource().getEntityOrThrow())))
             .then(argument("entities", entities())
                 .executes(context -> executeAddHealth(context, getEntities(context, "entities")))
-                .then(argument("value", floatArg())
-                    .executes(context -> executeAddHealth(context, getEntities(context, "entities"), getFloat(context, "value"))))))
+                .then(argument("probability", floatArg())
+                    .executes(context -> executeAddHealth(context, getEntities(context, "entities"), getFloat(context, "probability"))))))
         .then(literal("remove")
             .executes(context -> executeRemoveHealth(context, Collections.singleton(context.getSource().getEntityOrThrow())))
             .then(argument("entities", entities())
                 .executes(context -> executeRemoveHealth(context, getEntities(context, "entities")))
-                .then(argument("value", floatArg())
-                    .executes(context -> executeRemoveHealth(context, getEntities(context, "entities"), getFloat(context, "value")))))));
+                .then(argument("probability", floatArg())
+                    .executes(context -> executeRemoveHealth(context, getEntities(context, "entities"), getFloat(context, "probability")))))));
   }
 
   public static final DynamicCommandExceptionType NOT_LIVING = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.health.get.single.not_living", o));

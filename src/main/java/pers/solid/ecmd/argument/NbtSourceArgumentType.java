@@ -65,7 +65,7 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
     return suggestedParser.buildSuggestions(context, builder.createOffset(reader.getCursor()));
   }
 
-  private static final Collection<String> EXAMPLES = List.of("block ~ ~1 ~", "blocks sphere(5) min", "entity @s", "entity Solid", "entity @e[type=pig,limit=1]", "entities @a max", "entities @e random", "store x", "literal {key: value}");
+  private static final Collection<String> EXAMPLES = List.of("block ~ ~1 ~", "blocks sphere(5) min", "entity @s", "entity Solid", "entity @e[type=pig,limit=1]", "entities @a max", "entities @e random", "store x", "literal {key: probability}");
 
   @Override
   public Collection<String> getExamples() {

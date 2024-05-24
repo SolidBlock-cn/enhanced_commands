@@ -6,10 +6,10 @@ import java.awt.*;
 import java.util.function.UnaryOperator;
 
 public final class Styles {
-  private static final Color TARGET_COLOR = new Color(0xDD95F5);
+  private static final Color TARGET_COLOR = new Color(0xF7CAFA);
   private static final Color ACTUAL_COLOR = new Color(0x58B8FF);
-  private static final Color EXPECTED_COLOR = new Color(0x66F6AD);
-  private static final Color RESULT_COLOR = new Color(0x56FFF8);
+  private static final Color EXPECTED_COLOR = new Color(0x66E498);
+  private static final Color RESULT_COLOR = new Color(0xCBEBED);
   /**
    * 命令输出结果中的目标部分的样式。
    */

@@ -95,7 +95,7 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
       }
       reader.expect('=');
       reader.skipWhitespace();
-      // parse value
+      // parse probability
       final ArgumentType<?> argumentType = arguments.get(name);
       if (suggestionProvider != null) {
         final int cursorBeforeParseValue = reader.getCursor();

@@ -6,6 +6,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
@@ -21,6 +23,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
@@ -29,16 +32,18 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
+import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public interface LootConditionBlockPredicate extends BlockPredicate {
   Gson GSON = LootGsons.getConditionGsonBuilder().setLenient().create();
 
-  LootCondition lootCondition();
+  LootCondition lootCondition(CachedBlockPosition cachedBlockPosition);
 
   @Override
   default boolean test(CachedBlockPosition cachedBlockPosition) {
-    final LootCondition lootCondition = lootCondition();
+    final LootCondition lootCondition = lootCondition(cachedBlockPosition);
     final WorldView world = cachedBlockPosition.getWorld();
     if (!(world instanceof final ServerWorld serverWorld)) return false;
     return lootCondition.test(new LootContext.Builder(serverWorld)
@@ -57,14 +62,11 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
   }
 
   record Anonymous(@NotNull LootCondition lootCondition) implements LootConditionBlockPredicate {
+    public static final Codec<Anonymous> CODEC = RecordCodecBuilder.create(i -> i.ap(Anonymous::new, Codecs.JSON_ELEMENT.xmap(jsonElement -> GSON.fromJson(jsonElement, LootCondition.class), GSON::toJsonTree).fieldOf("loot_condition").forGetter(Anonymous::lootCondition)));
+
     @Override
     public @NotNull String asString() {
       return "predicate(" + GSON.toJson(lootCondition) + ")";
-    }
-
-    @Override
-    public void writeNbt(@NotNull NbtCompound nbtCompound) {
-      nbtCompound.putString("predicate", GSON.toJson(lootCondition));
     }
 
     @Override
@@ -75,17 +77,24 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
         return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.loot_condition.anonymous.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos())));
       }
     }
+
+    @Override
+    public LootCondition lootCondition(CachedBlockPosition cachedBlockPosition) {
+      return lootCondition;
+    }
   }
 
-  record Named(@NotNull Identifier identifier, @NotNull LootCondition lootCondition) implements LootConditionBlockPredicate {
-    @Override
-    public @NotNull String asString() {
-      return "predicate(" + identifier + ")";
+  final class Named implements LootConditionBlockPredicate {
+    public static final Codec<Named> CODEC = RecordCodecBuilder.create(i -> i.ap(Named::new, Identifier.CODEC.fieldOf("identifier").forGetter(named -> named.identifier)));
+    private final @NotNull Identifier identifier;
+
+    public Named(@NotNull Identifier identifier) {
+      this.identifier = identifier;
     }
 
     @Override
-    public void writeNbt(@NotNull NbtCompound nbtCompound) {
-      nbtCompound.putString("predicate", identifier.toString());
+    public @NotNull String asString() {
+      return "predicate(" + identifier + ")";
     }
 
     @Override
@@ -96,7 +105,44 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
         return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.loot_condition.named.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(Styles.EXPECTED)));
       }
     }
+
+    private transient WeakReference<LootConditionManager> managerRef = null;
+    private transient LootCondition cached = null;
+
+    @Override
+    public LootCondition lootCondition(CachedBlockPosition cachedBlockPosition) {
+      if (cachedBlockPosition.getWorld() instanceof ServerWorld serverWorld) {
+        final LootConditionManager predicateManager = serverWorld.getServer().getPredicateManager();
+        if (managerRef != null && managerRef.refersTo(predicateManager) && cached != null) {
+          return cached;
+        }
+        managerRef = new WeakReference<>(predicateManager);
+        return cached = predicateManager.get(identifier);
+      }
+      throw new UnsupportedOperationException("LootConditionBlockPredicate with a predicate ID can only be run on the server!");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (obj == this) return true;
+      if (obj == null || obj.getClass() != this.getClass()) return false;
+      var that = (Named) obj;
+      return Objects.equals(this.identifier, that.identifier);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(identifier);
+    }
+
+    @Override
+    public String toString() {
+      return "Named[" +
+          "identifier=" + identifier + ']';
+    }
   }
+
+  Codec<LootConditionBlockPredicate> CODEC = Codec.BOOL.dispatch("is_anonymous", p -> p instanceof Anonymous, b -> b ? Anonymous.CODEC : Named.CODEC);
 
   enum Type implements BlockPredicateType<LootConditionBlockPredicate> {
     LOOT_CONDITION_TYPE;
@@ -110,16 +156,13 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
         return new Anonymous(GSON.fromJson(predicateString, LootCondition.class));
       } else {
         final Identifier identifier = new Identifier(predicateString);
-        if (world instanceof ServerWorld serverWorld) {
-          final LootCondition lootCondition = serverWorld.getServer().getPredicateManager().get(identifier);
-          if (lootCondition == null) {
-            throw new IllegalArgumentException("Unknown loot table predicate: " + identifier);
-          }
-          return new Named(identifier, lootCondition);
-        } else {
-          throw new IllegalStateException("ServerWorld required");
-        }
+        return new Named(identifier);
       }
+    }
+
+    @Override
+    public @NotNull Codec<LootConditionBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 
@@ -147,7 +190,7 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
             parser.reader.setCursor(cursorBeforeId);
             throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parser.reader, id.toString()), cursorAfterId);
           }
-          return new Named(id, lootCondition);
+          return new Named(id);
         };
       } else if (anonymous != null) {
         return new Anonymous(anonymous);

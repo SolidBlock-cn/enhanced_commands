@@ -28,7 +28,7 @@ public class KeywordArgs {
     if (values.containsKey(name)) {
       return (T) values.get(name);
     }
-    // The value is not provided
+    // The probability is not provided
     if (type.defaultValues().containsKey(name)) {
       return (T) type.defaultValues().get(name);
     } else if (type.requiredArguments().contains(name)) {

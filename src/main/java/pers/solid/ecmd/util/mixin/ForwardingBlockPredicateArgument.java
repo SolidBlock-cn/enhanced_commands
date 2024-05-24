@@ -19,7 +19,7 @@ public class ForwardingBlockPredicateArgument implements BlockPredicateArgumentT
 
   @Override
   public boolean hasNbt() {
-    return modBlockPredicate instanceof NbtBlockPredicate || modBlockPredicate instanceof PropertiesNbtCombinationBlockPredicate p && p.nbtBlockPredicate() != null;
+    return modBlockPredicate instanceof NbtBlockPredicate || modBlockPredicate instanceof PropertiesNbtCombinationBlockPredicate p && p.nbt() != null;
   }
 
   @Override

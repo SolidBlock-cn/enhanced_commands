@@ -1,5 +1,6 @@
 package pers.solid.ecmd.argument;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.block.Block;
@@ -109,7 +110,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     if (values.size() == 1) {
       propertyPredicates.add(new ComparisonPropertyPredicate<>(property, comparator, values.iterator().next()));
     } else {
-      propertyPredicates.add(new MultiValuePropertyPredicate<>(property, values, comparator == Comparator.NE));
+      propertyPredicates.add(new MultiValuePropertyPredicate<>(property, ImmutableList.copyOf(values), comparator == Comparator.NE));
     }
   }
 
@@ -197,7 +198,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
     if (values.size() == 1) {
       propertyNamePredicates.add(new ComparisonPropertyNamePredicate(propertyName, comparator, values.iterator().next()));
     } else {
-      propertyNamePredicates.add(new MultiValuePropertyNamePredicate(propertyName, values, comparator == Comparator.NE));
+      propertyNamePredicates.add(new MultiValuePropertyNamePredicate(propertyName, ImmutableList.copyOf(values), comparator == Comparator.NE));
     }
     reader.skipWhitespace();
   }

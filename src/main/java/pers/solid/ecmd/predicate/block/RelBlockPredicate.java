@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -44,12 +46,6 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     return "rel(%s %s %s, %s)".formatted(relPos.getX(), relPos.getY(), relPos.getZ(), predicate.asString());
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putIntArray("pos", new int[]{relPos.getX(), relPos.getY(), relPos.getZ()});
-    nbtCompound.put("predicate", predicate.createNbt());
-  }
-
   public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
     private Function<ServerCommandSource, Vec3i> relPos;
     private BlockPredicateArgument blockPredicate;
@@ -81,6 +77,8 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
   }
 
+  public static final Codec<RelBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(RelBlockPredicate::new, Vec3i.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
+
   public enum Type implements BlockPredicateType<RelBlockPredicate> {
     REL_TYPE;
 
@@ -90,8 +88,13 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
       if (intArray.length != 3) {
         throw new IllegalArgumentException("The length of integer array 'pos' must be 3.");
       } else {
-        return new RelBlockPredicate(new Vec3i(intArray[0], intArray[1], intArray[2]), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world));
+        return new RelBlockPredicate(new Vec3i(intArray[0], intArray[1], intArray[2]), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
       }
+    }
+
+    @Override
+    public @NotNull Codec<RelBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 }

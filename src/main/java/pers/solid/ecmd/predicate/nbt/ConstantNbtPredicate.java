@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 
@@ -7,6 +8,7 @@ public enum ConstantNbtPredicate implements NbtPredicate {
   TRUE(true),
   FALSE(false);
 
+  public static final Codec<ConstantNbtPredicate> CODEC = Codec.BOOL.xmap(b -> b ? TRUE : FALSE, v -> v == TRUE);
   private final boolean value;
 
   ConstantNbtPredicate(boolean value) {
@@ -26,6 +28,11 @@ public enum ConstantNbtPredicate implements NbtPredicate {
   @Override
   public boolean test(@NotNull NbtElement nbtElement) {
     return value;
+  }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.CONSTANT;
   }
 
   public static ConstantNbtPredicate of(boolean value) {

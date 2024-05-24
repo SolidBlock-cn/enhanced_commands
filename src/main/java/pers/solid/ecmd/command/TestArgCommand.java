@@ -6,18 +6,20 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.command.argument.NbtElementArgumentType;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.command.argument.Vec3ArgumentType;
+import net.minecraft.command.argument.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.visitor.NbtTextFormatter;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.command.CommandManager;
@@ -25,11 +27,14 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
@@ -37,6 +42,7 @@ import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
@@ -44,8 +50,16 @@ import pers.solid.ecmd.util.bridge.CommandBridge;
 import java.util.HashSet;
 import java.util.Set;
 
+import static net.minecraft.command.argument.NbtCompoundArgumentType.getNbtCompound;
+import static net.minecraft.command.argument.NbtElementArgumentType.getNbtElement;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static pers.solid.ecmd.argument.BlockFunctionArgumentType.getBlockFunction;
+import static pers.solid.ecmd.argument.BlockPredicateArgumentType.getBlockPredicate;
+import static pers.solid.ecmd.argument.EnhancedPosArgumentType.getPosArgument;
+import static pers.solid.ecmd.argument.NbtFunctionArgumentType.getNbtFunction;
+import static pers.solid.ecmd.argument.NbtPredicateArgumentType.getNbtPredicate;
+import static pers.solid.ecmd.argument.RegionArgumentType.getRegion;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum TestArgCommand implements CommandRegistrationCallback {
@@ -57,6 +71,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
         .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
         .then(addNbtProperties(literal("nbt")))
+        .then(addNbtCompoundProperties(literal("nbt_compound")))
         .then(addNbtPredicateProperties(literal("nbt_predicate")))
         .then(addNbtFunctionProperties(literal("nbt_function")))
         .then(addPosProperties(literal("pos")))
@@ -67,26 +82,26 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockFunctionProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
     return argumentBuilder.then(argument("block_function", BlockFunctionArgumentType.blockFunction(registryAccess))
         .executes(context -> {
-          final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
+          final BlockFunction blockFunction = getBlockFunction(context, "block_function");
           CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockFunction), false);
           CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(blockFunction.createNbt()), false);
           return 1;
         })
         .then(literal("string")
             .executes(context -> {
-              final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
+              final BlockFunction blockFunction = getBlockFunction(context, "block_function");
               CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockFunction), false);
               return 1;
             }))
         .then(literal("nbt")
             .executes(context -> {
-              final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
+              final BlockFunction blockFunction = getBlockFunction(context, "block_function");
               CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(blockFunction.createNbt()), false);
               return 1;
             }))
         .then(literal("reparse")
             .executes(context -> {
-              final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
+              final BlockFunction blockFunction = getBlockFunction(context, "block_function");
               final String s = blockFunction.asString();
               CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
               final BlockFunction reparse = BlockFunction.parse(registryAccess, s, context.getSource());
@@ -96,7 +111,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             }))
         .then(literal("redeserialize")
             .executes(context -> {
-              final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block_function");
+              final BlockFunction blockFunction = getBlockFunction(context, "block_function");
               final NbtCompound nbt = blockFunction.createNbt();
               CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
               try {
@@ -114,76 +129,46 @@ public enum TestArgCommand implements CommandRegistrationCallback {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockPredicateProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
     return argumentBuilder.then(argument("block_predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
-        .executes(context -> {
-          final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
-          CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockPredicate), false);
-          CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(blockPredicate.createNbt()), false);
-          return 1;
-        })
+        .executes(context -> executeStringShow(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString))
         .then(literal("string")
-            .executes(context -> {
-              final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
-              CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockPredicate), false);
-              return 1;
-            }))
+            .executes(context -> executeStringShow(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString)))
         .then(literal("nbt")
-            .executes(context -> {
-              final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(blockPredicate.createNbt()), false);
-              return 1;
-            }))
-        .then(literal("reparse")
-            .executes(context -> {
-              final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
-              final String s = blockPredicate.asString();
-              CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
-              final BlockPredicate reparse = BlockPredicate.parse(registryAccess, s, context.getSource());
-              final boolean b = blockPredicate.equals(reparse);
-              CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
-              return BooleanUtils.toInteger(b);
-            }))
-        .then(literal("redeserialize")
-            .executes(context -> {
-              final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "block_predicate");
-              final NbtCompound nbt = blockPredicate.createNbt();
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
-              try {
-                final BlockPredicate reDeserialize = BlockPredicate.fromNbt(nbt, context.getSource().getWorld());
-                final boolean b = blockPredicate.equals(reDeserialize);
-                CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
-                return BooleanUtils.toInteger(b);
-              } catch (Throwable e) {
-                EnhancedCommands.LOGGER.error("Parsing block predicate from NBT:", e);
-                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
-              }
-            }))
+            .executes(context -> executeCodecShow(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json")
+            .executes(context -> executeCodecShow(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, JsonOps.INSTANCE)))
+        .then(literal("string_test")
+            .executes(context -> executeStringTest(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString, s -> BlockPredicate.parse(registryAccess, s, context.getSource()))))
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, JsonOps.INSTANCE)))
     );
   }
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtProperties(T argumentBuilder) {
     return argumentBuilder.then(argument("nbt", NbtElementArgumentType.nbtElement())
         .executes(context -> {
-          CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(NbtElementArgumentType.getNbtElement(context, "nbt")), false);
+          CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(getNbtElement(context, "nbt")), false);
           return 1;
         })
         .then(literal("plainstring")
             .executes(context -> {
-              CommandBridge.sendFeedback(context, () -> Text.literal(TextUtil.toSpacedStringNbt(NbtElementArgumentType.getNbtElement(context, "nbt"))), false);
+              CommandBridge.sendFeedback(context, () -> Text.literal(TextUtil.toSpacedStringNbt(getNbtElement(context, "nbt"))), false);
               return 1;
             }))
         .then(literal("prettyprinted")
             .executes(context -> {
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(NbtElementArgumentType.getNbtElement(context, "nbt")), false);
+              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(getNbtElement(context, "nbt")), false);
               return 1;
             }))
         .then(literal("indented")
             .executes(context -> {
-              CommandBridge.sendFeedback(context, () -> new NbtTextFormatter("  ", 0).apply(NbtElementArgumentType.getNbtElement(context, "nbt")), false);
+              CommandBridge.sendFeedback(context, () -> new NbtTextFormatter("  ", 0).apply(getNbtElement(context, "nbt")), false);
               return 1;
             }))
         .then(literal("test")
             .executes(context -> {
-              final NbtElement nbtElement = NbtElementArgumentType.getNbtElement(context, "nbt");
+              final NbtElement nbtElement = getNbtElement(context, "nbt");
               final String s = TextUtil.toSpacedStringNbt(nbtElement);
               CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(Styles.RESULT)), false);
               final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser(new StringReader(s)).parsePredicate(false, false);
@@ -199,86 +184,62 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtCompoundProperties(T argumentBuilder) {
+    return argumentBuilder.then(argument("nbt_compound", NbtCompoundArgumentType.nbtCompound())
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getNbtCompound(context, "nbt_compound"), NbtCompound.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getNbtCompound(context, "nbt_compound"), NbtCompound.CODEC, JsonOps.INSTANCE)))
+    );
+  }
+
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtPredicateProperties(T argumentBuilder) {
     return argumentBuilder.then(argument("nbt_predicate", NbtPredicateArgumentType.ELEMENT)
-        .executes(context -> {
-          final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
-          CommandBridge.sendFeedback(context, () -> TextUtil.literal(nbtPredicate), false);
-          return 1;
-        })
+        .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString))
         .then(literal("match")
             .then(argument("nbt_to_test", NbtElementArgumentType.nbtElement())
                 .executes(context -> {
-                  final NbtElement nbtToTest = NbtElementArgumentType.getNbtElement(context, "nbt_to_test");
-                  final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
+                  final NbtElement nbtToTest = getNbtElement(context, "nbt_to_test");
+                  final NbtPredicate nbtPredicate = getNbtPredicate(context, "nbt_predicate");
                   final boolean test = nbtPredicate.test(nbtToTest);
                   CommandBridge.sendFeedback(context, () -> Text.literal(Boolean.toString(test)), false);
                   return BooleanUtils.toInteger(test);
                 })))
         .then(literal("string")
-            .executes(context -> {
-              final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
-              CommandBridge.sendFeedback(context, () -> TextUtil.literal(nbtPredicate), false);
-              return 1;
-            }))
-        .then(literal("reparse")
-            .executes(context -> {
-              final NbtPredicate nbtPredicate = NbtPredicateArgumentType.getNbtPredicate(context, "nbt_predicate");
-              final String s = nbtPredicate.asString();
-              CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
-              final NbtPredicate reparse = new NbtPredicateSuggestedParser(new StringReader(s)).parseCompound(false, false);
-              final boolean b = nbtPredicate.equals(reparse);
-              CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
-              return BooleanUtils.toInteger(b);
-            }))
+            .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString)))
+        .then(literal("string_test")
+            .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> new NbtPredicateSuggestedParser(new StringReader(s)).parseCompound(false, false))))
     );
   }
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtFunctionProperties(T argumentBuilder) {
     return argumentBuilder.then(argument("nbt_function", NbtFunctionArgumentType.ELEMENT)
-        .executes(context -> {
-          final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
-          CommandBridge.sendFeedback(context, () -> TextUtil.literal(nbtFunction), false);
-          return 1;
-        })
+        .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString))
         .then(literal("apply")
             .executes(context -> {
-              final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
+              final NbtFunction nbtFunction = getNbtFunction(context, "nbt_function");
               final NbtElement apply = nbtFunction.apply(null);
               CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(apply), false);
               return 1;
             })
             .then(argument("nbt_element", NbtElementArgumentType.nbtElement())
                 .executes(context -> {
-                  final NbtElement nbtElement = NbtElementArgumentType.getNbtElement(context, "nbt_element");
-                  final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
+                  final NbtElement nbtElement = getNbtElement(context, "nbt_element");
+                  final NbtFunction nbtFunction = getNbtFunction(context, "nbt_function");
                   final NbtElement apply = nbtFunction.apply(nbtElement);
                   CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(apply), false);
                   return 1;
                 })))
         .then(literal("string")
-            .executes(context -> {
-              final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
-              CommandBridge.sendFeedback(context, () -> Text.literal(nbtFunction.asString(false)), false);
-              return 1;
-            }))
-        .then(literal("reparse")
-            .executes(context -> {
-              final NbtFunction nbtFunction = NbtFunctionArgumentType.getNbtFunction(context, "nbt_function");
-              final String s = nbtFunction.asString(false);
-              CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
-              final NbtFunction reparse = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
-              CommandBridge.sendFeedback(context, () -> Text.literal(reparse.asString(false)).formatted(Formatting.GRAY), false);
-              final boolean b = nbtFunction.equals(reparse);
-              CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
-              return BooleanUtils.toInteger(b);
-            }))
+            .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString)))
+        .then(literal("string_test")
+            .executes(context -> executeStringTest(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString, s -> new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false))))
     );
   }
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addPosProperties(T argumentBuilder) {
     final Command<ServerCommandSource> execution = context -> {
-      final PosArgument pos = EnhancedPosArgumentType.getPosArgument(context, "pos");
+      final PosArgument pos = getPosArgument(context, "pos");
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.pos.result").append(ScreenTexts.LINE_BREAK).append(Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY)), false);
       return 1;
@@ -309,52 +270,22 @@ public enum TestArgCommand implements CommandRegistrationCallback {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addRegionProperties(T argumentBuilder, CommandRegistryAccess commandRegistryAccess) {
     return argumentBuilder.then(argument("region", RegionArgumentType.region(commandRegistryAccess))
-        .executes(context -> {
-          final Region region = RegionArgumentType.getRegion(context, "region");
-          CommandBridge.sendFeedback(context, () -> TextUtil.literal(region), false);
-          CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(region.createNbt()), false);
-          return 1;
-        })
+        .executes(context -> executeStringShow(context, getRegion(context, "region"), Region::asString))
         .then(literal("string")
-            .executes(context -> {
-              final Region region = RegionArgumentType.getRegion(context, "region");
-              CommandBridge.sendFeedback(context, () -> TextUtil.literal(region), false);
-              return 1;
-            }))
+            .executes(context -> executeStringShow(context, getRegion(context, "region"), Region::asString)))
         .then(literal("nbt")
-            .executes(context -> {
-              final Region region = RegionArgumentType.getRegion(context, "region");
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(region.createNbt()), false);
-              return 1;
-            }))
-        .then(literal("reparse")
-            .executes(context -> {
-              final Region region = RegionArgumentType.getRegion(context, "region");
-              final String s = region.asString();
-              CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
-              final Region reparse = RegionArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).toAbsoluteRegion(context.getSource());
-              final boolean b = reparse.equals(region);
-              CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
-              return BooleanUtils.toInteger(b);
-            }))
-        .then(literal("redeserialize")
-            .executes(context -> {
-              final Region region = RegionArgumentType.getRegion(context, "region");
-              final NbtElement nbt = region.createNbt();
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
-              try {
-                final Region reDeserialize = Region.fromNbt(nbt);
-                final boolean b = region.equals(reDeserialize);
-                CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
-                return BooleanUtils.toInteger(b);
-              } catch (Throwable e) {
-                EnhancedCommands.LOGGER.error("Parsing region from NBT:", e);
-                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
-              }
-            }))
+            .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json")
+            .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
+        .then(literal("string_test")
+            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).toAbsoluteRegion(context.getSource()))))
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
         .then(literal("illustrate")
             .executes(context -> {
-              final Region region = RegionArgumentType.getRegion(context, "region");
+              final Region region = getRegion(context, "region");
               final ServerWorld world = context.getSource().getWorld();
               int numOfIteratedButNotMatch = 0;
               int numOfNotIteratedButMatch = 0;
@@ -384,5 +315,51 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               return numOfIteratedButNotMatch;
             }))
     );
+  }
+
+  private static <A> int executeStringShow(CommandContext<ServerCommandSource> context, A fetchedArg, FailableFunction<A, String, CommandSyntaxException> toString) throws CommandSyntaxException {
+    final String s = toString.apply(fetchedArg);
+    CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
+    return 1;
+  }
+
+  private static <A> int executeStringTest(CommandContext<ServerCommandSource> context, A fetchedArg, FailableFunction<A, String, CommandSyntaxException> toString, FailableFunction<String, A, CommandSyntaxException> fromString) throws CommandSyntaxException {
+    final String s = toString.apply(fetchedArg);
+    CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
+    final A second = fromString.apply(s);
+    final boolean b = second.equals(fetchedArg);
+    CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
+    return BooleanUtils.toInteger(b);
+  }
+
+  private static <A, T> int executeCodecShow(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
+    final T code = Util.getResult(codec.encodeStart(ops, fetchedArg), IllegalStateException::new);
+    if (code instanceof NbtElement nbt) {
+      CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
+    } else {
+      CommandBridge.sendFeedback(context, () -> Text.literal(code.toString()).styled(Styles.RESULT), false);
+    }
+    return 1;
+  }
+
+  private static <A, T> int executeCodecTest(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
+    final T code = Util.getResult(codec.encodeStart(ops, fetchedArg), IllegalStateException::new);
+    if (code instanceof NbtElement nbt) {
+      CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
+    } else {
+      CommandBridge.sendFeedback(context, () -> Text.literal(code.toString()).styled(Styles.RESULT), false);
+    }
+    try {
+      final A second = Util.getResult(codec.decode(ops, code), IllegalStateException::new).getFirst();
+      if (second instanceof NbtElement nbt) {
+        CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
+      }
+      final boolean b = second.equals(fetchedArg);
+      CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
+      return BooleanUtils.toInteger(b);
+    } catch (Throwable e) {
+      EnhancedCommands.LOGGER.error("Parsing region from NBT:", e);
+      throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
+    }
   }
 }

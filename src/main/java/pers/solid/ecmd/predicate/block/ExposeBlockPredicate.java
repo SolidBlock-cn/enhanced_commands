@@ -3,12 +3,12 @@ package pers.solid.ecmd.predicate.block;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
@@ -31,7 +31,7 @@ import java.util.*;
  * @param exposureType The exposure type. By default, it is exposed to empty collision.
  * @param directions   The directions to test exposure.
  */
-public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull Iterable<@NotNull Direction> directions) implements BlockPredicate {
+public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull List<@NotNull Direction> directions) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
     return "expose(" + exposureType.asString() + ", " + String.join(" ", Iterables.transform(directions, Direction::asString)) + ")";
@@ -69,22 +69,6 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   @Override
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.EXPOSE;
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("exposure_type", exposureType.asString());
-    final NbtList nbtList = new NbtList();
-    nbtCompound.put("directions", nbtList);
-    for (Direction direction : directions) {
-      nbtList.add(NbtString.of(direction.asString()));
-    }
-
-    // 如果只有一个元素，那么没有必须存储为列表。
-    if (nbtList.size() == 1) {
-      nbtCompound.remove("directions");
-      nbtCompound.put("directions", nbtList.get(0));
-    }
   }
 
   /**
@@ -216,6 +200,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
   }
 
+  public static final Codec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), Direction.CODEC.listOf().fieldOf("directions").forGetter(ExposeBlockPredicate::directions)));
+
   public enum Type implements BlockPredicateType<ExposeBlockPredicate> {
     EXPOSE_TYPE;
 
@@ -231,6 +217,11 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
         directions = nbtCompound.getList("directions", NbtElement.STRING_TYPE).stream().map(nbtElement -> Direction.byName(nbtElement.asString())).filter(Objects::nonNull).toList();
       }
       return new ExposeBlockPredicate(type, directions);
+    }
+
+    @Override
+    public @NotNull Codec<ExposeBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 }

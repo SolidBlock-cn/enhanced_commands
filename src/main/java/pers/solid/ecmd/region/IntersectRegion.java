@@ -52,7 +52,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   }
 
   /**
-   * The volume of the intersect region is inaccurate. The actual value equals to of lower than it.
+   * The volume of the intersect region is inaccurate. The actual probability equals to of lower than it.
    */
   @Override
   public double volume() {

@@ -1,5 +1,7 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +11,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull NbtPredicate> map, boolean negated) implements NbtPredicate {
+  public static final Codec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("map").forGetter(EqualsCompoundNbtPredicate::map), Codec.BOOL.fieldOf("negated").forGetter(EqualsCompoundNbtPredicate::negated)));
+
   @Override
   public @NotNull String asString() {
     return asString(true);
@@ -45,5 +49,10 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
       }
     }
     return !negated;
+  }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.EQUALS_COMPOUND;
   }
 }

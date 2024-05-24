@@ -34,4 +34,9 @@ public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expect
     }
     return !negated;
   }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.EQUALS_LIST;
+  }
 }

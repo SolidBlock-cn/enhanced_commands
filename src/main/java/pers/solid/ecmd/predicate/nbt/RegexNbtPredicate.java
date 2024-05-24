@@ -18,4 +18,9 @@ public record RegexNbtPredicate(Pattern pattern, boolean negated) implements Nbt
       return negated;
     return negated != pattern.matcher(nbtString.asString()).find();
   }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.REGEX;
+  }
 }

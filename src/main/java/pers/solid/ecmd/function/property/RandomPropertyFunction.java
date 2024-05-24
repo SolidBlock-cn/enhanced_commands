@@ -31,7 +31,7 @@ public record RandomPropertyFunction<T extends Comparable<T>>(Property<T> proper
   @Override
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", property.getName());
-    nbtCompound.putString("value", "*");
+    nbtCompound.putString("probability", "*");
     nbtCompound.putBoolean("must", must);
   }
 }

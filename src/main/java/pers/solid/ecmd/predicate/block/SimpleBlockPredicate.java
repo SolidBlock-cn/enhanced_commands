@@ -1,14 +1,17 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -19,27 +22,30 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.predicate.property.BlockBiasedOps;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
-import pers.solid.ecmd.util.NbtConvertible;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>> propertyEntries) implements BlockPredicate {
+public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    return Registries.BLOCK.getId(block).toString();
+    final String id = Registries.BLOCK.getId(block).toString();
+    return properties.isEmpty() ? id : id + properties.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "[", "]"));
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     if (!cachedBlockPosition.getBlockState().isOf(block))
       return false;
-    for (PropertyPredicate<?> propertyPredicate : propertyEntries) {
+    for (PropertyPredicate<?> propertyPredicate : properties) {
       if (!propertyPredicate.test(cachedBlockPosition.getBlockState()))
         return false;
     }
@@ -61,7 +67,7 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     } else {
       messages.add(Text.translatable("enhanced_commands.block_predicate.simple.is_the_block", posText, actualText).styled(Styles.TRUE));
     }
-    for (PropertyPredicate<?> propertyPredicate : propertyEntries) {
+    for (PropertyPredicate<?> propertyPredicate : properties) {
       final TestResult propertyResult = propertyPredicate.testAndDescribe(blockState, blockPos);
       messages.addAll(propertyResult.descriptions());
       if (!propertyResult.successes()) {
@@ -76,15 +82,19 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
     return BlockPredicateTypes.SIMPLE;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("block", Registries.BLOCK.getId(block).toString());
-    if (!propertyEntries.isEmpty()) {
-      final NbtList nbtList = new NbtList();
-      nbtCompound.put("properties", nbtList);
-      nbtList.addAll(Collections2.transform(propertyEntries, NbtConvertible::createNbt));
+  public static final Codec<SimpleBlockPredicate> CODEC = Registries.BLOCK.getCodec().dispatch("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.create(i -> i.ap(o -> new SimpleBlockPredicate(block, o), new Codec<List<PropertyPredicate<?>>>() {
+    private static final Codec<List<PropertyPredicate<?>>> backedCodec = PropertyPredicate.CODEC.listOf();
+
+    @Override
+    public <T> DataResult<T> encode(List<PropertyPredicate<?>> input, DynamicOps<T> ops, T prefix) {
+      return backedCodec.encode(input, BlockBiasedOps.of(ops, block.getStateManager()), prefix);
     }
-  }
+
+    @Override
+    public <T> DataResult<Pair<List<PropertyPredicate<?>>, T>> decode(DynamicOps<T> ops, T input) {
+      return backedCodec.decode(BlockBiasedOps.of(ops, block.getStateManager()), input);
+    }
+  }.optionalFieldOf("properties", Collections.emptyList()).forGetter(SimpleBlockPredicate::properties))));
 
   public enum Type implements BlockPredicateType<SimpleBlockPredicate>, Parser<BlockPredicateArgument> {
     SIMPLE_TYPE;
@@ -97,6 +107,11 @@ public record SimpleBlockPredicate(Block block, Collection<PropertyPredicate<?>>
           .<PropertyPredicate<?>>map(nbtElement -> PropertyPredicate.fromNbt((NbtCompound) nbtElement, block))
           .toList();
       return new SimpleBlockPredicate(block, predicates);
+    }
+
+    @Override
+    public @NotNull Codec<SimpleBlockPredicate> getCodec() {
+      return CODEC;
     }
 
     @Override

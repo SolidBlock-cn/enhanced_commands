@@ -168,11 +168,6 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
     return Util.getResult(CODEC.decode(NbtOps.INSTANCE, nbtElement), IllegalArgumentException::new).getFirst();
   }
 
-  @ApiStatus.NonExtendable
-  default Codec<? extends Region> getCodec() {
-    return getType().getCodec();
-  }
-
   @SuppressWarnings("unchecked")
   private static <R extends Region> NbtElement encode(Codec<R> codec, Region region) {
     return codec.encodeStart(NbtOps.INSTANCE, (R) region).result().orElseThrow();

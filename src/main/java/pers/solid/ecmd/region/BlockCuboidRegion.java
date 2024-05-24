@@ -18,7 +18,7 @@ import java.util.function.Function;
  */
 public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements IntBackedRegion {
   /**
-   * Create a block cuboid region from several coordinates. The comparison is required. The min value must not be larger than max value (but can be equal).
+   * Create a block cuboid region from several coordinates. The comparison is required. The min probability must not be larger than max probability (but can be equal).
    *
    * @see #of(int, int, int, int, int, int)
    */

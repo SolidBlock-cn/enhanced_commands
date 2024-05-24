@@ -1,6 +1,8 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -9,9 +11,9 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionParamsParser;
@@ -21,26 +23,27 @@ import pers.solid.ecmd.util.Styles;
  * <p>The predicate that passes only a probability test is passed.</p>
  * <h2>Syntax</h2>
  * <ul>
- *   <li>{@code rand(<value>)} - passes under a specified probability.</li>
- *   <li>{@code rand(<value>, <predicate>)} - passes when both probability test and another block predicate passes. Identical to {@code all(rand(value), <predicate>)}.</li>
+ *   <li>{@code rand(<probability>)} - passes under a specified probability.</li>
+ *   <li>{@code rand(<probability>, <predicate>)} - passes when both probability test and another block predicate passes. Identical to {@code all(rand(probability), <predicate>)}.</li>
  *   </ul>
  */
-public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate, Random random) implements BlockPredicate {
+public record RandBlockPredicate(float probability, @NotNull BlockPredicate predicate) implements BlockPredicate {
   @Override
   public @NotNull String asString() {
-    if (predicate == null) {
-      return "rand(" + value + ")";
+    if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
+      return "rand(" + probability + ")";
     } else {
-      return "rand(" + value + ", " + predicate.asString() + ")";
+      return "rand(" + probability + ", " + predicate.asString() + ")";
     }
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    if (predicate == null) {
-      return random.nextFloat() < value;
+    final Random random = ((WorldAccess) cachedBlockPosition.getWorld()).getRandom();
+    if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
+      return random.nextFloat() < probability;
     } else {
-      return random.nextFloat() < value && predicate.test(cachedBlockPosition);
+      return random.nextFloat() < probability && predicate.test(cachedBlockPosition);
     }
   }
 
@@ -48,8 +51,8 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final float nextFloat = RandomUtils.nextFloat(0, 1);
     final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(Styles.ACTUAL);
-    final MutableText o2 = Text.literal(String.valueOf(value)).styled(Styles.EXPECTED);
-    if (nextFloat < value) {
+    final MutableText o2 = Text.literal(String.valueOf(probability)).styled(Styles.EXPECTED);
+    if (nextFloat < probability) {
       return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.probability.pass", o1, o2));
     } else {
       return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.probability.fail", o1, o2));
@@ -61,23 +64,13 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     return BlockPredicateTypes.RAND;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putFloat("value", value);
-    if (predicate != null) {
-      nbtCompound.put("predicate", predicate.createNbt());
-    } else {
-      nbtCompound.remove("predicate");
-    }
-  }
-
   public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
     private float value;
-    private @Nullable BlockPredicateArgument predicate;
+    private @NotNull BlockPredicateArgument predicate = ConstantBlockPredicate.ALWAYS_TRUE;
 
     @Override
     public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new RandBlockPredicate(value, predicate == null ? null : predicate.apply(source), source.getWorld().getRandom());
+      return source -> new RandBlockPredicate(value, predicate.apply(source));
     }
 
     @Override
@@ -105,16 +98,23 @@ public record RandBlockPredicate(float value, @Nullable BlockPredicate predicate
     }
   }
 
+  public static final Codec<RandBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(RandBlockPredicate::new, Codec.FLOAT.fieldOf("probability").forGetter(RandBlockPredicate::probability), BlockPredicate.CODEC.optionalFieldOf("predicate", ConstantBlockPredicate.ALWAYS_TRUE).forGetter(RandBlockPredicate::predicate)));
+
   public enum Type implements BlockPredicateType<RandBlockPredicate> {
     RAND_TYPE;
 
     @Override
     public @NotNull RandBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       if (nbtCompound.contains("predicate", NbtElement.COMPOUND_TYPE)) {
-        return new RandBlockPredicate(nbtCompound.getFloat("value"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world), world.getRandom());
+        return new RandBlockPredicate(nbtCompound.getFloat("probability"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
       } else {
-        return new RandBlockPredicate(nbtCompound.getFloat("value"), null, world.getRandom());
+        return new RandBlockPredicate(nbtCompound.getFloat("probability"), ConstantBlockPredicate.ALWAYS_TRUE);
       }
+    }
+
+    @Override
+    public @NotNull Codec<RandBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 }

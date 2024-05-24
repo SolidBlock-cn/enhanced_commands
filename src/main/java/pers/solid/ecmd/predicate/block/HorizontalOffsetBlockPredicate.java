@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import joptsimple.internal.Strings;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -25,12 +27,13 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
 
   @Override
   public @NotNull String asString() {
+    final String s = blockPredicate instanceof HorizontalOffsetBlockPredicate ? "(" + blockPredicate.asString() + ")" : blockPredicate.asString();
     if (offset > 0) {
-      return Strings.repeat('<', offset) + blockPredicate.asString();
+      return Strings.repeat('<', offset) + s;
     } else if (offset < 0) {
-      return Strings.repeat('>', -offset) + blockPredicate.asString();
+      return Strings.repeat('>', -offset) + s;
     } else {
-      return blockPredicate.asString();
+      return s;
     }
   }
 
@@ -59,11 +62,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     return BlockPredicateTypes.HORIZONTAL_OFFSET;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putInt("offset", offset);
-    nbtCompound.put("predicate", blockPredicate.createNbt());
-  }
+  public static final Codec<HorizontalOffsetBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(HorizontalOffsetBlockPredicate::new, Codec.INT.fieldOf("offset").forGetter(HorizontalOffsetBlockPredicate::offset), BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(HorizontalOffsetBlockPredicate::blockPredicate)));
 
   public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate>, Parser<BlockPredicateArgument> {
     HORIZONTAL_OFFSET_TYPE;
@@ -71,8 +70,13 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     @Override
     public @NotNull HorizontalOffsetBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final int offset = nbtCompound.getInt("offset");
-      final BlockPredicate predicate = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world);
+      final BlockPredicate predicate = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"));
       return new HorizontalOffsetBlockPredicate(offset, predicate);
+    }
+
+    @Override
+    public @NotNull Codec<HorizontalOffsetBlockPredicate> getCodec() {
+      return CODEC;
     }
 
     @Override

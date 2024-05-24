@@ -1,6 +1,8 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -41,11 +43,6 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("pattern", pattern.toString());
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o)
       return true;
@@ -60,12 +57,19 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     return pattern.pattern().hashCode();
   }
 
+  public static final Codec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockPredicate::new, Codec.STRING.xmap(Pattern::compile, Pattern::pattern).fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
+
   public enum Type implements BlockPredicateType<IdContainBlockPredicate> {
     ID_CONTAIN_TYPE;
 
     @Override
     public @NotNull IdContainBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new IdContainBlockPredicate(Pattern.compile(nbtCompound.getString("pattern")));
+    }
+
+    @Override
+    public @NotNull Codec<IdContainBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 

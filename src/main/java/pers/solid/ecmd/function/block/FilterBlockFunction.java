@@ -68,7 +68,7 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
     @Override
     public @NotNull FilterBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new FilterBlockFunction(
-          BlockFunction.fromNbt(nbtCompound.getCompound("function"), world), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"), world),
+          BlockFunction.fromNbt(nbtCompound.getCompound("function"), world), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")),
           nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else"), world) : null
       );
     }

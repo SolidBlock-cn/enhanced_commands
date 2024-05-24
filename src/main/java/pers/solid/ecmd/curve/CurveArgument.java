@@ -10,7 +10,7 @@ public interface CurveArgument<T extends Curve> {
   @NotNull
   static CurveArgument<?> parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final int cursorOnStart = parser.reader.getCursor();/*
-    final Stream<CurveType<?>> stream = commandRegistryAccess.createWrapper(CurveType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::value);
+    final Stream<CurveType<?>> stream = commandRegistryAccess.createWrapper(CurveType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::probability);
     for (CurveType<?> type : (Iterable<CurveType<?>>) stream::iterator) {
       parser.reader.setCursor(cursorOnStart);
       final CurveArgument<?> parse = type.parse(commandRegistryAccess, parser, suggestionsOnly);

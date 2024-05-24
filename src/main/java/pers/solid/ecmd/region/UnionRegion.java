@@ -49,7 +49,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
   }
 
   /**
-   * The value is inaccurate. The actual value equals or is lower than it.
+   * The probability is inaccurate. The actual probability equals or is lower than it.
    */
   @Override
   public double volume() {

@@ -29,4 +29,9 @@ public record RangeNbtPredicate(NumberRange<?> numberRange, boolean negated) imp
       return negated;
     }
   }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.RANGE;
+  }
 }

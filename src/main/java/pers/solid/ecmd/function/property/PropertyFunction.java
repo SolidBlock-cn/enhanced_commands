@@ -41,7 +41,7 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
     } else if ("~".equals(propertyName)) {
       return new AllOriginalPropertyFunction(new HashSet<>());
     }
-    final String valueName = nbtCompound.getString("value");
+    final String valueName = nbtCompound.getString("probability");
     final boolean must = nbtCompound.getBoolean("must");
 
     final Property<?> property = block.getStateManager().getProperty(propertyName);
@@ -58,6 +58,6 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
 
   private static <T extends Comparable<T>> SimplePropertyFunction<T> getSimplePropertyFunctionFromValue(Property<T> property, String valueName, boolean must) {
     // 此方法独立出来是为了避免出现泛型错误。
-    return new SimplePropertyFunction<>(property, property.parse(valueName).orElseThrow(() -> new IllegalArgumentException("The property '%s' does not support value named '%s'.".formatted(property.getName(), valueName))), must);
+    return new SimplePropertyFunction<>(property, property.parse(valueName).orElseThrow(() -> new IllegalArgumentException("The property '%s' does not support probability named '%s'.".formatted(property.getName(), valueName))), must);
   }
 }

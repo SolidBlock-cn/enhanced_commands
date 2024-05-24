@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.property;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -20,9 +22,11 @@ import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
-import java.util.Collection;
+import java.util.List;
 
-public record MultiValuePropertyNamePredicate(String propertyName, Collection<String> valueNames, boolean inverted) implements PropertyNamePredicate {
+public record MultiValuePropertyNamePredicate(String propertyName, List<String> valueNames, boolean inverted) implements PropertyNamePredicate {
+  public static final Codec<MultiValuePropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3(MultiValuePropertyNamePredicate::new, Codec.STRING.fieldOf("property_name").forGetter(MultiValuePropertyNamePredicate::propertyName), Codec.STRING.listOf().fieldOf("value_names").forGetter(MultiValuePropertyNamePredicate::valueNames), Codec.BOOL.fieldOf("inverted").forGetter(MultiValuePropertyNamePredicate::inverted)));
+
   @Override
   public boolean test(BlockState blockState) {
     final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
@@ -65,6 +69,11 @@ public record MultiValuePropertyNamePredicate(String propertyName, Collection<St
   }
 
   @Override
+  public @NotNull Type getType() {
+    return Type.MULTI_VALUE;
+  }
+
+  @Override
   public @NotNull String asString() {
     return propertyName + (inverted ? "!=" : "=") + StringUtils.join(valueNames, "|");
   }
@@ -75,6 +84,6 @@ public record MultiValuePropertyNamePredicate(String propertyName, Collection<St
     nbtCompound.putString("comparator", inverted ? Comparator.NE.asString() : Comparator.EQ.asString());
     final NbtList list = new NbtList();
     list.addAll(Collections2.transform(valueNames, NbtString::of));
-    nbtCompound.put("value", list);
+    nbtCompound.put("probability", list);
   }
 }

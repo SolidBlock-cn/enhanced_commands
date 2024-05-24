@@ -32,7 +32,7 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
   @Override
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", propertyName);
-    nbtCompound.putString("value", "*");
+    nbtCompound.putString("probability", "*");
     nbtCompound.putBoolean("must", must);
   }
 }

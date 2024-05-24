@@ -106,7 +106,7 @@ public final class TagBlockFunction implements BlockFunction {
   @Override
   public String toString() {
     return "TagBlockFunction{" +
-        "blockTag=" + blockTag +
+        "tags=" + blockTag +
         ", propertyNameFunctions=" + propertyNameFunctions +
         '}';
   }

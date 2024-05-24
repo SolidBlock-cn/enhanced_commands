@@ -1,6 +1,8 @@
 package pers.solid.ecmd.predicate.property;
 
 import com.google.common.collect.Collections2;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -15,10 +17,24 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> property, Collection<T> values, boolean inverted) implements PropertyPredicate<T> {
+public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> property, List<T> values, boolean inverted) implements PropertyPredicate<T> {
+  public static final Codec<MultiValuePropertyPredicate<?>> CODEC = PropertyCodec.INSTANCE.dispatch("property", MultiValuePropertyPredicate::property, MultiValuePropertyPredicate::getCodecByProperty);
+
+  private static <T extends Comparable<T>> Codec<MultiValuePropertyPredicate<T>> getCodecByProperty(Property<T> property) {
+    return RecordCodecBuilder.create(i -> i.apply2(
+        (values, inverted) -> new MultiValuePropertyPredicate<>(property, values, inverted),
+        property.getCodec().listOf().fieldOf("values").forGetter(MultiValuePropertyPredicate::values),
+        Codec.BOOL.fieldOf("inverted").forGetter(MultiValuePropertyPredicate::inverted)));
+  }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.MULTI_VALUE;
+  }
+
   @Override
   public boolean test(BlockState blockState) {
     return blockState.contains(property) && values.contains(blockState.get(property)) != inverted;
@@ -66,6 +82,6 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
     nbtCompound.putString("comparator", inverted ? Comparator.NE.asString() : Comparator.EQ.asString());
     final NbtList nbtList = new NbtList();
     nbtList.addAll(Collections2.transform(values, input -> NbtString.of(property.name(input))));
-    nbtCompound.put("value", nbtList);
+    nbtCompound.put("probability", nbtList);
   }
 }

@@ -1,5 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.MutableText;
@@ -10,6 +12,8 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
 
 public record ExistencePropertyNamePredicate(String propertyName, boolean exists) implements PropertyNamePredicate {
+  public static final Codec<ExistencePropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExistencePropertyNamePredicate::new, Codec.STRING.fieldOf("property_name").forGetter(ExistencePropertyNamePredicate::propertyName), Codec.BOOL.fieldOf("exists").forGetter(ExistencePropertyNamePredicate::exists)));
+
   @Override
   public @NotNull String asString() {
     return propertyName + (exists ? "=*" : "!=*");
@@ -37,6 +41,11 @@ public record ExistencePropertyNamePredicate(String propertyName, boolean exists
     } else {
       return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.name_fail_absent", blockText, propertyNameText));
     }
+  }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.EXISTENCE;
   }
 
   @Override

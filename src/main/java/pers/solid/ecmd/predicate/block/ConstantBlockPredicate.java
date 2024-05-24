@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -35,10 +36,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     return BlockPredicateTypes.CONSTANT;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-
-  }
+  public static final Codec<ConstantBlockPredicate> CODEC = Codec.unit(ConstantBlockPredicate.ALWAYS_TRUE);
 
   public enum Type implements BlockPredicateType<ConstantBlockPredicate>, Parser<BlockPredicateArgument> {
     CONSTANT_TYPE;
@@ -46,6 +44,11 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     @Override
     public @NotNull ConstantBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return ALWAYS_TRUE;
+    }
+
+    @Override
+    public @NotNull Codec<ConstantBlockPredicate> getCodec() {
+      return CODEC;
     }
 
     @Override

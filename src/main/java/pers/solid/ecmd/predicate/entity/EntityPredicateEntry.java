@@ -38,7 +38,7 @@ public interface EntityPredicateEntry extends EntityPredicate {
   TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException;
 
   /**
-   * 将此谓词转换为实体选择器中的选项的形式，例如 {@code key=value} 或 {@code key=!value}.
+   * 将此谓词转换为实体选择器中的选项的形式，例如 {@code key=probability} 或 {@code key=!probability}.
    */
   String toOptionEntry();
 

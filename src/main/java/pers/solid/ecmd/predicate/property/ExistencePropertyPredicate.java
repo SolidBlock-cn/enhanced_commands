@@ -1,5 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
@@ -11,9 +13,16 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
 
 public record ExistencePropertyPredicate<T extends Comparable<T>>(Property<T> property, boolean exists) implements PropertyPredicate<T> {
+  public static final Codec<ExistencePropertyPredicate<?>> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExistencePropertyPredicate::new, PropertyCodec.INSTANCE.fieldOf("property").forGetter(ExistencePropertyPredicate::property), Codec.BOOL.fieldOf("exists").forGetter(ExistencePropertyPredicate::exists)));
+
   @Override
   public @NotNull String asString() {
     return property.getName() + (exists ? "=*" : "!=*");
+  }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.EXISTENCE;
   }
 
   @Override

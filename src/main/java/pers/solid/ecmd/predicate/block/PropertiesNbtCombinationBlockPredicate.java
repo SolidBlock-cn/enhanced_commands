@@ -1,6 +1,9 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -16,6 +19,7 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,47 +30,47 @@ import java.util.stream.Stream;
  *   oak_sign{front_text = [~"a", ~"b", *, *]}
  * </pre>
  */
-public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate firstBlockPredicate, @Nullable PropertiesNamesBlockPredicate propertyNamesPredicate, @Nullable NbtBlockPredicate nbtBlockPredicate) implements BlockPredicate {
+public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate base, @Nullable PropertiesNamesBlockPredicate properties, @Nullable NbtBlockPredicate nbt) implements BlockPredicate {
   @Contract(value = "_, null, null -> fail", pure = true)
   public PropertiesNbtCombinationBlockPredicate {
-    if (propertyNamesPredicate == null && nbtBlockPredicate == null) {
+    if (properties == null && nbt == null) {
       throw new IllegalArgumentException("The property names and nbt predicate cannot be both null. In that case, directly use the first block predicate.");
     }
-    if (firstBlockPredicate instanceof NbtPredicate) {
-      throw new IllegalArgumentException("The firstBlockPredicate cannot be NbtPredicate or PropertyNamesPredicate");
+    if (base instanceof NbtPredicate) {
+      throw new IllegalArgumentException("The base cannot be NbtPredicate or PropertyNamesPredicate");
     }
-    if (firstBlockPredicate instanceof PropertiesNamesBlockPredicate && propertyNamesPredicate != null) {
-      throw new IllegalArgumentException("The propertyNamesPredicate must be null when the firstBlockPredicate is instance of PropertyNamesPredicate");
+    if (base instanceof PropertiesNamesBlockPredicate && properties != null) {
+      throw new IllegalArgumentException("The properties must be null when the base is instance of PropertyNamesPredicate");
     }
   }
 
   @Override
   public @NotNull String asString() {
-    return Stream.of(firstBlockPredicate, propertyNamesPredicate, nbtBlockPredicate).filter(Objects::nonNull).map(ExpressionConvertible::asString).collect(Collectors.joining());
+    return Stream.of(base, properties, nbt).filter(Objects::nonNull).map(ExpressionConvertible::asString).collect(Collectors.joining());
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return firstBlockPredicate.test(cachedBlockPosition) && (propertyNamesPredicate == null || propertyNamesPredicate.test(cachedBlockPosition)) && (nbtBlockPredicate == null || nbtBlockPredicate.test(cachedBlockPosition));
+    return base.test(cachedBlockPosition) && (properties == null || properties.test(cachedBlockPosition)) && (nbt == null || nbt.test(cachedBlockPosition));
   }
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
-    final List<TestResult> attachements = new ArrayList<>(3);
-    attachements.add(firstBlockPredicate.testAndDescribe(cachedBlockPosition));
-    if (propertyNamesPredicate != null) {
-      attachements.add(propertyNamesPredicate.testAndDescribe(cachedBlockPosition));
+    final List<TestResult> attachments = new ArrayList<>(3);
+    attachments.add(base.testAndDescribe(cachedBlockPosition));
+    if (properties != null) {
+      attachments.add(properties.testAndDescribe(cachedBlockPosition));
     }
-    if (nbtBlockPredicate != null) {
-      attachements.add(nbtBlockPredicate.testAndDescribe(cachedBlockPosition));
+    if (nbt != null) {
+      attachments.add(nbt.testAndDescribe(cachedBlockPosition));
     }
 
-    if (attachements.size() == 1) {
-      return attachements.get(0);
-    } else if (Iterables.all(attachements, TestResult::successes)) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.all.pass"), attachements);
+    if (attachments.size() == 1) {
+      return attachments.get(0);
+    } else if (Iterables.all(attachments, TestResult::successes)) {
+      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.all.pass"), attachments);
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.all.fail"), attachements);
+      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.all.fail"), attachments);
     }
   }
 
@@ -75,16 +79,10 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
     return BlockPredicateTypes.PROPERTIES_NBT_COMBINATION;
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("first", firstBlockPredicate.createNbt());
-    if (propertyNamesPredicate != null) {
-      nbtCompound.put("properties", propertyNamesPredicate.createNbt());
-    }
-    if (nbtBlockPredicate != null) {
-      nbtCompound.put("nbt", nbtBlockPredicate.createNbt());
-    }
-  }
+  public static final Codec<PropertiesNbtCombinationBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3((b, p, n) -> new PropertiesNbtCombinationBlockPredicate(b, p.orElse(null), n.orElse(null)),
+      BlockPredicate.CODEC.fieldOf("base").forGetter(PropertiesNbtCombinationBlockPredicate::base),
+      PropertiesNamesBlockPredicate.CODEC.optionalFieldOf("properties").forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockPredicate::properties)),
+      NbtBlockPredicate.CODEC.optionalFieldOf("nbt").forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockPredicate::nbt))));
 
   public enum Type implements BlockPredicateType<PropertiesNbtCombinationBlockPredicate> {
     PROPERTIES_NBT_COMBINATION_TYPE;
@@ -92,10 +90,15 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate fir
     @Override
     public @NotNull PropertiesNbtCombinationBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       return new PropertiesNbtCombinationBlockPredicate(
-          BlockPredicate.fromNbt(nbtCompound.getCompound("first"), world),
+          BlockPredicate.fromNbt(nbtCompound.getCompound("first")),
           nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertiesNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), world) : null,
           nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockPredicate.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), world) : null
       );
+    }
+
+    @Override
+    public @NotNull Codec<PropertiesNbtCombinationBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 }

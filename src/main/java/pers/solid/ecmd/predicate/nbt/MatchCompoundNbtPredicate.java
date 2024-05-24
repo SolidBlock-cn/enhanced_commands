@@ -80,4 +80,9 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull 
     }
     return !negated;
   }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.MATCH_COMPOUND;
+  }
 }

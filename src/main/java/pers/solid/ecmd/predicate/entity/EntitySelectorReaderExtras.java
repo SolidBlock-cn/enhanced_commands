@@ -64,7 +64,7 @@ public class EntitySelectorReaderExtras {
    */
   public CommandContext<?> context = null;
   /**
-   * 此集合包含本模组中已经使用了的参数名称，只有当此参数禁止重复使用时才会加入到这个里面，并表示为之外的参数检测重复。值为是否是表示为反向的（即 {@code option=!value}，因为一些参数允许多次使用反向的用法（如 {@code option=!value1,option=!value2}），但是不允许混合使用反向和未反向用法（如 {@code option=!value1,option=value2} 或 {@code option=value1,option=!value2}）或多次使用非反向的用法（如 {@code option=value1,option=value2}）。
+   * 此集合包含本模组中已经使用了的参数名称，只有当此参数禁止重复使用时才会加入到这个里面，并表示为之外的参数检测重复。值为是否是表示为反向的（即 {@code option=!probability}，因为一些参数允许多次使用反向的用法（如 {@code option=!value1,option=!value2}），但是不允许混合使用反向和未反向用法（如 {@code option=!value1,option=value2} 或 {@code option=value1,option=!value2}）或多次使用非反向的用法（如 {@code option=value1,option=value2}）。
    */
   public Object2BooleanMap<String> usedParams = new Object2BooleanOpenHashMap<>();
 

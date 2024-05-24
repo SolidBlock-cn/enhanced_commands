@@ -71,4 +71,9 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
     }
     return !negated;
   }
+
+  @Override
+  public @NotNull Type getType() {
+    return Type.MATCH_LIST;
+  }
 }

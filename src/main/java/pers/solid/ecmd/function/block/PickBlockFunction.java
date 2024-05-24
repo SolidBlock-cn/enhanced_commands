@@ -99,7 +99,7 @@ public interface PickBlockFunction extends BlockFunction {
       for (ObjectDoublePair<BlockFunction> pair : pairs) {
         final NbtCompound nbtCompound1 = new NbtCompound();
         nbtList.add(nbtCompound1);
-        nbtCompound1.put("value", pair.left().createNbt());
+        nbtCompound1.put("probability", pair.left().createNbt());
         nbtCompound1.putDouble("weight", pair.rightDouble());
       }
     }
@@ -118,7 +118,7 @@ public interface PickBlockFunction extends BlockFunction {
           if (!(element instanceof final NbtCompound nbtCompound1))
             continue;
           final float weight = nbtCompound1.getFloat("weight");
-          final BlockFunction value = BlockFunction.fromNbt(nbtCompound1.getCompound("value"), world);
+          final BlockFunction value = BlockFunction.fromNbt(nbtCompound1.getCompound("probability"), world);
           pairsBuilder.add(ObjectDoublePair.of(value, weight));
         }
         return new Weighted(pairsBuilder.build());

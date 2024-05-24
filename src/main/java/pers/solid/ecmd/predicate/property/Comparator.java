@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.StringIdentifiable;
@@ -19,6 +20,8 @@ public enum Comparator implements StringIdentifiable {
   NE("!=", (actual, expected) -> !actual.equals(expected));
 
   public static final Map<String, Comparator> NAME_TO_VALUE = Util.make(new ImmutableMap.Builder<String, Comparator>(), builder -> Arrays.stream(values()).forEach(comparator -> builder.put(comparator.asString(), comparator))).put("=!", NE).build();
+  public static final com.mojang.serialization.Codec<Comparator> CODEC = StringIdentifiable.createCodec(Comparator::values);
+  public static final MapCodec<Comparator> FIELD_CODEC = CODEC.fieldOf("comparator");
 
   private final String name;
   private final BiPredicate biPredicate;

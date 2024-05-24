@@ -1,6 +1,8 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -38,13 +40,6 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   @Override
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.BI_PREDICATE;
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putBoolean("same", same);
-    nbtCompound.put("predicate1", blockPredicate1.createNbt());
-    nbtCompound.put("predicate2", blockPredicate2.createNbt());
   }
 
   public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
@@ -88,15 +83,22 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
   }
 
+  public static final Codec<BiPredicateBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.fieldOf("block_predicate1").forGetter(BiPredicateBlockPredicate::blockPredicate1), BlockPredicate.CODEC.fieldOf("block_predicate2").forGetter(BiPredicateBlockPredicate::blockPredicate2), Codec.BOOL.fieldOf("same").forGetter(BiPredicateBlockPredicate::same)).apply(i, BiPredicateBlockPredicate::new));
+
   public enum Type implements BlockPredicateType<BiPredicateBlockPredicate> {
     BI_PREDICATE_TYPE;
 
     @Override
     public @NotNull BiPredicateBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
       final boolean same = nbtCompound.getBoolean("same");
-      final BlockPredicate predicate1 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate1"), world);
-      final BlockPredicate predicate2 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate2"), world);
+      final BlockPredicate predicate1 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate1"));
+      final BlockPredicate predicate2 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate2"));
       return new BiPredicateBlockPredicate(predicate1, predicate2, same);
+    }
+
+    @Override
+    public @NotNull Codec<BiPredicateBlockPredicate> getCodec() {
+      return CODEC;
     }
   }
 }

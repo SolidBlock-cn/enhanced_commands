@@ -215,7 +215,7 @@ public final class SeparatedExecuteCommand {
             .then(argument("objective", ScoreboardObjectiveArgumentType.scoreboardObjective()).redirect(node, context -> executeStoreScore(context.getSource(), ScoreHolderArgumentType.getScoreboardScoreHolders(context, "targets"), ScoreboardObjectiveArgumentType.getObjective(context, "objective"), requestResult)))));
     builder.then(literal("bossbar")
         .then(argument("id", IdentifierArgumentType.identifier()).suggests(BossBarCommand.SUGGESTION_PROVIDER)
-            .then(literal("value").redirect(node, context -> executeStoreBossbar(context.getSource(), BossBarCommand.getBossBar(context), true, requestResult)))
+            .then(literal("probability").redirect(node, context -> executeStoreBossbar(context.getSource(), BossBarCommand.getBossBar(context), true, requestResult)))
             .then(literal("max").redirect(node, context -> executeStoreBossbar(context.getSource(), BossBarCommand.getBossBar(context), false, requestResult)))));
 
     for (DataCommand.ObjectType objectType : DataCommand.TARGET_OBJECT_TYPES) {

@@ -1,5 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -14,6 +16,8 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record ComparisonPropertyNamePredicate(String propertyName, Comparator comparator, String valueName) implements PropertyNamePredicate {
+  public static final Codec<ComparisonPropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3(ComparisonPropertyNamePredicate::new, Codec.STRING.fieldOf("property_name").forGetter(ComparisonPropertyNamePredicate::propertyName), Comparator.FIELD_CODEC.forGetter(ComparisonPropertyNamePredicate::comparator), Codec.STRING.fieldOf("value_name").forGetter(ComparisonPropertyNamePredicate::valueName)));
+
   @Override
   public @NotNull String asString() {
     return propertyName + comparator.asString() + valueName;
@@ -60,9 +64,14 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
   }
 
   @Override
+  public @NotNull Type getType() {
+    return Type.COMPARISON;
+  }
+
+  @Override
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.putString("property", propertyName);
     nbtCompound.putString("comparator", comparator.asString());
-    nbtCompound.putString("value", valueName);
+    nbtCompound.putString("probability", valueName);
   }
 }

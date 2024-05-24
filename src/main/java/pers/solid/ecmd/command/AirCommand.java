@@ -64,8 +64,8 @@ public enum AirCommand implements CommandRegistrationCallback {
                                 })))))))
         .then(literal("set")
             .then(argument("entities", entities())
-                .then(argument("value", integer())
-                    .executes(context -> executeSetAir(context, getEntities(context, "entities"), getInteger(context, "value"))))
+                .then(argument("probability", integer())
+                    .executes(context -> executeSetAir(context, getEntities(context, "entities"), getInteger(context, "probability"))))
                 .then(literal("from")
                     .then(literal("result").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
@@ -97,14 +97,14 @@ public enum AirCommand implements CommandRegistrationCallback {
             .executes(context -> executeAddAir(context, Collections.singleton(context.getSource().getEntityOrThrow())))
             .then(argument("entities", entities())
                 .executes(context -> executeAddAir(context, getEntities(context, "entities")))
-                .then(argument("value", integer())
-                    .executes(context -> executeAddAir(context, getEntities(context, "entities"), getInteger(context, "value"))))))
+                .then(argument("probability", integer())
+                    .executes(context -> executeAddAir(context, getEntities(context, "entities"), getInteger(context, "probability"))))))
         .then(literal("remove")
             .executes(context -> executeRemoveAir(context, Collections.singleton(context.getSource().getEntityOrThrow())))
             .then(argument("entities", entities())
                 .executes(context -> executeRemoveAir(context, getEntities(context, "entities")))
-                .then(argument("value", integer())
-                    .executes(context -> executeRemoveAir(context, getEntities(context, "entities"), getInteger(context, "value")))))));
+                .then(argument("probability", integer())
+                    .executes(context -> executeRemoveAir(context, getEntities(context, "entities"), getInteger(context, "probability")))))));
   }
 
   private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) {
