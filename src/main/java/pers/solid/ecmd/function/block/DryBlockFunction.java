@@ -19,6 +19,8 @@ import pers.solid.ecmd.util.FunctionParamsParser;
  * 去除方块函数中的流体，并将 waterlogged 设为 false。这不一定总是能够成功。
  */
 public record DryBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
+  public static final Codec<DryBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.group(BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(DryBlockFunction::function)).apply(i, DryBlockFunction::new));
+
   @Override
   public @NotNull String asString() {
     return "dry(" + (function.isEmpty() ? "" : function.asString()) + ")";
@@ -40,8 +42,6 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
   public @NotNull BlockFunctionType<DryBlockFunction> getType() {
     return BlockFunctionTypes.DRY;
   }
-
-  public static final Codec<DryBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.group(BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(DryBlockFunction::function)).apply(i, DryBlockFunction::new));
 
   public enum Type implements BlockFunctionType<DryBlockFunction> {
     DRY_TYPE;

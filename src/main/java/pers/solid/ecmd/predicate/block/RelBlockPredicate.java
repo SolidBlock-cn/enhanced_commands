@@ -21,6 +21,8 @@ import java.util.function.Function;
 
 public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate predicate) implements BlockPredicate {
 
+  public static final Codec<RelBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(RelBlockPredicate::new, Vec3i.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
+
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     final BlockPos pos = cachedBlockPosition.getBlockPos().add(relPos);
@@ -42,6 +44,15 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
   @Override
   public @NotNull String asString() {
     return "rel(%s %s %s, %s)".formatted(relPos.getX(), relPos.getY(), relPos.getZ(), predicate.asString());
+  }
+
+  public enum Type implements BlockPredicateType<RelBlockPredicate> {
+    REL_TYPE;
+
+    @Override
+    public @NotNull Codec<RelBlockPredicate> getCodec() {
+      return CODEC;
+    }
   }
 
   public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
@@ -72,17 +83,6 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
       } else if (paramIndex == 1) {
         blockPredicate = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
-    }
-  }
-
-  public static final Codec<RelBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(RelBlockPredicate::new, Vec3i.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
-
-  public enum Type implements BlockPredicateType<RelBlockPredicate> {
-    REL_TYPE;
-
-    @Override
-    public @NotNull Codec<RelBlockPredicate> getCodec() {
-      return CODEC;
     }
   }
 }

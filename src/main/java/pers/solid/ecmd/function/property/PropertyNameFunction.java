@@ -15,12 +15,6 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 public interface PropertyNameFunction extends ExpressionConvertible {
   Codec<PropertyNameFunction> CODEC = Type.CODEC.dispatch(PropertyNameFunction::getType, type -> type.codec);
 
-  @Contract(pure = true)
-  BlockState getModifiedState(BlockState origState, BlockState blockState, Random random);
-
-  @Contract(pure = true)
-  String propertyName();
-
   /**
    * 当 must 为 true 时，返回属性或者抛出异常。当 must 为 false 时，返回属性或者 null，不抛出异常。
    */
@@ -37,6 +31,12 @@ public interface PropertyNameFunction extends ExpressionConvertible {
     }
     return property;
   }
+
+  @Contract(pure = true)
+  BlockState getModifiedState(BlockState origState, BlockState blockState, Random random);
+
+  @Contract(pure = true)
+  String propertyName();
 
   @NotNull
   Type getType();

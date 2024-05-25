@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
  * @see TagBlockPredicate#properties
  */
 public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate> predicates) implements BlockPredicate {
+  public static final Codec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
+
   @Override
   public @NotNull String asString() {
     return predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(",", "[", "]"));
@@ -70,8 +72,6 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.PROPERTY_NAMES;
   }
-
-  public static final Codec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("predicate", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
 
   public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate>, Parser<BlockPredicateArgument> {
     PROPERTY_NAMES_TYPE;

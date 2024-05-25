@@ -21,6 +21,9 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 public record SphereRegion(double radius, Vec3d center) implements Region {
+  public static final SimpleCommandExceptionType EXPAND_FAILED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.sphere_cannot_expand"));
+  public static final Codec<SphereRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(SphereRegion::radius), Vec3d.CODEC.fieldOf("center").forGetter(SphereRegion::center)).apply(i, SphereRegion::new));
+
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return vec3d.isInRange(center, radius);
@@ -40,8 +43,6 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   public @NotNull RegionType<?> getType() {
     return RegionTypes.SPHERE;
   }
-
-  public static final SimpleCommandExceptionType EXPAND_FAILED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.sphere_cannot_expand"));
 
   @Override
   public @NotNull SphereRegion expanded(double offset) {
@@ -77,8 +78,6 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   public @NotNull Box minContainingBox() {
     return Box.of(center, 2 * radius, 2 * radius, 2 * radius);
   }
-
-  public static final Codec<SphereRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(SphereRegion::radius), Vec3d.CODEC.fieldOf("center").forGetter(SphereRegion::center)).apply(i, SphereRegion::new));
 
   public enum Type implements RegionType<SphereRegion> {
     SPHERE_TYPE;

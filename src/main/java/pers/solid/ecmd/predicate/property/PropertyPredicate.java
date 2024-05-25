@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
@@ -11,16 +12,20 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
-public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionConvertible {
-  Codec<PropertyPredicate<?>> CODEC = Type.CODEC.dispatch(PropertyPredicate::getType, type -> type.codec);
+import java.util.function.Function;
 
-  @NotNull
-  Type getType();
+public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionConvertible {
+  static Codec<PropertyPredicate<?>> getCodec(Block block) {
+    return Type.CODEC.dispatch(PropertyPredicate::getType, type -> type.getCodec(block));
+  }
 
   @NotNull
   static <T extends Comparable<T>> MutableText propertyAndValue(BlockState blockState, Property<T> property) {
     return Text.literal(property.getName() + "=" + property.name(blockState.get(property)));
   }
+
+  @NotNull
+  Type getType();
 
   boolean test(BlockState blockState);
 
@@ -29,23 +34,26 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
   Property<T> property();
 
   enum Type implements StringIdentifiable {
-    COMPARISON("comparison", ComparisonPropertyPredicate.CODEC),
-    EXISTENCE("existence", ExistencePropertyPredicate.CODEC),
-    MULTI_VALUE("multi_value", MultiValuePropertyPredicate.CODEC),
-    CUSTOM("custom", com.mojang.serialization.Codec.unit(null));
+    COMPARISON("comparison", ComparisonPropertyPredicate::getCodec),
+    EXISTENCE("existence", ExistencePropertyPredicate::getCodec),
+    MULTI_VALUE("multi_value", MultiValuePropertyPredicate::getCodec);
 
     public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
+    public final Function<Block, com.mojang.serialization.Codec<? extends PropertyPredicate<?>>> codecFunction;
     private final String name;
-    public final com.mojang.serialization.Codec<? extends PropertyPredicate<?>> codec;
 
-    Type(String name, com.mojang.serialization.Codec<? extends PropertyPredicate<?>> codec) {
+    Type(String name, Function<Block, com.mojang.serialization.Codec<? extends PropertyPredicate<?>>> codecFunction) {
       this.name = name;
-      this.codec = codec;
+      this.codecFunction = codecFunction;
     }
 
     @Override
     public String asString() {
       return name;
+    }
+
+    public com.mojang.serialization.Codec<? extends PropertyPredicate<?>> getCodec(Block block) {
+      return codecFunction.apply(block);
     }
   }
 }

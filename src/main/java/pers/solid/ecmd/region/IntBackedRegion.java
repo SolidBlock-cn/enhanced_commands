@@ -16,6 +16,30 @@ import java.util.function.Function;
  * A region that supports only integer operations. Operations related double will throw {@link UnsupportedOperationException}, unless it equals to the integer.
  */
 public interface IntBackedRegion extends Region {
+  DynamicCommandExceptionType MOVE_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.move_must_int", o));
+  DynamicCommandExceptionType MOVE_MUST_INT_VECTOR = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.move_must_int_vector", o));
+  DynamicCommandExceptionType EXPAND_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.expand_must_int", o));
+  DynamicCommandExceptionType ROTATION_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.rotation_pivot_must_center", o));
+  DynamicCommandExceptionType MIRROR_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.mirror_pivot_must_center", o));
+
+  static Vec3i toFlooredIntOrThrow(Vec3d vec3d, DynamicCommandExceptionType dynamicCommandExceptionType) {
+    final BlockPos vec3i = BlockPos.ofFloored(vec3d);
+    if (vec3d.equals(Vec3d.of(vec3i))) {
+      return vec3i;
+    } else {
+      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(Styles.ACTUAL)));
+    }
+  }
+
+  static Vec3i toCenteredIntOrThrow(Vec3d vec3d, DynamicCommandExceptionType dynamicCommandExceptionType) {
+    final BlockPos vec3i = BlockPos.ofFloored(vec3d);
+    if (vec3d.equals(Vec3d.ofCenter(vec3i))) {
+      return vec3i;
+    } else {
+      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(Styles.ACTUAL)));
+    }
+  }
+
   @Override
   boolean contains(@NotNull Vec3i vec3i);
 
@@ -24,23 +48,17 @@ public interface IntBackedRegion extends Region {
     return contains(BlockPos.ofFloored(vec3d));
   }
 
-  DynamicCommandExceptionType MOVE_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.move_must_int", o));
-
   @Override
   @NotNull
   default Region moved(@NotNull Vec3i relativePos) {
     return transformedInt(vec3i -> vec3i.add(relativePos));
   }
 
-  DynamicCommandExceptionType MOVE_MUST_INT_VECTOR = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.move_must_int_vector", o));
-
   @Override
   @NotNull
   default Region moved(@NotNull Vec3d relativePos) {
     return moved(toFlooredIntOrThrow(relativePos, MOVE_MUST_INT_VECTOR));
   }
-
-  DynamicCommandExceptionType EXPAND_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.expand_must_int", o));
 
   @Override
   @NotNull
@@ -98,8 +116,6 @@ public interface IntBackedRegion extends Region {
     throw new UnsupportedOperationException();
   }
 
-  DynamicCommandExceptionType ROTATION_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.rotation_pivot_must_center", o));
-
   @Override
   @NotNull
   default Region rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
@@ -118,8 +134,6 @@ public interface IntBackedRegion extends Region {
     throw new UnsupportedOperationException();
   }
 
-  DynamicCommandExceptionType MIRROR_PIVOT_MUST_CENTER = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.mirror_pivot_must_center", o));
-
   @Override
   @NotNull
   default Region mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
@@ -137,24 +151,6 @@ public interface IntBackedRegion extends Region {
   @Override
   default double volume() {
     return numberOfBlocksAffected();
-  }
-
-  static Vec3i toFlooredIntOrThrow(Vec3d vec3d, DynamicCommandExceptionType dynamicCommandExceptionType) {
-    final BlockPos vec3i = BlockPos.ofFloored(vec3d);
-    if (vec3d.equals(Vec3d.of(vec3i))) {
-      return vec3i;
-    } else {
-      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(Styles.ACTUAL)));
-    }
-  }
-
-  static Vec3i toCenteredIntOrThrow(Vec3d vec3d, DynamicCommandExceptionType dynamicCommandExceptionType) {
-    final BlockPos vec3i = BlockPos.ofFloored(vec3d);
-    if (vec3d.equals(Vec3d.ofCenter(vec3i))) {
-      return vec3i;
-    } else {
-      throw new UnsupportedOperationException(dynamicCommandExceptionType.create(TextUtil.wrapVector(vec3d).styled(Styles.ACTUAL)));
-    }
   }
 
   @Override

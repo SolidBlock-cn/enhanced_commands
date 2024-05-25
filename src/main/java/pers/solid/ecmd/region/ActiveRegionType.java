@@ -17,6 +17,8 @@ import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgument> {
   TYPE;
 
+  private static final Codec<Region> CODEC = Codec.of(Encoder.error("Cannot encode"), Decoder.error("Region NBT cannot hold this type of region"));
+
   @Override
   public RegionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
     parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.region.active_region"), suggestionsBuilder));
@@ -34,8 +36,6 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgumen
       return null;
     }
   }
-
-  private static final Codec<Region> CODEC = Codec.of(Encoder.error("Cannot encode"), Decoder.error("Region NBT cannot hold this type of region"));
 
   @Override
   public @NotNull Codec<Region> getCodec() {

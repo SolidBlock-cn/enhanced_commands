@@ -25,6 +25,8 @@ import pers.solid.ecmd.util.Styles;
  *   </ul>
  */
 public record RandBlockPredicate(float probability, @NotNull BlockPredicate predicate) implements BlockPredicate {
+  public static final Codec<RandBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(RandBlockPredicate::new, Codec.FLOAT.fieldOf("probability").forGetter(RandBlockPredicate::probability), BlockPredicate.CODEC.optionalFieldOf("predicate", ConstantBlockPredicate.ALWAYS_TRUE).forGetter(RandBlockPredicate::predicate)));
+
   @Override
   public @NotNull String asString() {
     if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
@@ -61,6 +63,15 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
     return BlockPredicateTypes.RAND;
   }
 
+  public enum Type implements BlockPredicateType<RandBlockPredicate> {
+    RAND_TYPE;
+
+    @Override
+    public @NotNull Codec<RandBlockPredicate> getCodec() {
+      return CODEC;
+    }
+  }
+
   public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
     private float value;
     private @NotNull BlockPredicateArgument predicate = ConstantBlockPredicate.ALWAYS_TRUE;
@@ -92,17 +103,6 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
       } else if (paramIndex == 1) {
         predicate = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
       }
-    }
-  }
-
-  public static final Codec<RandBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(RandBlockPredicate::new, Codec.FLOAT.fieldOf("probability").forGetter(RandBlockPredicate::probability), BlockPredicate.CODEC.optionalFieldOf("predicate", ConstantBlockPredicate.ALWAYS_TRUE).forGetter(RandBlockPredicate::predicate)));
-
-  public enum Type implements BlockPredicateType<RandBlockPredicate> {
-    RAND_TYPE;
-
-    @Override
-    public @NotNull Codec<RandBlockPredicate> getCodec() {
-      return CODEC;
     }
   }
 }

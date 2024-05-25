@@ -21,6 +21,8 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
+  public static final Codec<SingleBlockPosRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3i.CODEC.fieldOf("pos").forGetter(SingleBlockPosRegion::pos)).apply(i, SingleBlockPosRegion::new));
+
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
     return this.pos.equals(vec3i);
@@ -60,8 +62,6 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
   public @NotNull Iterator<BlockPos> iterator() {
     return Iterators.singletonIterator(new BlockPos(pos));
   }
-
-  public static final Codec<SingleBlockPosRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3i.CODEC.fieldOf("pos").forGetter(SingleBlockPosRegion::pos)).apply(i, SingleBlockPosRegion::new));
 
   public enum Type implements RegionType<SingleBlockPosRegion> {
     INSTANCE;

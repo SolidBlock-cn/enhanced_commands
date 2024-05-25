@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.function.Function;
 
 public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) implements BlockFunction {
+  public static final Codec<MirrorBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(MirrorBlockFunction::new, EnumOrRandom.getCodec(BlockMirror.CODEC, BlockMirror::values).fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
+
   @Override
   public @NotNull String asString() {
     return "mirror(" + mirror.asString() + ")";
@@ -36,8 +38,6 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
   public @NotNull BlockFunctionType<MirrorBlockFunction> getType() {
     return BlockFunctionTypes.MIRROR;
   }
-
-  public static final Codec<MirrorBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(MirrorBlockFunction::new, EnumOrRandom.getCodec(BlockMirror.CODEC, BlockMirror::values).fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
 
   public enum Type implements BlockFunctionType<MirrorBlockFunction> {
     MIRROR_TYPE;

@@ -26,6 +26,8 @@ import pers.solid.ecmd.util.StateUtil;
 import java.util.List;
 
 public record StonecutBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
+  public static final Codec<StonecutBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(StonecutBlockFunction::function)));
+
   @Override
   public @NotNull String asString() {
     return "stonecut(" + (function.isEmpty() ? "" : function.asString()) + ")";
@@ -68,8 +70,6 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
   public @NotNull BlockFunctionType<StonecutBlockFunction> getType() {
     return BlockFunctionTypes.STONE_CUT;
   }
-
-  public static final Codec<StonecutBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(StonecutBlockFunction::function)));
 
   public enum Type implements BlockFunctionType<StonecutBlockFunction> {
     STONE_CUT_TYPE;

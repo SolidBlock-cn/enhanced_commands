@@ -17,6 +17,10 @@ import java.util.function.Function;
  * @param <T> 该属性的类型。
  */
 public interface PropertyFunction<T extends Comparable<T>> extends ExpressionConvertible {
+  static Codec<PropertyFunction<?>> getCodec(Block block) {
+    return Type.CODEC.dispatch(PropertyFunction::getType, type -> type.getCodec(block));
+  }
+
   /**
    * 修改方块状态，并返回修改后的方块状态。由于方块状态是不可变对象，因此返回的是另一个方块状态对象（也有可能是同一个）。
    *
@@ -33,10 +37,6 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
   Property<T> property();
 
   Type getType();
-
-  static Codec<PropertyFunction<?>> getCodec(Block block) {
-    return Type.CODEC.dispatch(PropertyFunction::getType, type -> type.getCodec(block));
-  }
 
   enum Type implements StringIdentifiable {
     ALL_ORIGINAL("all_original", AllOriginalPropertyFunction::getCodec),

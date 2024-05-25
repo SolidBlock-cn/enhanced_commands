@@ -14,6 +14,8 @@ import pers.solid.ecmd.util.FunctionParamsParser;
 import java.util.List;
 
 public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPredicate blockPredicate2, boolean same) implements BlockPredicate {
+  public static final Codec<BiPredicateBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.fieldOf("block_predicate1").forGetter(BiPredicateBlockPredicate::blockPredicate1), BlockPredicate.CODEC.fieldOf("block_predicate2").forGetter(BiPredicateBlockPredicate::blockPredicate2), Codec.BOOL.fieldOf("same").forGetter(BiPredicateBlockPredicate::same)).apply(i, BiPredicateBlockPredicate::new));
+
   @Override
   public @NotNull String asString() {
     return (same ? "same" : "diff") + "(" + blockPredicate1.asString() + ", " + blockPredicate2.asString() + ")";
@@ -38,6 +40,15 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   @Override
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.BI_PREDICATE;
+  }
+
+  public enum Type implements BlockPredicateType<BiPredicateBlockPredicate> {
+    BI_PREDICATE_TYPE;
+
+    @Override
+    public @NotNull Codec<BiPredicateBlockPredicate> getCodec() {
+      return CODEC;
+    }
   }
 
   public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
@@ -78,17 +89,6 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     @Override
     public int maxParamsCount() {
       return 2;
-    }
-  }
-
-  public static final Codec<BiPredicateBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.fieldOf("block_predicate1").forGetter(BiPredicateBlockPredicate::blockPredicate1), BlockPredicate.CODEC.fieldOf("block_predicate2").forGetter(BiPredicateBlockPredicate::blockPredicate2), Codec.BOOL.fieldOf("same").forGetter(BiPredicateBlockPredicate::same)).apply(i, BiPredicateBlockPredicate::new));
-
-  public enum Type implements BlockPredicateType<BiPredicateBlockPredicate> {
-    BI_PREDICATE_TYPE;
-
-    @Override
-    public @NotNull Codec<BiPredicateBlockPredicate> getCodec() {
-      return CODEC;
     }
   }
 }

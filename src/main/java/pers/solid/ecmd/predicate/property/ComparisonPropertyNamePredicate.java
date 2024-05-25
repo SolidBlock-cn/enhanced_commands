@@ -15,7 +15,10 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record ComparisonPropertyNamePredicate(String propertyName, Comparator comparator, String valueName) implements PropertyNamePredicate {
-  public static final Codec<ComparisonPropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3(ComparisonPropertyNamePredicate::new, Codec.STRING.fieldOf("property_name").forGetter(ComparisonPropertyNamePredicate::propertyName), Comparator.FIELD_CODEC.forGetter(ComparisonPropertyNamePredicate::comparator), Codec.STRING.fieldOf("value_name").forGetter(ComparisonPropertyNamePredicate::valueName)));
+  public static final Codec<ComparisonPropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3(ComparisonPropertyNamePredicate::new,
+      Codec.STRING.fieldOf("property").forGetter(ComparisonPropertyNamePredicate::propertyName),
+      Comparator.FIELD_CODEC.forGetter(ComparisonPropertyNamePredicate::comparator),
+      Codec.STRING.fieldOf("value").forGetter(ComparisonPropertyNamePredicate::valueName)));
 
   @Override
   public @NotNull String asString() {

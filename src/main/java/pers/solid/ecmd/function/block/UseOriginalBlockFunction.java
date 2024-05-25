@@ -17,6 +17,8 @@ import pers.solid.ecmd.util.ParsingUtil;
 public enum UseOriginalBlockFunction implements BlockFunction {
   USE_ORIGINAL;
 
+  public static final Codec<UseOriginalBlockFunction> CODEC = Codec.unit(USE_ORIGINAL);
+
   @Override
   public @NotNull String asString() {
     return "~";
@@ -31,8 +33,6 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   public @NotNull BlockFunctionType<UseOriginalBlockFunction> getType() {
     return BlockFunctionTypes.USE_ORIGINAL;
   }
-
-  public static final Codec<UseOriginalBlockFunction> CODEC = Codec.unit(USE_ORIGINAL);
 
   public enum Type implements BlockFunctionType<UseOriginalBlockFunction>, Parser<BlockFunctionArgument> {
     USE_ORIGINAL_TYPE;

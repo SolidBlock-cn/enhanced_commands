@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.property;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -21,7 +22,10 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.List;
 
 public record MultiValuePropertyNamePredicate(String propertyName, List<String> valueNames, boolean inverted) implements PropertyNamePredicate {
-  public static final Codec<MultiValuePropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3(MultiValuePropertyNamePredicate::new, Codec.STRING.fieldOf("property_name").forGetter(MultiValuePropertyNamePredicate::propertyName), Codec.STRING.listOf().fieldOf("value_names").forGetter(MultiValuePropertyNamePredicate::valueNames), Codec.BOOL.fieldOf("inverted").forGetter(MultiValuePropertyNamePredicate::inverted)));
+  public static final Codec<MultiValuePropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3(MultiValuePropertyNamePredicate::new,
+      Codec.STRING.fieldOf("property").forGetter(MultiValuePropertyNamePredicate::propertyName),
+      Codec.STRING.listOf().optionalFieldOf("values", ImmutableList.of()).forGetter(MultiValuePropertyNamePredicate::valueNames),
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MultiValuePropertyNamePredicate::inverted)));
 
   @Override
   public boolean test(BlockState blockState) {

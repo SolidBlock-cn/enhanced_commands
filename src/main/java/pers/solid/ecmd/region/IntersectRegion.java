@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public record IntersectRegion(@NotNull List<Region> regions) implements RegionsBasedRegion<IntersectRegion, Region> {
+  public static final Codec<IntersectRegion> CODEC = RecordCodecBuilder.create(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, IntersectRegion::new));
+
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return regions.stream().allMatch(region -> region.contains(vec3d));
@@ -69,7 +71,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
 
   @Override
   public @NotNull String asString() {
-    return "intersect(" + String.join(", ", Collections2.transform(regions, Region::asString))+ ")";
+    return "intersect(" + String.join(", ", Collections2.transform(regions, Region::asString)) + ")";
   }
 
   @Override
@@ -92,8 +94,6 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   public IntersectRegion newRegion(@NotNull List<Region> regions) {
     return new IntersectRegion(regions);
   }
-
-  public static final Codec<IntersectRegion> CODEC = RecordCodecBuilder.create(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, IntersectRegion::new));
 
   public enum Type implements RegionType<IntersectRegion> {
     INTERSECT_TYPE;

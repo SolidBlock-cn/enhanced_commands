@@ -24,6 +24,15 @@ import java.util.stream.Stream;
 public interface Region extends Iterable<BlockPos>, ExpressionConvertible, RegionArgument {
   Codec<Region> CODEC = RegionType.REGISTRY.getCodec().dispatch(Region::getType, RegionType::getCodec);
 
+  static @NotNull Region fromNbt(@NotNull NbtElement nbtElement) {
+    return Util.getResult(CODEC.decode(NbtOps.INSTANCE, nbtElement), IllegalArgumentException::new).getFirst();
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <R extends Region> NbtElement encode(Codec<R> codec, Region region) {
+    return codec.encodeStart(NbtOps.INSTANCE, (R) region).result().orElseThrow();
+  }
+
   /**
    * 判断方块坐标是否在该区域内。其默认的实现方式是判断方块坐标的中心位置。
    */
@@ -162,15 +171,6 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
   @Override
   default Region toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException {
     return this;
-  }
-
-  static @NotNull Region fromNbt(@NotNull NbtElement nbtElement) {
-    return Util.getResult(CODEC.decode(NbtOps.INSTANCE, nbtElement), IllegalArgumentException::new).getFirst();
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <R extends Region> NbtElement encode(Codec<R> codec, Region region) {
-    return codec.encodeStart(NbtOps.INSTANCE, (R) region).result().orElseThrow();
   }
 
   @ApiStatus.NonExtendable

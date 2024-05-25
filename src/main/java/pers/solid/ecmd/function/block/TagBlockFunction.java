@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public final class TagBlockFunction implements BlockFunction {
+  public static final Codec<TagBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(TagBlockFunction::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(f -> f.tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", ImmutableList.of()).forGetter(f -> f.properties)));
   private final @NotNull TagKey<Block> tag;
   private final @NotNull List<PropertyNameFunction> properties;
   private transient Block[] blocks;
@@ -96,8 +97,6 @@ public final class TagBlockFunction implements BlockFunction {
         ", properties=" + properties +
         '}';
   }
-
-  public static final Codec<TagBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(TagBlockFunction::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(f -> f.tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", ImmutableList.of()).forGetter(f -> f.properties)));
 
   public enum Type implements BlockFunctionType<TagBlockFunction>, Parser<BlockFunctionArgument> {
     TAG_TYPE;

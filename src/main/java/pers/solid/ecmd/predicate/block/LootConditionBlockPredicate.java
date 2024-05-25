@@ -36,6 +36,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface LootConditionBlockPredicate extends BlockPredicate {
   Gson GSON = LootGsons.getConditionGsonBuilder().setLenient().create();
+  Codec<LootConditionBlockPredicate> CODEC = Codec.BOOL.dispatch("anonymous", p -> p instanceof Anonymous, b -> b ? Anonymous.CODEC : Named.CODEC);
 
   LootCondition lootCondition(CachedBlockPosition cachedBlockPosition);
 
@@ -57,6 +58,15 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
   @NotNull
   default Type getType() {
     return BlockPredicateTypes.LOOT_CONDITION;
+  }
+
+  enum Type implements BlockPredicateType<LootConditionBlockPredicate> {
+    LOOT_CONDITION_TYPE;
+
+    @Override
+    public @NotNull Codec<LootConditionBlockPredicate> getCodec() {
+      return CODEC;
+    }
   }
 
   record Anonymous(@NotNull LootCondition lootCondition) implements LootConditionBlockPredicate {
@@ -83,8 +93,10 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
   }
 
   final class Named implements LootConditionBlockPredicate {
-    public static final Codec<Named> CODEC = RecordCodecBuilder.create(i -> i.ap(Named::new, Identifier.CODEC.fieldOf("identifier").forGetter(named -> named.identifier)));
+    public static final Codec<Named> CODEC = RecordCodecBuilder.create(i -> i.ap(Named::new, Identifier.CODEC.fieldOf("id").forGetter(named -> named.identifier)));
     private final @NotNull Identifier identifier;
+    private transient WeakReference<LootConditionManager> managerRef = null;
+    private transient LootCondition cached = null;
 
     public Named(@NotNull Identifier identifier) {
       this.identifier = identifier;
@@ -103,9 +115,6 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
         return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.loot_condition.named.fail", TextUtil.wrapVector(cachedBlockPosition.getBlockPos()), TextUtil.literal(identifier).styled(Styles.EXPECTED)));
       }
     }
-
-    private transient WeakReference<LootConditionManager> managerRef = null;
-    private transient LootCondition cached = null;
 
     @Override
     public LootCondition lootCondition(CachedBlockPosition cachedBlockPosition) {
@@ -140,21 +149,21 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
     }
   }
 
-  Codec<LootConditionBlockPredicate> CODEC = Codec.BOOL.dispatch("is_anonymous", p -> p instanceof Anonymous, b -> b ? Anonymous.CODEC : Named.CODEC);
-
-  enum Type implements BlockPredicateType<LootConditionBlockPredicate> {
-    LOOT_CONDITION_TYPE;
-
-    @Override
-    public @NotNull Codec<LootConditionBlockPredicate> getCodec() {
-      return CODEC;
-    }
-  }
-
   class Parser implements FunctionParamsParser<BlockPredicateArgument> {
     protected Identifier id;
     protected LootCondition anonymous;
     protected int cursorBeforeId, cursorAfterId;
+
+    private static CompletableFuture<Suggestions> getLootConditionIdSuggestions(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder, int cursorBeforeId) {
+      if (context.getSource() instanceof final ServerCommandSource source) {
+        LootConditionManager lootConditionManager = source.getServer().getPredicateManager();
+        return CommandSource.suggestIdentifiers(lootConditionManager.getIds(), suggestionsBuilder.createOffset(cursorBeforeId));
+      } else if (context.getSource() instanceof CommandSource commandSource) {
+        return commandSource.getCompletions(context);
+      } else {
+        return Suggestions.empty();
+      }
+    }
 
     @Override
     public int minParamsCount() {
@@ -212,17 +221,6 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
           }
         })));
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ")");
-      }
-    }
-
-    private static CompletableFuture<Suggestions> getLootConditionIdSuggestions(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder, int cursorBeforeId) {
-      if (context.getSource() instanceof final ServerCommandSource source) {
-        LootConditionManager lootConditionManager = source.getServer().getPredicateManager();
-        return CommandSource.suggestIdentifiers(lootConditionManager.getIds(), suggestionsBuilder.createOffset(cursorBeforeId));
-      } else if (context.getSource() instanceof CommandSource commandSource) {
-        return commandSource.getCompletions(context);
-      } else {
-        return Suggestions.empty();
       }
     }
   }

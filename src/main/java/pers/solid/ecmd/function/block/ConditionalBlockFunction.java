@@ -23,6 +23,8 @@ import pers.solid.ecmd.util.FunctionParamsParser;
  * </blockquote>
  */
 public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNull BlockFunction functionIfTrue, @NotNull BlockFunction functionIfFalse) implements BlockFunction {
+  public static final Codec<ConditionalBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3(ConditionalBlockFunction::new, BlockPredicate.CODEC.fieldOf("condition").forGetter(ConditionalBlockFunction::condition), BlockFunction.CODEC.fieldOf("then").forGetter(ConditionalBlockFunction::functionIfTrue), BlockFunction.CODEC.optionalFieldOf("else", BlockFunction.EMPTY).forGetter(ConditionalBlockFunction::functionIfFalse)));
+
   @Override
   public @NotNull String asString() {
     return "if(" + condition.asString() + ", " + functionIfTrue.asString() + (functionIfFalse == BlockFunction.EMPTY ? "" : ", " + functionIfFalse.asString()) + ")";
@@ -42,8 +44,6 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
   public @NotNull BlockFunctionType<ConditionalBlockFunction> getType() {
     return BlockFunctionTypes.CONDITIONAL;
   }
-
-  public static final Codec<ConditionalBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3(ConditionalBlockFunction::new, BlockPredicate.CODEC.fieldOf("condition").forGetter(ConditionalBlockFunction::condition), BlockFunction.CODEC.fieldOf("then").forGetter(ConditionalBlockFunction::functionIfTrue), BlockFunction.CODEC.optionalFieldOf("else", BlockFunction.EMPTY).forGetter(ConditionalBlockFunction::functionIfFalse)));
 
   public enum Type implements BlockFunctionType<ConditionalBlockFunction> {
     CONDITIONAL_TYPE;

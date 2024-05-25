@@ -15,6 +15,10 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import java.util.Set;
 
 public record AllRandomPropertyFunction(@NotNull Set<Property<?>> except) implements GeneralPropertyFunction {
+  public static Codec<AllRandomPropertyFunction> getCodec(Block block) {
+    return RecordCodecBuilder.create(i -> i.ap(AllRandomPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllRandomPropertyFunction::except)));
+  }
+
   @Override
   public @NotNull String asString() {
     return "*";
@@ -40,10 +44,6 @@ public record AllRandomPropertyFunction(@NotNull Set<Property<?>> except) implem
   @Override
   public Type getType() {
     return Type.ALL_RANDOM;
-  }
-
-  public static Codec<AllRandomPropertyFunction> getCodec(Block block) {
-    return RecordCodecBuilder.create(i -> i.ap(AllRandomPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllRandomPropertyFunction::except)));
   }
 
 }

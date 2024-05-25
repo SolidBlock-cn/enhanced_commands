@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
 import java.util.ArrayList;
@@ -28,6 +29,11 @@ import java.util.stream.Stream;
  * </pre>
  */
 public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate base, @Nullable PropertiesNamesBlockPredicate properties, @Nullable NbtBlockPredicate nbt) implements BlockPredicate {
+  public static final Codec<PropertiesNbtCombinationBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3((b, p, n) -> new PropertiesNbtCombinationBlockPredicate(b, p.orElse(null), n.orElse(null)),
+      BlockPredicate.CODEC.fieldOf("base").forGetter(PropertiesNbtCombinationBlockPredicate::base),
+      PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties").xmap(o -> o.map(PropertiesNamesBlockPredicate::new), o -> o.map(PropertiesNamesBlockPredicate::predicates)).forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockPredicate::properties)),
+      NbtPredicate.CODEC.optionalFieldOf("nbt").xmap(o -> o.map(NbtBlockPredicate::new), o -> o.map(NbtBlockPredicate::nbtPredicate)).forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockPredicate::nbt))));
+
   @Contract(value = "_, null, null -> fail", pure = true)
   public PropertiesNbtCombinationBlockPredicate {
     if (properties == null && nbt == null) {
@@ -75,11 +81,6 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.PROPERTIES_NBT_COMBINATION;
   }
-
-  public static final Codec<PropertiesNbtCombinationBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3((b, p, n) -> new PropertiesNbtCombinationBlockPredicate(b, p.orElse(null), n.orElse(null)),
-      BlockPredicate.CODEC.fieldOf("base").forGetter(PropertiesNbtCombinationBlockPredicate::base),
-      PropertiesNamesBlockPredicate.CODEC.optionalFieldOf("properties").forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockPredicate::properties)),
-      NbtBlockPredicate.CODEC.optionalFieldOf("nbt").forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockPredicate::nbt))));
 
   public enum Type implements BlockPredicateType<PropertiesNbtCombinationBlockPredicate> {
     PROPERTIES_NBT_COMBINATION_TYPE;

@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> propertyNameFunctions) implements BlockFunction {
+  public static final Codec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::propertyNameFunctions)));
+
   @Override
   public @NotNull String asString() {
     return "[" + propertyNameFunctions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(",")) + "]";
@@ -39,8 +41,6 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> pro
   public @NotNull BlockFunctionType<PropertyNamesBlockFunction> getType() {
     return BlockFunctionTypes.PROPERTY_NAMES;
   }
-
-  public static final Codec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::propertyNameFunctions)));
 
   public enum Type implements BlockFunctionType<PropertyNamesBlockFunction>, Parser<BlockFunctionArgument> {
     PROPERTY_NAMES_TYPE;

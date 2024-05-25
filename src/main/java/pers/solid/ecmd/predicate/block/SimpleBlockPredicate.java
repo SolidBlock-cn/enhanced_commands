@@ -1,10 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -18,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
-import pers.solid.ecmd.predicate.property.BlockBiasedOps;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Parser;
@@ -31,6 +27,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
+  public static final Codec<SimpleBlockPredicate> CODEC = Registries.BLOCK.getCodec().dispatch("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), PropertyPredicate.getCodec(block).listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(SimpleBlockPredicate::properties))));
+
+
   @Override
   public @NotNull String asString() {
     final String id = Registries.BLOCK.getId(block).toString();
@@ -77,20 +76,6 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.SIMPLE;
   }
-
-  public static final Codec<SimpleBlockPredicate> CODEC = Registries.BLOCK.getCodec().dispatch("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.create(i -> i.ap(o -> new SimpleBlockPredicate(block, o), new Codec<List<PropertyPredicate<?>>>() {
-    private static final Codec<List<PropertyPredicate<?>>> backedCodec = PropertyPredicate.CODEC.listOf();
-
-    @Override
-    public <T> DataResult<T> encode(List<PropertyPredicate<?>> input, DynamicOps<T> ops, T prefix) {
-      return backedCodec.encode(input, BlockBiasedOps.of(ops, block.getStateManager()), prefix);
-    }
-
-    @Override
-    public <T> DataResult<Pair<List<PropertyPredicate<?>>, T>> decode(DynamicOps<T> ops, T input) {
-      return backedCodec.decode(BlockBiasedOps.of(ops, block.getStateManager()), input);
-    }
-  }.optionalFieldOf("properties", Collections.emptyList()).forGetter(SimpleBlockPredicate::properties))));
 
   public enum Type implements BlockPredicateType<SimpleBlockPredicate>, Parser<BlockPredicateArgument> {
     SIMPLE_TYPE;

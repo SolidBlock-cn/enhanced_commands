@@ -11,7 +11,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
 
 public record ExistencePropertyNamePredicate(String propertyName, boolean exists) implements PropertyNamePredicate {
-  public static final Codec<ExistencePropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExistencePropertyNamePredicate::new, Codec.STRING.fieldOf("property_name").forGetter(ExistencePropertyNamePredicate::propertyName), Codec.BOOL.fieldOf("exists").forGetter(ExistencePropertyNamePredicate::exists)));
+  public static final Codec<ExistencePropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExistencePropertyNamePredicate::new, Codec.STRING.fieldOf("property").forGetter(ExistencePropertyNamePredicate::propertyName), Codec.BOOL.optionalFieldOf("exists", false).forGetter(ExistencePropertyNamePredicate::exists)));
 
   @Override
   public @NotNull String asString() {

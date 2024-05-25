@@ -37,10 +37,20 @@ import java.util.stream.Collectors;
  */
 public interface PickBlockFunction extends BlockFunction {
   SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.pick.zero_sum"));
+  Codec<PickBlockFunction> CODEC = Codec.<PickBlockFunction, Uniform>either(Codec.BOOL.dispatch("weighted", f -> f instanceof Weighted, b -> b ? Weighted.CODEC : Uniform.CODEC), Uniform.CODEC).xmap(ei -> ei.map(Function.identity(), Function.identity()), Either::left);
 
   @Override
   default @NotNull BlockFunctionType<PickBlockFunction> getType() {
     return BlockFunctionTypes.PICK;
+  }
+
+  enum Type implements BlockFunctionType<PickBlockFunction> {
+    PICK_TYPE;
+
+    @Override
+    public @NotNull Codec<PickBlockFunction> getCodec() {
+      return CODEC;
+    }
   }
 
   /**
@@ -92,20 +102,9 @@ public interface PickBlockFunction extends BlockFunction {
 
   }
 
-  Codec<PickBlockFunction> CODEC = Codec.<PickBlockFunction, Uniform>either(Codec.BOOL.dispatch("weighted", f -> f instanceof Weighted, b -> b ? Weighted.CODEC : Uniform.CODEC), Uniform.CODEC).xmap(ei -> ei.map(Function.identity(), Function.identity()), Either::left);
-
-  enum Type implements BlockFunctionType<PickBlockFunction> {
-    PICK_TYPE;
-
-    @Override
-    public @NotNull Codec<PickBlockFunction> getCodec() {
-      return CODEC;
-    }
-  }
-
   class Parser implements FunctionParamsParser<BlockFunctionArgument> {
-    boolean weighted = false;
     final List<ObjectDoublePair<BlockFunctionArgument>> pairs = new ArrayList<>();
+    boolean weighted = false;
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {

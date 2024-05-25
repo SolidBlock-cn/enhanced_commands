@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) implements RegionBasedRegion.IntBacked<CuboidOutlineRegion, BlockCuboidRegion> {
   public static final DynamicCommandExceptionType NON_POSITIVE_THICKNESS = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.cuboid_outline.non_positive_thickness", o));
   public static final Dynamic2CommandExceptionType TOO_THICK = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.region.cuboid_outline.too_thick", a, b));
+  public static final Codec<CuboidOutlineRegion> CODEC = RecordCodecBuilder.create(i -> i.group(BlockCuboidRegion.CODEC.fieldOf("region").forGetter(CuboidOutlineRegion::region), Codec.INT.optionalFieldOf("thickness", 1).forGetter(CuboidOutlineRegion::thickness)).apply(i, CuboidOutlineRegion::new));
 
   public CuboidOutlineRegion {
     if (thickness <= 0) {
@@ -102,8 +103,6 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   public @Nullable Box minContainingBox() {
     return region.minContainingBox();
   }
-
-  public static final Codec<CuboidOutlineRegion> CODEC = RecordCodecBuilder.create(i -> i.group(BlockCuboidRegion.CODEC.fieldOf("region").forGetter(CuboidOutlineRegion::region), Codec.INT.optionalFieldOf("thickness", 1).forGetter(CuboidOutlineRegion::thickness)).apply(i, CuboidOutlineRegion::new));
 
   public enum Type implements RegionType<CuboidOutlineRegion> {
     CUBOID_OUTLINE_TYPE;

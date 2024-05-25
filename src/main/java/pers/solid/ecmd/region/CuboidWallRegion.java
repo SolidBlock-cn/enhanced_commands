@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implements RegionBasedRegion.IntBacked<CuboidWallRegion, BlockCuboidRegion> {
+  public static final Codec<CuboidWallRegion> CODEC = RecordCodecBuilder.create(i -> i.group(BlockCuboidRegion.CODEC.fieldOf("region").forGetter(CuboidWallRegion::region), Codec.INT.optionalFieldOf("thickness", 1).forGetter(CuboidWallRegion::thickness)).apply(i, CuboidWallRegion::new));
+
   public CuboidWallRegion {
     if (thickness <= 0) {
       throw new IllegalArgumentException(CuboidOutlineRegion.NON_POSITIVE_THICKNESS.create(thickness));
@@ -101,8 +103,6 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
         new BlockCuboidRegion(region.minX() + thickness, region.minY(), region.maxZ() - thickness + 1, region.maxX() - thickness, region.maxY(), region.maxZ())
     );
   }
-
-  public static final Codec<CuboidWallRegion> CODEC = RecordCodecBuilder.create(i -> i.group(BlockCuboidRegion.CODEC.fieldOf("region").forGetter(CuboidWallRegion::region), Codec.INT.optionalFieldOf("thickness", 1).forGetter(CuboidWallRegion::thickness)).apply(i, CuboidWallRegion::new));
 
   public enum Type implements RegionType<CuboidWallRegion> {
     CUBOID_WALL_TYPE;

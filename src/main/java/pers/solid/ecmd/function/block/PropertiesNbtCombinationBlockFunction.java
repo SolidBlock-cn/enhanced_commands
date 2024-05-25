@@ -11,7 +11,9 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
+import pers.solid.ecmd.function.property.PropertyNameFunction;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -19,6 +21,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base, @Nullable PropertyNamesBlockFunction properties, @Nullable NbtBlockFunction nbt) implements BlockFunction {
+  public static final Codec<PropertiesNbtCombinationBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3((b, p, n) -> new PropertiesNbtCombinationBlockFunction(b, p.orElse(null), n.orElse(null)),
+      BlockFunction.CODEC.fieldOf("base").forGetter(PropertiesNbtCombinationBlockFunction::base),
+      PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties").xmap(o -> o.map(PropertyNamesBlockFunction::new), o -> o.map(PropertyNamesBlockFunction::propertyNameFunctions)).forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockFunction::properties)),
+      CompoundNbtFunction.CODEC.optionalFieldOf("nbt").xmap(o -> o.map(NbtBlockFunction::new), o -> o.map(NbtBlockFunction::nbtFunction)).forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockFunction::nbt))));
+
   @Contract(value = "_, null, null -> fail", pure = true)
   public PropertiesNbtCombinationBlockFunction {
     if (properties == null && nbt == null) {
@@ -37,7 +44,6 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
     return Stream.of(base, properties, nbt).filter(Objects::nonNull).map(BlockFunction::asString).collect(Collectors.joining());
   }
 
-
   @Override
   public @NotNull BlockFunctionType<PropertiesNbtCombinationBlockFunction> getType() {
     return BlockFunctionTypes.PROPERTIES_NBT_COMBINATION;
@@ -54,11 +60,6 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
     }
     return blockState;
   }
-
-  public static final Codec<PropertiesNbtCombinationBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3((b, p, n) -> new PropertiesNbtCombinationBlockFunction(b, p.orElse(null), n.orElse(null)),
-      BlockFunction.CODEC.fieldOf("base").forGetter(PropertiesNbtCombinationBlockFunction::base),
-      PropertyNamesBlockFunction.CODEC.optionalFieldOf("properties").forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockFunction::properties)),
-      NbtBlockFunction.CODEC.optionalFieldOf("nbt").forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockFunction::nbt))));
 
   public enum Type implements BlockFunctionType<PropertiesNbtCombinationBlockFunction> {
     PROPERTIES_NBT_COMBINATION_TYPE;

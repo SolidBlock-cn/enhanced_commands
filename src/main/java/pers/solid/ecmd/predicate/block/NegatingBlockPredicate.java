@@ -15,24 +15,26 @@ import pers.solid.ecmd.util.ParsingUtil;
 
 import java.util.List;
 
-public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements BlockPredicate {
+public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockPredicate {
+  public static final Codec<NegatingBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(NegatingBlockPredicate::new, BlockPredicate.CODEC.fieldOf("predicate").forGetter(NegatingBlockPredicate::predicate)));
+
   @Override
   public @NotNull String asString() {
-    if (blockPredicate instanceof NegatingBlockPredicate) {
-      return "!(" + blockPredicate.asString() + ")";
+    if (predicate instanceof NegatingBlockPredicate) {
+      return "!(" + predicate.asString() + ")";
     } else {
-      return "!" + blockPredicate.asString();
+      return "!" + predicate.asString();
     }
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return !blockPredicate.test(cachedBlockPosition);
+    return !predicate.test(cachedBlockPosition);
   }
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
-    final TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition);
+    final TestResult testResult = predicate.testAndDescribe(cachedBlockPosition);
     if (testResult.successes()) {
       return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.negation.fail"), List.of(testResult));
     } else {
@@ -44,8 +46,6 @@ public record NegatingBlockPredicate(BlockPredicate blockPredicate) implements B
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.NEGATING;
   }
-
-  public static final Codec<NegatingBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(NegatingBlockPredicate::new, BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(NegatingBlockPredicate::blockPredicate)));
 
   public enum Type implements BlockPredicateType<NegatingBlockPredicate>, Parser<BlockPredicateArgument> {
     NEGATING_TYPE;

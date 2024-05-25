@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record AnyBlockPredicate(List<BlockPredicate> blockPredicates) implements BlockPredicate {
+  public static final Codec<AnyBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("block_predicates").forGetter(AnyBlockPredicate::blockPredicates)).apply(i, AnyBlockPredicate::new));
+
   @Override
   public @NotNull String asString() {
     return "any(" + String.join(", ", Collections2.transform(blockPredicates, ExpressionConvertible::asString)) + ")";
@@ -52,6 +54,15 @@ public record AnyBlockPredicate(List<BlockPredicate> blockPredicates) implements
     return BlockPredicateTypes.ANY;
   }
 
+  public enum Type implements BlockPredicateType<AnyBlockPredicate> {
+    ANY_TYPE;
+
+    @Override
+    public @NotNull Codec<AnyBlockPredicate> getCodec() {
+      return CODEC;
+    }
+  }
+
   public record Parser(List<BlockPredicateArgument> blockPredicates) implements FunctionParamsParser<BlockPredicateArgument> {
     public Parser() {
       this(new ArrayList<>());
@@ -66,17 +77,6 @@ public record AnyBlockPredicate(List<BlockPredicate> blockPredicates) implements
     @Override
     public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       return source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, input -> input.apply(source)));
-    }
-  }
-
-  public static final Codec<AnyBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("block_predicates").forGetter(AnyBlockPredicate::blockPredicates)).apply(i, AnyBlockPredicate::new));
-
-  public enum Type implements BlockPredicateType<AnyBlockPredicate> {
-    ANY_TYPE;
-
-    @Override
-    public @NotNull Codec<AnyBlockPredicate> getCodec() {
-      return CODEC;
     }
   }
 }

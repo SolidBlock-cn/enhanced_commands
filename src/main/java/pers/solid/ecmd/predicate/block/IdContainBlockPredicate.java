@@ -19,6 +19,8 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import java.util.regex.Pattern;
 
 public record IdContainBlockPredicate(@NotNull Pattern pattern) implements BlockPredicate {
+  public static final Codec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockPredicate::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
+
   @Override
   public @NotNull String asString() {
     return "idcontain(" + NbtString.escape(pattern.pattern()) + ")";
@@ -55,8 +57,6 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   public int hashCode() {
     return pattern.pattern().hashCode();
   }
-
-  public static final Codec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockPredicate::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
 
   public enum Type implements BlockPredicateType<IdContainBlockPredicate> {
     ID_CONTAIN_TYPE;

@@ -17,6 +17,15 @@ import java.util.function.Function;
  * <p>In any case, a block cuboid region has a min volume of 1, which means the two corners are a same block position.
  */
 public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements IntBackedRegion {
+  public static final Codec<BlockCuboidRegion> CODEC = RecordCodecBuilder.create(i -> i.group(
+      Codec.INT.fieldOf("minX").forGetter(BlockCuboidRegion::minX),
+      Codec.INT.fieldOf("minY").forGetter(BlockCuboidRegion::minY),
+      Codec.INT.fieldOf("minZ").forGetter(BlockCuboidRegion::minZ),
+      Codec.INT.fieldOf("maxX").forGetter(BlockCuboidRegion::maxX),
+      Codec.INT.fieldOf("maxY").forGetter(BlockCuboidRegion::maxY),
+      Codec.INT.fieldOf("maxZ").forGetter(BlockCuboidRegion::maxZ)
+  ).apply(i, BlockCuboidRegion::new));
+
   /**
    * Create a block cuboid region from several coordinates. The comparison is required. The min probability must not be larger than max probability (but can be equal).
    *
@@ -26,13 +35,6 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     Preconditions.checkArgument(minX <= maxX, "minX should not be larger than maxX");
     Preconditions.checkArgument(minY <= maxY, "minY should not be larger than maxY");
     Preconditions.checkArgument(minZ <= maxZ, "minZ should not be larger than maxX");
-  }
-
-  /**
-   * Create a block cuboid region from several coordinates. The comparison is not required. They will be compared in implementation.
-   */
-  public static BlockCuboidRegion of(int x1, int y1, int z1, int x2, int y2, int z2) {
-    return new BlockCuboidRegion(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2), Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
   }
 
   /**
@@ -47,6 +49,13 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
    */
   public BlockCuboidRegion(Vec3i from, Vec3i to) {
     this(BlockBox.create(from, to));
+  }
+
+  /**
+   * Create a block cuboid region from several coordinates. The comparison is not required. They will be compared in implementation.
+   */
+  public static BlockCuboidRegion of(int x1, int y1, int z1, int x2, int y2, int z2) {
+    return new BlockCuboidRegion(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2), Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
   }
 
   @NotNull
@@ -94,7 +103,6 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   public CuboidRegion asCuboidRegion() {
     return new CuboidRegion(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
   }
-
 
   @Override
   public Region transformedInt(Function<Vec3i, Vec3i> transformation) {
@@ -209,13 +217,4 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   public boolean contains(@NotNull Vec3d vec3d) {
     return contains(BlockPos.ofFloored(vec3d));
   }
-
-  public static final Codec<BlockCuboidRegion> CODEC = RecordCodecBuilder.create(i -> i.group(
-      Codec.INT.fieldOf("minX").forGetter(BlockCuboidRegion::minX),
-      Codec.INT.fieldOf("minY").forGetter(BlockCuboidRegion::minY),
-      Codec.INT.fieldOf("minZ").forGetter(BlockCuboidRegion::minZ),
-      Codec.INT.fieldOf("maxX").forGetter(BlockCuboidRegion::maxX),
-      Codec.INT.fieldOf("maxY").forGetter(BlockCuboidRegion::maxY),
-      Codec.INT.fieldOf("maxZ").forGetter(BlockCuboidRegion::maxZ)
-  ).apply(i, BlockCuboidRegion::new));
 }

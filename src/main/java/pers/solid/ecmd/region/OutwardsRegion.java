@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBackedRegion {
+  public static final Codec<OutwardsRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3i.CODEC.fieldOf("center").forGetter(OutwardsRegion::center), Codec.INT.fieldOf("x").forGetter(OutwardsRegion::x), Codec.INT.fieldOf("y").forGetter(OutwardsRegion::y), Codec.INT.fieldOf("z").forGetter(OutwardsRegion::z)).apply(i, OutwardsRegion::new));
+
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
     return this.minContainingBlockBox().contains(vec3i);
@@ -65,8 +67,6 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   public @NotNull String asString() {
     return "outwards(%s %s %s, %s %s %s)".formatted(Integer.toString(center.getX()), Integer.toString(center.getY()), Integer.toString(center.getZ()), Integer.toString(x), Integer.toString(y), Integer.toString(z));
   }
-
-  public static final Codec<OutwardsRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3i.CODEC.fieldOf("center").forGetter(OutwardsRegion::center), Codec.INT.fieldOf("x").forGetter(OutwardsRegion::x), Codec.INT.fieldOf("y").forGetter(OutwardsRegion::y), Codec.INT.fieldOf("z").forGetter(OutwardsRegion::z)).apply(i, OutwardsRegion::new));
 
   public enum Type implements RegionType<OutwardsRegion> {
     INSTANCE;

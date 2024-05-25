@@ -30,6 +30,8 @@ import java.util.regex.Pattern;
  * </pre>
  */
 public record IdReplaceBlockFunction(Pattern pattern, String replacement) implements BlockFunction {
+  public static final Codec<IdReplaceBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(IdReplaceBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdReplaceBlockFunction::pattern), Codec.STRING.fieldOf("replacement").forGetter(IdReplaceBlockFunction::replacement)));
+
   @Override
   public boolean equals(Object o) {
     if (this == o)
@@ -65,8 +67,6 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   public @NotNull BlockFunctionType<IdReplaceBlockFunction> getType() {
     return BlockFunctionTypes.ID_REPLACE;
   }
-
-  public static final Codec<IdReplaceBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(IdReplaceBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdReplaceBlockFunction::pattern), Codec.STRING.fieldOf("replacement").forGetter(IdReplaceBlockFunction::replacement)));
 
   public enum Type implements BlockFunctionType<IdReplaceBlockFunction> {
     ID_REPLACE_TYPE;

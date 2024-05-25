@@ -14,6 +14,8 @@ import pers.solid.ecmd.util.ParsingUtil;
 public enum ConstantBlockPredicate implements BlockPredicate {
   ALWAYS_TRUE;
 
+  public static final Codec<ConstantBlockPredicate> CODEC = Codec.unit(ConstantBlockPredicate.ALWAYS_TRUE);
+
   @Override
   public @NotNull String asString() {
     return "*";
@@ -33,8 +35,6 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.CONSTANT;
   }
-
-  public static final Codec<ConstantBlockPredicate> CODEC = Codec.unit(ConstantBlockPredicate.ALWAYS_TRUE);
 
   public enum Type implements BlockPredicateType<ConstantBlockPredicate>, Parser<BlockPredicateArgument> {
     CONSTANT_TYPE;

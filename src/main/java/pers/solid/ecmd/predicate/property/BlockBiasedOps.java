@@ -5,6 +5,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateManager;
 import net.minecraft.util.dynamic.ForwardingDynamicOps;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * <p>在包装了一层 {@link DynamicOps} 的基础上，额外存储一个 {@link #stateManager} 字段，以便于在特定情况下，需要在已知方块的 {@code stateManager}的情况下，序列化对应的属性名称，因为只有已经具体是哪个方块，才能根据属性名称获得到具体的属性对象，然后再根据此属性转化属性值。
@@ -15,6 +16,7 @@ import net.minecraft.util.dynamic.ForwardingDynamicOps;
  *
  * @see #of
  */
+@ApiStatus.Experimental
 public class BlockBiasedOps<T> extends ForwardingDynamicOps<T> {
   private final StateManager<Block, BlockState> stateManager;
 

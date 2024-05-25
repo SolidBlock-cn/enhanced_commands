@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
@@ -15,10 +16,13 @@ import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public record OutlineRegion(OutlineType outlineType, Region region) implements RegionBasedRegion<OutlineRegion, Region> {
+  public static final Codec<OutlineRegion> CODEC = RecordCodecBuilder.create(i -> i.group(OutlineType.OUTLINE_TYPE_FIELD.forGetter(OutlineRegion::outlineType), Region.CODEC.fieldOf("region").forGetter(OutlineRegion::region)).apply(i, OutlineRegion::new));
+
   public static Region of(Region region, OutlineType outlineType) throws CommandSyntaxException {
     try {
       if (region instanceof BlockCuboidRegion cuboidRegion) {
@@ -92,8 +96,6 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     return region.minContainingBox();
   }
 
-  public static final Codec<OutlineRegion> CODEC = RecordCodecBuilder.create(i -> i.group(OutlineType.CODEC.fieldOf("outline_type").forGetter(OutlineRegion::outlineType), Region.CODEC.fieldOf("region").forGetter(OutlineRegion::region)).apply(i, OutlineRegion::new));
-
   @Override
   public OutlineRegion newRegion(Region region) {
     return new OutlineRegion(outlineType, region);
@@ -135,8 +137,9 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
       }
     };
 
-    private final String name;
     public static final Codec<OutlineType> CODEC = StringIdentifiable.createCodec(OutlineType::values);
+    public static final MapCodec<OutlineType> OUTLINE_TYPE_FIELD = OutlineType.CODEC.optionalFieldOf("outline_type").xmap(o -> o.orElse(OutlineType.OUTLINE), Optional::of);
+    private final String name;
 
     OutlineType(String name) {
       this.name = name;

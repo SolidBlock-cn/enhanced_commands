@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
@@ -11,9 +12,18 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 public record ComparisonPropertyPredicate<T extends Comparable<T>>(Property<T> property, Comparator comparator, T value) implements PropertyPredicate<T> {
+  public static com.mojang.serialization.Codec<ComparisonPropertyPredicate<?>> getCodec(Block block) {
+    return CodecUtil.propertyForBlock(block.getStateManager()).dispatch("property", ComparisonPropertyPredicate::property, ComparisonPropertyPredicate::getCodecByProperty);
+  }
 
+  private static <T extends Comparable<T>> Codec<ComparisonPropertyPredicate<T>> getCodecByProperty(Property<T> property) {
+    return RecordCodecBuilder.create(i -> i.apply2((comparator, value) -> new ComparisonPropertyPredicate<>(property, comparator, value),
+        Comparator.FIELD_CODEC.forGetter(ComparisonPropertyPredicate::comparator),
+        property.getCodec().fieldOf("value").forGetter(ComparisonPropertyPredicate::value)));
+  }
 
   @Override
   public @NotNull String asString() {
@@ -47,13 +57,5 @@ public record ComparisonPropertyPredicate<T extends Comparable<T>>(Property<T> p
     } else {
       return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.fail", posText, actualText, expectedText));
     }
-  }
-
-  public static final Codec<ComparisonPropertyPredicate<?>> CODEC = PropertyCodec.INSTANCE.dispatch("property", ComparisonPropertyPredicate::property, ComparisonPropertyPredicate::getCodecByProperty);
-
-  private static <T extends Comparable<T>> Codec<ComparisonPropertyPredicate<T>> getCodecByProperty(Property<T> property) {
-    return RecordCodecBuilder.create(i -> i.apply2((comparator, value) -> new ComparisonPropertyPredicate<>(property, comparator, value),
-        Comparator.FIELD_CODEC.forGetter(ComparisonPropertyPredicate::comparator),
-        property.getCodec().fieldOf("probability").forGetter(ComparisonPropertyPredicate::value)));
   }
 }

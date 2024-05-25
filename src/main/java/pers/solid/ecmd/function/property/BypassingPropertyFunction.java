@@ -23,6 +23,14 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 public record BypassingPropertyFunction<T extends Comparable<T>>(Property<T> property, boolean must) implements PropertyFunction<T> {
   private static final RecordCodecBuilder<BypassingPropertyFunction<?>, Boolean> MUST_FIELD_CODEC = Codec.BOOL.optionalFieldOf("must", false).forGetter(BypassingPropertyFunction::must);
 
+  public static Codec<BypassingPropertyFunction<?>> getCodec(Block block) {
+    return RecordCodecBuilder.create(i -> i.apply2(
+        BypassingPropertyFunction::new,
+        CodecUtil.propertyForBlock(block.getStateManager()).fieldOf("property").forGetter(BypassingPropertyFunction::property),
+        MUST_FIELD_CODEC
+    ));
+  }
+
   @Override
   public @NotNull String asString() {
     return property.getName() + (must ? "==~" : "=~");
@@ -40,14 +48,6 @@ public record BypassingPropertyFunction<T extends Comparable<T>>(Property<T> pro
   @Override
   public Type getType() {
     return Type.BYPASSING;
-  }
-
-  public static Codec<BypassingPropertyFunction<?>> getCodec(Block block) {
-    return RecordCodecBuilder.create(i -> i.apply2(
-        BypassingPropertyFunction::new,
-        CodecUtil.propertyForBlock(block.getStateManager()).fieldOf("property").forGetter(BypassingPropertyFunction::property),
-        MUST_FIELD_CODEC
-    ));
   }
 
 }

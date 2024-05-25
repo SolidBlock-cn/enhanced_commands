@@ -23,12 +23,11 @@ public interface PropertyNamePredicate extends ExpressionConvertible {
   enum Type implements StringIdentifiable {
     COMPARISON("comparison", ComparisonPropertyNamePredicate.CODEC),
     EXISTENCE("existence", ExistencePropertyNamePredicate.CODEC),
-    MULTI_VALUE("multi_value", MultiValuePropertyNamePredicate.CODEC),
-    CUSTOM("custom", com.mojang.serialization.Codec.unit(null));
+    MULTI_VALUE("multi_value", MultiValuePropertyNamePredicate.CODEC);
 
-    private final String name;
-    public final com.mojang.serialization.Codec<? extends PropertyNamePredicate> codec;
     public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
+    public final com.mojang.serialization.Codec<? extends PropertyNamePredicate> codec;
+    private final String name;
 
     Type(String name, com.mojang.serialization.Codec<? extends PropertyNamePredicate> codec) {
       this.name = name;

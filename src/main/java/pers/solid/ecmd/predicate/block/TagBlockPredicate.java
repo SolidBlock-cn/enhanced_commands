@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
  * @see BlockArgumentParser#parseTagId()
  */
 public record TagBlockPredicate(@NotNull TagKey<Block> tags, @NotNull @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
+  public static final Codec<TagBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(TagBlockPredicate::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockPredicate::tags), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
+
   @Override
   public @NotNull String asString() {
     if (properties.isEmpty()) {
@@ -82,8 +84,6 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tags, @NotNull @Unmodifia
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.TAG;
   }
-
-  public static final Codec<TagBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(TagBlockPredicate::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockPredicate::tags), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
 
   public enum Type implements BlockPredicateType<TagBlockPredicate>, Parser<BlockPredicateArgument> {
     TAG_TYPE;

@@ -19,6 +19,8 @@ import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {
+  public static final Codec<NbtBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt").forGetter(NbtBlockPredicate::nbtPredicate)));
+
   @Override
   public @NotNull String asString() {
     return nbtPredicate.asString(false);
@@ -48,8 +50,6 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.NBT;
   }
-
-  public static final Codec<NbtBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt_predicate").forGetter(NbtBlockPredicate::nbtPredicate)));
 
   public enum Type implements BlockPredicateType<NbtBlockPredicate>, Parser<BlockPredicateArgument> {
     NBT_TYPE;

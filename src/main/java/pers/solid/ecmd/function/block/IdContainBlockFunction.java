@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
  * 从 id 包含指定正则表达式的方块中随机选择一个。
  */
 public final class IdContainBlockFunction implements BlockFunction {
+  public static final Codec<IdContainBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockFunction::pattern)));
   private final @NotNull Pattern pattern;
   private transient World world;
   private transient Block[] blocks;
@@ -85,8 +86,6 @@ public final class IdContainBlockFunction implements BlockFunction {
   public @NotNull Pattern pattern() {
     return pattern;
   }
-
-  public static final Codec<IdContainBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockFunction::pattern)));
 
   public enum Type implements BlockFunctionType<IdContainBlockFunction> {
     ID_CONTAIN_TYPE;

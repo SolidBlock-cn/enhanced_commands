@@ -23,6 +23,8 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public record UnionRegion(@NotNull List<Region> regions) implements RegionsBasedRegion<UnionRegion, Region> {
+  public static final Codec<UnionRegion> CODEC = RecordCodecBuilder.create(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, UnionRegion::new));
+
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return regions.stream().anyMatch(region -> region.contains(vec3d));
@@ -81,8 +83,6 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
   public UnionRegion newRegion(@NotNull List<Region> regions) {
     return new UnionRegion(regions);
   }
-
-  public static final Codec<UnionRegion> CODEC = RecordCodecBuilder.create(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, UnionRegion::new));
 
   public enum Type implements RegionType<UnionRegion> {
     UNION_TYPE;

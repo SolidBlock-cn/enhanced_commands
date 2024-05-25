@@ -22,6 +22,7 @@ import java.util.List;
 public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPredicate) implements BlockPredicate {
   public static final Text ABOVE_BLOCK = Text.translatable("enhanced_commands.block_predicate.above_block");
   public static final Text BENEATH_BLOCK = Text.translatable("enhanced_commands.block_predicate.beneath_block");
+  public static final Codec<HorizontalOffsetBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(HorizontalOffsetBlockPredicate::new, Codec.INT.fieldOf("offset").forGetter(HorizontalOffsetBlockPredicate::offset), BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(HorizontalOffsetBlockPredicate::blockPredicate)));
 
   @Override
   public @NotNull String asString() {
@@ -59,8 +60,6 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.HORIZONTAL_OFFSET;
   }
-
-  public static final Codec<HorizontalOffsetBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(HorizontalOffsetBlockPredicate::new, Codec.INT.fieldOf("offset").forGetter(HorizontalOffsetBlockPredicate::offset), BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(HorizontalOffsetBlockPredicate::blockPredicate)));
 
   public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate>, Parser<BlockPredicateArgument> {
     HORIZONTAL_OFFSET_TYPE;

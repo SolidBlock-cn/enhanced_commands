@@ -17,6 +17,8 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 public record RegionBlockPredicate(Region region) implements BlockPredicate {
+  public static final Codec<RegionBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(RegionBlockPredicate::new, Region.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
+
   @Override
   public @NotNull String asString() {
     return "region(" + region.asString() + ")";
@@ -38,8 +40,6 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
   public @NotNull BlockPredicateType<?> getType() {
     return BlockPredicateTypes.REGION;
   }
-
-  public static final Codec<RegionBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(RegionBlockPredicate::new, Region.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
 
   public enum Type implements BlockPredicateType<RegionBlockPredicate> {
     REGION_TYPE;

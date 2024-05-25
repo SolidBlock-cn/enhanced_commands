@@ -13,6 +13,10 @@ import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public interface RegionsBasedRegion<T extends RegionsBasedRegion<T, R>, R extends Region> extends Region {
+  static <R extends Region, T extends RegionsBasedRegion<T, R>> RecordCodecBuilder<T, List<R>> regionsCodecField(Codec<R> codec) {
+    return codec.listOf().fieldOf("regions").forGetter(RegionsBasedRegion::regions);
+  }
+
   @NotNull
   List<R> regions();
 
@@ -73,9 +77,5 @@ public interface RegionsBasedRegion<T extends RegionsBasedRegion<T, R>, R extend
   @NotNull
   default T expanded(double offset, Direction.Type type) {
     return newRegionWithTransformation(input -> (R) input.expanded(offset, type));
-  }
-
-  static <R extends Region, T extends RegionsBasedRegion<T, R>> RecordCodecBuilder<T, List<R>> regionsCodecField(Codec<R> codec) {
-    return codec.listOf().fieldOf("regions").forGetter(RegionsBasedRegion::regions);
   }
 }

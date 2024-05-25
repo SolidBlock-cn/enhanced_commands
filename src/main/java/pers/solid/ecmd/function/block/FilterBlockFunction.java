@@ -26,6 +26,8 @@ import pers.solid.ecmd.util.FunctionParamsParser;
  * 注意：此方法不一定能够正常地对方块实体进行检测。
  */
 public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull BlockPredicate predicate, @NotNull BlockFunction elseFunction) implements BlockFunction {
+  public static final Codec<FilterBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3(FilterBlockFunction::new, BlockFunction.CODEC.fieldOf("function").forGetter(FilterBlockFunction::function), BlockPredicate.CODEC.fieldOf("predicate").forGetter(FilterBlockFunction::predicate), BlockFunction.CODEC.optionalFieldOf("else", EMPTY).forGetter(FilterBlockFunction::elseFunction)));
+
   @Override
   public @NotNull String asString() {
     return "filter(" + function.asString() + ", " + predicate.asString() + (elseFunction.isEmpty() ? "" : ", " + elseFunction.asString()) + ")";
@@ -48,8 +50,6 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
   public @NotNull BlockFunctionType<FilterBlockFunction> getType() {
     return BlockFunctionTypes.FILTER;
   }
-
-  public static final Codec<FilterBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3(FilterBlockFunction::new, BlockFunction.CODEC.fieldOf("function").forGetter(FilterBlockFunction::function), BlockPredicate.CODEC.fieldOf("predicate").forGetter(FilterBlockFunction::predicate), BlockFunction.CODEC.optionalFieldOf("else", EMPTY).forGetter(FilterBlockFunction::elseFunction)));
 
   public enum Type implements BlockFunctionType<FilterBlockFunction> {
     FILTER_TYPE;

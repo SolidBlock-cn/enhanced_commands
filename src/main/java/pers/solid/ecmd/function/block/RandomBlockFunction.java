@@ -23,6 +23,7 @@ import pers.solid.ecmd.util.StateUtil;
  * 此方块函数可以产生任意的方块的任意方块状态，无论其原先的方块是什么。
  */
 public final class RandomBlockFunction implements BlockFunction {
+  public static final Codec<RandomBlockFunction> CODEC = Codec.unit(RandomBlockFunction::new);
   private transient FeatureSet featureSet;
   private transient Block[] blocks;
 
@@ -74,8 +75,6 @@ public final class RandomBlockFunction implements BlockFunction {
   public String toString() {
     return "RandomBlockFunction{}";
   }
-
-  public static final Codec<RandomBlockFunction> CODEC = Codec.unit(RandomBlockFunction::new);
 
   public enum Type implements BlockFunctionType<RandomBlockFunction>, Parser<BlockFunctionArgument> {
     RANDOM_TYPE;

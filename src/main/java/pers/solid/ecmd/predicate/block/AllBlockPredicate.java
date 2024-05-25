@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record AllBlockPredicate(List<BlockPredicate> blockPredicates) implements BlockPredicate {
+  public static final Codec<AllBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("block_predicates").forGetter(AllBlockPredicate::blockPredicates)).apply(i, AllBlockPredicate::new));
+
   @Override
   public @NotNull String asString() {
     return "all(" + String.join(", ", Collections2.transform(blockPredicates, ExpressionConvertible::asString)) + ")";
@@ -52,6 +54,15 @@ public record AllBlockPredicate(List<BlockPredicate> blockPredicates) implements
     return BlockPredicateTypes.ALL;
   }
 
+  public enum Type implements BlockPredicateType<AllBlockPredicate> {
+    ALL_TYPE;
+
+    @Override
+    public @NotNull Codec<AllBlockPredicate> getCodec() {
+      return CODEC;
+    }
+  }
+
   public record Parser(List<BlockPredicateArgument> blockPredicates) implements FunctionParamsParser<BlockPredicateArgument> {
     public Parser() {
       this(new ArrayList<>());
@@ -65,17 +76,6 @@ public record AllBlockPredicate(List<BlockPredicate> blockPredicates) implements
     @Override
     public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       blockPredicates.add(BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly));
-    }
-  }
-
-  public static final Codec<AllBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("block_predicates").forGetter(AllBlockPredicate::blockPredicates)).apply(i, AllBlockPredicate::new));
-
-  public enum Type implements BlockPredicateType<AllBlockPredicate> {
-    ALL_TYPE;
-
-    @Override
-    public @NotNull Codec<AllBlockPredicate> getCodec() {
-      return CODEC;
     }
   }
 }

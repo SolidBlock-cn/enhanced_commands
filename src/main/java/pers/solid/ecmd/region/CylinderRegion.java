@@ -20,6 +20,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius, @Range(from = 0, to = Long.MAX_VALUE) double height, Vec3d center) implements Region {
+  public static final SimpleCommandExceptionType MUST_EXPAND_VERTICALLY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.cylinder_must_expand_vertically"));
+  public static final Codec<CylinderRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CylinderRegion::radius), Codec.DOUBLE.fieldOf("height").forGetter(CylinderRegion::height), Vec3d.CODEC.fieldOf("center").forGetter(CylinderRegion::center)).apply(i, CylinderRegion::new));
+
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     if (center.y + height / 2 <= vec3d.y || center.y - height / 2 > vec3d.y) {
@@ -65,8 +68,6 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   public @NotNull CylinderRegion transformed(Function<Vec3d, Vec3d> transformation) {
     return new CylinderRegion(radius, height, transformation.apply(center));
   }
-
-  public static final SimpleCommandExceptionType MUST_EXPAND_VERTICALLY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.cylinder_must_expand_vertically"));
 
   @Override
   public @NotNull Region expanded(double offset) {
@@ -128,8 +129,6 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   public @NotNull Box minContainingBox() {
     return new Box(center.x - radius, center.y - height / 2, center.z - radius, center.x + radius, center.y + height / 2, center.z + radius);
   }
-
-  public static final Codec<CylinderRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CylinderRegion::radius), Codec.DOUBLE.fieldOf("height").forGetter(CylinderRegion::height), Vec3d.CODEC.fieldOf("center").forGetter(CylinderRegion::center)).apply(i, CylinderRegion::new));
 
   public enum Type implements RegionType<CylinderRegion> {
     CYLINDER_TYPE;

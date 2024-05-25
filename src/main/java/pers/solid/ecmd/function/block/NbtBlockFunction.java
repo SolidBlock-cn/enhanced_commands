@@ -19,6 +19,8 @@ import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) implements BlockFunction {
+  public static final Codec<NbtBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(NbtBlockFunction::new, CompoundNbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
+
   @Override
   public @NotNull String asString() {
     return nbtFunction.asString(false);
@@ -34,8 +36,6 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
   public @NotNull BlockFunctionType<NbtBlockFunction> getType() {
     return BlockFunctionTypes.NBT;
   }
-
-  public static final Codec<NbtBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(NbtBlockFunction::new, CompoundNbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
 
   public enum Type implements BlockFunctionType<NbtBlockFunction>, Parser<BlockFunctionArgument> {
     NBT_TYPE;

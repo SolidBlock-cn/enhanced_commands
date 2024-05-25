@@ -5,11 +5,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -50,17 +47,6 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
 
   @NotNull
   BlockPredicateType<?> getType();
-
-  /**
-   * 从 NBT 中获取一个 BlockPredicate 对象。会先从这个 NBT 中获取 type，并从注册表中获取。如果这个 type 不正确，或者里面的参数不正确，会直接抛出错误。
-   */
-  static @NotNull BlockPredicate fromNbt(@NotNull NbtElement nbtCompound) {
-    return Util.getResult(CODEC.decode(NbtOps.INSTANCE, nbtCompound), IllegalStateException::new).getFirst();
-  }
-
-  default NbtElement createNbt() {
-    return Util.getResult(CODEC.encodeStart(NbtOps.INSTANCE, this), IllegalStateException::new);
-  }
 
   @Override
   default BlockPredicate apply(ServerCommandSource source) throws CommandSyntaxException {

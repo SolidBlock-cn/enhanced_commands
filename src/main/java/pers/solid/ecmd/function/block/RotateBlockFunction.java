@@ -16,6 +16,8 @@ import pers.solid.ecmd.util.EnumOrRandom;
 import pers.solid.ecmd.util.FunctionParamsParser;
 
 public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation) implements BlockFunction {
+  public static final Codec<RotateBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(RotateBlockFunction::new, EnumOrRandom.getCodec(BlockRotation.CODEC, BlockRotation::values).fieldOf("rotation").forGetter(RotateBlockFunction::rotation)));
+
   @Override
   public @NotNull String asString() {
     return "rotate(" + rotation.asString() + ")";
@@ -30,8 +32,6 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
   public @NotNull BlockFunctionType<RotateBlockFunction> getType() {
     return BlockFunctionTypes.ROTATE;
   }
-
-  public static final Codec<RotateBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(RotateBlockFunction::new, EnumOrRandom.getCodec(BlockRotation.CODEC, BlockRotation::values).fieldOf("rotation").forGetter(RotateBlockFunction::rotation)));
 
   public enum Type implements BlockFunctionType<RotateBlockFunction> {
     ROTATE_TYPE;

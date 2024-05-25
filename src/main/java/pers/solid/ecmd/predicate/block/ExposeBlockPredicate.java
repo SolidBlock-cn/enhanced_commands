@@ -31,6 +31,8 @@ import java.util.TreeSet;
  * @param directions   The directions to test exposure.
  */
 public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull List<@NotNull Direction> directions) implements BlockPredicate {
+  public static final Codec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), Direction.CODEC.listOf().optionalFieldOf("directions", List.of(Direction.values())).forGetter(ExposeBlockPredicate::directions)));
+
   @Override
   public @NotNull String asString() {
     return "expose(" + exposureType.asString() + ", " + String.join(" ", Iterables.transform(directions, Direction::asString)) + ")";
@@ -110,8 +112,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
         return !VoxelShapes.combine(VoxelShapes.fullCube(), offsetCachedBlockPosition.getBlockState().getCollisionShape(offsetCachedBlockPosition.getWorld(), offsetCachedBlockPosition.getBlockPos()).getFace(direction.getOpposite()), BooleanBiFunction.ONLY_FIRST).isEmpty();
       }
     };
-    private final String name;
     public static final Codec<ExposureType> CODEC = StringIdentifiable.createCodec(ExposureType::values);
+    private final String name;
 
     ExposureType(String name) {
       this.name = name;
@@ -129,9 +131,18 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
   }
 
+  public enum Type implements BlockPredicateType<ExposeBlockPredicate> {
+    EXPOSE_TYPE;
+
+    @Override
+    public @NotNull Codec<ExposeBlockPredicate> getCodec() {
+      return CODEC;
+    }
+  }
+
   public static final class Parser implements FunctionParamsParser<ExposeBlockPredicate> {
-    private ExposureType exposureType;
     private final Set<@NotNull Direction> directions = new TreeSet<>();
+    private ExposureType exposureType;
 
     @Override
     public ExposeBlockPredicate getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
@@ -196,17 +207,6 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
         }
       }
-    }
-  }
-
-  public static final Codec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), Direction.CODEC.listOf().fieldOf("directions").forGetter(ExposeBlockPredicate::directions)));
-
-  public enum Type implements BlockPredicateType<ExposeBlockPredicate> {
-    EXPOSE_TYPE;
-
-    @Override
-    public @NotNull Codec<ExposeBlockPredicate> getCodec() {
-      return CODEC;
     }
   }
 }

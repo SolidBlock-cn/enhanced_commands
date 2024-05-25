@@ -9,9 +9,6 @@ import java.util.Objects;
 import java.util.Set;
 
 public interface GeneralPropertyFunction extends PropertyFunction<Integer> {
-  @NotNull
-  Set<Property<?>> except();
-
   static void updateExcepts(Collection<? extends PropertyFunction<?>> propertyFunctions) {
     for (PropertyFunction<?> propertyFunction : propertyFunctions) {
       if (propertyFunction instanceof GeneralPropertyFunction generalPropertyFunction) {
@@ -21,9 +18,10 @@ public interface GeneralPropertyFunction extends PropertyFunction<Integer> {
     }
   }
 
-  interface OfName extends PropertyNameFunction {
-    @NotNull Collection<String> except();
+  @NotNull
+  Set<Property<?>> except();
 
+  interface OfName extends PropertyNameFunction {
     static void updateExcepts(Collection<? extends PropertyNameFunction> propertyNameFunctions) {
       for (PropertyNameFunction propertyNameFunction : propertyNameFunctions) {
         if (propertyNameFunction instanceof OfName ofName) {
@@ -32,5 +30,8 @@ public interface GeneralPropertyFunction extends PropertyFunction<Integer> {
         }
       }
     }
+
+    @NotNull
+    Collection<String> except();
   }
 }

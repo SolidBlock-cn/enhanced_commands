@@ -14,6 +14,10 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import java.util.Set;
 
 public record AllOriginalPropertyFunction(@NotNull Set<Property<?>> except) implements GeneralPropertyFunction {
+  public static Codec<AllOriginalPropertyFunction> getCodec(Block block) {
+    return RecordCodecBuilder.create(i -> i.ap(AllOriginalPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllOriginalPropertyFunction::except)));
+  }
+
   @Override
   public @NotNull String asString() {
     return "~";
@@ -37,10 +41,6 @@ public record AllOriginalPropertyFunction(@NotNull Set<Property<?>> except) impl
   @Override
   public Type getType() {
     return Type.ALL_ORIGINAL;
-  }
-
-  public static Codec<AllOriginalPropertyFunction> getCodec(Block block) {
-    return RecordCodecBuilder.create(i -> i.ap(AllOriginalPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllOriginalPropertyFunction::except)));
   }
 
 }

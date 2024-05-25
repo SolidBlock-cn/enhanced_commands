@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
+  public static final Codec<SimpleBlockFunction> CODEC = Registries.BLOCK.getCodec().dispatch("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), PropertyFunction.getCodec(block).listOf().optionalFieldOf("properties", ImmutableList.of()).forGetter(SimpleBlockFunction::properties))));
+
   @Override
   public @NotNull String asString() {
     final StringBuilder stringBuilder = new StringBuilder(Registries.BLOCK.getId(block).toString());
@@ -43,8 +45,6 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
     }
     return stateToPlace;
   }
-
-  public static final Codec<SimpleBlockFunction> CODEC = Registries.BLOCK.getCodec().dispatch("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), PropertyFunction.getCodec(block).listOf().optionalFieldOf("properties", ImmutableList.of()).forGetter(SimpleBlockFunction::properties))));
 
   @Override
   public @NotNull BlockFunctionType<SimpleBlockFunction> getType() {

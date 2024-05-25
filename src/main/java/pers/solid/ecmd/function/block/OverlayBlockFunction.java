@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
  * 叠加多个方块函数，依次应用。
  */
 public record OverlayBlockFunction(List<BlockFunction> functions) implements BlockFunction {
+  public static final Codec<OverlayBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayBlockFunction::functions)));
+
   @Override
   public @NotNull String asString() {
     return "overlay(" + functions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
@@ -39,8 +41,6 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
   public @NotNull BlockFunctionType<OverlayBlockFunction> getType() {
     return BlockFunctionTypes.OVERLAY;
   }
-
-  public static final Codec<OverlayBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayBlockFunction::functions)));
 
   public enum Type implements BlockFunctionType<OverlayBlockFunction> {
     OVERLAY_TYPE;

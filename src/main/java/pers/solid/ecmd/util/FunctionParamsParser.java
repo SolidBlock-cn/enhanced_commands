@@ -114,16 +114,16 @@ public interface FunctionParamsParser<T> extends Parser<T> {
   }
 
   /**
-   * 在完成所有参数的解析后，返回结果。通常在此接口的实现过程中，解析参数时会设置字段的一些值，此方法则使用字段中的值。
-   */
-  T getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException;
-
-  /**
    * 解析特定位置的参数。实现时需要覆盖此方法以实现对具体各参数的解析。
    *
    * @param paramIndex 参数的位置。例如，解析第一个参数时，{@code paramIndex} 为 0。
    */
   void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
+
+  /**
+   * 在完成所有参数的解析后，返回结果。通常在此接口的实现过程中，解析参数时会设置字段的一些值，此方法则使用字段中的值。
+   */
+  T getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException;
 
   /**
    * 指定函数名称，从而让对象知晓是在解析的函数名称。通霄来说，在函数命令是由 {@link FunctionsParser} 解析的，解析后分配各自的 {@link FunctionsParser}。有时抛出的异常的信息中会使用到函数名称。如果不需要使用，可以不实现此方法。

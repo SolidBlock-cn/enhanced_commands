@@ -21,7 +21,7 @@ public enum Comparator implements StringIdentifiable {
 
   public static final Map<String, Comparator> NAME_TO_VALUE = Util.make(new ImmutableMap.Builder<String, Comparator>(), builder -> Arrays.stream(values()).forEach(comparator -> builder.put(comparator.asString(), comparator))).put("=!", NE).build();
   public static final com.mojang.serialization.Codec<Comparator> CODEC = StringIdentifiable.createCodec(Comparator::values);
-  public static final MapCodec<Comparator> FIELD_CODEC = CODEC.fieldOf("comparator");
+  public static final MapCodec<Comparator> FIELD_CODEC = CODEC.optionalFieldOf("comparator").xmap(comparator -> comparator.orElse(EQ), Optional::of);
 
   private final String name;
   private final BiPredicate biPredicate;

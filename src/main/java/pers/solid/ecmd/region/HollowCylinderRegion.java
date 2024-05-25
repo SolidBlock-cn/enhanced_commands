@@ -22,6 +22,27 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, CylinderRegion region) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
+  public static final Codec<HollowCylinderRegion> CODEC = RecordCodecBuilder.create(i -> i.group(
+          OutlineRegion.OutlineType.OUTLINE_TYPE_FIELD.forGetter(HollowCylinderRegion::outlineType),
+          CylinderRegion.CODEC.fieldOf("region").forGetter(HollowCylinderRegion::region))
+      .apply(i, HollowCylinderRegion::new));
+
+  public static boolean horizontallyWithinCylinder(CylinderRegion cylinderRegion, Vec3d vec3d) {
+    return Vector2d.distance(vec3d.x, vec3d.z, cylinderRegion.center().x, cylinderRegion.center().z) <= cylinderRegion.radius();
+  }
+
+  public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineRegion.OutlineType outlineType, BlockPos testPos) {
+    outlineType = switch (outlineType) {
+      case OUTLINE -> OutlineRegion.OutlineType.WALL;
+      case OUTLINE_CONNECTED -> OutlineRegion.OutlineType.WALL_CONNECTED;
+      default -> outlineType;
+    };
+    return outlineType.modifiedTest(blockPos -> {
+      final Vec3d centerPos = blockPos.toCenterPos();
+      return Vector2d.distance(centerPos.x, centerPos.z, cylinderRegion.center().x, cylinderRegion.center().z) <= cylinderRegion.radius();
+    }, testPos);
+  }
+
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return contains(BlockPos.ofFloored(vec3d));
@@ -44,22 +65,6 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
       }
     }
     return false;
-  }
-
-  public static boolean horizontallyWithinCylinder(CylinderRegion cylinderRegion, Vec3d vec3d) {
-    return Vector2d.distance(vec3d.x, vec3d.z, cylinderRegion.center().x, cylinderRegion.center().z) <= cylinderRegion.radius();
-  }
-
-  public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineRegion.OutlineType outlineType, BlockPos testPos) {
-    outlineType = switch (outlineType) {
-      case OUTLINE -> OutlineRegion.OutlineType.WALL;
-      case OUTLINE_CONNECTED -> OutlineRegion.OutlineType.WALL_CONNECTED;
-      default -> outlineType;
-    };
-    return outlineType.modifiedTest(blockPos -> {
-      final Vec3d centerPos = blockPos.toCenterPos();
-      return Vector2d.distance(centerPos.x, centerPos.z, cylinderRegion.center().x, cylinderRegion.center().z) <= cylinderRegion.radius();
-    }, testPos);
   }
 
   @Override
@@ -126,8 +131,6 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
   public @NotNull Box minContainingBox() {
     return region.minContainingBox();
   }
-
-  public static final Codec<HollowCylinderRegion> CODEC = RecordCodecBuilder.create(i -> i.group(OutlineRegion.OutlineType.CODEC.fieldOf("outline_type").forGetter(HollowCylinderRegion::outlineType), CylinderRegion.CODEC.fieldOf("region").forGetter(HollowCylinderRegion::region)).apply(i, HollowCylinderRegion::new));
 
   public enum Type implements RegionType<HollowCylinderRegion> {
     HOLLOW_CYLINDER_TYPE;
