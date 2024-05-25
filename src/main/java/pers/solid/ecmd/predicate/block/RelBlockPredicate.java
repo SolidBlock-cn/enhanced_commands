@@ -6,12 +6,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
@@ -53,7 +51,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     @Override
     public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
       Preconditions.checkNotNull(relPos, "relPos (argument 1)");
-      Preconditions.checkNotNull(blockPredicate, "blockPredicate (argument 2)");
+      Preconditions.checkNotNull(blockPredicate, "predicate (argument 2)");
       return source -> new RelBlockPredicate(relPos.apply(source), blockPredicate.apply(source));
     }
 
@@ -81,16 +79,6 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
 
   public enum Type implements BlockPredicateType<RelBlockPredicate> {
     REL_TYPE;
-
-    @Override
-    public @NotNull RelBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final int[] intArray = nbtCompound.getIntArray("pos");
-      if (intArray.length != 3) {
-        throw new IllegalArgumentException("The length of integer array 'pos' must be 3.");
-      } else {
-        return new RelBlockPredicate(new Vec3i(intArray[0], intArray[1], intArray[2]), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
-      }
-    }
 
     @Override
     public @NotNull Codec<RelBlockPredicate> getCodec() {

@@ -1,16 +1,16 @@
 package pers.solid.ecmd.function.block;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -22,6 +22,7 @@ import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -45,30 +46,28 @@ public interface PickBlockFunction extends BlockFunction {
   /**
    * 多个方块函数具有相等的权重。这种情况下可以最快地产生。
    */
-  record Uniform(List<BlockFunction> blockFunctions) implements PickBlockFunction {
+  record Uniform(List<BlockFunction> functions) implements PickBlockFunction {
+    public static final Codec<Uniform> CODEC = RecordCodecBuilder.create(i -> i.ap(Uniform::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(Uniform::functions)));
+
     @Override
     public @NotNull String asString() {
-      return "pick(" + blockFunctions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
+      return "pick(" + functions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
     }
 
     @Override
     public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-      return blockFunctions.get(world.random.nextInt(blockFunctions.size())).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      return functions.get(world.random.nextInt(functions.size())).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
 
-    @Override
-    public void writeNbt(@NotNull NbtCompound nbtCompound) {
-      nbtCompound.putBoolean("weighted", false);
-      final NbtList nbtList = new NbtList();
-      nbtCompound.put("functions", nbtList);
-      nbtList.addAll(Lists.transform(blockFunctions, BlockFunction::createNbt));
-    }
   }
 
   /**
    * 带有权重的方块函数，在运行时会根据权重来进行选择。
    */
   record Weighted(List<ObjectDoublePair<BlockFunction>> pairs) implements PickBlockFunction {
+    public static final Codec<ObjectDoublePair<BlockFunction>> PAIR_CODEC = RecordCodecBuilder.create(j -> j.apply2(ObjectDoublePair::of, BlockFunction.CODEC.fieldOf("function").forGetter(ObjectDoublePair::left), Codec.DOUBLE.optionalFieldOf("probability", 1d).forGetter(ObjectDoublePair::rightDouble)));
+    public static final Codec<Weighted> CODEC = RecordCodecBuilder.create(i -> i.ap(Weighted::new, PAIR_CODEC.listOf().fieldOf("pairs").forGetter(Weighted::pairs)));
+
     @Override
     public @NotNull String asString() {
       return "pick(" + pairs.stream().map(pair -> pair.left().asString() + " " + pair.rightDouble()).collect(Collectors.joining(", ")) + ")";
@@ -91,41 +90,16 @@ public interface PickBlockFunction extends BlockFunction {
       return blockState;
     }
 
-    @Override
-    public void writeNbt(@NotNull NbtCompound nbtCompound) {
-      nbtCompound.putBoolean("weighted", true);
-      final NbtList nbtList = new NbtList();
-      nbtCompound.put("functions", nbtList);
-      for (ObjectDoublePair<BlockFunction> pair : pairs) {
-        final NbtCompound nbtCompound1 = new NbtCompound();
-        nbtList.add(nbtCompound1);
-        nbtCompound1.put("probability", pair.left().createNbt());
-        nbtCompound1.putDouble("weight", pair.rightDouble());
-      }
-    }
   }
+
+  Codec<PickBlockFunction> CODEC = Codec.<PickBlockFunction, Uniform>either(Codec.BOOL.dispatch("weighted", f -> f instanceof Weighted, b -> b ? Weighted.CODEC : Uniform.CODEC), Uniform.CODEC).xmap(ei -> ei.map(Function.identity(), Function.identity()), Either::left);
 
   enum Type implements BlockFunctionType<PickBlockFunction> {
     PICK_TYPE;
 
     @Override
-    public @NotNull PickBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final boolean weighted = nbtCompound.getBoolean("weighted");
-      if (weighted) {
-        final ImmutableList.Builder<ObjectDoublePair<BlockFunction>> pairsBuilder = new ImmutableList.Builder<>();
-        final NbtList nbtList = nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE);
-        for (NbtElement element : nbtList) {
-          if (!(element instanceof final NbtCompound nbtCompound1))
-            continue;
-          final float weight = nbtCompound1.getFloat("weight");
-          final BlockFunction value = BlockFunction.fromNbt(nbtCompound1.getCompound("probability"), world);
-          pairsBuilder.add(ObjectDoublePair.of(value, weight));
-        }
-        return new Weighted(pairsBuilder.build());
-      } else {
-        final NbtList nbtList = nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE);
-        return new Uniform(nbtList.stream().map(nbtElement -> BlockFunction.fromNbt(((NbtCompound) nbtElement), world)).collect(ImmutableList.toImmutableList()));
-      }
+    public @NotNull Codec<PickBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 

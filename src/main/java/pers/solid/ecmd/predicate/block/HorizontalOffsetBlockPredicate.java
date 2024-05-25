@@ -7,10 +7,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import joptsimple.internal.Strings;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -66,13 +64,6 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
 
   public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate>, Parser<BlockPredicateArgument> {
     HORIZONTAL_OFFSET_TYPE;
-
-    @Override
-    public @NotNull HorizontalOffsetBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final int offset = nbtCompound.getInt("offset");
-      final BlockPredicate predicate = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate"));
-      return new HorizontalOffsetBlockPredicate(offset, predicate);
-    }
 
     @Override
     public @NotNull Codec<HorizontalOffsetBlockPredicate> getCodec() {

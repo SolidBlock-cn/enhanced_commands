@@ -1,15 +1,15 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.regex.Pattern;
 
@@ -28,7 +29,7 @@ import java.util.regex.Pattern;
  *   idreplace('_planks$', 'wood')
  * </pre>
  */
-public record IdReplaceBlockFunction(Pattern pattern, String replacement, RegistryWrapper<Block> registryWrapper) implements BlockFunction {
+public record IdReplaceBlockFunction(Pattern pattern, String replacement) implements BlockFunction {
   @Override
   public boolean equals(Object o) {
     if (this == o)
@@ -56,15 +57,8 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
     final String old = Registries.BLOCK.getId(block).toString();
     final String replaced = pattern.matcher(old).replaceAll(replacement);
     final Identifier identifier = Identifier.tryParse(replaced);
-    if (identifier == null)
-      return blockState;
-    return registryWrapper.getOptional(RegistryKey.of(RegistryKeys.BLOCK, identifier)).map(blockReference -> blockReference.value().getDefaultState()).orElse(blockState);
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("pattern", pattern.pattern());
-    nbtCompound.putString("replacement", replacement);
+    if (identifier == null) return blockState;
+    return world.getRegistryManager().get(RegistryKeys.BLOCK).getOrEmpty(identifier).filter(block1 -> block1.isEnabled(world.getEnabledFeatures())).map(Block::getDefaultState).orElse(blockState);
   }
 
   @Override
@@ -72,16 +66,14 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
     return BlockFunctionTypes.ID_REPLACE;
   }
 
+  public static final Codec<IdReplaceBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(IdReplaceBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdReplaceBlockFunction::pattern), Codec.STRING.fieldOf("replacement").forGetter(IdReplaceBlockFunction::replacement)));
+
   public enum Type implements BlockFunctionType<IdReplaceBlockFunction> {
     ID_REPLACE_TYPE;
 
     @Override
-    public @NotNull IdReplaceBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new IdReplaceBlockFunction(
-          Pattern.compile(nbtCompound.getString("pattern")),
-          nbtCompound.getString("replacement"),
-          world.createCommandRegistryWrapper(RegistryKeys.BLOCK)
-      );
+    public @NotNull Codec<IdReplaceBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 
@@ -94,7 +86,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement, Regist
 
     @Override
     public IdReplaceBlockFunction getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return new IdReplaceBlockFunction(pattern, replacement, commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
+      return new IdReplaceBlockFunction(pattern, replacement);
     }
 
     @Override

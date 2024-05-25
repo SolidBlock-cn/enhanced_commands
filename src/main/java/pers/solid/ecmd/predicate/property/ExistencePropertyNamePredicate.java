@@ -3,7 +3,6 @@ package pers.solid.ecmd.predicate.property;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -46,11 +45,5 @@ public record ExistencePropertyNamePredicate(String propertyName, boolean exists
   @Override
   public @NotNull Type getType() {
     return Type.EXISTENCE;
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", propertyName);
-    nbtCompound.putBoolean("exists", exists);
   }
 }

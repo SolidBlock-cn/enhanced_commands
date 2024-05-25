@@ -4,6 +4,8 @@ import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
@@ -55,6 +57,13 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
         return INVALID_ENUM_EXCEPTION.createWithContext(parser.reader, s);
       }));
     }
+  }
+
+  static <E extends Enum<E> & StringIdentifiable> com.mojang.serialization.Codec<EnumOrRandom<E>> getCodec(com.mojang.serialization.Codec<E> codec, Supplier<E[]> values) {
+    return com.mojang.serialization.Codec.either(
+        com.mojang.serialization.Codec.STRING.flatXmap(s -> "*".equals(s) ? DataResult.success(random(values.get())) : DataResult.error(() -> "not random value"), v -> DataResult.success("*")),
+        codec
+    ).xmap(either -> either.map(Function.identity(), EnumOrRandom::of), o -> o instanceof EnumOrRandom.Instance<E> i ? Either.right(i.value) : Either.left(((RandomValue<E>) o)));
   }
 
   record Instance<E extends Enum<E> & StringIdentifiable>(E value) implements EnumOrRandom<E> {

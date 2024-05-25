@@ -1,16 +1,16 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
@@ -22,10 +22,10 @@ import pers.solid.ecmd.util.FunctionParamsParser;
  * <code>if(#air, stone, water)</code> - 如果原先的方块是空气，则产生石头，否则产生水。
  * </blockquote>
  */
-public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNull BlockFunction functionIfTrue, @Nullable BlockFunction functionIfFalse) implements BlockFunction {
+public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNull BlockFunction functionIfTrue, @NotNull BlockFunction functionIfFalse) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "if(" + condition.asString() + ", " + functionIfTrue.asString() + (functionIfFalse == null ? "" : ", " + functionIfFalse.asString()) + ")";
+    return "if(" + condition.asString() + ", " + functionIfTrue.asString() + (functionIfFalse == BlockFunction.EMPTY ? "" : ", " + functionIfFalse.asString()) + ")";
   }
 
   @Override
@@ -33,19 +33,8 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, pos, false);
     if (condition.test(cachedBlockPosition)) {
       return functionIfTrue.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
-    } else if (functionIfFalse != null) {
-      return functionIfFalse.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     } else {
-      return blockState;
-    }
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("if", condition.createNbt());
-    nbtCompound.put("then", functionIfTrue.createNbt());
-    if (functionIfFalse != null) {
-      nbtCompound.put("else", functionIfFalse.createNbt());
+      return functionIfFalse.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
   }
 
@@ -54,16 +43,14 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     return BlockFunctionTypes.CONDITIONAL;
   }
 
+  public static final Codec<ConditionalBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3(ConditionalBlockFunction::new, BlockPredicate.CODEC.fieldOf("condition").forGetter(ConditionalBlockFunction::condition), BlockFunction.CODEC.fieldOf("then").forGetter(ConditionalBlockFunction::functionIfTrue), BlockFunction.CODEC.optionalFieldOf("else", BlockFunction.EMPTY).forGetter(ConditionalBlockFunction::functionIfFalse)));
+
   public enum Type implements BlockFunctionType<ConditionalBlockFunction> {
     CONDITIONAL_TYPE;
 
     @Override
-    public @NotNull ConditionalBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new ConditionalBlockFunction(
-          BlockPredicate.fromNbt(nbtCompound.getCompound("if")),
-          BlockFunction.fromNbt(nbtCompound.getCompound("then"), world),
-          nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else"), world) : null
-      );
+    public @NotNull Codec<ConditionalBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 
@@ -73,7 +60,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? null : valueIfFalse.apply(source));
+      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? BlockFunction.EMPTY : valueIfFalse.apply(source));
     }
 
     @Override

@@ -5,9 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
@@ -87,14 +85,6 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
 
   public enum Type implements BlockPredicateType<BiPredicateBlockPredicate> {
     BI_PREDICATE_TYPE;
-
-    @Override
-    public @NotNull BiPredicateBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final boolean same = nbtCompound.getBoolean("same");
-      final BlockPredicate predicate1 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate1"));
-      final BlockPredicate predicate2 = BlockPredicate.fromNbt(nbtCompound.getCompound("predicate2"));
-      return new BiPredicateBlockPredicate(predicate1, predicate2, same);
-    }
 
     @Override
     public @NotNull Codec<BiPredicateBlockPredicate> getCodec() {

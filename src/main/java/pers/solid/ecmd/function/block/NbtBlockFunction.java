@@ -1,7 +1,8 @@
 package pers.solid.ecmd.function.block;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -30,27 +31,18 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("nbtFunction", nbtFunction.asString(false));
-  }
-
-  @Override
   public @NotNull BlockFunctionType<NbtBlockFunction> getType() {
     return BlockFunctionTypes.NBT;
   }
 
+  public static final Codec<NbtBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(NbtBlockFunction::new, CompoundNbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
 
   public enum Type implements BlockFunctionType<NbtBlockFunction>, Parser<BlockFunctionArgument> {
     NBT_TYPE;
 
     @Override
-    public @NotNull NbtBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final String s = nbtCompound.getString("nbtPredicate");
-      try {
-        return new NbtBlockFunction(new NbtFunctionSuggestedParser(new StringReader(s)).parseCompound(false));
-      } catch (CommandSyntaxException e) {
-        throw new IllegalArgumentException("Cannot parse nbt: " + s, e);
-      }
+    public @NotNull Codec<NbtBlockFunction> getCodec() {
+      return CODEC;
     }
 
     @Override

@@ -9,13 +9,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -91,16 +87,6 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tags, @NotNull @Unmodifia
 
   public enum Type implements BlockPredicateType<TagBlockPredicate>, Parser<BlockPredicateArgument> {
     TAG_TYPE;
-
-    @Override
-    public @NotNull TagBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final TagKey<Block> tag = TagKey.of(RegistryKeys.BLOCK, new Identifier(nbtCompound.getString("tag")));
-      final List<PropertyNamePredicate> predicates = nbtCompound.getList("properties", NbtElement.COMPOUND_TYPE)
-          .stream()
-          .map(nbtElement -> PropertyNamePredicate.fromNbt((NbtCompound) nbtElement))
-          .toList();
-      return new TagBlockPredicate(tag, predicates);
-    }
 
     @Override
     public @NotNull Codec<TagBlockPredicate> getCodec() {

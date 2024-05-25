@@ -6,9 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 
 public interface GeneralPropertyFunction extends PropertyFunction<Integer> {
-  @NotNull Collection<Property<?>> except();
+  @NotNull
+  Set<Property<?>> except();
 
   static void updateExcepts(Collection<? extends PropertyFunction<?>> propertyFunctions) {
     for (PropertyFunction<?> propertyFunction : propertyFunctions) {

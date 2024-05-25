@@ -1,11 +1,14 @@
 package pers.solid.ecmd.function.property;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.List;
 
@@ -28,10 +31,19 @@ public record RandomPropertyFunction<T extends Comparable<T>>(Property<T> proper
     }
   }
 
+  private static final RecordCodecBuilder<RandomPropertyFunction<?>, Boolean> MUST_FIELD_CODEC = Codec.BOOL.optionalFieldOf("must", false).forGetter(RandomPropertyFunction::must);
+
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", property.getName());
-    nbtCompound.putString("probability", "*");
-    nbtCompound.putBoolean("must", must);
+  public Type getType() {
+    return Type.RANDOM;
   }
+
+  public static Codec<RandomPropertyFunction<?>> getCodec(Block block) {
+    return RecordCodecBuilder.create(i -> i.apply2(
+        RandomPropertyFunction::new,
+        CodecUtil.propertyForBlock(block.getStateManager()).fieldOf("property").forGetter(RandomPropertyFunction::property),
+        MUST_FIELD_CODEC
+    ));
+  }
+
 }

@@ -8,7 +8,9 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -49,6 +51,7 @@ import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static net.minecraft.command.argument.NbtCompoundArgumentType.getNbtCompound;
 import static net.minecraft.command.argument.NbtElementArgumentType.getNbtElement;
@@ -81,49 +84,19 @@ public enum TestArgCommand implements CommandRegistrationCallback {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockFunctionProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
     return argumentBuilder.then(argument("block_function", BlockFunctionArgumentType.blockFunction(registryAccess))
-        .executes(context -> {
-          final BlockFunction blockFunction = getBlockFunction(context, "block_function");
-          CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockFunction), false);
-          CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(blockFunction.createNbt()), false);
-          return 1;
-        })
+        .executes(context -> executeStringShow(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString))
         .then(literal("string")
-            .executes(context -> {
-              final BlockFunction blockFunction = getBlockFunction(context, "block_function");
-              CommandBridge.sendFeedback(context, () -> TextUtil.literal(blockFunction), false);
-              return 1;
-            }))
+            .executes(context -> executeStringShow(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString)))
         .then(literal("nbt")
-            .executes(context -> {
-              final BlockFunction blockFunction = getBlockFunction(context, "block_function");
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(blockFunction.createNbt()), false);
-              return 1;
-            }))
-        .then(literal("reparse")
-            .executes(context -> {
-              final BlockFunction blockFunction = getBlockFunction(context, "block_function");
-              final String s = blockFunction.asString();
-              CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
-              final BlockFunction reparse = BlockFunction.parse(registryAccess, s, context.getSource());
-              final boolean b = blockFunction.equals(reparse);
-              CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
-              return BooleanUtils.toInteger(b);
-            }))
-        .then(literal("redeserialize")
-            .executes(context -> {
-              final BlockFunction blockFunction = getBlockFunction(context, "block_function");
-              final NbtCompound nbt = blockFunction.createNbt();
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
-              try {
-                final BlockFunction reDeserialize = BlockFunction.fromNbt(nbt, context.getSource().getWorld());
-                final boolean b = blockFunction.equals(reDeserialize);
-                CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
-                return BooleanUtils.toInteger(b);
-              } catch (Throwable e) {
-                EnhancedCommands.LOGGER.error("Parsing block function from NBT:", e);
-                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
-              }
-            }))
+            .executes(context -> executeCodecShow(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json")
+            .executes(context -> executeCodecShow(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, JsonOps.INSTANCE)))
+        .then(literal("string_test")
+            .executes(context -> executeStringTest(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString, s -> BlockFunction.parse(registryAccess, s, context.getSource()))))
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, JsonOps.INSTANCE)))
     );
   }
 
@@ -181,6 +154,14 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
               return (reparsedPredicateMatches ? 2 : 0) + (reparsedFunctionEqual ? 1 : 0);
             }))
+        .then(literal("convert")
+            .then(literal("block_function")
+                .executes(context -> executeConvertShow(context, BlockFunction.CODEC)))
+            .then(literal("block_predicate")
+                .executes(context -> executeConvertShow(context, BlockPredicate.CODEC)))
+            .then(literal("region")
+                .executes(context -> executeConvertShow(context, Region.CODEC)))
+        )
     );
   }
 
@@ -317,6 +298,17 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
+  private static <A> int executeConvertShow(NbtElement nbtElement, Codec<A> codec, Consumer<A> resultConsumer) throws CommandSyntaxException {
+    final DataResult<Pair<A, NbtElement>> decode = codec.decode(NbtOps.INSTANCE, nbtElement);
+    final A result = Util.getResult(decode, CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
+    resultConsumer.accept(result);
+    return 1;
+  }
+
+  private static <A extends ExpressionConvertible> int executeConvertShow(CommandContext<ServerCommandSource> context, Codec<A> codec) throws CommandSyntaxException {
+    return executeConvertShow(getNbtElement(context, "nbt"), codec, a -> CommandBridge.sendFeedback(context, () -> Text.literal(a.asString()).styled(Styles.RESULT), false));
+  }
+
   private static <A> int executeStringShow(CommandContext<ServerCommandSource> context, A fetchedArg, FailableFunction<A, String, CommandSyntaxException> toString) throws CommandSyntaxException {
     final String s = toString.apply(fetchedArg);
     CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
@@ -333,7 +325,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   }
 
   private static <A, T> int executeCodecShow(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
-    final T code = Util.getResult(codec.encodeStart(ops, fetchedArg), IllegalStateException::new);
+    final T code = Util.getResult(codec.encodeStart(ops, fetchedArg), CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof NbtElement nbt) {
       CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
     } else {
@@ -343,14 +335,14 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   }
 
   private static <A, T> int executeCodecTest(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
-    final T code = Util.getResult(codec.encodeStart(ops, fetchedArg), IllegalStateException::new);
+    final T code = Util.getResult(codec.encodeStart(ops, fetchedArg), CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof NbtElement nbt) {
       CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
     } else {
       CommandBridge.sendFeedback(context, () -> Text.literal(code.toString()).styled(Styles.RESULT), false);
     }
     try {
-      final A second = Util.getResult(codec.decode(ops, code), IllegalStateException::new).getFirst();
+      final A second = Util.getResult(codec.decode(ops, code), CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
       if (second instanceof NbtElement nbt) {
         CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
       }

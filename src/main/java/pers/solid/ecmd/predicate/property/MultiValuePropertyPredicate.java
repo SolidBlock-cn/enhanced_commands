@@ -1,12 +1,8 @@
 package pers.solid.ecmd.predicate.property;
 
-import com.google.common.collect.Collections2;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -74,14 +70,5 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
   @Override
   public @NotNull String asString() {
     return property.getName() + (inverted ? "!=" : "=") + values.stream().map(property::name).collect(Collectors.joining("|"));
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", property.getName());
-    nbtCompound.putString("comparator", inverted ? Comparator.NE.asString() : Comparator.EQ.asString());
-    final NbtList nbtList = new NbtList();
-    nbtList.addAll(Collections2.transform(values, input -> NbtString.of(property.name(input))));
-    nbtCompound.put("probability", nbtList);
   }
 }

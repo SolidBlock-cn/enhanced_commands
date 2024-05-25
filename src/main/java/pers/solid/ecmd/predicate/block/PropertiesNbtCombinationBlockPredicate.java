@@ -5,10 +5,7 @@ import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -86,15 +83,6 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
 
   public enum Type implements BlockPredicateType<PropertiesNbtCombinationBlockPredicate> {
     PROPERTIES_NBT_COMBINATION_TYPE;
-
-    @Override
-    public @NotNull PropertiesNbtCombinationBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new PropertiesNbtCombinationBlockPredicate(
-          BlockPredicate.fromNbt(nbtCompound.getCompound("first")),
-          nbtCompound.contains("properties", NbtElement.COMPOUND_TYPE) ? PropertiesNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE.fromNbt(nbtCompound.getCompound("properties"), world) : null,
-          nbtCompound.contains("nbt", NbtElement.COMPOUND_TYPE) ? NbtBlockPredicate.Type.NBT_TYPE.fromNbt(nbtCompound.getCompound("nbt"), world) : null
-      );
-    }
 
     @Override
     public @NotNull Codec<PropertiesNbtCombinationBlockPredicate> getCodec() {

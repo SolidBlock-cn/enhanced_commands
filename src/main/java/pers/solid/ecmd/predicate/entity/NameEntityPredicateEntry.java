@@ -20,6 +20,6 @@ public record NameEntityPredicateEntry(String expectedName, boolean hasNegation)
 
   @Override
   public String toOptionEntry() {
-    return "name=" + expectedName;
+    return "propertyName=" + expectedName;
   }
 }

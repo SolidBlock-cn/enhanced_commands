@@ -184,7 +184,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   protected Property<?> parseProperty() throws CommandSyntaxException {
     addPropertyNameSuggestions();
     final int cursorBeforeReadString = reader.getCursor();
-    // parse block property name
+    // parse block property propertyName
     String propertyName = reader.readString();
     if (propertyName.isEmpty()) {
       final int cursorAfterReadString = reader.getCursor();
@@ -272,7 +272,7 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   }
 
   protected void parsePropertyNameEntry() throws CommandSyntaxException {
-    // parse a property name
+    // parse a property propertyName
     addTagPropertiesNameSuggestions();
     final int cursorBeforePropertyName = reader.getCursor();
     final String propertyName = this.reader.readString();

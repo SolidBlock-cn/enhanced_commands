@@ -1,6 +1,8 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.inventory.SimpleInventory;
@@ -9,7 +11,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.state.property.Properties;
@@ -18,24 +19,21 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.StateUtil;
 
 import java.util.List;
 
-public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) implements BlockFunction {
+public record StonecutBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "stonecut(" + (blockFunction == null ? "" : blockFunction.asString()) + ")";
+    return "stonecut(" + (function.isEmpty() ? "" : function.asString()) + ")";
   }
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    if (blockFunction != null) {
-      blockState = blockFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
-    }
+    blockState = function.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     final Item item = blockState.getBlock().asItem();
     if (item == Items.AIR) {
       return blockState;
@@ -67,23 +65,18 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    if (blockFunction != null) {
-      nbtCompound.put("function", blockFunction.createNbt());
-    }
-  }
-
-  @Override
   public @NotNull BlockFunctionType<StonecutBlockFunction> getType() {
     return BlockFunctionTypes.STONE_CUT;
   }
+
+  public static final Codec<StonecutBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(StonecutBlockFunction::function)));
 
   public enum Type implements BlockFunctionType<StonecutBlockFunction> {
     STONE_CUT_TYPE;
 
     @Override
-    public @NotNull StonecutBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new StonecutBlockFunction(nbtCompound.contains("function", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("function"), world) : null);
+    public @NotNull Codec<StonecutBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 
@@ -92,7 +85,7 @@ public record StonecutBlockFunction(@Nullable BlockFunction blockFunction) imple
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new StonecutBlockFunction(blockFunction == null ? null : blockFunction.apply(source));
+      return source -> new StonecutBlockFunction(blockFunction == null ? EMPTY : blockFunction.apply(source));
     }
 
     @Override

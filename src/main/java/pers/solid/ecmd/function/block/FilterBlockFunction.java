@@ -1,18 +1,18 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.mixin.CachedBlockPositionAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.FunctionParamsParser;
@@ -25,35 +25,22 @@ import pers.solid.ecmd.util.FunctionParamsParser;
  * </pre>
  * 注意：此方法不一定能够正常地对方块实体进行检测。
  */
-public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull BlockPredicate blockPredicate, @Nullable BlockFunction elseFunction) implements BlockFunction {
+public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull BlockPredicate predicate, @NotNull BlockFunction elseFunction) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "filter(" + blockFunction.asString() + ", " + blockPredicate.asString() + (elseFunction == null ? "" : ", " + elseFunction.asString()) + ")";
+    return "filter(" + function.asString() + ", " + predicate.asString() + (elseFunction.isEmpty() ? "" : ", " + elseFunction.asString()) + ")";
   }
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     final NbtCompound valueBeforeModify = blockEntityData.getValue();
-    final BlockState newState = blockFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+    final BlockState newState = function.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, pos, false);
-    ((CachedBlockPositionAccessor) cachedBlockPosition).setState(newState);
-    if (blockPredicate.test(cachedBlockPosition)) {
+    if (predicate.test(cachedBlockPosition)) {
       return newState;
-    } else if (elseFunction == null) {
-      blockEntityData.setValue(valueBeforeModify);
-      return blockState;
     } else {
       blockEntityData.setValue(valueBeforeModify);
       return elseFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
-    }
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("function", blockFunction.createNbt());
-    nbtCompound.put("predicate", blockPredicate.createNbt());
-    if (elseFunction != null) {
-      nbtCompound.put("else", elseFunction.createNbt());
     }
   }
 
@@ -62,15 +49,14 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
     return BlockFunctionTypes.FILTER;
   }
 
+  public static final Codec<FilterBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3(FilterBlockFunction::new, BlockFunction.CODEC.fieldOf("function").forGetter(FilterBlockFunction::function), BlockPredicate.CODEC.fieldOf("predicate").forGetter(FilterBlockFunction::predicate), BlockFunction.CODEC.optionalFieldOf("else", EMPTY).forGetter(FilterBlockFunction::elseFunction)));
+
   public enum Type implements BlockFunctionType<FilterBlockFunction> {
     FILTER_TYPE;
 
     @Override
-    public @NotNull FilterBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new FilterBlockFunction(
-          BlockFunction.fromNbt(nbtCompound.getCompound("function"), world), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")),
-          nbtCompound.contains("else", NbtElement.COMPOUND_TYPE) ? BlockFunction.fromNbt(nbtCompound.getCompound("else"), world) : null
-      );
+    public @NotNull Codec<FilterBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 
@@ -81,7 +67,7 @@ public record FilterBlockFunction(@NotNull BlockFunction blockFunction, @NotNull
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? null : elseFunction.apply(source));
+      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? EMPTY : elseFunction.apply(source));
     }
 
     @Override

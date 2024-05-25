@@ -76,7 +76,7 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
     }
 
     for (int i = 0; i < 1024 && reader.canRead(); i++) {
-      // parse name
+      // parse propertyName
       final int cursorBeforeReadName = reader.getCursor();
       final String name = reader.readString();
       if (!arguments.containsKey(name)) {

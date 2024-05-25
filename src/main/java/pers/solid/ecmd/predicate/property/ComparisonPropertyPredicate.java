@@ -3,7 +3,6 @@ package pers.solid.ecmd.predicate.property;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -48,13 +47,6 @@ public record ComparisonPropertyPredicate<T extends Comparable<T>>(Property<T> p
     } else {
       return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.fail", posText, actualText, expectedText));
     }
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", property.getName());
-    nbtCompound.putString("comparator", comparator.asString());
-    nbtCompound.putString("probability", property.name(value));
   }
 
   public static final Codec<ComparisonPropertyPredicate<?>> CODEC = PropertyCodec.INSTANCE.dispatch("property", ComparisonPropertyPredicate::property, ComparisonPropertyPredicate::getCodecByProperty);

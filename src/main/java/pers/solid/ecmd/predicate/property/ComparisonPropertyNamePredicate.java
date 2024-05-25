@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.MutableText;
@@ -66,12 +65,5 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
   @Override
   public @NotNull Type getType() {
     return Type.COMPARISON;
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", propertyName);
-    nbtCompound.putString("comparator", comparator.asString());
-    nbtCompound.putString("probability", valueName);
   }
 }

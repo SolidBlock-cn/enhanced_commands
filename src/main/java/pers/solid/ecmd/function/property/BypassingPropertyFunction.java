@@ -1,10 +1,13 @@
 package pers.solid.ecmd.function.property;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 /**
  * 此属性函数用于表示不改变方块状态属性，也就是说改变方块之后仍保留原来的方块状态属性的值。例如：
@@ -18,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
  * </pre>
  */
 public record BypassingPropertyFunction<T extends Comparable<T>>(Property<T> property, boolean must) implements PropertyFunction<T> {
+  private static final RecordCodecBuilder<BypassingPropertyFunction<?>, Boolean> MUST_FIELD_CODEC = Codec.BOOL.optionalFieldOf("must", false).forGetter(BypassingPropertyFunction::must);
+
   @Override
   public @NotNull String asString() {
     return property.getName() + (must ? "==~" : "=~");
@@ -33,9 +38,16 @@ public record BypassingPropertyFunction<T extends Comparable<T>>(Property<T> pro
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", property.getName());
-    nbtCompound.putString("probability", "~");
-    nbtCompound.putBoolean("must", must);
+  public Type getType() {
+    return Type.BYPASSING;
   }
+
+  public static Codec<BypassingPropertyFunction<?>> getCodec(Block block) {
+    return RecordCodecBuilder.create(i -> i.apply2(
+        BypassingPropertyFunction::new,
+        CodecUtil.propertyForBlock(block.getStateManager()).fieldOf("property").forGetter(BypassingPropertyFunction::property),
+        MUST_FIELD_CODEC
+    ));
+  }
+
 }

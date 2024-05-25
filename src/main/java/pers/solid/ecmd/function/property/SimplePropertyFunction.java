@@ -1,10 +1,13 @@
 package pers.solid.ecmd.function.property;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 /**
  * 简单地设置将方块的某个属性设置为值。其中，{@code must} 参考用于控制方块状态不存在时，是直接失败还是不执行。但由于命令解析时就已经判断好了方块状态是否存在，因此此参数的作用不大。
@@ -27,9 +30,15 @@ public record SimplePropertyFunction<T extends Comparable<T>>(Property<T> proper
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", property.getName());
-    nbtCompound.putString("probability", property.name(value));
-    nbtCompound.putBoolean("must", must);
+  public Type getType() {
+    return Type.SIMPLE;
+  }
+
+  public static Codec<SimplePropertyFunction<?>> getCodec(Block block) {
+    return CodecUtil.propertyForBlock(block.getStateManager()).dispatch("property", SimplePropertyFunction::property, SimplePropertyFunction::createCodecForProperty);
+  }
+
+  private static <T extends Comparable<T>> Codec<SimplePropertyFunction<T>> createCodecForProperty(Property<T> property) {
+    return RecordCodecBuilder.create(i -> i.apply2((value, must) -> new SimplePropertyFunction<>(property, value, must), property.getCodec().fieldOf("value").forGetter(SimplePropertyFunction::value), Codec.BOOL.optionalFieldOf("must", false).forGetter(SimplePropertyFunction::must)));
   }
 }

@@ -1,21 +1,17 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
@@ -23,7 +19,10 @@ import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * To test which a block is exposed in the specified directions and the specified type.
@@ -204,20 +203,6 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
 
   public enum Type implements BlockPredicateType<ExposeBlockPredicate> {
     EXPOSE_TYPE;
-
-    @Override
-    public @NotNull ExposeBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final String typeName = nbtCompound.getString("exposure_type");
-      final ExposureType type = ExposureType.CODEC.byId(typeName);
-      Preconditions.checkNotNull(type, "Unknown exposure type: %", typeName);
-      final List<Direction> directions;
-      if (nbtCompound.contains("directions", NbtElement.STRING_TYPE)) {
-        directions = Collections.singletonList(Direction.byName(nbtCompound.getString("directions")));
-      } else {
-        directions = nbtCompound.getList("directions", NbtElement.STRING_TYPE).stream().map(nbtElement -> Direction.byName(nbtElement.asString())).filter(Objects::nonNull).toList();
-      }
-      return new ExposeBlockPredicate(type, directions);
-    }
 
     @Override
     public @NotNull Codec<ExposeBlockPredicate> getCodec() {

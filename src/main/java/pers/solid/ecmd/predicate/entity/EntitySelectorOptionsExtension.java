@@ -95,7 +95,7 @@ public class EntitySelectorOptionsExtension {
 
   private static void registerInapplicableReasons() {
     final var map = INAPPLICABLE_REASONS;
-    markRequiringUniqueNoMixture("name");
+    markRequiringUniqueNoMixture("propertyName");
     map.put("distance", (reader, option, restoreCursor) -> {
       reader.getReader().setCursor(restoreCursor);
       if (EntitySelectorReaderExtras.getOf(reader).implicitDistance) {

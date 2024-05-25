@@ -24,7 +24,7 @@ public class KeywordArgs {
 
   @SuppressWarnings("unchecked")
   public <T> T getArg(@NotNull String name) {
-    Preconditions.checkArgument(type.arguments().containsKey(name), "Invalid arg name: %s", name);
+    Preconditions.checkArgument(type.arguments().containsKey(name), "Invalid arg propertyName: %s", name);
     if (values.containsKey(name)) {
       return (T) values.get(name);
     }

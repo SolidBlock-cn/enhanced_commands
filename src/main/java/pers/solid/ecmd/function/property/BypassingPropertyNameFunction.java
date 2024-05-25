@@ -1,13 +1,16 @@
 package pers.solid.ecmd.function.property;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
 public record BypassingPropertyNameFunction(String propertyName, boolean must) implements PropertyNameFunction {
+  public static final Codec<BypassingPropertyNameFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(BypassingPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(BypassingPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(BypassingPropertyNameFunction::must)));
+
   @Override
   public @NotNull String asString() {
     return propertyName + (must ? "==~" : "=~");
@@ -23,9 +26,8 @@ public record BypassingPropertyNameFunction(String propertyName, boolean must) i
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", propertyName);
-    nbtCompound.putString("probability", "~");
-    nbtCompound.putBoolean("must", must);
+  public @NotNull Type getType() {
+    return Type.BYPASSING;
   }
+
 }

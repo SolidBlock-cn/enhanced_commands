@@ -1,13 +1,13 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.base.Suppliers;
+import com.mojang.serialization.Codec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -19,19 +19,23 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.StateUtil;
 
-import java.util.function.Supplier;
-
 /**
  * 此方块函数可以产生任意的方块的任意方块状态，无论其原先的方块是什么。
  */
 public final class RandomBlockFunction implements BlockFunction {
-  private transient final Supplier<Block[]> blocks;
+  private transient FeatureSet featureSet;
+  private transient Block[] blocks;
 
-  /**
-   *
-   */
-  public RandomBlockFunction(RegistryWrapper<Block> registryWrapper) {
-    blocks = Suppliers.memoize(() -> registryWrapper.streamEntries().map(RegistryEntry.Reference::value).toArray(Block[]::new));
+  private @NotNull Block[] getBlocks(DynamicRegistryManager rm, FeatureSet fs) {
+    if (blocks == null || featureSet != fs) {
+      return (blocks = calculateBlocks(rm, fs));
+    }
+    return blocks;
+  }
+
+  private @NotNull Block[] calculateBlocks(DynamicRegistryManager rm, FeatureSet fs) {
+    this.featureSet = fs;
+    return rm.get(RegistryKeys.BLOCK).stream().filter(block -> block.isEnabled(fs)).toArray(Block[]::new);
   }
 
   @Override
@@ -41,17 +45,13 @@ public final class RandomBlockFunction implements BlockFunction {
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    final Block[] blocks = this.blocks.get();
+    final Block[] blocks = getBlocks(world.getRegistryManager(), world.getEnabledFeatures());
     if (blocks.length == 0) {
-      return null;
+      return blockState;
     }
     final Random random = world.getRandom();
     final Block block = blocks[random.nextInt(blocks.length)];
     return StateUtil.getBlockWithRandomProperties(block, random);
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
   }
 
   @Override
@@ -61,8 +61,7 @@ public final class RandomBlockFunction implements BlockFunction {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
+    if (this == o) return true;
     return o instanceof RandomBlockFunction;
   }
 
@@ -76,12 +75,14 @@ public final class RandomBlockFunction implements BlockFunction {
     return "RandomBlockFunction{}";
   }
 
+  public static final Codec<RandomBlockFunction> CODEC = Codec.unit(RandomBlockFunction::new);
+
   public enum Type implements BlockFunctionType<RandomBlockFunction>, Parser<BlockFunctionArgument> {
     RANDOM_TYPE;
 
     @Override
-    public @NotNull RandomBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new RandomBlockFunction(world.createCommandRegistryWrapper(RegistryKeys.BLOCK));
+    public @NotNull Codec<RandomBlockFunction> getCodec() {
+      return CODEC;
     }
 
     @Override
@@ -92,7 +93,7 @@ public final class RandomBlockFunction implements BlockFunction {
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();
         parser.suggestionProviders.clear();
-        return new RandomBlockFunction(commandRegistryAccess.createWrapper(RegistryKeys.BLOCK));
+        return new RandomBlockFunction();
       }
       return null;
     }

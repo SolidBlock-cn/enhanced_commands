@@ -5,17 +5,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.regex.Pattern;
 
@@ -57,15 +56,10 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     return pattern.pattern().hashCode();
   }
 
-  public static final Codec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockPredicate::new, Codec.STRING.xmap(Pattern::compile, Pattern::pattern).fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
+  public static final Codec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockPredicate::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
 
   public enum Type implements BlockPredicateType<IdContainBlockPredicate> {
     ID_CONTAIN_TYPE;
-
-    @Override
-    public @NotNull IdContainBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new IdContainBlockPredicate(Pattern.compile(nbtCompound.getString("pattern")));
-    }
 
     @Override
     public @NotNull Codec<IdContainBlockPredicate> getCodec() {

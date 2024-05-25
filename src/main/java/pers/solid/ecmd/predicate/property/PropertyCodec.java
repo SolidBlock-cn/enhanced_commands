@@ -25,7 +25,7 @@ public enum PropertyCodec implements Codec<Property<?>> {
         return DataResult.success(Pair.of(property, ops.empty()));
       });
     }
-    return DataResult.error(() -> "The ops is not instance of " + BlockBiasedOps.class + ", and cannot get property from name!");
+    return DataResult.error(() -> "The ops is not instance of " + BlockBiasedOps.class + ", and cannot get property from propertyName!");
   }
 
   @Override

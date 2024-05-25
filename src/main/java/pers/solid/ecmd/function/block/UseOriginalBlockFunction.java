@@ -1,5 +1,6 @@
 package pers.solid.ecmd.function.block;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -27,20 +28,18 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-  }
-
-  @Override
   public @NotNull BlockFunctionType<UseOriginalBlockFunction> getType() {
     return BlockFunctionTypes.USE_ORIGINAL;
   }
+
+  public static final Codec<UseOriginalBlockFunction> CODEC = Codec.unit(USE_ORIGINAL);
 
   public enum Type implements BlockFunctionType<UseOriginalBlockFunction>, Parser<BlockFunctionArgument> {
     USE_ORIGINAL_TYPE;
 
     @Override
-    public @NotNull UseOriginalBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return USE_ORIGINAL;
+    public @NotNull Codec<UseOriginalBlockFunction> getCodec() {
+      return CODEC;
     }
 
     @Override

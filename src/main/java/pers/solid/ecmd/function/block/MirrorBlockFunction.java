@@ -1,6 +1,8 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
@@ -31,21 +33,18 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("mirror", mirror.asString());
-  }
-
-  @Override
   public @NotNull BlockFunctionType<MirrorBlockFunction> getType() {
     return BlockFunctionTypes.MIRROR;
   }
+
+  public static final Codec<MirrorBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(MirrorBlockFunction::new, EnumOrRandom.getCodec(BlockMirror.CODEC, BlockMirror::values).fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
 
   public enum Type implements BlockFunctionType<MirrorBlockFunction> {
     MIRROR_TYPE;
 
     @Override
-    public @NotNull MirrorBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new MirrorBlockFunction(EnumOrRandom.parse(BlockMirror.CODEC, nbtCompound.getString("mirror"), BlockMirror::values).orElseThrow());
+    public @NotNull Codec<MirrorBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 

@@ -1,6 +1,8 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -15,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.regex.Pattern;
 
@@ -53,11 +56,6 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("pattern", pattern.toString());
-  }
-
-  @Override
   public @NotNull BlockFunctionType<IdContainBlockFunction> getType() {
     return BlockFunctionTypes.ID_CONTAIN;
   }
@@ -88,13 +86,14 @@ public final class IdContainBlockFunction implements BlockFunction {
     return pattern;
   }
 
+  public static final Codec<IdContainBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockFunction::pattern)));
 
   public enum Type implements BlockFunctionType<IdContainBlockFunction> {
     ID_CONTAIN_TYPE;
 
     @Override
-    public @NotNull IdContainBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new IdContainBlockFunction(Pattern.compile(nbtCompound.getString("pattern")));
+    public @NotNull Codec<IdContainBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 

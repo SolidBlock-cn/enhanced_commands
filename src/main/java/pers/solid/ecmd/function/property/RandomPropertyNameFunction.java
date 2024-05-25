@@ -1,7 +1,8 @@
 package pers.solid.ecmd.function.property;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.RandomUtils;
@@ -10,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public record RandomPropertyNameFunction(String propertyName, boolean must) implements PropertyNameFunction {
+  public static final Codec<RandomPropertyNameFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(RandomPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(RandomPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(RandomPropertyNameFunction::must)));
+
   @Override
   public @NotNull String asString() {
     return propertyName + (must ? "==*" : "=*");
@@ -24,15 +27,14 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
     return getModifiedStateForProperty(blockState, property);
   }
 
+  @Override
+  public @NotNull Type getType() {
+    return Type.RANDOM;
+  }
+
   private <T extends Comparable<T>> BlockState getModifiedStateForProperty(BlockState blockState, Property<T> property) {
     final List<T> values = List.copyOf(property.getValues());
     return blockState.with(property, values.get(RandomUtils.nextInt(0, values.size())));
   }
 
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", propertyName);
-    nbtCompound.putString("probability", "*");
-    nbtCompound.putBoolean("must", must);
-  }
 }

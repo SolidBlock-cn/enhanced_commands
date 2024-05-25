@@ -1,6 +1,8 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -25,21 +27,18 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("rotation", rotation.asString());
-  }
-
-  @Override
   public @NotNull BlockFunctionType<RotateBlockFunction> getType() {
     return BlockFunctionTypes.ROTATE;
   }
+
+  public static final Codec<RotateBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(RotateBlockFunction::new, EnumOrRandom.getCodec(BlockRotation.CODEC, BlockRotation::values).fieldOf("rotation").forGetter(RotateBlockFunction::rotation)));
 
   public enum Type implements BlockFunctionType<RotateBlockFunction> {
     ROTATE_TYPE;
 
     @Override
-    public @NotNull RotateBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new RotateBlockFunction(EnumOrRandom.parse(BlockRotation.CODEC, nbtCompound.getString("rotation"), BlockRotation::values).orElseThrow());
+    public @NotNull Codec<RotateBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 

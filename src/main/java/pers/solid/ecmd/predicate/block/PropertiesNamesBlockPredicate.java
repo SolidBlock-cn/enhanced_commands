@@ -6,11 +6,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
@@ -78,15 +75,6 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
 
   public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate>, Parser<BlockPredicateArgument> {
     PROPERTY_NAMES_TYPE;
-
-    @Override
-    public @NotNull PropertiesNamesBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final List<PropertyNamePredicate> predicates = nbtCompound.getList("predicates", NbtElement.COMPOUND_TYPE)
-          .stream()
-          .map(nbtElement -> PropertyNamePredicate.fromNbt((NbtCompound) nbtElement))
-          .toList();
-      return new PropertiesNamesBlockPredicate(predicates);
-    }
 
     @Override
     public @NotNull Codec<PropertiesNamesBlockPredicate> getCodec() {

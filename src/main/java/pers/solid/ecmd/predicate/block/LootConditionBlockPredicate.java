@@ -18,13 +18,11 @@ import net.minecraft.loot.condition.LootConditionManager;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -146,19 +144,6 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
 
   enum Type implements BlockPredicateType<LootConditionBlockPredicate> {
     LOOT_CONDITION_TYPE;
-
-    @Override
-    public @NotNull LootConditionBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final String predicateString = nbtCompound.getString("predicate");
-      if (predicateString.isEmpty()) throw new IllegalArgumentException("predicate expected in NBT");
-      final char c = predicateString.charAt(0);
-      if (c == '[' || c == '{' || StringReader.isQuotedStringStart(c)) {
-        return new Anonymous(GSON.fromJson(predicateString, LootCondition.class));
-      } else {
-        final Identifier identifier = new Identifier(predicateString);
-        return new Named(identifier);
-      }
-    }
 
     @Override
     public @NotNull Codec<LootConditionBlockPredicate> getCodec() {

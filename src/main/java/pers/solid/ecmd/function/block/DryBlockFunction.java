@@ -1,32 +1,32 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
 
 /**
  * 去除方块函数中的流体，并将 waterlogged 设为 false。这不一定总是能够成功。
  */
-public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements BlockFunction {
+public record DryBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "dry(" + (blockFunction == null ? "" : blockFunction.asString()) + ")";
+    return "dry(" + (function.isEmpty() ? "" : function.asString()) + ")";
   }
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    BlockState state = blockFunction == null ? blockState : blockFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+    BlockState state = function.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     if (state.contains(Properties.WATERLOGGED)) {
       state = state.with(Properties.WATERLOGGED, false);
     }
@@ -37,27 +37,18 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    if (blockFunction != null) {
-      nbtCompound.put("function", blockFunction.createNbt());
-    }
-  }
-
-  @Override
   public @NotNull BlockFunctionType<DryBlockFunction> getType() {
     return BlockFunctionTypes.DRY;
   }
+
+  public static final Codec<DryBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.group(BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(DryBlockFunction::function)).apply(i, DryBlockFunction::new));
 
   public enum Type implements BlockFunctionType<DryBlockFunction> {
     DRY_TYPE;
 
     @Override
-    public @NotNull DryBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      if (nbtCompound.contains("function", NbtElement.COMPOUND_TYPE)) {
-        return new DryBlockFunction(BlockFunction.fromNbt(nbtCompound.getCompound("function"), world));
-      } else {
-        return new DryBlockFunction(null);
-      }
+    public @NotNull Codec<DryBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 
@@ -66,7 +57,7 @@ public record DryBlockFunction(@Nullable BlockFunction blockFunction) implements
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-      return source -> new DryBlockFunction(blockFunction == null ? null : blockFunction.apply(source));
+      return source -> new DryBlockFunction(blockFunction == null ? EMPTY : blockFunction.apply(source));
     }
 
     @Override

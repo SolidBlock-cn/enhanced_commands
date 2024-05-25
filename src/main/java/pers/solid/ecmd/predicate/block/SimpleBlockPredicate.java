@@ -10,14 +10,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -98,16 +94,6 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
 
   public enum Type implements BlockPredicateType<SimpleBlockPredicate>, Parser<BlockPredicateArgument> {
     SIMPLE_TYPE;
-
-    @Override
-    public @NotNull SimpleBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final Block block = Registries.BLOCK.getOrEmpty(new Identifier(nbtCompound.getString("block"))).orElseThrow();
-      final List<PropertyPredicate<?>> predicates = nbtCompound.getList("properties", NbtElement.COMPOUND_TYPE)
-          .stream()
-          .<PropertyPredicate<?>>map(nbtElement -> PropertyPredicate.fromNbt((NbtCompound) nbtElement, block))
-          .toList();
-      return new SimpleBlockPredicate(block, predicates);
-    }
 
     @Override
     public @NotNull Codec<SimpleBlockPredicate> getCodec() {

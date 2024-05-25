@@ -1,8 +1,8 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -11,7 +11,6 @@ import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -20,13 +19,14 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 /**
  * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockStateArgument} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
  */
-public interface BlockFunction extends ExpressionConvertible, NbtConvertible, BlockFunctionArgument {
+public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgument {
+  BlockFunction EMPTY = EmptyBlockFunction.INSTANCE;
+  Codec<BlockFunction> CODEC = BlockFunctionType.REGISTRY.getCodec().dispatch(BlockFunction::getType, BlockFunctionType::getCodec);
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));
 
   static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
@@ -67,27 +67,15 @@ public interface BlockFunction extends ExpressionConvertible, NbtConvertible, Bl
   @NotNull
   BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData);
 
-  void writeNbt(@NotNull NbtCompound nbtCompound);
-
   @NotNull
   BlockFunctionType<?> getType();
 
   @Override
-  default void writeIdentifyingData(@NotNull NbtCompound nbtCompound) {
-    final BlockFunctionType<?> type = getType();
-    final Identifier id = BlockFunctionType.REGISTRY.getId(type);
-    nbtCompound.putString("type", Preconditions.checkNotNull(id, "Unknown block function type: %s", type).toString());
-    writeNbt(nbtCompound);
-  }
-
-  static @NotNull BlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-    final BlockFunctionType<?> type = BlockFunctionType.REGISTRY.get(new Identifier(nbtCompound.getString("type")));
-    Preconditions.checkNotNull(type, "Unknown block function type: %s", type);
-    return type.fromNbt(nbtCompound, world);
-  }
-
-  @Override
   default BlockFunction apply(ServerCommandSource source) {
     return this;
+  }
+
+  default boolean isEmpty() {
+    return this == EMPTY;
   }
 }

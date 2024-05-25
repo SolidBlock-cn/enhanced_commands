@@ -29,11 +29,11 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   /**
    * 使用通用属性（<code>*</code> 或 <code>~</code> 不带具体的属性名称）时，此字段表示需要排除的属性（就是已经被其他属性函数使用了的）。没有使用通用属性时，则为 {@code null}。
    */
-  public @Nullable Collection<Property<?>> exceptionForGeneralProperty = null;
+  public @Nullable Set<Property<?>> exceptionForGeneralProperty = null;
   /**
    * 使用通用属性（<code>*</code> 或 <code>~</code> 不带具体的属性名称）时，此字段表示需要排除的属性名称（就是已经被其他属性名称函数使用了的）。没有使用通用属性时，则为 {@code null}。
    */
-  public @Nullable Collection<String> exceptionForGeneralPropertyName = null;
+  public @Nullable Set<String> exceptionForGeneralPropertyName = null;
   private boolean must = false;
   private int cursorBeforeGeneralFunction = -1;
 

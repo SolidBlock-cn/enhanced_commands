@@ -1,16 +1,20 @@
 package pers.solid.ecmd.function.property;
 
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
-import java.util.Collection;
+import java.util.Set;
 
-public record AllRandomPropertyFunction(@NotNull Collection<Property<?>> except) implements GeneralPropertyFunction {
+public record AllRandomPropertyFunction(@NotNull Set<Property<?>> except) implements GeneralPropertyFunction {
   @Override
   public @NotNull String asString() {
     return "*";
@@ -34,7 +38,12 @@ public record AllRandomPropertyFunction(@NotNull Collection<Property<?>> except)
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.putString("property", "*");
+  public Type getType() {
+    return Type.ALL_RANDOM;
   }
+
+  public static Codec<AllRandomPropertyFunction> getCodec(Block block) {
+    return RecordCodecBuilder.create(i -> i.ap(AllRandomPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllRandomPropertyFunction::except)));
+  }
+
 }

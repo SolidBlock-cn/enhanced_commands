@@ -1,9 +1,14 @@
 package pers.solid.ecmd.function.nbt;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,6 +39,14 @@ import java.util.stream.Collectors;
  * @param allowsMerge 是否允许对 NBT 复合标签进行合并
  */
 public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boolean allowsMerge) implements NbtFunction {
+  public static final Codec<CompoundNbtFunction> CODEC = Codec.STRING.flatXmap(s -> {
+    try {
+      return DataResult.success(new NbtFunctionSuggestedParser(new StringReader(s)).parseCompound(false));
+    } catch (CommandSyntaxException e) {
+      return DataResult.error(e::getMessage);
+    }
+  }, f -> DataResult.success(f.asString()));
+
   @Override
   public @NotNull String asString(boolean requirePrefix) {
     return (allowsMerge ? (requirePrefix ? ": " : "") : "= ") + "{" + source.entrySet().stream().map(entry -> {

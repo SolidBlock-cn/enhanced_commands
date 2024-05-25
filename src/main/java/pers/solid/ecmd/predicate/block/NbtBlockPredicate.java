@@ -1,16 +1,13 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
@@ -56,16 +53,6 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
 
   public enum Type implements BlockPredicateType<NbtBlockPredicate>, Parser<BlockPredicateArgument> {
     NBT_TYPE;
-
-    @Override
-    public @NotNull NbtBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final String s = nbtCompound.getString("nbtPredicate");
-      try {
-        return new NbtBlockPredicate(new NbtPredicateSuggestedParser(new StringReader(s)).parseCompound(false, false));
-      } catch (CommandSyntaxException e) {
-        throw new IllegalArgumentException("Cannot parse nbt: " + s, e);
-      }
-    }
 
     @Override
     public @NotNull Codec<NbtBlockPredicate> getCodec() {

@@ -1,12 +1,11 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -15,17 +14,14 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.property.GeneralPropertyFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
-import pers.solid.ecmd.util.NbtConvertible;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record PropertyNamesBlockFunction(@NotNull Collection<PropertyNameFunction> propertyNameFunctions) implements BlockFunction {
+public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> propertyNameFunctions) implements BlockFunction {
   @Override
   public @NotNull String asString() {
     return "[" + propertyNameFunctions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(",")) + "]";
@@ -40,28 +36,18 @@ public record PropertyNamesBlockFunction(@NotNull Collection<PropertyNameFunctio
   }
 
   @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    final NbtList nbtList = new NbtList();
-    nbtCompound.put("functions", nbtList);
-    nbtList.addAll(Collections2.transform(propertyNameFunctions, NbtConvertible::createNbt));
-  }
-
-  @Override
   public @NotNull BlockFunctionType<PropertyNamesBlockFunction> getType() {
     return BlockFunctionTypes.PROPERTY_NAMES;
   }
+
+  public static final Codec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::propertyNameFunctions)));
 
   public enum Type implements BlockFunctionType<PropertyNamesBlockFunction>, Parser<BlockFunctionArgument> {
     PROPERTY_NAMES_TYPE;
 
     @Override
-    public @NotNull PropertyNamesBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final List<PropertyNameFunction> functions = nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE)
-          .stream()
-          .map(nbtElement -> PropertyNameFunction.fromNbt((NbtCompound) nbtElement))
-          .toList();
-      GeneralPropertyFunction.OfName.updateExcepts(functions);
-      return new PropertyNamesBlockFunction(functions);
+    public @NotNull Codec<PropertyNamesBlockFunction> getCodec() {
+      return CODEC;
     }
 
     @Override

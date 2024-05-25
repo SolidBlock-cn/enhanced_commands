@@ -1,14 +1,12 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -17,32 +15,24 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * 叠加多个方块函数，依次应用。
  */
-public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) implements BlockFunction {
+public record OverlayBlockFunction(List<BlockFunction> functions) implements BlockFunction {
   @Override
   public @NotNull String asString() {
-    return "overlay(" + blockFunctions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
+    return "overlay(" + functions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
   }
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    for (BlockFunction blockFunction : blockFunctions) {
+    for (BlockFunction blockFunction : functions) {
       blockState = blockFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
     return blockState;
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    final NbtList nbtList = new NbtList();
-    nbtCompound.put("functions", nbtList);
-    nbtList.addAll(Collections2.transform(blockFunctions, BlockFunction::createNbt));
   }
 
   @Override
@@ -50,12 +40,14 @@ public record OverlayBlockFunction(Collection<BlockFunction> blockFunctions) imp
     return BlockFunctionTypes.OVERLAY;
   }
 
+  public static final Codec<OverlayBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayBlockFunction::functions)));
+
   public enum Type implements BlockFunctionType<OverlayBlockFunction> {
     OVERLAY_TYPE;
 
     @Override
-    public @NotNull OverlayBlockFunction fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      return new OverlayBlockFunction(ImmutableList.copyOf(Lists.transform(nbtCompound.getList("functions", NbtElement.COMPOUND_TYPE), nbtElement -> BlockFunction.fromNbt((NbtCompound) nbtElement, world))));
+    public @NotNull Codec<OverlayBlockFunction> getCodec() {
+      return CODEC;
     }
   }
 

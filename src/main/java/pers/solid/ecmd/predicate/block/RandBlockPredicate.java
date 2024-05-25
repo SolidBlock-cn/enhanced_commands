@@ -5,12 +5,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
@@ -102,15 +99,6 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
 
   public enum Type implements BlockPredicateType<RandBlockPredicate> {
     RAND_TYPE;
-
-    @Override
-    public @NotNull RandBlockPredicate fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      if (nbtCompound.contains("predicate", NbtElement.COMPOUND_TYPE)) {
-        return new RandBlockPredicate(nbtCompound.getFloat("probability"), BlockPredicate.fromNbt(nbtCompound.getCompound("predicate")));
-      } else {
-        return new RandBlockPredicate(nbtCompound.getFloat("probability"), ConstantBlockPredicate.ALWAYS_TRUE);
-      }
-    }
 
     @Override
     public @NotNull Codec<RandBlockPredicate> getCodec() {
