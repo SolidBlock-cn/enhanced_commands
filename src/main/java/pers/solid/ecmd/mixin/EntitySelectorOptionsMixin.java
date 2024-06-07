@@ -247,17 +247,17 @@ public abstract class EntitySelectorOptionsMixin {
    * 修改 "gamemode" 的值的建议，使之接受本模组中的扩展的游戏模式名称。
    */
   @Inject(method = "method_9946", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;buildFuture()Ljava/util/concurrent/CompletableFuture;", shift = At.Shift.BEFORE, remap = false))
-  private static void suggestMoreGamemodes(EntitySelectorReader entitySelectorReader, SuggestionsBuilder advancements, Consumer<SuggestionsBuilder> consumer, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local String stringxx, @Local(ordinal = 0) boolean blxx, @Local(ordinal = 1) boolean bl2) {
+  private static void suggestMoreGamemodes(EntitySelectorReader entitySelectorReader, SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local String stringxx, @Local(ordinal = 0) boolean blxx, @Local(ordinal = 1) boolean bl2) {
     if (!EntitySelectorParsingConfig.CURRENT.acceptGameModeAlias) {
       return;
     }
     for (String name : MixinShared.EXTENDED_GAME_MODE_NAMES.keySet()) {
       if (name.toLowerCase(Locale.ROOT).startsWith(stringxx)) {
         if (bl2) {
-          advancements.suggest("!" + name);
+          builder.suggest("!" + name);
         }
         if (blxx) {
-          advancements.suggest(name);
+          builder.suggest(name);
         }
       }
     }
@@ -496,6 +496,15 @@ public abstract class EntitySelectorOptionsMixin {
     if (context != null && (!StringReader.isAllowedInUnquotedString(stringReader.peek(-1)) || stringReader.canRead() && StringReader.isAllowedInUnquotedString(stringReader.peek()))) {
       EntitySelectorOptionsExtension.mixinGetAdvancementIdSuggestions(reader, stringReader, context);
     }
+  }
+
+
+  /**
+   * 在进度 id 或进度的条件 id 的等号后，读取布尔值前，提供布尔值的建议。
+   */
+  @Inject(method = "method_9974", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readBoolean()Z", shift = At.Shift.BEFORE, remap = false))
+  private static void addAdvancementsValueBooleanSuggestions(EntitySelectorReader reader, CallbackInfo ci) {
+    reader.setSuggestionProvider(EntitySelectorOptionsExtension.BOOLEAN_SUGGEST);
   }
 
   @Inject(method = "method_9974", at = {

@@ -1,5 +1,7 @@
 package pers.solid.ecmd.function.block;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
@@ -9,6 +11,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -19,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 /**
@@ -26,7 +30,9 @@ import pers.solid.ecmd.util.mixin.MixinShared;
  */
 public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgument {
   BlockFunction EMPTY = EmptyBlockFunction.INSTANCE;
-  Codec<BlockFunction> CODEC = BlockFunctionType.REGISTRY.getCodec().dispatch(BlockFunction::getType, BlockFunctionType::getCodec);
+  Codec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.getCodec().dispatch(BlockFunction::getType, BlockFunctionType::getCodec);
+  Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.createEntryCodec().xmap(block -> new SimpleBlockFunction(block.value(), ImmutableList.of()), Functions.compose(Block::getRegistryEntry, SimpleBlockFunction::block)), MAP_CODEC);
+
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));
 
   static @NotNull BlockFunction parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {

@@ -27,7 +27,7 @@ public final class BlockFunctionTypes {
   public static final BlockFunctionType<SimpleBlockFunction> SIMPLE = register(SimpleBlockFunction.Type.SIMPLE_TYPE, "simple");
   public static final BlockFunctionType<PropertyNamesBlockFunction> PROPERTY_NAMES = register(PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE, "property_names");
   public static final BlockFunctionType<NbtBlockFunction> NBT = register(NbtBlockFunction.Type.NBT_TYPE, "nbt");
-  public static final BlockFunctionType<PropertiesNbtCombinationBlockFunction> PROPERTIES_NBT_COMBINATION = register(PropertiesNbtCombinationBlockFunction.Type.PROPERTIES_NBT_COMBINATION_TYPE, "property_name_combination");
+  public static final BlockFunctionType<PropertiesNbtCombinationBlockFunction> PROPERTIES_NBT_COMBINATION = register(PropertiesNbtCombinationBlockFunction.Type.PROPERTIES_NBT_COMBINATION_TYPE, "properties_nbt_combination");
   public static final BlockFunctionType<RandomBlockFunction> RANDOM = register(RandomBlockFunction.Type.RANDOM_TYPE, "random");
   public static final BlockFunctionType<TagBlockFunction> TAG = register(TagBlockFunction.Type.TAG_TYPE, "tag");
   public static final BlockFunctionType<UseOriginalBlockFunction> USE_ORIGINAL = register(UseOriginalBlockFunction.Type.USE_ORIGINAL_TYPE, "use_original");

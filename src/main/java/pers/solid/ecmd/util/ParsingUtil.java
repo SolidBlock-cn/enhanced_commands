@@ -79,6 +79,13 @@ public final class ParsingUtil {
   }
 
   /**
+   * 在输入布尔值时，提供布尔值的建议。
+   */
+  public static CompletableFuture<Suggestions> suggestBoolean(SuggestionsBuilder builder) {
+    return CommandSource.suggestMatching(new String[]{"true", "false"}, builder);
+  }
+
+  /**
    * 提供单个字符串的建议（仅在字符串与输入的内容匹配时才建议），并通过 supplier 来指定提示文本。
    *
    * @param candidate 需要建议的字符串。

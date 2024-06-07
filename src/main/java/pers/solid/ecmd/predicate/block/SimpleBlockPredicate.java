@@ -1,5 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -20,14 +22,14 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
-  public static final Codec<SimpleBlockPredicate> CODEC = Registries.BLOCK.getCodec().dispatch("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), PropertyPredicate.getCodec(block).listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(SimpleBlockPredicate::properties))));
+  public static final Codec<SimpleBlockPredicate> CODEC = Registries.BLOCK.createEntryCodec().dispatch("block", Functions.compose(Block::getRegistryEntry, SimpleBlockPredicate::block), block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockPredicate(block.value(), properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block.value()).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
 
 
   @Override

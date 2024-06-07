@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
@@ -26,6 +27,12 @@ public class EntitySelectorExtras {
     EnhancedCommands.LOGGER.warn("Warning! There is no ServerCommandSource yet for {}!", EntitySelectorExtras.this);
     return false;
   };
+  /**
+   * 此字体决定了在运行 {@link EntitySelector#getUnfilteredEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
+   *
+   * @see pers.solid.ecmd.mixin.EntitySelectorReaderMixin#buildExtraPredicate(CallbackInfoReturnable)
+   */
+  public @Nullable EntitySelectorCollector collector;
 
   public Predicate<Entity> createUpdatedPredicate(ServerCommandSource source) throws CommandSyntaxException {
     // 这个 transform 过的 iterable 会被复制一遍。

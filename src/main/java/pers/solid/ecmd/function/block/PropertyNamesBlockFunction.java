@@ -21,17 +21,17 @@ import pers.solid.ecmd.util.ParsingUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> propertyNameFunctions) implements BlockFunction {
-  public static final Codec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::propertyNameFunctions)));
+public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> functions) implements BlockFunction {
+  public static final Codec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::functions)));
 
   @Override
   public @NotNull String asString() {
-    return "[" + propertyNameFunctions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(",")) + "]";
+    return "[" + functions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(",")) + "]";
   }
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    for (PropertyNameFunction propertyNameFunction : propertyNameFunctions) {
+    for (PropertyNameFunction propertyNameFunction : functions) {
       blockState = propertyNameFunction.getModifiedState(origState, blockState, world.getRandom());
     }
     return blockState;

@@ -1,11 +1,12 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,6 +14,7 @@ import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,10 +31,16 @@ import java.util.stream.Stream;
  * </pre>
  */
 public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate base, @Nullable PropertiesNamesBlockPredicate properties, @Nullable NbtBlockPredicate nbt) implements BlockPredicate {
-  public static final Codec<PropertiesNbtCombinationBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3((b, p, n) -> new PropertiesNbtCombinationBlockPredicate(b, p.orElse(null), n.orElse(null)),
-      BlockPredicate.CODEC.fieldOf("base").forGetter(PropertiesNbtCombinationBlockPredicate::base),
-      PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties").xmap(o -> o.map(PropertiesNamesBlockPredicate::new), o -> o.map(PropertiesNamesBlockPredicate::predicates)).forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockPredicate::properties)),
-      NbtPredicate.CODEC.optionalFieldOf("nbt").xmap(o -> o.map(NbtBlockPredicate::new), o -> o.map(NbtBlockPredicate::nbtPredicate)).forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockPredicate::nbt))));
+  public static final Codec<PropertiesNbtCombinationBlockPredicate> CODEC = RecordCodecBuilder.<Triple<BlockPredicate, Optional<PropertiesNamesBlockPredicate>, Optional<NbtBlockPredicate>>>mapCodec(i -> i.apply3(Triple::of,
+      BlockPredicate.CODEC.fieldOf("base").forGetter(Triple::getLeft),
+      CodecUtil.optionalField("properties", PropertyNamePredicate.CODEC.listOf()).xmap(o -> o.map(PropertiesNamesBlockPredicate::new), o -> o.map(PropertiesNamesBlockPredicate::predicates)).forGetter(Triple::getMiddle),
+      CodecUtil.optionalField("nbt", NbtPredicate.CODEC).xmap(o -> o.map(NbtBlockPredicate::new), o -> o.map(NbtBlockPredicate::nbtPredicate)).forGetter(Triple::getRight))).flatXmap(triple -> {
+    try {
+      return DataResult.success(new PropertiesNbtCombinationBlockPredicate(triple.getLeft(), triple.getMiddle().orElse(null), triple.getRight().orElse(null)));
+    } catch (IllegalArgumentException e) {
+      return DataResult.error(e::getMessage);
+    }
+  }, p -> DataResult.success(Triple.of(p.base, Optional.ofNullable(p.properties), Optional.ofNullable(p.nbt)))).codec();
 
   @Contract(value = "_, null, null -> fail", pure = true)
   public PropertiesNbtCombinationBlockPredicate {

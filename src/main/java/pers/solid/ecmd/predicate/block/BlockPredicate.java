@@ -1,10 +1,14 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
+import net.minecraft.block.Block;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -13,11 +17,13 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.function.Predicate;
 
 public interface BlockPredicate extends Predicate<CachedBlockPosition>, ExpressionConvertible, BlockPredicateArgument {
-  Codec<BlockPredicate> CODEC = BlockPredicateType.REGISTRY.getCodec().dispatch(BlockPredicate::getType, BlockPredicateType::getCodec);
+  Codec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.getCodec().dispatch(BlockPredicate::getType, BlockPredicateType::getCodec);
+  Codec<BlockPredicate> CODEC = CodecUtil.combined(Registries.BLOCK.createEntryCodec().xmap(block -> new SimpleBlockPredicate(block.value(), ImmutableList.of()), Functions.compose(Block::getRegistryEntry, SimpleBlockPredicate::block)), MAP_CODEC);
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
 

@@ -1,19 +1,21 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.base.Functions;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,10 +23,16 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base, @Nullable PropertyNamesBlockFunction properties, @Nullable NbtBlockFunction nbt) implements BlockFunction {
-  public static final Codec<PropertiesNbtCombinationBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3((b, p, n) -> new PropertiesNbtCombinationBlockFunction(b, p.orElse(null), n.orElse(null)),
-      BlockFunction.CODEC.fieldOf("base").forGetter(PropertiesNbtCombinationBlockFunction::base),
-      PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties").xmap(o -> o.map(PropertyNamesBlockFunction::new), o -> o.map(PropertyNamesBlockFunction::propertyNameFunctions)).forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockFunction::properties)),
-      CompoundNbtFunction.CODEC.optionalFieldOf("nbt").xmap(o -> o.map(NbtBlockFunction::new), o -> o.map(NbtBlockFunction::nbtFunction)).forGetter(Functions.compose(Optional::ofNullable, PropertiesNbtCombinationBlockFunction::nbt))));
+  public static final Codec<PropertiesNbtCombinationBlockFunction> CODEC = RecordCodecBuilder.<Triple<BlockFunction, Optional<PropertyNamesBlockFunction>, Optional<NbtBlockFunction>>>mapCodec(i -> i.apply3(Triple::of,
+      BlockFunction.CODEC.fieldOf("base").forGetter(Triple::getLeft),
+      CodecUtil.optionalField("properties", PropertyNameFunction.CODEC.listOf()).xmap(o -> o.map(PropertyNamesBlockFunction::new), o -> o.map(PropertyNamesBlockFunction::functions)).forGetter(Triple::getMiddle),
+      CodecUtil.optionalField("nbt", CompoundNbtFunction.CODEC).xmap(o -> o.map(NbtBlockFunction::new), o -> o.map(NbtBlockFunction::nbtFunction)).forGetter(Triple::getRight))).flatXmap(triple -> {
+    try {
+      return DataResult.success(new PropertiesNbtCombinationBlockFunction(triple.getLeft(), triple.getMiddle().orElse(null), triple.getRight().orElse(null)));
+    } catch (IllegalArgumentException e) {
+      return DataResult.error(e::getMessage);
+    }
+  }, f -> DataResult.success(Triple.of(f.base, Optional.ofNullable(f.properties), Optional.ofNullable(f.nbt)))).codec();
 
   @Contract(value = "_, null, null -> fail", pure = true)
   public PropertiesNbtCombinationBlockFunction {

@@ -13,6 +13,11 @@ import java.util.Objects;
 
 public record TypeEntityPredicateEntry(EntityType<?> expectedType, boolean hasNegation) implements EntityPredicateEntry {
   @Override
+  public boolean test(Entity entity) {
+    return Objects.equals(expectedType, entity.getType()) != hasNegation;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     final EntityType<?> actualType = entity.getType();
     final boolean equals = Objects.equals(actualType, expectedType);

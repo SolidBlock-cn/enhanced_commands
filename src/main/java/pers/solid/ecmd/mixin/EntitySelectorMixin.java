@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
@@ -44,5 +45,25 @@ public class EntitySelectorMixin implements EntitySelectorExtension {
   @Inject(method = {"getEntity", "getUnfilteredEntities", "getPlayer", "getPlayers"}, at = @At("HEAD"))
   private void setSource(ServerCommandSource source, CallbackInfoReturnable<Entity> cir) throws CommandSyntaxException {
     ec$ext.updateSource(source);
+  }
+
+  /**
+   * 特定类型的实体选择器（如 {@code passengers}）应该以特殊的方式，从世界收集实体列表。
+   */
+  @Inject(method = "getUnfilteredEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z", shift = At.Shift.BEFORE), cancellable = true)
+  private void modifiedEntityCollector(ServerCommandSource source, CallbackInfoReturnable<List<? extends Entity>> cir, @Local Predicate<Entity> actualPredicate) throws CommandSyntaxException {
+    if (ec$ext.collector != null) {
+      cir.setReturnValue(ec$ext.collector.collectEntities(source).filter(actualPredicate).toList());
+    }
+  }
+
+  /**
+   * 特定类型的实体选择器（如 {@code passengers}）应该以特殊的方式，从世界收集玩家列表。
+   */
+  @Inject(method = "getPlayers", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z", shift = At.Shift.BEFORE), cancellable = true)
+  private void modifiedPlayerCollector(ServerCommandSource source, CallbackInfoReturnable<List<ServerPlayerEntity>> cir, @Local Predicate<Entity> actualPredicate) throws CommandSyntaxException {
+    if (ec$ext.collector != null) {
+      cir.setReturnValue(ec$ext.collector.collectPlayers(source).filter(actualPredicate).toList());
+    }
   }
 }

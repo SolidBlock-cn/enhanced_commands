@@ -1,6 +1,6 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Functions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -18,12 +18,14 @@ import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.PropertyFunction;
 import pers.solid.ecmd.util.Parser;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
-  public static final Codec<SimpleBlockFunction> CODEC = Registries.BLOCK.getCodec().dispatch("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), PropertyFunction.getCodec(block).listOf().optionalFieldOf("properties", ImmutableList.of()).forGetter(SimpleBlockFunction::properties))));
+  public static final Codec<SimpleBlockFunction> CODEC = Registries.BLOCK.createEntryCodec().dispatch("block", Functions.compose(Block::getRegistryEntry, SimpleBlockFunction::block), block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockFunction(block.value(), properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block.value()).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
 
   @Override
   public @NotNull String asString() {

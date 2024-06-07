@@ -68,6 +68,8 @@ import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -92,6 +94,10 @@ public class EntitySelectorOptionsExtension {
   public static final SimpleCommandExceptionType DISTANCE_ALREADY_IMPLICIT = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.distance_already_implicit"));
   public static final SimpleCommandExceptionType INVALID_NEGATIVE_LIMIT_WITH_SORTER = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.invalid_negative_limit_with_sorter"));
   public static final SimpleCommandExceptionType INVALID_SORTER_WITH_NEGATIVE_LIMIT = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.invalid_sorter_with_negative_limit"));
+  /**
+   * 在解析内容时提供布尔值的建议。
+   */
+  public static final BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> BOOLEAN_SUGGEST = (builder, suggestionsBuilderConsumer) -> ParsingUtil.suggestBoolean(builder);
 
   private static void registerInapplicableReasons() {
     final var map = INAPPLICABLE_REASONS;
@@ -553,6 +559,23 @@ public class EntitySelectorOptionsExtension {
         EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new EffectEntityPredicateEntry(value, inverted));
       }
     }, reader -> isNeverPositivelyUsed(reader, "effect"), Text.translatable("enhanced_commands.entity_predicate.effect"));
+
+    // 检测实体的主人（驯养者）
+    putOption("owner", reader -> {
+      final StringReader stringReader = reader.getReader();
+      final boolean inverted = reader.readNegationCharacter();
+      stringReader.skipWhitespace();
+      if (stringReader.canRead()) {
+        final char peek = stringReader.peek();
+        if (peek == ']' || peek == ',' || peek == ';') {
+          // 在 'owner=' 或 'owner=!' 后没有接任何值时，使用 null 值
+          EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new OwnerEntityPredicateEntry(null, inverted));
+          return;
+        }
+      }
+      final EntitySelector value = EntitySelectors.readOmittibleEntitySelector(reader);
+      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value, source), inverted));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.owner"));
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {
@@ -567,6 +590,7 @@ public class EntitySelectorOptionsExtension {
   private static void putSimpleBooleanOption(String id, Predicate<Entity> predicate, String baseTranslationKey) {
     putOption(id, reader -> {
       final boolean inverted = reader.readNegationCharacter();
+      reader.setSuggestionProvider(BOOLEAN_SUGGEST);
       final boolean expected = inverted != reader.getReader().readBoolean();
       EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new SimpleBooleanEntityPredicateEntry(predicate, expected, baseTranslationKey + "." + true, baseTranslationKey + "." + false, id));
       // 对于布尔值，使用否定的直接替换其效果，仍视为未被取反的谓词
