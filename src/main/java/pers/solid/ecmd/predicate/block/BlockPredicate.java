@@ -14,8 +14,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 

@@ -5,8 +5,8 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.util.TestResult;
 
 import java.util.ArrayList;
 import java.util.List;

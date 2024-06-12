@@ -7,8 +7,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 
 public record ExistencePropertyNamePredicate(String propertyName, boolean exists) implements PropertyNamePredicate {
   public static final Codec<ExistencePropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExistencePropertyNamePredicate::new, Codec.STRING.fieldOf("property").forGetter(ExistencePropertyNamePredicate::propertyName), Codec.BOOL.optionalFieldOf("exists", false).forGetter(ExistencePropertyNamePredicate::exists)));

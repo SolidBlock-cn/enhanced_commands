@@ -62,6 +62,8 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @Shadow
   protected abstract CompletableFuture<Suggestions> suggestOpen(SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer);
 
+  @Shadow
+  private boolean hasLimit;
   @Unique
   private final EntitySelectorReaderExtras ec$ext = new EntitySelectorReaderExtras((EntitySelectorReader) (Object) this);
 
@@ -159,6 +161,10 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
     if (EntitySelectorTypeExtras.EXTRA_LIMITS.containsKey(atVariable)) {
       limit = EntitySelectorTypeExtras.EXTRA_LIMITS.getInt(atVariable);
     }
+    if (EntitySelectorTypeExtras.FORCE_ONE_LIMIT.contains(atVariable)) {
+      limit = 1;
+      hasLimit = true;
+    }
     if (EntitySelectorTypeExtras.EXTRA_SORTERS.containsKey(atVariable)) {
       sorter = EntitySelectorTypeExtras.EXTRA_SORTERS.get(atVariable);
     }
@@ -188,8 +194,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
    */
   @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicate:Ljava/util/function/Predicate;"), to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;skip()V")))
   private void modifiedSetSuggestOpen(CallbackInfo ci) {
-    // todo replace 'cursorBeforeStart'
-    suggestionProvider = (builder, consumer) -> suggestSelectorRest(builder.createOffset(builder.getStart() - ec$ext.atVariable.length()), consumer).thenCombine(suggestOpen(builder, consumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
+    suggestionProvider = (builder, consumer) -> suggestSelectorRest(builder.createOffset(ec$ext.cursorBeforeOptionName), consumer).thenCombine(suggestOpen(builder, consumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
   }
 
   @ModifyExpressionValue(method = "readAtVariable", at = @At(value = "INVOKE", target = "Ljava/lang/String;valueOf(C)Ljava/lang/String;"))

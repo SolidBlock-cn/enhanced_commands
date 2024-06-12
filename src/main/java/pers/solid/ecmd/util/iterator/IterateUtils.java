@@ -16,7 +16,6 @@ public final class IterateUtils {
   private IterateUtils() {
   }
 
-
   @Contract(pure = true)
   public static <T> Stream<T> singletonNullStream() {
     return Stream.of((T) null);

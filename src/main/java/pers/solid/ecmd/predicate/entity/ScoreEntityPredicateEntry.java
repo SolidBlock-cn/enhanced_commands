@@ -11,9 +11,9 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.tuple.Triple;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;

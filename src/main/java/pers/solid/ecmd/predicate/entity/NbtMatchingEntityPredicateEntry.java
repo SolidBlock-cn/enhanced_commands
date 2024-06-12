@@ -6,7 +6,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.TestResult;
 
 public record NbtMatchingEntityPredicateEntry(NbtCompound nbtCompound, boolean hasNegation) implements EntityPredicateEntry {
   @Override

@@ -10,9 +10,9 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;

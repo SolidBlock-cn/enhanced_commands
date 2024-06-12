@@ -8,8 +8,8 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record LootTablePredicateEntityPredicateEntry(Identifier predicateId, boolean hasNegation) implements EntityPredicateEntry {

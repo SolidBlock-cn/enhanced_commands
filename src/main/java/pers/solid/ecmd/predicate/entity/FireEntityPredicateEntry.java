@@ -3,8 +3,8 @@ package pers.solid.ecmd.predicate.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.TestResult;
 
 public record FireEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
   public static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.fire");

@@ -7,8 +7,8 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.StringUtils;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;

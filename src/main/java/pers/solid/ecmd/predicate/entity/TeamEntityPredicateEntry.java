@@ -5,8 +5,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 
 public record TeamEntityPredicateEntry(String expectedTeamName, boolean hasNegation) implements EntityPredicateEntry {
   @Override

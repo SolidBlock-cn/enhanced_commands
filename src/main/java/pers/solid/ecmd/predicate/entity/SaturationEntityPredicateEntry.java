@@ -5,8 +5,8 @@ import net.minecraft.command.FloatRangeArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.TestResult;
 
 public record SaturationEntityPredicateEntry(FloatRangeArgument floatRange, boolean inverted) implements EntityPredicateEntry {
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.saturation");

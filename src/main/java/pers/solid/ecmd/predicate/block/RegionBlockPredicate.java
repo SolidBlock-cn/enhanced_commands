@@ -9,11 +9,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record RegionBlockPredicate(Region region) implements BlockPredicate {

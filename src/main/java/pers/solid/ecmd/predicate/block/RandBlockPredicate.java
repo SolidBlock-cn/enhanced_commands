@@ -12,9 +12,9 @@ import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 
 /**
  * <p>The predicate that passes only a probability test is passed.</p>

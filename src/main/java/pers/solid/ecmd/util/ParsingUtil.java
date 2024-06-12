@@ -90,7 +90,6 @@ public final class ParsingUtil {
    *
    * @param candidate 需要建议的字符串。
    * @param tooltip   该字符串对应的提示文本。
-   * @return
    */
   public static SuggestionsBuilder suggestString(String candidate, Supplier<Message> tooltip, SuggestionsBuilder builder) {
     String remaining = builder.getRemainingLowerCase();
@@ -104,7 +103,6 @@ public final class ParsingUtil {
    * 提供单个字符串的建议（仅在字符串与输入的内容匹配时才建议），不提供提示文本。
    *
    * @param candidate 需要建议的字符串。
-   * @return
    */
   public static SuggestionsBuilder suggestString(String candidate, SuggestionsBuilder builder) {
     String remaining = builder.getRemainingLowerCase();
@@ -119,7 +117,6 @@ public final class ParsingUtil {
    *
    * @param candidate 需要建议的字符串。
    * @param tooltip   该字符串对应的提示文本。
-   * @return
    */
   public static SuggestionsBuilder suggestString(String candidate, Message tooltip, SuggestionsBuilder builder) {
     return suggestString(candidate, Suppliers.ofInstance(tooltip), builder);
@@ -302,31 +299,27 @@ public final class ParsingUtil {
     }
   }
 
-  private static final Reference2ReferenceMap<RegistryKey<? extends Registry<?>>, Function<?, ? extends Message>> NAME_SUGGESTION_PROVIDERS = new Reference2ReferenceOpenHashMap<>();
-
   public static <T> void registerNameSuggestionProvider(RegistryKey<? extends Registry<T>> registryKey, Function<? super T, ? extends Message> function) {
-    NAME_SUGGESTION_PROVIDERS.put(registryKey, function);
+    NameSuggestionsInitHolder.NAME_SUGGESTION_PROVIDERS.put(registryKey, function);
   }
 
   @SuppressWarnings("unchecked")
   public static <T> Function<? super T, ? extends Message> getNameSuggestionProvider(RegistryKey<? extends Registry<T>> registryKey) {
-    NameSuggestionsInitHolder.makeSureInitialized();
-    return (Function<? super T, ? extends Message>) NAME_SUGGESTION_PROVIDERS.get(registryKey);
-  }
-
-  private static void initDefaultSuggestionProviders() {
-    registerNameSuggestionProvider(RegistryKeys.BLOCK, Block::getName);
-    registerNameSuggestionProvider(RegistryKeys.ITEM, Item::getName);
-    registerNameSuggestionProvider(RegistryKeys.ENTITY_TYPE, EntityType::getName);
-    registerNameSuggestionProvider(RegistryKeys.STATUS_EFFECT, StatusEffect::getName);
+    return (Function<? super T, ? extends Message>) NameSuggestionsInitHolder.NAME_SUGGESTION_PROVIDERS.get(registryKey);
   }
 
   private static class NameSuggestionsInitHolder {
-    private static void makeSureInitialized() {
-    }
+    private static final Reference2ReferenceMap<RegistryKey<? extends Registry<?>>, Function<?, ? extends Message>> NAME_SUGGESTION_PROVIDERS = new Reference2ReferenceOpenHashMap<>();
 
     static {
       initDefaultSuggestionProviders();
+    }
+
+    private static void initDefaultSuggestionProviders() {
+      registerNameSuggestionProvider(RegistryKeys.BLOCK, Block::getName);
+      registerNameSuggestionProvider(RegistryKeys.ITEM, Item::getName);
+      registerNameSuggestionProvider(RegistryKeys.ENTITY_TYPE, EntityType::getName);
+      registerNameSuggestionProvider(RegistryKeys.STATUS_EFFECT, StatusEffect::getName);
     }
   }
 }

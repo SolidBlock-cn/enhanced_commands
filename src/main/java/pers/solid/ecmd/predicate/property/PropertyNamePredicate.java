@@ -5,8 +5,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.TestResult;
 
 public interface PropertyNamePredicate extends ExpressionConvertible {
   Codec<PropertyNamePredicate> CODEC = Type.CODEC.dispatch(PropertyNamePredicate::getType, type -> type.codec);

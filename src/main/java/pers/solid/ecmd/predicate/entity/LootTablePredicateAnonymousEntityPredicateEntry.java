@@ -8,8 +8,8 @@ import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition lootCondition, boolean hasNegation) implements EntityPredicateEntry {

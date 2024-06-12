@@ -17,12 +17,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.Parser;
-import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 
 import java.util.Collections;
 import java.util.List;

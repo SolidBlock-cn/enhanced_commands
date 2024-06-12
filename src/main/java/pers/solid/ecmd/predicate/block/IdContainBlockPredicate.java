@@ -10,10 +10,10 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.regex.Pattern;

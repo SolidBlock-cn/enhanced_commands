@@ -5,8 +5,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.TestResult;
 
 public record FoodEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.food");

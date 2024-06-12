@@ -30,6 +30,7 @@
     "RegistryEntryPredicateArgumentTypeMixin",
     "ServerCommandSourceAccessor",
     "ServerPlayerEntityMixin",
+    "ServerWorldAccessor",
     "StringReaderMixin",
     "TextSerializerAccessor",
     "TextSerializerMixin",

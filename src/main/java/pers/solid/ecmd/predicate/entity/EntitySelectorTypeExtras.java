@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.command.EntitySelectorReader;
@@ -14,6 +15,7 @@ import pers.solid.ecmd.mixin.EntitySelectorReaderAccessor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -47,7 +49,7 @@ public final class EntitySelectorTypeExtras {
     map.put(NEAREST_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.nearest_entity"));
     map.put(RANDOM_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.random_entity"));
     map.put(FURTHEST_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.furthest_entity"));
-    // todo implement these
+
     Text text;
     map.put(NEAREST_NON_PLAYER, text = Text.translatable("enhanced_commands.argument.entity.selector.nearest_non_player"));
     map.put(NEAREST_NON_PLAYER2, text);
@@ -77,6 +79,7 @@ public final class EntitySelectorTypeExtras {
     map.put(RANDOM_NON_PLAYER, 1);
     map.put(RANDOM_NON_PLAYER2, 1);
   });
+  public static final Set<String> FORCE_ONE_LIMIT = Sets.newHashSet(OWNER, VEHICLE, LEASHER, ORIGIN, ATTACKER, TARGET, CONTROLLER, CONTROLLING_VEHICLE);
   public static final Map<String, BiConsumer<Vec3d, List<? extends Entity>>> EXTRA_SORTERS = Util.make(new HashMap<>(), map -> {
     map.put(NEAREST_ENTITY, EntitySelectorReader.NEAREST);
     map.put(RANDOM_ENTITY, EntitySelectorReader.RANDOM);

@@ -26,7 +26,6 @@ import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 

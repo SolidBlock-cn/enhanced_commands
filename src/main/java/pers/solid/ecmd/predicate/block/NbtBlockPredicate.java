@@ -12,10 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {

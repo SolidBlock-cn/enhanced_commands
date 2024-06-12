@@ -6,8 +6,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 
 public record PoseEntityPredicateEntry(@NotNull EntityPose expected, boolean inverted) implements EntityPredicateEntry {
   public static final ImmutableBiMap<EntityPose, String> ENTITY_POSE_NAMES = ImmutableBiMap.<EntityPose, String>builder()

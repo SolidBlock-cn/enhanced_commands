@@ -14,9 +14,9 @@ import net.minecraft.text.Texts;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;

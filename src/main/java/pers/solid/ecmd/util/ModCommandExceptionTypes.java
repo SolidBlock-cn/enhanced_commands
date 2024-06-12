@@ -12,6 +12,9 @@ import net.minecraft.util.Util;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 此模组包含的一些扩展的 {@link CommandExceptionType}。
+ */
 public final class ModCommandExceptionTypes {
   public static final DynamicCommandExceptionType INVALID_REGEX = new DynamicCommandExceptionType(msg -> Text.translatable("enhanced_commands.argument.regex.invalid", msg));
   public static final Dynamic2CommandExceptionType BLOCK_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((blockId, blockName) -> Text.translatable("enhanced_commands.argument.block.feature_required", blockId, blockName));

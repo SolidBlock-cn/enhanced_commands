@@ -13,12 +13,8 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.Parser;
-import pers.solid.ecmd.util.ParsingUtil;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 
 import java.util.ArrayList;
 import java.util.Collections;

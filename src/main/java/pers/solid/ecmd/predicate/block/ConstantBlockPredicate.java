@@ -7,9 +7,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.TestResult;
 
 public enum ConstantBlockPredicate implements BlockPredicate {
   ALWAYS_TRUE;

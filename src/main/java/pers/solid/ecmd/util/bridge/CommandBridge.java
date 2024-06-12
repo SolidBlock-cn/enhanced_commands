@@ -9,6 +9,10 @@ import pers.solid.ecmd.mixin.ServerCommandSourceAccessor;
 
 import java.util.function.Supplier;
 
+/**
+ * <p>用于连接不同版本中与命令有关的方法。
+ * <p>从 1.20 开始，<code>source.sendFeedback</code> 的第二个参数由 {@code Text} 改成了 {@code Supplier<Text>}。
+ */
 public final class CommandBridge {
   private CommandBridge() {}
 

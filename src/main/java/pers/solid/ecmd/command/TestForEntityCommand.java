@@ -18,6 +18,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import pers.solid.ecmd.argument.EntityPredicateArgumentType;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 

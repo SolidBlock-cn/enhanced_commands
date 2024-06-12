@@ -3,7 +3,7 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.TestResult;
 
 import java.util.function.Predicate;
 

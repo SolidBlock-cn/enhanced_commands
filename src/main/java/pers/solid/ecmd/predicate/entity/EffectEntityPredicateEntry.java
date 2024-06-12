@@ -6,7 +6,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.TestResult;
 
 public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted) implements EntityPredicateEntry {
   @Override

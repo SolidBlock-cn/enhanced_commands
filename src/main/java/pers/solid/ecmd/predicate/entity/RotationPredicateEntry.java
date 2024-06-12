@@ -4,9 +4,9 @@ import net.minecraft.command.FloatRangeArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import org.intellij.lang.annotations.MagicConstant;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.lambda.ToFloatFunction;
 

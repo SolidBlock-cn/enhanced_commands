@@ -68,6 +68,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     TestArgCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestForCommands.INSTANCE.register(dispatcher, registryAccess, environment);
     TpRelCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    EnhancedWeatherCommand.INSTANCE.register(dispatcher, registryAccess, environment);
   }
 
   public static <S> LiteralCommandNode<S> registerWithArgumentModification(CommandDispatcher<S> dispatcher, LiteralArgumentBuilder<S> directBuilder, LiteralArgumentBuilder<S> indirectBuilder, CommandNode<S> then, RedirectModifier<S> redirectModifier) {

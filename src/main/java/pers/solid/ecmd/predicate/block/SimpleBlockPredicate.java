@@ -16,12 +16,8 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.Parser;
-import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.ArrayList;

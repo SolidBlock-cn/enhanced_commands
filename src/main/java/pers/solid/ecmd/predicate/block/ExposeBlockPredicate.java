@@ -14,9 +14,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.ArrayList;

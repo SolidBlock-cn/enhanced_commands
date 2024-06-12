@@ -6,7 +6,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.TestResult;
 
 import java.util.List;
 import java.util.UUID;

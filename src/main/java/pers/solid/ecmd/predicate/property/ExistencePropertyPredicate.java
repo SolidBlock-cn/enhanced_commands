@@ -9,8 +9,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 public record ExistencePropertyPredicate<T extends Comparable<T>>(Property<T> property, boolean exists) implements PropertyPredicate<T> {

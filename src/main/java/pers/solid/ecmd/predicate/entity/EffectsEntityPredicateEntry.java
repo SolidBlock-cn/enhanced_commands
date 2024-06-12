@@ -10,9 +10,9 @@ import net.minecraft.predicate.entity.EntityEffectPredicate;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import pers.solid.ecmd.command.TestResult;
 import pers.solid.ecmd.mixin.EffectDataAccessor;
 import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.TestResult;
 
 import java.util.*;
 

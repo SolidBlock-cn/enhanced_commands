@@ -6,7 +6,7 @@ import net.minecraft.command.EntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.command.TestResult;
+import pers.solid.ecmd.util.TestResult;
 
 import java.util.Collection;
 
