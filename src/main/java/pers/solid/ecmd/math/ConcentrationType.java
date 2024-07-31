@@ -1,5 +1,7 @@
 package pers.solid.ecmd.math;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import it.unimi.dsi.fastutil.doubles.DoubleIterable;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.floats.FloatIterable;
@@ -8,7 +10,6 @@ import it.unimi.dsi.fastutil.ints.IntIterable;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongIterable;
 import it.unimi.dsi.fastutil.longs.LongList;
-import net.minecraft.command.CommandException;
 import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtFloat;
@@ -24,28 +25,28 @@ import java.util.Iterator;
 public enum ConcentrationType implements StringIdentifiable {
   FIRST("first", false) {
     @Override
-    public double concentrateLong(LongIterable values) {
+    public double concentrateLong(LongIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       return iterator.nextLong();
     }
 
     @Override
-    public double concentrateInt(IntIterable values) {
+    public double concentrateInt(IntIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       return iterator.nextInt();
     }
 
     @Override
-    public double concentrateFloat(FloatIterable values) {
+    public double concentrateFloat(FloatIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       return iterator.nextFloat();
     }
 
     @Override
-    public double concentrateDouble(DoubleIterable values) {
+    public double concentrateDouble(DoubleIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       return iterator.nextDouble();
@@ -53,7 +54,7 @@ public enum ConcentrationType implements StringIdentifiable {
   },
   LAST("last", false) {
     @Override
-    public double concentrateLong(LongIterable values) {
+    public double concentrateLong(LongIterable values) throws CommandSyntaxException {
       if (values instanceof LongList longList && !longList.isEmpty()) return longList.getLong(longList.size() - 1);
       final var iterator = values.iterator();
       ensureHasNext(iterator);
@@ -63,7 +64,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateInt(IntIterable values) {
+    public double concentrateInt(IntIterable values) throws CommandSyntaxException {
       if (values instanceof IntList intList && !intList.isEmpty()) return intList.getInt(intList.size() - 1);
       final var iterator = values.iterator();
       ensureHasNext(iterator);
@@ -73,7 +74,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateFloat(FloatIterable values) {
+    public double concentrateFloat(FloatIterable values) throws CommandSyntaxException {
       if (values instanceof FloatList floatList && !floatList.isEmpty())
         return floatList.getFloat(floatList.size() - 1);
       final var iterator = values.iterator();
@@ -84,7 +85,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateDouble(DoubleIterable values) {
+    public double concentrateDouble(DoubleIterable values) throws CommandSyntaxException {
       if (values instanceof DoubleList doubleList && !doubleList.isEmpty())
         return doubleList.getDouble(doubleList.size() - 1);
       final var iterator = values.iterator();
@@ -97,7 +98,7 @@ public enum ConcentrationType implements StringIdentifiable {
 
   MIN("min", false) {
     @Override
-    public double concentrateLong(LongIterable values) {
+    public double concentrateLong(LongIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       var r = iterator.nextLong();
@@ -106,7 +107,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateInt(IntIterable values) {
+    public double concentrateInt(IntIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       var r = iterator.nextInt();
@@ -115,7 +116,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateFloat(FloatIterable values) {
+    public double concentrateFloat(FloatIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       var r = iterator.nextFloat();
@@ -124,7 +125,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateDouble(DoubleIterable values) {
+    public double concentrateDouble(DoubleIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       var r = iterator.nextDouble();
@@ -134,7 +135,7 @@ public enum ConcentrationType implements StringIdentifiable {
   },
   MAX("max", false) {
     @Override
-    public double concentrateLong(LongIterable values) {
+    public double concentrateLong(LongIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       var r = iterator.nextLong();
@@ -143,7 +144,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateInt(IntIterable values) {
+    public double concentrateInt(IntIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       var r = iterator.nextInt();
@@ -152,7 +153,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateFloat(FloatIterable values) {
+    public double concentrateFloat(FloatIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       var r = iterator.nextFloat();
@@ -161,7 +162,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
 
     @Override
-    public double concentrateDouble(DoubleIterable values) {
+    public double concentrateDouble(DoubleIterable values) throws CommandSyntaxException {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       var r = iterator.nextDouble();
@@ -253,8 +254,8 @@ public enum ConcentrationType implements StringIdentifiable {
       return sum;
     }
   };
-  public static final Text NO_VALUE = Text.translatable("enhanced_commands.concentration_type.no_value");
-  public static final Codec<ConcentrationType> CODEC = StringIdentifiable.createCodec(ConcentrationType::values);
+  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.concentration_type.no_value"));
+  public static final EnumCodec<ConcentrationType> CODEC = StringIdentifiable.createCodec(ConcentrationType::values);
   private final String name;
   private final Text displayName;
   /**
@@ -268,13 +269,13 @@ public enum ConcentrationType implements StringIdentifiable {
     this.forcesDouble = forcesDouble;
   }
 
-  public abstract double concentrateLong(LongIterable values);
+  public abstract double concentrateLong(LongIterable values) throws CommandSyntaxException;
 
-  public abstract double concentrateInt(IntIterable values);
+  public abstract double concentrateInt(IntIterable values) throws CommandSyntaxException;
 
-  public abstract double concentrateFloat(FloatIterable values);
+  public abstract double concentrateFloat(FloatIterable values) throws CommandSyntaxException;
 
-  public abstract double concentrateDouble(DoubleIterable values);
+  public abstract double concentrateDouble(DoubleIterable values) throws CommandSyntaxException;
 
   // 以下两个方法均用于以适当的方式将计算结果转化为字符串。尽管计算结果始终是 double，但在一些情况下，仍需要以原来的类型的方式呈现值。例如，几个整数的最大值尽管计算出来后是 double，但我们仍会尽可能以整数的方式呈现它，但考虑到最大值可能超过 Integer.MAX_VALUE，因此对于 int，仍使用 long。
 
@@ -306,8 +307,8 @@ public enum ConcentrationType implements StringIdentifiable {
     return forcesDouble ? NbtDouble.of(result) : NbtFloat.of((float) result);
   }
 
-  private static void ensureHasNext(Iterator<?> iterator) {
-    if (!iterator.hasNext()) throw new CommandException(NO_VALUE);
+  private static void ensureHasNext(Iterator<?> iterator) throws CommandSyntaxException {
+    if (!iterator.hasNext()) throw NO_VALUE.create();
   }
 
   @Override

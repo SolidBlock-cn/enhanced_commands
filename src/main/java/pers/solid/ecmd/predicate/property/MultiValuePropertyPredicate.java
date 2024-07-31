@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.property;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,15 +21,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> property, List<T> values, boolean inverted) implements PropertyPredicate<T> {
-  private static <T extends Comparable<T>> Codec<MultiValuePropertyPredicate<T>> getCodecByProperty(Property<T> property) {
-    return RecordCodecBuilder.create(i -> i.apply2(
+  private static <T extends Comparable<T>> MapCodec<MultiValuePropertyPredicate<T>> getCodecByProperty(Property<T> property) {
+    return RecordCodecBuilder.mapCodec(i -> i.apply2(
         (values, inverted) -> new MultiValuePropertyPredicate<>(property, values, inverted),
         property.getCodec().listOf().optionalFieldOf("values", ImmutableList.of()).forGetter(MultiValuePropertyPredicate::values),
         Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MultiValuePropertyPredicate::inverted)));
   }
 
-  public static com.mojang.serialization.Codec<MultiValuePropertyPredicate<?>> getCodec(Block block) {
-    return CodecUtil.propertyForBlock(block.getStateManager()).dispatch("property", MultiValuePropertyPredicate::property, MultiValuePropertyPredicate::getCodecByProperty);
+  public static MapCodec<MultiValuePropertyPredicate<?>> getCodec(Block block) {
+    return CodecUtil.propertyForBlock(block.getStateManager()).dispatchMap("property", MultiValuePropertyPredicate::property, MultiValuePropertyPredicate::getCodecByProperty);
   }
 
   @Override

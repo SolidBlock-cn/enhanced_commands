@@ -29,7 +29,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -136,7 +135,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             }))
         .then(literal("indented")
             .executes(context -> {
-              CommandBridge.sendFeedback(context, () -> new NbtTextFormatter("  ", 0).apply(getNbtElement(context, "nbt")), false);
+              CommandBridge.sendFeedback(context, () -> new NbtTextFormatter("  ").apply(getNbtElement(context, "nbt")), false);
               return 1;
             }))
         .then(literal("test")
@@ -300,7 +299,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
 
   private static <A> int executeConvertShow(NbtElement nbtElement, Codec<A> codec, Consumer<A> resultConsumer) throws CommandSyntaxException {
     final DataResult<Pair<A, NbtElement>> decode = codec.decode(NbtOps.INSTANCE, nbtElement);
-    final A result = Util.getResult(decode, CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
+    final A result = decode.getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
     resultConsumer.accept(result);
     return 1;
   }
@@ -325,7 +324,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   }
 
   private static <A, T> int executeCodecShow(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
-    final T code = Util.getResult(codec.encodeStart(ops, fetchedArg), CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
+    final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof NbtElement nbt) {
       CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
     } else {
@@ -335,14 +334,14 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   }
 
   private static <A, T> int executeCodecTest(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
-    final T code = Util.getResult(codec.encodeStart(ops, fetchedArg), CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
+    final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof NbtElement nbt) {
       CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
     } else {
       CommandBridge.sendFeedback(context, () -> Text.literal(code.toString()).styled(Styles.RESULT), false);
     }
     try {
-      final A second = Util.getResult(codec.decode(ops, code), CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
+      final A second = codec.decode(ops, code).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
       if (second instanceof NbtElement nbt) {
         CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
       }

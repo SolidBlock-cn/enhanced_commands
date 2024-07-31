@@ -1,7 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -19,7 +19,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import java.util.regex.Pattern;
 
 public record IdContainBlockPredicate(@NotNull Pattern pattern) implements BlockPredicate {
-  public static final Codec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockPredicate::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
+  public static final MapCodec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(IdContainBlockPredicate::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
 
   @Override
   public @NotNull String asString() {
@@ -62,7 +62,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     ID_CONTAIN_TYPE;
 
     @Override
-    public @NotNull Codec<IdContainBlockPredicate> getCodec() {
+    public @NotNull MapCodec<IdContainBlockPredicate> getCodec() {
       return CODEC;
     }
   }

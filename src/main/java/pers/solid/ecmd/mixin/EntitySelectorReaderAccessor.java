@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -17,7 +18,7 @@ import java.util.function.Predicate;
 @Mixin(EntitySelectorReader.class)
 public interface EntitySelectorReaderAccessor {
   @Accessor
-  void setPredicate(Predicate<Entity> predicate);
+  List<Predicate<Entity>> getPredicates();
 
   @Invoker
   void callReadArguments() throws CommandSyntaxException;

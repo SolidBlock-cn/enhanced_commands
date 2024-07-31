@@ -74,7 +74,8 @@ public class SelectorEntityPredicate implements EntityPredicate {
       predicates.add(entity -> entity.getWorld().equals(source.getWorld()));
     }
 
-    predicates.add(accessor.callGetPositionPredicate(accessor.getPositionOffset().apply(source.getPosition()))::test);
+    final Vec3d vec3d = accessor.getPositionOffset().apply(source.getPosition());
+    predicates.add(accessor.callGetPositionPredicate(vec3d, accessor.callGetOffsetBox(vec3d), source.getEnabledFeatures())::test);
     return Predicates.and(predicates);
   }
 
@@ -143,7 +144,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
       descriptions.add(TestResult.of(intersects, Text.translatable("enhanced_commands.entity_predicate.box." + intersects, displayName, Text.literal(String.format("(%s %s %s, %s %s %s)", box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.minZ)).styled(Styles.EXPECTED))));
     }
 
-    final NumberRange.FloatRange distance = accessor.getDistance();
+    final NumberRange.DoubleRange distance = accessor.getDistance();
     if (!distance.isDummy()) {
       final String distanceAsString = StringUtil.wrapRange(distance);
       final double squaredDistance = entity.squaredDistanceTo(positionOffset);

@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.property;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -14,8 +14,8 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import java.util.Set;
 
 public record AllOriginalPropertyFunction(@NotNull Set<Property<?>> except) implements GeneralPropertyFunction {
-  public static Codec<AllOriginalPropertyFunction> getCodec(Block block) {
-    return RecordCodecBuilder.create(i -> i.ap(AllOriginalPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllOriginalPropertyFunction::except)));
+  public static MapCodec<AllOriginalPropertyFunction> getCodec(Block block) {
+    return RecordCodecBuilder.mapCodec(i -> i.ap(AllOriginalPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllOriginalPropertyFunction::except)));
   }
 
   @Override

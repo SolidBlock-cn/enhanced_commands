@@ -1,6 +1,6 @@
 package pers.solid.ecmd.regionselection;
 
-import net.minecraft.command.CommandException;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -72,9 +72,9 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public BlockCuboidRegion buildRegion() {
+  public BlockCuboidRegion buildRegion() throws CommandSyntaxException {
     if (first == null || second == null) {
-      throw new CommandException(NOT_COMPLETED);
+      throw NOT_COMPLETED.create();
     } else {
       return new BlockCuboidRegion(first, second);
     }

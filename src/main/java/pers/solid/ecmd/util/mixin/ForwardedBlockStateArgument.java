@@ -3,11 +3,9 @@ package pers.solid.ecmd.util.mixin;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Texts;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +38,8 @@ public class ForwardedBlockStateArgument extends BlockStateArgument {
     try {
       this.sourcedBlockFunction = blockFunction.apply(source);
     } catch (CommandSyntaxException e) {
-      throw new CommandException(Texts.toText(e.getRawMessage()));
+      //todo runtime
+      throw new RuntimeException(e);
     }
   }
 

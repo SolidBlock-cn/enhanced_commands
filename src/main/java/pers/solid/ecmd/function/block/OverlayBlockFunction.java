@@ -2,7 +2,7 @@ package pers.solid.ecmd.function.block;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * 叠加多个方块函数，依次应用。
  */
 public record OverlayBlockFunction(List<BlockFunction> functions) implements BlockFunction {
-  public static final Codec<OverlayBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayBlockFunction::functions)));
+  public static final MapCodec<OverlayBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayBlockFunction::functions)));
 
   @Override
   public @NotNull String asString() {
@@ -46,7 +46,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     OVERLAY_TYPE;
 
     @Override
-    public @NotNull Codec<OverlayBlockFunction> getCodec() {
+    public @NotNull MapCodec<OverlayBlockFunction> getCodec() {
       return CODEC;
     }
   }

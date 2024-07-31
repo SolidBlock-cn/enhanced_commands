@@ -3,7 +3,7 @@ package pers.solid.ecmd.region;
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
@@ -22,7 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, CylinderRegion region) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
-  public static final Codec<HollowCylinderRegion> CODEC = RecordCodecBuilder.create(i -> i.group(
+  public static final MapCodec<HollowCylinderRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
           OutlineRegion.OutlineType.OUTLINE_TYPE_FIELD.forGetter(HollowCylinderRegion::outlineType),
           CylinderRegion.CODEC.fieldOf("region").forGetter(HollowCylinderRegion::region))
       .apply(i, HollowCylinderRegion::new));
@@ -151,7 +151,7 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
     }
 
     @Override
-    public @NotNull Codec<HollowCylinderRegion> getCodec() {
+    public @NotNull MapCodec<HollowCylinderRegion> getCodec() {
       return CODEC;
     }
   }

@@ -2,7 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * @see BlockArgumentParser#parseTagId()
  */
 public record TagBlockPredicate(@NotNull TagKey<Block> tags, @NotNull @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
-  public static final Codec<TagBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(TagBlockPredicate::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockPredicate::tags), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
+  public static final MapCodec<TagBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockPredicate::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockPredicate::tags), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
 
   @Override
   public @NotNull String asString() {
@@ -85,7 +85,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tags, @NotNull @Unmodifia
     TAG_TYPE;
 
     @Override
-    public @NotNull Codec<TagBlockPredicate> getCodec() {
+    public @NotNull MapCodec<TagBlockPredicate> getCodec() {
       return CODEC;
     }
 

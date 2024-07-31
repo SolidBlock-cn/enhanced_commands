@@ -26,7 +26,7 @@ public enum UnloadedPosBehavior implements StringIdentifiable {
    */
   FORCE("force");
   private final String name;
-  public static final StringIdentifiable.Codec<UnloadedPosBehavior> CODEC = StringIdentifiable.createCodec(UnloadedPosBehavior::values);
+  public static final StringIdentifiable.EnumCodec<UnloadedPosBehavior> CODEC = StringIdentifiable.createCodec(UnloadedPosBehavior::values);
   public static final ImmutableList<UnloadedPosBehavior> VALUES = ImmutableList.copyOf(values());
 
   UnloadedPosBehavior(String name) {this.name = name;}

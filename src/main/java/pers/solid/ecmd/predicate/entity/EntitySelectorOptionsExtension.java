@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -13,22 +14,22 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
-import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.command.*;
 import net.minecraft.command.argument.PosArgument;
-import net.minecraft.command.argument.RegistryEntryArgumentType;
+import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.loot.LootGsons;
 import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.condition.LootConditionManager;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.predicate.NumberRange;
@@ -37,9 +38,9 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.scoreboard.ReadableScoreboardScore;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -62,6 +63,7 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
@@ -209,15 +211,15 @@ public class EntitySelectorOptionsExtension {
 
   private static void registerModOptions() {
     putOption("r", reader -> {
-      final NumberRange.FloatRange original = reader.getDistance();
+      final NumberRange.DoubleRange original = reader.getDistance();
       final StringReader stringReader = reader.getReader();
       final int cursorBeforeValue = stringReader.getCursor();
       final float value = stringReader.readFloat();
       EntitySelectorReaderExtras.getOf(reader).implicitDistance = true;
-      if (original.getMin() == null) {
-        reader.setDistance(NumberRange.FloatRange.atMost(value));
+      if (original.min().isEmpty()) {
+        reader.setDistance(NumberRange.DoubleRange.atMost(value));
       } else {
-        if (value < original.getMin()) {
+        if (value < original.min().get()) {
           final int cursorAfterValue = stringReader.getCursor();
           stringReader.setCursor(cursorBeforeValue);
           throw CommandSyntaxExceptionExtension.withCursorEnd(NumberRange.EXCEPTION_SWAPPED.createWithContext(stringReader), cursorAfterValue);
@@ -226,19 +228,19 @@ public class EntitySelectorOptionsExtension {
           stringReader.setCursor(cursorBeforeValue);
           throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.NEGATIVE_DISTANCE_EXCEPTION.createWithContext(stringReader), cursorAfterValue);
         }
-        reader.setDistance(NumberRange.FloatRange.between(original.getMin(), value));
+        reader.setDistance(NumberRange.DoubleRange.between(original.min().get(), value));
       }
-    }, reader -> reader.getDistance().isDummy() || EntitySelectorReaderExtras.getOf(reader).implicitDistance && reader.getDistance().getMax() != null, Text.translatable("enhanced_commands.argument.entity.options.r.description"));
+    }, reader -> reader.getDistance().isDummy() || EntitySelectorReaderExtras.getOf(reader).implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.r.description"));
     putOption("rm", reader -> {
-      final NumberRange.FloatRange original = reader.getDistance();
+      final NumberRange.DoubleRange original = reader.getDistance();
       final StringReader stringReader = reader.getReader();
       final int cursorBeforeValue = stringReader.getCursor();
       final float value = stringReader.readFloat();
       EntitySelectorReaderExtras.getOf(reader).implicitDistance = true;
-      if (original.getMax() == null) {
-        reader.setDistance(NumberRange.FloatRange.atLeast(value));
+      if (original.max().isEmpty()) {
+        reader.setDistance(NumberRange.DoubleRange.atLeast(value));
       } else {
-        if (value > original.getMax()) {
+        if (value > original.max().get()) {
           final int cursorAfterValue = stringReader.getCursor();
           stringReader.setCursor(cursorBeforeValue);
           throw CommandSyntaxExceptionExtension.withCursorEnd(NumberRange.EXCEPTION_SWAPPED.createWithContext(stringReader), cursorAfterValue);
@@ -247,9 +249,9 @@ public class EntitySelectorOptionsExtension {
           stringReader.setCursor(cursorBeforeValue);
           throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.NEGATIVE_DISTANCE_EXCEPTION.createWithContext(stringReader), cursorAfterValue);
         }
-        reader.setDistance(NumberRange.FloatRange.between(value, original.getMax()));
+        reader.setDistance(NumberRange.DoubleRange.between(value, original.max().get()));
       }
-    }, reader -> reader.getDistance().isDummy() || EntitySelectorReaderExtras.getOf(reader).implicitDistance && reader.getDistance().getMax() != null, Text.translatable("enhanced_commands.argument.entity.options.rm.description"));
+    }, reader -> reader.getDistance().isDummy() || EntitySelectorReaderExtras.getOf(reader).implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.rm.description"));
 
     putOption("region", reader -> {
       final SuggestedParser parser = new SuggestedParser(reader.getReader());
@@ -502,8 +504,8 @@ public class EntitySelectorOptionsExtension {
     putOption("effect", reader -> {
       final StringReader stringReader = reader.getReader();
       stringReader.skipWhitespace();
-      final RegistryWrapper<StatusEffect> wrapper = MixinShared.getCommandRegistryAccess().createWrapper(RegistryKeys.STATUS_EFFECT);
-      final var type = new RegistryEntryArgumentType<>(MixinShared.getCommandRegistryAccess(), RegistryKeys.STATUS_EFFECT);
+      final RegistryWrapper<StatusEffect> wrapper = MixinShared.getCommandRegistryAccess().getWrapperOrThrow(RegistryKeys.STATUS_EFFECT);
+      final var type = RegistryEntryReferenceArgumentType.registryEntry(MixinShared.getCommandRegistryAccess(), RegistryKeys.STATUS_EFFECT);
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
@@ -517,7 +519,8 @@ public class EntitySelectorOptionsExtension {
           }
 
           final int cursorBeforeEffectEntry = stringReader.getCursor();
-          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.filter(effect -> !effects.containsKey(effect)).streamEntries()::iterator, suggestionsBuilder, ref -> ref.registryKey().getValue(), ref1 -> ref1.value().getName()));
+          // todo check
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries().filter(effect -> !effects.containsKey(effect.value())), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref1 -> ref1.value().getName()));
           final var effect = type.parse(stringReader).value();
           if (effects.containsKey(effect)) {
             final int cursorAfterEffectId = stringReader.getCursor();
@@ -744,7 +747,7 @@ public class EntitySelectorOptionsExtension {
         // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
       }
 
-      reader.setPredicate(entity -> {
+      reader.addPredicate(entity -> {
         if (entity instanceof final ServerPlayerEntity serverPlayerEntity) {
           GameMode actualGameMode = serverPlayerEntity.interactionManager.getGameMode();
           return hasNegation != parsedGameModes.contains(actualGameMode);
@@ -769,8 +772,8 @@ public class EntitySelectorOptionsExtension {
     if (context.getSource() instanceof final ServerCommandSource serverCommandSource) {
       final int cursor = stringReader.getCursor();
       final ServerScoreboard scoreboard = serverCommandSource.getServer().getScoreboard();
-      final Collection<String> objectiveNames = scoreboard.getObjectiveNames();
-      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> ParsingUtil.suggestMatchingStringWithTooltip(objectiveNames, s -> scoreboard.getObjective(s).getDisplayName(), suggestionsBuilder.createOffset(cursor)));
+      final Collection<ScoreboardObjective> objectives = scoreboard.getObjectives();
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestMatching(objectives, suggestionsBuilder.createOffset(cursor), ScoreboardObjective::getName, ScoreboardObjective::getDisplayName));
     } else if (context.getSource() instanceof final CommandSource commandSource) {
       entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> commandSource.getCompletions(context));
     }
@@ -786,7 +789,7 @@ public class EntitySelectorOptionsExtension {
       final var advancementLoader = serverCommandSource.getServer().getAdvancementLoader();
       entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
         final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursor);
-        CommandSource.suggestFromIdentifier(advancementLoader.getAdvancements(), offset, Advancement::getId, Advancement::toHoverableText);
+        CommandSource.suggestFromIdentifier(advancementLoader.getAdvancements(), offset, AdvancementEntry::id, advancementEntry -> advancementEntry.value().name().orElseGet(() -> TextUtil.literal(advancementEntry.id())));
         return offset.buildFuture();
       });
     } else if (context.getSource() instanceof final CommandSource commandSource) {
@@ -801,8 +804,8 @@ public class EntitySelectorOptionsExtension {
   public static void mixinGetLootConditionIdSuggestions(EntitySelectorReader entitySelectorReader, StringReader stringReader, @NotNull CommandContext<?> context) {
     if (context.getSource() instanceof final ServerCommandSource serverCommandSource) {
       final int cursor = stringReader.getCursor();
-      final var predicateManager = serverCommandSource.getServer().getPredicateManager();
-      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestIdentifiers(predicateManager.getIds(), suggestionsBuilder.createOffset(cursor)));
+      final var ids = serverCommandSource.getServer().getReloadableRegistries().getIds(RegistryKeys.PREDICATE);
+      entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestIdentifiers(ids, suggestionsBuilder.createOffset(cursor)));
     } else if (context.getSource() instanceof final CommandSource commandSource) {
       entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> commandSource.getCompletions(context));
     }
@@ -815,17 +818,17 @@ public class EntitySelectorOptionsExtension {
   public static Predicate<Entity> mixinInvertedScoredPredicate(List<Pair<String, NumberRange.IntRange>> invertedScores) {
     return entity -> {
       final Scoreboard scoreboard = entity.getServer().getScoreboard();
-      final String entityName = entity.getEntityName();
+      final String entityName = entity.getNameForScoreboard();
       for (Pair<String, NumberRange.IntRange> pair : invertedScores) {
         ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(pair.left());
         if (scoreboardObjective == null) {
           return false;
         }
-        if (!scoreboard.playerHasObjective(entityName, scoreboardObjective)) {
+        final ReadableScoreboardScore score = scoreboard.getScore(entity, scoreboardObjective);
+        if (score == null) {
           return false;
         }
-        ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(entityName, scoreboardObjective);
-        int i = scoreboardPlayerScore.getScore();
+        int i = score.getScore();
         if (pair.right().test(i)) {
           return false;
         }
@@ -834,14 +837,11 @@ public class EntitySelectorOptionsExtension {
     };
   }
 
-  protected static final Gson LOOT_CONDITION_GSON = LootGsons.getConditionGsonBuilder().setLenient().create();
-
   public static boolean mixinReadLiteralPredicate(EntitySelectorReader reader, boolean hasNegation, StringReader stringReader) throws CommandSyntaxException {
     reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
       final CommandContext<?> context = EntitySelectorReaderExtras.getOf(reader).context;
       if (context != null && context.getSource() instanceof ServerCommandSource source) {
-        LootConditionManager lootConditionManager = source.getServer().getPredicateManager();
-        return CommandSource.suggestIdentifiers(lootConditionManager.getIds(), suggestionsBuilder);
+        return CommandSource.suggestIdentifiers(source.getServer().getReloadableRegistries().getIds(RegistryKeys.PREDICATE), suggestionsBuilder);
       } else if (context != null && context.getSource() instanceof CommandSource commandSource) {
         return commandSource.getCompletions(context);
       } else {
@@ -850,18 +850,20 @@ public class EntitySelectorOptionsExtension {
     });
     if (stringReader.canRead() && stringReader.peek() == '{') {
       reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-      final LootCondition lootCondition = ParsingUtil.parseJson(stringReader, input -> LOOT_CONDITION_GSON.fromJson(input, LootCondition.class), ModCommandExceptionTypes.INVALID_LOOT_TABLE_JSON);
-      reader.setPredicate(entity -> {
-        if (!(entity.world instanceof ServerWorld serverWorld)) {
+      // todo json
+      final LootCondition lootCondition = ParsingUtil.parseJson(stringReader, input -> LootCondition.CODEC.decode(JsonOps.INSTANCE, new Gson().fromJson(input, JsonElement.class)).getOrThrow().getFirst(), ModCommandExceptionTypes.INVALID_LOOT_TABLE_JSON);
+      reader.addPredicate(entity -> {
+        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
           return false;
         } else {
           if (lootCondition == null) {
             return false;
           } else {
-            LootContext lootContext = new LootContext.Builder(serverWorld)
-                .parameter(LootContextParameters.THIS_ENTITY, entity)
-                .parameter(LootContextParameters.ORIGIN, entity.getPos())
-                .build(LootContextTypes.SELECTOR);
+            LootContext lootContext = new LootContext.Builder(new LootContextParameterSet.Builder(serverWorld)
+                .add(LootContextParameters.THIS_ENTITY, entity)
+                .add(LootContextParameters.ORIGIN, entity.getPos())
+                .build(LootContextTypes.SELECTOR))
+                .build(Optional.empty());
             return hasNegation ^ lootCondition.test(lootContext);
           }
         }

@@ -3,7 +3,7 @@ package pers.solid.ecmd.predicate.block;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record AllBlockPredicate(List<BlockPredicate> blockPredicates) implements BlockPredicate {
-  public static final Codec<AllBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("block_predicates").forGetter(AllBlockPredicate::blockPredicates)).apply(i, AllBlockPredicate::new));
+  public static final MapCodec<AllBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("block_predicates").forGetter(AllBlockPredicate::blockPredicates)).apply(i, AllBlockPredicate::new));
 
   @Override
   public @NotNull String asString() {
@@ -58,7 +58,7 @@ public record AllBlockPredicate(List<BlockPredicate> blockPredicates) implements
     ALL_TYPE;
 
     @Override
-    public @NotNull Codec<AllBlockPredicate> getCodec() {
+    public @NotNull MapCodec<AllBlockPredicate> getCodec() {
       return CODEC;
     }
   }

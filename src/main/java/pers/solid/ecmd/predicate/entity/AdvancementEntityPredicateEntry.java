@@ -3,7 +3,7 @@ package pers.solid.ecmd.predicate.entity;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.advancement.criterion.CriterionProgress;
@@ -37,16 +37,16 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
       final Identifier advancementId = entry.getKey();
       final var value = entry.getValue();
 
-      final Advancement advancement = advancementLoader.get(advancementId);
-      if (advancement == null) {
+      final AdvancementEntry advancementEntry = advancementLoader.get(advancementId);
+      if (advancementEntry == null) {
         // the advancement does not exist -> false
         attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.no_advancement", TextUtil.literal(advancementId).styled(Styles.TARGET))));
         result = false;
         continue;
       }
-      final AdvancementProgress progress = advancementTracker.getProgress(advancement);
+      final AdvancementProgress progress = advancementTracker.getProgress(advancementEntry);
 
-      final MutableText advancementText = TextUtil.styled(advancement.toHoverableText(), Styles.TARGET);
+      final MutableText advancementText = TextUtil.styled(advancementEntry.value().name().orElse(TextUtil.literal(advancementId)), Styles.TARGET);
       if (value.left().isPresent()) {
         boolean progressResult = true;
         final ImmutableList.Builder<TestResult> progressAttachments = new ImmutableList.Builder<>();

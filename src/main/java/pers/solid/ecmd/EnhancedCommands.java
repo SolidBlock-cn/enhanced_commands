@@ -23,6 +23,12 @@ public class EnhancedCommands implements ModInitializer {
   public static final String MOD_ID = "enhanced_commands";
   public static final Logger LOGGER = LoggerFactory.getLogger(EnhancedCommands.class);
 
+  private static final Identifier EXAMPLE_ID = Identifier.of(MOD_ID, "");
+
+  public static Identifier id(String path) {
+    return EXAMPLE_ID.withPath(path);
+  }
+
   @Override
   public void onInitialize() {
     BlockPredicateTypes.init();
@@ -40,7 +46,7 @@ public class EnhancedCommands implements ModInitializer {
     WandEvent.registerEvents();
 
     // 注册服务器运行任务的事件
-    ServerTickEvents.END_SERVER_TICK.register(new Identifier(MOD_ID, "tick_iterator_task"), server -> {
+    ServerTickEvents.END_SERVER_TICK.register(id("tick_iterator_task"), server -> {
       server.getProfiler().push("enhanced_commands:tick_iterator_task");
       ((ThreadExecutorExtension) server).ec_advanceTasks();
       server.getProfiler().pop();

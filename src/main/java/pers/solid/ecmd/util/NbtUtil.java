@@ -2,7 +2,8 @@ package pers.solid.ecmd.util;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import net.minecraft.command.CommandException;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtCompound;
@@ -76,7 +77,6 @@ public final class NbtUtil {
    *
    * @param nbtCompound 需要转换为 {@link NbtCompound} 值。
    * @return 根据 NBT 数据转换而成的 {@link Vec3i}。
-   * @see net.minecraft.nbt.NbtHelper#toBlockPos(NbtCompound)
    */
   @Contract(value = "null -> null; !null -> new", pure = true)
   public static @Nullable Vec3i toVec3i(@Nullable NbtCompound nbtCompound) {
@@ -121,15 +121,17 @@ public final class NbtUtil {
     return nbtList.stream().filter(nbtElement -> nbtElement instanceof NbtCompound).map(nbtElement -> (NbtCompound) nbtElement).map(function).toList();
   }
 
+  private static final DynamicCommandExceptionType INVALID = new DynamicCommandExceptionType(pathString -> Text.translatable("commands.data.get.invalid", pathString));
+
   /**
    * 如果 NBT 元素为数字，则直接返回这个值，否则抛出错误。
    */
   @Contract(value = "_, _ -> param1", pure = true)
-  public static @NotNull AbstractNbtNumber toNumberOrThrow(@NotNull NbtElement nbtElement, @NotNull NbtPathArgumentType.NbtPath path) {
+  public static @NotNull AbstractNbtNumber toNumberOrThrow(@NotNull NbtElement nbtElement, @NotNull NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
     if (nbtElement instanceof AbstractNbtNumber number) {
       return number;
     } else {
-      throw new CommandException(Text.translatable("commands.data.get.invalid", path.toString()));
+      throw INVALID.create(path.toString());
     }
   }
 }

@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
@@ -26,10 +27,10 @@ public interface PropertyNamePredicate extends ExpressionConvertible {
     MULTI_VALUE("multi_value", MultiValuePropertyNamePredicate.CODEC);
 
     public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
-    public final com.mojang.serialization.Codec<? extends PropertyNamePredicate> codec;
+    public final MapCodec<? extends PropertyNamePredicate> codec;
     private final String name;
 
-    Type(String name, com.mojang.serialization.Codec<? extends PropertyNamePredicate> codec) {
+    Type(String name, MapCodec<? extends PropertyNamePredicate> codec) {
       this.name = name;
       this.codec = codec;
     }

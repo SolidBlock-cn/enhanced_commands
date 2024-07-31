@@ -1,6 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
@@ -14,7 +14,7 @@ import pers.solid.ecmd.util.TestResult;
 public enum ConstantBlockPredicate implements BlockPredicate {
   ALWAYS_TRUE;
 
-  public static final Codec<ConstantBlockPredicate> CODEC = Codec.unit(ConstantBlockPredicate.ALWAYS_TRUE);
+  public static final MapCodec<ConstantBlockPredicate> CODEC = MapCodec.unit(ConstantBlockPredicate.ALWAYS_TRUE);
 
   @Override
   public @NotNull String asString() {
@@ -40,7 +40,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     CONSTANT_TYPE;
 
     @Override
-    public @NotNull Codec<ConstantBlockPredicate> getCodec() {
+    public @NotNull MapCodec<ConstantBlockPredicate> getCodec() {
       return CODEC;
     }
 

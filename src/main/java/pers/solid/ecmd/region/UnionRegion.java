@@ -2,7 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public record UnionRegion(@NotNull List<Region> regions) implements RegionsBasedRegion<UnionRegion, Region> {
-  public static final Codec<UnionRegion> CODEC = RecordCodecBuilder.create(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, UnionRegion::new));
+  public static final MapCodec<UnionRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, UnionRegion::new));
 
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
@@ -103,7 +103,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public @NotNull Codec<UnionRegion> getCodec() {
+    public @NotNull MapCodec<UnionRegion> getCodec() {
       return CODEC;
     }
   }

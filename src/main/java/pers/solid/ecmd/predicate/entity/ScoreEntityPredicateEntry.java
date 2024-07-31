@@ -5,8 +5,8 @@ import com.google.common.collect.Iterables;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.entity.Entity;
 import net.minecraft.predicate.NumberRange;
+import net.minecraft.scoreboard.ReadableScoreboardScore;
 import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -27,7 +27,7 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
     boolean result = true;
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
     final ServerScoreboard scoreboard = entity.getServer().getScoreboard();
-    String entityName = entity.getEntityName();
+    String entityName = entity.getNameForScoreboard();
     for (var triple : Iterables.concat(
         Iterables.transform(expectedScore.entrySet(), entry -> Triple.of(entry.getKey(), entry.getValue(), false)),
         Iterables.transform(invertedScores, input -> Triple.of(input.left(), input.right(), true))
@@ -40,13 +40,13 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
       }
 
       final MutableText objectiveText = TextUtil.styled(objective.getDisplayName(), Styles.TARGET);
-      if (!scoreboard.playerHasObjective(entityName, objective)) {
+      final ReadableScoreboardScore score = scoreboard.getScore(entity, objective);
+      if (score == null) {
         attachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.score.no_player_score", displayName, objectiveText)));
         result = false;
         continue;
       }
 
-      ScoreboardPlayerScore score = scoreboard.getPlayerScore(entityName, objective);
       int scoreValue = score.getScore();
       final boolean inverted = triple.getRight();
       final NumberRange.IntRange intRange = triple.getMiddle();

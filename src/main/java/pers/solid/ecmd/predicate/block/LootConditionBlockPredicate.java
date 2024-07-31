@@ -1,41 +1,45 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootGsons;
 import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.condition.LootConditionManager;
 import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.ReloadableRegistries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
-import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface LootConditionBlockPredicate extends BlockPredicate {
-  Gson GSON = LootGsons.getConditionGsonBuilder().setLenient().create();
-  Codec<LootConditionBlockPredicate> CODEC = Codec.BOOL.dispatch("anonymous", p -> p instanceof Anonymous, b -> b ? Anonymous.CODEC : Named.CODEC);
+  MapCodec<LootConditionBlockPredicate> CODEC = Codec.BOOL.dispatchMap("anonymous", p -> p instanceof Anonymous, b -> b ? Anonymous.CODEC : Named.CODEC);
 
   LootCondition lootCondition(CachedBlockPosition cachedBlockPosition);
 
@@ -44,13 +48,15 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
     final LootCondition lootCondition = lootCondition(cachedBlockPosition);
     final WorldView world = cachedBlockPosition.getWorld();
     if (!(world instanceof final ServerWorld serverWorld)) return false;
-    return lootCondition.test(new LootContext.Builder(serverWorld)
+    final LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverWorld)
+        .add(LootContextParameters.ORIGIN, cachedBlockPosition.getBlockPos().toCenterPos())
+        .add(LootContextParameters.BLOCK_STATE, cachedBlockPosition.getBlockState())
+        .add(LootContextParameters.BLOCK_ENTITY, cachedBlockPosition.getBlockEntity())
+        .addOptional(LootContextParameters.TOOL, ItemStack.EMPTY)
+        .build(LootContextTypes.BLOCK);
+    return lootCondition.test(new LootContext.Builder(lootContextParameterSet)
         .random(serverWorld.random)
-        .parameter(LootContextParameters.ORIGIN, cachedBlockPosition.getBlockPos().toCenterPos())
-        .parameter(LootContextParameters.BLOCK_STATE, cachedBlockPosition.getBlockState())
-        .optionalParameter(LootContextParameters.BLOCK_ENTITY, cachedBlockPosition.getBlockEntity())
-        .parameter(LootContextParameters.TOOL, ItemStack.EMPTY)
-        .build(LootContextTypes.BLOCK));
+        .build(Optional.empty()));
   }
 
   @Override
@@ -63,17 +69,17 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
     LOOT_CONDITION_TYPE;
 
     @Override
-    public @NotNull Codec<LootConditionBlockPredicate> getCodec() {
+    public @NotNull MapCodec<LootConditionBlockPredicate> getCodec() {
       return CODEC;
     }
   }
 
   record Anonymous(@NotNull LootCondition lootCondition) implements LootConditionBlockPredicate {
-    public static final Codec<Anonymous> CODEC = RecordCodecBuilder.create(i -> i.ap(Anonymous::new, Codecs.JSON_ELEMENT.xmap(jsonElement -> GSON.fromJson(jsonElement, LootCondition.class), GSON::toJsonTree).fieldOf("loot_condition").forGetter(Anonymous::lootCondition)));
+    public static final MapCodec<Anonymous> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(Anonymous::new, LootCondition.CODEC.fieldOf("loot_condition").forGetter(Anonymous::lootCondition)));
 
     @Override
     public @NotNull String asString() {
-      return "predicate(" + GSON.toJson(lootCondition) + ")";
+      return "predicate(" + LootCondition.CODEC.encodeStart(JsonOps.INSTANCE, lootCondition).resultOrPartial() + ")";
     }
 
     @Override
@@ -92,9 +98,8 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
   }
 
   final class Named implements LootConditionBlockPredicate {
-    public static final Codec<Named> CODEC = RecordCodecBuilder.create(i -> i.ap(Named::new, Identifier.CODEC.fieldOf("id").forGetter(named -> named.identifier)));
+    public static final MapCodec<Named> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(Named::new, Identifier.CODEC.fieldOf("id").forGetter(named -> named.identifier)));
     private final @NotNull Identifier identifier;
-    private transient WeakReference<LootConditionManager> managerRef = null;
     private transient LootCondition cached = null;
 
     public Named(@NotNull Identifier identifier) {
@@ -118,12 +123,9 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
     @Override
     public LootCondition lootCondition(CachedBlockPosition cachedBlockPosition) {
       if (cachedBlockPosition.getWorld() instanceof ServerWorld serverWorld) {
-        final LootConditionManager predicateManager = serverWorld.getServer().getPredicateManager();
-        if (managerRef != null && managerRef.refersTo(predicateManager) && cached != null) {
-          return cached;
-        }
-        managerRef = new WeakReference<>(predicateManager);
-        return cached = predicateManager.get(identifier);
+        final Optional<RegistryEntry.Reference<LootCondition>> entry = serverWorld.getServer().getReloadableRegistries().createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, identifier));
+        // todo check
+        return entry.orElseThrow().value();
       }
       throw new UnsupportedOperationException("LootConditionBlockPredicate with a predicate ID can only be run on the server!");
     }
@@ -155,8 +157,8 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
 
     private static CompletableFuture<Suggestions> getLootConditionIdSuggestions(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder, int cursorBeforeId) {
       if (context.getSource() instanceof final ServerCommandSource source) {
-        LootConditionManager lootConditionManager = source.getServer().getPredicateManager();
-        return CommandSource.suggestIdentifiers(lootConditionManager.getIds(), suggestionsBuilder.createOffset(cursorBeforeId));
+        ReloadableRegistries.Lookup lookup = source.getServer().getReloadableRegistries();
+        return CommandSource.suggestIdentifiers(lookup.getIds(RegistryKeys.PREDICATE), suggestionsBuilder.createOffset(cursorBeforeId));
       } else if (context.getSource() instanceof CommandSource commandSource) {
         return commandSource.getCompletions(context);
       } else {
@@ -178,8 +180,8 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
     public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
       if (id != null) {
         return source -> {
-          final LootCondition lootCondition = source.getServer().getPredicateManager().get(id);
-          if (lootCondition == null) {
+          final Optional<LootCondition> lootCondition = commandRegistryAccess.createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id)).map(RegistryEntry.Reference::value);
+          if (lootCondition.isEmpty()) {
             parser.reader.setCursor(cursorBeforeId);
             throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parser.reader, id.toString()), cursorAfterId);
           }
@@ -201,7 +203,8 @@ public interface LootConditionBlockPredicate extends BlockPredicate {
         final char peek = reader.peek();
         if (peek == '{' || peek == '[' || StringReader.isQuotedStringStart(peek)) {
           parser.suggestionProviders.clear();
-          this.anonymous = ParsingUtil.parseJson(reader, input -> GSON.fromJson(input, LootCondition.class), ModCommandExceptionTypes.INVALID_LOOT_TABLE_JSON);
+          // todo check
+          this.anonymous = ParsingUtil.parseJson(reader, input -> LootCondition.CODEC.decode(JsonOps.INSTANCE, new Gson().fromJson(input, JsonElement.class)).getOrThrow().getFirst(), ModCommandExceptionTypes.INVALID_LOOT_TABLE_JSON);
           return;
         }
       }

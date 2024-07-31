@@ -1,34 +1,33 @@
 package pers.solid.ecmd.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.predicate.NumberRange;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.predicate.entity.EntitySelectorExtras;
 import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 @Mixin(EntitySelector.class)
-public class EntitySelectorMixin implements EntitySelectorExtension {
+public abstract class EntitySelectorMixin implements EntitySelectorExtension {
+  @Shadow
+  protected abstract Predicate<Entity> getPositionPredicate(Vec3d pos, @Nullable Box box, @Nullable FeatureSet enabledFeatures);
+
   @Unique
   private final EntitySelectorExtras ec$ext = new EntitySelectorExtras();
 
@@ -37,12 +36,12 @@ public class EntitySelectorMixin implements EntitySelectorExtension {
     return ec$ext;
   }
 
-  @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;basePredicate:Ljava/util/function/Predicate;", shift = At.Shift.BEFORE))
-  private void modifyBasePredicate(int count, boolean includesNonPlayers, boolean localWorldOnly, Predicate<Entity> basePredicate, NumberRange.FloatRange distance, Function<Vec3d, Vec3d> positionOffset, @Nullable Box box, BiConsumer<Vec3d, List<? extends Entity>> sorter, boolean senderOnly, @Nullable String playerName, @Nullable UUID uuid, @Nullable EntityType<?> type, boolean usesAt, CallbackInfo ci, @Local LocalRef<Predicate<Entity>> basePredicateRef) {
-    basePredicateRef.set(basePredicateRef.get().and(this.ec$ext::testForExtraPredicates));
+  @ModifyReturnValue(method = "getPositionPredicate", at = @At("RETURN"))
+  private Predicate<Entity> modifyPositionPredicate(Predicate<Entity> original) {
+    return original.and(this.ec$ext::testForExtraPredicates);
   }
 
-  @Inject(method = {"getEntity", "getUnfilteredEntities", "getPlayer", "getPlayers"}, at = @At("HEAD"))
+  @Inject(method = {"getEntity", "getEntities(Lnet/minecraft/server/command/ServerCommandSource;)Ljava/util/List;", "getPlayer", "getPlayers"}, at = @At("HEAD"))
   private void setSource(ServerCommandSource source, CallbackInfoReturnable<Entity> cir) throws CommandSyntaxException {
     ec$ext.updateSource(source);
   }
@@ -50,10 +49,10 @@ public class EntitySelectorMixin implements EntitySelectorExtension {
   /**
    * 特定类型的实体选择器（如 {@code passengers}）应该以特殊的方式，从世界收集实体列表。
    */
-  @Inject(method = "getUnfilteredEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z", shift = At.Shift.BEFORE), cancellable = true)
-  private void modifiedEntityCollector(ServerCommandSource source, CallbackInfoReturnable<List<? extends Entity>> cir, @Local Predicate<Entity> actualPredicate) throws CommandSyntaxException {
+  @Inject(method = "getEntities(Lnet/minecraft/server/command/ServerCommandSource;)Ljava/util/List;", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z", shift = At.Shift.BEFORE), cancellable = true)
+  private void modifiedEntityCollector(ServerCommandSource source, CallbackInfoReturnable<List<? extends Entity>> cir, @Local Vec3d vec3d, @Local Box box) throws CommandSyntaxException {
     if (ec$ext.collector != null) {
-      cir.setReturnValue(ec$ext.collector.collectEntities(source).filter(actualPredicate).toList());
+      cir.setReturnValue(ec$ext.collector.collectEntities(source).filter(getPositionPredicate(vec3d, box, null)).toList());
     }
   }
 

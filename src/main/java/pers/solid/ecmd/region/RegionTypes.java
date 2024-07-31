@@ -3,7 +3,6 @@ package pers.solid.ecmd.region;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.FunctionsParser;
@@ -50,7 +49,7 @@ public final class RegionTypes {
     if (value instanceof Parser<?>) {
       PARSERS.add((Parser<RegionArgument>) value);
     }
-    return Registry.register(RegionType.REGISTRY, new Identifier(EnhancedCommands.MOD_ID, name), value);
+    return Registry.register(RegionType.REGISTRY, EnhancedCommands.id(name), value);
   }
 
   public static void init() {

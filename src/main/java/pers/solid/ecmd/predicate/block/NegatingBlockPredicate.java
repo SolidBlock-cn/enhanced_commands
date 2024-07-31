@@ -1,7 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -16,7 +16,7 @@ import pers.solid.ecmd.util.TestResult;
 import java.util.List;
 
 public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockPredicate {
-  public static final Codec<NegatingBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(NegatingBlockPredicate::new, BlockPredicate.CODEC.fieldOf("predicate").forGetter(NegatingBlockPredicate::predicate)));
+  public static final MapCodec<NegatingBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NegatingBlockPredicate::new, BlockPredicate.CODEC.fieldOf("predicate").forGetter(NegatingBlockPredicate::predicate)));
 
   @Override
   public @NotNull String asString() {
@@ -51,7 +51,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
     NEGATING_TYPE;
 
     @Override
-    public @NotNull Codec<NegatingBlockPredicate> getCodec() {
+    public @NotNull MapCodec<NegatingBlockPredicate> getCodec() {
       return CODEC;
     }
 

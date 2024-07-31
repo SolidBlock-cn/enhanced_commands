@@ -12,6 +12,7 @@ import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -40,7 +41,7 @@ public enum DebugDeOpCommand implements CommandRegistrationCallback {
       if (playerManager.isOperator(gameProfile)) {
         playerManager.removeFromOperators(gameProfile);
         ++i;
-        source.sendFeedback(Text.translatable("commands.deop.success", ((GameProfile) targets.iterator().next()).getName()), true);
+        CommandBridge.sendFeedback(source, () -> Text.translatable("commands.deop.success", targets.iterator().next().getName()), true);
       }
     }
 

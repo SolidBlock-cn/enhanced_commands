@@ -1,9 +1,8 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
-  public static final Codec<SimpleBlockPredicate> CODEC = Registries.BLOCK.createEntryCodec().dispatch("block", Functions.compose(Block::getRegistryEntry, SimpleBlockPredicate::block), block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockPredicate(block.value(), properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block.value()).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
+  public static final MapCodec<SimpleBlockPredicate> CODEC = Registries.BLOCK.getCodec().dispatchMap("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
 
 
   @Override
@@ -79,7 +78,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
     SIMPLE_TYPE;
 
     @Override
-    public @NotNull Codec<SimpleBlockPredicate> getCodec() {
+    public @NotNull MapCodec<SimpleBlockPredicate> getCodec() {
       return CODEC;
     }
 

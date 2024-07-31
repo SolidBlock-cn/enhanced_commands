@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
@@ -22,7 +23,7 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBackedRegion {
-  public static final Codec<OutwardsRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3i.CODEC.fieldOf("center").forGetter(OutwardsRegion::center), Codec.INT.fieldOf("x").forGetter(OutwardsRegion::x), Codec.INT.fieldOf("y").forGetter(OutwardsRegion::y), Codec.INT.fieldOf("z").forGetter(OutwardsRegion::z)).apply(i, OutwardsRegion::new));
+  public static final MapCodec<OutwardsRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3i.CODEC.fieldOf("center").forGetter(OutwardsRegion::center), Codec.INT.fieldOf("x").forGetter(OutwardsRegion::x), Codec.INT.fieldOf("y").forGetter(OutwardsRegion::y), Codec.INT.fieldOf("z").forGetter(OutwardsRegion::z)).apply(i, OutwardsRegion::new));
 
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
@@ -87,7 +88,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public @NotNull Codec<OutwardsRegion> getCodec() {
+    public @NotNull MapCodec<OutwardsRegion> getCodec() {
       return CODEC;
     }
   }

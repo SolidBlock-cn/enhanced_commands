@@ -262,11 +262,11 @@ public class SuggestedParser {
     return parseAndSuggestValues(iterable, StringIdentifiable::asString, tooltip, valueGetter);
   }
 
-  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip, StringIdentifiable.Codec<T> codec) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip, StringIdentifiable.EnumCodec<T> codec) throws CommandSyntaxException {
     return parseAndSuggestEnums(iterable, tooltip, codec::byId);
   }
 
-  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(T[] iterable, Function<T, @Nullable Message> tooltip, StringIdentifiable.Codec<T> codec) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(T[] iterable, Function<T, @Nullable Message> tooltip, StringIdentifiable.EnumCodec<T> codec) throws CommandSyntaxException {
     return parseAndSuggestEnums(Arrays.asList(iterable), tooltip, codec);
   }
 

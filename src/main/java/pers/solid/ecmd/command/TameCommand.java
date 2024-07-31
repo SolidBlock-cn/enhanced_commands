@@ -109,7 +109,7 @@ public enum TameCommand implements CommandRegistrationCallback {
       horse.setOwnerUuid(owner.getUuid());
       return true;
     } else if (entity instanceof TameableEntity tameable) {
-      tameable.setTamed(true);
+      tameable.setTamed(true, true);
       tameable.setOwnerUuid(owner.getUuid());
       return true;
     } else {
@@ -123,7 +123,7 @@ public enum TameCommand implements CommandRegistrationCallback {
       horse.setOwnerUuid(null);
       return true;
     } else if (entity instanceof TameableEntity tameable) {
-      tameable.setTamed(false);
+      tameable.setTamed(false, true);
       tameable.setOwnerUuid(null);
       return true;
     } else {

@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * 从 id 包含指定正则表达式的方块中随机选择一个。
  */
 public final class IdContainBlockFunction implements BlockFunction {
-  public static final Codec<IdContainBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(IdContainBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockFunction::pattern)));
+  public static final MapCodec<IdContainBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(IdContainBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockFunction::pattern)));
   private final @NotNull Pattern pattern;
   private transient World world;
   private transient Block[] blocks;
@@ -91,7 +91,7 @@ public final class IdContainBlockFunction implements BlockFunction {
     ID_CONTAIN_TYPE;
 
     @Override
-    public @NotNull Codec<IdContainBlockFunction> getCodec() {
+    public @NotNull MapCodec<IdContainBlockFunction> getCodec() {
       return CODEC;
     }
   }

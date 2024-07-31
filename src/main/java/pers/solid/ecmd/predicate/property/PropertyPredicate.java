@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
@@ -39,10 +40,10 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
     MULTI_VALUE("multi_value", MultiValuePropertyPredicate::getCodec);
 
     public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
-    public final Function<Block, com.mojang.serialization.Codec<? extends PropertyPredicate<?>>> codecFunction;
+    public final Function<Block, MapCodec<? extends PropertyPredicate<?>>> codecFunction;
     private final String name;
 
-    Type(String name, Function<Block, com.mojang.serialization.Codec<? extends PropertyPredicate<?>>> codecFunction) {
+    Type(String name, Function<Block, MapCodec<? extends PropertyPredicate<?>>> codecFunction) {
       this.name = name;
       this.codecFunction = codecFunction;
     }
@@ -52,7 +53,7 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
       return name;
     }
 
-    public com.mojang.serialization.Codec<? extends PropertyPredicate<?>> getCodec(Block block) {
+    public MapCodec<? extends PropertyPredicate<?>> getCodec(Block block) {
       return codecFunction.apply(block);
     }
   }

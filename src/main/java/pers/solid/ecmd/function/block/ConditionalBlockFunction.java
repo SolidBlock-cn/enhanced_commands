@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -23,7 +23,7 @@ import pers.solid.ecmd.util.FunctionParamsParser;
  * </blockquote>
  */
 public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNull BlockFunction functionIfTrue, @NotNull BlockFunction functionIfFalse) implements BlockFunction {
-  public static final Codec<ConditionalBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3(ConditionalBlockFunction::new, BlockPredicate.CODEC.fieldOf("condition").forGetter(ConditionalBlockFunction::condition), BlockFunction.CODEC.fieldOf("then").forGetter(ConditionalBlockFunction::functionIfTrue), BlockFunction.CODEC.optionalFieldOf("else", BlockFunction.EMPTY).forGetter(ConditionalBlockFunction::functionIfFalse)));
+  public static final MapCodec<ConditionalBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(ConditionalBlockFunction::new, BlockPredicate.CODEC.fieldOf("condition").forGetter(ConditionalBlockFunction::condition), BlockFunction.CODEC.fieldOf("then").forGetter(ConditionalBlockFunction::functionIfTrue), BlockFunction.CODEC.optionalFieldOf("else", BlockFunction.EMPTY).forGetter(ConditionalBlockFunction::functionIfFalse)));
 
   @Override
   public @NotNull String asString() {
@@ -49,7 +49,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     CONDITIONAL_TYPE;
 
     @Override
-    public @NotNull Codec<ConditionalBlockFunction> getCodec() {
+    public @NotNull MapCodec<ConditionalBlockFunction> getCodec() {
       return CODEC;
     }
   }

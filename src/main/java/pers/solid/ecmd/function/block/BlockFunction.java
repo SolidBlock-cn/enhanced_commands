@@ -1,6 +1,5 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -31,7 +30,7 @@ import pers.solid.ecmd.util.mixin.MixinShared;
 public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgument {
   BlockFunction EMPTY = EmptyBlockFunction.INSTANCE;
   Codec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.getCodec().dispatch(BlockFunction::getType, BlockFunctionType::getCodec);
-  Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.createEntryCodec().xmap(block -> new SimpleBlockFunction(block.value(), ImmutableList.of()), Functions.compose(Block::getRegistryEntry, SimpleBlockFunction::block)), MAP_CODEC);
+  Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC);
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));
 
@@ -51,7 +50,7 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
     if (blockEntity != null) {
       final NbtCompound modifiedData = blockEntityData.getValue();
       if (modifiedData != null) {
-        blockEntity.readNbt(modifiedData);
+        blockEntity.read(modifiedData, world.getRegistryManager());
         result = true;
       }
     }

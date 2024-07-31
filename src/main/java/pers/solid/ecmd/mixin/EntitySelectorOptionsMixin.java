@@ -22,16 +22,18 @@ import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2BooleanLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.EntitySelectorOptions;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.ServerAdvancementLoader;
 import net.minecraft.server.command.ServerCommandSource;
@@ -145,7 +147,7 @@ public abstract class EntitySelectorOptionsMixin {
     throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "propertyName"), EntitySelectorReaderExtras.getOf(reader).cursorAfterOptionName);
   }
 
-  @Inject(method = "method_9982", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+  @Inject(method = "method_9982", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void addNamePredicateInformation(EntitySelectorReader reader, CallbackInfo ci, int i, boolean hasNegation, String expectedName) {
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new NameEntityPredicateEntry(expectedName, hasNegation));
   }
@@ -193,7 +195,7 @@ public abstract class EntitySelectorOptionsMixin {
   @WrapWithCondition(method = "method_9980", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setLevelRange(Lnet/minecraft/predicate/NumberRange$IntRange;)V"))
   private static boolean applyNegativeLevel(EntitySelectorReader instance, NumberRange.IntRange levelRange, @Share("inverted") LocalBooleanRef ref) {
     if (ref.get()) {
-      instance.setPredicate(entity -> entity instanceof final PlayerEntity player && !levelRange.test(player.experienceLevel));
+      instance.addPredicate(entity -> entity instanceof final PlayerEntity player && !levelRange.test(player.experienceLevel));
       EntitySelectorReaderExtras.getOf(instance).addDescription(source -> new LevelEntityPredicateEntry(levelRange, true));
       return false;
     } else {
@@ -214,7 +216,7 @@ public abstract class EntitySelectorOptionsMixin {
   /**
    * 当使用 {@code @p} 时，limit 的值应该允许为负值，从而表示选择最远的实体。
    */
-  @Inject(method = "method_9969", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;readInt()I", remap = false))
+  @Inject(method = "method_9969", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;setCursor(I)V", remap = false))
   private static void acceptsImplicitNegativeLimit(EntitySelectorReader reader, CallbackInfo ci, @Local(ordinal = 0) int cursor, @Local(ordinal = 1) LocalIntRef readInt) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.allowNegativeDistanceForNearest) {
       return;
@@ -246,8 +248,8 @@ public abstract class EntitySelectorOptionsMixin {
   /**
    * 修改 "gamemode" 的值的建议，使之接受本模组中的扩展的游戏模式名称。
    */
-  @Inject(method = "method_9946", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;buildFuture()Ljava/util/concurrent/CompletableFuture;", shift = At.Shift.BEFORE, remap = false))
-  private static void suggestMoreGamemodes(EntitySelectorReader entitySelectorReader, SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local String stringxx, @Local(ordinal = 0) boolean blxx, @Local(ordinal = 1) boolean bl2) {
+  @Inject(method = "method_9946", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;buildFuture()Ljava/util/concurrent/CompletableFuture;", shift = At.Shift.BEFORE))
+  private static void suggestMoreGamemodes(EntitySelectorReader entitySelectorReader, SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local(ordinal = 0) String stringxx, @Local(ordinal = 0) boolean blxx, @Local(ordinal = 1) boolean bl2) {
     if (!EntitySelectorParsingConfig.CURRENT.acceptGameModeAlias) {
       return;
     }
@@ -276,7 +278,7 @@ public abstract class EntitySelectorOptionsMixin {
     return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, commandSyntaxException.getCursor() + string.length());
   }
 
-  @WrapWithCondition(method = "method_9948", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"))
+  @WrapWithCondition(method = "method_9948", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
   private static boolean readMultipleGameModes(EntitySelectorReader reader, Predicate<Entity> predicate, @Local boolean hasNegation, @Local @NotNull GameMode gameMode) throws CommandSyntaxException {
     // 尝试读取更多的游戏模式，即允许多个值。
     if (!EntitySelectorParsingConfig.CURRENT.allowMultipleGameModes) {
@@ -285,7 +287,7 @@ public abstract class EntitySelectorOptionsMixin {
     return EntitySelectorOptionsExtension.mixinReadMultipleGameModes(reader, hasNegation, gameMode);
   }
 
-  @Inject(method = "method_9951", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+  @Inject(method = "method_9951", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void addSelectsTeamInformation(EntitySelectorReader reader, CallbackInfo ci, boolean hasNegation, String expectedTeamName) {
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new TeamEntityPredicateEntry(expectedTeamName, hasNegation));
   }
@@ -328,7 +330,7 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V", ordinal = 0, shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/registry/tag/TagKey;of(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/util/Identifier;)Lnet/minecraft/registry/tag/TagKey;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V", ordinal = 0, shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/registry/tag/TagKey;of(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/util/Identifier;)Lnet/minecraft/registry/tag/TagKey;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   private static void acceptMultipleTypesOnEntry(EntitySelectorReader reader, CallbackInfo ci, int cursorBeforeNegation, boolean hasNegation, TagKey<EntityType<?>> tagKey) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.allowMultipleTypes) {
       return;
@@ -338,7 +340,7 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V", shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V", shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   private static void acceptMultipleTypesOnTag(EntitySelectorReader reader, CallbackInfo ci, int cursorBeforeNegation, boolean hasNegation, Identifier identifier, EntityType<?> entityType) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.allowMultipleTypes) {
       return;
@@ -349,12 +351,12 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT, slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;readTagCharacter()Z"), to = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")))
+  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT, slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;readTagCharacter()Z"), to = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")))
   private static void addEntityTypeTagInformation(EntitySelectorReader reader, CallbackInfo ci, int cursorStart, boolean hasNegation, TagKey<EntityType<?>> tagKey) {
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new TypeTagEntityPredicateEntry(tagKey, hasNegation));
   }
 
-  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT, slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")))
+  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT, slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")))
   private static void addEntityTypeInformation(EntitySelectorReader reader, CallbackInfo ci, int cursorStart, boolean hasNegation, Identifier identifier, EntityType<?> expectedType) {
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new TypeEntityPredicateEntry(expectedType, hasNegation));
   }
@@ -392,12 +394,12 @@ public abstract class EntitySelectorOptionsMixin {
     return original || EntitySelectorReaderExtras.getOf(reader).implicitEntityType;
   }
 
-  @Inject(method = "method_9968", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+  @Inject(method = "method_9968", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void addTagInformation(EntitySelectorReader reader, CallbackInfo ci, boolean hasNegation, String tagName) {
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new TagEntityPredicateEntry(tagName, hasNegation));
   }
 
-  @Inject(method = "method_9966", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+  @Inject(method = "method_9966", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void addNbtInformation(EntitySelectorReader reader, CallbackInfo ci, boolean hasNegation, NbtCompound nbtCompound) {
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new NbtMatchingEntityPredicateEntry(nbtCompound, hasNegation));
   }
@@ -464,7 +466,7 @@ public abstract class EntitySelectorOptionsMixin {
     return original && invertedScores.get().isEmpty();
   }
 
-  @ModifyArg(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"))
+  @ModifyArg(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
   private static Predicate<Entity> applyScoreNegationsToPredicate2(Predicate<Entity> predicate, @Share("invertedScores") LocalRef<List<Pair<String, NumberRange.IntRange>>> ref) {
     final List<Pair<String, NumberRange.IntRange>> invertedScores = ref.get();
     if (!invertedScores.isEmpty()) {
@@ -474,7 +476,7 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @Inject(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+  @Inject(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void addScoreInformation(EntitySelectorReader reader, CallbackInfo ci, StringReader stringReader, Map<String, NumberRange.IntRange> expectedScore, @Share("invertedScores") LocalRef<List<Pair<String, NumberRange.IntRange>>> invertedScores) {
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new ScoreEntityPredicateEntry(expectedScore, invertedScores.get()));
   }
@@ -550,10 +552,10 @@ public abstract class EntitySelectorOptionsMixin {
       final int cursor = stringReader.getCursor();
       final ServerAdvancementLoader advancementLoader = serverCommandSource.getServer().getAdvancementLoader();
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
-        final Advancement advancement = advancementLoader.get(advancementId);
-        if (advancement != null) {
+        final AdvancementEntry advancementEntry = advancementLoader.get(advancementId);
+        if (advancementEntry != null) {
           // 配合 acceptQuotedCriterionName 方法使用，当进度条件名称含有特殊的字符时，应该建议带有引号的字符串。
-          return CommandSource.suggestMatching(advancement.getCriteria().keySet().stream().map(ParsingUtil::quoteStringIfNeeded), suggestionsBuilder.createOffset(cursor));
+          return CommandSource.suggestMatching(advancementEntry.value().criteria().keySet().stream().map(ParsingUtil::quoteStringIfNeeded), suggestionsBuilder.createOffset(cursor));
         } else {
           return Suggestions.empty();
         }
@@ -587,7 +589,7 @@ public abstract class EntitySelectorOptionsMixin {
     advancements.get().put(advancementId, Either.right(expectedValue));
   }
 
-  @Inject(method = "method_9974", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"))
+  @Inject(method = "method_9974", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
   private static void addAdvancementInformation(EntitySelectorReader reader, CallbackInfo ci, @Share("advancements") LocalRef<Map<Identifier, Either<Object2BooleanMap<String>, Boolean>>> advancements) {
     final Map<Identifier, Either<Object2BooleanMap<String>, Boolean>> build = advancements.get();
     EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new AdvancementEntityPredicateEntry(build));
@@ -620,9 +622,9 @@ public abstract class EntitySelectorOptionsMixin {
     if (cancel) ci.cancel();
   }
 
-  @Inject(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-  private static void addPredicateInformation(EntitySelectorReader reader, CallbackInfo ci, boolean bl, Identifier identifier) throws CommandSyntaxException {
-    EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new LootTablePredicateEntityPredicateEntry(identifier, bl));
+  @Inject(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
+  private static void addPredicateInformation(EntitySelectorReader reader, CallbackInfo ci, boolean bl, RegistryKey<LootCondition> registryKey) throws CommandSyntaxException {
+    EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new LootTablePredicateEntityPredicateEntry(registryKey.getValue(), bl));
 
     // 如果 reader 后面没有内容，那么提前抛出异常，这是为了避免在输入了不完整的 id 时，由于进行了后面的解析，导致建议的内容被覆盖。
     if (!reader.getReader().canRead() && EntitySelectorReaderExtras.getOf(reader).context != null) {

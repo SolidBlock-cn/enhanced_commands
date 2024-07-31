@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -19,7 +19,7 @@ import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.ParsingUtil;
 
 public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) implements BlockFunction {
-  public static final Codec<NbtBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(NbtBlockFunction::new, CompoundNbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
+  public static final MapCodec<NbtBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockFunction::new, CompoundNbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
 
   @Override
   public @NotNull String asString() {
@@ -41,7 +41,7 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
     NBT_TYPE;
 
     @Override
-    public @NotNull Codec<NbtBlockFunction> getCodec() {
+    public @NotNull MapCodec<NbtBlockFunction> getCodec() {
       return CODEC;
     }
 

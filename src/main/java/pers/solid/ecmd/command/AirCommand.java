@@ -60,7 +60,7 @@ public enum AirCommand implements CommandRegistrationCallback {
                                 .executes(context -> {
                                   final NbtTarget target = getNbtTarget(context, "target");
                                   final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
-                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.modifyNbt(path, nbt));
+                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.modifyNbt(path, nbt, context.getSource().getRegistryManager()));
                                 })))))))
         .then(literal("set")
             .then(argument("entities", entities())
@@ -69,7 +69,7 @@ public enum AirCommand implements CommandRegistrationCallback {
                 .then(literal("from")
                     .then(literal("result").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
-                      return context.getSource().mergeConsumers((context1, success, result) -> {
+                      return context.getSource().mergeReturnValueConsumers((success, result) -> {
                         for (Entity entity : entities) {
                           entity.setAir(result);
                         }
@@ -77,7 +77,7 @@ public enum AirCommand implements CommandRegistrationCallback {
                     }))
                     .then(literal("success").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
-                      return context.getSource().mergeConsumers((context1, success, result) -> {
+                      return context.getSource().mergeReturnValueConsumers((success, result) -> {
                         for (Entity entity : entities) {
                           entity.setAir(success ? 1 : 0);
                         }
@@ -91,7 +91,7 @@ public enum AirCommand implements CommandRegistrationCallback {
                         .then(argument("path", nbtPath())
                             .executes(context -> {
                               final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
-                              return executeSetAir(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path), path).intValue());
+                              return executeSetAir(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path, context.getSource().getRegistryManager()), path).intValue());
                             }))))))
         .then(literal("add")
             .executes(context -> executeAddAir(context, Collections.singleton(context.getSource().getEntityOrThrow())))
@@ -107,11 +107,11 @@ public enum AirCommand implements CommandRegistrationCallback {
                     .executes(context -> executeRemoveAir(context, getEntities(context, "entities"), getInteger(context, "probability")))))));
   }
 
-  private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) {
+  private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) throws CommandSyntaxException {
     return executeGetAir(context, entities, concentrationType, null);
   }
 
-  private static <T extends Throwable> int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, @Nullable FailableConsumer<NbtElement, T> nbtElementConsumer) throws T {
+  private static <T extends Throwable> int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, @Nullable FailableConsumer<NbtElement, T> nbtElementConsumer) throws T, CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       final int air = entity.getAir();

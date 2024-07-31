@@ -4,13 +4,13 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.TimeArgumentType;
-import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.command.CommandManager;
@@ -59,7 +59,7 @@ public enum FireCommand implements CommandRegistrationCallback {
                     .executes(context -> executeExtinguishFire(context, EntityArgumentType.getEntities(context, "entities"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getBoolean("sound")))))));
   }
 
-  public static int executeGetFire(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) {
+  public static int executeGetFire(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) throws CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       final int fireTicks = entity.getFireTicks();
@@ -79,7 +79,7 @@ public enum FireCommand implements CommandRegistrationCallback {
   public static int executeSetFire(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, int value, boolean influencedByFireResistance) {
     for (Entity entity : entities) {
       if (influencedByFireResistance && entity instanceof LivingEntity livingEntity) {
-        livingEntity.setFireTicks(ProtectionEnchantment.transformFireDuration(livingEntity, value));
+        livingEntity.setFireTicks(value);
       } else {
         entity.setFireTicks(value);
       }

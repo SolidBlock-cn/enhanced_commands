@@ -148,7 +148,7 @@ public enum NbtConcentrationType implements StringIdentifiable {
   public static final SimpleCommandExceptionType NO_DATA_TO_BE_CONCENTRATED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_concentration_type.no_data"));
   public static final Dynamic2CommandExceptionType MIXED_TYPE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.nbt_concentration_type.mixed_type", a, b));
   public static final DynamicCommandExceptionType UNSUPPORTED_TYPE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.nbt_concentration_type.unsupported_type", o));
-  public static final StringIdentifiable.Codec<NbtConcentrationType> CODEC = StringIdentifiable.createCodec(NbtConcentrationType::values);
+  public static final StringIdentifiable.EnumCodec<NbtConcentrationType> CODEC = StringIdentifiable.createCodec(NbtConcentrationType::values);
 
   private final String name;
 

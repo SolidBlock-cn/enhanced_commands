@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
 import net.minecraft.command.CommandRegistryAccess;
@@ -171,13 +172,13 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
   }
 
 
-  public static final Codec<CircleCurve> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3d.CODEC.fieldOf("radius").forGetter(CircleCurve::radius), Vec3d.CODEC.fieldOf("center").forGetter(CircleCurve::center), Vec3d.CODEC.fieldOf("axis").forGetter(CircleCurve::axis), Codec.DOUBLE.fieldOf("minAngle").forGetter(CircleCurve::minAngle), Codec.DOUBLE.fieldOf("maxAngle").forGetter(CircleCurve::maxAngle)).apply(i, CircleCurve::new));
+  public static final MapCodec<CircleCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("radius").forGetter(CircleCurve::radius), Vec3d.CODEC.fieldOf("center").forGetter(CircleCurve::center), Vec3d.CODEC.fieldOf("axis").forGetter(CircleCurve::axis), Codec.DOUBLE.fieldOf("minAngle").forGetter(CircleCurve::minAngle), Codec.DOUBLE.fieldOf("maxAngle").forGetter(CircleCurve::maxAngle)).apply(i, CircleCurve::new));
 
   public enum Type implements CurveType<CircleCurve> {
     INSTANCE;
 
     @Override
-    public @NotNull Codec<CircleCurve> getCodec() {
+    public @NotNull MapCodec<CircleCurve> getCodec() {
       return CODEC;
     }
   }

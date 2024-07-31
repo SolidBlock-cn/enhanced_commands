@@ -6,8 +6,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.Dynamic3CommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.datafixers.util.Either;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.argument.RegistryEntryPredicateArgumentType;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -93,9 +93,15 @@ public interface EnhancedEntryPredicate<T> extends RegistryEntryPredicateArgumen
       this.others = predicates.stream().map(p -> p instanceof EnhancedEntryPredicate.EntryBased<T> ? null : p).filter(Objects::nonNull).toList();
     }
 
+    public static final SimpleCommandExceptionType MULTIPLE_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.registry_entry_predicate.multiple"));
+
     @Override
     public Either<RegistryEntry.Reference<T>, RegistryEntryList.Named<T>> getEntry() {
-      throw new CommandException(Text.translatable("enhanced_commands.argument.registry_entry_predicate.multiple"));
+      try {
+        throw MULTIPLE_VALUE.create();
+      } catch (CommandSyntaxException e) {
+        throw new RuntimeException(e);
+      }
     }
 
     @SuppressWarnings("unchecked")

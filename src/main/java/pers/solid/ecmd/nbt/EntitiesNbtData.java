@@ -7,9 +7,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.predicate.NbtPredicate;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -19,7 +21,7 @@ import java.util.function.Function;
 
 public record EntitiesNbtData(Collection<? extends Entity> entities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtSource, NbtTarget {
   @Override
-  public <T> Collection<T> getNbts(Function<NbtCompound, T> mappingFunction) throws CommandSyntaxException {
+  public <T> Collection<T> getNbts(Function<NbtCompound, T> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
     return entities.stream().map(NbtPredicate::entityToNbt).map(mappingFunction).collect(ImmutableList.toImmutableList());
   }
 
@@ -34,7 +36,7 @@ public record EntitiesNbtData(Collection<? extends Entity> entities, NbtConcentr
   }
 
   @Override
-  public void setNbt(NbtCompound nbt) throws CommandSyntaxException {
+  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     for (Entity entity : entities) {
       UUID uuid = entity.getUuid();
       entity.readNbt(nbt);
@@ -43,7 +45,7 @@ public record EntitiesNbtData(Collection<? extends Entity> entities, NbtConcentr
   }
 
   @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator) throws CommandSyntaxException {
+  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     for (Entity entity : entities) {
       UUID uuid = entity.getUuid();
       entity.readNbt(operator.apply(NbtPredicate.entityToNbt(entity)));

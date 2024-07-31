@@ -92,7 +92,7 @@ public interface EntityPredicateEntry extends EntityPredicate {
    * @param entityName    实体的显示名称，会显示在测试结果中。
    * @param inverted      测试是否为反向的，不影响结果的文本内容，但是会影响结果的真假判断。
    */
-  static <E extends Entity> TestResult testDouble(E entity, double actual, NumberRange.FloatRange expected, Text criterionName, Text entityName, boolean inverted) {
+  static <E extends Entity> TestResult testDouble(E entity, double actual, NumberRange.DoubleRange expected, Text criterionName, Text entityName, boolean inverted) {
     final MutableText actualText = TextUtil.literal(actual).styled(Styles.ACTUAL);
     final MutableText expectedText = Text.literal(StringUtil.wrapRange(expected)).styled(Styles.EXPECTED);
     if (expected.test(actual)) {

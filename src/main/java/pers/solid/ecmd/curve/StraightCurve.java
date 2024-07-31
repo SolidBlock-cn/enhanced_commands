@@ -3,7 +3,7 @@ package pers.solid.ecmd.curve;
 import com.google.common.collect.AbstractIterator;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
@@ -126,13 +126,13 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     return Type.INSTANCE;
   }
 
-  public static final Codec<StraightCurve> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(StraightCurve::from), Vec3d.CODEC.fieldOf("to").forGetter(StraightCurve::to)).apply(i, StraightCurve::new));
+  public static final MapCodec<StraightCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(StraightCurve::from), Vec3d.CODEC.fieldOf("to").forGetter(StraightCurve::to)).apply(i, StraightCurve::new));
 
   public enum Type implements CurveType<StraightCurve> {
     INSTANCE;
 
     @Override
-    public @NotNull Codec<StraightCurve> getCodec() {
+    public @NotNull MapCodec<StraightCurve> getCodec() {
       return CODEC;
     }
   }

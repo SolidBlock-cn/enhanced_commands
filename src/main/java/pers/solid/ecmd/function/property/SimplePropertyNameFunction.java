@@ -1,6 +1,7 @@
 package pers.solid.ecmd.function.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
 public record SimplePropertyNameFunction(String propertyName, String valueName, boolean must) implements PropertyNameFunction {
-  public static final Codec<SimplePropertyNameFunction> CODEC = RecordCodecBuilder.create(i -> i.apply3(
+  public static final MapCodec<SimplePropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(
       SimplePropertyNameFunction::new,
       Codec.STRING.fieldOf("property").forGetter(SimplePropertyNameFunction::propertyName),
       Codec.STRING.fieldOf("value").forGetter(SimplePropertyNameFunction::valueName),

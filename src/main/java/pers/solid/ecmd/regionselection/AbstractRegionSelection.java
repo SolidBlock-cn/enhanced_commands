@@ -1,5 +1,6 @@
 package pers.solid.ecmd.regionselection;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.Region;
 
@@ -9,12 +10,16 @@ public abstract class AbstractRegionSelection<R extends Region> implements Regio
   /**
    * 建立起绝对的区域。
    */
-  public abstract R buildRegion();
+  public abstract R buildRegion() throws CommandSyntaxException;
 
   @Override
   public R region() {
     if (calculatedRegion == null) {
-      calculatedRegion = buildRegion();
+      try {
+        calculatedRegion = buildRegion();
+      } catch (CommandSyntaxException e) {
+        // todo handle
+      }
     }
     return calculatedRegion;
   }

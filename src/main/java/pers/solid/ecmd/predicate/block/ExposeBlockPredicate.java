@@ -2,7 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -31,7 +31,7 @@ import java.util.TreeSet;
  * @param directions   The directions to test exposure.
  */
 public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull List<@NotNull Direction> directions) implements BlockPredicate {
-  public static final Codec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), Direction.CODEC.listOf().optionalFieldOf("directions", List.of(Direction.values())).forGetter(ExposeBlockPredicate::directions)));
+  public static final MapCodec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), Direction.CODEC.listOf().optionalFieldOf("directions", List.of(Direction.values())).forGetter(ExposeBlockPredicate::directions)));
 
   @Override
   public @NotNull String asString() {
@@ -112,7 +112,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
         return !VoxelShapes.combine(VoxelShapes.fullCube(), offsetCachedBlockPosition.getBlockState().getCollisionShape(offsetCachedBlockPosition.getWorld(), offsetCachedBlockPosition.getBlockPos()).getFace(direction.getOpposite()), BooleanBiFunction.ONLY_FIRST).isEmpty();
       }
     };
-    public static final Codec<ExposureType> CODEC = StringIdentifiable.createCodec(ExposureType::values);
+    public static final EnumCodec<ExposureType> CODEC = StringIdentifiable.createCodec(ExposureType::values);
     private final String name;
 
     ExposureType(String name) {
@@ -135,7 +135,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     EXPOSE_TYPE;
 
     @Override
-    public @NotNull Codec<ExposeBlockPredicate> getCodec() {
+    public @NotNull MapCodec<ExposeBlockPredicate> getCodec() {
       return CODEC;
     }
   }

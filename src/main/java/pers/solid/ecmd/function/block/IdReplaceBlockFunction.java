@@ -2,6 +2,7 @@ package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -30,7 +31,7 @@ import java.util.regex.Pattern;
  * </pre>
  */
 public record IdReplaceBlockFunction(Pattern pattern, String replacement) implements BlockFunction {
-  public static final Codec<IdReplaceBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(IdReplaceBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdReplaceBlockFunction::pattern), Codec.STRING.fieldOf("replacement").forGetter(IdReplaceBlockFunction::replacement)));
+  public static final MapCodec<IdReplaceBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(IdReplaceBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdReplaceBlockFunction::pattern), Codec.STRING.fieldOf("replacement").forGetter(IdReplaceBlockFunction::replacement)));
 
   @Override
   public boolean equals(Object o) {
@@ -72,7 +73,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     ID_REPLACE_TYPE;
 
     @Override
-    public @NotNull Codec<IdReplaceBlockFunction> getCodec() {
+    public @NotNull MapCodec<IdReplaceBlockFunction> getCodec() {
       return CODEC;
     }
   }

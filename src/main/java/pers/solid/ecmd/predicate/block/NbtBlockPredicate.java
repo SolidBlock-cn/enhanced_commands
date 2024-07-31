@@ -1,11 +1,12 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +20,7 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {
-  public static final Codec<NbtBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt").forGetter(NbtBlockPredicate::nbtPredicate)));
+  public static final MapCodec<NbtBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt").forGetter(NbtBlockPredicate::nbtPredicate)));
 
   @Override
   public @NotNull String asString() {
@@ -29,7 +30,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     final BlockEntity blockEntity = cachedBlockPosition.getBlockEntity();
-    return blockEntity != null && nbtPredicate.test(blockEntity.createNbt());
+    return blockEntity != null && nbtPredicate.test(blockEntity.createNbt(cachedBlockPosition.getWorld().getRegistryManager()));
   }
 
   @Override
@@ -37,9 +38,10 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     final BlockEntity blockEntity = cachedBlockPosition.getBlockEntity();
     final MutableText nameText = cachedBlockPosition.getBlockState().getBlock().getName();
     final MutableText posText = TextUtil.wrapVector(cachedBlockPosition.getBlockPos());
+    final DynamicRegistryManager registryManager = cachedBlockPosition.getWorld().getRegistryManager();
     if (blockEntity == null) {
       return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.nbt.not_block_entity", nameText, posText));
-    } else if (nbtPredicate.test(blockEntity.createNbt())) {
+    } else if (nbtPredicate.test(blockEntity.createNbt(registryManager))) {
       return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.nbt.pass", nameText, posText));
     } else {
       return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.nbt.fail"));
@@ -55,7 +57,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     NBT_TYPE;
 
     @Override
-    public @NotNull Codec<NbtBlockPredicate> getCodec() {
+    public @NotNull MapCodec<NbtBlockPredicate> getCodec() {
       return CODEC;
     }
 

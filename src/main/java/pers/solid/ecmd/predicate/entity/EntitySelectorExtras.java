@@ -28,7 +28,7 @@ public class EntitySelectorExtras {
     return false;
   };
   /**
-   * 此字体决定了在运行 {@link EntitySelector#getUnfilteredEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
+   * 此字体决定了在运行 {@link EntitySelector#getEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
    *
    * @see pers.solid.ecmd.mixin.EntitySelectorReaderMixin#buildExtraPredicate(CallbackInfoReturnable)
    */

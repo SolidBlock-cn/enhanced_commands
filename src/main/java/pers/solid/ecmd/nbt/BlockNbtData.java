@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.BlockDataObject;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -20,12 +21,12 @@ public record BlockNbtData(BlockDataObject blockDataObject) implements NbtSource
   }
 
   @Override
-  public void setNbt(NbtCompound nbt) {
+  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
     blockDataObject.setNbt(nbt);
   }
 
   @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator) throws CommandSyntaxException {
+  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     blockDataObject.setNbt(operator.apply(blockDataObject.getNbt()));
   }
 

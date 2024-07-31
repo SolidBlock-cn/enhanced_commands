@@ -2,7 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate predicate) implements BlockPredicate {
 
-  public static final Codec<RelBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(RelBlockPredicate::new, Vec3i.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
+  public static final MapCodec<RelBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RelBlockPredicate::new, Vec3i.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
@@ -50,7 +50,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     REL_TYPE;
 
     @Override
-    public @NotNull Codec<RelBlockPredicate> getCodec() {
+    public @NotNull MapCodec<RelBlockPredicate> getCodec() {
       return CODEC;
     }
   }

@@ -1,7 +1,9 @@
 package pers.solid.ecmd.regionselection;
 
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -28,7 +30,7 @@ import java.util.function.Supplier;
  * 区域选择可用于玩家在游戏内通过交互式的操作来建立一个区域。这个区域会在服务器和客户端之间进行同步，因此需要实现与 NBRegionBuilder 之间的转换。
  */
 public interface RegionSelection extends RegionBasedRegion<RegionSelection, Region> {
-  Text NOT_COMPLETED = Text.translatable("enhanced_commands.region_selection.not_completed");
+  SimpleCommandExceptionType NOT_COMPLETED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region_selection.not_completed"));
 
   /**
    * 设置第一个点时的操作。有可能是直接设置的特定的点，也有可能是重新开始一个全新的区域。
@@ -82,7 +84,6 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
   /**
    * 区域沿指定坐标轴延伸浮点数值后的区域。
    *
-   * @return
    */
   default @NotNull RegionSelection expanded(double offset, Direction.Axis axis) {
     throw new UnsupportedOperationException();
@@ -91,7 +92,6 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
   /**
    * 区域往指定方向延伸浮点数值后的区域，被延伸的那一侧是沿该方向最远的一侧。
    *
-   * @return
    */
   default @NotNull RegionSelection expanded(double offset, Direction direction) {
     throw new UnsupportedOperationException();
@@ -139,13 +139,14 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
 
   void writeNbt(@NotNull NbtCompound nbtCompound);
 
-  Codec<RegionSelection> CODEC = Codec.of(Region.CODEC.comap(RegionSelection::region), Decoder.error("Decoding region selection is not supported"));
+  // todo check
+  MapCodec<RegionSelection> CODEC = MapCodec.assumeMapUnsafe(Codec.of(Region.CODEC.comap(RegionSelection::region), Decoder.error("Decoding region selection is not supported")));
 
   enum Type implements RegionType<RegionSelection> {
     INSTANCE;
 
     public @NotNull RegionSelection fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final Identifier identifier = new Identifier(nbtCompound.getString("selection_type"));
+      final Identifier identifier = Identifier.of(nbtCompound.getString("selection_type"));
       final RegionSelectionType regionSelectionType = RegionSelectionType.REGISTRY.getOrEmpty(identifier).orElseThrow();
       final RegionSelection regionSelection = regionSelectionType.createRegionSelection();
       regionSelection.fromNbt(nbtCompound, world);
@@ -153,7 +154,7 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
     }
 
     @Override
-    public @NotNull Codec<RegionSelection> getCodec() {
+    public @NotNull MapCodec<RegionSelection> getCodec() {
       return CODEC;
     }
   }

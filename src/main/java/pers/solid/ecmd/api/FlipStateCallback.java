@@ -3,10 +3,10 @@ package pers.solid.ecmd.api;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.enums.BlockFace;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.block.enums.WallMountLocation;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.math.Direction;
@@ -78,11 +78,11 @@ public interface FlipStateCallback {
     if (original.contains(Properties.UP) && original.contains(Properties.DOWN)) {
       intermediate = intermediate.with(Properties.UP, original.get(Properties.DOWN)).with(Properties.DOWN, original.get(Properties.UP));
     }
-    if (original.contains(Properties.WALL_MOUNT_LOCATION)) {
-      intermediate = intermediate.with(Properties.WALL_MOUNT_LOCATION, switch (original.get(Properties.WALL_MOUNT_LOCATION)) {
-        case FLOOR -> WallMountLocation.CEILING;
-        case CEILING -> WallMountLocation.FLOOR;
-        case WALL -> WallMountLocation.WALL;
+    if (original.contains(Properties.BLOCK_FACE)) {
+      intermediate = intermediate.with(Properties.BLOCK_FACE, switch (original.get(Properties.BLOCK_FACE)) {
+        case FLOOR -> BlockFace.CEILING;
+        case CEILING -> BlockFace.FLOOR;
+        case WALL -> BlockFace.WALL;
       });
     }
     return intermediate;

@@ -2,9 +2,10 @@ package pers.solid.ecmd.regionselection;
 
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -40,8 +41,8 @@ public final class WandEvent {
   }
 
   public static ItemStack setWand(ItemStack stack) {
-    stack.getOrCreateNbt().putBoolean("enhanced_commands:region_selection_tool", true);
-    stack.setCustomName(Text.translatable("item.enhanced_commands.region_selection_tool").styled(style -> style.withColor(0xc7f0a2).withItalic(Boolean.FALSE)));
+    NbtComponent.set(DataComponentTypes.CUSTOM_DATA, stack, nbtCompound -> nbtCompound.putBoolean("enhanced_commands:region_selection_tool", true));
+    stack.set(DataComponentTypes.ITEM_NAME, Text.translatable("item.enhanced_commands.region_selection_tool").styled(style -> style.withColor(0xc7f0a2)));
     return stack;
   }
 
@@ -50,7 +51,7 @@ public final class WandEvent {
   }
 
   public static boolean isWand(ItemStack stack) {
-    final NbtCompound nbt = stack.getNbt();
-    return nbt != null && nbt.getBoolean("enhanced_commands:region_selection_tool");
+    final NbtComponent nbtComponent = stack.get(DataComponentTypes.CUSTOM_DATA);
+    return nbtComponent != null && nbtComponent.contains("enhanced_commands:region_selection_tool");
   }
 }

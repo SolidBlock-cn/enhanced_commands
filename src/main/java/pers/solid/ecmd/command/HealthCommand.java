@@ -68,7 +68,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
                 .then(literal("from")
                     .then(literal("result").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
-                      return context.getSource().mergeConsumers((context1, success, result) -> {
+                      return context.getSource().mergeReturnValueConsumers((success, result) -> {
                         for (Entity entity : entities) {
                           if (entity instanceof LivingEntity livingEntity) {
                             livingEntity.setHealth(result);
@@ -78,7 +78,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
                     }))
                     .then(literal("success").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
-                      return context.getSource().mergeConsumers((context1, success, result) -> {
+                      return context.getSource().mergeReturnValueConsumers((success, result) -> {
                         for (Entity entity : entities) {
                           if (entity instanceof LivingEntity livingEntity) {
                             livingEntity.setHealth(success ? 1 : 0);
@@ -94,7 +94,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
                         .then(argument("path", nbtPath())
                             .executes(context -> {
                               final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
-                              return executeSetHealth(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path), path).floatValue());
+                              return executeSetHealth(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path, context.getSource().getRegistryManager()), path).floatValue());
                             }))))))
         .then(literal("add")
             .executes(context -> executeAddHealth(context, Collections.singleton(context.getSource().getEntityOrThrow())))
@@ -126,7 +126,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
       final float health = livingEntity.getHealth();
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(health).styled(Styles.RESULT)), false);
       if (nbtTarget != null && nbtPath != null) {
-        nbtTarget.modifyNbt(nbtPath, NbtFloat.of(health));
+        nbtTarget.modifyNbt(nbtPath, NbtFloat.of(health), context.getSource().getRegistryManager());
       }
       return (int) (health * scale);
     } else {
@@ -142,7 +142,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
       final double result = concentrationType.concentrateFloat(floats);
       CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.get.multiple", floats.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.floatToString(result)).styled(Styles.RESULT)), false);
       if (nbtTarget != null && nbtPath != null) {
-        nbtTarget.modifyNbt(nbtPath, concentrationType.floatToNbt(result));
+        nbtTarget.modifyNbt(nbtPath, concentrationType.floatToNbt(result), context.getSource().getRegistryManager());
       }
       return (int) (result * scale);
     }

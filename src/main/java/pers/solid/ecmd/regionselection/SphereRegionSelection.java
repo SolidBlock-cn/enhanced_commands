@@ -1,6 +1,6 @@
 package pers.solid.ecmd.regionselection;
 
-import net.minecraft.command.CommandException;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -76,9 +76,9 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public SphereRegion buildRegion() {
+  public SphereRegion buildRegion() throws CommandSyntaxException {
     if (center == null || radiusTarget == null) {
-      throw new CommandException(NOT_COMPLETED);
+      throw NOT_COMPLETED.create();
     } else {
       return new SphereRegion(radius, center);
     }

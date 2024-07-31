@@ -1,6 +1,7 @@
 package pers.solid.ecmd.function.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
 public record BypassingPropertyNameFunction(String propertyName, boolean must) implements PropertyNameFunction {
-  public static final Codec<BypassingPropertyNameFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(BypassingPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(BypassingPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(BypassingPropertyNameFunction::must)));
+  public static final MapCodec<BypassingPropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(BypassingPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(BypassingPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(BypassingPropertyNameFunction::must)));
 
   @Override
   public @NotNull String asString() {

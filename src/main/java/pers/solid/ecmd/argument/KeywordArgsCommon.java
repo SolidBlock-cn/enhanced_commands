@@ -45,11 +45,11 @@ public final class KeywordArgsCommon {
   }
 
   private static <T extends Function<CommandRegistryAccess, KeywordArgsArgumentType>> T register(String name, T keywordArgsFunction) {
-    return register(new Identifier(EnhancedCommands.MOD_ID, name), keywordArgsFunction);
+    return register(EnhancedCommands.id(name), keywordArgsFunction);
   }
 
   private static Function<CommandRegistryAccess, KeywordArgsArgumentType> register(String name, KeywordArgsArgumentType keywordArgs) {
-    return register(new Identifier(EnhancedCommands.MOD_ID, name), keywordArgs);
+    return register(EnhancedCommands.id(name), keywordArgs);
   }
 
   public static @Nullable Identifier getId(Function<CommandRegistryAccess, KeywordArgsArgumentType> target) {

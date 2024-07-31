@@ -4,10 +4,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
-import net.minecraft.command.CommandException;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.Parser;
@@ -17,7 +16,7 @@ import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgument> {
   TYPE;
 
-  private static final Codec<Region> CODEC = Codec.of(Encoder.error("Cannot encode"), Decoder.error("Region NBT cannot hold this type of region"));
+  private static final MapCodec<Region> CODEC = MapCodec.assumeMapUnsafe(Codec.of(Encoder.error("Cannot encode"), Decoder.error("Region NBT cannot hold this type of region")));
 
   @Override
   public RegionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
@@ -25,20 +24,14 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgumen
     if (parser.reader.canRead() && parser.reader.peek() == '$') {
       parser.reader.skip();
       parser.suggestionProviders.clear();
-      return source -> {
-        try {
-          return ((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow();
-        } catch (CommandSyntaxException e) {
-          throw new CommandException(Texts.toText(e.getRawMessage()));
-        }
-      };
+      return source -> ((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow();
     } else {
       return null;
     }
   }
 
   @Override
-  public @NotNull Codec<Region> getCodec() {
+  public @NotNull MapCodec<Region> getCodec() {
     return CODEC;
   }
 }

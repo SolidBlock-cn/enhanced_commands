@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
-import net.minecraft.util.Identifier;
 import pers.solid.ecmd.EnhancedCommands;
 
 /**
@@ -36,7 +35,7 @@ public class ModArgumentTypes {
 
   private static <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void register(
       String name, Class<? extends A> clazz, ArgumentSerializer<A, T> serializer) {
-    ArgumentTypeRegistry.registerArgumentType(new Identifier(EnhancedCommands.MOD_ID, name), clazz, serializer);
+    ArgumentTypeRegistry.registerArgumentType(EnhancedCommands.id(name), clazz, serializer);
   }
 
 
@@ -44,6 +43,6 @@ public class ModArgumentTypes {
   private static <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerTrustingType(
       // 此方法用于需要使用特殊泛型的方法，和 register 类似，但是为了在特殊情况下编译通过。
       String name, Class<?> clazz, ArgumentSerializer<A, T> serializer) {
-    ArgumentTypeRegistry.registerArgumentType(new Identifier(EnhancedCommands.MOD_ID, name), (Class<? extends A>) clazz, serializer);
+    ArgumentTypeRegistry.registerArgumentType(EnhancedCommands.id(name), (Class<? extends A>) clazz, serializer);
   }
 }

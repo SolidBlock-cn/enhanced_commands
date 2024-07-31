@@ -96,7 +96,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
       return null;
     }
     blockDisplayEntity.setPosition(Vec3d.of(pos));
-    blockDisplayEntity.setBlockState(state);
+//    blockDisplayEntity.setBlockState(state); todo block display: use AW
     world.spawnEntity(blockDisplayEntity);
     return blockDisplayEntity;
   }

@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -16,7 +16,7 @@ import pers.solid.ecmd.util.EnumOrRandom;
 import pers.solid.ecmd.util.FunctionParamsParser;
 
 public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation) implements BlockFunction {
-  public static final Codec<RotateBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(RotateBlockFunction::new, EnumOrRandom.getCodec(BlockRotation.CODEC, BlockRotation::values).fieldOf("rotation").forGetter(RotateBlockFunction::rotation)));
+  public static final MapCodec<RotateBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RotateBlockFunction::new, EnumOrRandom.getCodec(BlockRotation.CODEC, BlockRotation::values).fieldOf("rotation").forGetter(RotateBlockFunction::rotation)));
 
   @Override
   public @NotNull String asString() {
@@ -37,7 +37,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
     ROTATE_TYPE;
 
     @Override
-    public @NotNull Codec<RotateBlockFunction> getCodec() {
+    public @NotNull MapCodec<RotateBlockFunction> getCodec() {
       return CODEC;
     }
   }

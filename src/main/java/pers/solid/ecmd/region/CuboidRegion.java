@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
@@ -30,7 +31,7 @@ import java.util.function.Function;
  * @param box
  */
 public record CuboidRegion(Box box) implements Region {
-  public static final Codec<CuboidRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(r -> new Vec3d(r.box.minX, r.box.minY, r.box.minZ)), Vec3d.CODEC.fieldOf("to").forGetter(r -> new Vec3d(r.box.maxX, r.box.maxY, r.box.maxZ))).apply(i, CuboidRegion::new));
+  public static final MapCodec<CuboidRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(r -> new Vec3d(r.box.minX, r.box.minY, r.box.minZ)), Vec3d.CODEC.fieldOf("to").forGetter(r -> new Vec3d(r.box.maxX, r.box.maxY, r.box.maxZ))).apply(i, CuboidRegion::new));
 
   /**
    * Create a cuboid region from several coordinates. The comparison is not required because it will be compared in implementation.
@@ -172,8 +173,8 @@ public record CuboidRegion(Box box) implements Region {
     }
 
     @Override
-    public @NotNull Codec<Region> getCodec() {
-      return Codec.BOOL.dispatch("block", r -> r instanceof BlockCuboidRegion, isBlock -> isBlock ? BlockCuboidRegion.CODEC : CuboidRegion.CODEC);
+    public @NotNull MapCodec<Region> getCodec() {
+      return Codec.BOOL.dispatchMap("block", r -> r instanceof BlockCuboidRegion, isBlock -> isBlock ? BlockCuboidRegion.CODEC : CuboidRegion.CODEC);
     }
   }
 

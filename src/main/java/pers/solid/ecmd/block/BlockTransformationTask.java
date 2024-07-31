@@ -134,7 +134,7 @@ public class BlockTransformationTask {
             final BlockPos transformedBlockPos = mutable.set(blockPosTransformer.apply(blockPos));
             transformedStates.put(transformedBlockPos.asLong(), blockStateTransformer.apply(blockState));
             if (cachedBlockPosition.getBlockEntity() != null) {
-              nbts.put(transformedBlockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt());
+              nbts.put(transformedBlockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt(world.getRegistryManager()));
             }
 
             return transformedBlockPos;
@@ -175,7 +175,7 @@ public class BlockTransformationTask {
           final NbtCompound nbtCompound = nbts.get(entry.getLongKey());
           final @Nullable BlockEntity transformedBlockEntity;
           if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(transformedBlockPos)) != null) {
-            transformedBlockEntity.readNbt(nbtCompound);
+            transformedBlockEntity.read(nbtCompound, world.getRegistryManager());
             affected = true;
           }
           if (affected) affectedBlocks++;
@@ -258,7 +258,7 @@ public class BlockTransformationTask {
                     final NbtCompound nbtCompound = nbts.get(i.asLong());
                     final @Nullable BlockEntity transformedBlockEntity;
                     if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(i)) != null) {
-                      transformedBlockEntity.readNbt(nbtCompound);
+                      transformedBlockEntity.read(nbtCompound, world.getRegistryManager());
                       affected = true;
                     }
                     if (affected) affectedBlocks++;

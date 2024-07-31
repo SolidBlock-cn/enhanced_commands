@@ -2,7 +2,7 @@ package pers.solid.ecmd.function.block;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public final class TagBlockFunction implements BlockFunction {
-  public static final Codec<TagBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(TagBlockFunction::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(f -> f.tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", ImmutableList.of()).forGetter(f -> f.properties)));
+  public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("tag").forGetter(f -> f.tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", ImmutableList.of()).forGetter(f -> f.properties)));
   private final @NotNull TagKey<Block> tag;
   private final @NotNull List<PropertyNameFunction> properties;
   private transient Block[] blocks;
@@ -102,7 +102,7 @@ public final class TagBlockFunction implements BlockFunction {
     TAG_TYPE;
 
     @Override
-    public @NotNull Codec<TagBlockFunction> getCodec() {
+    public @NotNull MapCodec<TagBlockFunction> getCodec() {
       return CODEC;
     }
 

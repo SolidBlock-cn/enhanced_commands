@@ -1,6 +1,6 @@
 package pers.solid.ecmd.predicate.property;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -15,12 +15,12 @@ import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 public record ComparisonPropertyPredicate<T extends Comparable<T>>(Property<T> property, Comparator comparator, T value) implements PropertyPredicate<T> {
-  public static com.mojang.serialization.Codec<ComparisonPropertyPredicate<?>> getCodec(Block block) {
-    return CodecUtil.propertyForBlock(block.getStateManager()).dispatch("property", ComparisonPropertyPredicate::property, ComparisonPropertyPredicate::getCodecByProperty);
+  public static MapCodec<ComparisonPropertyPredicate<?>> getCodec(Block block) {
+    return CodecUtil.propertyForBlock(block.getStateManager()).dispatchMap("property", ComparisonPropertyPredicate::property, ComparisonPropertyPredicate::getCodecByProperty);
   }
 
-  private static <T extends Comparable<T>> Codec<ComparisonPropertyPredicate<T>> getCodecByProperty(Property<T> property) {
-    return RecordCodecBuilder.create(i -> i.apply2((comparator, value) -> new ComparisonPropertyPredicate<>(property, comparator, value),
+  private static <T extends Comparable<T>> MapCodec<ComparisonPropertyPredicate<T>> getCodecByProperty(Property<T> property) {
+    return RecordCodecBuilder.mapCodec(i -> i.apply2((comparator, value) -> new ComparisonPropertyPredicate<>(property, comparator, value),
         Comparator.FIELD_CODEC.forGetter(ComparisonPropertyPredicate::comparator),
         property.getCodec().fieldOf("value").forGetter(ComparisonPropertyPredicate::value)));
   }

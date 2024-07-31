@@ -2,13 +2,16 @@ package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -42,55 +45,12 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 public enum FoodCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(literalR2("food")
-        .executes(context -> executeGetAll(context, Collections.singleton(context.getSource().getPlayerOrThrow()), null))
-        .then(literal("get")
-            .executes(context -> executeGetAll(context, Collections.singleton(context.getSource().getPlayerOrThrow()), null))
-            .then(argument("players", players())
-                .executes(context -> executeGetAll(context, getPlayers(context, "players"), ConcentrationType.AVERAGE))
-                .then(argument("concentration_type", concentrationType())
-                    .executes(context -> executeGetAll(context, getPlayers(context, "players"), getConcentrationType(context, "concentration_type"))))))
-        .then(literal("setfood")
-            .then(argument("players", players())
-                .then(argument("food", integer())
-                    .executes(context -> executeSetFood(context, getPlayers(context, "players"), getInteger(context, "food")))
-                    .then(argument("saturation", floatArg())
-                        .executes(context -> executeSetFoodAndSaturation(context, getPlayers(context, "players"), getInteger(context, "food"), getFloat(context, "saturation")))))))
-        .then(literal("setsaturation")
-            .then(argument("players", players())
-                .then(argument("saturation", floatArg())
-                    .executes(context -> executeSetSaturation(context, getPlayers(context, "players"), getFloat(context, "saturation"))))))
-        .then(literal("setexhaustion")
-            .then(argument("players", players())
-                .then(argument("exhaustion", floatArg())
-                    .executes(context -> executeSetExhaustion(context, getPlayers(context, "players"), getFloat(context, "exhaustion"))))))
-        .then(literal("add")
-            .executes(context -> executeAddToMax(context, Collections.singleton(context.getSource().getPlayerOrThrow())))
-            .then(argument("players", players())
-                .executes(context -> executeAddToMax(context, getPlayers(context, "players")))
-                .then(argument("food", integer())
-                    .executes(context -> executeAdd(context, getPlayers(context, "players"), getInteger(context, "food"), 0))
-                    .then(argument("saturation_modifier", floatArg())
-                        .executes(context -> executeAdd(context, getPlayers(context, "players"), getInteger(context, "food"), getFloat(context, "saturation_modifier")))))
-                .then(literal("item")
-                    .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))
-                    .then(argument("item", itemStack(registryAccess))
-                        .executes(context -> executeAddFromFood(context, getPlayers(context, "players"), getItemStackArgument(context, "item").createStack(1, false)))))
-                .then(literal("from")
-                    .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))
-                    .then(argument("slot", itemSlot())
-                        .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), getItemSlot(context, "slot")))))))
-        .then(literal("tick")
-            .executes(context -> executeTick(context, Collections.singleton(context.getSource().getPlayerOrThrow()), 1))
-            .then(argument("players", players())
-                .executes(context -> executeTick(context, getPlayers(context, "players"), 1))
-                .then(argument("times", integer(0, 32767))
-                    .executes(context -> executeTick(context, getPlayers(context, "players"), getInteger(context, "times")))))));
-  }
+  public static final DynamicCommandExceptionType ADD_FROM_NOT_FOOD = new DynamicCommandExceptionType(stackName -> Text.translatable("enhanced_commands.commands.food.add_from.not_food", stackName));
+  public static final Dynamic2CommandExceptionType ADD_FROM_HAND_NOT_FOOD = new Dynamic2CommandExceptionType((playerName, stackName) -> Text.translatable("enhanced_commands.commands.food.add_from_hand.not_food", playerName, stackName));
+  public static final DynamicCommandExceptionType ADD_FROM_HAND_NONE_FOOD = new DynamicCommandExceptionType(playersSize -> TextUtil.enhancedTranslatable(("enhanced_commands.commands.food.add_from_hand.none_food"), playersSize));
+  public static final DynamicCommandExceptionType ADD_FROM_NONE_FOOD = new DynamicCommandExceptionType(playersSize -> TextUtil.enhancedTranslatable(("enhanced_commands.commands.food.add_from.none_food"), playersSize));
 
-  public static int executeGetAll(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, ConcentrationType concentrationType) {
+  public static int executeGetAll(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, ConcentrationType concentrationType) throws CommandSyntaxException {
     final int size = players.size();
     if (size == 1) {
       final PlayerEntity player = players.iterator().next();
@@ -103,12 +63,15 @@ public enum FoodCommand implements CommandRegistrationCallback {
       final IntList foodLevels = new IntArrayList(size);
       final FloatList saturationLevels = new FloatArrayList(size);
       final FloatList exhaustionLevels = new FloatArrayList(size);
+      final double food = concentrationType.concentrateInt(foodLevels);
+      final double saturation = concentrationType.concentrateFloat(saturationLevels);
+      final double exhaustion = concentrationType.concentrateFloat(exhaustionLevels);
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.get.multiple",
           TextUtil.literal(size).styled(Styles.TARGET),
           concentrationType.getDisplayName(),
-          Text.literal(concentrationType.longToString(concentrationType.concentrateInt(foodLevels))).styled(Styles.RESULT),
-          Text.literal(concentrationType.floatToString(concentrationType.concentrateFloat(saturationLevels))).styled(Styles.RESULT),
-          Text.literal(concentrationType.floatToString(concentrationType.concentrateFloat(exhaustionLevels))).styled(Styles.RESULT)
+          Text.literal(concentrationType.longToString(food)).styled(Styles.RESULT),
+          Text.literal(concentrationType.floatToString(saturation)).styled(Styles.RESULT),
+          Text.literal(concentrationType.floatToString(exhaustion)).styled(Styles.RESULT)
       ), false);
     }
     return size;
@@ -197,13 +160,13 @@ public enum FoodCommand implements CommandRegistrationCallback {
     return size;
   }
 
-  public static int executeAddFromFood(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, ItemStack stack) {
+  public static int executeAddFromFood(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, ItemStack stack) throws CommandSyntaxException {
     final int size = players.size();
     for (PlayerEntity player : players) {
-      player.getHungerManager().eat(stack.getItem(), stack);
+      player.getHungerManager().eat(stack.get(DataComponentTypes.FOOD));
     }
-    if (!stack.isFood()) {
-      throw new CommandException(Text.translatable("enhanced_commands.commands.food.add_from.not_food", stack.getName()));
+    if (!stack.contains(DataComponentTypes.FOOD)) {
+      throw ADD_FROM_NOT_FOOD.create(stack.getName());
     }
     if (size == 1) {
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_food.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
@@ -213,17 +176,17 @@ public enum FoodCommand implements CommandRegistrationCallback {
     return size;
   }
 
-  public static int executeAddFromSlot(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, int slot) {
+  public static int executeAddFromSlot(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, int slot) throws CommandSyntaxException {
     final int size = players.size();
     if (size == 1) {
       final PlayerEntity player = players.iterator().next();
       final ItemStack stack = slot == -1 ? player.getMainHandStack() : player.getInventory().getStack(slot);
-      player.getHungerManager().eat(stack.getItem(), stack);
-      if (!stack.isFood()) {
+      player.getHungerManager().eat(stack.get(DataComponentTypes.FOOD));
+      if (!stack.contains(DataComponentTypes.FOOD)) {
         if (slot == -1) {
-          throw new CommandException(Text.translatable("enhanced_commands.commands.food.add_from_hand.not_food", player, stack.getName()));
+          throw ADD_FROM_HAND_NOT_FOOD.create(player.getDisplayName(), stack.getName());
         } else {
-          throw new CommandException(Text.translatable("enhanced_commands.commands.food.add_from.not_food", stack.getName()));
+          throw ADD_FROM_NOT_FOOD.create(stack.getName());
         }
       }
       if (slot == -1) {
@@ -236,14 +199,14 @@ public enum FoodCommand implements CommandRegistrationCallback {
       int successes = 0;
       for (PlayerEntity player : players) {
         final ItemStack stack = slot == -1 ? player.getMainHandStack() : player.getInventory().getStack(slot);
-        player.getHungerManager().eat(stack.getItem(), stack);
-        if (stack.isFood()) successes++;
+        player.getHungerManager().eat(stack.get(DataComponentTypes.FOOD));
+        if (stack.contains(DataComponentTypes.FOOD)) successes++;
       }
       if (successes == 0) {
         if (slot == -1) {
-          throw new CommandException(TextUtil.enhancedTranslatable("enhanced_commands.commands.food.add_from_hand.none_food", players.size()));
+          throw ADD_FROM_HAND_NONE_FOOD.create(players.size());
         } else {
-          throw new CommandException(TextUtil.enhancedTranslatable("enhanced_commands.commands.food.add_from.none_food", players.size()));
+          throw ADD_FROM_NONE_FOOD.create(players.size());
         }
       }
       int finalSuccesses = successes;
@@ -254,6 +217,54 @@ public enum FoodCommand implements CommandRegistrationCallback {
       }
       return successes;
     }
+  }
+
+  @Override
+  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    dispatcher.register(literalR2("food")
+        .executes(context -> executeGetAll(context, Collections.singleton(context.getSource().getPlayerOrThrow()), null))
+        .then(literal("get")
+            .executes(context -> executeGetAll(context, Collections.singleton(context.getSource().getPlayerOrThrow()), null))
+            .then(argument("players", players())
+                .executes(context -> executeGetAll(context, getPlayers(context, "players"), ConcentrationType.AVERAGE))
+                .then(argument("concentration_type", concentrationType())
+                    .executes(context -> executeGetAll(context, getPlayers(context, "players"), getConcentrationType(context, "concentration_type"))))))
+        .then(literal("setfood")
+            .then(argument("players", players())
+                .then(argument("food", integer())
+                    .executes(context -> executeSetFood(context, getPlayers(context, "players"), getInteger(context, "food")))
+                    .then(argument("saturation", floatArg())
+                        .executes(context -> executeSetFoodAndSaturation(context, getPlayers(context, "players"), getInteger(context, "food"), getFloat(context, "saturation")))))))
+        .then(literal("setsaturation")
+            .then(argument("players", players())
+                .then(argument("saturation", floatArg())
+                    .executes(context -> executeSetSaturation(context, getPlayers(context, "players"), getFloat(context, "saturation"))))))
+        .then(literal("setexhaustion")
+            .then(argument("players", players())
+                .then(argument("exhaustion", floatArg())
+                    .executes(context -> executeSetExhaustion(context, getPlayers(context, "players"), getFloat(context, "exhaustion"))))))
+        .then(literal("add")
+            .executes(context -> executeAddToMax(context, Collections.singleton(context.getSource().getPlayerOrThrow())))
+            .then(argument("players", players())
+                .executes(context -> executeAddToMax(context, getPlayers(context, "players")))
+                .then(argument("food", integer())
+                    .executes(context -> executeAdd(context, getPlayers(context, "players"), getInteger(context, "food"), 0))
+                    .then(argument("saturation_modifier", floatArg())
+                        .executes(context -> executeAdd(context, getPlayers(context, "players"), getInteger(context, "food"), getFloat(context, "saturation_modifier")))))
+                .then(literal("item")
+                    .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))
+                    .then(argument("item", itemStack(registryAccess))
+                        .executes(context -> executeAddFromFood(context, getPlayers(context, "players"), getItemStackArgument(context, "item").createStack(1, false)))))
+                .then(literal("from")
+                    .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))
+                    .then(argument("slot", itemSlot())
+                        .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), getItemSlot(context, "slot")))))))
+        .then(literal("tick")
+            .executes(context -> executeTick(context, Collections.singleton(context.getSource().getPlayerOrThrow()), 1))
+            .then(argument("players", players())
+                .executes(context -> executeTick(context, getPlayers(context, "players"), 1))
+                .then(argument("times", integer(0, 32767))
+                    .executes(context -> executeTick(context, getPlayers(context, "players"), getInteger(context, "times")))))));
   }
 
   private int executeTick(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, int times) {

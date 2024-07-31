@@ -3,6 +3,7 @@ package pers.solid.ecmd.predicate.block;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import joptsimple.internal.Strings;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -22,7 +23,7 @@ import java.util.List;
 public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPredicate) implements BlockPredicate {
   public static final Text ABOVE_BLOCK = Text.translatable("enhanced_commands.block_predicate.above_block");
   public static final Text BENEATH_BLOCK = Text.translatable("enhanced_commands.block_predicate.beneath_block");
-  public static final Codec<HorizontalOffsetBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(HorizontalOffsetBlockPredicate::new, Codec.INT.fieldOf("offset").forGetter(HorizontalOffsetBlockPredicate::offset), BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(HorizontalOffsetBlockPredicate::blockPredicate)));
+  public static final MapCodec<HorizontalOffsetBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(HorizontalOffsetBlockPredicate::new, Codec.INT.fieldOf("offset").forGetter(HorizontalOffsetBlockPredicate::offset), BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(HorizontalOffsetBlockPredicate::blockPredicate)));
 
   @Override
   public @NotNull String asString() {
@@ -65,7 +66,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     HORIZONTAL_OFFSET_TYPE;
 
     @Override
-    public @NotNull Codec<HorizontalOffsetBlockPredicate> getCodec() {
+    public @NotNull MapCodec<HorizontalOffsetBlockPredicate> getCodec() {
       return CODEC;
     }
 

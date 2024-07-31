@@ -2,7 +2,7 @@ package pers.solid.ecmd.function.property;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -15,8 +15,8 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import java.util.Set;
 
 public record AllRandomPropertyFunction(@NotNull Set<Property<?>> except) implements GeneralPropertyFunction {
-  public static Codec<AllRandomPropertyFunction> getCodec(Block block) {
-    return RecordCodecBuilder.create(i -> i.ap(AllRandomPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllRandomPropertyFunction::except)));
+  public static MapCodec<AllRandomPropertyFunction> getCodec(Block block) {
+    return RecordCodecBuilder.mapCodec(i -> i.ap(AllRandomPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", ImmutableSet.of()).forGetter(AllRandomPropertyFunction::except)));
   }
 
   @Override

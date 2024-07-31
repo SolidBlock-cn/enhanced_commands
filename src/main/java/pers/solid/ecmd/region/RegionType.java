@@ -1,17 +1,16 @@
 package pers.solid.ecmd.region;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.FunctionParamsParser;
 
 public interface RegionType<R extends Region> {
-  RegistryKey<Registry<RegionType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(new Identifier(EnhancedCommands.MOD_ID, "region_type"));
+  RegistryKey<Registry<RegionType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region_type"));
   Registry<RegionType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
 
   /**
@@ -36,5 +35,5 @@ public interface RegionType<R extends Region> {
   }
 
   @NotNull
-  Codec<R> getCodec();
+  MapCodec<R> getCodec();
 }

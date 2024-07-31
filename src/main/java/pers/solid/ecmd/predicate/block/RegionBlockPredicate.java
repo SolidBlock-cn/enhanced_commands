@@ -1,7 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -17,7 +17,7 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record RegionBlockPredicate(Region region) implements BlockPredicate {
-  public static final Codec<RegionBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(RegionBlockPredicate::new, Region.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
+  public static final MapCodec<RegionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RegionBlockPredicate::new, Region.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
 
   @Override
   public @NotNull String asString() {
@@ -45,7 +45,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
     REGION_TYPE;
 
     @Override
-    public @NotNull Codec<RegionBlockPredicate> getCodec() {
+    public @NotNull MapCodec<RegionBlockPredicate> getCodec() {
       return CODEC;
     }
   }

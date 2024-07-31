@@ -91,7 +91,7 @@ public class EntitySelectorReaderExtras {
   }
 
   public void addPredicateAndDescription(EntityPredicateEntry predicateDescription) {
-    self.setPredicate(predicateDescription);
+    self.addPredicate(predicateDescription);
     addDescription(predicateDescription);
   }
 

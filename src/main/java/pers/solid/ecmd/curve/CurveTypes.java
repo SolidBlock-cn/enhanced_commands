@@ -2,7 +2,6 @@ package pers.solid.ecmd.curve;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
 import pers.solid.ecmd.EnhancedCommands;
 
 public final class CurveTypes {
@@ -13,7 +12,7 @@ public final class CurveTypes {
   }
 
   public static <T extends CurveType<?>> T register(T curveType, String name) {
-    return Registry.register(CurveType.REGISTRY, new Identifier(EnhancedCommands.MOD_ID, name), curveType);
+    return Registry.register(CurveType.REGISTRY, EnhancedCommands.id(name), curveType);
   }
 
   public static void init() {

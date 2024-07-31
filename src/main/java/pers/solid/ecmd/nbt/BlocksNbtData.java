@@ -6,9 +6,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -17,8 +19,8 @@ import java.util.function.Function;
 
 public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtSource, NbtTarget {
   @Override
-  public <T> Collection<T> getNbts(Function<NbtCompound, T> mappingFunction) throws CommandSyntaxException {
-    return blockEntities.stream().map(BlockEntity::createNbtWithIdentifyingData).map(mappingFunction).collect(ImmutableList.toImmutableList());
+  public <T> Collection<T> getNbts(Function<NbtCompound, T> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
+    return blockEntities.stream().map(blockEntity -> blockEntity.createNbtWithIdentifyingData(registryLookup)).map(mappingFunction).collect(ImmutableList.toImmutableList());
   }
 
   @Override
@@ -32,18 +34,18 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrat
   }
 
   @Override
-  public void setNbt(NbtCompound nbt) {
+  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
     for (BlockEntity blockEntity : blockEntities) {
-      blockEntity.readNbt(nbt);
+      blockEntity.read(nbt, registryLookup);
       blockEntity.markDirty();
       blockEntity.getWorld().updateListeners(blockEntity.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_ALL);
     }
   }
 
   @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator) throws CommandSyntaxException {
+  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     for (BlockEntity blockEntity : blockEntities) {
-      blockEntity.readNbt(operator.apply(blockEntity.createNbtWithIdentifyingData()));
+      blockEntity.read(operator.apply(blockEntity.createNbtWithIdentifyingData(registryLookup)), registryLookup);
       blockEntity.markDirty();
       blockEntity.getWorld().updateListeners(blockEntity.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_ALL);
     }

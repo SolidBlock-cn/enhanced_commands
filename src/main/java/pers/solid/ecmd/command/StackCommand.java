@@ -14,7 +14,6 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -121,11 +120,13 @@ public enum StackCommand implements CommandRegistrationCallback {
     return executeStackInDirection(RegionArgumentType.getRegion(context, "region"), direction, stackAmount, keywordArgs, context);
   }
 
+  public static final SimpleCommandExceptionType UNSUPPORTED_BOX = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.stack.unsupported_box"));
+
   public static int executeStackInDirection(Region region, Direction direction, int stackAmount, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final BlockBox blockBox = region.minContainingBlockBox();
     final int offsetAmount;
     if (blockBox == null) {
-      throw new CommandException(Text.translatable("enhanced_commands.commands.stack.unsupported_box"));
+      throw UNSUPPORTED_BOX.create();
     } else if (!keywordArgs.getBoolean("absolute")) {
       final Direction.Axis axis = direction.getAxis();
       offsetAmount = axis.choose(blockBox.getMaxX(), blockBox.getMaxY(), blockBox.getMaxZ()) - axis.choose(blockBox.getMinX(), blockBox.getMinY(), blockBox.getMinZ()) + 1 + keywordArgs.getInt("gap");
@@ -196,7 +197,7 @@ public enum StackCommand implements CommandRegistrationCallback {
           if (transformOnly == null || transformOnly.test(cachedBlockPosition)) {
             sourceStates.put(blockPos.asLong(), cachedBlockPosition.getBlockState());
             if (cachedBlockPosition.getBlockEntity() != null) {
-              sourceBlockEntities.put(blockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt());
+              sourceBlockEntities.put(blockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt(world.getRegistryManager()));
             }
           }
           return null;
@@ -249,7 +250,7 @@ public enum StackCommand implements CommandRegistrationCallback {
               if (blockEntity != null) {
                 final NbtCompound nbtCompound = sourceBlockEntities.get(entry.getLongKey());
                 if (nbtCompound != null) {
-                  blockEntity.readNbt(nbtCompound);
+                  blockEntity.read(nbtCompound, world.getRegistryManager());
                   modofied = true;
                 }
               }

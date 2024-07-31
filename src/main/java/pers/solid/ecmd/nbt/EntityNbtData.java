@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntityDataObject;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -20,12 +21,12 @@ public record EntityNbtData(EntityDataObject entityDataObject) implements NbtSou
   }
 
   @Override
-  public void setNbt(NbtCompound nbt) throws CommandSyntaxException {
+  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     entityDataObject.setNbt(nbt);
   }
 
   @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator) throws CommandSyntaxException {
+  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     entityDataObject.setNbt(operator.apply(entityDataObject.getNbt()));
   }
 

@@ -1,18 +1,19 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.StonecuttingRecipe;
+import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.BlockPos;
@@ -26,7 +27,7 @@ import pers.solid.ecmd.util.StateUtil;
 import java.util.List;
 
 public record StonecutBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
-  public static final Codec<StonecutBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(StonecutBlockFunction::function)));
+  public static final MapCodec<StonecutBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(StonecutBlockFunction::function)));
 
   @Override
   public @NotNull String asString() {
@@ -40,11 +41,11 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     if (item == Items.AIR) {
       return blockState;
     }
-    final List<StonecuttingRecipe> allMatches = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SimpleInventory(item.getDefaultStack()), world);
+    final List<RecipeEntry<StonecuttingRecipe>> allMatches = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SingleStackRecipeInput(item.getDefaultStack()), world);
     if (allMatches.isEmpty()) {
       return blockState;
     }
-    final ItemStack output = allMatches.get(world.getRandom().nextInt(allMatches.size())).getOutput(world.getRegistryManager());
+    final ItemStack output = allMatches.get(world.getRandom().nextInt(allMatches.size())).value().getResult(world.getRegistryManager());
     if (output.getItem() instanceof BlockItem blockItem) {
       BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), world.getRandom());
       for (Property<?> property : result.getProperties()) {
@@ -75,7 +76,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     STONE_CUT_TYPE;
 
     @Override
-    public @NotNull Codec<StonecutBlockFunction> getCodec() {
+    public @NotNull MapCodec<StonecutBlockFunction> getCodec() {
       return CODEC;
     }
   }

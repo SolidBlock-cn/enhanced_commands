@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
@@ -25,7 +26,7 @@ import pers.solid.ecmd.util.TestResult;
  *   </ul>
  */
 public record RandBlockPredicate(float probability, @NotNull BlockPredicate predicate) implements BlockPredicate {
-  public static final Codec<RandBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.apply2(RandBlockPredicate::new, Codec.FLOAT.fieldOf("probability").forGetter(RandBlockPredicate::probability), BlockPredicate.CODEC.optionalFieldOf("predicate", ConstantBlockPredicate.ALWAYS_TRUE).forGetter(RandBlockPredicate::predicate)));
+  public static final MapCodec<RandBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RandBlockPredicate::new, Codec.FLOAT.fieldOf("probability").forGetter(RandBlockPredicate::probability), BlockPredicate.CODEC.optionalFieldOf("predicate", ConstantBlockPredicate.ALWAYS_TRUE).forGetter(RandBlockPredicate::predicate)));
 
   @Override
   public @NotNull String asString() {
@@ -67,7 +68,7 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
     RAND_TYPE;
 
     @Override
-    public @NotNull Codec<RandBlockPredicate> getCodec() {
+    public @NotNull MapCodec<RandBlockPredicate> getCodec() {
       return CODEC;
     }
   }

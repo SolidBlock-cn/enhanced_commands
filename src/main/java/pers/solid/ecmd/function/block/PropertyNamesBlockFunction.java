@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> functions) implements BlockFunction {
-  public static final Codec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::functions)));
+  public static final MapCodec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::functions)));
 
   @Override
   public @NotNull String asString() {
@@ -46,7 +46,7 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
     PROPERTY_NAMES_TYPE;
 
     @Override
-    public @NotNull Codec<PropertyNamesBlockFunction> getCodec() {
+    public @NotNull MapCodec<PropertyNamesBlockFunction> getCodec() {
       return CODEC;
     }
 

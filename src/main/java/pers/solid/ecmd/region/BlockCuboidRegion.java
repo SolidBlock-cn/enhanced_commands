@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
@@ -17,7 +18,7 @@ import java.util.function.Function;
  * <p>In any case, a block cuboid region has a min volume of 1, which means the two corners are a same block position.
  */
 public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements IntBackedRegion {
-  public static final Codec<BlockCuboidRegion> CODEC = RecordCodecBuilder.create(i -> i.group(
+  public static final MapCodec<BlockCuboidRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.INT.fieldOf("minX").forGetter(BlockCuboidRegion::minX),
       Codec.INT.fieldOf("minY").forGetter(BlockCuboidRegion::minY),
       Codec.INT.fieldOf("minZ").forGetter(BlockCuboidRegion::minZ),

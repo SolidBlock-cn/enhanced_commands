@@ -1,6 +1,7 @@
 package pers.solid.ecmd.function.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateManager;
@@ -50,9 +51,9 @@ public interface PropertyNameFunction extends ExpressionConvertible {
     public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
 
     private final String name;
-    private final com.mojang.serialization.Codec<? extends PropertyNameFunction> codec;
+    private final MapCodec<? extends PropertyNameFunction> codec;
 
-    Type(String name, com.mojang.serialization.Codec<? extends PropertyNameFunction> codec) {
+    Type(String name, MapCodec<? extends PropertyNameFunction> codec) {
       this.name = name;
       this.codec = codec;
     }

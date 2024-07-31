@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -14,8 +15,8 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 public record ExistencePropertyPredicate<T extends Comparable<T>>(Property<T> property, boolean exists) implements PropertyPredicate<T> {
-  public static com.mojang.serialization.Codec<ExistencePropertyPredicate<?>> getCodec(Block block) {
-    return RecordCodecBuilder.create(i -> i.apply2(ExistencePropertyPredicate::new, CodecUtil.propertyForBlock(block.getStateManager()).fieldOf("property").forGetter(ExistencePropertyPredicate::property), Codec.BOOL.optionalFieldOf("exists", false).forGetter(ExistencePropertyPredicate::exists)));
+  public static MapCodec<ExistencePropertyPredicate<?>> getCodec(Block block) {
+    return RecordCodecBuilder.mapCodec(i -> i.apply2(ExistencePropertyPredicate::new, CodecUtil.propertyForBlock(block.getStateManager()).fieldOf("property").forGetter(ExistencePropertyPredicate::property), Codec.BOOL.optionalFieldOf("exists", false).forGetter(ExistencePropertyPredicate::exists)));
   }
 
   @Override

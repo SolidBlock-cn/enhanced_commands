@@ -4,9 +4,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.predicate.NumberRange;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -24,7 +26,7 @@ public interface EntitySelectorAccessor {
   UUID getUuid();
 
   @Invoker
-  Predicate<Entity> callGetPositionPredicate(Vec3d pos);
+  Predicate<Entity> callGetPositionPredicate(Vec3d pos, @Nullable Box box, @Nullable FeatureSet enabledFeatures);
 
   @Accessor
   Function<Vec3d, Vec3d> getPositionOffset();
@@ -36,5 +38,8 @@ public interface EntitySelectorAccessor {
   Box getBox();
 
   @Accessor
-  NumberRange.FloatRange getDistance();
+  NumberRange.DoubleRange getDistance();
+
+  @Invoker
+  Box callGetOffsetBox(Vec3d offset);
 }

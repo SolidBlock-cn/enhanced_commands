@@ -7,7 +7,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.*;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -25,7 +24,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
   Codec<Region> CODEC = RegionType.REGISTRY.getCodec().dispatch(Region::getType, RegionType::getCodec);
 
   static @NotNull Region fromNbt(@NotNull NbtElement nbtElement) {
-    return Util.getResult(CODEC.decode(NbtOps.INSTANCE, nbtElement), IllegalArgumentException::new).getFirst();
+    return CODEC.decode(NbtOps.INSTANCE, nbtElement).getOrThrow().getFirst();
   }
 
   @SuppressWarnings("unchecked")

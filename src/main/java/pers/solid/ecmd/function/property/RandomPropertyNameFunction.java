@@ -1,17 +1,18 @@
 package pers.solid.ecmd.function.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.math.random.Random;
-import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public record RandomPropertyNameFunction(String propertyName, boolean must) implements PropertyNameFunction {
-  public static final Codec<RandomPropertyNameFunction> CODEC = RecordCodecBuilder.create(i -> i.apply2(RandomPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(RandomPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(RandomPropertyNameFunction::must)));
+  public static final MapCodec<RandomPropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RandomPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(RandomPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(RandomPropertyNameFunction::must)));
 
   @Override
   public @NotNull String asString() {
@@ -34,7 +35,7 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
 
   private <T extends Comparable<T>> BlockState getModifiedStateForProperty(BlockState blockState, Property<T> property) {
     final List<T> values = List.copyOf(property.getValues());
-    return blockState.with(property, values.get(RandomUtils.nextInt(0, values.size())));
+    return blockState.with(property, values.get(ThreadLocalRandom.current().nextInt(values.size())));
   }
 
 }

@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) implements BlockFunction {
-  public static final Codec<MirrorBlockFunction> CODEC = RecordCodecBuilder.create(i -> i.ap(MirrorBlockFunction::new, EnumOrRandom.getCodec(BlockMirror.CODEC, BlockMirror::values).fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
+  public static final MapCodec<MirrorBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(MirrorBlockFunction::new, EnumOrRandom.getCodec(BlockMirror.CODEC, BlockMirror::values).fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
 
   @Override
   public @NotNull String asString() {
@@ -43,7 +43,7 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
     MIRROR_TYPE;
 
     @Override
-    public @NotNull Codec<MirrorBlockFunction> getCodec() {
+    public @NotNull MapCodec<MirrorBlockFunction> getCodec() {
       return CODEC;
     }
   }

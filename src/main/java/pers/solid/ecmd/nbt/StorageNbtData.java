@@ -5,6 +5,7 @@ import net.minecraft.command.DataCommandStorage;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.function.FailableFunction;
@@ -22,13 +23,13 @@ public record StorageNbtData(DataCommandStorage dataCommandStorage, Identifier i
   }
 
   @Override
-  public void setNbt(NbtCompound nbt) {
+  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
     dataCommandStorage.set(id, nbt);
   }
 
   @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator) throws CommandSyntaxException {
-    setNbt(operator.apply(getNbt()));
+  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    setNbt(operator.apply(getNbt()), registryLookup);
   }
 
   @Override

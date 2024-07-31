@@ -51,7 +51,7 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
     } else {
       final int cursorBeforeParse = parser.reader.getCursor();
       final String s = parser.reader.readUnquotedString();
-      Optional<E> optional = codec instanceof Codec<E> codec1 ? Optional.ofNullable(codec1.byId(s)) : codec.parse(JsonOps.INSTANCE, new JsonPrimitive(s)).result();
+      Optional<E> optional = codec instanceof EnumCodec<E> codec1 ? Optional.ofNullable(codec1.byId(s)) : codec.parse(JsonOps.INSTANCE, new JsonPrimitive(s)).result();
       return of(optional.orElseThrow(() -> {
         parser.reader.setCursor(cursorBeforeParse);
         return INVALID_ENUM_EXCEPTION.createWithContext(parser.reader, s);

@@ -332,8 +332,8 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       // 先尝试读取 NumberRange
       final int cursorBeforeRange = reader.getCursor();
       try {
-        final NumberRange.FloatRange parsedRange = NumberRange.FloatRange.parse(reader);
-        if (parsedRange.getMin() != null && !parsedRange.getMin().equals(parsedRange.getMax())) {
+        final NumberRange.DoubleRange parsedRange = NumberRange.DoubleRange.parse(reader);
+        if (parsedRange.min().isPresent() && !parsedRange.min().equals(parsedRange.max())) {
           return new RangeNbtPredicate(parsedRange, isNegated);
         } else {
           reader.setCursor(cursorBeforeRange);

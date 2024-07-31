@@ -155,7 +155,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   /**
    * 根据读取到的增强的参数类型，应用相应的特殊的限制。例如，读取到 {@code @f} 时，设置 {@code limit=1,sort=furthest}。
    */
-  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicate:Ljava/util/function/Predicate;", shift = At.Shift.AFTER))
+  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;", shift = At.Shift.AFTER))
   private void appendAdditionalLimitations(CallbackInfo ci) {
     final String atVariable = ec$ext.atVariable;
     if (EntitySelectorTypeExtras.EXTRA_LIMITS.containsKey(atVariable)) {
@@ -192,7 +192,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   /**
    * 在没有读取玩所有的实体选择器类型之前，不需要急于提供方括号的建议，只有已经完全输入后，再提供方括号的建议。
    */
-  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicate:Ljava/util/function/Predicate;"), to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;skip()V")))
+  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;"), to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;skip()V")))
   private void modifiedSetSuggestOpen(CallbackInfo ci) {
     suggestionProvider = (builder, consumer) -> suggestSelectorRest(builder.createOffset(ec$ext.cursorBeforeOptionName), consumer).thenCombine(suggestOpen(builder, consumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
   }

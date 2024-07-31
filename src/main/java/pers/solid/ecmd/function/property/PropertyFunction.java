@@ -1,6 +1,7 @@
 package pers.solid.ecmd.function.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
@@ -47,9 +48,9 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
     public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
 
     private final String name;
-    private final Function<Block, com.mojang.serialization.Codec<? extends PropertyFunction<?>>> codecFunction;
+    private final Function<Block, MapCodec<? extends PropertyFunction<?>>> codecFunction;
 
-    Type(String name, Function<Block, com.mojang.serialization.Codec<? extends PropertyFunction<?>>> codecFunction) {
+    Type(String name, Function<Block, MapCodec<? extends PropertyFunction<?>>> codecFunction) {
       this.name = name;
       this.codecFunction = codecFunction;
     }
@@ -59,7 +60,7 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
       return name;
     }
 
-    public com.mojang.serialization.Codec<? extends PropertyFunction<?>> getCodec(Block block) {
+    public MapCodec<? extends PropertyFunction<?>> getCodec(Block block) {
       return codecFunction.apply(block);
     }
   }

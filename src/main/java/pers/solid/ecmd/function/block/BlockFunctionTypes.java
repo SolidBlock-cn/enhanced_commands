@@ -5,7 +5,6 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.FunctionParamsParser;
@@ -50,7 +49,7 @@ public final class BlockFunctionTypes {
     if (value != SimpleBlockFunction.Type.SIMPLE_TYPE && value instanceof Parser<?> parser) {
       PARSERS.add((Parser<BlockFunctionArgument>) parser);
     }
-    return Registry.register(BlockFunctionType.REGISTRY, new Identifier(EnhancedCommands.MOD_ID, name), value);
+    return Registry.register(BlockFunctionType.REGISTRY, EnhancedCommands.id(name), value);
   }
 
   public static void init() {

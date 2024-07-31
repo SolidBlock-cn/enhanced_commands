@@ -4,6 +4,7 @@ import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
@@ -22,7 +23,7 @@ import java.util.function.Function;
 
 public record SphereRegion(double radius, Vec3d center) implements Region {
   public static final SimpleCommandExceptionType EXPAND_FAILED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.sphere_cannot_expand"));
-  public static final Codec<SphereRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(SphereRegion::radius), Vec3d.CODEC.fieldOf("center").forGetter(SphereRegion::center)).apply(i, SphereRegion::new));
+  public static final MapCodec<SphereRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(SphereRegion::radius), Vec3d.CODEC.fieldOf("center").forGetter(SphereRegion::center)).apply(i, SphereRegion::new));
 
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
@@ -98,7 +99,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     }
 
     @Override
-    public @NotNull Codec<SphereRegion> getCodec() {
+    public @NotNull MapCodec<SphereRegion> getCodec() {
       return CODEC;
     }
   }

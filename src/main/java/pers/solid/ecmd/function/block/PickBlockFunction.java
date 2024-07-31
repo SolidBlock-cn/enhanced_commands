@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.block.BlockState;
@@ -22,7 +22,6 @@ import pers.solid.ecmd.util.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
  */
 public interface PickBlockFunction extends BlockFunction {
   SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.pick.zero_sum"));
-  Codec<PickBlockFunction> CODEC = Codec.<PickBlockFunction, Uniform>either(Codec.BOOL.dispatch("weighted", f -> f instanceof Weighted, b -> b ? Weighted.CODEC : Uniform.CODEC), Uniform.CODEC).xmap(ei -> ei.map(Function.identity(), Function.identity()), Either::left);
+  MapCodec<PickBlockFunction> CODEC = Codec.BOOL.dispatchMap("weighted", f -> f instanceof Weighted, b -> b ? Weighted.CODEC : Uniform.CODEC);
 
   @Override
   default @NotNull BlockFunctionType<PickBlockFunction> getType() {
@@ -48,7 +47,7 @@ public interface PickBlockFunction extends BlockFunction {
     PICK_TYPE;
 
     @Override
-    public @NotNull Codec<PickBlockFunction> getCodec() {
+    public @NotNull MapCodec<PickBlockFunction> getCodec() {
       return CODEC;
     }
   }
@@ -57,7 +56,7 @@ public interface PickBlockFunction extends BlockFunction {
    * 多个方块函数具有相等的权重。这种情况下可以最快地产生。
    */
   record Uniform(List<BlockFunction> functions) implements PickBlockFunction {
-    public static final Codec<Uniform> CODEC = RecordCodecBuilder.create(i -> i.ap(Uniform::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(Uniform::functions)));
+    public static final MapCodec<Uniform> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(Uniform::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(Uniform::functions)));
 
     @Override
     public @NotNull String asString() {
@@ -76,7 +75,7 @@ public interface PickBlockFunction extends BlockFunction {
    */
   record Weighted(List<ObjectDoublePair<BlockFunction>> pairs) implements PickBlockFunction {
     public static final Codec<ObjectDoublePair<BlockFunction>> PAIR_CODEC = RecordCodecBuilder.create(j -> j.apply2(ObjectDoublePair::of, BlockFunction.CODEC.fieldOf("function").forGetter(ObjectDoublePair::left), Codec.DOUBLE.optionalFieldOf("probability", 1d).forGetter(ObjectDoublePair::rightDouble)));
-    public static final Codec<Weighted> CODEC = RecordCodecBuilder.create(i -> i.ap(Weighted::new, PAIR_CODEC.listOf().fieldOf("pairs").forGetter(Weighted::pairs)));
+    public static final MapCodec<Weighted> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(Weighted::new, PAIR_CODEC.listOf().fieldOf("pairs").forGetter(Weighted::pairs)));
 
     @Override
     public @NotNull String asString() {

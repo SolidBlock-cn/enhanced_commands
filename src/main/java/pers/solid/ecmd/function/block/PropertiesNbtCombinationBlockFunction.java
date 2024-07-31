@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.block;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base, @Nullable PropertyNamesBlockFunction properties, @Nullable NbtBlockFunction nbt) implements BlockFunction {
-  public static final Codec<PropertiesNbtCombinationBlockFunction> CODEC = RecordCodecBuilder.<Triple<BlockFunction, Optional<PropertyNamesBlockFunction>, Optional<NbtBlockFunction>>>mapCodec(i -> i.apply3(Triple::of,
+  public static final MapCodec<PropertiesNbtCombinationBlockFunction> CODEC = RecordCodecBuilder.<Triple<BlockFunction, Optional<PropertyNamesBlockFunction>, Optional<NbtBlockFunction>>>mapCodec(i -> i.apply3(Triple::of,
       BlockFunction.CODEC.fieldOf("base").forGetter(Triple::getLeft),
       CodecUtil.optionalField("properties", PropertyNameFunction.CODEC.listOf()).xmap(o -> o.map(PropertyNamesBlockFunction::new), o -> o.map(PropertyNamesBlockFunction::functions)).forGetter(Triple::getMiddle),
       CodecUtil.optionalField("nbt", CompoundNbtFunction.CODEC).xmap(o -> o.map(NbtBlockFunction::new), o -> o.map(NbtBlockFunction::nbtFunction)).forGetter(Triple::getRight))).flatXmap(triple -> {
@@ -32,7 +32,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
     } catch (IllegalArgumentException e) {
       return DataResult.error(e::getMessage);
     }
-  }, f -> DataResult.success(Triple.of(f.base, Optional.ofNullable(f.properties), Optional.ofNullable(f.nbt)))).codec();
+  }, f -> DataResult.success(Triple.of(f.base, Optional.ofNullable(f.properties), Optional.ofNullable(f.nbt))));
 
   @Contract(value = "_, null, null -> fail", pure = true)
   public PropertiesNbtCombinationBlockFunction {
@@ -73,7 +73,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
     PROPERTIES_NBT_COMBINATION_TYPE;
 
     @Override
-    public @NotNull Codec<PropertiesNbtCombinationBlockFunction> getCodec() {
+    public @NotNull MapCodec<PropertiesNbtCombinationBlockFunction> getCodec() {
       return CODEC;
     }
   }

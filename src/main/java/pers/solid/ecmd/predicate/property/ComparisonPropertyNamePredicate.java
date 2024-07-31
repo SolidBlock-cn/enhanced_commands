@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -15,7 +16,7 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record ComparisonPropertyNamePredicate(String propertyName, Comparator comparator, String valueName) implements PropertyNamePredicate {
-  public static final Codec<ComparisonPropertyNamePredicate> CODEC = RecordCodecBuilder.create(i -> i.apply3(ComparisonPropertyNamePredicate::new,
+  public static final MapCodec<ComparisonPropertyNamePredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(ComparisonPropertyNamePredicate::new,
       Codec.STRING.fieldOf("property").forGetter(ComparisonPropertyNamePredicate::propertyName),
       Comparator.FIELD_CODEC.forGetter(ComparisonPropertyNamePredicate::comparator),
       Codec.STRING.fieldOf("value").forGetter(ComparisonPropertyNamePredicate::valueName)));

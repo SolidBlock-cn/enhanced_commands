@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.RegistryEntryArgumentType;
+import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -57,7 +57,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
             .then(argument("type", omittedRegistryEntry(registryAccess, RegionSelectionType.REGISTRY_KEY))
                 .executes(context -> {
                   final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
-                  final RegistryEntry.Reference<RegionSelectionType> registryEntry = RegistryEntryArgumentType.getRegistryEntry(context, "type", RegionSelectionType.REGISTRY_KEY);
+                  final RegistryEntry.Reference<RegionSelectionType> registryEntry = RegistryEntryReferenceArgumentType.getRegistryEntry(context, "type", RegionSelectionType.REGISTRY_KEY);
                   final RegionSelectionType type = registryEntry.value();
                   ((ServerPlayerEntityExtension) player).ec$switchRegionSelectionType(type);
                   CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.regionselection.changed", TextUtil.literal(registryEntry.registryKey().getValue()).styled(Styles.RESULT)), true);

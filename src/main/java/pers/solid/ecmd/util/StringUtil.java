@@ -18,17 +18,17 @@ public final class StringUtil {
   }
 
   public static <T extends Number> String wrapRange(NumberRange<T> numberRange) {
-    final var min = numberRange.getMin();
-    final var max = numberRange.getMax();
-    if (min != null && min.equals(max)) {
+    final var min = numberRange.min();
+    final var max = numberRange.max();
+    if (min.isPresent() && min.equals(max)) {
       return min.toString();
     }
     return Objects.toString(min, "") + ".." + Objects.toString(max, "");
   }
 
   public static String wrapRange(FloatRangeArgument numberRange) {
-    final var min = numberRange.getMin();
-    final var max = numberRange.getMax();
+    final var min = numberRange.min();
+    final var max = numberRange.max();
     if (min != null && min.equals(max)) {
       return min.toString();
     }

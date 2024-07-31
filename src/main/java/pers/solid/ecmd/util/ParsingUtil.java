@@ -31,7 +31,7 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.mixin.TextSerializerAccessor;
+import pers.solid.ecmd.mixin.JsonReaderUtilsAccessor;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.io.IOException;
@@ -273,7 +273,7 @@ public final class ParsingUtil {
    * 通过反射的方式，从 {@link JsonReader} 中读取位置信息。
    */
   public static int getPos(@NotNull JsonReader jsonReader) {
-    return TextSerializerAccessor.invokeGetPosition(jsonReader) - 1;
+    return JsonReaderUtilsAccessor.invokeGetPos(jsonReader) - 1;
   }
 
   public static <T> T parseJson(StringReader reader, FailableFunction<JsonReader, T, JsonParseException> readFunction, DynamicCommandExceptionType exceptionType) throws CommandSyntaxException {

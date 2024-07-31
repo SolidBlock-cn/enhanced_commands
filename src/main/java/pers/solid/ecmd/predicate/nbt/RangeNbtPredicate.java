@@ -21,7 +21,7 @@ public record RangeNbtPredicate(NumberRange<?> numberRange, boolean negated) imp
   public boolean test(@NotNull NbtElement nbtElement) {
     if (!(nbtElement instanceof final AbstractNbtNumber nbtNumber))
       return negated;
-    if (numberRange instanceof NumberRange.FloatRange floatRange) {
+    if (numberRange instanceof NumberRange.DoubleRange floatRange) {
       return floatRange.test(nbtNumber.doubleValue()) != negated;
     } else if (numberRange instanceof NumberRange.IntRange intRange) {
       return intRange.test(nbtNumber.intValue()) != negated;

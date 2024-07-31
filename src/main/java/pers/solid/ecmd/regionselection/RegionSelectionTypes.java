@@ -1,7 +1,6 @@
 package pers.solid.ecmd.regionselection;
 
 import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.Validate;
 import pers.solid.ecmd.EnhancedCommands;
 
@@ -14,7 +13,7 @@ public final class RegionSelectionTypes {
   }
 
   private static <T extends RegionSelectionType> T register(T regionBuilder, String name) {
-    return Registry.register(RegionSelectionType.REGISTRY, new Identifier(EnhancedCommands.MOD_ID, name), regionBuilder);
+    return Registry.register(RegionSelectionType.REGISTRY, EnhancedCommands.id(name), regionBuilder);
   }
 
   public static void init() {

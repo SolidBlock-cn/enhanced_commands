@@ -1,6 +1,6 @@
 package pers.solid.ecmd.function.block;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -17,7 +17,7 @@ import pers.solid.ecmd.util.ParsingUtil;
 public enum UseOriginalBlockFunction implements BlockFunction {
   USE_ORIGINAL;
 
-  public static final Codec<UseOriginalBlockFunction> CODEC = Codec.unit(USE_ORIGINAL);
+  public static final MapCodec<UseOriginalBlockFunction> CODEC = MapCodec.unit(USE_ORIGINAL);
 
   @Override
   public @NotNull String asString() {
@@ -38,7 +38,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     USE_ORIGINAL_TYPE;
 
     @Override
-    public @NotNull Codec<UseOriginalBlockFunction> getCodec() {
+    public @NotNull MapCodec<UseOriginalBlockFunction> getCodec() {
       return CODEC;
     }
 

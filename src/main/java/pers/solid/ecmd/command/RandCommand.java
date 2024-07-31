@@ -167,6 +167,7 @@ public enum RandCommand implements CommandRegistrationCallback {
     return node;
   }
 
+  @SuppressWarnings("unchecked")
   private static @Nullable FailableConsumer<NbtElement, CommandSyntaxException> optionalNbtConsumer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final Map<String, ParsedArgument<ServerCommandSource, ?>> arguments = ((CommandContextAccessor<ServerCommandSource>) context).getArguments();
     if (arguments.containsKey("target") && arguments.containsKey("path")) {

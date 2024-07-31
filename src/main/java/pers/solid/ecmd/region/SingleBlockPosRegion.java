@@ -3,7 +3,7 @@ package pers.solid.ecmd.region;
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
-  public static final Codec<SingleBlockPosRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Vec3i.CODEC.fieldOf("pos").forGetter(SingleBlockPosRegion::pos)).apply(i, SingleBlockPosRegion::new));
+  public static final MapCodec<SingleBlockPosRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3i.CODEC.fieldOf("pos").forGetter(SingleBlockPosRegion::pos)).apply(i, SingleBlockPosRegion::new));
 
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
@@ -82,7 +82,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     }
 
     @Override
-    public @NotNull Codec<SingleBlockPosRegion> getCodec() {
+    public @NotNull MapCodec<SingleBlockPosRegion> getCodec() {
       return CODEC;
     }
   }

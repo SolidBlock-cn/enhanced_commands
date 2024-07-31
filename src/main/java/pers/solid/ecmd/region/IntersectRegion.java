@@ -2,7 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public record IntersectRegion(@NotNull List<Region> regions) implements RegionsBasedRegion<IntersectRegion, Region> {
-  public static final Codec<IntersectRegion> CODEC = RecordCodecBuilder.create(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, IntersectRegion::new));
+  public static final MapCodec<IntersectRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, IntersectRegion::new));
 
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
@@ -114,7 +114,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public @NotNull Codec<IntersectRegion> getCodec() {
+    public @NotNull MapCodec<IntersectRegion> getCodec() {
       return CODEC;
     }
   }

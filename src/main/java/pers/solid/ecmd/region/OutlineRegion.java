@@ -1,7 +1,6 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
@@ -21,7 +20,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public record OutlineRegion(OutlineType outlineType, Region region) implements RegionBasedRegion<OutlineRegion, Region> {
-  public static final Codec<OutlineRegion> CODEC = RecordCodecBuilder.create(i -> i.group(OutlineType.OUTLINE_TYPE_FIELD.forGetter(OutlineRegion::outlineType), Region.CODEC.fieldOf("region").forGetter(OutlineRegion::region)).apply(i, OutlineRegion::new));
+  public static final MapCodec<OutlineRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(OutlineType.OUTLINE_TYPE_FIELD.forGetter(OutlineRegion::outlineType), Region.CODEC.fieldOf("region").forGetter(OutlineRegion::region)).apply(i, OutlineRegion::new));
 
   public static Region of(Region region, OutlineType outlineType) throws CommandSyntaxException {
     try {
@@ -137,7 +136,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
       }
     };
 
-    public static final Codec<OutlineType> CODEC = StringIdentifiable.createCodec(OutlineType::values);
+    public static final EnumCodec<OutlineType> CODEC = StringIdentifiable.createCodec(OutlineType::values);
     public static final MapCodec<OutlineType> OUTLINE_TYPE_FIELD = OutlineType.CODEC.optionalFieldOf("outline_type").xmap(o -> o.orElse(OutlineType.OUTLINE), Optional::of);
     private final String name;
 
@@ -180,7 +179,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public @NotNull Codec<OutlineRegion> getCodec() {
+    public @NotNull MapCodec<OutlineRegion> getCodec() {
       return CODEC;
     }
   }

@@ -5,6 +5,8 @@ import net.minecraft.predicate.entity.EntityEffectPredicate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
+import java.util.Optional;
+
 @Mixin(EntityEffectPredicate.EffectData.class)
 public interface EffectDataAccessor {
   @Accessor
@@ -14,9 +16,9 @@ public interface EffectDataAccessor {
   NumberRange.IntRange getDuration();
 
   @Accessor
-  Boolean getAmbient();
+  Optional<Boolean> getAmbient();
 
   @Accessor
-  Boolean getVisible();
+  Optional<Boolean> getVisible();
 
 }

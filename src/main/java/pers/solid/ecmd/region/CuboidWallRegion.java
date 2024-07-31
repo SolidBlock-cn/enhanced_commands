@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -14,7 +15,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implements RegionBasedRegion.IntBacked<CuboidWallRegion, BlockCuboidRegion> {
-  public static final Codec<CuboidWallRegion> CODEC = RecordCodecBuilder.create(i -> i.group(BlockCuboidRegion.CODEC.fieldOf("region").forGetter(CuboidWallRegion::region), Codec.INT.optionalFieldOf("thickness", 1).forGetter(CuboidWallRegion::thickness)).apply(i, CuboidWallRegion::new));
+  public static final MapCodec<CuboidWallRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockCuboidRegion.CODEC.fieldOf("region").forGetter(CuboidWallRegion::region), Codec.INT.optionalFieldOf("thickness", 1).forGetter(CuboidWallRegion::thickness)).apply(i, CuboidWallRegion::new));
 
   public CuboidWallRegion {
     if (thickness <= 0) {
@@ -123,7 +124,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     }
 
     @Override
-    public @NotNull Codec<CuboidWallRegion> getCodec() {
+    public @NotNull MapCodec<CuboidWallRegion> getCodec() {
       return CODEC;
     }
   }

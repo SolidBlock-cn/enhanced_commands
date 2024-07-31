@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.RegistryEntryArgumentType;
+import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registry;
@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 
 public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, RegistryWrapper<T> registryWrapper, RegistryKey<? extends Registry<T>> registryRef) implements ArgumentType<RegistryEntry.Reference<T>> {
   public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull String omittedNamespace, @NotNull CommandRegistryAccess commandRegistryAccess, @NotNull RegistryKey<? extends Registry<T>> registryRef) {
-    return new OmittedRegistryEntryArgumentType<>(omittedNamespace, commandRegistryAccess.createWrapper(registryRef), registryRef);
+    return new OmittedRegistryEntryArgumentType<>(omittedNamespace, commandRegistryAccess.getWrapperOrThrow(registryRef), registryRef);
   }
 
   public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull CommandRegistryAccess commandRegistryAccess, @NotNull RegistryKey<? extends Registry<T>> registryRef) {
@@ -48,9 +48,9 @@ public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, Regis
     Identifier identifier;
     try {
       if (StringUtils.contains(string, Identifier.NAMESPACE_SEPARATOR)) {
-        identifier = new Identifier(string);
+        identifier = Identifier.of(string);
       } else {
-        identifier = new Identifier(omittedNamespace, string);
+        identifier = Identifier.of(omittedNamespace, string);
       }
     } catch (InvalidIdentifierException var4) {
       reader.setCursor(i);
@@ -61,7 +61,7 @@ public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, Regis
     if (optional.isPresent()) {
       return optional.get();
     } else {
-      throw RegistryEntryArgumentType.NOT_FOUND_EXCEPTION.create(identifier, this.registryRef.getValue());
+      throw RegistryEntryReferenceArgumentType.NOT_FOUND_EXCEPTION.create(identifier, this.registryRef.getValue());
     }
   }
 

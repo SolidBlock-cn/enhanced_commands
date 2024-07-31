@@ -1,6 +1,6 @@
 package pers.solid.ecmd.function.block;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -23,7 +23,7 @@ import pers.solid.ecmd.util.StateUtil;
  * 此方块函数可以产生任意的方块的任意方块状态，无论其原先的方块是什么。
  */
 public final class RandomBlockFunction implements BlockFunction {
-  public static final Codec<RandomBlockFunction> CODEC = Codec.unit(RandomBlockFunction::new);
+  public static final MapCodec<RandomBlockFunction> CODEC = MapCodec.unit(RandomBlockFunction::new);
   private transient FeatureSet featureSet;
   private transient Block[] blocks;
 
@@ -80,7 +80,7 @@ public final class RandomBlockFunction implements BlockFunction {
     RANDOM_TYPE;
 
     @Override
-    public @NotNull Codec<RandomBlockFunction> getCodec() {
+    public @NotNull MapCodec<RandomBlockFunction> getCodec() {
       return CODEC;
     }
 

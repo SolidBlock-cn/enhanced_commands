@@ -1,6 +1,5 @@
 package pers.solid.ecmd.predicate.entity;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -101,7 +100,7 @@ public final class EntitySelectorTypeExtras {
     map.put(FURTHEST_NON_PLAYER, excludesPlayersConsumer);
     map.put(RANDOM_NON_PLAYER, excludesPlayersConsumer);
     map.put(RANDOM_NON_PLAYER2, excludesPlayersConsumer);
-    map.put(ALL_INCLUDING_DEAD, reader -> ((EntitySelectorReaderAccessor) reader).setPredicate(Predicates.alwaysTrue()));
+    map.put(ALL_INCLUDING_DEAD, reader -> ((EntitySelectorReaderAccessor) reader).getPredicates().clear());
     map.put(PETS, reader -> EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> {
       final Entity sender = source.getEntityOrThrow();
       return new OwnerEntityPredicateEntry(entity -> entity == sender, false);

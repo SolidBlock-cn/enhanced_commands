@@ -1,7 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * @see TagBlockPredicate#properties
  */
 public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate> predicates) implements BlockPredicate {
-  public static final Codec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.create(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
+  public static final MapCodec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
 
   @Override
   public @NotNull String asString() {
@@ -73,7 +73,7 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     PROPERTY_NAMES_TYPE;
 
     @Override
-    public @NotNull Codec<PropertiesNamesBlockPredicate> getCodec() {
+    public @NotNull MapCodec<PropertiesNamesBlockPredicate> getCodec() {
       return CODEC;
     }
 

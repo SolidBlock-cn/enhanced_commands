@@ -1,6 +1,7 @@
 package pers.solid.ecmd.argument;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Codec;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;

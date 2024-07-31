@@ -38,7 +38,7 @@ public enum DirectionArgument implements StringIdentifiable, Function<@NotNull S
   RANDOM_HORIZONTAL("random_horizontal", source -> Direction.Type.HORIZONTAL.random(source.getWorld().getRandom())),
   RANDOM_VERTICAL("random_vertical", source -> Direction.Type.VERTICAL.random(source.getWorld().getRandom()));
 
-  public static final Codec<DirectionArgument> CODEC = StringIdentifiable.createCodec(DirectionArgument::values);
+  public static final EnumCodec<DirectionArgument> CODEC = StringIdentifiable.createCodec(DirectionArgument::values);
   private final String name;
   private final Function<ServerCommandSource, Direction> function;
 

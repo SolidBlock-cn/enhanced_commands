@@ -5,13 +5,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.predicate.NumberRange;
 import net.minecraft.predicate.entity.EntityEffectPredicate;
-import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import pers.solid.ecmd.mixin.EffectDataAccessor;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.*;
@@ -21,7 +17,7 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
   public boolean test(Entity entity) {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return false;
-    }
+    }/* // todo complete
     final var actualEffects = livingEntity.getActiveStatusEffects();
     for (final var entry : effects.entrySet()) {
       final StatusEffect statusEffect = entry.getKey();
@@ -29,7 +25,7 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
       if (entry.getValue().test(statusEffectInstance) == inverted.contains(statusEffect)) {
         return false;
       }
-    }
+    }*/
     return true;
   }
 
@@ -38,11 +34,11 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
-    final var actualEffects = livingEntity.getActiveStatusEffects();
+    final Map<RegistryEntry<StatusEffect>, StatusEffectInstance> actualEffects = livingEntity.getActiveStatusEffects();
     boolean result = true;
     final List<TestResult> attachments = new ArrayList<>();
-
-    for (final var entry : effects.entrySet()) {
+/* // todo complete effect
+    for (final Map.Entry<StatusEffect, EntityEffectPredicate.EffectData> entry : effects.entrySet()) {
       final StatusEffect statusEffect = entry.getKey();
       StatusEffectInstance statusEffectInstance = actualEffects.get(statusEffect);
       final var testResult = entry.getValue().test(statusEffectInstance);
@@ -50,7 +46,7 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
       final var passes = testResult != isInverted;
       result &= passes;
 
-      final EffectDataAccessor accessor = (EffectDataAccessor) entry.getValue();
+      final EffectDataAccessor accessor = (EffectDataAccessor) (Object) entry.getValue();
       if (accessor.getAmplifier().isDummy() && accessor.getDuration().isDummy() && accessor.getAmbient() == null && accessor.getVisible() == null) {
         if (testResult) {
           attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.true_dummy", displayName, statusEffect.getName())));
@@ -66,7 +62,7 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
           attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.false_advanced_no_effect", displayName, statusEffect.getName())));
         }
       }
-    }
+    }*/
     if (result) {
       return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.effect.pass", displayName), attachments);
     } else {
@@ -76,12 +72,12 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
 
   @Override
   public String toOptionEntry() {
-    final StringJoiner joiner = new StringJoiner(", ", "{", "}");
+    final StringJoiner joiner = new StringJoiner(", ", "{", "}");/* // todo complete
     for (var entry : effects.entrySet()) {
       final StatusEffect statusEffect = entry.getKey();
       final Identifier id = Registries.STATUS_EFFECT.getId(statusEffect);
       final EntityEffectPredicate.EffectData effectData = entry.getValue();
-      final EffectDataAccessor accessor = (EffectDataAccessor) effectData;
+      final EffectDataAccessor accessor = (EffectDataAccessor) (Object) effectData;
       final StringJoiner joiner2 = new StringJoiner(", ", "{", "}");
       final NumberRange.IntRange amplifier = accessor.getAmplifier();
       boolean dummy = true;
@@ -110,7 +106,7 @@ public record EffectsEntityPredicateEntry(Map<StatusEffect, EntityEffectPredicat
       } else {
         joiner.add(id + " = " + (inverted.contains(statusEffect) ? "!" : "") + joiner2);
       }
-    }
+    }*/
 
     return joiner.toString();
   }

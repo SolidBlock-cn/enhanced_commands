@@ -34,7 +34,7 @@ public enum EntitySelectorCollector implements StringIdentifiable {
   /**
    * 使用拴绳拴住了此实体的实体，类似于 {@code /execute on leasher}。
    */
-  LEASHER("leasher", source -> source.getEntityOrThrow() instanceof MobEntity mobEntity ? stream(mobEntity.getHoldingEntity()) : Stream.of()),
+  LEASHER("leasher", source -> source.getEntityOrThrow() instanceof MobEntity mobEntity ? stream(mobEntity.getLeashHolder()) : Stream.of()),
   /**
    * 实体的来源，例如抛出了该珍珠的玩家，类似于 {@code /execute on origin}。
    */

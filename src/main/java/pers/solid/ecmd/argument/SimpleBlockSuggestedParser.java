@@ -52,13 +52,13 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
   public SimpleBlockSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
     super(reader);
     this.commandRegistryAccess = commandRegistryAccess;
-    this.registryWrapper = commandRegistryAccess.createWrapper(RegistryKeys.BLOCK);
+    this.registryWrapper = commandRegistryAccess.getWrapperOrThrow(RegistryKeys.BLOCK);
   }
 
   public SimpleBlockSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader, List<SuggestionProvider> suggestionProviders) {
     super(reader, suggestionProviders);
     this.commandRegistryAccess = commandRegistryAccess;
-    this.registryWrapper = commandRegistryAccess.createWrapper(RegistryKeys.BLOCK);
+    this.registryWrapper = commandRegistryAccess.getWrapperOrThrow(RegistryKeys.BLOCK);
   }
 
   protected static <T extends Comparable<T>> void suggestValuesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder) {

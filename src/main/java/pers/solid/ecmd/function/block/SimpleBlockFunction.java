@@ -1,8 +1,7 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.base.Functions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
-  public static final Codec<SimpleBlockFunction> CODEC = Registries.BLOCK.createEntryCodec().dispatch("block", Functions.compose(Block::getRegistryEntry, SimpleBlockFunction::block), block -> RecordCodecBuilder.create(i -> i.ap(properties -> new SimpleBlockFunction(block.value(), properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block.value()).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
+  public static final MapCodec<SimpleBlockFunction> CODEC = Registries.BLOCK.getCodec().dispatchMap("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
 
   @Override
   public @NotNull String asString() {
@@ -57,7 +56,7 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
     SIMPLE_TYPE;
 
     @Override
-    public @NotNull Codec<SimpleBlockFunction> getCodec() {
+    public @NotNull MapCodec<SimpleBlockFunction> getCodec() {
       return CODEC;
     }
 

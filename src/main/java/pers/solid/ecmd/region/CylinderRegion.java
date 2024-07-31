@@ -3,6 +3,7 @@ package pers.solid.ecmd.region;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
@@ -21,7 +22,7 @@ import java.util.stream.Stream;
 
 public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius, @Range(from = 0, to = Long.MAX_VALUE) double height, Vec3d center) implements Region {
   public static final SimpleCommandExceptionType MUST_EXPAND_VERTICALLY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.cylinder_must_expand_vertically"));
-  public static final Codec<CylinderRegion> CODEC = RecordCodecBuilder.create(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CylinderRegion::radius), Codec.DOUBLE.fieldOf("height").forGetter(CylinderRegion::height), Vec3d.CODEC.fieldOf("center").forGetter(CylinderRegion::center)).apply(i, CylinderRegion::new));
+  public static final MapCodec<CylinderRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CylinderRegion::radius), Codec.DOUBLE.fieldOf("height").forGetter(CylinderRegion::height), Vec3d.CODEC.fieldOf("center").forGetter(CylinderRegion::center)).apply(i, CylinderRegion::new));
 
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
@@ -149,7 +150,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
 
     @Override
-    public @NotNull Codec<CylinderRegion> getCodec() {
+    public @NotNull MapCodec<CylinderRegion> getCodec() {
       return CODEC;
     }
   }

@@ -15,7 +15,8 @@ public record NbtMatchingEntityPredicateEntry(NbtCompound nbtCompound, boolean h
     if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
       ItemStack itemStack = serverPlayerEntity.getInventory().getMainHandStack();
       if (!itemStack.isEmpty()) {
-        actualNbt.put("SelectedItem", itemStack.writeNbt(new NbtCompound()));
+        // check the usage here
+//        actualNbt.put("SelectedItem", itemStack.writeNbt(new NbtCompound()));
       }
     }
     boolean matches = NbtHelper.matches(nbtCompound, actualNbt, true);
