@@ -90,9 +90,9 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
     return c;
   }
 
-  @Inject(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setEntityType(Lnet/minecraft/entity/EntityType;)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-  private void setImplicitEntityType(CallbackInfo ci, int i, char c) {
-    if (c != 'a') {
+  @Inject(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setEntityType(Lnet/minecraft/entity/EntityType;)V"))
+  private void setImplicitEntityType(CallbackInfo ci) {
+    if (!"a".equals(ec$ext.atVariable)) {
       ec$ext.implicitEntityType = true;
       ec$ext.implicitNonPlayers = true;
     }
@@ -194,7 +194,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
    */
   @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;"), to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;skip()V")))
   private void modifiedSetSuggestOpen(CallbackInfo ci) {
-    suggestionProvider = (builder, consumer) -> suggestSelectorRest(builder.createOffset(ec$ext.cursorBeforeOptionName), consumer).thenCombine(suggestOpen(builder, consumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
+    suggestionProvider = (builder, consumer) -> suggestSelectorRest(builder /* todo 检查此处的 cursor */, consumer).thenCombine(suggestOpen(builder, consumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
   }
 
   @ModifyExpressionValue(method = "readAtVariable", at = @At(value = "INVOKE", target = "Ljava/lang/String;valueOf(C)Ljava/lang/String;"))

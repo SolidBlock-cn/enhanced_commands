@@ -13,7 +13,6 @@ import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.server.command.LocateCommand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 
@@ -21,10 +20,6 @@ import java.util.function.Function;
 
 @Mixin(LocateCommand.class)
 public abstract class LocateCommandMixin {
-  @Shadow
-  private static String getKeyString(Pair<BlockPos, ? extends RegistryEntry<?>> result) {
-    return null;
-  }
 
   /**
    * 此方法用于对 {@link EnhancedEntryPredicate.AnyOf} 进行特殊处理，因为其返回的 {@link EnhancedEntryPredicate.AnyOf#getEntry()} 方法无法正常使用，需要特殊处理，故使用共享值并返回 null。
@@ -47,7 +42,7 @@ public abstract class LocateCommandMixin {
   private static <T> Object wrappedMap(Either<RegistryEntry.Reference<T>, RegistryEntryList.Named<T>> instance, Function<? super RegistryEntry.Reference<T>, ? extends T> l, Function<? super RegistryEntryList.Named<T>, ? extends T> r, Operation<String> original, @Share("special_predicate") LocalRef<EnhancedEntryPredicate.AnyOf<T>> anyOfShare, @Local(argsOnly = true) Pair<BlockPos, ? extends RegistryEntry<?>> result) {
     final EnhancedEntryPredicate.AnyOf<T> get = anyOfShare.get();
     if (get != null) {
-      return get.asString() + " (" + getKeyString(result) + ")";
+      return get.asString() + " (" + result.getSecond().getIdAsString() + ")";
     } else {
       return original.call(instance, l, r);
     }

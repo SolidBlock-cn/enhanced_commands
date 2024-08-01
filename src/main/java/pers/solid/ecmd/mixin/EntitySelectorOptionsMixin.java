@@ -4,7 +4,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -95,7 +95,7 @@ public abstract class EntitySelectorOptionsMixin {
    * 在抛出 {@link EntitySelectorOptions#INAPPLICABLE_OPTION_EXCEPTION} 前，重置 cursor 为整个 propertyName 的部分。
    */
   @ModifyArg(method = "getHandler", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorOptions;INAPPLICABLE_OPTION_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;"), to = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorOptions;UNKNOWN_OPTION_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")), index = 0)
-  private static ImmutableStringReader tweakInapplicableException(ImmutableStringReader reader, @Local(argsOnly = true) int restoreCursor, @Local LocalIntRef cursorEnd) {
+  private static ImmutableStringReader tweakInapplicableException(ImmutableStringReader reader, @Local(argsOnly = true) int restoreCursor, @Local(argsOnly = true) LocalIntRef cursorEnd) {
     cursorEnd.set(reader.getCursor());
     ((StringReader) reader).setCursor(restoreCursor);
     return reader;
@@ -105,7 +105,7 @@ public abstract class EntitySelectorOptionsMixin {
    * 在抛出 {@link EntitySelectorOptions#INAPPLICABLE_OPTION_EXCEPTION} 前，重置 cursorEnd 为整个 propertyName 的后面。
    */
   @ModifyExpressionValue(method = "getHandler", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorOptions;INAPPLICABLE_OPTION_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;"), to = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorOptions;UNKNOWN_OPTION_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
-  private static CommandSyntaxException tweakInapplicableException2(CommandSyntaxException commandSyntaxException, @Local int cursorEnd) {
+  private static CommandSyntaxException tweakInapplicableException2(CommandSyntaxException commandSyntaxException, @Local(argsOnly = true) int cursorEnd) {
     return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorEnd);
   }
 
@@ -135,7 +135,7 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @ModifyExpressionValue(method = "getHandler", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorOptions;UNKNOWN_OPTION_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
-  private static CommandSyntaxException tweakUnknownOptionException(CommandSyntaxException commandSyntaxException, @Local String option) {
+  private static CommandSyntaxException tweakUnknownOptionException(CommandSyntaxException commandSyntaxException, @Local(argsOnly = true) String option) {
     return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, commandSyntaxException.getCursor() + option.length());
   }
 
@@ -216,7 +216,7 @@ public abstract class EntitySelectorOptionsMixin {
   /**
    * 当使用 {@code @p} 时，limit 的值应该允许为负值，从而表示选择最远的实体。
    */
-  @Inject(method = "method_9969", at = @At(value = "INVOKE_ASSIGN", target = "Lcom/mojang/brigadier/StringReader;setCursor(I)V", remap = false))
+  @Inject(method = "method_9969", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;setCursor(I)V", remap = false))
   private static void acceptsImplicitNegativeLimit(EntitySelectorReader reader, CallbackInfo ci, @Local(ordinal = 0) int cursor, @Local(ordinal = 1) LocalIntRef readInt) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.allowNegativeDistanceForNearest) {
       return;
@@ -248,8 +248,8 @@ public abstract class EntitySelectorOptionsMixin {
   /**
    * 修改 "gamemode" 的值的建议，使之接受本模组中的扩展的游戏模式名称。
    */
-  @Inject(method = "method_9946", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;buildFuture()Ljava/util/concurrent/CompletableFuture;", shift = At.Shift.BEFORE))
-  private static void suggestMoreGamemodes(EntitySelectorReader entitySelectorReader, SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local(ordinal = 0) String stringxx, @Local(ordinal = 0) boolean blxx, @Local(ordinal = 1) boolean bl2) {
+  @Inject(method = "method_9946", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;values()[Lnet/minecraft/world/GameMode;", shift = At.Shift.BEFORE))
+  private static void suggestMoreGamemodes(EntitySelectorReader entitySelectorReader, SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local(ordinal = 0) String stringxx, @Local(ordinal = 0) boolean blx, @Local(ordinal = 1) boolean bl2) {
     if (!EntitySelectorParsingConfig.CURRENT.acceptGameModeAlias) {
       return;
     }
@@ -258,7 +258,7 @@ public abstract class EntitySelectorOptionsMixin {
         if (bl2) {
           builder.suggest("!" + name);
         }
-        if (blxx) {
+        if (blx) {
           builder.suggest(name);
         }
       }
