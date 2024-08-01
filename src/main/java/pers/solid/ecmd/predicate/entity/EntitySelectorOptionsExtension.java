@@ -56,6 +56,8 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.mixins.ext.EntitySelectorReaderExtension;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
@@ -64,8 +66,6 @@ import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
@@ -602,14 +602,14 @@ public class EntitySelectorOptionsExtension {
   }
 
   private static boolean markParamAsUsed(EntitySelectorReader reader, String option, boolean inverted) {
-    return ((EntitySelectorReaderExtension) reader).ec$getExt().usedParams.put(option, inverted);
+    return ((EntitySelectorReaderExtension) reader).extension$ec().usedParams.put(option, inverted);
   }
 
   /**
    * 参数从未被以非反向的方式使用过。如果参数是以反向的方式使用的，则没有影响。
    */
   private static boolean isNeverPositivelyUsed(EntitySelectorReader reader, String option) {
-    return ((EntitySelectorReaderExtension) reader).ec$getExt().usedParams.getOrDefault(option, true);
+    return ((EntitySelectorReaderExtension) reader).extension$ec().usedParams.getOrDefault(option, true);
   }
 
   /**
@@ -619,7 +619,7 @@ public class EntitySelectorOptionsExtension {
    */
   @Contract(pure = true)
   private static void checkNoInversionMix(EntitySelectorReader reader, String option, boolean inverted) throws CommandSyntaxException {
-    final EntitySelectorReaderExtras extras = ((EntitySelectorReaderExtension) reader).ec$getExt();
+    final EntitySelectorReaderExtras extras = ((EntitySelectorReaderExtension) reader).extension$ec();
     final Object2BooleanMap<String> usedParams = extras.usedParams;
     if (usedParams.getOrDefault(option, false)) {
       // 此前使用了反向的用法，则此时也必须要求使用反向的用法。

@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util.mixin;
+package pers.solid.ecmd.mixins.ext;
 
 import net.minecraft.command.EntitySelectorReader;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
@@ -11,5 +11,5 @@ public interface EntitySelectorReaderExtension {
   /**
    * 获取原版的 {@link EntitySelectorReader} 对象中，通过本模组加入的包含一些扩展信息的对象的字段。
    */
-  EntitySelectorReaderExtras ec$getExt();
+  EntitySelectorReaderExtras extension$ec();
 }

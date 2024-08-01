@@ -9,7 +9,7 @@ import pers.solid.ecmd.util.mixin.TranslatableTextContentMixinHelper;
 
 @Mixin(TranslatableTextContent.class)
 public abstract class TranslatableTextContentMixin {
-  @ModifyExpressionValue(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;mapCodec(Ljava/util/function/Function;)Lcom/mojang/serialization/MapCodec;"))
+  @ModifyExpressionValue(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;mapCodec(Ljava/util/function/Function;)Lcom/mojang/serialization/MapCodec;", remap = false))
   private static MapCodec<TranslatableTextContent> modifyCodec(MapCodec<TranslatableTextContent> original) {
     return TranslatableTextContentMixinHelper.modifyTranslatableCodec(original);
   }

@@ -11,7 +11,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ArgumentHelper;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.Collection;

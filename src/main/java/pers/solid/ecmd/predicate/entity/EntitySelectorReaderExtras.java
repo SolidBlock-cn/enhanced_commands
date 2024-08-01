@@ -10,7 +10,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
-import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,8 +72,11 @@ public class EntitySelectorReaderExtras {
     this.self = self;
   }
 
+  /**
+   * 获取 {@link EntitySelectorReader} 对象中的 {@link EntitySelectorReaderExtras} 对象。当接口没有注入，或者调用时无法通过编辑时，可调用此方法。
+   */
   public static EntitySelectorReaderExtras getOf(EntitySelectorReader entitySelectorReader) {
-    return ((EntitySelectorReaderExtension) entitySelectorReader).ec$getExt();
+    return entitySelectorReader.extension$ec();
   }
 
   public void addFunction(FailableFunction<ServerCommandSource, Predicate<Entity>, CommandSyntaxException> predicateFunction) {

@@ -17,7 +17,7 @@ import pers.solid.ecmd.util.SuggestionProvider;
 
 import java.util.*;
 
-import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 
 public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedParser {
   public final List<PropertyFunction<?>> propertyFunctions = new ArrayList<>();

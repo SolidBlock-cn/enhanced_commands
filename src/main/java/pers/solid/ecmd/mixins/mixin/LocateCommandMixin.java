@@ -38,7 +38,7 @@ public abstract class LocateCommandMixin {
   /**
    * 此方法用于对 {@link EnhancedEntryPredicate.AnyOf} 进行特殊处理，因为其返回的 {@link EnhancedEntryPredicate.AnyOf#getEntry()} 方法无法正常使用，需要特殊处理，故使用共享值并返回特殊的值。
    */
-  @WrapOperation(method = "sendCoordinates(Lnet/minecraft/server/command/ServerCommandSource;Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;Lnet/minecraft/util/math/BlockPos;Lcom/mojang/datafixers/util/Pair;Ljava/lang/String;ZLjava/time/Duration;)I", at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;"))
+  @WrapOperation(method = "sendCoordinates(Lnet/minecraft/server/command/ServerCommandSource;Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;Lnet/minecraft/util/math/BlockPos;Lcom/mojang/datafixers/util/Pair;Ljava/lang/String;ZLjava/time/Duration;)I", at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;", remap = false))
   private static <T> Object wrappedMap(Either<RegistryEntry.Reference<T>, RegistryEntryList.Named<T>> instance, Function<? super RegistryEntry.Reference<T>, ? extends T> l, Function<? super RegistryEntryList.Named<T>, ? extends T> r, Operation<String> original, @Share("special_predicate") LocalRef<EnhancedEntryPredicate.AnyOf<T>> anyOfShare, @Local(argsOnly = true) Pair<BlockPos, ? extends RegistryEntry<?>> result) {
     final EnhancedEntryPredicate.AnyOf<T> get = anyOfShare.get();
     if (get != null) {

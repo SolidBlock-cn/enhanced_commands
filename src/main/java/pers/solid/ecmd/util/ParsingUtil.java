@@ -32,7 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.accessor.JsonReaderUtilsAccessor;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 
 import java.io.IOException;
 import java.util.ArrayList;

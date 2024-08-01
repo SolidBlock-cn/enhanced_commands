@@ -9,7 +9,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Nullables;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 
 import java.util.Map;
 import java.util.Set;

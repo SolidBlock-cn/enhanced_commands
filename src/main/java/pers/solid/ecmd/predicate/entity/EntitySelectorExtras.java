@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
 import pers.solid.ecmd.util.iterator.IterateUtils;
-import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -50,8 +49,11 @@ public class EntitySelectorExtras {
     }
   }
 
+  /**
+   * 获取已有 {@link EntitySelector} 中的 {@link EntitySelectorExtras} 对象。当接口没有注入或者无法编译时，可以调用此方法。
+   */
   public static EntitySelectorExtras getOf(EntitySelector entitySelector) {
-    return ((EntitySelectorExtension) entitySelector).ec$getExt();
+    return entitySelector.extension$ec();
   }
 
   public boolean testForExtraPredicates(Entity entity) {

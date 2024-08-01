@@ -25,6 +25,7 @@ import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
+import pers.solid.ecmd.mixins.accessor.BlockDisplayEntityAccessor;
 import pers.solid.ecmd.mixins.accessor.FallingBlockEntityAccessor;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.mixin.MixinShared;
@@ -95,7 +96,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
       return null;
     }
     blockDisplayEntity.setPosition(Vec3d.of(pos));
-//    blockDisplayEntity.setBlockState(state); todo block display: use AW
+    ((BlockDisplayEntityAccessor) blockDisplayEntity).callSetBlockState(state);
     world.spawnEntity(blockDisplayEntity);
     return blockDisplayEntity;
   }

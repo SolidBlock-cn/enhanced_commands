@@ -40,6 +40,15 @@
       ],
       "net/minecraft/class_2168": [
         "pers/solid/ecmd/mixins/ext/ServerCommandSourceExtension"
+      ],
+      "com/mojang/brigadier/exceptions/CommandSyntaxException": [
+        "pers/solid/ecmd/mixins/ext/CommandSyntaxExceptionExtension"
+      ],
+      "net/minecraft/class_2300": [
+        "pers/solid/ecmd/mixins/ext/EntitySelectorExtension"
+      ],
+      "net/minecraft/class_2303": [
+        "pers/solid/ecmd/mixins/ext/EntitySelectorReaderExtension"
       ]
     }
   }

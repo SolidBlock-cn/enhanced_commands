@@ -11,8 +11,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.EnumOrRandom;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;

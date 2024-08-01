@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 
 public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<@NotNull String, Object> defaultValues, Set<Identifier> shared, Set<String> argumentsFromShared) implements ArgumentType<KeywordArgs> {
   public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.keyword_args.unknown_argument_name", o));

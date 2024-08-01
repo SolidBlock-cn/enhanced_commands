@@ -31,8 +31,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.*;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.Objects;
 import java.util.Optional;

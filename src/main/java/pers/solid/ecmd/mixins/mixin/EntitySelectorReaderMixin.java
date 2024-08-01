@@ -17,17 +17,15 @@ import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import pers.solid.ecmd.mixins.ext.EntitySelectorReaderExtension;
 import pers.solid.ecmd.predicate.entity.*;
 import pers.solid.ecmd.util.ParsingUtil;
-import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
-import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 
 import java.util.List;
 import java.util.Map;
@@ -64,52 +62,45 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
 
   @Shadow
   private boolean hasLimit;
-  @Unique
-  private final EntitySelectorReaderExtras ec$ext = new EntitySelectorReaderExtras((EntitySelectorReader) (Object) this);
-
-  @Override
-  public EntitySelectorReaderExtras ec$getExt() {
-    return ec$ext;
-  }
 
   @Inject(method = "readArguments", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readString()Ljava/lang/String;", remap = false), slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorOptions;getHandler(Lnet/minecraft/command/EntitySelectorReader;Ljava/lang/String;I)Lnet/minecraft/command/EntitySelectorOptions$SelectorHandler;")), locals = LocalCapture.CAPTURE_FAILSOFT)
   private void setCursorBeforeOptionName(CallbackInfo ci, int i) {
-    ec$ext.cursorBeforeOptionName = i; // cursor
+    extension$ec().cursorBeforeOptionName = i; // cursor
   }
 
   @Inject(method = "readArguments", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorOptions;getHandler(Lnet/minecraft/command/EntitySelectorReader;Ljava/lang/String;I)Lnet/minecraft/command/EntitySelectorOptions$SelectorHandler;"))
   private void setCursorAfterOptionName(CallbackInfo ci) {
-    ec$ext.cursorAfterOptionName = reader.getCursor(); // cursor
+    extension$ec().cursorAfterOptionName = reader.getCursor(); // cursor
   }
 
   @ModifyExpressionValue(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;read()C", remap = false))
   private char setAtVariable(char c) {
-    if (ec$ext.atVariable == null) {
-      ec$ext.atVariable = Character.toString(c);
+    if (extension$ec().atVariable == null) {
+      extension$ec().atVariable = Character.toString(c);
     }
     return c;
   }
 
   @Inject(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;setEntityType(Lnet/minecraft/entity/EntityType;)V"))
   private void setImplicitEntityType(CallbackInfo ci) {
-    if (!"a".equals(ec$ext.atVariable)) {
-      ec$ext.implicitEntityType = true;
-      ec$ext.implicitNonPlayers = true;
+    if (!"a".equals(extension$ec().atVariable)) {
+      extension$ec().implicitEntityType = true;
+      extension$ec().implicitNonPlayers = true;
     }
   }
 
   @Inject(method = "buildPredicate", at = @At("HEAD"))
   private void buildPredicateDescriptions(CallbackInfo ci) {
     if (pitchRange != FloatRangeArgument.ANY) {
-      ec$ext.addDescription(source -> new RotationPredicateEntry(pitchRange, "pitch", Entity::getPitch, rotationPredicate(pitchRange, Entity::getPitch)));
+      extension$ec().addDescription(source -> new RotationPredicateEntry(pitchRange, "pitch", Entity::getPitch, rotationPredicate(pitchRange, Entity::getPitch)));
     }
 
     if (yawRange != FloatRangeArgument.ANY) {
-      ec$ext.addDescription(source -> new RotationPredicateEntry(yawRange, "yaw", Entity::getYaw, rotationPredicate(yawRange, Entity::getYaw)));
+      extension$ec().addDescription(source -> new RotationPredicateEntry(yawRange, "yaw", Entity::getYaw, rotationPredicate(yawRange, Entity::getYaw)));
     }
 
     if (!levelRange.isDummy()) {
-      ec$ext.addDescription(source -> new LevelEntityPredicateEntry(levelRange, false));
+      extension$ec().addDescription(source -> new LevelEntityPredicateEntry(levelRange, false));
     }
   }
 
@@ -119,10 +110,10 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @Inject(method = "build", at = @At("RETURN"))
   private void buildExtraPredicate(CallbackInfoReturnable<EntitySelector> cir) {
     final EntitySelector returnValue = cir.getReturnValue();
-    final EntitySelectorExtras extras = ((EntitySelectorExtension) returnValue).ec$getExt();
-    extras.predicateFunctions = ec$ext.predicateFunctions;
-    extras.predicateDescriptions = ec$ext.predicateDescriptions;
-    extras.collector = ec$ext.atVariable != null ? EntitySelectorCollector.NAMES.get(ec$ext.atVariable) : null;
+    final EntitySelectorExtras extras = EntitySelectorExtras.getOf(returnValue);
+    extras.predicateFunctions = extension$ec().predicateFunctions;
+    extras.predicateDescriptions = extension$ec().predicateDescriptions;
+    extras.collector = extension$ec().atVariable != null ? EntitySelectorCollector.NAMES.get(extension$ec().atVariable) : null;
   }
 
   /**
@@ -130,22 +121,22 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
    */
   @Inject(method = "setIncludesNonPlayers", at = @At("TAIL"))
   private void setExplicitNonPlayer(boolean includesNonPlayers, CallbackInfo ci) {
-    ec$ext.implicitNonPlayers = false;
+    extension$ec().implicitNonPlayers = false;
   }
 
   /**
    * 在读取 {@code a}、{@code e} 等参数之前，读取其他可能的参数，并作为 {@code @e} 应对。
    */
-  @WrapOperation(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;read()C"))
+  @WrapOperation(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;read()C", remap = false))
   private char readMoreNames(StringReader instance, Operation<Character> original) {
     final int cursorBeforeUnquoted = reader.getCursor();
     final String extraName = reader.readUnquotedString();
     if (EntitySelectorTypeExtras.EXTRA_NAMES.containsKey(extraName)) {
-      ec$ext.atVariable = extraName;
+      extension$ec().atVariable = extraName;
       return 'e';
     } else if (extraName.length() > 1) {
       // 此时读到的 extraName 是无效的多于一个字符。
-      ec$ext.atVariable = extraName;
+      extension$ec().atVariable = extraName;
       return '?';
     }
     reader.setCursor(cursorBeforeUnquoted);
@@ -157,7 +148,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
    */
   @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;", shift = At.Shift.AFTER))
   private void appendAdditionalLimitations(CallbackInfo ci) {
-    final String atVariable = ec$ext.atVariable;
+    final String atVariable = extension$ec().atVariable;
     if (EntitySelectorTypeExtras.EXTRA_LIMITS.containsKey(atVariable)) {
       limit = EntitySelectorTypeExtras.EXTRA_LIMITS.getInt(atVariable);
     }
@@ -176,7 +167,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   /**
    * 在提供变量类型的建议时，排除不匹配的建议。原版中由于只有一个字符，故没有考虑到这个问题。
    */
-  @WrapOperation(method = "suggestSelector(Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;suggest(Ljava/lang/String;Lcom/mojang/brigadier/Message;)Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;"))
+  @WrapOperation(method = "suggestSelector(Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;suggest(Ljava/lang/String;Lcom/mojang/brigadier/Message;)Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;", remap = false))
   private static SuggestionsBuilder suggestSelectorsCautiously(SuggestionsBuilder instance, String text, Message tooltip, Operation<SuggestionsBuilder> original) {
     return ParsingUtil.suggestString(text, tooltip, instance);
   }
@@ -192,13 +183,13 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   /**
    * 在没有读取玩所有的实体选择器类型之前，不需要急于提供方括号的建议，只有已经完全输入后，再提供方括号的建议。
    */
-  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;"), to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;skip()V")))
+  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;"), to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;skip()V", remap = false)))
   private void modifiedSetSuggestOpen(CallbackInfo ci) {
     suggestionProvider = (builder, consumer) -> suggestSelectorRest(builder /* todo 检查此处的 cursor */, consumer).thenCombine(suggestOpen(builder, consumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
   }
 
   @ModifyExpressionValue(method = "readAtVariable", at = @At(value = "INVOKE", target = "Ljava/lang/String;valueOf(C)Ljava/lang/String;"))
   private String injectedUnknownSelectorException(String original) {
-    return ec$ext.atVariable;
+    return extension$ec().atVariable;
   }
 }

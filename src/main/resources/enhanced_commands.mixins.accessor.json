@@ -4,6 +4,7 @@
   "package": "pers.solid.ecmd.mixins.accessor",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BlockDisplayEntityAccessor",
     "CachedBlockPositionAccessor",
     "CommandContextAccessor",
     "EffectDataAccessor",

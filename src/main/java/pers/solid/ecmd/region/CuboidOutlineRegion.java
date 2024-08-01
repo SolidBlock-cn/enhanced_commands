@@ -21,8 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.Iterator;
 import java.util.stream.Stream;

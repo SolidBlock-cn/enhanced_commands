@@ -27,6 +27,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.configs.RegistryParsingConfig;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.CommandManagerMixin;
 import pers.solid.ecmd.mixins.mixin.WorldChunkMixin;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;

@@ -54,7 +54,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
       final List<? extends Entity> entities = entitySelector.getEntities(source.hasPermissionLevel(2) ? source : source.withLevel(2));
       return Predicates.in(entities);
     }
-    EntitySelectorExtras.getOf(entitySelector).updateSource(source);
+    entitySelector.extension$ec().updateSource(source);
     final var accessor = (EntitySelectorAccessor) entitySelector;
 
     List<com.google.common.base.Predicate<Entity>> predicates = new ArrayList<>();
@@ -154,7 +154,7 @@ public class SelectorEntityPredicate implements EntityPredicate {
 
     // 以下部分为 EntitySelectorOptions 中的原版部分
 
-    final var predicateDescriptions = EntitySelectorExtras.getOf(entitySelector).predicateDescriptions;
+    final var predicateDescriptions = entitySelector.extension$ec().predicateDescriptions;
     if (predicateDescriptions != null) {
       for (var predicateDescription : predicateDescriptions) {
         descriptions.add(predicateDescription.apply(source).testAndDescribe(entity, displayName));

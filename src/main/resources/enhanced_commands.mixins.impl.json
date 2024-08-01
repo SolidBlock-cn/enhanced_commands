@@ -4,6 +4,9 @@
   "package": "pers.solid.ecmd.mixins.impl",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "CommandSyntaxExceptionExtensionImpl",
+    "EntitySelectorExtensionImpl",
+    "EntitySelectorReaderExtensionImpl",
     "MutableTextExtensionImpl",
     "ServerCommandSourceExtensionImpl"
   ],

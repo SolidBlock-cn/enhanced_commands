@@ -18,7 +18,7 @@ import java.util.Map;
 @Mixin(ContextChain.class)
 public abstract class ContextChainMixin {
   @SuppressWarnings("unchecked")
-  @ModifyArg(method = "runModifier", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/RedirectModifier;apply(Lcom/mojang/brigadier/context/CommandContext;)Ljava/util/Collection;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/RedirectModifier;apply(Lcom/mojang/brigadier/context/CommandContext;)Ljava/util/Collection;")))
+  @ModifyArg(method = "runModifier", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/RedirectModifier;apply(Lcom/mojang/brigadier/context/CommandContext;)Ljava/util/Collection;", remap = false), slice = @Slice(from = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/RedirectModifier;apply(Lcom/mojang/brigadier/context/CommandContext;)Ljava/util/Collection;", remap = false)), remap = false)
   private static <S> CommandContext<S> modifyArgumentsForContext(CommandContext<S> context, @Local RedirectModifier<S> modifier, @Local(argsOnly = true) S source, @Local(ordinal = 1) CommandContext<S> previousContext) throws CommandSyntaxException {
     if (modifier instanceof EnhancedRedirectModifier.Multiple<S> enhancedRedirectModifier) {
       final Map<String, ParsedArgument<S, ?>> arguments = ((CommandContextAccessor<S>) context).getArguments();

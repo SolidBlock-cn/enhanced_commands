@@ -18,10 +18,10 @@ import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.SuggestionProvider;
-import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;

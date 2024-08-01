@@ -39,7 +39,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 
 /**
  * Similar to {@link net.minecraft.command.argument.BlockPosArgumentType} and {@link Vec3ArgumentType}, with some slight modifications.
