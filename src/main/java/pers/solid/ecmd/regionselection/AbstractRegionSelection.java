@@ -2,6 +2,7 @@ package pers.solid.ecmd.regionselection;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.region.Region;
 
 public abstract class AbstractRegionSelection<R extends Region> implements RegionSelection {
@@ -18,7 +19,7 @@ public abstract class AbstractRegionSelection<R extends Region> implements Regio
       try {
         calculatedRegion = buildRegion();
       } catch (CommandSyntaxException e) {
-        // todo handle
+        throw new CommandRuntimeException(e);
       }
     }
     return calculatedRegion;

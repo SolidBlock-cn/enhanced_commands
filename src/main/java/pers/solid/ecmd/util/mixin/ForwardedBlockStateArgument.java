@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionArgument;
 
@@ -38,8 +39,7 @@ public class ForwardedBlockStateArgument extends BlockStateArgument {
     try {
       this.sourcedBlockFunction = blockFunction.apply(source);
     } catch (CommandSyntaxException e) {
-      //todo runtime
-      throw new RuntimeException(e);
+      throw new CommandRuntimeException(e);
     }
   }
 
