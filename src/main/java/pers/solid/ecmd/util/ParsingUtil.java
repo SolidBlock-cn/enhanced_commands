@@ -2,15 +2,13 @@ package pers.solid.ecmd.util;
 
 import com.google.common.base.Functions;
 import com.google.common.base.Suppliers;
-import com.google.gson.JsonParseException;
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.MalformedJsonException;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.chars.CharSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -19,7 +17,10 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
@@ -32,9 +33,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.accessor.JsonReaderUtilsAccessor;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -276,27 +275,13 @@ public final class ParsingUtil {
     return JsonReaderUtilsAccessor.invokeGetPos(jsonReader) - 1;
   }
 
-  public static <T> T parseJson(StringReader reader, FailableFunction<JsonReader, T, JsonParseException> readFunction, DynamicCommandExceptionType exceptionType) throws CommandSyntaxException {
-    final java.io.StringReader in = new java.io.StringReader(reader.getString());
-    final int cursorBeforeJson = reader.getCursor();
-    try {
-      in.skip(cursorBeforeJson);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    final JsonReader jsonReader = new JsonReader(in);
-    try {
-      final T apply = readFunction.apply(jsonReader);
-      reader.setCursor(cursorBeforeJson + getPos(jsonReader));
-      return apply;
-    } catch (RuntimeException e) {
-      if (e.getCause() instanceof MalformedJsonException malformedJsonException) {
-        reader.setCursor(cursorBeforeJson + getPos(jsonReader) - 1);
-        throw ModCommandExceptionTypes.MALFORMED_JSON.createWithContext(reader, malformedJsonException.getMessage());
-      } else {
-        throw CommandSyntaxExceptionExtension.withCursorEnd(exceptionType.createWithContext(reader, e.getMessage()), cursorBeforeJson + getPos(jsonReader));
-      }
-    }
+  public static <A, E extends Throwable> A parseNbt(StringReader reader, FailableFunction<NbtElement, A, E> readFunction) throws E, CommandSyntaxException {
+    final NbtElement nbtElement = new StringNbtReader(reader).parseElement();
+    return readFunction.apply(nbtElement);
+  }
+
+  public static <A, E extends Throwable> A parseNbt(StringReader reader, Codec<A> codec, Function<String, E> exceptionSupplier) throws E, CommandSyntaxException {
+    return parseNbt(reader, element -> codec.parse(NbtOps.INSTANCE, element).getOrThrow(exceptionSupplier));
   }
 
   public static <T> void registerNameSuggestionProvider(RegistryKey<? extends Registry<T>> registryKey, Function<? super T, ? extends Message> function) {

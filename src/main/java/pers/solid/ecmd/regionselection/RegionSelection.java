@@ -8,7 +8,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -139,19 +138,10 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
 
   void writeNbt(@NotNull NbtCompound nbtCompound);
 
-  // todo check
   MapCodec<RegionSelection> CODEC = MapCodec.assumeMapUnsafe(Codec.of(Region.CODEC.comap(RegionSelection::region), Decoder.error("Decoding region selection is not supported")));
 
   enum Type implements RegionType<RegionSelection> {
     INSTANCE;
-
-    public @NotNull RegionSelection fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-      final Identifier identifier = Identifier.of(nbtCompound.getString("selection_type"));
-      final RegionSelectionType regionSelectionType = RegionSelectionType.REGISTRY.getOrEmpty(identifier).orElseThrow();
-      final RegionSelection regionSelection = regionSelectionType.createRegionSelection();
-      regionSelection.fromNbt(nbtCompound, world);
-      return regionSelection;
-    }
 
     @Override
     public @NotNull MapCodec<RegionSelection> getCodec() {

@@ -635,7 +635,7 @@
   "enhanced_commands.parsing.expected.3": "需要“%s”、“%s”或“%s”",
   "enhanced_commands.parsing.expected.4": "需要“%s”、“%s”、“%s”或“%s”",
   "enhanced_commands.parsing.expected_whitespace": "参数后面需要有空白字符",
-  "enhanced_commands.parsing.invalid_loot_table_json": "无效的战利品表json：%s",
+  "enhanced_commands.parsing.invalid_loot_table": "无效的战利品表：%s",
   "enhanced_commands.parsing.malformed_json": "无效的JSON：%s",
   "enhanced_commands.parsing.unknown_function": "未知的函数“%s”",
   "enhanced_commands.parsing.unknown_keyword": "未知的关键字“%s”",

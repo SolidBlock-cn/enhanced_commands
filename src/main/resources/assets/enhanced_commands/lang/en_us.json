@@ -635,7 +635,7 @@
   "enhanced_commands.parsing.expected.3": "Expected '%s', '%s' or '%s'",
   "enhanced_commands.parsing.expected.4": "Expected '%s', '%s', '%s' or '%s'",
   "enhanced_commands.parsing.expected_whitespace": "Expected whitespace after the argument",
-  "enhanced_commands.parsing.invalid_loot_table_json": "Invalid loot table json: %s",
+  "enhanced_commands.parsing.invalid_loot_table": "Invalid loot table: %s",
   "enhanced_commands.parsing.malformed_json": "Malformed JSON: %s",
   "enhanced_commands.parsing.unknown_function": "Unknown function '%s'",
   "enhanced_commands.parsing.unknown_keyword": "Unknown keyword '%s'",

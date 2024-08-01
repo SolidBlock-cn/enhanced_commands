@@ -4,8 +4,6 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -14,7 +12,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
@@ -850,8 +847,7 @@ public class EntitySelectorOptionsExtension {
     });
     if (stringReader.canRead() && stringReader.peek() == '{') {
       reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-      // todo json
-      final LootCondition lootCondition = ParsingUtil.parseJson(stringReader, input -> LootCondition.CODEC.decode(JsonOps.INSTANCE, new Gson().fromJson(input, JsonElement.class)).getOrThrow().getFirst(), ModCommandExceptionTypes.INVALID_LOOT_TABLE_JSON);
+      final LootCondition lootCondition = ParsingUtil.parseNbt(stringReader, LootCondition.CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
       reader.addPredicate(entity -> {
         if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
           return false;

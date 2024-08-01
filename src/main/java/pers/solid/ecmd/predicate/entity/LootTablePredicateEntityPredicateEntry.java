@@ -6,13 +6,13 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.bridge.LootBridge;
 
 import java.util.Optional;
 
@@ -22,16 +22,15 @@ public record LootTablePredicateEntityPredicateEntry(Identifier predicateId, boo
     if (!(entity.getWorld() instanceof final ServerWorld serverWorld)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.not_on_server", displayName));
     } else {
-      // todo check predicate
-      LootCondition lootCondition = serverWorld.getServer().getReloadableRegistries().getRegistryManager().get(RegistryKeys.PREDICATE).get(predicateId);
-      if (lootCondition == null) {
+      Optional<LootCondition> lootCondition = LootBridge.getLootCondition(serverWorld, predicateId);
+      if (lootCondition.isEmpty()) {
         return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.unknown_predicate", TextUtil.literal(predicateId).styled(Styles.TARGET)));
       } else {
         LootContext lootContext = new LootContext.Builder(new LootContextParameterSet.Builder(serverWorld)
             .add(LootContextParameters.THIS_ENTITY, entity)
             .add(LootContextParameters.ORIGIN, entity.getPos())
             .build(LootContextTypes.SELECTOR)).build(Optional.empty());
-        final boolean test = lootCondition.test(lootContext);
+        final boolean test = lootCondition.get().test(lootContext);
         if (hasNegation ^ test) {
           return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.predicate.pass", displayName, TextUtil.literal(predicateId).styled(Styles.TARGET), TextUtil.literal(test).styled(Styles.ACTUAL)));
         } else {
