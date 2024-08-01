@@ -32,7 +32,6 @@ import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
-import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -165,11 +164,11 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
           .iterator();
       mainIterator = Iterables.concat(() -> testPosIteration, placingIteration).iterator();
     }
-    final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable(hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
+    final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> Text.translatable(hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> "enhanced_commands.commands.fill.complete_skipped";
       case BREAK -> "enhanced_commands.commands.fill.complete_broken";
       default -> "enhanced_commands.commands.fill.complete";
-    } : "enhanced_commands.commands.fill.complete", numbersAffected.getValue()), true));
+    } : "enhanced_commands.commands.fill.complete", numbersAffected.getValue()).enhanced$$(), true));
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {

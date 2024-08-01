@@ -21,7 +21,6 @@ import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.region.SphereRegion;
-import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
@@ -83,7 +82,7 @@ public enum DrawCommand implements CommandRegistrationCallback {
         })
         .map(blockPos -> null)
         .iterator();
-    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.fill.complete", numbersAffected.getValue()), true)));
+    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.complete", numbersAffected.getValue()).enhanced$$(), true)));
     if (!immediately && estimatedIterationAmount > 16384) {
       // The region is too large. Send a server task.
       ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhanced_commands.commands.draw.task_name", curve.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));

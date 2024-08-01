@@ -114,9 +114,9 @@ public enum MoveCommand implements CommandRegistrationCallback {
       @Override
       public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
         if (affectedEntities == -1) {
-          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> TextUtil.enhancedTranslatable("enhanced_commands.commands.move.complete.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks)), vec3i -> TextUtil.enhancedTranslatable("enhanced_commands.commands.move.complete.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks))), true);
+          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.complete.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks)).enhanced$$(), vec3i -> Text.translatable("enhanced_commands.commands.move.complete.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks)).enhanced$$()), true);
         } else {
-          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> TextUtil.enhancedTranslatable("enhanced_commands.commands.move.complete_with_entities.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)), vec3i -> TextUtil.enhancedTranslatable("enhanced_commands.commands.move.complete_with_entities.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks), Integer.toString(affectedEntities))), true);
+          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.complete_with_entities.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), vec3i -> Text.translatable("enhanced_commands.commands.move.complete_with_entities.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$()), true);
         }
       }
 

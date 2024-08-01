@@ -20,7 +20,6 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
-import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
@@ -69,7 +68,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
     if (size == 0) {
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.count.none", size), false);
     } else {
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tasks.count", size), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.count", size).enhanced$$(), false);
     }
     return size;
   }
@@ -81,7 +80,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
     if (size == 0) {
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.clear.none", size), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tasks.clear", size), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tasks.clear", size).enhanced$$(), true);
     }
     return size;
   }
@@ -183,7 +182,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
       return 0;
     }
     CommandBridge.sendFeedback(context.getSource(), () -> {
-      final MutableText message = TextUtil.enhancedTranslatable("enhanced_commands.commands.tasks.list.summary", Integer.toString(size));
+      final MutableText message = Text.translatable("enhanced_commands.commands.tasks.list.summary", Integer.toString(size)).enhanced$$();
       for (IteratorTask<?> iteratorTask : Iterables.limit(iteratorTasks, limit)) {
         final List<Text> list = new ArrayList<>();
         if (iteratorTask.suspended) {

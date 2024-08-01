@@ -50,11 +50,11 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
       final int passes = Iterables.size(Iterables.filter(entities, predicate::test));
       final MutableText exampleEntity = TextUtil.styled(entities.iterator().next().getDisplayName(), Styles.TARGET);
       if (passes == size) {
-        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.all_pass", size, exampleEntity).styled(Styles.TRUE), false);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.all_pass", size, exampleEntity).enhanced$$().styled(Styles.TRUE), false);
       } else if (passes == 0) {
-        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.none_pass", size, exampleEntity).styled(Styles.FALSE), false);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.none_pass", size, exampleEntity).enhanced$$().styled(Styles.FALSE), false);
       } else {
-        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.testfor.entity.partially_pass", size, exampleEntity, passes).styled(Styles.MEDIUM), false);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.partially_pass", size, exampleEntity, passes).enhanced$$().styled(Styles.MEDIUM), false);
       }
       return passes;
     }

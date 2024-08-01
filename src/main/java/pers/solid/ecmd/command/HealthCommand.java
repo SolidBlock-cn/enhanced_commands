@@ -111,7 +111,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
   }
 
   public static final DynamicCommandExceptionType NOT_LIVING = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.health.get.single.not_living", o));
-  public static final DynamicCommandExceptionType NOT_LIVING_MULTIPLE = new DynamicCommandExceptionType(o -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.get.multiple.not_living", o));
+  public static final DynamicCommandExceptionType NOT_LIVING_MULTIPLE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.health.get.multiple.not_living", o).enhanced$$());
 
   private static int executeGetHealth(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, double scale) throws CommandSyntaxException {
     return executeGetHealth(context, entities, concentrationType, scale, null, null);
@@ -140,7 +140,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       final double result = concentrationType.concentrateFloat(floats);
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.get.multiple", floats.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.floatToString(result)).styled(Styles.RESULT)), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.get.multiple", floats.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.floatToString(result)).styled(Styles.RESULT)).enhanced$$(), false);
       if (nbtTarget != null && nbtPath != null) {
         nbtTarget.modifyNbt(nbtPath, concentrationType.floatToNbt(result), context.getSource().getRegistryManager());
       }
@@ -169,7 +169,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.set.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.set.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)).enhanced$$(), true);
       return successes;
     }
   }
@@ -195,7 +195,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.add.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.add.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)).enhanced$$(), true);
       return successes;
     }
   }
@@ -221,7 +221,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.add_to_max.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.add_to_max.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)).enhanced$$(), true);
       return successes;
     }
   }
@@ -247,7 +247,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.remove.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.remove.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)).enhanced$$(), true);
       return successes;
     }
   }
@@ -273,7 +273,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.health.remove_all.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.health.remove_all.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)).enhanced$$(), true);
       return successes;
     }
   }

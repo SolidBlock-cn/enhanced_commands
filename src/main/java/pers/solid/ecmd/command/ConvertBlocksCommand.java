@@ -32,7 +32,6 @@ import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -54,8 +53,8 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
         .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgumentType(), UnloadedPosBehavior.REJECT)
         .build();
 
-    final IntFunction<Text> fallingBlockFeedback = value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.convertblocks.falling_block.complete", value);
-    final IntFunction<Text> blockDisplayFeedback = value -> TextUtil.enhancedTranslatable("enhanced_commands.commands.convertblocks.block_display.complete", value);
+    final IntFunction<Text> fallingBlockFeedback = value -> Text.translatable("enhanced_commands.commands.convertblocks.falling_block.complete", value).enhanced$$();
+    final IntFunction<Text> blockDisplayFeedback = value -> Text.translatable("enhanced_commands.commands.convertblocks.block_display.complete", value).enhanced$$();
     ModCommands.registerWithRegionArgumentModification(
         dispatcher,
         ModCommands.literalR2("convertblocks"),

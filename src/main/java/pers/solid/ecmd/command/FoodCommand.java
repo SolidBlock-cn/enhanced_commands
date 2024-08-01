@@ -47,8 +47,8 @@ public enum FoodCommand implements CommandRegistrationCallback {
 
   public static final DynamicCommandExceptionType ADD_FROM_NOT_FOOD = new DynamicCommandExceptionType(stackName -> Text.translatable("enhanced_commands.commands.food.add_from.not_food", stackName));
   public static final Dynamic2CommandExceptionType ADD_FROM_HAND_NOT_FOOD = new Dynamic2CommandExceptionType((playerName, stackName) -> Text.translatable("enhanced_commands.commands.food.add_from_hand.not_food", playerName, stackName));
-  public static final DynamicCommandExceptionType ADD_FROM_HAND_NONE_FOOD = new DynamicCommandExceptionType(playersSize -> TextUtil.enhancedTranslatable(("enhanced_commands.commands.food.add_from_hand.none_food"), playersSize));
-  public static final DynamicCommandExceptionType ADD_FROM_NONE_FOOD = new DynamicCommandExceptionType(playersSize -> TextUtil.enhancedTranslatable(("enhanced_commands.commands.food.add_from.none_food"), playersSize));
+  public static final DynamicCommandExceptionType ADD_FROM_HAND_NONE_FOOD = new DynamicCommandExceptionType(playersSize -> Text.translatable(("enhanced_commands.commands.food.add_from_hand.none_food"), playersSize).enhanced$$());
+  public static final DynamicCommandExceptionType ADD_FROM_NONE_FOOD = new DynamicCommandExceptionType(playersSize -> Text.translatable(("enhanced_commands.commands.food.add_from.none_food"), playersSize).enhanced$$());
 
   public static int executeGetAll(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, ConcentrationType concentrationType) throws CommandSyntaxException {
     final int size = players.size();
@@ -277,9 +277,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
     }
     CommandBridge.sendFeedback(context, () -> {
       if (players.size() == 1) {
-        return TextUtil.enhancedTranslatable("enhanced_commands.commands.food.tick.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), times);
+        return Text.translatable("enhanced_commands.commands.food.tick.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), times).enhanced$$();
       } else {
-        return TextUtil.enhancedTranslatable("enhanced_commands.commands.food.tick.single", TextUtil.literal(players.size()).styled(Styles.TARGET), times);
+        return Text.translatable("enhanced_commands.commands.food.tick.single", TextUtil.literal(players.size()).styled(Styles.TARGET), times).enhanced$$();
       }
     }, true);
     return updated;

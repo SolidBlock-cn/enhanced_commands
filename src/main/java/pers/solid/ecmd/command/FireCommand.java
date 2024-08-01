@@ -71,7 +71,7 @@ public enum FireCommand implements CommandRegistrationCallback {
         integers.add(entity.getFireTicks());
       }
       final double result = concentrationType.concentrateInt(integers);
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.fire.get.multiple", integers.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.longToString(result)).styled(Styles.RESULT)), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.fire.get.multiple", integers.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.longToString(result)).styled(Styles.RESULT)).enhanced$$(), false);
       return (int) (result);
     }
   }
@@ -86,9 +86,9 @@ public enum FireCommand implements CommandRegistrationCallback {
     }
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.fire.set.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(entity.getFireTicks()).styled(Styles.RESULT)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.fire.set.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(entity.getFireTicks()).styled(Styles.RESULT)).enhanced$$(), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.fire.set.multiple", TextUtil.literal(entities.size()).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.fire.set.multiple", TextUtil.literal(entities.size()).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)).enhanced$$(), true);
     }
     return entities.size();
   }
@@ -105,7 +105,7 @@ public enum FireCommand implements CommandRegistrationCallback {
       final Entity entity = entities.iterator().next();
       CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.fire.extinguish.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.fire.extinguish.multiple", TextUtil.literal(entities.size()).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.fire.extinguish.multiple", TextUtil.literal(entities.size()).styled(Styles.TARGET)).enhanced$$(), true);
     }
     return entities.size();
   }

@@ -12,7 +12,6 @@ import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.NbtConcentrationType;
-import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -30,7 +29,7 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrat
 
   @Override
   public Text feedbackQuery(NbtElement nbtElement, NbtConcentrationType nbtConcentrationType) {
-    return TextUtil.enhancedTranslatable("enhanced_commands.nbt.blocks.query", blockEntities.size(), nbtElement);
+    return Text.translatable("enhanced_commands.nbt.blocks.query", blockEntities.size(), nbtElement).enhanced$$();
   }
 
   @Override
@@ -53,6 +52,6 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrat
 
   @Override
   public Text feedbackModify() {
-    return TextUtil.enhancedTranslatable("enhanced_commands.nbt.blocks.modify", blockEntities.size());
+    return Text.translatable("enhanced_commands.nbt.blocks.modify", blockEntities.size()).enhanced$$();
   }
 }

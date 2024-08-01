@@ -47,7 +47,7 @@ public enum TameCommand implements CommandRegistrationCallback {
   }
 
   public static final DynamicCommandExceptionType NOT_TAMEABLE_SINGLE = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.commands.tame.not_tameable.single", s));
-  public static final DynamicCommandExceptionType NOT_TAMEABLE_MULTIPLE = new DynamicCommandExceptionType(s -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tame.not_tameable.multiple", s));
+  public static final DynamicCommandExceptionType NOT_TAMEABLE_MULTIPLE = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.commands.tame.not_tameable.multiple", s).enhanced$$());
 
   public static int executeTrust(CommandContext<ServerCommandSource> context, ServerPlayerEntity owner) throws CommandSyntaxException {
     final Collection<? extends Entity> targets = getEntities(context, "targets");
@@ -165,10 +165,10 @@ public enum TameCommand implements CommandRegistrationCallback {
         }
       }
       if (owners.isEmpty()) {
-        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tame.get.multiple.not_tamed", TextUtil.literal(targets.size()).styled(Styles.TARGET)), false);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.multiple.not_tamed", TextUtil.literal(targets.size()).styled(Styles.TARGET)).enhanced$$(), false);
       } else if (owners.size() == 1) {
         final Either<UUID, LivingEntity> owner = owners.iterator().next();
-        CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.tame.get.multiple.tamed_by_single", TextUtil.literal(targets.size()).styled(Styles.TARGET), owner.map(uuid -> Text.literal(uuid.toString()).styled(Styles.RESULT), livingEntity -> TextUtil.styled(livingEntity.getDisplayName(), Styles.RESULT))), false);
+        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.multiple.tamed_by_single", TextUtil.literal(targets.size()).styled(Styles.TARGET), owner.map(uuid -> Text.literal(uuid.toString()).styled(Styles.RESULT), livingEntity -> TextUtil.styled(livingEntity.getDisplayName(), Styles.RESULT))).enhanced$$(), false);
       } else {
         CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.multiple.tamed_by_multiple", TextUtil.literal(targets.size()).styled(Styles.TARGET), TextUtil.literal(owners.size()).styled(Styles.RESULT)), false);
       }

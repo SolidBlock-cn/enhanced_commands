@@ -29,7 +29,6 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -177,9 +176,9 @@ public enum RotateCommand implements CommandRegistrationCallback {
       @Override
       public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
         if (affectedEntities == -1) {
-          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.rotate.complete", Integer.toString(affectedBlocks)), true);
+          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.rotate.complete", Integer.toString(affectedBlocks)).enhanced$$(), true);
         } else {
-          CommandBridge.sendFeedback(source, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.rotate.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)), true);
+          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.rotate.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), true);
         }
       }
 

@@ -126,7 +126,7 @@ public enum AirCommand implements CommandRegistrationCallback {
         integers.add(entity.getAir());
       }
       final double result = concentrationType.concentrateInt(integers);
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.get.multiple", integers.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.longToString(result)).styled(Styles.RESULT)), false);
+      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.air.get.multiple", integers.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.longToString(result)).styled(Styles.RESULT)).enhanced$$(), false);
       if (nbtElementConsumer != null) {
         nbtElementConsumer.accept(concentrationType.longToNbt(result));
       }
@@ -145,7 +145,10 @@ public enum AirCommand implements CommandRegistrationCallback {
       for (Entity entity : entities) {
         entity.setAir(value);
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.set.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> {
+        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)};
+        return Text.translatable("enhanced_commands.commands.air.set.multiple", args).enhanced$$();
+      }, true);
       return size;
     }
   }
@@ -161,7 +164,10 @@ public enum AirCommand implements CommandRegistrationCallback {
       for (Entity entity : entities) {
         entity.setAir(entity.getAir() + value);
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.add.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> {
+        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)};
+        return Text.translatable("enhanced_commands.commands.air.add.multiple", args).enhanced$$();
+      }, true);
       return size;
     }
   }
@@ -177,7 +183,10 @@ public enum AirCommand implements CommandRegistrationCallback {
       for (Entity entity : entities) {
         entity.setAir(entity.getMaxAir());
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.add_to_max.multiple", TextUtil.literal(size).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> {
+        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET)};
+        return Text.translatable("enhanced_commands.commands.air.add_to_max.multiple", args).enhanced$$();
+      }, true);
       return size;
     }
   }
@@ -193,7 +202,10 @@ public enum AirCommand implements CommandRegistrationCallback {
       for (Entity entity : entities) {
         entity.setAir(entity.getAir() - value);
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.remove.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> {
+        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)};
+        return Text.translatable("enhanced_commands.commands.air.remove.multiple", args).enhanced$$();
+      }, true);
       return size;
     }
   }
@@ -209,7 +221,10 @@ public enum AirCommand implements CommandRegistrationCallback {
       for (Entity entity : entities) {
         entity.setAir(0);
       }
-      CommandBridge.sendFeedback(context, () -> TextUtil.enhancedTranslatable("enhanced_commands.commands.air.remove_all.multiple", TextUtil.literal(size).styled(Styles.TARGET)), true);
+      CommandBridge.sendFeedback(context, () -> {
+        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET)};
+        return Text.translatable("enhanced_commands.commands.air.remove_all.multiple", args).enhanced$$();
+      }, true);
       return size;
     }
   }

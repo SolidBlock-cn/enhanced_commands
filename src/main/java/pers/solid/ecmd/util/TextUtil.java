@@ -9,7 +9,6 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
@@ -109,34 +108,6 @@ public final class TextUtil {
    */
   public static MutableText wrapBoolean(boolean b) {
     return Text.literal(Boolean.toString(b)).formatted(b ? Formatting.GREEN : Formatting.RED);
-  }
-
-  /**
-   * 可翻译并使用增强功能的文本组件，相比 {@link Text#translatable} 有增强的功能。
-   */
-  public static MutableText enhancedTranslatable(String key) {
-    return MutableText.of(new EnhancedTranslatableTextContent(key, null, TranslatableTextContent.EMPTY_ARGUMENTS));
-  }
-
-  /**
-   * 可翻译并使用增强功能的文本组件，相比 {@link Text#translatable} 有增强的功能。
-   */
-  public static MutableText enhancedTranslatable(String key, Object... args) {
-    return MutableText.of(new EnhancedTranslatableTextContent(key, null, args));
-  }
-
-  /**
-   * 可翻译并使用增强功能的文本组件，相比 {@link Text#translatable} 有增强的功能。
-   */
-  public static MutableText enhancedTranslatableWithFallback(String key, @Nullable String fallback) {
-    return MutableText.of(new EnhancedTranslatableTextContent(key, fallback, TranslatableTextContent.EMPTY_ARGUMENTS));
-  }
-
-  /**
-   * 可翻译并使用增强功能的文本组件，相比 {@link Text#translatable} 有增强的功能。
-   */
-  public static MutableText enhancedTranslatableWithFallback(String key, @Nullable String fallback, Object... args) {
-    return MutableText.of(new EnhancedTranslatableTextContent(key, fallback, args));
   }
 
   /**
