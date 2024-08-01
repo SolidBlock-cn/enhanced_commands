@@ -21,7 +21,6 @@ import net.minecraft.text.Text;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -58,7 +57,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
       final int foodLevel = hungerManager.getFoodLevel();
       final float saturationLevel = hungerManager.getSaturationLevel();
       final float exhaustion = hungerManager.getExhaustion();
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.get.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.literal(foodLevel).styled(Styles.RESULT), TextUtil.literal(saturationLevel).styled(Styles.RESULT), TextUtil.literal(exhaustion).styled(Styles.RESULT)), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.get.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.literal(foodLevel).styled(Styles.RESULT), TextUtil.literal(saturationLevel).styled(Styles.RESULT), TextUtil.literal(exhaustion).styled(Styles.RESULT)), false);
     } else {
       final IntList foodLevels = new IntArrayList(size);
       final FloatList saturationLevels = new FloatArrayList(size);
@@ -66,7 +65,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
       final double food = concentrationType.concentrateInt(foodLevels);
       final double saturation = concentrationType.concentrateFloat(saturationLevels);
       final double exhaustion = concentrationType.concentrateFloat(exhaustionLevels);
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.get.multiple",
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.get.multiple",
           TextUtil.literal(size).styled(Styles.TARGET),
           concentrationType.getDisplayName(),
           Text.literal(concentrationType.longToString(food)).styled(Styles.RESULT),
@@ -83,9 +82,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
       player.getHungerManager().setFoodLevel(value);
     }
     if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.set_food.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_food.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.set_food.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_food.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
     }
     return size;
   }
@@ -98,9 +97,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
       hungerManager.setSaturationLevel(food);
     }
     if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.set_food_and_saturation.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(food).styled(Styles.RESULT), TextUtil.literal(saturation).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_food_and_saturation.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(food).styled(Styles.RESULT), TextUtil.literal(saturation).styled(Styles.RESULT)), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.set_food_and_saturation.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(food).styled(Styles.RESULT), TextUtil.literal(saturation).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_food_and_saturation.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(food).styled(Styles.RESULT), TextUtil.literal(saturation).styled(Styles.RESULT)), true);
     }
     return size;
   }
@@ -111,9 +110,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
       player.getHungerManager().setSaturationLevel(value);
     }
     if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.set_saturation.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_saturation.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.set_saturation.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_saturation.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
     }
     return size;
   }
@@ -124,9 +123,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
       player.getHungerManager().setExhaustion(value);
     }
     if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.set_exhaustion.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_exhaustion.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.set_exhaustion.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_exhaustion.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
     }
     return size;
   }
@@ -140,9 +139,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
       hungerManager.setExhaustion(0);
     }
     if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_to_max.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_to_max.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET)), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_to_max.multiple", TextUtil.literal(size).styled(Styles.TARGET)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_to_max.multiple", TextUtil.literal(size).styled(Styles.TARGET)), true);
     }
     return size;
   }
@@ -153,9 +152,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
       player.getHungerManager().add(food, saturationModifier);
     }
     if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(food).styled(Styles.RESULT), TextUtil.literal(saturationModifier).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(food).styled(Styles.RESULT), TextUtil.literal(saturationModifier).styled(Styles.RESULT)), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(food).styled(Styles.RESULT), TextUtil.literal(saturationModifier).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(food).styled(Styles.RESULT), TextUtil.literal(saturationModifier).styled(Styles.RESULT)), true);
     }
     return size;
   }
@@ -169,9 +168,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
       throw ADD_FROM_NOT_FOOD.create(stack.getName());
     }
     if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_food.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_food.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_food.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_food.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
     }
     return size;
   }
@@ -190,9 +189,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
         }
       }
       if (slot == -1) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_from_hand.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_from_hand.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
       } else {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_from.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_from.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.styled(stack.getName(), Styles.RESULT)), true);
       }
       return 1;
     } else {
@@ -211,9 +210,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
       }
       int finalSuccesses = successes;
       if (slot == -1) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_from_hand.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_from_hand.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)), true);
       } else {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.food.add_from.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_from.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)), true);
       }
       return successes;
     }
@@ -275,7 +274,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
         updated++;
       }
     }
-    CommandBridge.sendFeedback(context, () -> {
+    context.getSource().sendFeedback$ecBridge(() -> {
       if (players.size() == 1) {
         return Text.translatable("enhanced_commands.commands.food.tick.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), times).enhanced$$();
       } else {

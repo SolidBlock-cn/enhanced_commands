@@ -1,0 +1,20 @@
+package pers.solid.ecmd.mixins.ext;
+
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+
+import java.util.function.Supplier;
+
+/**
+ * 此接口将注入至 {@link ServerCommandSource}。
+ *
+ * @see pers.solid.ecmd.mixins.impl.ServerCommandSourceExtensionImpl
+ */
+public interface ServerCommandSourceExtension {
+  /**
+   * 在 1.20 之前，第一个参数是 {@code Text}，而自 1.20 之后，第一个参数调整为 {@code Supplier<Text>}，为减少在不同版本之间转换的成本，在这里做个桥梁方法。请优先使用此方法。
+   */
+  default void sendFeedback$ecBridge(Supplier<Text> feedbackSupplier, boolean broadcastToOps) {
+    ((ServerCommandSource) this).sendFeedback(feedbackSupplier, broadcastToOps);
+  }
+}

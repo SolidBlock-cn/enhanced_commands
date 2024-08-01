@@ -12,7 +12,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.BooleanUtils;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Comparator;
 import java.util.List;
@@ -54,11 +53,11 @@ public enum PileCommand implements CommandRegistrationCallback {
     }
     final int result = x + 1;
     if (result == size) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.pile.success", size), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.pile.success", size), false);
     } else if (x == 0) {
       throw PILING_FAILED.create(size);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.pile.success_partial", result), true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.pile.success_partial", result), true);
     }
     return result;
   }

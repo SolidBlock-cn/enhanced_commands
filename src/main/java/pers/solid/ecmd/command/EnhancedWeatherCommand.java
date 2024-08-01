@@ -12,7 +12,6 @@ import net.minecraft.world.level.ServerWorldProperties;
 import org.apache.commons.lang3.BooleanUtils;
 import pers.solid.ecmd.mixins.accessor.ServerWorldAccessor;
 import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -36,7 +35,7 @@ public enum EnhancedWeatherCommand implements CommandRegistrationCallback {
   private static int executeQuery(ServerCommandSource source, byte returns) {
     final ServerWorld world = source.getWorld();
     final ServerWorldProperties properties = ((ServerWorldAccessor) world).getWorldProperties();
-    CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.weather.query", describeWeather(properties.isRaining(), properties.isThundering()).styled(Styles.RESULT), properties.getClearWeatherTime(), properties.getRainTime(), properties.getThunderTime()), false);
+    source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.weather.query", describeWeather(properties.isRaining(), properties.isThundering()).styled(Styles.RESULT), properties.getClearWeatherTime(), properties.getRainTime(), properties.getThunderTime()), false);
     return switch (returns) {
       case 1 -> properties.getClearWeatherTime();
       case 2 -> properties.getRainTime();

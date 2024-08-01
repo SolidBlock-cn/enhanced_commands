@@ -24,7 +24,6 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import static net.minecraft.command.argument.RegistryEntryPredicateArgumentType.registryEntryPredicate;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -58,7 +57,7 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
       throw TEST_FOR_BIOME_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final RegistryEntry<Biome> biome = world.getBiome(blockPos);
-    CommandBridge.sendFeedback(source, () -> biome.getKeyOrValue().map(key -> Text.translatable("enhanced_commands.commands.testfor.biome.info", TextUtil.wrapVector(blockPos), TextUtil.biome(key).styled(Styles.RESULT), TextUtil.literal(key.getValue()).styled(Styles.RESULT)), value -> Text.translatable("enhanced_commands.commands.testfor.biome.info_unregistered", TextUtil.wrapVector(blockPos), Text.literal(value.toString()).styled(Styles.RESULT))), false);
+    source.sendFeedback$ecBridge(() -> biome.getKeyOrValue().map(key -> Text.translatable("enhanced_commands.commands.testfor.biome.info", TextUtil.wrapVector(blockPos), TextUtil.biome(key).styled(Styles.RESULT), TextUtil.literal(key.getValue()).styled(Styles.RESULT)), value -> Text.translatable("enhanced_commands.commands.testfor.biome.info_unregistered", TextUtil.wrapVector(blockPos), Text.literal(value.toString()).styled(Styles.RESULT))), false);
     return 1;
   }
 
@@ -72,7 +71,7 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
     final var predicate = RegistryEntryPredicateArgumentType.getRegistryEntryPredicate(context, "biome", RegistryKeys.BIOME);
     final RegistryEntry<Biome> actualBiome = world.getBiome(blockPos);
     final boolean test = predicate.test(actualBiome);
-    CommandBridge.sendFeedback(source, () -> {
+    source.sendFeedback$ecBridge(() -> {
       final MutableText posText = TextUtil.wrapVector(blockPos);
       final MutableText actualText = actualBiome.getKeyOrValue().map(TextUtil::biome, biome1 -> Text.literal(biome1.toString())).styled(Styles.ACTUAL);
       if (predicate instanceof EnhancedEntryPredicate.AnyOf<Biome> anyOf) {

@@ -16,9 +16,9 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -54,7 +54,7 @@ public enum TameCommand implements CommandRegistrationCallback {
     if (targets.size() == 1) {
       final Entity entity = targets.iterator().next();
       if (setTrust(entity, owner)) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.trust.success.single", entity.getDisplayName(), owner.getDisplayName()), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.trust.success.single", entity.getDisplayName(), owner.getDisplayName()), true);
         return 1;
       } else {
         throw NOT_TAMEABLE_SINGLE.create(entity.getDisplayName());
@@ -68,7 +68,7 @@ public enum TameCommand implements CommandRegistrationCallback {
       }
       if (success > 0) {
         int finalSuccess = success;
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.trust.success.multiple", finalSuccess, owner.getDisplayName()), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.trust.success.multiple", finalSuccess, owner.getDisplayName()), true);
         return finalSuccess;
       } else {
         throw NOT_TAMEABLE_MULTIPLE.create(targets.size());
@@ -81,7 +81,7 @@ public enum TameCommand implements CommandRegistrationCallback {
     if (targets.size() == 1) {
       final Entity entity = targets.iterator().next();
       if (setMistrust(entity)) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.mistrust.success.single", entity.getDisplayName()), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.mistrust.success.single", entity.getDisplayName()), true);
         return 1;
       } else {
         throw NOT_TAMEABLE_SINGLE.create(entity.getDisplayName());
@@ -95,7 +95,7 @@ public enum TameCommand implements CommandRegistrationCallback {
       }
       if (success > 0) {
         int finalSuccess = success;
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.mistrust.success.multiple", finalSuccess), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.mistrust.success.multiple", finalSuccess), true);
         return finalSuccess;
       } else {
         throw NOT_TAMEABLE_MULTIPLE.create(targets.size());
@@ -138,19 +138,19 @@ public enum TameCommand implements CommandRegistrationCallback {
       if (entity instanceof Tameable tameable) {
         final UUID ownerUuid = tameable.getOwnerUuid();
         if (ownerUuid == null) {
-          CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.single.not_tamed", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)), false);
+          context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.get.single.not_tamed", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)), false);
           return 0;
         } else {
           final LivingEntity owner = tameable.getOwner();
           if (owner != null) {
-            CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.single.tamed", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.styled(owner.getDisplayName(), Styles.RESULT)), false);
+            context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.get.single.tamed", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.styled(owner.getDisplayName(), Styles.RESULT)), false);
           } else {
-            CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.single.tamed", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), Text.literal(ownerUuid.toString()).styled(Styles.RESULT)), false);
+            context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.get.single.tamed", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), Text.literal(ownerUuid.toString()).styled(Styles.RESULT)), false);
           }
           return 1;
         }
       } else {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.single.not_tameable", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)), false);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.get.single.not_tameable", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)), false);
         return 0;
       }
     } else {
@@ -165,12 +165,13 @@ public enum TameCommand implements CommandRegistrationCallback {
         }
       }
       if (owners.isEmpty()) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.multiple.not_tamed", TextUtil.literal(targets.size()).styled(Styles.TARGET)).enhanced$$(), false);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.get.multiple.not_tamed", TextUtil.literal(targets.size()).styled(Styles.TARGET)).enhanced$$(), false);
       } else if (owners.size() == 1) {
         final Either<UUID, LivingEntity> owner = owners.iterator().next();
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.multiple.tamed_by_single", TextUtil.literal(targets.size()).styled(Styles.TARGET), owner.map(uuid -> Text.literal(uuid.toString()).styled(Styles.RESULT), livingEntity -> TextUtil.styled(livingEntity.getDisplayName(), Styles.RESULT))).enhanced$$(), false);
+        @NotNull ServerCommandSource source = context.getSource();
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.get.multiple.tamed_by_single", TextUtil.literal(targets.size()).styled(Styles.TARGET), owner.map(uuid -> Text.literal(uuid.toString()).styled(Styles.RESULT), livingEntity -> TextUtil.styled(livingEntity.getDisplayName(), Styles.RESULT))).enhanced$$(), false);
       } else {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.tame.get.multiple.tamed_by_multiple", TextUtil.literal(targets.size()).styled(Styles.TARGET), TextUtil.literal(owners.size()).styled(Styles.RESULT)), false);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tame.get.multiple.tamed_by_multiple", TextUtil.literal(targets.size()).styled(Styles.TARGET), TextUtil.literal(owners.size()).styled(Styles.RESULT)), false);
       }
       return owners.size();
     }

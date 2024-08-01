@@ -21,7 +21,6 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.function.Function;
 
@@ -114,9 +113,9 @@ public enum MoveCommand implements CommandRegistrationCallback {
       @Override
       public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
         if (affectedEntities == -1) {
-          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.complete.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks)).enhanced$$(), vec3i -> Text.translatable("enhanced_commands.commands.move.complete.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks)).enhanced$$()), true);
+          source.sendFeedback$ecBridge(() -> relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.complete.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks)).enhanced$$(), vec3i -> Text.translatable("enhanced_commands.commands.move.complete.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks)).enhanced$$()), true);
         } else {
-          CommandBridge.sendFeedback(source, () -> relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.complete_with_entities.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), vec3i -> Text.translatable("enhanced_commands.commands.move.complete_with_entities.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$()), true);
+          source.sendFeedback$ecBridge(() -> relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.complete_with_entities.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), vec3i -> Text.translatable("enhanced_commands.commands.move.complete_with_entities.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$()), true);
         }
       }
 

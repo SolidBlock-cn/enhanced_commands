@@ -7,7 +7,6 @@ import net.minecraft.text.Text;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +56,7 @@ public record TestResult(boolean successes, @Unmodifiable List<Text> description
   }
 
   public void sendMessage(ServerCommandSource serverCommandSource) {
-    CommandBridge.sendFeedback(serverCommandSource, () -> {
+    serverCommandSource.sendFeedback$ecBridge(() -> {
       final List<Text> lines = new ArrayList<>();
       appendTexts(lines, 0);
       return ScreenTexts.joinLines(lines);

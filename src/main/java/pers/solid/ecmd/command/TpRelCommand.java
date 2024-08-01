@@ -22,7 +22,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.*;
 
@@ -152,18 +151,15 @@ public enum TpRelCommand implements CommandRegistrationCallback {
 
     if (targets.size() == 1) {
       Vec3d finalVec3d = vec3d;
-      CommandBridge.sendFeedback(source, () -> Text.translatable(
-              "commands.teleport.success.location.single",
-              targets.iterator().next().getDisplayName(),
-              formatFloat(finalVec3d.x),
-              formatFloat(finalVec3d.y),
-              formatFloat(finalVec3d.z)
-          ),
-          true
-      );
+      source.sendFeedback$ecBridge(() -> Text.translatable(
+          "commands.teleport.success.location.single",
+          targets.iterator().next().getDisplayName(),
+          formatFloat(finalVec3d.x),
+          formatFloat(finalVec3d.y),
+          formatFloat(finalVec3d.z)
+      ), true);
     } else if (!targets.isEmpty()) {
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.tprel.multiple", targets.size()), true
-      );
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tprel.multiple", targets.size()), true);
     }
 
     return targets.size();

@@ -15,12 +15,12 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.BooleanUtils;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EntityPredicateArgumentType;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 
@@ -39,7 +39,7 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
   private int executeTestPredicate(Collection<? extends Entity> entities, EntityPredicate predicate, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final int size = entities.size();
     if (size == 0) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.none").formatted(Formatting.RED), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.none").formatted(Formatting.RED), false);
       return 0;
     } else if (size == 1) {
       final Entity entity = entities.iterator().next();
@@ -50,11 +50,11 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
       final int passes = Iterables.size(Iterables.filter(entities, predicate::test));
       final MutableText exampleEntity = TextUtil.styled(entities.iterator().next().getDisplayName(), Styles.TARGET);
       if (passes == size) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.all_pass", size, exampleEntity).enhanced$$().styled(Styles.TRUE), false);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.all_pass", size, exampleEntity).enhanced$$().styled(Styles.TRUE), false);
       } else if (passes == 0) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.none_pass", size, exampleEntity).enhanced$$().styled(Styles.FALSE), false);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.none_pass", size, exampleEntity).enhanced$$().styled(Styles.FALSE), false);
       } else {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.partially_pass", size, exampleEntity, passes).enhanced$$().styled(Styles.MEDIUM), false);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.partially_pass", size, exampleEntity, passes).enhanced$$().styled(Styles.MEDIUM), false);
       }
       return passes;
     }
@@ -63,13 +63,15 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
   private int executeShowEntities(Collection<? extends Entity> entities, CommandContext<ServerCommandSource> context) {
     final int size = entities.size();
     if (size == 0) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.none").formatted(Formatting.RED), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.none").formatted(Formatting.RED), false);
     } else if (size == 1) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.single", TextUtil.styled(entities.iterator().next().getDisplayName(), Styles.RESULT)), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.single", TextUtil.styled(entities.iterator().next().getDisplayName(), Styles.RESULT)), false);
     } else if (size < 9) {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.several", Texts.join(entities, entity -> TextUtil.styled(entity.getDisplayName(), Styles.RESULT)), TextUtil.literal(size).styled(Styles.RESULT)), false);
+      @NotNull ServerCommandSource source = context.getSource();
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.several", Texts.join(entities, entity -> TextUtil.styled(entity.getDisplayName(), Styles.RESULT)), TextUtil.literal(size).styled(Styles.RESULT)), false);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testfor.entity.many", Texts.join(ImmutableList.copyOf(Iterables.limit(entities, 10)), entity -> TextUtil.styled(entity.getDisplayName(), Styles.RESULT)), TextUtil.literal(size).styled(Styles.RESULT)), false);
+      @NotNull ServerCommandSource source = context.getSource();
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.many", Texts.join(ImmutableList.copyOf(Iterables.limit(entities, 10)), entity -> TextUtil.styled(entity.getDisplayName(), Styles.RESULT)), TextUtil.literal(size).styled(Styles.RESULT)), false);
     }
     return size;
   }

@@ -34,7 +34,6 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.RegionArgumentType;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.lambda.ToFloatTriFunction;
 import pers.solid.ecmd.util.lambda.ToIntQuadFunction;
 import pers.solid.ecmd.util.lambda.ToIntTriFunction;
@@ -285,7 +284,7 @@ public final class SeparatedExecuteCommand {
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addConditionLogic(CommandNode<ServerCommandSource> root, T builder, boolean positive, Condition condition) {
     return builder.fork(root, context -> ExecuteCommandAccessor.callGetSourceOrEmptyForConditionFork(context, positive, condition.test(context))).executes(context -> {
       if (positive == condition.test(context)) {
-        CommandBridge.sendFeedback(context, () -> Text.translatable("commands.execute.conditional.pass"), false);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("commands.execute.conditional.pass"), false);
         return 1;
       } else {
         throw CONDITIONAL_FAIL_EXCEPTION.create();

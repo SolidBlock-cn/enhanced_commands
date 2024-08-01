@@ -24,7 +24,6 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.function.BiFunction;
@@ -93,10 +92,10 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
     final Region region = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegion();
     if (region == null) {
-      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.activeregion.get_none", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.activeregion.get_none", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), false);
       return 0;
     } else {
-      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.activeregion.get", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.literal(region).styled(Styles.RESULT)), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.activeregion.get", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.literal(region).styled(Styles.RESULT)), false);
       return 1;
     }
   }
@@ -104,14 +103,14 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   public static int executeSet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final PlayerEntity player = source.getPlayerOrThrow();
-    CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.activeregion.set.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), true);
+    source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.activeregion.set.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), true);
     return 1;
   }
 
   public static int executeRemove(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final PlayerEntity player = source.getPlayerOrThrow();
-    CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.activeregion.remove.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), true);
+    source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.activeregion.remove.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), true);
     return 1;
   }
 
@@ -179,7 +178,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
 
     // 注意：当玩家有 regionBuilder 时，会自动生成 region，且理论上 regionBuilder 和 region 进行的操作应当是一致的。
     ((ServerPlayerEntityExtension) player).ec$setActiveRegion(operatedRegion);
-    CommandBridge.sendFeedback(source, () -> messageSingle.apply(player, operatedRegion), true);
+    source.sendFeedback$ecBridge(() -> messageSingle.apply(player, operatedRegion), true);
     return 1;
   }
 }

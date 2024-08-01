@@ -33,7 +33,6 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Iterator;
@@ -153,18 +152,18 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> {
       if (hasUnloaded.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
         } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
         }
       }
-      CommandBridge.sendFeedback(source, () -> feedback.apply(numbersAffected.intValue()), true);
+      source.sendFeedback$ecBridge(() -> feedback.apply(numbersAffected.intValue()), true);
     });
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!keywordArgs.getBoolean("immediately") && region.numberOfBlocksAffected() > 2048) {
       ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhanced_commands.commands.convertblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

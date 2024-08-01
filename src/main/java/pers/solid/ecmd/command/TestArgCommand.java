@@ -46,7 +46,6 @@ import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -120,37 +119,37 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtProperties(T argumentBuilder) {
     return argumentBuilder.then(argument("nbt", NbtElementArgumentType.nbtElement())
         .executes(context -> {
-          CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(getNbtElement(context, "nbt")), false);
+          context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(getNbtElement(context, "nbt")), false);
           return 1;
         })
         .then(literal("plainstring")
             .executes(context -> {
-              CommandBridge.sendFeedback(context, () -> Text.literal(TextUtil.toSpacedStringNbt(getNbtElement(context, "nbt"))), false);
+              context.getSource().sendFeedback$ecBridge(() -> Text.literal(TextUtil.toSpacedStringNbt(getNbtElement(context, "nbt"))), false);
               return 1;
             }))
         .then(literal("prettyprinted")
             .executes(context -> {
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(getNbtElement(context, "nbt")), false);
+              context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(getNbtElement(context, "nbt")), false);
               return 1;
             }))
         .then(literal("indented")
             .executes(context -> {
-              CommandBridge.sendFeedback(context, () -> new NbtTextFormatter("  ").apply(getNbtElement(context, "nbt")), false);
+              context.getSource().sendFeedback$ecBridge(() -> new NbtTextFormatter("  ").apply(getNbtElement(context, "nbt")), false);
               return 1;
             }))
         .then(literal("test")
             .executes(context -> {
               final NbtElement nbtElement = getNbtElement(context, "nbt");
               final String s = TextUtil.toSpacedStringNbt(nbtElement);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(Styles.RESULT)), false);
+              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(Styles.RESULT)), false);
               final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser(new StringReader(s)).parsePredicate(false, false);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(Styles.RESULT)), false);
+              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(Styles.RESULT)), false);
               final NbtFunction reparsedFunction = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(Styles.RESULT)), false);
+              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
+              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
               final boolean reparsedFunctionEqual = reparsedFunction.apply(null).equals(nbtElement);
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
+              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
               return (reparsedPredicateMatches ? 2 : 0) + (reparsedFunctionEqual ? 1 : 0);
             }))
         .then(literal("convert")
@@ -182,7 +181,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                   final NbtElement nbtToTest = getNbtElement(context, "nbt_to_test");
                   final NbtPredicate nbtPredicate = getNbtPredicate(context, "nbt_predicate");
                   final boolean test = nbtPredicate.test(nbtToTest);
-                  CommandBridge.sendFeedback(context, () -> Text.literal(Boolean.toString(test)), false);
+                  context.getSource().sendFeedback$ecBridge(() -> Text.literal(Boolean.toString(test)), false);
                   return BooleanUtils.toInteger(test);
                 })))
         .then(literal("string")
@@ -199,7 +198,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             .executes(context -> {
               final NbtFunction nbtFunction = getNbtFunction(context, "nbt_function");
               final NbtElement apply = nbtFunction.apply(null);
-              CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(apply), false);
+              context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(apply), false);
               return 1;
             })
             .then(argument("nbt_element", NbtElementArgumentType.nbtElement())
@@ -207,7 +206,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                   final NbtElement nbtElement = getNbtElement(context, "nbt_element");
                   final NbtFunction nbtFunction = getNbtFunction(context, "nbt_function");
                   final NbtElement apply = nbtFunction.apply(nbtElement);
-                  CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(apply), false);
+                  context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(apply), false);
                   return 1;
                 })))
         .then(literal("string")
@@ -221,7 +220,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     final Command<ServerCommandSource> execution = context -> {
       final PosArgument pos = getPosArgument(context, "pos");
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
-      CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.pos.result").append(ScreenTexts.LINE_BREAK).append(Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY)), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.pos.result").append(ScreenTexts.LINE_BREAK).append(Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY)), false);
       return 1;
     };
     for (final EnhancedPosArgumentType.NumberType numberType : EnhancedPosArgumentType.NumberType.values()) {
@@ -291,7 +290,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               }
               final int finalNumOfIteratedButNotMatch = numOfIteratedButNotMatch;
               final int finalNumOfNotIteratedButMatch = numOfNotIteratedButMatch;
-              CommandBridge.sendFeedback(context, () -> Text.translatable("enhanced_commands.commands.testarg.region.verify.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), false);
+              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.region.verify.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), false);
               return numOfIteratedButNotMatch;
             }))
     );
@@ -305,30 +304,32 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   }
 
   private static <A extends ExpressionConvertible> int executeConvertShow(CommandContext<ServerCommandSource> context, Codec<A> codec) throws CommandSyntaxException {
-    return executeConvertShow(getNbtElement(context, "nbt"), codec, a -> CommandBridge.sendFeedback(context, () -> Text.literal(a.asString()).styled(Styles.RESULT), false));
+    return executeConvertShow(getNbtElement(context, "nbt"), codec, a -> {
+      context.getSource().sendFeedback$ecBridge(() -> Text.literal(a.asString()).styled(Styles.RESULT), false);
+    });
   }
 
   private static <A> int executeStringShow(CommandContext<ServerCommandSource> context, A fetchedArg, FailableFunction<A, String, CommandSyntaxException> toString) throws CommandSyntaxException {
     final String s = toString.apply(fetchedArg);
-    CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
+    context.getSource().sendFeedback$ecBridge(() -> Text.literal(s), false);
     return 1;
   }
 
   private static <A> int executeStringTest(CommandContext<ServerCommandSource> context, A fetchedArg, FailableFunction<A, String, CommandSyntaxException> toString, FailableFunction<String, A, CommandSyntaxException> fromString) throws CommandSyntaxException {
     final String s = toString.apply(fetchedArg);
-    CommandBridge.sendFeedback(context, () -> Text.literal(s), false);
+    context.getSource().sendFeedback$ecBridge(() -> Text.literal(s), false);
     final A second = fromString.apply(s);
     final boolean b = second.equals(fetchedArg);
-    CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
+    context.getSource().sendFeedback$ecBridge(() -> TextUtil.wrapBoolean(b), false);
     return BooleanUtils.toInteger(b);
   }
 
   private static <A, T> int executeCodecShow(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
     final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof NbtElement nbt) {
-      CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
+      context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(nbt), false);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.literal(code.toString()).styled(Styles.RESULT), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.literal(code.toString()).styled(Styles.RESULT), false);
     }
     return 1;
   }
@@ -336,17 +337,17 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   private static <A, T> int executeCodecTest(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
     final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof NbtElement nbt) {
-      CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
+      context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(nbt), false);
     } else {
-      CommandBridge.sendFeedback(context, () -> Text.literal(code.toString()).styled(Styles.RESULT), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.literal(code.toString()).styled(Styles.RESULT), false);
     }
     try {
       final A second = codec.decode(ops, code).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
       if (second instanceof NbtElement nbt) {
-        CommandBridge.sendFeedback(context, () -> NbtHelper.toPrettyPrintedText(nbt), false);
+        context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(nbt), false);
       }
       final boolean b = second.equals(fetchedArg);
-      CommandBridge.sendFeedback(context, () -> TextUtil.wrapBoolean(b), false);
+      context.getSource().sendFeedback$ecBridge(() -> TextUtil.wrapBoolean(b), false);
       return BooleanUtils.toInteger(b);
     } catch (Throwable e) {
       EnhancedCommands.LOGGER.error("Parsing region from NBT:", e);

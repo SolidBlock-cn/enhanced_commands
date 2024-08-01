@@ -27,7 +27,6 @@ import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.mixins.accessor.FallingBlockEntityAccessor;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.function.Function;
@@ -71,7 +70,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
       final NbtCompound apply = nbtFunction.apply(NbtPredicate.entityToNbt(entity));
       entity.readNbt(apply);
     }
-    CommandBridge.sendFeedback(source, () -> feedback.apply(blockPos), false);
+    source.sendFeedback$ecBridge(() -> feedback.apply(blockPos), false);
     return 1;
   }
 

@@ -28,7 +28,6 @@ import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
@@ -108,7 +107,7 @@ public interface BlockTransformationCommand {
         notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
       })));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(task.transformBlocks().getImmediateTask());
@@ -126,9 +125,9 @@ public interface BlockTransformationCommand {
   private static void notifyUnloadedPos(BlockTransformationTask task, UnloadedPosBehavior unloadedPosBehavior, ServerCommandSource source) {
     if (task.hasUnloadedPos) {
       if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
       } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
       }
     }
   }

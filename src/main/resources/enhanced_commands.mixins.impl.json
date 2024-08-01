@@ -4,7 +4,8 @@
   "package": "pers.solid.ecmd.mixins.impl",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "MutableTextExtensionImpl"
+    "MutableTextExtensionImpl",
+    "ServerCommandSourceExtensionImpl"
   ],
   "client": [
   ],

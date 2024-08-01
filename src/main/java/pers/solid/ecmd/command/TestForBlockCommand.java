@@ -24,7 +24,6 @@ import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 
@@ -57,7 +56,7 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     }
     final BlockState blockState = world.getBlockState(blockPos);
     final Collection<Property<?>> properties = blockState.getProperties();
-    CommandBridge.sendFeedback(source, () -> {
+    source.sendFeedback$ecBridge(() -> {
       final MutableText posText = TextUtil.wrapVector(blockPos);
       final MutableText resultText = blockState.getBlock().getName().styled(Styles.RESULT);
       final MutableText idText = TextUtil.literal(Registries.BLOCK.getId(blockState.getBlock())).styled(Styles.RESULT);
@@ -68,7 +67,7 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
       }
     }, false);
     for (Property<?> property : properties) {
-      CommandBridge.sendFeedback(source, () -> expressPropertyValue(blockState, property), false);
+      source.sendFeedback$ecBridge(() -> expressPropertyValue(blockState, property), false);
     }
     return 1;
   }

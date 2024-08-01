@@ -33,7 +33,6 @@ import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Iterator;
@@ -164,7 +163,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
           .iterator();
       mainIterator = Iterables.concat(() -> testPosIteration, placingIteration).iterator();
     }
-    final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> CommandBridge.sendFeedback(source, () -> Text.translatable(hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
+    final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> source.sendFeedback$ecBridge(() -> Text.translatable(hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> "enhanced_commands.commands.fill.complete_skipped";
       case BREAK -> "enhanced_commands.commands.fill.complete_broken";
       default -> "enhanced_commands.commands.fill.complete";
@@ -174,7 +173,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
       ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhanced_commands.commands.fill.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

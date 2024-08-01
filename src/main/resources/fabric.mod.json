@@ -35,6 +35,9 @@
     "loom:injected_interfaces": {
       "net/minecraft/class_5250": [
         "pers/solid/ecmd/mixins/ext/MutableTextExtension"
+      ],
+      "net/minecraft/class_2168": [
+        "pers/solid/ecmd/mixins/ext/ServerCommandSourceExtension"
       ]
     }
   }

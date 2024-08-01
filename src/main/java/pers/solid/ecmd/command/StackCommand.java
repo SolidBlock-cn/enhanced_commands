@@ -40,7 +40,6 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
@@ -281,15 +280,15 @@ public enum StackCommand implements CommandRegistrationCallback {
     Iterator<?> iterator = Iterators.concat(UnloadedPosException.catching(Iterators.concat(iterators.iterator())), IterateUtils.singletonPeekingIterator(() -> {
       if (hasUnloadedPos.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
         } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
         }
       }
       if (affectEntities != null) {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.stack.complete_including_entities", blocksAffected, entitiesAffected), true);
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.stack.complete_including_entities", blocksAffected, entitiesAffected), true);
       } else {
-        CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
       }
       if (transformsRegion && player != null) {
         ((ServerPlayerEntityExtension) player).ec$setActiveRegion(targetRegion);
@@ -300,7 +299,7 @@ public enum StackCommand implements CommandRegistrationCallback {
     if (!immediately && region.numberOfBlocksAffected() * stackAmount > 16384) {
       // The region is too large. Send a server task.
       ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount)), UnloadedPosException.catching(iterator));
-      CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

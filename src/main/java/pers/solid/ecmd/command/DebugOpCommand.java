@@ -12,7 +12,6 @@ import net.minecraft.server.PlayerManager;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -51,7 +50,7 @@ public enum DebugOpCommand implements CommandRegistrationCallback {
       if (!playerManager.isOperator(gameProfile)) {
         playerManager.addToOperators(gameProfile);
         ++i;
-        CommandBridge.sendFeedback(source, () -> Text.translatable("commands.op.success", targets.iterator().next().getName()), true);
+        source.sendFeedback$ecBridge(() -> Text.translatable("commands.op.success", targets.iterator().next().getName()), true);
       }
     }
     if (i == 0) {

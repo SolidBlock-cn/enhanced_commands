@@ -10,7 +10,6 @@ import net.minecraft.text.Text;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 
 public enum DebugPermissionLevelCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -21,7 +20,7 @@ public enum DebugPermissionLevelCommand implements CommandRegistrationCallback {
         .executes(context -> {
           final ServerCommandSource source = context.getSource();
           final int level = ((ServerCommandSourceAccessor) source).getLevel();
-          CommandBridge.sendFeedback(source, () -> Text.translatable("enhanced_commands.commands.debug:permissionlevel.result", TextUtil.literal(level).styled(Styles.RESULT)), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.debug:permissionlevel.result", TextUtil.literal(level).styled(Styles.RESULT)), false);
           return level;
         })
         .then(CommandManager.argument("level", IntegerArgumentType.integer())

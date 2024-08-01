@@ -21,7 +21,6 @@ import pers.solid.ecmd.regionselection.RegionSelectionType;
 import pers.solid.ecmd.regionselection.WandEvent;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.function.Supplier;
@@ -39,7 +38,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
     final Command<ServerCommandSource> executesWithoutParam = context -> {
       final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
       player.giveItemStack(WandEvent.createWandStack());
-      CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.regionselection.build_now", Text.keybind("key.attack").formatted(Formatting.GRAY), Text.keybind("key.use").formatted(Formatting.GRAY)), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.regionselection.build_now", Text.keybind("key.attack").formatted(Formatting.GRAY), Text.keybind("key.use").formatted(Formatting.GRAY)), false);
       return 1;
     };
     final LiteralCommandNode<ServerCommandSource> regionselection
@@ -60,7 +59,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
                   final RegistryEntry.Reference<RegionSelectionType> registryEntry = RegistryEntryReferenceArgumentType.getRegistryEntry(context, "type", RegionSelectionType.REGISTRY_KEY);
                   final RegionSelectionType type = registryEntry.value();
                   ((ServerPlayerEntityExtension) player).ec$switchRegionSelectionType(type);
-                  CommandBridge.sendFeedback(context.getSource(), () -> Text.translatable("enhanced_commands.commands.regionselection.changed", TextUtil.literal(registryEntry.registryKey().getValue()).styled(Styles.RESULT)), true);
+                  context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.regionselection.changed", TextUtil.literal(registryEntry.registryKey().getValue()).styled(Styles.RESULT)), true);
                   return 1;
                 }))));
     dispatcher.register(literalR2("rs")
@@ -77,7 +76,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
       case 2 -> regionSelection.clickSecondPoint(blockPos, player);
       default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
     };
-    CommandBridge.sendFeedback(source, textSupplier, true);
+    source.sendFeedback$ecBridge(textSupplier, true);
     return 1;
   }
 }
