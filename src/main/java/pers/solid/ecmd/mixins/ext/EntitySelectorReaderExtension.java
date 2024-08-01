@@ -11,5 +11,7 @@ public interface EntitySelectorReaderExtension {
   /**
    * 获取原版的 {@link EntitySelectorReader} 对象中，通过本模组加入的包含一些扩展信息的对象的字段。
    */
-  EntitySelectorReaderExtras extension$ec();
+  default EntitySelectorReaderExtras extension$ec() {
+    throw new UnsupportedOperationException();
+  }
 }
