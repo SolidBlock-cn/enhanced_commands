@@ -7,13 +7,12 @@ import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.command.argument.EntityArgumentType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import pers.solid.ecmd.predicate.entity.EntitySelectorReaderExtras;
 
 @Mixin(EntityArgumentType.class)
 public abstract class EntityArgumentTypeMixin {
   @ModifyExpressionValue(method = "listSuggestions", at = @At(value = "NEW", target = "(Lcom/mojang/brigadier/StringReader;Z)Lnet/minecraft/command/EntitySelectorReader;"))
   private EntitySelectorReader addContext(EntitySelectorReader entitySelectorReader, @Local(argsOnly = true) CommandContext<?> context) {
-    EntitySelectorReaderExtras.getOf(entitySelectorReader).context = context;
+    entitySelectorReader.extension$ec().context = context;
     return entitySelectorReader;
   }
 }

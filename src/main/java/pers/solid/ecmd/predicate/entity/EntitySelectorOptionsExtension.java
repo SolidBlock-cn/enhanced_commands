@@ -106,7 +106,7 @@ public class EntitySelectorOptionsExtension {
     markRequiringUniqueNoMixture("propertyName");
     map.put("distance", (reader, option, restoreCursor) -> {
       reader.getReader().setCursor(restoreCursor);
-      if (EntitySelectorReaderExtras.getOf(reader).implicitDistance) {
+      if (reader.extension$ec().implicitDistance) {
         return DISTANCE_ALREADY_IMPLICIT.createWithContext(reader.getReader());
       } else {
         return DUPLICATE_OPTION.createWithContext(reader.getReader(), option);
@@ -128,7 +128,7 @@ public class EntitySelectorOptionsExtension {
     map.put("sort", (reader, option, restoreCursor) -> {
       final StringReader stringReader = reader.getReader();
       stringReader.setCursor(restoreCursor);
-      if (EntitySelectorReaderExtras.getOf(reader).implicitNegativeLimit) {
+      if (reader.extension$ec().implicitNegativeLimit) {
         return INVALID_SORTER_WITH_NEGATIVE_LIMIT.createWithContext(stringReader);
       }
       return reader.isSenderOnly() ? INVALID_SORT_FOR_AT_S.createWithContext(stringReader) : DUPLICATE_OPTION.createWithContext(stringReader, "sort");
@@ -137,7 +137,7 @@ public class EntitySelectorOptionsExtension {
     markRequiringUnique("team");
     map.put("type", (reader, option, restoreCursor) -> {
       if (reader.selectsEntityType()) {
-        final EntitySelectorReaderExtras entitySelectorReaderExtras = EntitySelectorReaderExtras.getOf(reader);
+        final EntitySelectorReaderExtras entitySelectorReaderExtras = reader.extension$ec();
         final String atVariable = entitySelectorReaderExtras.atVariable;
         final StringReader stringReader = reader.getReader();
         if (atVariable != null) {
@@ -162,7 +162,7 @@ public class EntitySelectorOptionsExtension {
     markRequiringUnique("scores");
     markRequiringUnique("advancements");
     final InapplicableReasonProvider providerForR = (reader, option, restoreCursor) -> {
-      if (EntitySelectorReaderExtras.getOf(reader).implicitDistance) {
+      if (reader.extension$ec().implicitDistance) {
         reader.getReader().setCursor(restoreCursor);
         return DUPLICATE_OPTION.createWithContext(reader.getReader(), option);
       } else {
@@ -215,7 +215,7 @@ public class EntitySelectorOptionsExtension {
       final StringReader stringReader = reader.getReader();
       final int cursorBeforeValue = stringReader.getCursor();
       final float value = stringReader.readFloat();
-      EntitySelectorReaderExtras.getOf(reader).implicitDistance = true;
+      reader.extension$ec().implicitDistance = true;
       if (original.min().isEmpty()) {
         reader.setDistance(NumberRange.DoubleRange.atMost(value));
       } else {
@@ -230,13 +230,13 @@ public class EntitySelectorOptionsExtension {
         }
         reader.setDistance(NumberRange.DoubleRange.between(original.min().get(), value));
       }
-    }, reader -> reader.getDistance().isDummy() || EntitySelectorReaderExtras.getOf(reader).implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.r.description"));
+    }, reader -> reader.getDistance().isDummy() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.r.description"));
     putOption("rm", reader -> {
       final NumberRange.DoubleRange original = reader.getDistance();
       final StringReader stringReader = reader.getReader();
       final int cursorBeforeValue = stringReader.getCursor();
       final float value = stringReader.readFloat();
-      EntitySelectorReaderExtras.getOf(reader).implicitDistance = true;
+      reader.extension$ec().implicitDistance = true;
       if (original.max().isEmpty()) {
         reader.setDistance(NumberRange.DoubleRange.atLeast(value));
       } else {
@@ -251,15 +251,15 @@ public class EntitySelectorOptionsExtension {
         }
         reader.setDistance(NumberRange.DoubleRange.between(value, original.max().get()));
       }
-    }, reader -> reader.getDistance().isDummy() || EntitySelectorReaderExtras.getOf(reader).implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.rm.description"));
+    }, reader -> reader.getDistance().isDummy() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.rm.description"));
 
     putOption("region", reader -> {
       final SuggestedParser parser = new SuggestedParser(reader.getReader());
-      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
+      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(reader.extension$ec().context, suggestionsBuilder));
       final CommandRegistryAccess registryAccess = MixinShared.getCommandRegistryAccess();
       final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, false);
 
-      EntitySelectorReaderExtras.getOf(reader).addFunction(source -> {
+      reader.extension$ec().addFunction(source -> {
         final Region region;
         region = regionArgument.toAbsoluteRegion(source);
         return entity -> region.contains(entity.getPos());
@@ -329,7 +329,7 @@ public class EntitySelectorOptionsExtension {
       }
 
       final ImmutableList<EntitySelector> build = entitySelectors.build();
-      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> new AlternativesEntityPredicateEntry(build, source, inverted));
+      reader.extension$ec().addPredicateAndDescription(source -> new AlternativesEntityPredicateEntry(build, source, inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
 
     putOption("health", reader -> {
@@ -341,12 +341,12 @@ public class EntitySelectorOptionsExtension {
       final String unquotedString = stringReader.readUnquotedString();
       if ("max".equals(unquotedString)) {
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new HealthMaxEntityPredicateEntry(inverted));
+        reader.extension$ec().addPredicateAndDescription(new HealthMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
         final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new HealthEntityPredicateEntry(floatRange, inverted));
+        reader.extension$ec().addPredicateAndDescription(new HealthEntityPredicateEntry(floatRange, inverted));
       }
       markParamAsUsed(reader, "health", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "health"), Text.translatable("enhanced_commands.argument.entity.options.health"));
@@ -360,12 +360,12 @@ public class EntitySelectorOptionsExtension {
       final String unquotedString = stringReader.readUnquotedString();
       if ("max".equals(unquotedString)) {
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new AirMaxEntityPredicateEntry(inverted));
+        reader.extension$ec().addPredicateAndDescription(new AirMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
         final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new AirEntityPredicateEntry(intRange, inverted));
+        reader.extension$ec().addPredicateAndDescription(new AirEntityPredicateEntry(intRange, inverted));
       }
       markParamAsUsed(reader, "air", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "air"), Text.translatable("enhanced_commands.argument.entity.options.air"));
@@ -376,7 +376,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "food", inverted);
       final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
-      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new FoodEntityPredicateEntry(intRange, inverted));
+      reader.extension$ec().addPredicateAndDescription(new FoodEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "food", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "food"), Text.translatable("enhanced_commands.argument.entity.options.food"));
     markRequiringUniqueNoMixture("food");
@@ -386,7 +386,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "saturation", inverted);
       final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
       reader.setIncludesNonPlayers(false);
-      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new SaturationEntityPredicateEntry(floatRange, inverted));
+      reader.extension$ec().addPredicateAndDescription(new SaturationEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "saturation", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "saturation"), Text.translatable("enhanced_commands.argument.entity.options.saturation"));
     markRequiringUniqueNoMixture("saturation");
@@ -396,7 +396,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "exhaustion", inverted);
       final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
       reader.setIncludesNonPlayers(false);
-      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new ExhaustionEntityPredicateEntry(floatRange, inverted));
+      reader.extension$ec().addPredicateAndDescription(new ExhaustionEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "exhaustion", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "exhaustion"), Text.translatable("enhanced_commands.argument.entity.options.exhaustion"));
     markRequiringUniqueNoMixture("exhaustion");
@@ -405,7 +405,7 @@ public class EntitySelectorOptionsExtension {
       final boolean inverted = reader.readNegationCharacter();
       checkNoInversionMix(reader, "fire", inverted);
       final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
-      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new FireEntityPredicateEntry(intRange, inverted));
+      reader.extension$ec().addPredicateAndDescription(new FireEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "fire", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "fire"), Text.translatable("enhanced_commands.argument.entity.options.fire"));
     markRequiringUniqueNoMixture("fire");
@@ -418,7 +418,7 @@ public class EntitySelectorOptionsExtension {
       final String s = reader.getReader().readUnquotedString();
       final EntityPose entityPose = PoseEntityPredicateEntry.ENTITY_POSE_NAMES.inverse().get(s);
       if (entityPose != null) {
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new PoseEntityPredicateEntry(entityPose, inverted));
+        reader.extension$ec().addPredicateAndDescription(new PoseEntityPredicateEntry(entityPose, inverted));
         markParamAsUsed(reader, "pose", inverted);
       } else {
         final int cursorAfter = reader.getReader().getCursor();
@@ -452,7 +452,7 @@ public class EntitySelectorOptionsExtension {
             break;
           }
           parser.suggestionProviders.clear();
-          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(reader.extension$ec().context, suggestionsBuilder));
           final PosArgument posArgument = parser.parseAndSuggestArgument(EnhancedPosArgumentType.blockPos());
 
           stringReader.skipWhitespace();
@@ -465,7 +465,7 @@ public class EntitySelectorOptionsExtension {
           }
 
           parser.suggestionProviders.clear();
-          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(reader.extension$ec().context, suggestionsBuilder));
           final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(MixinShared.getCommandRegistryAccess(), parser, false);
 
           map.put(posArgument, blockPredicateArgument);
@@ -483,7 +483,7 @@ public class EntitySelectorOptionsExtension {
           }
         }
 
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> {
+        reader.extension$ec().addPredicateAndDescription(source -> {
           final ImmutableMap.Builder<PosArgument, BlockPredicate> newMapBuilder = new ImmutableMap.Builder<>();
           for (final var entry : map.entrySet()) {
             final var posArgument = entry.getKey();
@@ -494,9 +494,9 @@ public class EntitySelectorOptionsExtension {
         });
       } else {
         parser.suggestionProviders.clear();
-        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(EntitySelectorReaderExtras.getOf(reader).context, suggestionsBuilder));
+        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(reader.extension$ec().context, suggestionsBuilder));
         final BlockPredicateArgument parse = BlockPredicateArgument.parse(MixinShared.getCommandRegistryAccess(), parser, false);
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
+        reader.extension$ec().addPredicateAndDescription(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
       }
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.block"));
 
@@ -553,13 +553,13 @@ public class EntitySelectorOptionsExtension {
           }
         }
 
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(entry);
+        reader.extension$ec().addPredicateAndDescription(entry);
       } else {
         final boolean inverted = reader.readNegationCharacter();
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries(), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref -> ref.value().getName()));
         final StatusEffect value = type.parse(stringReader).value();
 
-        EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new EffectEntityPredicateEntry(value, inverted));
+        reader.extension$ec().addPredicateAndDescription(new EffectEntityPredicateEntry(value, inverted));
       }
     }, reader -> isNeverPositivelyUsed(reader, "effect"), Text.translatable("enhanced_commands.entity_predicate.effect"));
 
@@ -572,12 +572,12 @@ public class EntitySelectorOptionsExtension {
         final char peek = stringReader.peek();
         if (peek == ']' || peek == ',' || peek == ';') {
           // 在 'owner=' 或 'owner=!' 后没有接任何值时，使用 null 值
-          EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new OwnerEntityPredicateEntry(null, inverted));
+          reader.extension$ec().addPredicateAndDescription(new OwnerEntityPredicateEntry(null, inverted));
           return;
         }
       }
       final EntitySelector value = EntitySelectors.readOmittibleEntitySelector(reader);
-      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(source -> new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value, source), inverted));
+      reader.extension$ec().addPredicateAndDescription(source -> new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value, source), inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.owner"));
   }
 
@@ -595,7 +595,7 @@ public class EntitySelectorOptionsExtension {
       final boolean inverted = reader.readNegationCharacter();
       reader.setSuggestionProvider(BOOLEAN_SUGGEST);
       final boolean expected = inverted != reader.getReader().readBoolean();
-      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new SimpleBooleanEntityPredicateEntry(predicate, expected, baseTranslationKey + "." + true, baseTranslationKey + "." + false, id));
+      reader.extension$ec().addPredicateAndDescription(new SimpleBooleanEntityPredicateEntry(predicate, expected, baseTranslationKey + "." + true, baseTranslationKey + "." + false, id));
       // 对于布尔值，使用否定的直接替换其效果，仍视为未被取反的谓词
       markParamAsUsed(reader, id, false);
     }, reader -> isNeverPositivelyUsed(reader, id), Text.translatable(baseTranslationKey));
@@ -698,7 +698,7 @@ public class EntitySelectorOptionsExtension {
         // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
       }
 
-      EntitySelectorReaderExtras.getOf(reader).addPredicateAndDescription(new TypesEntityPredicateEntry(values, hasNegation));
+      reader.extension$ec().addPredicateAndDescription(new TypesEntityPredicateEntry(values, hasNegation));
       return true;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
@@ -755,11 +755,11 @@ public class EntitySelectorOptionsExtension {
           return false;
         }
       });
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new GameModeEntityPredicateEntry.Multiple(parsedGameModes, hasNegation));
+      reader.extension$ec().addDescription(source -> new GameModeEntityPredicateEntry.Multiple(parsedGameModes, hasNegation));
       return false;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new GameModeEntityPredicateEntry.Single(gameMode, hasNegation));
+      reader.extension$ec().addDescription(source -> new GameModeEntityPredicateEntry.Single(gameMode, hasNegation));
       return true;
     }
   }
@@ -839,7 +839,7 @@ public class EntitySelectorOptionsExtension {
 
   public static boolean mixinReadLiteralPredicate(EntitySelectorReader reader, boolean hasNegation, StringReader stringReader) throws CommandSyntaxException {
     reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
-      final CommandContext<?> context = EntitySelectorReaderExtras.getOf(reader).context;
+      final CommandContext<?> context = reader.extension$ec().context;
       if (context != null && context.getSource() instanceof ServerCommandSource source) {
         return CommandSource.suggestIdentifiers(source.getServer().getReloadableRegistries().getIds(RegistryKeys.PREDICATE), suggestionsBuilder);
       } else if (context != null && context.getSource() instanceof CommandSource commandSource) {
@@ -868,7 +868,7 @@ public class EntitySelectorOptionsExtension {
           }
         }
       });
-      EntitySelectorReaderExtras.getOf(reader).addDescription(source -> new LootTablePredicateAnonymousEntityPredicateEntry(lootCondition, hasNegation));
+      reader.extension$ec().addDescription(source -> new LootTablePredicateAnonymousEntityPredicateEntry(lootCondition, hasNegation));
       return true;
     }
     return false;

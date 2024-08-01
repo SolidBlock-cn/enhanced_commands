@@ -14,7 +14,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
-import pers.solid.ecmd.predicate.entity.EntitySelectorReaderExtras;
 
 import java.util.Collection;
 import java.util.List;
@@ -52,7 +51,7 @@ public record EntityPredicateArgumentType(CommandRegistryAccess commandRegistryA
       StringReader stringReader = new StringReader(builder.getInput());
       stringReader.setCursor(builder.getStart());
       EntitySelectorReader entitySelectorReader = new EntitySelectorReader(stringReader, commandSource.hasPermissionLevel(2));
-      EntitySelectorReaderExtras.getOf(entitySelectorReader).context = context;
+      entitySelectorReader.extension$ec().context = context;
       final var accessor = (EntitySelectorReaderAccessor) entitySelectorReader;
 
       try {
