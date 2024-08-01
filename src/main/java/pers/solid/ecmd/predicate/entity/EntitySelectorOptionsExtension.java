@@ -34,6 +34,7 @@ import net.minecraft.predicate.entity.EntityEffectPredicate;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.scoreboard.ReadableScoreboardScore;
 import net.minecraft.scoreboard.Scoreboard;
@@ -54,7 +55,6 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.mixins.ext.EntitySelectorReaderExtension;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
@@ -506,8 +506,8 @@ public class EntitySelectorOptionsExtension {
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
-        final LinkedHashMap<StatusEffect, EntityEffectPredicate.EffectData> effects = new LinkedHashMap<>();
-        final HashSet<StatusEffect> inverted = new HashSet<>();
+        final LinkedHashMap<RegistryEntry<StatusEffect>, EntityEffectPredicate.EffectData> effects = new LinkedHashMap<>();
+        final HashSet<RegistryEntry<StatusEffect>> inverted = new HashSet<>();
         final EffectsEntityPredicateEntry entry = new EffectsEntityPredicateEntry(effects, inverted);
         while (true) {
           if (stringReader.canRead() && stringReader.peek() == '}') {
@@ -516,13 +516,12 @@ public class EntitySelectorOptionsExtension {
           }
 
           final int cursorBeforeEffectEntry = stringReader.getCursor();
-          // todo check
-          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries().filter(effect -> !effects.containsKey(effect.value())), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref1 -> ref1.value().getName()));
-          final var effect = type.parse(stringReader).value();
-          if (effects.containsKey(effect)) {
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries().filter(effectEntry -> !effects.containsKey(effectEntry)), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref1 -> ref1.value().getName()));
+          final var effectEntry = type.parse(stringReader);
+          if (effects.containsKey(effectEntry)) {
             final int cursorAfterEffectId = stringReader.getCursor();
             stringReader.setCursor(cursorBeforeEffectEntry);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, effect.getName()), cursorAfterEffectId);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, effectEntry.value().getName()), cursorAfterEffectId);
           }
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest("=").buildFuture());
           stringReader.skipWhitespace();
@@ -532,9 +531,9 @@ public class EntitySelectorOptionsExtension {
 
           // 这里暂时只允许读布尔值。
           final boolean expected = stringReader.readBoolean();
-          effects.put(effect, new EntityEffectPredicate.EffectData());
+          effects.put(effectEntry, new EntityEffectPredicate.EffectData());
           if (isInverted == expected) {
-            inverted.add(effect);
+            inverted.add(effectEntry);
           }
 
           stringReader.skipWhitespace();
@@ -599,14 +598,14 @@ public class EntitySelectorOptionsExtension {
   }
 
   private static boolean markParamAsUsed(EntitySelectorReader reader, String option, boolean inverted) {
-    return ((EntitySelectorReaderExtension) reader).extension$ec().usedParams.put(option, inverted);
+    return reader.extension$ec().usedParams.put(option, inverted);
   }
 
   /**
    * 参数从未被以非反向的方式使用过。如果参数是以反向的方式使用的，则没有影响。
    */
   private static boolean isNeverPositivelyUsed(EntitySelectorReader reader, String option) {
-    return ((EntitySelectorReaderExtension) reader).extension$ec().usedParams.getOrDefault(option, true);
+    return reader.extension$ec().usedParams.getOrDefault(option, true);
   }
 
   /**
@@ -616,7 +615,7 @@ public class EntitySelectorOptionsExtension {
    */
   @Contract(pure = true)
   private static void checkNoInversionMix(EntitySelectorReader reader, String option, boolean inverted) throws CommandSyntaxException {
-    final EntitySelectorReaderExtras extras = ((EntitySelectorReaderExtension) reader).extension$ec();
+    final EntitySelectorReaderExtras extras = reader.extension$ec();
     final Object2BooleanMap<String> usedParams = extras.usedParams;
     if (usedParams.getOrDefault(option, false)) {
       // 此前使用了反向的用法，则此时也必须要求使用反向的用法。
@@ -815,7 +814,6 @@ public class EntitySelectorOptionsExtension {
   public static Predicate<Entity> mixinInvertedScoredPredicate(List<Pair<String, NumberRange.IntRange>> invertedScores) {
     return entity -> {
       final Scoreboard scoreboard = entity.getServer().getScoreboard();
-      final String entityName = entity.getNameForScoreboard();
       for (Pair<String, NumberRange.IntRange> pair : invertedScores) {
         ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(pair.left());
         if (scoreboardObjective == null) {

@@ -7,7 +7,6 @@
     "BlockDisplayEntityAccessor",
     "CachedBlockPositionAccessor",
     "CommandContextAccessor",
-    "EffectDataAccessor",
     "EntitySelectorAccessor",
     "EntitySelectorReaderAccessor",
     "ExecuteCommandAccessor",

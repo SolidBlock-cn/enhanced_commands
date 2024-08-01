@@ -3,8 +3,11 @@ package pers.solid.ecmd.mixins.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
@@ -23,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.ext.EntitySelectorReaderExtension;
 import pers.solid.ecmd.predicate.entity.*;
 import pers.solid.ecmd.util.ParsingUtil;
@@ -111,9 +115,10 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   private void buildExtraPredicate(CallbackInfoReturnable<EntitySelector> cir) {
     final EntitySelector returnValue = cir.getReturnValue();
     final EntitySelectorExtras extras = EntitySelectorExtras.getOf(returnValue);
-    extras.predicateFunctions = extension$ec().predicateFunctions;
-    extras.predicateDescriptions = extension$ec().predicateDescriptions;
-    extras.collector = extension$ec().atVariable != null ? EntitySelectorCollector.NAMES.get(extension$ec().atVariable) : null;
+    final EntitySelectorReaderExtras selfExtras = extension$ec();
+    extras.predicateFunctions = selfExtras.predicateFunctions;
+    extras.predicateDescriptions = selfExtras.predicateDescriptions;
+    extras.collector = selfExtras.atVariable != null ? EntitySelectorCollector.NAMES.get(selfExtras.atVariable) : null;
   }
 
   /**
@@ -128,8 +133,9 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
    * 在读取 {@code a}、{@code e} 等参数之前，读取其他可能的参数，并作为 {@code @e} 应对。
    */
   @WrapOperation(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;read()C", remap = false))
-  private char readMoreNames(StringReader instance, Operation<Character> original) {
+  private char readMoreNames(StringReader instance, Operation<Character> original, @Share("cursorBeforeVariable") LocalIntRef ref) {
     final int cursorBeforeUnquoted = reader.getCursor();
+    ref.set(cursorBeforeUnquoted);
     final String extraName = reader.readUnquotedString();
     if (EntitySelectorTypeExtras.EXTRA_NAMES.containsKey(extraName)) {
       extension$ec().atVariable = extraName;
@@ -183,13 +189,21 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   /**
    * 在没有读取玩所有的实体选择器类型之前，不需要急于提供方括号的建议，只有已经完全输入后，再提供方括号的建议。
    */
-  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;"), to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;skip()V", remap = false)))
-  private void modifiedSetSuggestOpen(CallbackInfo ci) {
-    suggestionProvider = (builder, consumer) -> suggestSelectorRest(builder /* todo 检查此处的 cursor */, consumer).thenCombine(suggestOpen(builder, consumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
+  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;"), to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;skip()V", remap = false)), locals = LocalCapture.CAPTURE_FAILSOFT)
+  private void modifiedSetSuggestOpen(CallbackInfo ci, @Share("cursorBeforeVariable") LocalIntRef ref) {
+    suggestionProvider = (builder, consumer) -> suggestSelectorRest(builder.createOffset(ref.get()), consumer).thenCombine(suggestOpen(builder, consumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
   }
 
+  /**
+   * 报告 UNKNOWN_SELECTOR_EXCEPTION 时，使用的参数不应该是 {@code "@" + c}，而有可能是本模组中含有多个字符的名称。
+   */
   @ModifyExpressionValue(method = "readAtVariable", at = @At(value = "INVOKE", target = "Ljava/lang/String;valueOf(C)Ljava/lang/String;"))
   private String injectedUnknownSelectorException(String original) {
     return extension$ec().atVariable;
+  }
+
+  @ModifyExpressionValue(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;UNKNOWN_SELECTOR_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
+  private CommandSyntaxException modifyUnknownSelectorException(CommandSyntaxException original) {
+    return CommandSyntaxExceptionExtension.addCursorEnd(original, extension$ec().atVariable);
   }
 }

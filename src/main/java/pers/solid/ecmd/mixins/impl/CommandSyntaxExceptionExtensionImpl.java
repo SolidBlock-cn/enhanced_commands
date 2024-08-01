@@ -11,12 +11,12 @@ public abstract class CommandSyntaxExceptionExtensionImpl implements CommandSynt
   private int cursorEnd = -1;
 
   @Override
-  public int ec$getCursorEnd() {
+  public int getCursorEnd$ec() {
     return cursorEnd;
   }
 
   @Override
-  public void ec$setCursorEnd(int cursorEnd) {
+  public void setCursorEnd$ec(int cursorEnd) {
     this.cursorEnd = cursorEnd;
   }
 }

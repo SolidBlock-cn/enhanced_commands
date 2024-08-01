@@ -19,7 +19,7 @@ public abstract class CommandSyntaxExceptionMixin implements CommandSyntaxExcept
 
   @Inject(method = "getContext", at = @At(value = "INVOKE", target = "Ljava/lang/StringBuilder;append(Ljava/lang/String;)Ljava/lang/StringBuilder;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(II)Ljava/lang/String;", shift = At.Shift.AFTER), to = @At(value = "CONSTANT", args = "stringValue=<--[HERE]")), locals = LocalCapture.CAPTURE_FAILSOFT)
   public void injectedGetContext(CallbackInfoReturnable<String> cir, StringBuilder builder, int cursor) {
-    final int cursorEnd = Math.min(ec$getCursorEnd(), input.length());
+    final int cursorEnd = Math.min(getCursorEnd$ec(), input.length());
     if (cursorEnd >= 0 && cursorEnd > cursor) {
       builder.append('»');
       builder.append(input, cursor, cursorEnd);

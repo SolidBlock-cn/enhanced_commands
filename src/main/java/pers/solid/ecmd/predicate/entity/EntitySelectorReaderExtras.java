@@ -32,7 +32,7 @@ public class EntitySelectorReaderExtras {
   /**
    * 指“@”后的内容的类型。
    */
-  public @Nullable String atVariable;
+  public String atVariable;
   /**
    * 如果是通过 @r、@p 等选择器指定的实体类型，则为 {@code true}。在这种情况下，应该允许指定一个 type 参数来覆盖此设置。
    */
@@ -70,13 +70,6 @@ public class EntitySelectorReaderExtras {
 
   public EntitySelectorReaderExtras(EntitySelectorReader self) {
     this.self = self;
-  }
-
-  /**
-   * 获取 {@link EntitySelectorReader} 对象中的 {@link EntitySelectorReaderExtras} 对象。当接口没有注入，或者调用时无法通过编辑时，可调用此方法。
-   */
-  public static EntitySelectorReaderExtras getOf(EntitySelectorReader entitySelectorReader) {
-    return entitySelectorReader.extension$ec();
   }
 
   public void addFunction(FailableFunction<ServerCommandSource, Predicate<Entity>, CommandSyntaxException> predicateFunction) {
