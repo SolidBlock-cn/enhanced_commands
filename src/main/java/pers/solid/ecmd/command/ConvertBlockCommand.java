@@ -25,7 +25,7 @@ import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
-import pers.solid.ecmd.mixin.FallingBlockEntityAccessor;
+import pers.solid.ecmd.mixins.accessor.FallingBlockEntityAccessor;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.mixin.MixinShared;

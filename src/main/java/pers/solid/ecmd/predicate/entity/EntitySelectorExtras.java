@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.EntitySelectorExtension;
 
@@ -30,7 +31,7 @@ public class EntitySelectorExtras {
   /**
    * 此字体决定了在运行 {@link EntitySelector#getEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
    *
-   * @see pers.solid.ecmd.mixin.EntitySelectorReaderMixin#buildExtraPredicate(CallbackInfoReturnable)
+   * @see EntitySelectorReaderMixin#buildExtraPredicate(CallbackInfoReturnable)
    */
   public @Nullable EntitySelectorCollector collector;
 

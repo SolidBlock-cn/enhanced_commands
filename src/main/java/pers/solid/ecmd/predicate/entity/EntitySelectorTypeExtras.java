@@ -9,7 +9,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
-import pers.solid.ecmd.mixin.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 
 import java.util.HashMap;
 import java.util.List;

@@ -27,6 +27,8 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.configs.RegistryParsingConfig;
+import pers.solid.ecmd.mixins.mixin.CommandManagerMixin;
+import pers.solid.ecmd.mixins.mixin.WorldChunkMixin;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
 
@@ -54,7 +56,7 @@ public final class MixinShared {
   /**
    * 如果此值为 {@code true}，那么会抑制 {@link net.minecraft.world.chunk.WorldChunk#setBlockState(BlockPos, BlockState, boolean)} 对 {@link BlockState#onBlockAdded(World, BlockPos, BlockState, boolean)} 的调用。通常来说，这是一个临时的设置，在调用前修改此值，调用后立即复原，以免对其他模组产生影响。
    *
-   * @see pers.solid.ecmd.mixin.WorldChunkMixin#wrappedOnBlockAdded(BlockState, World, BlockPos, BlockState, boolean)
+   * @see WorldChunkMixin#wrappedOnBlockAdded(BlockState, World, BlockPos, BlockState, boolean)
    */
   public static boolean suppressOnBlockAdded = false;
 
@@ -89,7 +91,7 @@ public final class MixinShared {
   /**
    * 在注册命令时调用此方法，以设置 {@link #commandRegistryAccessReference} 的值，注意它是个弱引用，通过来说在服务器关闭或者离开世界之前都不应该清除。
    *
-   * @see pers.solid.ecmd.mixin.CommandManagerMixin
+   * @see CommandManagerMixin
    * @see CommandManager#CommandManager
    */
   public static void setWeakCommandRegistryAccess(CommandRegistryAccess commandRegistryAccess) {

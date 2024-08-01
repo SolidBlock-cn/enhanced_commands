@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
 import pers.solid.ecmd.util.mixin.EntitySelectorReaderExtension;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class EntitySelectorReaderExtras {
   /**
    * 此参数会在 {@link EntitySelectorReader#build()} 中。
    *
-   * @see pers.solid.ecmd.mixin.EntitySelectorReaderMixin
+   * @see EntitySelectorReaderMixin
    */
   public @Nullable List<FailableFunction<ServerCommandSource, Predicate<Entity>, CommandSyntaxException>> predicateFunctions = null;
   /**

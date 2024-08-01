@@ -20,7 +20,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.commons.lang3.function.FailableConsumer;
 import pers.solid.ecmd.argument.NbtTargetArgumentType;
 import pers.solid.ecmd.configs.CommandsConfig;
-import pers.solid.ecmd.mixin.CommandContextAccessor;
+import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.EnhancedRedirectModifier;

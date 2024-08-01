@@ -21,7 +21,7 @@ import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixin.CommandContextAccessor;
+import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.CommandBridge;

@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "pers.solid.ecmd.mixins.impl",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MutableTextExtensionImpl"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

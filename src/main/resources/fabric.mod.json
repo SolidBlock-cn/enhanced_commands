@@ -22,12 +22,20 @@
   },
 
   "mixins": [
-    "enhanced_commands.mixins.json"
+    "enhanced_commands.mixins.mixin.json"
   ],
 
   "depends": {
     "fabricloader": "*",
     "fabric-api": "*",
     "minecraft": "~1.21"
+  },
+
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_5250": [
+        "pers/solid/ecmd/mixins/ext/MutableTextExtension"
+      ]
+    }
   }
 }

@@ -32,7 +32,7 @@ import net.minecraft.world.LightType;
 import pers.solid.ecmd.argument.DirectionArgumentType;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.RegionArgumentType;
-import pers.solid.ecmd.mixin.ExecuteCommandAccessor;
+import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 import pers.solid.ecmd.util.lambda.ToFloatTriFunction;

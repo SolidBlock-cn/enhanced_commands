@@ -8,7 +8,7 @@ import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.mixin.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 
 /**
  * 此类包含了与实体选择器有关的一些实用方法。

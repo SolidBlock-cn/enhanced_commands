@@ -31,7 +31,7 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.mixin.JsonReaderUtilsAccessor;
+import pers.solid.ecmd.mixins.accessor.JsonReaderUtilsAccessor;
 import pers.solid.ecmd.util.mixin.CommandSyntaxExceptionExtension;
 
 import java.io.IOException;

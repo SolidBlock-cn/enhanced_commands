@@ -12,7 +12,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import pers.solid.ecmd.mixin.EntitySelectorAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;

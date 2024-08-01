@@ -10,7 +10,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.world.level.ServerWorldProperties;
 import org.apache.commons.lang3.BooleanUtils;
-import pers.solid.ecmd.mixin.ServerWorldAccessor;
+import pers.solid.ecmd.mixins.accessor.ServerWorldAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.bridge.CommandBridge;
 

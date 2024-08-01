@@ -1,7 +1,7 @@
 package pers.solid.ecmd.util.mixin;
 
 import net.minecraft.command.EntitySelector;
-import pers.solid.ecmd.mixin.EntitySelectorMixin;
+import pers.solid.ecmd.mixins.mixin.EntitySelectorMixin;
 import pers.solid.ecmd.predicate.entity.EntitySelectorExtras;
 
 /**

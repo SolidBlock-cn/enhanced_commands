@@ -4,6 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
@@ -11,6 +14,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.mixins.accessor.TranslatableTextContentAccessor;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,9 +29,20 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
   private Language languageCache;
   private List<StringVisitable> translations = ImmutableList.of();
   private static final Pattern ARG_FORMAT = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z])");
+  public static final MapCodec<EnhancedTranslatableTextContent> CODEC = RecordCodecBuilder.mapCodec(
+      instance -> instance.group(
+              Codec.STRING.fieldOf("translate").forGetter(TranslatableTextContent::getKey),
+              Codec.STRING.lenientOptionalFieldOf("fallback").forGetter(content -> Optional.ofNullable(content.getFallback())),
+              TranslatableTextContentAccessor.getARGUMENT_CODEC().listOf().optionalFieldOf("with").forGetter(content -> TranslatableTextContentAccessor.callToOptionalList(content.getArgs()))
+          )
+          .apply(instance, EnhancedTranslatableTextContent::of));
 
   public EnhancedTranslatableTextContent(String key, @Nullable String fallback, Object[] args) {
     super(key, fallback, args);
+  }
+
+  private static EnhancedTranslatableTextContent of(String key, Optional<String> fallback, Optional<List<Object>> args) {
+    return new EnhancedTranslatableTextContent(key, fallback.orElse(null), TranslatableTextContentAccessor.callToArray(args));
   }
 
   private void updateTranslations() {
@@ -235,5 +250,17 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
         + ", args="
         + Arrays.toString(this.getArgs())
         + "}";
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof EnhancedTranslatableTextContent)) return false;
+    return super.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return super.hashCode();
   }
 }

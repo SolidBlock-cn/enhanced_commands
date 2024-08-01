@@ -31,7 +31,7 @@ import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixin.ClientCommandSourceAccessor;
+import pers.solid.ecmd.mixins.accessor.ClientCommandSourceAccessor;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Arrays;
