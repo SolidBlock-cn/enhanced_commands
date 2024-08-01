@@ -23,7 +23,6 @@ import java.util.function.IntFunction;
 
 @Mixin(ExecuteCommand.class)
 public interface ExecuteCommandAccessor {
-
   @Accessor
   static SimpleCommandExceptionType getCONDITIONAL_FAIL_EXCEPTION() {
     throw new AssertionError();

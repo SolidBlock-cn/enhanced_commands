@@ -22,6 +22,8 @@
   },
 
   "mixins": [
+    "enhanced_commands.mixins.accessor.json",
+    "enhanced_commands.mixins.impl.json",
     "enhanced_commands.mixins.mixin.json"
   ],
 
