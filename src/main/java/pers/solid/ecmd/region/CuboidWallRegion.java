@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.Iterator;
 import java.util.stream.Stream;

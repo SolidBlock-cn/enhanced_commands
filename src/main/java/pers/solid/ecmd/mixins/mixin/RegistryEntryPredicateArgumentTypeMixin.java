@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.mixin.MixinShared;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -115,7 +115,7 @@ public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
           to = @At(value = "INVOKE", target = "Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$TagBased;<init>(Lnet/minecraft/registry/entry/RegistryEntryList$Named;)V")
       )
   )
-  public Supplier<CommandSyntaxException> modifiedParseTagException(Supplier<CommandSyntaxException> exceptionSupplier, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local StringReader stringReader) {
+  public Supplier<CommandSyntaxException> modifiedParseTagException(Supplier<CommandSyntaxException> exceptionSupplier, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader) {
     return () -> {
       final int cursorBeforeId = localIntRef.get();
       final int cursorAfterId = stringReader.getCursor();
@@ -141,7 +141,7 @@ public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
           to = @At(value = "INVOKE", target = "Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryBased;<init>(Lnet/minecraft/registry/entry/RegistryEntry$Reference;)V")
       )
   )
-  public Supplier<CommandSyntaxException> modifiedParseEntryException(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local StringReader stringReader, @Local Identifier identifier) {
+  public Supplier<CommandSyntaxException> modifiedParseEntryException(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader, @Local Identifier identifier) {
     return MixinShared.mixinModifiedParseThrow(registryRef, original, localIntRef, stringReader, identifier);
   }
 

@@ -13,7 +13,7 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;

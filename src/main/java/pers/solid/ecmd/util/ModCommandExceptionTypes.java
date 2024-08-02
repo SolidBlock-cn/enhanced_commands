@@ -27,7 +27,7 @@ public final class ModCommandExceptionTypes {
   public static final DynamicCommandExceptionType UNKNOWN_KEYWORD = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.unknown_keyword", o));
   public static final DynamicCommandExceptionType UNKNOWN_FUNCTION = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.unknown_function", o));
   public static final DynamicCommandExceptionType DUPLICATE_KEYWORD = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.duplicate_keyword", o));
-  public static final DynamicCommandExceptionType DUPLICATE_VALUE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.duplicate_value", o));
+  public static final DynamicCommandExceptionType DUPLICATE_VALUE = new DynamicCommandExceptionType(o -> Text.stringifiedTranslatable("enhanced_commands.parsing.duplicate_value", o));
   private static final Text VALID_UNITS = Text.translatable("enhanced_commands.parsing.angle_accepted_values");
   public static final DynamicCommandExceptionType ANGLE_UNIT_EXPECTED = new DynamicCommandExceptionType(number -> Text.translatable("enhanced_commands.parsing.angle_unit_expected", number, VALID_UNITS));
   public static final DynamicCommandExceptionType ANGLE_UNIT_UNKNOWN = new DynamicCommandExceptionType(actual -> Text.translatable("enhanced_commands.parsing.angle_unit_unknown", actual, VALID_UNITS));
@@ -39,6 +39,7 @@ public final class ModCommandExceptionTypes {
 
   public static final DynamicCommandExceptionType UNKNOWN_STATUS_EFFECT = new DynamicCommandExceptionType(id -> Text.translatable("enhanced_commands.parsing.unknown_registry_entry.effect", id));
   public static final DynamicCommandExceptionType UNKNOWN_BIOME = new DynamicCommandExceptionType(id -> Text.translatable("enhanced_commands.parsing.unknown_registry_entry.biome", id));
+  public static final SimpleCommandExceptionType CONTAINS_UPPER_CASE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.id.contains_upper_case"));
 
   public static final Map<RegistryKey<? extends Registry<?>>, DynamicCommandExceptionType> REGISTRY_ENTRY_EXCEPTION_TYPES = Util.make(new HashMap<>(), map -> {
     map.put(RegistryKeys.BLOCK, BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION);

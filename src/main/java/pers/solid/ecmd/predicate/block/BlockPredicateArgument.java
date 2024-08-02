@@ -14,8 +14,8 @@ import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.Parser;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collections;

@@ -45,6 +45,7 @@
   "enhanced_commands.argument.entity.selector.target": "Attack target of the entity",
   "enhanced_commands.argument.entity.selector.vehicle": "Entity that the entity rides",
   "enhanced_commands.argument.entity_type.feature_required": "The entity type id %s (%s) exists, but it cannot be used because required feature flags are not enabled (usually experimental features)",
+  "enhanced_commands.argument.id.contains_upper_case": "Ids must not contain upper case",
   "enhanced_commands.argument.item.feature_required": "The item id %s (%s) exists, but it cannot be used because required feature flags are not enabled (usually experimental features)",
   "enhanced_commands.argument.keyword_args.duplicate_argument_name": "Duplicate argument name: %s",
   "enhanced_commands.argument.keyword_args.unknown_argument_name": "Unknown argument name: %s",

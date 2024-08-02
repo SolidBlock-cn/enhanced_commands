@@ -10,7 +10,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Objects;
 

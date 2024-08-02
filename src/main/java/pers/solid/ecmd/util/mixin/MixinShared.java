@@ -31,7 +31,7 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.CommandManagerMixin;
 import pers.solid.ecmd.mixins.mixin.WorldChunkMixin;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -167,7 +167,7 @@ public final class MixinShared {
     }
 
     if (ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.containsKey(registryRef)) {
-      return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.get(registryRef).createWithContext(stringReader, identifier), cursorAfterId);
+      return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.get(registryRef).createWithContext(stringReader, identifier.toString()), cursorAfterId);
     } else {
       return CommandSyntaxExceptionExtension.withCursorEnd(EnhancedEntryPredicate.NOT_FOUND_EXCEPTION.createWithContext(stringReader, identifier, registryRef.getValue()), cursorAfterId);
     }

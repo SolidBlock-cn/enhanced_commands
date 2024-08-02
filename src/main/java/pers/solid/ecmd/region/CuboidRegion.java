@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.Collections;
 import java.util.Iterator;

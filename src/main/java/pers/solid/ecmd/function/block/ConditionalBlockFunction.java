@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
-import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 /**
  * 当原先的方块符合方块谓词时，应用函数 1，否则应用函数 2。例如：

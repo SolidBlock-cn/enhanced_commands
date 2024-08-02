@@ -45,6 +45,7 @@
   "enhanced_commands.argument.entity.selector.target": "实体的攻击目标",
   "enhanced_commands.argument.entity.selector.vehicle": "实体骑乘的实体",
   "enhanced_commands.argument.entity_type.feature_required": "实体类型id：%s（%s）存在，但是无法使用，因为当前世界没有启用相应的功能标签（通常是实验性内容）",
+  "enhanced_commands.argument.id.contains_upper_case": "id不能包含大写字母",
   "enhanced_commands.argument.item.feature_required": "物品id：%s（%s）存在，但是无法使用，因为当前世界没有启用相应的功能标签（通常是实验性内容）",
   "enhanced_commands.argument.keyword_args.duplicate_argument_name": "重复的参数名称：%s",
   "enhanced_commands.argument.keyword_args.unknown_argument_name": "未知的参数名称：%s",

@@ -15,7 +15,7 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.predicate.property.*;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.SuggestionProvider;
+import pers.solid.ecmd.util.parse.SuggestionProvider;
 
 import java.util.*;
 import java.util.function.Predicate;

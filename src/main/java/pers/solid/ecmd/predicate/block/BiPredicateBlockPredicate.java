@@ -9,8 +9,8 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.List;
 

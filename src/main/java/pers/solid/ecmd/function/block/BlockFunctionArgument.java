@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
-import pers.solid.ecmd.util.Parser;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collections;
 import java.util.List;

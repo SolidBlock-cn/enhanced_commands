@@ -25,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.ParsingUtil;
-import pers.solid.ecmd.util.SuggestionProvider;
+import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.util.parse.SuggestionProvider;
 
 import java.util.List;
 import java.util.stream.Stream;

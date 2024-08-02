@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util;
+package pers.solid.ecmd.util.parse;
 
 import com.google.common.base.Functions;
 import com.google.common.base.Supplier;
@@ -10,6 +10,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Nullables;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 import java.util.Map;
 import java.util.Set;

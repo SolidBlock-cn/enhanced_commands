@@ -16,8 +16,8 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.Parser;
 import pers.solid.ecmd.util.StateUtil;
+import pers.solid.ecmd.util.parse.Parser;
 
 /**
  * 此方块函数可以产生任意的方块的任意方块状态，无论其原先的方块是什么。

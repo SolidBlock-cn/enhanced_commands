@@ -5,8 +5,8 @@ import com.google.common.collect.Lists;
 import net.minecraft.registry.Registry;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.regionselection.RegionSelection;
-import pers.solid.ecmd.util.FunctionsParser;
-import pers.solid.ecmd.util.Parser;
+import pers.solid.ecmd.util.parse.FunctionsParser;
+import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.LinkedHashMap;
 import java.util.List;

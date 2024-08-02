@@ -16,8 +16,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.FunctionParamsParser;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Iterator;

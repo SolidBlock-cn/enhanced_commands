@@ -19,6 +19,7 @@ import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.Collections;
 import java.util.List;

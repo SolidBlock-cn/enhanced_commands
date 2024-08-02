@@ -9,8 +9,8 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.Parser;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgument> {

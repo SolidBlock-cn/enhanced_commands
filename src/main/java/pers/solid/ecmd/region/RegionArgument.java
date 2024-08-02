@@ -5,7 +5,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.Parser;
+import pers.solid.ecmd.util.parse.Parser;
 
 /**
  * @see net.minecraft.command.argument.PosArgument

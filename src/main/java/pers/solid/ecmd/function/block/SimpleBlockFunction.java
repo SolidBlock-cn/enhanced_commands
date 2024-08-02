@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.PropertyFunction;
-import pers.solid.ecmd.util.Parser;
+import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collections;

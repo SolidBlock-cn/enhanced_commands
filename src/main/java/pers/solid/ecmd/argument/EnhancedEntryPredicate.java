@@ -141,7 +141,7 @@ public interface EnhancedEntryPredicate<T> extends RegistryEntryPredicateArgumen
   }
 
   Dynamic2CommandExceptionType NOT_FOUND_EXCEPTION = new Dynamic2CommandExceptionType(
-      (tag, type) -> Text.translatable("argument.resource_tag.not_found", tag, type)
+      (tag, type) -> Text.stringifiedTranslatable("argument.resource_tag.not_found", tag, type)
   );
   Dynamic3CommandExceptionType WRONG_TYPE_EXCEPTION = new Dynamic3CommandExceptionType(
       (tag, type, expectedType) -> Text.translatable("argument.resource_tag.invalid_type", tag, type, expectedType)
@@ -196,7 +196,10 @@ public interface EnhancedEntryPredicate<T> extends RegistryEntryPredicateArgumen
         RegistryKey<T> registryKey = RegistryKey.of(registryRef, entryId);
         RegistryEntry.Reference<T> reference = registryWrapper
             .getOptional(registryKey)
-            .orElseThrow(() -> MixinShared.modifiedRegistryEntryException(registryRef, reader, entryId, cursorAfterId));
+            .orElseThrow(() -> {
+              reader.setCursor(cursorBeforeId);
+              return MixinShared.modifiedRegistryEntryException(registryRef, reader, entryId, cursorAfterId);
+            });
         values.add(new EntryBased<>(reference));
       }
     }

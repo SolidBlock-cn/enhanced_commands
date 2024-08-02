@@ -6,7 +6,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.NbtConcentrationType;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 public record EntitiesNbtDataArgument(EntitySelector entitySelector, NbtConcentrationType nbtConcentrationType) implements NbtSourceArgument, NbtTargetArgument {
   public EntitiesNbtData getEntitiesNbtData(ServerCommandSource source) throws CommandSyntaxException {

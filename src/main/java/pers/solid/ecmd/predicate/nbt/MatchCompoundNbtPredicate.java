@@ -5,7 +5,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Map;
 import java.util.stream.Collectors;

@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
-import pers.solid.ecmd.util.Parser;
+import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.List;
 import java.util.stream.Collectors;

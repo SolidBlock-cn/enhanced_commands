@@ -14,8 +14,8 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.nbt.*;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.ParsingUtil;
-import pers.solid.ecmd.util.SuggestionProvider;
+import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.util.parse.SuggestionProvider;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -7,8 +7,8 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.ParsingUtil;
-import pers.solid.ecmd.util.SuggestionProvider;
+import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.util.parse.SuggestionProvider;
 
 public record StorageNbtDataArgument(Identifier id) implements NbtSourceArgument, NbtTargetArgument {
   public StorageNbtData getNbtData(ServerCommandSource source) {

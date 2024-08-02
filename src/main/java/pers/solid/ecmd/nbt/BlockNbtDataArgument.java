@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
 
 public record BlockNbtDataArgument(PosArgument posArgument) implements NbtSourceArgument, NbtTargetArgument {

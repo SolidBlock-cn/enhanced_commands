@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.property.*;
 import pers.solid.ecmd.predicate.property.Comparator;
-import pers.solid.ecmd.util.ParsingUtil;
-import pers.solid.ecmd.util.SuggestionProvider;
+import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.util.parse.SuggestionProvider;
 
 import java.util.*;
 
