@@ -2,7 +2,6 @@ package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -16,7 +15,8 @@ import pers.solid.ecmd.function.block.ConditionalBlockFunction;
 import pers.solid.ecmd.predicate.block.RegionBlockPredicate;
 import pers.solid.ecmd.region.OutlineRegion;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.util.EnhancedRedirectModifier;
+
+import java.util.Collections;
 
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
@@ -47,9 +47,10 @@ public enum OutlineCommand implements CommandRegistrationCallback {
         CommandManager.argument("region", RegionArgumentType.region(registryAccess)).then(
             CommandManager.argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
                 .executes(context -> executeWithDefaultKeywordArgs(context, OutlineRegion.OutlineType.WALL))
-                .forward(outlineTypeArgumentNode, (EnhancedRedirectModifier.Constant<ServerCommandSource>) (args, previousArguments, source) -> {
-                  args.putAll(previousArguments);
-                  args.put("outline_type", new ParsedArgument<>(0, 0, OutlineRegion.OutlineType.WALL));
+                .forward(outlineTypeArgumentNode, context -> {
+                  final ServerCommandSource source = context.getSource();
+                  source.addExtraArgument$ec("outline_type", OutlineRegion.OutlineType.WALL);
+                  return Collections.singleton(source);
                 }, false)));
   }
 

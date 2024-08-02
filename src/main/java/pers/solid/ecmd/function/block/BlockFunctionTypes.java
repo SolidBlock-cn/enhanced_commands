@@ -7,7 +7,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.FunctionsParser;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class BlockFunctionTypes {
-  public static final Map<String, Supplier<FunctionParamsParser<? extends BlockFunctionArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockFunctionTypes::registerFunctions);
+  public static final Map<String, Supplier<FunctionLikeParser<? extends BlockFunctionArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockFunctionTypes::registerFunctions);
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockFunctionTypes::registerFunctionNames);
   public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (commandRegistryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly, true), parser);
   public static final Parser<BlockFunctionArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
@@ -40,6 +40,7 @@ public final class BlockFunctionTypes {
   public static final BlockFunctionType<IdReplaceBlockFunction> ID_REPLACE = register(IdReplaceBlockFunction.Type.ID_REPLACE_TYPE, "id_replace");
   public static final BlockFunctionType<RotateBlockFunction> ROTATE = register(RotateBlockFunction.Type.ROTATE_TYPE, "rotate");
   public static final BlockFunctionType<MirrorBlockFunction> MIRROR = register(MirrorBlockFunction.Type.MIRROR_TYPE, "mirror");
+  public static final BlockFunctionType<CheckerboardBlockFunction> CHECKERBOARD = register(CheckerboardBlockFunction.Type.CHECKERBOARD_TYPE, "checkerboard");
 
   private BlockFunctionTypes() {
   }
@@ -56,7 +57,7 @@ public final class BlockFunctionTypes {
     Preconditions.checkState(BlockFunctionType.REGISTRY.size() != 0);
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionParamsParser<? extends BlockFunctionArgument>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockFunctionArgument>>> map) {
     map.put("pick", PickBlockFunction.Parser::new);
     map.put("dry", DryBlockFunction.Parser::new);
     map.put("overlay", OverlayBlockFunction.Parser::new);
@@ -67,6 +68,7 @@ public final class BlockFunctionTypes {
     map.put("idreplace", IdReplaceBlockFunction.Parser::new);
     map.put("rotate", RotateBlockFunction.Parser::new);
     map.put("mirror", MirrorBlockFunction.Parser::new);
+    map.put("checkerboard", CheckerboardBlockFunction.Parser::new);
   }
 
   private static void registerFunctionNames(Map<String, Text> map) {
@@ -80,5 +82,6 @@ public final class BlockFunctionTypes {
     map.put("idreplace", Text.translatable("enhanced_commands.block_function.id_replace"));
     map.put("rotate", Text.translatable("enhanced_commands.block_function.rotate"));
     map.put("mirror", Text.translatable("enhanced_commands.block_function.mirror"));
+    map.put("checkerboard", Text.translatable("enhanced_commands.block_function.checkerboard"));
   }
 }

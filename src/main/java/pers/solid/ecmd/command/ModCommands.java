@@ -16,16 +16,15 @@ import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.commons.lang3.function.FailableConsumer;
 import pers.solid.ecmd.argument.NbtTargetArgumentType;
 import pers.solid.ecmd.configs.CommandsConfig;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.util.EnhancedRedirectModifier;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
+import java.util.Collections;
 import java.util.function.Predicate;
 
 public enum ModCommands implements CommandRegistrationCallback {
@@ -77,10 +76,11 @@ public enum ModCommands implements CommandRegistrationCallback {
     return register;
   }
 
-  public static final EnhancedRedirectModifier.Constant<ServerCommandSource> REGION_ARGUMENTS_MODIFIER = (arguments, previousArguments, source) -> {
-    final ServerPlayerEntity player = source.getPlayerOrThrow();
-    final RegionArgument regionArgument = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegionOrThrow();
-    arguments.put("region", new ParsedArgument<>(0, 0, regionArgument));
+  public static final RedirectModifier<ServerCommandSource> REGION_ARGUMENTS_MODIFIER = context -> {
+    final ServerCommandSource source = context.getSource();
+    final RegionArgument regionArgument = ((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow();
+    source.addExtraArgument$ec("region", regionArgument);
+    return Collections.singleton(source);
   };
 
   public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, CommandNode<ServerCommandSource> regionArgument) {

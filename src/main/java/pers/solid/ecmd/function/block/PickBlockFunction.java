@@ -18,6 +18,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.ArrayList;
@@ -137,9 +138,10 @@ public interface PickBlockFunction extends BlockFunction {
       if (parser.reader.canRead() && StringReader.isAllowedNumber(parser.reader.peek())) {
         final int cursorBeforeDouble = parser.reader.getCursor();
         final double weight = parser.reader.readDouble();
+        final int cursorAfterDouble = parser.reader.getCursor();
         if (weight < 0) {
           parser.reader.setCursor(cursorBeforeDouble);
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, weight);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, weight), cursorAfterDouble);
         }
         weighted = true;
         pairs.add(ObjectDoublePair.of(parse, weight));

@@ -18,16 +18,16 @@ import java.util.function.Function;
 
 public class FunctionsParser<T> implements Parser<T> {
   private final Set<String> functions;
-  private final Function<String, FunctionParamsParser<? extends T>> parserFactory;
+  private final Function<String, FunctionLikeParser<? extends T>> parserFactory;
   private final Function<String, Text> tooltipProvider;
 
-  public FunctionsParser(Set<String> functions, Function<String, FunctionParamsParser<? extends T>> parserFactory, Function<String, Text> tooltipProvider) {
+  public FunctionsParser(Set<String> functions, Function<String, FunctionLikeParser<? extends T>> parserFactory, Function<String, Text> tooltipProvider) {
     this.functions = functions;
     this.parserFactory = parserFactory;
     this.tooltipProvider = tooltipProvider;
   }
 
-  public FunctionsParser(Map<String, Supplier<FunctionParamsParser<? extends T>>> functions, Map<String, Text> functionNames) {
+  public FunctionsParser(Map<String, Supplier<FunctionLikeParser<? extends T>>> functions, Map<String, Text> functionNames) {
     this.functions = functions.keySet();
     this.parserFactory = s -> Nullables.map(functions.get(s), Supplier::get);
     this.tooltipProvider = Functions.forMap(functionNames, null);
@@ -40,10 +40,11 @@ public class FunctionsParser<T> implements Parser<T> {
     parser.suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(functions, suggestionsBuilder, s -> s + "(", tooltipProvider::apply));
     final String unquotedString = reader.readUnquotedString();
     if (!unquotedString.isEmpty() && reader.canRead() && reader.peek() == '(') {
-      final FunctionParamsParser<? extends T> functionParamsParser = parserFactory.apply(unquotedString);
+      final FunctionLikeParser<? extends T> functionParamsParser = parserFactory.apply(unquotedString);
       if (functionParamsParser != null) {
         functionParamsParser.setFunctionName(unquotedString);
         functionParamsParser.setCursorBeforeFunctionName(cursorOnStart);
+        reader.skip();
         return functionParamsParser.parseAfterLeftParenthesis(commandRegistryAccess, parser, suggestionsOnly);
       } else {
         final int cursorAfterFunctionName = reader.getCursor();

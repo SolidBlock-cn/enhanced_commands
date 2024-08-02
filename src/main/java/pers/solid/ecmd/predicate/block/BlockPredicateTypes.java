@@ -7,7 +7,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.FunctionsParser;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class BlockPredicateTypes {
-  public static final Map<String, Supplier<FunctionParamsParser<? extends BlockPredicateArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
+  public static final Map<String, Supplier<FunctionLikeParser<? extends BlockPredicateArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockPredicateTypes::registerFunctionNames);
   public static final Parser<BlockPredicateArgument> PARENTHESES_PARSER = (commandRegistryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly, true), parser);
   public static final Parser<BlockPredicateArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
@@ -52,7 +52,7 @@ public final class BlockPredicateTypes {
     return Registry.register(BlockPredicateType.REGISTRY, EnhancedCommands.id(name), value);
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionParamsParser<? extends BlockPredicateArgument>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockPredicateArgument>>> map) {
     map.put("all", AllBlockPredicate.Parser::new);
     map.put("any", AnyBlockPredicate.Parser::new);
     map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), false));

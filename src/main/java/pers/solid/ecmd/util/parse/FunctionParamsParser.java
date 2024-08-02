@@ -33,7 +33,6 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
 
   @Override
   default void parseWithinParenthesis(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    parser.reader.skip();
     // after the left parentheses
     parser.reader.skipWhitespace();
 
@@ -43,11 +42,11 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
     if (paramsCount >= minParamsCount()) {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
-          suggestionsBuilder.suggest(rightOpenString());
+          suggestionsBuilder.suggest(rightParString());
         }
       });
     }
-    if (parser.reader.canRead() && parser.reader.peek() == rightOpen()) {
+    if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
       if (paramsCount >= minParamsCount()) {
         // In this case, the parameters are empty
         return;
@@ -67,7 +66,7 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
             suggestionsBuilder.suggest(separatorString());
           }
           if (finalParamsCount >= minParamsCount()) {
-            suggestionsBuilder.suggest(rightOpenString());
+            suggestionsBuilder.suggest(rightParString());
           }
         }
       });
@@ -78,9 +77,9 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, separator());
         } else if (paramsCount < maxParamsCount()) {
           // params enough but not full, suggest both
-          throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(parser.reader, separator(), rightOpen());
+          throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(parser.reader, separator(), rightPar());
         } else {
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightOpen());
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightPar());
         }
       } else if (parser.reader.peek() == separator()) {
         if (paramsCount >= maxParamsCount()) {
@@ -89,7 +88,7 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
         parser.reader.skip();
         parser.reader.skipWhitespace();
         parser.suggestionProviders.clear();
-      } else if (parser.reader.peek() == rightOpen()) {
+      } else if (parser.reader.peek() == rightPar()) {
         if (paramsCount < minParamsCount()) {
           throw PARAMS_TOO_FEW.createWithContext(parser.reader, paramsCount, minParamsCount());
         }

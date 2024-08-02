@@ -5,11 +5,11 @@ import net.minecraft.command.CommandRegistryAccess;
 import pers.solid.ecmd.argument.SuggestedParser;
 
 public interface FunctionLikeParser<T> extends Parser<T> {
-  default char leftOpen() {
+  default char leftPar() {
     return '(';
   }
 
-  default char rightOpen() {
+  default char rightPar() {
     return ')';
   }
 
@@ -17,12 +17,12 @@ public interface FunctionLikeParser<T> extends Parser<T> {
     return ',';
   }
 
-  default String leftOpenString() {
-    return Character.toString(leftOpen());
+  default String leftParString() {
+    return Character.toString(leftPar());
   }
 
-  default String rightOpenString() {
-    return Character.toString(rightOpen());
+  default String rightParString() {
+    return Character.toString(rightPar());
   }
 
   default String separatorString() {
@@ -31,14 +31,11 @@ public interface FunctionLikeParser<T> extends Parser<T> {
 
   @Override
   default T parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
-    if (!(parser.reader.canRead() && parser.reader.peek() == leftOpen())) {
+    if (!(parser.reader.canRead() && parser.reader.peek() == leftPar())) {
       return null;
     }
-    parseAfterLeftParenthesis(commandRegistryAccess, parser, suggestionsOnly);
-    if (parser.reader.canRead() && parser.reader.peek() == rightOpen()) {
-      return getParseResult(commandRegistryAccess, parser);
-    }
-    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightOpen());
+    parser.reader.skip();
+    return parseAfterLeftParenthesis(commandRegistryAccess, parser, suggestionsOnly);
   }
 
   /**
@@ -50,17 +47,18 @@ public interface FunctionLikeParser<T> extends Parser<T> {
 
   default T parseAfterLeftParenthesis(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     parseWithinParenthesis(commandRegistryAccess, parser, suggestionsOnly);
+    parser.reader.skipWhitespace();
     parser.suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
-        suggestionsBuilder.suggest(rightOpenString());
+        suggestionsBuilder.suggest(rightParString());
       }
     });
-    if (parser.reader.canRead() && parser.reader.peek() == rightOpen()) {
+    if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
       parser.reader.skip();
       parser.suggestionProviders.clear();
       return getParseResult(commandRegistryAccess, parser);
     }
-    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightOpen());
+    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightPar());
   }
 
   /**

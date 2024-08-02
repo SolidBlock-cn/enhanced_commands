@@ -2,7 +2,10 @@ package pers.solid.ecmd.mixins.ext;
 
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.EnhancedCommands;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -16,5 +19,22 @@ public interface ServerCommandSourceExtension {
    */
   default void sendFeedback$ecBridge(Supplier<Text> feedbackSupplier, boolean broadcastToOps) {
     ((ServerCommandSource) this).sendFeedback(feedbackSupplier, broadcastToOps);
+  }
+
+  @NotNull
+  Map<String, Object> getExtraArguments$ec();
+
+  default void addExtraArgument$ec(String name, Object argument) {
+    getExtraArguments$ec().put(name, argument);
+  }
+
+  default <T> T getExtraArgument$ec(String name, Class<T> type) {
+    final Object o = getExtraArguments$ec().get(name);
+    try {
+      return type.cast(o);
+    } catch (ClassCastException c) {
+      EnhancedCommands.LOGGER.error("Argument '{}' is not a correct type!", name, c);
+      return null;
+    }
   }
 }
