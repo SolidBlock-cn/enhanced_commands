@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.Codec;
@@ -24,6 +25,7 @@ import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.accessor.JsonReaderUtilsAccessor;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +50,7 @@ import java.util.regex.PatternSyntaxException;
  * 此类包含与命令解析和建议有关的静态实用方法。
  */
 public final class ParsingUtil {
+  public static final DynamicCommandExceptionType UNKNOWN_VALUE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.unknown_value", o));
   private static final CharSet EXTENDED_ALLOWED_STRINGS = CharSet.of('!', '@', '#', '$', '%', '^', '&', '*', '?', '\\');
 
   private ParsingUtil() {
@@ -180,6 +184,24 @@ public final class ParsingUtil {
     } else {
       reader.setCursor(cursorBeforeWhite);
       return first;
+    }
+  }
+
+  /**
+   * 解析一个字符串值，并根据字符串值转换为特定的对象。如果特定的对象为 {@code null}，则抛出异常。
+   *
+   * @see SuggestedParser#parseAndSuggestValues
+   */
+  public static <T> @NotNull T parseValues(StringReader reader, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
+    final int cursorBeforeRead = reader.getCursor();
+    final String name = reader.readString();
+    final int cursorAfterRead = reader.getCursor();
+    final T value = valueGetter.apply(name);
+    if (value == null) {
+      reader.setCursor(cursorBeforeRead);
+      throw CommandSyntaxExceptionExtension.withCursorEnd(UNKNOWN_VALUE.createWithContext(reader, name), cursorAfterRead);
+    } else {
+      return value;
     }
   }
 

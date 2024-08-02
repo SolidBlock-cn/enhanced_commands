@@ -9,6 +9,7 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Contract;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.function.Function;
 
@@ -45,7 +46,7 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
     BYPASSING("bypassing", BypassingPropertyFunction::getCodec),
     RANDOM("random", RandomPropertyFunction::getCodec),
     SIMPLE("simple", SimplePropertyFunction::getCodec);
-    public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
+    public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(Type.values());
 
     private final String name;
     private final Function<Block, MapCodec<? extends PropertyFunction<?>>> codecFunction;

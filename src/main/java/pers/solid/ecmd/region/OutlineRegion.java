@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.FunctionParamsParser;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Iterator;
 import java.util.List;
@@ -136,7 +137,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
       }
     };
 
-    public static final EnumCodec<OutlineType> CODEC = StringIdentifiable.createCodec(OutlineType::values);
+    public static final StringIdentifiableCodec<OutlineType> CODEC = StringIdentifiableCodec.create(OutlineType.values());
     public static final MapCodec<OutlineType> OUTLINE_TYPE_FIELD = OutlineType.CODEC.optionalFieldOf("outline_type").xmap(o -> o.orElse(OutlineType.OUTLINE), Optional::of);
     private final String name;
 

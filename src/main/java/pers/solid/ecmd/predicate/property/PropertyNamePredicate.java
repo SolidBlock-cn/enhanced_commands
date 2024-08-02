@@ -8,6 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 public interface PropertyNamePredicate extends ExpressionConvertible {
   Codec<PropertyNamePredicate> CODEC = Type.CODEC.dispatch(PropertyNamePredicate::getType, type -> type.codec);
@@ -26,7 +27,7 @@ public interface PropertyNamePredicate extends ExpressionConvertible {
     EXISTENCE("existence", ExistencePropertyNamePredicate.CODEC),
     MULTI_VALUE("multi_value", MultiValuePropertyNamePredicate.CODEC);
 
-    public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
+    public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(Type.values());
     public final MapCodec<? extends PropertyNamePredicate> codec;
     private final String name;
 

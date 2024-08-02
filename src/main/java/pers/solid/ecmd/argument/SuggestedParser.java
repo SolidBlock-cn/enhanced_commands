@@ -6,12 +6,10 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -22,6 +20,7 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.SuggestionProvider;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +33,6 @@ import java.util.function.Function;
  * <p>为了更灵活地控制建议提供过程，此类允许一次性提供多个建议。解析过程结束时（包括抛出 {@link CommandSyntaxException} 时），{@link #reader} 所在的 {@link StringReader#cursor cursor} 就是建议的起始位置，而这是位置也正是 {@link CommandSyntaxException} 的 cursor 位置。如果由于某些原因必须指定命令建议的起始位置，可以使用 {@link SuggestionProvider#offset(SuggestionProvider.Offset)} 作为建议内容。
  */
 public class SuggestedParser {
-  public static final DynamicCommandExceptionType UNKNOWN_VALUE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.unknown_value", o));
   /**
    * 此对象的基于的 {@link StringReader} 对象，会直接用于解析。在提供建议时，也会基于此对象的 {@link StringReader#string string} 和 {@link StringReader#cursor cursor} 来提供建议。
    */
@@ -245,28 +243,20 @@ public class SuggestedParser {
     }
   }
 
-  public <T> @NotNull T parseAndSuggestValues(Iterable<@Nullable T> iterable, Function<T, String> suggestions, Function<T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
-    final int cursorBeforeRead = reader.getCursor();
+  public <T> @NotNull T parseAndSuggestValues(Iterable<@Nullable T> iterable, Function<@NotNull T, String> suggestions, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     this.suggestionProviders.add((context, builder) -> CommandSource.suggestMatching(iterable, builder, suggestions, tooltip));
-    final String name = reader.readString();
-    final T value = valueGetter.apply(name);
-    if (value == null) {
-      reader.setCursor(cursorBeforeRead);
-      throw UNKNOWN_VALUE.createWithContext(reader, name);
-    } else {
-      return value;
-    }
+    return ParsingUtil.parseValues(this.reader, valueGetter);
   }
 
-  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(Iterable<T> iterable, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     return parseAndSuggestValues(iterable, StringIdentifiable::asString, tooltip, valueGetter);
   }
 
-  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip, StringIdentifiable.EnumCodec<T> codec) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(Iterable<T> iterable, Function<@NotNull T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
     return parseAndSuggestEnums(iterable, tooltip, codec::byId);
   }
 
-  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(T[] iterable, Function<T, @Nullable Message> tooltip, StringIdentifiable.EnumCodec<T> codec) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringIdentifiable> @NotNull T parseAndSuggestEnums(T[] iterable, Function<@NotNull T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
     return parseAndSuggestEnums(Arrays.asList(iterable), tooltip, codec);
   }
 

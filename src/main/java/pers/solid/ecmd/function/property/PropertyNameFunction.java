@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 public interface PropertyNameFunction extends ExpressionConvertible {
   Codec<PropertyNameFunction> CODEC = Type.CODEC.dispatch(PropertyNameFunction::getType, type -> type.codec);
@@ -48,7 +49,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
     BYPASSING("bypassing", BypassingPropertyNameFunction.CODEC),
     RANDOM("random", RandomPropertyNameFunction.CODEC),
     SIMPLE("simple", SimplePropertyNameFunction.CODEC);
-    public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
+    public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(Type.values());
 
     private final String name;
     private final MapCodec<? extends PropertyNameFunction> codec;

@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.function.Function;
 
@@ -39,7 +40,7 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
     EXISTENCE("existence", ExistencePropertyPredicate::getCodec),
     MULTI_VALUE("multi_value", MultiValuePropertyPredicate::getCodec);
 
-    public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
+    public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(Type.values());
     public final Function<Block, MapCodec<? extends PropertyPredicate<?>>> codecFunction;
     private final String name;
 

@@ -16,6 +16,7 @@ import net.minecraft.nbt.NbtFloat;
 import net.minecraft.nbt.NbtLong;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Iterator;
 
@@ -255,7 +256,7 @@ public enum ConcentrationType implements StringIdentifiable {
     }
   };
   public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.concentration_type.no_value"));
-  public static final EnumCodec<ConcentrationType> CODEC = StringIdentifiable.createCodec(ConcentrationType::values);
+  public static final StringIdentifiableCodec<ConcentrationType> CODEC = StringIdentifiableCodec.create(ConcentrationType.values());
   private final String name;
   private final Text displayName;
   /**

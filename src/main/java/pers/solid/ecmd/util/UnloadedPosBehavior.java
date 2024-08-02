@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 /**
  * 批量方块操作在遇到没有加载的坐标时的行为。
@@ -26,7 +27,7 @@ public enum UnloadedPosBehavior implements StringIdentifiable {
    */
   FORCE("force");
   private final String name;
-  public static final StringIdentifiable.EnumCodec<UnloadedPosBehavior> CODEC = StringIdentifiable.createCodec(UnloadedPosBehavior::values);
+  public static final StringIdentifiableCodec<UnloadedPosBehavior> CODEC = StringIdentifiableCodec.create(UnloadedPosBehavior.values());
   public static final ImmutableList<UnloadedPosBehavior> VALUES = ImmutableList.copyOf(values());
 
   UnloadedPosBehavior(String name) {this.name = name;}

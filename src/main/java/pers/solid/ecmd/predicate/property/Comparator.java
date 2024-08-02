@@ -6,6 +6,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.Util;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -20,7 +21,7 @@ public enum Comparator implements StringIdentifiable {
   NE("!=", (actual, expected) -> !actual.equals(expected));
 
   public static final Map<String, Comparator> NAME_TO_VALUE = Util.make(new ImmutableMap.Builder<String, Comparator>(), builder -> Arrays.stream(values()).forEach(comparator -> builder.put(comparator.asString(), comparator))).put("=!", NE).build();
-  public static final com.mojang.serialization.Codec<Comparator> CODEC = StringIdentifiable.createCodec(Comparator::values);
+  public static final StringIdentifiableCodec<Comparator> CODEC = StringIdentifiableCodec.create(Comparator.values());
   public static final MapCodec<Comparator> FIELD_CODEC = CODEC.optionalFieldOf("comparator").xmap(comparator -> comparator.orElse(EQ), Optional::of);
 
   private final String name;

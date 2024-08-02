@@ -9,6 +9,7 @@ import net.minecraft.util.StringIdentifiable;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 public interface NbtPredicate extends ExpressionConvertible {
   @Override
@@ -44,7 +45,7 @@ public interface NbtPredicate extends ExpressionConvertible {
     REGEX("regex");
 
     private final String name;
-    public static final com.mojang.serialization.Codec<Type> CODEC = StringIdentifiable.createCodec(Type::values);
+    public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(Type.values());
 
     Type(String name) {
       this.name = name;

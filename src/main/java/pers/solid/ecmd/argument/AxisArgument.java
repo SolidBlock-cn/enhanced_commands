@@ -1,7 +1,6 @@
 package pers.solid.ecmd.argument;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.serialization.Codec;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -9,6 +8,7 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec2f;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.function.Function;
 
@@ -31,8 +31,8 @@ public enum AxisArgument implements StringIdentifiable, Function<@NotNull Server
 
   public static final ImmutableList<AxisArgument> VALUES = ImmutableList.copyOf(values());
   public static final ImmutableList<AxisArgument> VALUES_EXCEPT_RANDOM = VALUES.subList(0, VALUES.size() - 2);
-  public static final Codec<AxisArgument> CODEC = StringIdentifiable.createCodec(AxisArgument::values);
-  public static final Codec<AxisArgument> CODEC_EXCLUDING_RANDOM = StringIdentifiable.createCodec(() -> VALUES_EXCEPT_RANDOM.toArray(AxisArgument[]::new));
+  public static final StringIdentifiableCodec<AxisArgument> CODEC = StringIdentifiableCodec.create(AxisArgument.values());
+  public static final StringIdentifiableCodec<AxisArgument> CODEC_EXCLUDING_RANDOM = StringIdentifiableCodec.create(VALUES_EXCEPT_RANDOM.toArray(AxisArgument[]::new));
   private final String name;
   private final Function<ServerCommandSource, Direction.Axis> function;
 

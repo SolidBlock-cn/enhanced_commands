@@ -18,6 +18,7 @@ import pers.solid.ecmd.util.FunctionParamsParser;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,7 +113,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
         return !VoxelShapes.combine(VoxelShapes.fullCube(), offsetCachedBlockPosition.getBlockState().getCollisionShape(offsetCachedBlockPosition.getWorld(), offsetCachedBlockPosition.getBlockPos()).getFace(direction.getOpposite()), BooleanBiFunction.ONLY_FIRST).isEmpty();
       }
     };
-    public static final EnumCodec<ExposureType> CODEC = StringIdentifiable.createCodec(ExposureType::values);
+    public static final StringIdentifiableCodec<ExposureType> CODEC = StringIdentifiableCodec.create(ExposureType.values());
     private final String name;
 
     ExposureType(String name) {
