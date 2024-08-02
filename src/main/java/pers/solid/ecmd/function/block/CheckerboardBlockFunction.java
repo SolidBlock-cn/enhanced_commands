@@ -46,21 +46,23 @@ public interface CheckerboardBlockFunction extends BlockFunction {
     }
   }
 
-  record Uniform(List<BlockFunction> functions, Vec3d axisScale, boolean floor) implements CheckerboardBlockFunction {
+  record Uniform(List<BlockFunction> functions, Vec3d axisScale, boolean floor, double offset) implements CheckerboardBlockFunction {
     public static final MapCodec<Uniform> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(Uniform::functions),
         Vec3d.CODEC.fieldOf("axis_scale").forGetter(Uniform::axisScale),
-        Codec.BOOL.optionalFieldOf("boolean", false).forGetter(Uniform::floor)).apply(i, Uniform::new));
+        Codec.BOOL.optionalFieldOf("boolean", false).forGetter(Uniform::floor),
+        Codec.DOUBLE.optionalFieldOf("offset", 0d).forGetter(Uniform::offset)
+    ).apply(i, Uniform::new));
 
     @Override
     public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-      final double v = getPoint(floor, pos, axisScale);
+      final double v = getPoint(floor, pos, axisScale, offset);
       final int i = MathHelper.floorMod(MathHelper.floor(v), functions.size());
       return functions.get(i).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
 
     @Override
     public @NotNull String asString() {
-      return "checkerboard(" + functions.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + (floor ? " \\ " : " * ") + axisScale.x + " " + axisScale.y + " " + axisScale.z + ")";
+      return "checkerboard(" + functions.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + (floor ? " \\ " : " * ") + axisScale.x + " " + axisScale.y + " " + axisScale.z + ", " + offset + ")";
     }
   }
 
@@ -68,7 +70,9 @@ public interface CheckerboardBlockFunction extends BlockFunction {
     public static final Codec<ObjectDoublePair<BlockFunction>> PAIR_CODEC = RecordCodecBuilder.create(i -> i.group(BlockFunction.CODEC.fieldOf("function").forGetter(ObjectDoublePair::left), Codec.DOUBLE.fieldOf("amount").forGetter(ObjectDoublePair::rightDouble)).apply(i, ObjectDoublePair::of));
     public static final MapCodec<Weighted> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(PAIR_CODEC.listOf().fieldOf("patterns").forGetter(Weighted::patterns),
         Vec3d.CODEC.fieldOf("axis_scale").forGetter(Weighted::axisScale),
-        Codec.BOOL.optionalFieldOf("floor", false).forGetter(Weighted::floor)).apply(i, Weighted::new));
+        Codec.BOOL.optionalFieldOf("floor", false).forGetter(Weighted::floor),
+        Codec.DOUBLE.optionalFieldOf("offset", 0d).forGetter(Weighted::offset)
+    ).apply(i, Weighted::new));
 
     public List<ObjectDoublePair<BlockFunction>> patterns() {
       return patterns;
@@ -82,21 +86,27 @@ public interface CheckerboardBlockFunction extends BlockFunction {
       return floor;
     }
 
+    public double offset() {
+      return offset;
+    }
+
     private final List<ObjectDoublePair<BlockFunction>> patterns;
     private final Vec3d axisScale;
     public final double totalLength;
     private final boolean floor;
+    private final double offset;
 
-    public Weighted(List<ObjectDoublePair<BlockFunction>> patterns, Vec3d axisScale, boolean floor) {
+    public Weighted(List<ObjectDoublePair<BlockFunction>> patterns, Vec3d axisScale, boolean floor, double offset) {
       this.patterns = patterns;
       this.axisScale = axisScale;
       this.totalLength = patterns.stream().mapToDouble(ObjectDoublePair::rightDouble).sum();
       this.floor = floor;
+      this.offset = offset;
     }
 
     @Override
     public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-      final double v = getPoint(floor, pos, axisScale);
+      final double v = getPoint(floor, pos, axisScale, offset);
       final double i = MathHelper.floorMod(v, totalLength);
       double stackedHeight = 0;
 
@@ -117,12 +127,12 @@ public interface CheckerboardBlockFunction extends BlockFunction {
     }
   }
 
-  private static double getPoint(boolean floor, BlockPos pos, Vec3d axisScale) {
+  private static double getPoint(boolean floor, BlockPos pos, Vec3d axisScale, double offset) {
     final double v;
     if (floor) {
-      v = Math.floor(pos.getX() / axisScale.x) + Math.floor(pos.getY() / axisScale.y) + Math.floor(pos.getZ() / axisScale.z);
+      v = Math.floor(pos.getX() / axisScale.x) + Math.floor(pos.getY() / axisScale.y) + Math.floor(pos.getZ() / axisScale.z) + offset;
     } else {
-      v = Vec3d.of(pos).dotProduct(axisScale);
+      v = Vec3d.of(pos).dotProduct(axisScale) + offset;
     }
     return v;
   }
@@ -134,6 +144,7 @@ public interface CheckerboardBlockFunction extends BlockFunction {
     protected boolean shouldDivide = false;
     protected boolean shouldFloor = false;
     private double weightSum = 0;
+    private double offset = 0;
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
@@ -141,9 +152,9 @@ public interface CheckerboardBlockFunction extends BlockFunction {
         axisScale = new Vec3d(1, 1, 1);
       }
       if (weighted) {
-        return source -> new Weighted(IterateUtils.transformFailableImmutableList(pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble())), axisScale, shouldFloor);
+        return source -> new Weighted(IterateUtils.transformFailableImmutableList(pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble())), axisScale, shouldFloor, offset);
       } else {
-        return source -> new Uniform(IterateUtils.transformFailableImmutableList(pairs, pair -> pair.left().apply(source)), axisScale, shouldFloor);
+        return source -> new Uniform(IterateUtils.transformFailableImmutableList(pairs, pair -> pair.left().apply(source)), axisScale, shouldFloor, offset);
       }
     }
 
@@ -216,6 +227,15 @@ public interface CheckerboardBlockFunction extends BlockFunction {
         this.axisScale = new Vec3d(1d / x, 1d / y, 1d / z);
       } else {
         this.axisScale = new Vec3d(x, y, z);
+      }
+
+      reader.skipWhitespace();
+      parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest(","));
+      if (reader.canRead() && reader.peek() == ',') {
+        reader.skip();
+        reader.skipWhitespace();
+        parser.suggestionProviders.clear();
+        offset = reader.readDouble();
       }
     }
   }

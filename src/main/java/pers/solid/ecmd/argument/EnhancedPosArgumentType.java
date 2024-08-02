@@ -11,6 +11,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
@@ -31,7 +32,6 @@ import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixins.accessor.ClientCommandSourceAccessor;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Arrays;
@@ -247,7 +247,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     @Nullable Vec3d crossHairPos = null;
     @Nullable Vec3i crossHairBlockPos = null;
     if (context.getSource() instanceof ClientCommandSource clientCommandSource) {
-      final MinecraftClient client = ((ClientCommandSourceAccessor) clientCommandSource).getClient();
+      final MinecraftClient client = ((FabricClientCommandSource) clientCommandSource).getClient();
       if (client.crosshairTarget != null && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
         crossHairPos = client.crosshairTarget.getPos();
         if (client.crosshairTarget instanceof BlockHitResult blockHitResult) {
