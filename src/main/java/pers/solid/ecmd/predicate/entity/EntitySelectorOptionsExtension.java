@@ -63,6 +63,8 @@ import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.bridge.BridgeFloatRange;
+import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
@@ -341,7 +343,7 @@ public class EntitySelectorOptionsExtension {
         reader.extension$ec().addPredicateAndDescription(new HealthMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
-        final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
+        final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
         reader.extension$ec().addPredicateAndDescription(new HealthEntityPredicateEntry(floatRange, inverted));
       }
@@ -360,7 +362,7 @@ public class EntitySelectorOptionsExtension {
         reader.extension$ec().addPredicateAndDescription(new AirMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
-        final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
+        final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
         reader.extension$ec().addPredicateAndDescription(new AirEntityPredicateEntry(intRange, inverted));
       }
@@ -371,7 +373,7 @@ public class EntitySelectorOptionsExtension {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
       checkNoInversionMix(reader, "food", inverted);
-      final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
+      final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
       reader.extension$ec().addPredicateAndDescription(new FoodEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "food", inverted);
@@ -381,7 +383,7 @@ public class EntitySelectorOptionsExtension {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
       checkNoInversionMix(reader, "saturation", inverted);
-      final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
+      final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
       reader.extension$ec().addPredicateAndDescription(new SaturationEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "saturation", inverted);
@@ -391,7 +393,7 @@ public class EntitySelectorOptionsExtension {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
       checkNoInversionMix(reader, "exhaustion", inverted);
-      final FloatRangeArgument floatRange = FloatRangeArgument.parse(stringReader, true);
+      final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
       reader.extension$ec().addPredicateAndDescription(new ExhaustionEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "exhaustion", inverted);
@@ -401,7 +403,7 @@ public class EntitySelectorOptionsExtension {
       final StringReader stringReader = reader.getReader();
       final boolean inverted = reader.readNegationCharacter();
       checkNoInversionMix(reader, "fire", inverted);
-      final NumberRange.IntRange intRange = NumberRange.IntRange.parse(stringReader);
+      final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
       reader.extension$ec().addPredicateAndDescription(new FireEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "fire", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "fire"), Text.translatable("enhanced_commands.argument.entity.options.fire"));

@@ -1,19 +1,18 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.FloatRangeArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 
-public record ExhaustionEntityPredicateEntry(FloatRangeArgument floatRange, boolean inverted) implements EntityPredicateEntry {
+public record ExhaustionEntityPredicateEntry(BridgeFloatRange floatRange, boolean inverted) implements EntityPredicateEntry {
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.exhaustion");
 
   @Override
   public boolean test(Entity entity) {
-    return entity instanceof final PlayerEntity player && floatRange.isInRange(player.getHungerManager().getExhaustion()) != inverted;
+    return entity instanceof final PlayerEntity player && floatRange.test(player.getHungerManager().getExhaustion()) != inverted;
   }
 
   @Override
@@ -27,6 +26,6 @@ public record ExhaustionEntityPredicateEntry(FloatRangeArgument floatRange, bool
 
   @Override
   public String toOptionEntry() {
-    return "exhaustion=" + (inverted ? "!" : "") + StringUtil.wrapRange(floatRange);
+    return "exhaustion=" + (inverted ? "!" : "") + floatRange.asString();
   }
 }

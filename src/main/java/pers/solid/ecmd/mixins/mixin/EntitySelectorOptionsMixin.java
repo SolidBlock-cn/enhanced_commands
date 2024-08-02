@@ -53,6 +53,7 @@ import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.predicate.entity.*;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
@@ -197,7 +198,7 @@ public abstract class EntitySelectorOptionsMixin {
   private static boolean applyNegativeLevel(EntitySelectorReader instance, NumberRange.IntRange levelRange, @Share("inverted") LocalBooleanRef ref) {
     if (ref.get()) {
       instance.addPredicate(entity -> entity instanceof final PlayerEntity player && !levelRange.test(player.experienceLevel));
-      instance.extension$ec().addDescription(source -> new LevelEntityPredicateEntry(levelRange, true));
+      instance.extension$ec().addDescription(source -> new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), true));
       return false;
     } else {
       return true;

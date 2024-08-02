@@ -2,12 +2,11 @@ package pers.solid.ecmd.predicate.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
-public record LevelEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
+public record LevelEntityPredicateEntry(BridgeIntRange intRange, boolean inverted) implements EntityPredicateEntry {
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.level");
 
   @Override
@@ -21,6 +20,6 @@ public record LevelEntityPredicateEntry(NumberRange.IntRange intRange, boolean i
 
   @Override
   public String toOptionEntry() {
-    return "level=" + (inverted ? "!" : "") + StringUtil.wrapRange(intRange);
+    return "level=" + (inverted ? "!" : "") + intRange.asString();
   }
 }

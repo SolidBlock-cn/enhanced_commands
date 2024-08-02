@@ -10,7 +10,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.*;
-import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.predicate.nbt.*;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ParsingUtil;
 import pers.solid.ecmd.util.SuggestionProvider;
+import pers.solid.ecmd.util.bridge.BridgeDoubleRange;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -261,7 +261,6 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       // 开始解析字符串，并将其视为正则表达式
       suggestionProviders.clear();
       reader.skipWhitespace();
-      final int cursorBeforeRegex = reader.getCursor();
       return new RegexNbtPredicate(ParsingUtil.readRegex(reader), false);
     }
 
@@ -332,8 +331,8 @@ public class NbtPredicateSuggestedParser extends SuggestedParser {
       // 先尝试读取 NumberRange
       final int cursorBeforeRange = reader.getCursor();
       try {
-        final NumberRange.DoubleRange parsedRange = NumberRange.DoubleRange.parse(reader);
-        if (parsedRange.min().isPresent() && !parsedRange.min().equals(parsedRange.max())) {
+        final BridgeDoubleRange parsedRange = BridgeDoubleRange.parse(reader);
+        if (parsedRange.min != null && !parsedRange.min.equals(parsedRange.max)) {
           return new RangeNbtPredicate(parsedRange, isNegated);
         } else {
           reader.setCursor(cursorBeforeRange);

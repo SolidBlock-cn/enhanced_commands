@@ -3,12 +3,11 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
-public record FoodEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
+public record FoodEntityPredicateEntry(BridgeIntRange intRange, boolean inverted) implements EntityPredicateEntry {
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.food");
 
   @Override
@@ -27,6 +26,6 @@ public record FoodEntityPredicateEntry(NumberRange.IntRange intRange, boolean in
 
   @Override
   public String toOptionEntry() {
-    return "food=" + (inverted ? "!" : "") + StringUtil.wrapRange(intRange);
+    return "food=" + (inverted ? "!" : "") + intRange.asString();
   }
 }

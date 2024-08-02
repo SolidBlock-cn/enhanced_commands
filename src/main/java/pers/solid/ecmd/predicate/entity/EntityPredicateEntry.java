@@ -1,16 +1,16 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.FloatRangeArgument;
 import net.minecraft.entity.Entity;
-import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.bridge.BridgeDoubleRange;
+import pers.solid.ecmd.util.bridge.BridgeFloatRange;
+import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
 /**
  * 测试实体的某一特定属性的谓词信息，可在测试时提供详细的文本描述，以及对应的字符串内的表示形式。
@@ -52,9 +52,9 @@ public interface EntityPredicateEntry extends EntityPredicate {
    * @param entityName    实体的显示名称，会显示在测试结果中。
    * @param inverted      测试是否为反向的，不影响结果的文本内容，但是会影响结果的真假判断。
    */
-  static <E extends Entity> TestResult testInt(E entity, int actual, NumberRange.IntRange expected, Text criterionName, Text entityName, boolean inverted) {
+  static <E extends Entity> TestResult testInt(E entity, int actual, BridgeIntRange expected, Text criterionName, Text entityName, boolean inverted) {
     final MutableText actualText = TextUtil.literal(actual).styled(Styles.ACTUAL);
-    final MutableText expectedText = Text.literal(StringUtil.wrapRange(expected)).styled(Styles.EXPECTED);
+    final MutableText expectedText = Text.literal(expected.asString()).styled(Styles.EXPECTED);
     if (expected.test(actual)) {
       return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {
@@ -72,10 +72,10 @@ public interface EntityPredicateEntry extends EntityPredicate {
    * @param entityName    实体的显示名称，会显示在测试结果中。
    * @param inverted      测试是否为反向的，不影响结果的文本内容，但是会影响结果的真假判断。
    */
-  static <E extends Entity> TestResult testFloat(E entity, float actual, FloatRangeArgument expected, Text criterionName, Text entityName, boolean inverted) {
+  static <E extends Entity> TestResult testFloat(E entity, float actual, BridgeFloatRange expected, Text criterionName, Text entityName, boolean inverted) {
     final MutableText actualText = TextUtil.literal(actual).styled(Styles.ACTUAL);
-    final MutableText expectedText = Text.literal(StringUtil.wrapRange(expected)).styled(Styles.EXPECTED);
-    if (expected.isInRange(actual)) {
+    final MutableText expectedText = Text.literal(expected.asString()).styled(Styles.EXPECTED);
+    if (expected.test(actual)) {
       return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {
       return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.general.out_of_range", criterionName, entityName, actualText, expectedText));
@@ -92,9 +92,9 @@ public interface EntityPredicateEntry extends EntityPredicate {
    * @param entityName    实体的显示名称，会显示在测试结果中。
    * @param inverted      测试是否为反向的，不影响结果的文本内容，但是会影响结果的真假判断。
    */
-  static <E extends Entity> TestResult testDouble(E entity, double actual, NumberRange.DoubleRange expected, Text criterionName, Text entityName, boolean inverted) {
+  static <E extends Entity> TestResult testDouble(E entity, double actual, BridgeDoubleRange expected, Text criterionName, Text entityName, boolean inverted) {
     final MutableText actualText = TextUtil.literal(actual).styled(Styles.ACTUAL);
-    final MutableText expectedText = Text.literal(StringUtil.wrapRange(expected)).styled(Styles.EXPECTED);
+    final MutableText expectedText = Text.literal(expected.asString()).styled(Styles.EXPECTED);
     if (expected.test(actual)) {
       return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {

@@ -1,12 +1,11 @@
 package pers.solid.ecmd.predicate.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
-public record AirEntityPredicateEntry(NumberRange.IntRange intRange, boolean inverted) implements EntityPredicateEntry {
+public record AirEntityPredicateEntry(BridgeIntRange intRange, boolean inverted) implements EntityPredicateEntry {
   @Override
   public boolean test(Entity entity) {
     return intRange.test(entity.getAir()) != inverted;
@@ -19,6 +18,6 @@ public record AirEntityPredicateEntry(NumberRange.IntRange intRange, boolean inv
 
   @Override
   public String toOptionEntry() {
-    return "air=" + (inverted ? "!" : "") + StringUtil.wrapRange(intRange);
+    return "air=" + (inverted ? "!" : "") + intRange.asString();
   }
 }

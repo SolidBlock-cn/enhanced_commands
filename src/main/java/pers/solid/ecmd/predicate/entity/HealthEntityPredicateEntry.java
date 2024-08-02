@@ -1,13 +1,12 @@
 package pers.solid.ecmd.predicate.entity;
 
-import net.minecraft.command.FloatRangeArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 
-public record HealthEntityPredicateEntry(FloatRangeArgument floatRange, boolean inverted) implements EntityPredicateEntry {
+public record HealthEntityPredicateEntry(BridgeFloatRange floatRange, boolean inverted) implements EntityPredicateEntry {
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.health");
 
   @Override
@@ -26,6 +25,6 @@ public record HealthEntityPredicateEntry(FloatRangeArgument floatRange, boolean 
 
   @Override
   public String toOptionEntry() {
-    return "health=" + (inverted ? "!" : "") + StringUtil.wrapRange(floatRange);
+    return "health=" + (inverted ? "!" : "") + floatRange.asString();
   }
 }

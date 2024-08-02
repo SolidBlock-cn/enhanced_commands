@@ -30,6 +30,8 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.ext.EntitySelectorReaderExtension;
 import pers.solid.ecmd.predicate.entity.*;
 import pers.solid.ecmd.util.ParsingUtil;
+import pers.solid.ecmd.util.bridge.BridgeFloatRange;
+import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
 import java.util.List;
 import java.util.Map;
@@ -96,15 +98,15 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @Inject(method = "buildPredicate", at = @At("HEAD"))
   private void buildPredicateDescriptions(CallbackInfo ci) {
     if (pitchRange != FloatRangeArgument.ANY) {
-      extension$ec().addDescription(source -> new RotationPredicateEntry(pitchRange, "pitch", Entity::getPitch, rotationPredicate(pitchRange, Entity::getPitch)));
+      extension$ec().addDescription(source -> new RotationPredicateEntry(BridgeFloatRange.fromVanilla(pitchRange), "pitch", Entity::getPitch, rotationPredicate(pitchRange, Entity::getPitch)));
     }
 
     if (yawRange != FloatRangeArgument.ANY) {
-      extension$ec().addDescription(source -> new RotationPredicateEntry(yawRange, "yaw", Entity::getYaw, rotationPredicate(yawRange, Entity::getYaw)));
+      extension$ec().addDescription(source -> new RotationPredicateEntry(BridgeFloatRange.fromVanilla(yawRange), "yaw", Entity::getYaw, rotationPredicate(yawRange, Entity::getYaw)));
     }
 
     if (!levelRange.isDummy()) {
-      extension$ec().addDescription(source -> new LevelEntityPredicateEntry(levelRange, false));
+      extension$ec().addDescription(source -> new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), false));
     }
   }
 
