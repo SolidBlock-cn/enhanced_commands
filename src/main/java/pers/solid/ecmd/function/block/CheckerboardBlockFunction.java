@@ -2,7 +2,6 @@ package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
@@ -10,15 +9,14 @@ import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.WeightedList;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
@@ -26,18 +24,27 @@ import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public interface CheckerboardBlockFunction extends BlockFunction {
-  MapCodec<CheckerboardBlockFunction> CODEC = Codec.BOOL.dispatchMap("uniform", f -> f instanceof Uniform, u -> u ? Uniform.CODEC : Weighted.CODEC);
+import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.util.ModCommandExceptionTypes.DUPLICATE_KEYWORD;
+import static pers.solid.ecmd.util.ModCommandExceptionTypes.UNKNOWN_KEYWORD;
+
+public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> functions, @NotNull Vec3d floor, @NotNull Vec3d axisScale, @NotNull Vec3d offset) implements BlockFunction {
+  private static final Vec3d UNIT = new Vec3d(1, 1, 1);
+  public static final MapCodec<CheckerboardBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      WeightedList.createMapCodec(BlockFunction.CODEC).fieldOf("functions").forGetter(CheckerboardBlockFunction::functions),
+      Vec3d.CODEC.optionalFieldOf("floor", Vec3d.ZERO).forGetter(CheckerboardBlockFunction::floor),
+      Vec3d.CODEC.optionalFieldOf("axis_scale", UNIT).forGetter(CheckerboardBlockFunction::axisScale),
+      Vec3d.CODEC.optionalFieldOf("offset", Vec3d.ZERO).forGetter(CheckerboardBlockFunction::offset)
+  ).apply(i, CheckerboardBlockFunction::new));
 
   @Override
   @NotNull
-  default BlockFunctionType<?> getType() {
+  public BlockFunctionType<?> getType() {
     return BlockFunctionTypes.CHECKERBOARD;
   }
 
-  enum Type implements BlockFunctionType<CheckerboardBlockFunction> {
+  public enum Type implements BlockFunctionType<CheckerboardBlockFunction> {
     CHECKERBOARD_TYPE;
 
     @Override
@@ -45,116 +52,74 @@ public interface CheckerboardBlockFunction extends BlockFunction {
       return CODEC;
     }
   }
-
-  record Uniform(List<BlockFunction> functions, Vec3d axisScale, boolean floor, double offset) implements CheckerboardBlockFunction {
-    public static final MapCodec<Uniform> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(Uniform::functions),
-        Vec3d.CODEC.fieldOf("axis_scale").forGetter(Uniform::axisScale),
-        Codec.BOOL.optionalFieldOf("boolean", false).forGetter(Uniform::floor),
-        Codec.DOUBLE.optionalFieldOf("offset", 0d).forGetter(Uniform::offset)
-    ).apply(i, Uniform::new));
-
     @Override
     public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-      final double v = getPoint(floor, pos, axisScale, offset);
-      final int i = MathHelper.floorMod(MathHelper.floor(v), functions.size());
-      return functions.get(i).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      double x = pos.getX() - offset.x;
+      double y = pos.getY() - offset.y;
+      double z = pos.getZ() - offset.z;
+      if (floor.x != 0) x = Math.floor(x / floor.x);
+      if (floor.y != 0) y = Math.floor(y / floor.y);
+      if (floor.z != 0) z = Math.floor(z / floor.z);
+      if (axisScale.x == 0) x = 0;
+      else x /= axisScale.x;
+      if (axisScale.y == 0) y = 0;
+      else y /= axisScale.y;
+      if (axisScale.z == 0) z = 0;
+      else z /= axisScale.z;
+      double v = x + y + z;
+      return functions.getElementAt(v).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
 
     @Override
     public @NotNull String asString() {
-      return "checkerboard(" + functions.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + (floor ? " \\ " : " * ") + axisScale.x + " " + axisScale.y + " " + axisScale.z + ", " + offset + ")";
-    }
-  }
-
-  final class Weighted implements CheckerboardBlockFunction {
-    public static final Codec<ObjectDoublePair<BlockFunction>> PAIR_CODEC = RecordCodecBuilder.create(i -> i.group(BlockFunction.CODEC.fieldOf("function").forGetter(ObjectDoublePair::left), Codec.DOUBLE.fieldOf("amount").forGetter(ObjectDoublePair::rightDouble)).apply(i, ObjectDoublePair::of));
-    public static final MapCodec<Weighted> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(PAIR_CODEC.listOf().fieldOf("patterns").forGetter(Weighted::patterns),
-        Vec3d.CODEC.fieldOf("axis_scale").forGetter(Weighted::axisScale),
-        Codec.BOOL.optionalFieldOf("floor", false).forGetter(Weighted::floor),
-        Codec.DOUBLE.optionalFieldOf("offset", 0d).forGetter(Weighted::offset)
-    ).apply(i, Weighted::new));
-
-    public List<ObjectDoublePair<BlockFunction>> patterns() {
-      return patterns;
-    }
-
-    public Vec3d axisScale() {
-      return axisScale;
-    }
-
-    public boolean floor() {
-      return floor;
-    }
-
-    public double offset() {
-      return offset;
-    }
-
-    private final List<ObjectDoublePair<BlockFunction>> patterns;
-    private final Vec3d axisScale;
-    public final double totalLength;
-    private final boolean floor;
-    private final double offset;
-
-    public Weighted(List<ObjectDoublePair<BlockFunction>> patterns, Vec3d axisScale, boolean floor, double offset) {
-      this.patterns = patterns;
-      this.axisScale = axisScale;
-      this.totalLength = patterns.stream().mapToDouble(ObjectDoublePair::rightDouble).sum();
-      this.floor = floor;
-      this.offset = offset;
-    }
-
-    @Override
-    public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-      final double v = getPoint(floor, pos, axisScale, offset);
-      final double i = MathHelper.floorMod(v, totalLength);
-      double stackedHeight = 0;
-
-      // 注意：pairs 中的各浮点数的总和应该为 1。
-      for (ObjectDoublePair<BlockFunction> pair : patterns) {
-        stackedHeight += pair.rightDouble();
-        if (i < stackedHeight) {
-          return pair.left().getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
-        }
+      final StringBuilder sb = new StringBuilder("checkerboard");
+      sb.append(functions.asString(ExpressionConvertible::asString));
+      if (!floor.equals(Vec3d.ZERO)) {
+        sb.append(" floor ").append(StringUtil.wrapPosition(floor));
       }
-
-      return blockState;
+      if (!axisScale.equals(UNIT)) {
+        sb.append(" scale ").append(StringUtil.wrapPosition(axisScale));
+      }
+      if (!offset.equals(Vec3d.ZERO)) {
+        sb.append(" offset ").append(offset);
+      }
+      return sb.append(")").toString();
     }
 
-    @Override
-    public @NotNull String asString() {
-      return "checkerboard(" + patterns.stream().map(pair -> pair.left().asString() + " " + pair.rightDouble()) + (floor ? " \\ " : " * ") + axisScale.x + " " + axisScale.y + " " + axisScale.z + ")";
-    }
-  }
-
-  private static double getPoint(boolean floor, BlockPos pos, Vec3d axisScale, double offset) {
-    final double v;
-    if (floor) {
-      v = Math.floor(pos.getX() / axisScale.x) + Math.floor(pos.getY() / axisScale.y) + Math.floor(pos.getZ() / axisScale.z) + offset;
-    } else {
-      v = Vec3d.of(pos).dotProduct(axisScale) + offset;
-    }
-    return v;
-  }
-
-  class Parser implements FunctionLikeParser<BlockFunctionArgument> {
+  public static class Parser implements FunctionLikeParser<BlockFunctionArgument> {
     protected final List<ObjectDoublePair<BlockFunctionArgument>> pairs = new ArrayList<>();
     protected boolean weighted = false;
     protected Vec3d axisScale = null;
-    protected boolean shouldDivide = false;
-    protected boolean shouldFloor = false;
+    protected Vec3d floor = null;
     private double weightSum = 0;
-    private double offset = 0;
+    private Vec3d offset = null;
+    private int cursorBeforeFunctionName;
+
+    @Override
+    public void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
+      this.cursorBeforeFunctionName = cursorBeforeFunctionName;
+    }
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
+      if (weightSum == 0) {
+        final int cursorEnd = parser.reader.getCursor();
+        parser.reader.setCursor(cursorBeforeFunctionName);
+        throw withCursorEnd(PickBlockFunction.SUM_ZERO.createWithContext(parser.reader), cursorEnd);
+      }
       if (axisScale == null) {
-        axisScale = new Vec3d(1, 1, 1);
+        axisScale = UNIT;
+      }
+      if (floor == null) {
+        floor = Vec3d.ZERO;
+      }
+      if (offset == null) {
+        offset = Vec3d.ZERO;
       }
       if (weighted) {
-        return source -> new Weighted(IterateUtils.transformFailableImmutableList(pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble())), axisScale, shouldFloor, offset);
+        return source -> new CheckerboardBlockFunction(new WeightedList.Weighted<>(IterateUtils.transformFailableImmutableList(pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble()))), floor, axisScale, offset);
       } else {
-        return source -> new Uniform(IterateUtils.transformFailableImmutableList(pairs, pair -> pair.left().apply(source)), axisScale, shouldFloor, offset);
+        return source -> new CheckerboardBlockFunction(new WeightedList.Uniform<>(IterateUtils.transformFailableImmutableList(pairs, pair -> pair.left().apply(source))), floor, axisScale, offset);
       }
     }
 
@@ -176,14 +141,10 @@ public interface CheckerboardBlockFunction extends BlockFunction {
           final int cursorAfterDouble = reader.getCursor();
           if (weight < 0) {
             reader.setCursor(cursorBeforeDouble);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, weight), cursorAfterDouble);
+            throw withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, weight), cursorAfterDouble);
           }
           weightSum += weight;
-          if (weightSum == 0) {
-            reader.setCursor(cursorBeforeDouble);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(PickBlockFunction.SUM_ZERO.createWithContext(reader), cursorAfterDouble);
-          }
-          weighted = true;
+          weighted |= weight != 1;
           pairs.add(ObjectDoublePair.of(parse, weight));
         } else {
           pairs.add(ObjectDoublePair.of(parse, 1));
@@ -193,49 +154,79 @@ public interface CheckerboardBlockFunction extends BlockFunction {
         reader.skipWhitespace();
         parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestionsBuilder
             .suggest(rightParString())
-            .suggest(separatorString())
-            .suggest("X")
-            .suggest("/")
-            .suggest("\\"));
-
+            .suggest(separatorString()));
         if (!reader.canRead()) {
-          throw ModCommandExceptionTypes.EXPECTED_4_SYMBOLS.createWithContext(reader, rightParString(), "X", "/", "\\");
+          break;
         }
+        reader.skipWhitespace();
         final char peek = reader.peek();
         if (peek == ',') {
           reader.skip();
           reader.skipWhitespace();
-        } else if (peek == 'X' || peek == 'x' || peek == '/' || peek == '\\') {
-          reader.skip();
-          shouldDivide = peek == '/';
-          shouldFloor = peek == '\\';
+        } else {
           break;
-        } else if (peek == rightPar()) {
-          return;
         }
       }
+      // 等待关键字的部分
 
       // 解析坐标轴尺寸的部分
       parser.suggestionProviders.clear();
       reader.skipWhitespace();
-      double x = reader.readDouble();
-      ParsingUtil.expectAndSkipWhitespace(reader);
-      double y = reader.readDouble();
-      ParsingUtil.expectAndSkipWhitespace(reader);
-      double z = reader.readDouble();
-      if (shouldDivide) {
-        this.axisScale = new Vec3d(1d / x, 1d / y, 1d / z);
-      } else {
-        this.axisScale = new Vec3d(x, y, z);
-      }
 
-      reader.skipWhitespace();
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest(","));
-      if (reader.canRead() && reader.peek() == ',') {
-        reader.skip();
+      while (true) {
+        parser.suggestionProviders.add((context, suggestionsBuilder) -> {
+          if (floor == null) {
+            ParsingUtil.suggestString("floor", suggestionsBuilder);
+          }
+          if (axisScale == null) {
+            ParsingUtil.suggestString("scale", suggestionsBuilder);
+          }
+          if (offset == null) {
+            ParsingUtil.suggestString("offset", suggestionsBuilder);
+          }
+        });
+
+        final int cursorBeforeKeyword = reader.getCursor();
+        final String keyword = reader.readUnquotedString();
+        if (keyword.isEmpty()) {
+          break;
+        }
+        final int cursorAfterKeyword = reader.getCursor();
+        switch (keyword) {
+          case "floor" -> {
+            parser.suggestionProviders.clear();
+            if (floor != null) {
+              reader.setCursor(cursorBeforeKeyword);
+              throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
+            }
+            ParsingUtil.expectAndSkipWhitespace(reader);
+            floor = ParsingUtil.parseShortenableVec3d(reader);
+          }
+          case "scale" -> {
+            parser.suggestionProviders.clear();
+            if (axisScale != null) {
+              reader.setCursor(cursorBeforeKeyword);
+              throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
+            }
+            ParsingUtil.expectAndSkipWhitespace(reader);
+            axisScale = ParsingUtil.parseShortenableVec3d(reader);
+          }
+          case "offset" -> {
+            parser.suggestionProviders.clear();
+            if (offset != null) {
+              reader.setCursor(cursorBeforeKeyword);
+              throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
+            }
+            ParsingUtil.expectAndSkipWhitespace(reader);
+            offset = ParsingUtil.parseShortenableVec3d(reader);
+          }
+          default -> {
+            reader.setCursor(cursorBeforeKeyword);
+            throw withCursorEnd(UNKNOWN_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
+          }
+        } // end switch
+
         reader.skipWhitespace();
-        parser.suggestionProviders.clear();
-        offset = reader.readDouble();
       }
     }
   }

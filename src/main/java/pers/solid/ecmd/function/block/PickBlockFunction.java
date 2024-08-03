@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -19,6 +17,8 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.WeightedList;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.ArrayList;
@@ -35,12 +35,13 @@ import java.util.stream.Collectors;
  * <p>
  * 允许零值，但总和不能为零。
  */
-public interface PickBlockFunction extends BlockFunction {
-  SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.pick.zero_sum"));
-  MapCodec<PickBlockFunction> CODEC = Codec.BOOL.dispatchMap("weighted", f -> f instanceof Weighted, b -> b ? Weighted.CODEC : Uniform.CODEC);
+public record PickBlockFunction(WeightedList<BlockFunction> functions) implements BlockFunction {
+  public static final SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.pick.zero_sum"));
+  public static final MapCodec<PickBlockFunction> CODEC = WeightedList.createMapCodec(BlockFunction.CODEC).xmap(PickBlockFunction::new, PickBlockFunction::functions);
 
   @Override
-  default @NotNull BlockFunctionType<PickBlockFunction> getType() {
+  @NotNull
+  public BlockFunctionType<PickBlockFunction> getType() {
     return BlockFunctionTypes.PICK;
   }
 
@@ -53,56 +54,21 @@ public interface PickBlockFunction extends BlockFunction {
     }
   }
 
-  /**
-   * 多个方块函数具有相等的权重。这种情况下可以最快地产生。
-   */
-  record Uniform(List<BlockFunction> functions) implements PickBlockFunction {
-    public static final MapCodec<Uniform> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(Uniform::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(Uniform::functions)));
 
     @Override
     public @NotNull String asString() {
-      return "pick(" + functions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
+      return functions.asStringStream(ExpressionConvertible::asString).collect(Collectors.joining(",", "pick(", ")"));
     }
 
-    @Override
-    public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-      return functions.get(world.random.nextInt(functions.size())).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
-    }
-
-  }
-
-  /**
-   * 带有权重的方块函数，在运行时会根据权重来进行选择。
-   */
-  record Weighted(List<ObjectDoublePair<BlockFunction>> pairs) implements PickBlockFunction {
-    public static final Codec<ObjectDoublePair<BlockFunction>> PAIR_CODEC = RecordCodecBuilder.create(j -> j.apply2(ObjectDoublePair::of, BlockFunction.CODEC.fieldOf("function").forGetter(ObjectDoublePair::left), Codec.DOUBLE.optionalFieldOf("probability", 1d).forGetter(ObjectDoublePair::rightDouble)));
-    public static final MapCodec<Weighted> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(Weighted::new, PAIR_CODEC.listOf().fieldOf("pairs").forGetter(Weighted::pairs)));
-
-    @Override
-    public @NotNull String asString() {
-      return "pick(" + pairs.stream().map(pair -> pair.left().asString() + " " + pair.rightDouble()).collect(Collectors.joining(", ")) + ")";
-    }
 
     @Override
     public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
       final Random random = world.getRandom();
-      final double d = random.nextDouble();
-      double stackedHeight = 0;
-
-      // 注意：pairs 中的各浮点数的总和应该为 1。
-      for (ObjectDoublePair<BlockFunction> pair : pairs) {
-        stackedHeight += pair.rightDouble();
-        if (d < stackedHeight) {
-          return pair.left().getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
-        }
-      }
-
-      return blockState;
+      return functions.getRandom(random).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     }
 
-  }
 
-  class Parser implements FunctionParamsParser<BlockFunctionArgument> {
+  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
     final List<ObjectDoublePair<BlockFunctionArgument>> pairs = new ArrayList<>();
     boolean weighted = false;
 
@@ -118,7 +84,7 @@ public interface PickBlockFunction extends BlockFunction {
           for (ObjectDoublePair<BlockFunctionArgument> pair : pairs) {
             builder.add(ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble() / sum));
           }
-          return new Weighted(builder.build());
+          return new PickBlockFunction(new WeightedList.Weighted<>(builder.build()));
         };
       } else {
         return source -> {
@@ -126,7 +92,7 @@ public interface PickBlockFunction extends BlockFunction {
           for (ObjectDoublePair<BlockFunctionArgument> pair : pairs) {
             builder.add(pair.left().apply(source));
           }
-          return new Uniform(builder.build());
+          return new PickBlockFunction(new WeightedList.Uniform<>(builder.build()));
         };
       }
     }

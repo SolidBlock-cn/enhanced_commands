@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
+import pers.solid.ecmd.util.WeightedList;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -36,7 +37,7 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
       for (BlockFunctionArgument function : functions) {
         builder.add(function.apply(source));
       }
-      return new PickBlockFunction.Uniform(builder.build());
+      return new PickBlockFunction(new WeightedList.Uniform<>(builder.build()));
     }, "|", PICK_TOOLTIP, parser, allowsSparse);
   }
 

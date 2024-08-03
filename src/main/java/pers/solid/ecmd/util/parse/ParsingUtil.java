@@ -28,6 +28,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
@@ -315,6 +316,36 @@ public final class ParsingUtil {
   @SuppressWarnings("unchecked")
   public static <T> Function<? super T, ? extends Message> getNameSuggestionProvider(RegistryKey<? extends Registry<T>> registryKey) {
     return (Function<? super T, ? extends Message>) NameSuggestionsInitHolder.NAME_SUGGESTION_PROVIDERS.get(registryKey);
+  }
+
+  /**
+   * <p>读取 1~3 个数（由空格分隔），并根据这 1~3 个数组成一个 {@code Vec3d}。</p>
+   * <p>当第 3 个数不存在时，z 采用第 1 个数。当第 2 个数不存在时，y 采用第 1 个数。例如：</p>
+   * <ul>
+   *   <li>{@code 1} → {@code (1, 1, 1)}</li>
+   *   <li>{@code 1, 2} -> {@code (1, 2, 1)}</li>
+   *   <li>{@code 1, 2, 3} -> {@code (1, 2, 3)}</li>
+   * </ul>
+   */
+  public static @NotNull Vec3d parseShortenableVec3d(StringReader reader) throws CommandSyntaxException {
+    final double x = reader.readDouble();
+    final int beforeFirstWhite = reader.getCursor();
+    reader.skipWhitespace();
+    if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
+      final double y = reader.readDouble();
+      final int beforeSecondWhite = reader.getCursor();
+      reader.skipWhitespace();
+      if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
+        final double z = reader.readDouble();
+        return new Vec3d(x, y, z);
+      } else {
+        reader.setCursor(beforeSecondWhite);
+        return new Vec3d(x, y, x);
+      }
+    } else {
+      reader.setCursor(beforeFirstWhite);
+      return new Vec3d(x, x, x);
+    }
   }
 
   private static class NameSuggestionsInitHolder {
