@@ -85,7 +85,7 @@ public final class RandomBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable RandomBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
+    public @Nullable RandomBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
       if (parser.reader.getRemaining().isEmpty()) {
         parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhanced_commands.block_function.random")));
       }

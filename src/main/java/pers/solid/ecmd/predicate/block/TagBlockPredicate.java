@@ -18,7 +18,10 @@ import org.jetbrains.annotations.UnmodifiableView;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.Collections;
@@ -91,8 +94,8 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tags, @NotNull @Unmodifia
     }
 
     @Override
-    public @Nullable TagBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser0);
+    public @Nullable TagBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         return new TagBlockPredicate(parser.tagId.getTag(), parser.propertyNamePredicates);

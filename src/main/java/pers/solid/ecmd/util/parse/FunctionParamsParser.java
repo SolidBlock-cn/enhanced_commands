@@ -32,7 +32,7 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
   }
 
   @Override
-  default void parseWithinParenthesis(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  default void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
     // after the left parentheses
     parser.reader.skipWhitespace();
 
@@ -56,7 +56,7 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
     }
     while (true) {
       parser.suggestionProviders.clear();
-      parseParameter(commandRegistryAccess, parser, paramsCount, suggestionsOnly);
+      parseParameter(registryAccess, parser, paramsCount, suggestionsOnly);
       paramsCount++;
       parser.reader.skipWhitespace();
       final int finalParamsCount = paramsCount;
@@ -104,5 +104,5 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
    *
    * @param paramIndex 参数的位置。例如，解析第一个参数时，{@code paramIndex} 为 0。
    */
-  void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
+  void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
 }

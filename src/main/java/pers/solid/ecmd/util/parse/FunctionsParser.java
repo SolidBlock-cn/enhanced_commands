@@ -34,7 +34,7 @@ public class FunctionsParser<T> implements Parser<T> {
   }
 
   @Override
-  public T parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+  public T parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
     final StringReader reader = parser.reader;
     final int cursorOnStart = reader.getCursor();
     parser.suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(functions, suggestionsBuilder, s -> s + "(", tooltipProvider::apply));
@@ -45,7 +45,7 @@ public class FunctionsParser<T> implements Parser<T> {
         functionParamsParser.setFunctionName(unquotedString);
         functionParamsParser.setCursorBeforeFunctionName(cursorOnStart);
         reader.skip();
-        return functionParamsParser.parseAfterLeftParenthesis(commandRegistryAccess, parser, suggestionsOnly);
+        return functionParamsParser.parseAfterLeftParenthesis(registryAccess, parser, suggestionsOnly);
       } else {
         final int cursorAfterFunctionName = reader.getCursor();
         reader.setCursor(cursorOnStart);

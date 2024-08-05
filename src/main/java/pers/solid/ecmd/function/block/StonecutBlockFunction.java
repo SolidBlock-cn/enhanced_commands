@@ -21,8 +21,8 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.StateUtil;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.List;
 
@@ -85,13 +85,13 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     private BlockFunctionArgument blockFunction = null;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> new StonecutBlockFunction(blockFunction == null ? EMPTY : blockFunction.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockFunction = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      blockFunction = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
     }
 
     @Override

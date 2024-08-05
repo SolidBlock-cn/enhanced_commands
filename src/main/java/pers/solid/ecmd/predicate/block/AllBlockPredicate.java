@@ -11,9 +11,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,13 +69,13 @@ public record AllBlockPredicate(List<BlockPredicate> blockPredicates) implements
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> new AllBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, x -> x.apply(source)));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockPredicates.add(BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly));
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      blockPredicates.add(BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly));
     }
   }
 }

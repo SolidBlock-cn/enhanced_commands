@@ -16,9 +16,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -142,7 +142,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     private boolean usingKeyword = false;
 
     @Override
-    public CurveArgument<StraightCurve> getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
+    public CurveArgument<StraightCurve> getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException {
       if (from == null || to == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
       }
@@ -150,7 +150,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
       final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {

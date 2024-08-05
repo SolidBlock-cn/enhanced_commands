@@ -25,8 +25,8 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
 
-  static @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return BlockPredicateArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).apply(source);
+  static @NotNull BlockPredicate parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
+    return BlockPredicateArgument.parse(registryAccess, new SuggestedParser(s), false).apply(source);
   }
 
   static TestResult successResult(BlockPos blockPos) {

@@ -14,11 +14,11 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
-import pers.solid.ecmd.util.parse.ParsingUtil;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,7 +146,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     private ExposureType exposureType;
 
     @Override
-    public ExposeBlockPredicate getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public ExposeBlockPredicate getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return new ExposeBlockPredicate(exposureType, directions.isEmpty() ? List.of(Direction.values()) : List.copyOf(directions));
     }
 
@@ -161,7 +161,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         parser.suggestionProviders.clear();
         exposureType = parser.parseAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);

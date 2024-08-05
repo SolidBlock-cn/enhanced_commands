@@ -59,15 +59,15 @@ public final class SeparatedExecuteCommand {
     consumer2.onResult(successful, returnValue);
   };
 
-  public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess commandRegistryAccess) {
+  public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
     RootCommandNode<ServerCommandSource> literalCommandNode = dispatcher.getRoot();
     dispatcher.register(literal("execute")
         .redirect(dispatcher.getRoot()));
     dispatcher.register(literalR2("run")
         .redirect(dispatcher.getRoot()));
 
-    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("if"), true, commandRegistryAccess));
-    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("unless"), false, commandRegistryAccess));
+    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("if"), true, registryAccess));
+    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("unless"), false, registryAccess));
     dispatcher.register(literalR2("as")
         .then(argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
           List<ServerCommandSource> list = Lists.newArrayList();
@@ -99,7 +99,7 @@ public final class SeparatedExecuteCommand {
           return list;
         })));
     dispatcher.register(literalR2("inregion")
-        .then(argument("region", RegionArgumentType.region(commandRegistryAccess))
+        .then(argument("region", RegionArgumentType.region(registryAccess))
             .fork(literalCommandNode, context -> {
               final Region region = RegionArgumentType.getRegion(context, "region");
               final ServerCommandSource source = context.getSource();
@@ -215,9 +215,9 @@ public final class SeparatedExecuteCommand {
     return ExecuteCommandAccessor.callExecuteStoreData(source, object, path, nbtSetter, requestResult);
   }
 
-  private static LiteralArgumentBuilder<ServerCommandSource> addConditionArguments(CommandNode<ServerCommandSource> root, LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
-    ExecuteCommandAccessor.callAddConditionArguments(root, argumentBuilder, positive, commandRegistryAccess);
-    return addExtraConditionArguments(root, argumentBuilder, positive, commandRegistryAccess);
+  private static LiteralArgumentBuilder<ServerCommandSource> addConditionArguments(CommandNode<ServerCommandSource> root, LiteralArgumentBuilder<ServerCommandSource> argumentBuilder, boolean positive, CommandRegistryAccess registryAccess) {
+    ExecuteCommandAccessor.callAddConditionArguments(root, argumentBuilder, positive, registryAccess);
+    return addExtraConditionArguments(root, argumentBuilder, positive, registryAccess);
   }
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockInfoArguments(CommandNode<ServerCommandSource> root, T argumentBuilder, boolean positive) {
@@ -273,7 +273,7 @@ public final class SeparatedExecuteCommand {
   }
 
 
-  public static <T extends ArgumentBuilder<ServerCommandSource, T>> T addExtraConditionArguments(CommandNode<ServerCommandSource> root, T argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
+  public static <T extends ArgumentBuilder<ServerCommandSource, T>> T addExtraConditionArguments(CommandNode<ServerCommandSource> root, T argumentBuilder, boolean positive, CommandRegistryAccess registryAccess) {
     return argumentBuilder
         .then(literal("block_info")
             .then(addBlockInfoArguments(root, argument("pos", EnhancedPosArgumentType.blockPos()), positive)))

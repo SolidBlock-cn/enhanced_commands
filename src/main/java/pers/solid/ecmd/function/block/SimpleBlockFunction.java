@@ -16,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.PropertyFunction;
-import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,8 +61,8 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
     }
 
     @Override
-    public @NotNull SimpleBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockFunctionSuggestedParser parser = new SimpleBlockFunctionSuggestedParser(commandRegistryAccess, parser0);
+    public @NotNull SimpleBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      SimpleBlockFunctionSuggestedParser parser = new SimpleBlockFunctionSuggestedParser(registryAccess, parser0);
       parser.parseBlockId();
       parser.parseProperties();
       return new SimpleBlockFunction(parser.block, parser.propertyFunctions);

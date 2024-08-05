@@ -29,8 +29,8 @@ public abstract class BlockPredicateArgumentTypeMixin implements ArgumentTypeExt
   private boolean extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void injectedInit(CommandRegistryAccess commandRegistryAccess, CallbackInfo ci) {
-    this.modArgumentType = new pers.solid.ecmd.argument.BlockPredicateArgumentType(commandRegistryAccess);
+  private void injectedInit(CommandRegistryAccess registryAccess, CallbackInfo ci) {
+    this.modArgumentType = new pers.solid.ecmd.argument.BlockPredicateArgumentType(registryAccess);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/BlockPredicateArgumentType$BlockPredicate;", at = @At("HEAD"), cancellable = true)

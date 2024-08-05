@@ -247,8 +247,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     return argumentBuilder;
   }
 
-  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addRegionProperties(T argumentBuilder, CommandRegistryAccess commandRegistryAccess) {
-    return argumentBuilder.then(argument("region", RegionArgumentType.region(commandRegistryAccess))
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addRegionProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
+    return argumentBuilder.then(argument("region", RegionArgumentType.region(registryAccess))
         .executes(context -> executeStringShow(context, getRegion(context, "region"), Region::asString))
         .then(literal("string")
             .executes(context -> executeStringShow(context, getRegion(context, "region"), Region::asString)))
@@ -257,7 +257,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(commandRegistryAccess, new SuggestedParser(s), false).toAbsoluteRegion(context.getSource()))))
+            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(registryAccess, new SuggestedParser(s), false).toAbsoluteRegion(context.getSource()))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")
@@ -325,6 +325,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   }
 
   private static <A, T> int executeCodecShow(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
+    ops = context.getSource().getRegistryManager().getOps(ops);
     final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof NbtElement nbt) {
       context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(nbt), false);
@@ -335,6 +336,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   }
 
   private static <A, T> int executeCodecTest(CommandContext<ServerCommandSource> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
+    ops = context.getSource().getRegistryManager().getOps(ops);
     final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof NbtElement nbt) {
       context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(nbt), false);

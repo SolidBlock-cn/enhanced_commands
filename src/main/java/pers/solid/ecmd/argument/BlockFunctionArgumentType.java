@@ -13,9 +13,9 @@ import pers.solid.ecmd.function.block.BlockFunctionArgument;
 
 import java.util.concurrent.CompletableFuture;
 
-public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<BlockFunctionArgument> {
-  public static BlockFunctionArgumentType blockFunction(CommandRegistryAccess commandRegistryAccess) {
-    return new BlockFunctionArgumentType(commandRegistryAccess);
+public record BlockFunctionArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<BlockFunctionArgument> {
+  public static BlockFunctionArgumentType blockFunction(CommandRegistryAccess registryAccess) {
+    return new BlockFunctionArgumentType(registryAccess);
   }
 
   public static BlockFunction getBlockFunction(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
@@ -24,7 +24,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAcc
 
   @Override
   public BlockFunctionArgument parse(StringReader reader) throws CommandSyntaxException {
-    return BlockFunctionArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false, false);
+    return BlockFunctionArgument.parse(registryAccess, new SuggestedParser(reader), false, false);
   }
 
   @Override
@@ -33,7 +33,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess commandRegistryAcc
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      BlockFunctionArgument.parse(commandRegistryAccess, parser, true, false);
+      BlockFunctionArgument.parse(registryAccess, parser, true, false);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

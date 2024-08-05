@@ -86,12 +86,12 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     }
 
     @Override
-    public IdReplaceBlockFunction getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public IdReplaceBlockFunction getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return new IdReplaceBlockFunction(pattern, replacement);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         pattern = ParsingUtil.readRegex(parser.reader);
       } else if (paramIndex == 1) {

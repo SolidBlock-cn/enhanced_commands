@@ -56,12 +56,12 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
     }
 
     @Override
-    public RotateBlockFunction getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public RotateBlockFunction getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return new RotateBlockFunction(rotation);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       rotation = EnumOrRandom.parseAndSuggest(BlockRotation.values(), BlockRotation.CODEC, parser);
     }
   }

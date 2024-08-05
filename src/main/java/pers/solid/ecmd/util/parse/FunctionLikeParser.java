@@ -30,23 +30,23 @@ public interface FunctionLikeParser<T> extends Parser<T> {
   }
 
   @Override
-  default T parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+  default T parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
     if (!(parser.reader.canRead() && parser.reader.peek() == leftPar())) {
       return null;
     }
     parser.reader.skip();
-    return parseAfterLeftParenthesis(commandRegistryAccess, parser, suggestionsOnly);
+    return parseAfterLeftParenthesis(registryAccess, parser, suggestionsOnly);
   }
 
   /**
    * 在完成所有参数的解析后，返回结果。通常在此接口的实现过程中，解析参数时会设置字段的一些值，此方法则使用字段中的值。
    */
-  T getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException;
+  T getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException;
 
-  void parseWithinParenthesis(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
+  void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
 
-  default T parseAfterLeftParenthesis(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    parseWithinParenthesis(commandRegistryAccess, parser, suggestionsOnly);
+  default T parseAfterLeftParenthesis(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    parseWithinParenthesis(registryAccess, parser, suggestionsOnly);
     parser.reader.skipWhitespace();
     parser.suggestionProviders.add((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
@@ -56,7 +56,7 @@ public interface FunctionLikeParser<T> extends Parser<T> {
     if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
       parser.reader.skip();
       parser.suggestionProviders.clear();
-      return getParseResult(commandRegistryAccess, parser);
+      return getParseResult(registryAccess, parser);
     }
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightPar());
   }

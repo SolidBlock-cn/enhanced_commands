@@ -87,8 +87,8 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
   public record Properties<T, F extends ArgumentType<T>, FP extends ArgumentSerializer.ArgumentTypeProperties<F>>(FP forwardProperties) implements ArgumentSerializer.ArgumentTypeProperties<VanillaWrappedArgumentType<T, F>> {
 
     @Override
-    public VanillaWrappedArgumentType<T, F> createType(CommandRegistryAccess commandRegistryAccess) {
-      return new VanillaWrappedArgumentType<>(forwardProperties.createType(commandRegistryAccess));
+    public VanillaWrappedArgumentType<T, F> createType(CommandRegistryAccess registryAccess) {
+      return new VanillaWrappedArgumentType<>(forwardProperties.createType(registryAccess));
     }
 
     @SuppressWarnings("unchecked")

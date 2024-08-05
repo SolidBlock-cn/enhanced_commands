@@ -28,12 +28,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, RegistryWrapper<T> registryWrapper, RegistryKey<? extends Registry<T>> registryRef) implements ArgumentType<RegistryEntry.Reference<T>> {
-  public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull String omittedNamespace, @NotNull CommandRegistryAccess commandRegistryAccess, @NotNull RegistryKey<? extends Registry<T>> registryRef) {
-    return new OmittedRegistryEntryArgumentType<>(omittedNamespace, commandRegistryAccess.getWrapperOrThrow(registryRef), registryRef);
+  public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull String omittedNamespace, @NotNull CommandRegistryAccess registryAccess, @NotNull RegistryKey<? extends Registry<T>> registryRef) {
+    return new OmittedRegistryEntryArgumentType<>(omittedNamespace, registryAccess.getWrapperOrThrow(registryRef), registryRef);
   }
 
-  public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull CommandRegistryAccess commandRegistryAccess, @NotNull RegistryKey<? extends Registry<T>> registryRef) {
-    return omittedRegistryEntry(EnhancedCommands.MOD_ID, commandRegistryAccess, registryRef);
+  public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull CommandRegistryAccess registryAccess, @NotNull RegistryKey<? extends Registry<T>> registryRef) {
+    return omittedRegistryEntry(EnhancedCommands.MOD_ID, registryAccess, registryRef);
   }
 
   // getRegistryEntry 方法请直接使用 RegistryEntryArgumentType 中的
@@ -105,8 +105,8 @@ public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, Regis
 
     public record Properties<T>(String omittedNamespace, RegistryKey<? extends Registry<T>> registryRef) implements ArgumentTypeProperties<OmittedRegistryEntryArgumentType<T>> {
       @Override
-      public OmittedRegistryEntryArgumentType<T> createType(CommandRegistryAccess commandRegistryAccess) {
-        return omittedRegistryEntry(omittedNamespace, commandRegistryAccess, this.registryRef);
+      public OmittedRegistryEntryArgumentType<T> createType(CommandRegistryAccess registryAccess) {
+        return omittedRegistryEntry(omittedNamespace, registryAccess, this.registryRef);
       }
 
       @SuppressWarnings("unchecked")

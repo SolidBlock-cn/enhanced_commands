@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * 叠加多个方块函数，依次应用。
  */
 public record OverlayBlockFunction(List<BlockFunction> functions) implements BlockFunction {
-  public static final MapCodec<OverlayBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayBlockFunction::functions)));
+  public static final MapCodec<OverlayBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("predicates").forGetter(OverlayBlockFunction::functions)));
 
   @Override
   public @NotNull String asString() {
@@ -55,7 +55,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     private final List<BlockFunctionArgument> blockFunctions = new ArrayList<>();
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> {
         final ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
         for (BlockFunctionArgument blockFunction : blockFunctions) {
@@ -66,8 +66,8 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockFunctions.add(BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly));
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      blockFunctions.add(BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly));
     }
   }
 }

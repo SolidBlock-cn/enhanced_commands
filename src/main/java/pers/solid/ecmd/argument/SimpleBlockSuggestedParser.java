@@ -44,21 +44,21 @@ public abstract class SimpleBlockSuggestedParser extends SuggestedParser {
     }
   };
   public final RegistryWrapper<Block> registryWrapper;
-  protected final CommandRegistryAccess commandRegistryAccess;
+  protected final CommandRegistryAccess registryAccess;
   public Block block;
   public Identifier blockId;
   public RegistryEntryList.Named<Block> tagId;
 
-  public SimpleBlockSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader) {
+  public SimpleBlockSuggestedParser(CommandRegistryAccess registryAccess, StringReader reader) {
     super(reader);
-    this.commandRegistryAccess = commandRegistryAccess;
-    this.registryWrapper = commandRegistryAccess.getWrapperOrThrow(RegistryKeys.BLOCK);
+    this.registryAccess = registryAccess;
+    this.registryWrapper = registryAccess.getWrapperOrThrow(RegistryKeys.BLOCK);
   }
 
-  public SimpleBlockSuggestedParser(CommandRegistryAccess commandRegistryAccess, StringReader reader, List<SuggestionProvider> suggestionProviders) {
+  public SimpleBlockSuggestedParser(CommandRegistryAccess registryAccess, StringReader reader, List<SuggestionProvider> suggestionProviders) {
     super(reader, suggestionProviders);
-    this.commandRegistryAccess = commandRegistryAccess;
-    this.registryWrapper = commandRegistryAccess.getWrapperOrThrow(RegistryKeys.BLOCK);
+    this.registryAccess = registryAccess;
+    this.registryWrapper = registryAccess.getWrapperOrThrow(RegistryKeys.BLOCK);
   }
 
   protected static <T extends Comparable<T>> void suggestValuesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder) {

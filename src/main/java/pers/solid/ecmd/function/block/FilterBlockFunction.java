@@ -66,18 +66,18 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
     private @Nullable BlockFunctionArgument elseFunction;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? EMPTY : elseFunction.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        blockFunction = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+        blockFunction = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
       } else if (paramIndex == 1) {
-        blockPredicate = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+        blockPredicate = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
       } else if (paramIndex == 2) {
-        elseFunction = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+        elseFunction = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
       }
     }
 

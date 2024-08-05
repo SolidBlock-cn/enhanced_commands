@@ -25,24 +25,24 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
   Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.all.symbol_tooltip");
   Text UNION_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.any.symbol_tooltip");
 
-  static @NotNull BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    return parse(commandRegistryAccess, parser, suggestionsOnly, true);
+  static @NotNull BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    return parse(registryAccess, parser, suggestionsOnly, true);
   }
 
-  static @NotNull BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return parseUnion(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
+  static @NotNull BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    return parseUnion(registryAccess, parser, suggestionsOnly, allowsSparse);
   }
 
-  static @NotNull BlockPredicateArgument parseUnion(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseIntersect(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "|", UNION_TOOLTIP, parser, allowsSparse);
+  static @NotNull BlockPredicateArgument parseUnion(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseIntersect(registryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "|", UNION_TOOLTIP, parser, allowsSparse);
   }
 
-  static @NotNull BlockPredicateArgument parseIntersect(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new AllBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
+  static @NotNull BlockPredicateArgument parseIntersect(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseCombination(registryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new AllBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
   }
 
-  static @NotNull BlockPredicateArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    final BlockPredicateArgument parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
+  static @NotNull BlockPredicateArgument parseCombination(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    final BlockPredicateArgument parseUnit = parseUnit(registryAccess, parser, suggestionsOnly, allowsSparse);
     if (parseUnit instanceof NbtPredicate) {
       return parseUnit;
     }
@@ -56,7 +56,7 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
         }
       });
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser);
+        final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser);
         suggestedParser.parsePropertyNames();
         propertyNamePredicates = suggestedParser.propertyNamePredicates;
       } else propertyNamePredicates = null;
@@ -78,13 +78,13 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
   }
 
   @NotNull
-  static BlockPredicateArgument parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+  static BlockPredicateArgument parseUnit(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
     final StringReader reader = parser.reader;
     final int cursorOnStart = reader.getCursor();
     // 刻意将 simple 调整到最后面
     for (Parser<BlockPredicateArgument> argumentParser : Iterables.concat(BlockPredicateTypes.PARSERS, Collections.singleton(SimpleBlockPredicate.Type.SIMPLE_TYPE))) {
       reader.setCursor(cursorOnStart);
-      final BlockPredicateArgument parse = argumentParser.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
+      final BlockPredicateArgument parse = argumentParser.parse(registryAccess, parser, suggestionsOnly, allowsSparse);
       if (parse != null) {
         return parse;
       }

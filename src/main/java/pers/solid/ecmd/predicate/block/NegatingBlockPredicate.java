@@ -9,9 +9,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.TestResult;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder));
       boolean negates = false;
       boolean suffixed = false;
@@ -67,7 +67,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
       }
       if (!suffixed) return null;
       if (allowsSparse) parser.reader.skipWhitespace();
-      final BlockPredicateArgument parse = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+      final BlockPredicateArgument parse = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
       if (negates) {
         return source -> new NegatingBlockPredicate(parse.apply(source));
       } else {

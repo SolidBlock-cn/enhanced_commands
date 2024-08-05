@@ -51,7 +51,7 @@ public enum NbtPredicateArgumentType implements ArgumentType<NbtPredicate>, Argu
   }
 
   @Override
-  public NbtPredicateArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+  public NbtPredicateArgumentType createType(CommandRegistryAccess registryAccess) {
     return this;
   }
 

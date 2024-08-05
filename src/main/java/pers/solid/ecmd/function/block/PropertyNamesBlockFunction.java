@@ -51,10 +51,10 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
     }
 
     @Override
-    public @Nullable BlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    public @Nullable BlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockFunctionSuggestedParser suggestedParser = new SimpleBlockFunctionSuggestedParser(commandRegistryAccess, parser);
+        final SimpleBlockFunctionSuggestedParser suggestedParser = new SimpleBlockFunctionSuggestedParser(registryAccess, parser);
         suggestedParser.parsePropertyNames();
         return new PropertyNamesBlockFunction(suggestedParser.propertyNameFunctions);
       } else {

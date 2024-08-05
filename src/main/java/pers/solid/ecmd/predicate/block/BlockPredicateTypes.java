@@ -20,7 +20,7 @@ import java.util.Map;
 public final class BlockPredicateTypes {
   public static final Map<String, Supplier<FunctionLikeParser<? extends BlockPredicateArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockPredicateTypes::registerFunctionNames);
-  public static final Parser<BlockPredicateArgument> PARENTHESES_PARSER = (commandRegistryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly, true), parser);
+  public static final Parser<BlockPredicateArgument> PARENTHESES_PARSER = (registryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly, true), parser);
   public static final Parser<BlockPredicateArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
   public static final List<Parser<BlockPredicateArgument>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
   public static final BlockPredicateType<SimpleBlockPredicate> SIMPLE = register(SimpleBlockPredicate.Type.SIMPLE_TYPE, "simple");
@@ -40,6 +40,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<IdContainBlockPredicate> ID_CONTAIN = register(IdContainBlockPredicate.Type.ID_CONTAIN_TYPE, "id_contain");
   public static final BlockPredicateType<RegionBlockPredicate> REGION = register(RegionBlockPredicate.Type.REGION_TYPE, "region");
   public static final LootConditionBlockPredicate.Type LOOT_CONDITION = register(LootConditionBlockPredicate.Type.LOOT_CONDITION_TYPE, "loot_condition");
+  public static final CheckerboardBlockPredicate.Type CHECKERBOARD = register(CheckerboardBlockPredicate.Type.CHECKERBOARD_TYPE, "checkerboard");
 
   private BlockPredicateTypes() {
   }
@@ -55,6 +56,7 @@ public final class BlockPredicateTypes {
   private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockPredicateArgument>>> map) {
     map.put("all", AllBlockPredicate.Parser::new);
     map.put("any", AnyBlockPredicate.Parser::new);
+    map.put("checkerboard", CheckerboardBlockPredicate.Parser::new);
     map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), false));
     map.put("expose", ExposeBlockPredicate.Parser::new);
     map.put("idcontain", IdContainBlockPredicate.Parser::new);
@@ -68,6 +70,7 @@ public final class BlockPredicateTypes {
   private static void registerFunctionNames(Map<String, Text> map) {
     map.put("all", Text.translatable("enhanced_commands.block_predicate.all"));
     map.put("any", Text.translatable("enhanced_commands.block_predicate.any"));
+    map.put("checkerboard", Text.translatable("enhanced_commands.block_predicate.checkerboard"));
     map.put("diff", Text.translatable("enhanced_commands.block_predicate.bi_predicate_diff"));
     map.put("expose", Text.translatable("enhanced_commands.block_predicate.expose"));
     map.put("idcontain", Text.translatable("enhanced_commands.block_predicate.id_contain"));

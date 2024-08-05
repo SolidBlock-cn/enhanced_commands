@@ -342,7 +342,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   }
 
   @Override
-  public EnhancedPosArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+  public EnhancedPosArgumentType createType(CommandRegistryAccess registryAccess) {
     return this;
   }
 

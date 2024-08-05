@@ -16,7 +16,10 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
-import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.Parser;
 
@@ -84,8 +87,8 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
     }
 
     @Override
-    public @NotNull BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser0);
+    public @NotNull BlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser0);
       parser.parseBlockId();
       parser.parseProperties();
       return new SimpleBlockPredicate(parser.block, parser.propertyPredicates);

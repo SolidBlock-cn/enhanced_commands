@@ -56,7 +56,7 @@ public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, Argume
   }
 
   @Override
-  public NbtFunctionArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+  public NbtFunctionArgumentType createType(CommandRegistryAccess registryAccess) {
     return this;
   }
 

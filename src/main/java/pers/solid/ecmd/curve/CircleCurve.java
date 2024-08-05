@@ -208,7 +208,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     private @Nullable DoubleDoublePair range;
 
     @Override
-    public CurveArgument<CircleCurve> getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
+    public CurveArgument<CircleCurve> getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException {
       if (this.radius == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, "radius");
       }
@@ -230,7 +230,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       parseRadius(parser, suggestionsOnly);
       while (true) {
         final int cursorBeforeWhite = parser.reader.getCursor();

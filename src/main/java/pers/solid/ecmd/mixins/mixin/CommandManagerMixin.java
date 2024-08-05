@@ -58,7 +58,7 @@ public abstract class CommandManagerMixin {
   }
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void storeCommandRegistryAccess(CommandManager.RegistrationEnvironment environment, CommandRegistryAccess commandRegistryAccess, CallbackInfo ci) {
-    MixinShared.setWeakCommandRegistryAccess(commandRegistryAccess);
+  private void storeCommandRegistryAccess(CommandManager.RegistrationEnvironment environment, CommandRegistryAccess registryAccess, CallbackInfo ci) {
+    MixinShared.setWeakCommandRegistryAccess(registryAccess);
   }
 }

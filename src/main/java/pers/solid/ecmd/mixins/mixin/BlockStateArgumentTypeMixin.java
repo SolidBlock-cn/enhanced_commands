@@ -32,8 +32,8 @@ public abstract class BlockStateArgumentTypeMixin implements ArgumentTypeExtensi
   private boolean extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void injectedInit(CommandRegistryAccess commandRegistryAccess, CallbackInfo ci) {
-    this.modArgumentType = new BlockFunctionArgumentType(commandRegistryAccess);
+  private void injectedInit(CommandRegistryAccess registryAccess, CallbackInfo ci) {
+    this.modArgumentType = new BlockFunctionArgumentType(registryAccess);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/BlockStateArgument;", at = @At("HEAD"), cancellable = true)

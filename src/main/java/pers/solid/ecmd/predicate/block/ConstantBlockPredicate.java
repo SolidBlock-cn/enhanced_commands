@@ -7,9 +7,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.TestResult;
 
 public enum ConstantBlockPredicate implements BlockPredicate {
   ALWAYS_TRUE;
@@ -45,7 +45,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     }
 
     @Override
-    public @Nullable BlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
+    public @Nullable BlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_predicate.constant"), suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();

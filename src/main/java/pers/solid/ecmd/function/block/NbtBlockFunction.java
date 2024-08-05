@@ -46,7 +46,7 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
     }
 
     @Override
-    public @Nullable NbtBlockFunction parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    public @Nullable NbtBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '{') {
         return new NbtBlockFunction(new NbtFunctionSuggestedParser(parser.reader, parser.suggestionProviders).parseCompound(false));

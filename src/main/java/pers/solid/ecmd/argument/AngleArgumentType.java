@@ -74,7 +74,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   }
 
   @Override
-  public AngleArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+  public AngleArgumentType createType(CommandRegistryAccess registryAccess) {
     return this;
   }
 

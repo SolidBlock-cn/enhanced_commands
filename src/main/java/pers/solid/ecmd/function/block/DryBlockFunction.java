@@ -56,13 +56,13 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
     BlockFunctionArgument blockFunction = null;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> new DryBlockFunction(blockFunction == null ? EMPTY : blockFunction.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockFunction = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      blockFunction = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
     }
 
     @Override

@@ -37,8 +37,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   private boolean must = false;
   private int cursorBeforeGeneralFunction = -1;
 
-  public SimpleBlockFunctionSuggestedParser(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-    super(commandRegistryAccess, parser.reader, parser.suggestionProviders);
+  public SimpleBlockFunctionSuggestedParser(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    super(registryAccess, parser.reader, parser.suggestionProviders);
   }
 
   @NotNull

@@ -88,10 +88,10 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) throws CommandSyntaxException {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException {
       if (id != null) {
         return source -> {
-          final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = commandRegistryAccess.createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
+          final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = registryAccess.createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
           if (lootCondition.isEmpty()) {
             parser.reader.setCursor(cursorBeforeId);
             throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parser.reader, id.toString()), cursorAfterId);
@@ -106,7 +106,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
       final int cursorBeforeId = parser.reader.getCursor();
       parser.suggestionProviders.add(SuggestionProvider.offset((context1, suggestionsBuilder1) -> getLootConditionIdSuggestions(context1, suggestionsBuilder1, cursorBeforeId)));

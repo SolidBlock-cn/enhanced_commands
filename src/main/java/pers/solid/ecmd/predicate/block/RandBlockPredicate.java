@@ -13,9 +13,9 @@ import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 /**
  * <p>The predicate that passes only a probability test is passed.</p>
@@ -78,7 +78,7 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
     private @NotNull BlockPredicateArgument predicate = ConstantBlockPredicate.ALWAYS_TRUE;
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> new RandBlockPredicate(value, predicate.apply(source));
     }
 
@@ -92,7 +92,7 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         value = parser.reader.readFloat();
         if (value > 1) {
@@ -102,7 +102,7 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooLow().createWithContext(parser.reader, value, 0);
         }
       } else if (paramIndex == 1) {
-        predicate = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+        predicate = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
       }
     }
   }

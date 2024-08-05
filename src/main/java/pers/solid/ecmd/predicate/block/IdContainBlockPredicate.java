@@ -10,11 +10,11 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
-import pers.solid.ecmd.util.parse.ParsingUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.regex.Pattern;
 
@@ -81,12 +81,12 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     }
 
     @Override
-    public IdContainBlockPredicate getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) { // @formatter:on
+    public IdContainBlockPredicate getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) { // @formatter:on
       return new IdContainBlockPredicate(pattern);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       parser.suggestionProviders.clear();
       pattern = ParsingUtil.readRegex(parser.reader);
     }

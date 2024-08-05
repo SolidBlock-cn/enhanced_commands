@@ -23,16 +23,16 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
   Text OVERLAY_TOOLTIP = Text.translatable("enhanced_commands.block_function.overlay.symbol_tooltip");
   Text PICK_TOOLTIP = Text.translatable("enhanced_commands.block_function.pick.symbol_tooltip");
 
-  static @NotNull BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    return parse(commandRegistryAccess, parser, suggestionsOnly, true);
+  static @NotNull BlockFunctionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    return parse(registryAccess, parser, suggestionsOnly, true);
   }
 
-  static @NotNull BlockFunctionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return parsePick(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
+  static @NotNull BlockFunctionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    return parsePick(registryAccess, parser, suggestionsOnly, allowsSparse);
   }
 
-  static @NotNull BlockFunctionArgument parsePick(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseOverlay(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> {
+  static @NotNull BlockFunctionArgument parsePick(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseOverlay(registryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> {
       ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
       for (BlockFunctionArgument function : functions) {
         builder.add(function.apply(source));
@@ -41,8 +41,8 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
     }, "|", PICK_TOOLTIP, parser, allowsSparse);
   }
 
-  static @NotNull BlockFunctionArgument parseOverlay(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseCombination(commandRegistryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> {
+  static @NotNull BlockFunctionArgument parseOverlay(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseCombination(registryAccess, parser, suggestionsOnly, allowsSparse), functions -> source -> {
       ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
       for (BlockFunctionArgument blockFunctionArgument : functions) {
         builder.add(blockFunctionArgument.apply(source));
@@ -51,8 +51,8 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
     }, "*", OVERLAY_TOOLTIP, parser, allowsSparse);
   }
 
-  static @NotNull BlockFunctionArgument parseCombination(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    final BlockFunctionArgument parseUnit = parseUnit(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
+  static @NotNull BlockFunctionArgument parseCombination(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    final BlockFunctionArgument parseUnit = parseUnit(registryAccess, parser, suggestionsOnly, allowsSparse);
     if (parseUnit instanceof NbtBlockFunction) {
       return parseUnit;
     }
@@ -66,7 +66,7 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
         }
       });
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockFunctionSuggestedParser suggestedParser = new SimpleBlockFunctionSuggestedParser(commandRegistryAccess, parser);
+        final SimpleBlockFunctionSuggestedParser suggestedParser = new SimpleBlockFunctionSuggestedParser(registryAccess, parser);
         suggestedParser.parsePropertyNames();
         propertyNameFunctions = suggestedParser.propertyNameFunctions;
       } else {propertyNameFunctions = null;}
@@ -88,14 +88,14 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
   }
 
   @NotNull
-  static BlockFunctionArgument parseUnit(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+  static BlockFunctionArgument parseUnit(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
     final StringReader reader = parser.reader;
     final int cursorOnStart = reader.getCursor();
 
     // 强制将 simple 调整到最后再去使用
     for (Parser<BlockFunctionArgument> argumentParser : Iterables.concat(BlockFunctionTypes.PARSERS, Collections.singleton(SimpleBlockFunction.Type.SIMPLE_TYPE))) {
       reader.setCursor(cursorOnStart);
-      final BlockFunctionArgument parse = argumentParser.parse(commandRegistryAccess, parser, suggestionsOnly, allowsSparse);
+      final BlockFunctionArgument parse = argumentParser.parse(registryAccess, parser, suggestionsOnly, allowsSparse);
       if (parse != null) {
         return parse;
       }

@@ -19,11 +19,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record EntityPredicateArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<EntityPredicateArgument> {
+public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<EntityPredicateArgument> {
   private static final List<String> EXAMPLES = List.of("@a", "SolidBlock", "0123", "@r", "@e[distance=..5]", "[m=c]", "[gamemode=creative]");
 
-  public static EntityPredicateArgumentType entityPredicate(CommandRegistryAccess commandRegistryAccess) {
-    return new EntityPredicateArgumentType(commandRegistryAccess);
+  public static EntityPredicateArgumentType entityPredicate(CommandRegistryAccess registryAccess) {
+    return new EntityPredicateArgumentType(registryAccess);
   }
 
   public static EntityPredicate getEntityPredicate(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {

@@ -20,7 +20,7 @@ import java.util.Map;
 public final class BlockFunctionTypes {
   public static final Map<String, Supplier<FunctionLikeParser<? extends BlockFunctionArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockFunctionTypes::registerFunctions);
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockFunctionTypes::registerFunctionNames);
-  public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (commandRegistryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly, true), parser);
+  public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (registryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly, true), parser);
   public static final Parser<BlockFunctionArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
   public static final List<Parser<BlockFunctionArgument>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
   public static final BlockFunctionType<SimpleBlockFunction> SIMPLE = register(SimpleBlockFunction.Type.SIMPLE_TYPE, "simple");
@@ -41,6 +41,7 @@ public final class BlockFunctionTypes {
   public static final BlockFunctionType<RotateBlockFunction> ROTATE = register(RotateBlockFunction.Type.ROTATE_TYPE, "rotate");
   public static final BlockFunctionType<MirrorBlockFunction> MIRROR = register(MirrorBlockFunction.Type.MIRROR_TYPE, "mirror");
   public static final BlockFunctionType<CheckerboardBlockFunction> CHECKERBOARD = register(CheckerboardBlockFunction.Type.CHECKERBOARD_TYPE, "checkerboard");
+  public static final BlockFunctionType<CheckerboardTagBlockFunction> CHECKERBOARD_TAG = register(CheckerboardTagBlockFunction.Type.CHECKERBOARD_TAG_TYPE, "checkerboard-tag");
 
   private BlockFunctionTypes() {
   }
@@ -69,6 +70,7 @@ public final class BlockFunctionTypes {
     map.put("rotate", RotateBlockFunction.Parser::new);
     map.put("mirror", MirrorBlockFunction.Parser::new);
     map.put("checkerboard", CheckerboardBlockFunction.Parser::new);
+    map.put("checkerboard-tag", CheckerboardTagBlockFunction.Parser::new);
   }
 
   private static void registerFunctionNames(Map<String, Text> map) {
@@ -83,5 +85,6 @@ public final class BlockFunctionTypes {
     map.put("rotate", Text.translatable("enhanced_commands.block_function.rotate"));
     map.put("mirror", Text.translatable("enhanced_commands.block_function.mirror"));
     map.put("checkerboard", Text.translatable("enhanced_commands.block_function.checkerboard"));
+    map.put("checkerboard-tag", Text.translatable("enhanced_commands.block_function.checkerboard-tag"));
   }
 }

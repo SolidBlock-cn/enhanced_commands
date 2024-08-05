@@ -59,18 +59,18 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     private BlockFunctionArgument valueIfTrue, valueIfFalse;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? BlockFunction.EMPTY : valueIfFalse.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        condition = BlockPredicateArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+        condition = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
       } else if (paramIndex == 1) {
-        valueIfTrue = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+        valueIfTrue = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
       } else if (paramIndex == 2) {
-        valueIfFalse = BlockFunctionArgument.parse(commandRegistryAccess, parser, suggestionsOnly);
+        valueIfFalse = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
       }
     }
 

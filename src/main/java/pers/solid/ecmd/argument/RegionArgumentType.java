@@ -16,11 +16,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<RegionArgument> {
+public record RegionArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<RegionArgument> {
   private static final List<String> EXAMPLES = List.of("cuboid(1 1 1, 2 2 2)", "sphere(3)", "cyl(3, 2)", "outline(cuboid(~~~, ~~~5))");
 
-  public static RegionArgumentType region(CommandRegistryAccess commandRegistryAccess) {
-    return new RegionArgumentType(commandRegistryAccess);
+  public static RegionArgumentType region(CommandRegistryAccess registryAccess) {
+    return new RegionArgumentType(registryAccess);
   }
 
   /**
@@ -46,7 +46,7 @@ public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) im
 
   @Override
   public RegionArgument parse(StringReader reader) throws CommandSyntaxException {
-    return RegionArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false);
+    return RegionArgument.parse(registryAccess, new SuggestedParser(reader), false);
   }
 
   @Override
@@ -55,7 +55,7 @@ public record RegionArgumentType(CommandRegistryAccess commandRegistryAccess) im
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      RegionArgument.parse(commandRegistryAccess, parser, true);
+      RegionArgument.parse(registryAccess, parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

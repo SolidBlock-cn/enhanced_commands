@@ -15,11 +15,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record CurveArgumentType(CommandRegistryAccess commandRegistryAccess) implements ArgumentType<CurveArgument<?>> {
+public record CurveArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<CurveArgument<?>> {
   private static final List<String> EXAMPLES = List.of("straight(~~~, ~3~3~3)", "straight(from ^^^ to ^^^5)", "circle(5)");
 
-  public static CurveArgumentType curve(CommandRegistryAccess commandRegistryAccess) {
-    return new CurveArgumentType(commandRegistryAccess);
+  public static CurveArgumentType curve(CommandRegistryAccess registryAccess) {
+    return new CurveArgumentType(registryAccess);
   }
 
   public static Curve getCurve(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
@@ -36,7 +36,7 @@ public record CurveArgumentType(CommandRegistryAccess commandRegistryAccess) imp
 
   @Override
   public CurveArgument<?> parse(StringReader reader) throws CommandSyntaxException {
-    return CurveArgument.parse(commandRegistryAccess, new SuggestedParser(reader), false);
+    return CurveArgument.parse(registryAccess, new SuggestedParser(reader), false);
   }
 
   @Override
@@ -45,7 +45,7 @@ public record CurveArgumentType(CommandRegistryAccess commandRegistryAccess) imp
     stringReader.setCursor(builder.getStart());
     final SuggestedParser parser = new SuggestedParser(stringReader);
     try {
-      CurveArgument.parse(commandRegistryAccess, parser, true);
+      CurveArgument.parse(registryAccess, parser, true);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

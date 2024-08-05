@@ -140,14 +140,14 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public RegionArgument parseAfterLeftParenthesis(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      final RegionArgument parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(commandRegistryAccess, parser, suggestionsOnly);
+    public RegionArgument parseAfterLeftParenthesis(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      final RegionArgument parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(registryAccess, parser, suggestionsOnly);
       cursorAfter = parser.reader.getCursor();
       return parsed;
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
       if (paramIndex == 0) {
         fromPos = parser.parseAndSuggestArgument(type);
@@ -175,7 +175,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> {
         try {
           return createParsedResult(source);

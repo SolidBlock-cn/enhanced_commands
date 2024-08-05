@@ -25,7 +25,7 @@ public class AxisArgumentType extends SimpleEnumArgumentTypes.StringIdentifiable
   }
 
   @Override
-  public AxisArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+  public AxisArgumentType createType(CommandRegistryAccess registryAccess) {
     return this;
   }
 

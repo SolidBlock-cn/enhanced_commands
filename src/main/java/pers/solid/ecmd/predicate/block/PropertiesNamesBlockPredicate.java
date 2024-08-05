@@ -14,7 +14,9 @@ import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -80,10 +82,10 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     }
 
     @Override
-    public @Nullable PropertiesNamesBlockPredicate parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    public @Nullable PropertiesNamesBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
       parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(commandRegistryAccess, parser);
+        final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser);
         suggestedParser.parsePropertyNames();
         return new PropertiesNamesBlockPredicate(suggestedParser.propertyNamePredicates);
       } else {

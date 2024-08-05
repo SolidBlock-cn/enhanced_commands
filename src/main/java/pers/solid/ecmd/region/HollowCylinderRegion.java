@@ -163,12 +163,12 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
     private OutlineRegion.OutlineType type = OutlineRegion.OutlineType.WALL;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> new HollowCylinderRegion(type, new CylinderRegion(radius, height, center.toAbsolutePos(source)));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         final int cursorBeforeReadDouble = parser.reader.getCursor();
         radius = parser.reader.readDouble();

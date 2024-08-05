@@ -9,9 +9,9 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgument> {
   TYPE;
@@ -19,7 +19,7 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgumen
   private static final MapCodec<Region> CODEC = MapCodec.assumeMapUnsafe(Codec.of(Encoder.error("Cannot encode"), Decoder.error("Region NBT cannot hold this type of region")));
 
   @Override
-  public RegionArgument parse(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+  public RegionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
     parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.region.active_region"), suggestionsBuilder));
     if (parser.reader.canRead() && parser.reader.peek() == '$') {
       parser.reader.skip();

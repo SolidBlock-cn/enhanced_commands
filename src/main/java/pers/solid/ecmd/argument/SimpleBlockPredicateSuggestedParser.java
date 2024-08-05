@@ -29,8 +29,8 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
   public final List<PropertyPredicate<?>> propertyPredicates = new ArrayList<>();
   public final List<PropertyNamePredicate> propertyNamePredicates = new ArrayList<>();
 
-  public SimpleBlockPredicateSuggestedParser(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
-    super(commandRegistryAccess, parser.reader, parser.suggestionProviders);
+  public SimpleBlockPredicateSuggestedParser(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    super(registryAccess, parser.reader, parser.suggestionProviders);
   }
 
   @NotNull

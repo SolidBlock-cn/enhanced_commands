@@ -15,9 +15,9 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.regex.Pattern;
 
@@ -110,12 +110,12 @@ public final class IdContainBlockFunction implements BlockFunction {
     }
 
     @Override
-    public IdContainBlockFunction getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public IdContainBlockFunction getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return new IdContainBlockFunction(pattern);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       parser.suggestionProviders.clear();
       pattern = ParsingUtil.readRegex(parser.reader);
     }

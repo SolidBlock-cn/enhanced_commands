@@ -13,8 +13,8 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -112,13 +112,13 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     private final List<RegionArgument> regions = new ArrayList<>();
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
       return source -> new UnionRegion(IterateUtils.transformFailableImmutableList(regions, regionArgument -> regionArgument.toAbsoluteRegion(source)));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess commandRegistryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      regions.add(RegionArgument.parse(commandRegistryAccess, parser, suggestionsOnly));
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      regions.add(RegionArgument.parse(registryAccess, parser, suggestionsOnly));
     }
   }
 }
