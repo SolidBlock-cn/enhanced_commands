@@ -100,7 +100,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
         return 0;
       }
     }
-    throw TASK_UUID_DOES_NOT_EXIST.create(uuid);
+    throw TASK_UUID_DOES_NOT_EXIST.create(uuid.toString());
   }
 
   private static MutableText createSuspendButton(UUID uuid) {
@@ -145,7 +145,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
         uuidToTasks.remove(uuid);
       }
     }
-    throw TASK_UUID_DOES_NOT_EXIST.create(uuid);
+    throw TASK_UUID_DOES_NOT_EXIST.create(uuid.toString());
   }
 
   private static int executeExhaustTask(MinecraftServer server, CommandContext<ServerCommandSource> context, UUID uuid, int limit) throws CommandSyntaxException {
@@ -170,7 +170,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
       }
     }
 
-    throw TASK_UUID_DOES_NOT_EXIST.create(uuid);
+    throw TASK_UUID_DOES_NOT_EXIST.create(uuid.toString());
   }
 
   private static int executeListTasks(MinecraftServer server, CommandContext<ServerCommandSource> context, int limit) {

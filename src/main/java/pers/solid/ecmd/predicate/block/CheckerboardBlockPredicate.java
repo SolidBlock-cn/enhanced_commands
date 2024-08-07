@@ -6,14 +6,15 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.Checkerboard;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.WeightedList;
+import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+
+import java.util.Collections;
 
 public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> predicates, @NotNull Vec3d floor, @NotNull Vec3d scale, @NotNull Vec3d offset) implements BlockPredicate, Checkerboard<BlockPredicate> {
   public static final MapCodec<CheckerboardBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -30,8 +31,10 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
-    // todo
-    return BlockPredicate.super.testAndDescribe(cachedBlockPosition);
+    final BlockPredicate entry = getEntry(predicates, cachedBlockPosition.getBlockPos());
+    final TestResult testResult = entry.testAndDescribe(cachedBlockPosition);
+    final MutableText wrapVector = TextUtil.wrapVector(cachedBlockPosition.getBlockPos());
+    return testResult.successes() ? TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.checkerboard.pass", wrapVector), Collections.singletonList(testResult)) : TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.checkerboard.fail", wrapVector), Collections.singletonList(testResult));
   }
 
   @Override

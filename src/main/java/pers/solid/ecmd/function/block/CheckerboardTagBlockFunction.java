@@ -60,7 +60,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   public @NotNull String asString() {
     final StringBuilder sb = new StringBuilder("checkerboard-tag(");
     final String mapped = entryList.getStorage().map(tagKey -> tagKey.id().toString(), list -> list.stream().map(RegistryEntry::getIdAsString).collect(Collectors.joining(", ")));
-    sb.append(mapped);
+    sb.append("#").append(mapped);
     return appendParameters(sb).append(")").toString();
   }
 

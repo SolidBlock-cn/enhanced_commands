@@ -148,6 +148,8 @@
   "enhanced_commands.block_predicate.bi_predicate_same_fail": "As both of the tests passed or failed, the test failed:",
   "enhanced_commands.block_predicate.bi_predicate_same_pass": "As both of the tests passed of failed, the test passed:",
   "enhanced_commands.block_predicate.checkerboard": "Checkerboard passes",
+  "enhanced_commands.block_predicate.checkerboard.fail": "The block at %s in a checkerboard failed owing to the following predicate:",
+  "enhanced_commands.block_predicate.checkerboard.pass": "The block at %s in a checkerboard passed owing to the following predicate:",
   "enhanced_commands.block_predicate.comparator_expected": "Comparator expected",
   "enhanced_commands.block_predicate.constant": "Match any",
   "enhanced_commands.block_predicate.constant.pass": "The block passes because the predicate matches any",

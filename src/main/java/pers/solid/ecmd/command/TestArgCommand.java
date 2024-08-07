@@ -23,6 +23,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.visitor.NbtTextFormatter;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -296,17 +297,15 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <A> int executeConvertShow(NbtElement nbtElement, Codec<A> codec, Consumer<A> resultConsumer) throws CommandSyntaxException {
-    final DataResult<Pair<A, NbtElement>> decode = codec.decode(NbtOps.INSTANCE, nbtElement);
+  private static <A> int executeConvertShow(NbtElement nbtElement, Codec<A> codec, Consumer<A> resultConsumer, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    final DataResult<Pair<A, NbtElement>> decode = codec.decode(registryLookup.getOps(NbtOps.INSTANCE), nbtElement);
     final A result = decode.getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
     resultConsumer.accept(result);
     return 1;
   }
 
   private static <A extends ExpressionConvertible> int executeConvertShow(CommandContext<ServerCommandSource> context, Codec<A> codec) throws CommandSyntaxException {
-    return executeConvertShow(getNbtElement(context, "nbt"), codec, a -> {
-      context.getSource().sendFeedback$ecBridge(() -> Text.literal(a.asString()).styled(Styles.RESULT), false);
-    });
+    return executeConvertShow(getNbtElement(context, "nbt"), codec, a -> context.getSource().sendFeedback$ecBridge(() -> Text.literal(a.asString()).styled(Styles.RESULT), false), context.getSource().getRegistryManager());
   }
 
   private static <A> int executeStringShow(CommandContext<ServerCommandSource> context, A fetchedArg, FailableFunction<A, String, CommandSyntaxException> toString) throws CommandSyntaxException {
