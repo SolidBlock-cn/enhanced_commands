@@ -40,7 +40,7 @@
 ### 函数语法
 
 - [`checkerboard(<方块函数> [权重] ...)`](checkerboard/zh.md)：棋盘格的图案。
-- [`checkerboard-tag(<方块函数> [权重] ...)`](checkerboard/zh.md)：以拥有方块标签的方块为内容的棋盘格图案。
+- [`checkerboard-tag(<方块函数> [权重] ...)`](checkerboard-tag/zh.md)：以拥有方块标签的方块为内容的棋盘格图案。
 - [`dry([方块函数])`](dry/zh.md)：除去当前方块的水，或者先应用方块函数然后再除去水。
 - [`filter(<方块函数 1>, <方块谓词>, [方块函数 2])`](filter/zh.md)：先计算出方块函数 1 的结果，如果方块函数 1 符合谓词，那么直接应用，否则计算方块函数 2 或者不操作。
 - [`idcontain(<正则表达式>)`](idcontain/zh.md)：随机选择一个 ID 符合指定的正则表达式的方块。
