@@ -26,12 +26,15 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return getEntry(predicates, cachedBlockPosition.getBlockPos()).test(cachedBlockPosition);
+    final BlockPredicate entry = getEntry(predicates, cachedBlockPosition.getBlockPos());
+    if (entry == null) return false;
+    return entry.test(cachedBlockPosition);
   }
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final BlockPredicate entry = getEntry(predicates, cachedBlockPosition.getBlockPos());
+    if (entry == null) return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.checkerboard.fail_no_checkerboard"));
     final TestResult testResult = entry.testAndDescribe(cachedBlockPosition);
     final MutableText wrapVector = TextUtil.wrapVector(cachedBlockPosition.getBlockPos());
     return testResult.successes() ? TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.checkerboard.pass", wrapVector), Collections.singletonList(testResult)) : TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.checkerboard.fail", wrapVector), Collections.singletonList(testResult));
