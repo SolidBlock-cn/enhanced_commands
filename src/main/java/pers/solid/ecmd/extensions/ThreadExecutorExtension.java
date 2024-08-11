@@ -3,11 +3,11 @@ package pers.solid.ecmd.extensions;
 import com.google.common.collect.Iterables;
 import net.minecraft.text.Text;
 import net.minecraft.util.thread.ThreadExecutor;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.command.FillReplaceCommand;
 
-import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
@@ -21,16 +21,18 @@ public interface ThreadExecutorExtension {
 
   default void ec_addIteratorTask(IteratorTask<?> task) {
     ec_getIteratorTasks().add(task);
-    ec_getUUIDToIteratorTasks().put(task.uuid, new WeakReference<>(task));
+    ec_getUUIDToIteratorTasks().put(task.uuid, task);
   }
 
   default void ec_addIteratorTask(Text name, Iterator<?> iterator) {
     ec_addIteratorTask(new IteratorTask<>(name, UUID.randomUUID(), iterator));
   }
 
+  @NotNull
   Queue<IteratorTask<?>> ec_getIteratorTasks();
 
-  Map<UUID, WeakReference<IteratorTask<?>>> ec_getUUIDToIteratorTasks();
+  @NotNull
+  Map<UUID, IteratorTask<?>> ec_getUUIDToIteratorTasks();
 
   /**
    * The method is used to handle tasks, such as those created by {@link FillReplaceCommand} when handling quantities of blocks.

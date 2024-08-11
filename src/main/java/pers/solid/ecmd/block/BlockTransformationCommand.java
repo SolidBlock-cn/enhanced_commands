@@ -70,6 +70,7 @@ public interface BlockTransformationCommand {
     final @Nullable BlockFunctionArgument remaining = keywordArgs.getArg("remaining");
     final ServerWorld world = source.getWorld();
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
+    final boolean bypassLimit = keywordArgs.getArg("bypass_limit");
     final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(world, region)
         .setFlags(FillReplaceCommand.getFlags(keywordArgs))
         .setModFlags(FillReplaceCommand.getModFlags(keywordArgs))
@@ -82,7 +83,8 @@ public interface BlockTransformationCommand {
         .transformsOnly(transformOnly == null ? null : transformOnly.apply(source))
         .fillRemainingWith(remaining == null ? null : remaining.apply(source))
         .setUnloadedPosBehavior(unloadedPosBehavior)
-        .interpolates(keywordArgs.supportsArg("interpolate") && keywordArgs.getBoolean("interpolate"));
+        .interpolates(keywordArgs.supportsArg("interpolate") && keywordArgs.getBoolean("interpolate"))
+        .bypassLimit(bypassLimit);
     if (keywordArgs.getBoolean("keep_remaining")) {
       builder.keepRemaining();
     }

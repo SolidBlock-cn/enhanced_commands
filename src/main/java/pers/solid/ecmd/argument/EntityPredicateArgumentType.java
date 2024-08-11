@@ -32,7 +32,8 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
 
   @Override
   public EntityPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
-    final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader);
+    // 考虑命令主要是由管理员执行的，所以使用允许使用实体选择器。
+    final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader, true);
     if (reader.canRead() && reader.peek() == '[') {
       reader.skip();
       entitySelectorReader.setIncludesNonPlayers(true);
@@ -41,6 +42,16 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
       ((EntitySelectorReaderAccessor) entitySelectorReader).callBuildPredicate();
       return EntityPredicateArgument.of(entitySelectorReader.build());
     } else {
+      return EntityPredicateArgument.of(entitySelectorReader.read());
+    }
+  }
+
+  @Override
+  public <S> EntityPredicateArgument parse(StringReader reader, S source) throws CommandSyntaxException {
+    if (EntitySelectorReader.shouldAllowAtSelectors(source)) {
+      return parse(reader);
+    } else {
+      final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader, false);
       return EntityPredicateArgument.of(entitySelectorReader.read());
     }
   }

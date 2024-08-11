@@ -285,7 +285,7 @@ public class EntitySelectorOptionsExtension {
           break;
         }
 
-        final EntitySelectorReader newReader = new EntitySelectorReader(stringReader);
+        final EntitySelectorReader newReader = new EntitySelectorReader(stringReader, true);
         final int cursorBeforeRead = stringReader.getCursor();
         try {
           final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
