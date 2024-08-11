@@ -2,6 +2,7 @@ package pers.solid.ecmd.command;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Streams;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -33,6 +34,7 @@ import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
+import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Iterator;
@@ -120,19 +122,21 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     final Iterator<Void> mainIterator;
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();
-    Stream<BlockPos> stream = region.stream();
+    Stream<@Nullable BlockPos> stream;
     if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-      stream = stream.takeWhile(pos -> {
+      stream = region.stream().takeWhile(pos -> {
         final boolean chunkLoaded = world.isChunkLoaded(pos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-      stream = stream.filter(pos -> {
+      stream = Streams.stream(new BatchedFilterIterable<>(region, 16, pos -> {
         final boolean chunkLoaded = world.isChunkLoaded(pos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
-      });
+      }));
+    } else {
+      stream = region.stream();
     }
 
     if (predicate == null) {
@@ -147,6 +151,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       LongList posThatMatch = new LongArrayList();
       final BlockPos.Mutable mutable = new BlockPos.Mutable();
       Iterator<Void> testPosIteration = stream.<Void>map(blockPos -> {
+            if (blockPos == null) return null;
             final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, true);
             if (predicate.test(cachedBlockPosition)) {
               posThatMatch.add(blockPos.asLong());

@@ -27,13 +27,13 @@ import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.UnloadedPosBehavior;
+import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * 涉及对区域内的方块（可能含有实体）进行变换的任务。此类能够处理一系列复杂的变换过程。
@@ -159,26 +159,24 @@ public class BlockTransformationTask {
     }
   }
 
-  /**
-   * 对 {@code Stream<BlockPos>} 进行修改，使之能适应 {@link #unloadedPosBehavior}，在特定情况下跳过或者中断流。
-   */
-  public Stream<BlockPos> modifyStreamForUnloadedPos(Stream<BlockPos> stream) {
+  public Iterable<@Nullable BlockPos> modifyIterableForUnloadedPos(Iterable<@Nullable BlockPos> iterable) {
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-      stream = stream.filter(blockPos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+      return new BatchedFilterIterable<>(iterable, 16, blockPos -> {
+        final boolean chunkLoaded = blockPos != null && world.isChunkLoaded(blockPos);
         if (!chunkLoaded) hasUnloadedPos = true;
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-      stream = stream.peek(blockPos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+      return Iterables.transform(iterable, blockPos -> {
+        final boolean chunkLoaded = blockPos != null && world.isChunkLoaded(blockPos);
         if (!chunkLoaded) {
           hasUnloadedPos = true;
           throw new UnloadedPosException(blockPos);
         }
+        return blockPos;
       });
     }
-    return stream;
+    return iterable;
   }
 
   public TaskSeries transformBlocks() throws CommandSyntaxException {
@@ -197,27 +195,32 @@ public class BlockTransformationTask {
     final Long2ReferenceMap<NbtCompound> nbts = new Long2ReferenceOpenHashMap<>();
 
     final BlockPos.Mutable mutable = new BlockPos.Mutable();
-    final Iterable<Void> storeTransformed = () -> modifyStreamForUnloadedPos(modifyStreamForUnloadedPos(region.stream())
-        .map(blockPos -> {
-          final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-          if ((transformsOnly == null || transformsOnly.test(cachedBlockPosition)) && cachedBlockPosition.getBlockState() != null) {
-            final BlockState blockState = cachedBlockPosition.getBlockState();
-            posTransformedOut.put(blockPos.asLong(), blockState);
-            final BlockPos transformedBlockPos = mutable.set(blockPosTransformer.apply(blockPos));
-            transformedStates.put(transformedBlockPos.asLong(), blockStateTransformer.apply(blockState));
-            if (cachedBlockPosition.getBlockEntity() != null) {
-              nbts.put(transformedBlockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt(world.getRegistryManager()));
-            }
 
-            return transformedBlockPos;
-          } else {
-            // 充 null 值表示未匹配到值，或者是未加载的区块。
-            posTransformedOut.put(blockPos.asLong(), null);
-
-            return blockPos.toImmutable();
+    final Iterable<Void> storeTransformed;
+    {
+      Iterable<@Nullable BlockPos> _posIterable = modifyIterableForUnloadedPos(region);
+      _posIterable = Iterables.transform(_posIterable, blockPos -> {
+        if (blockPos == null) return null;
+        final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+        if ((transformsOnly == null || transformsOnly.test(cachedBlockPosition)) && cachedBlockPosition.getBlockState() != null) {
+          final BlockState blockState = cachedBlockPosition.getBlockState();
+          posTransformedOut.put(blockPos.asLong(), blockState);
+          final BlockPos transformedBlockPos = mutable.set(blockPosTransformer.apply(blockPos));
+          transformedStates.put(transformedBlockPos.asLong(), blockStateTransformer.apply(blockState));
+          if (cachedBlockPosition.getBlockEntity() != null) {
+            nbts.put(transformedBlockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt(world.getRegistryManager()));
           }
-        }))
-        .map(blockPos -> (Void) null).iterator();
+
+          return transformedBlockPos;
+        } else {
+          // 充 null 值表示未匹配到值，或者是未加载的区块。
+          posTransformedOut.put(blockPos.asLong(), null);
+
+          return blockPos.toImmutable();
+        }
+      });
+      storeTransformed = Iterables.transform(modifyIterableForUnloadedPos(_posIterable), blockPos -> null);
+    }
 
     final Iterable<Void> collectMatchingTransformed;
     final LongSet matchingBlockPos;
@@ -255,40 +258,21 @@ public class BlockTransformationTask {
           return null;
         });
 
-    final Iterable<Void> transformEntities;
-    if (entitiesToAffect != null) {
-      transformEntities = Iterables.transform(() -> entitiesToAffect, entity -> {
-        if (entityTransformer != null) {
-          entityTransformer.accept(entity);
-        }
-        if (posTransformer != null) {
-          final Vec3d transformedPos = posTransformer.apply(entity.getPos());
-          if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-            serverPlayerEntity.networkHandler.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYaw(), serverPlayerEntity.getPitch(), PositionFlag.VALUES);
-          } else {
-            entity.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z);
-          }
-        }
-        affectedEntities++;
-        return (Void) null;
-      });
-    } else {
-      transformEntities = Collections.emptyList();
-    }
+    final Iterable<Void> transformEntities = transformEntities();
 
     final Iterable<Void> collectMatchingRemaining;
     final Iterable<Void> setRemaining;
     if (remaining != null) {
       if (affectsOnly != null) {
         final LongList affectedRemaining = new LongArrayList();
-        collectMatchingRemaining = () -> region.stream()
-            .filter(blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong()))
-            .map(blockPos -> {
-              if (affectsOnly.test(new CachedBlockPosition(world, blockPos, false))) {
+        collectMatchingRemaining = Iterables.transform(
+            new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong())),
+            blockPos -> {
+              if (blockPos != null && affectsOnly.test(new CachedBlockPosition(world, blockPos, false))) {
                 affectedRemaining.add(blockPos.asLong());
               }
-              return (Void) null;
-            }).iterator();
+              return null;
+            });
         setRemaining = () -> affectedRemaining.longStream()
             .mapToObj(blockPos -> {
               if (remaining.setBlock(world, mutable.set(blockPos), flags, modFlags)) {
@@ -298,14 +282,14 @@ public class BlockTransformationTask {
             }).iterator();
       } else {
         collectMatchingRemaining = Collections.emptyList();
-        setRemaining = () -> region.stream()
-            .filter(blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong()))
-            .map(blockPos -> {
-              if (remaining.setBlock(world, blockPos, flags, modFlags)) {
+        setRemaining = Iterables.transform(
+            new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong())),
+            blockPos -> {
+              if (blockPos != null && remaining.setBlock(world, blockPos, flags, modFlags)) {
                 affectedBlocks++;
               }
-              return (Void) null;
-            }).iterator();
+              return null;
+            });
       }
     } else {
       collectMatchingRemaining = setRemaining = Collections.emptyList();
@@ -316,8 +300,10 @@ public class BlockTransformationTask {
     if (interpolation && posTransformer != null && invertedPosTransformer != null && (untransformedBox = region.minContainingBlockBox()) != null) {
       final List<BlockPos> transformedCorners = new ArrayList<>();
       untransformedBox.forEachVertex(blockPos -> transformedCorners.add(BlockPos.ofFloored(posTransformer.apply(blockPos.toCenterPos()))));
-      addInterpolation = () -> modifyStreamForUnloadedPos(BlockPos.stream(transformedCorners.stream().mapToInt(Vec3i::getX).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getX).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).max().orElseThrow()))
-          .filter(transformedPos -> {
+      Iterable<BlockPos> _posIterable = BlockPos.iterate(transformedCorners.stream().mapToInt(Vec3i::getX).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getX).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).max().orElseThrow());
+      _posIterable = modifyIterableForUnloadedPos(_posIterable);
+      _posIterable = new BatchedFilterIterable<>(_posIterable, 16,
+          transformedPos -> {
             final BlockPos invertedPos = BlockPos.ofFloored(invertedPosTransformer.apply(transformedPos.toCenterPos()));
             if (region.contains(invertedPos) && !transformedStates.containsKey(transformedPos.asLong())) {
               if (affectsOnly == null || affectsOnly.test(new CachedBlockPosition(world, transformedPos, false))) {
@@ -340,12 +326,37 @@ public class BlockTransformationTask {
               }
             }
             return false;
-          }).map(blockPos -> (Void) null).iterator();
+          });
+      addInterpolation = Iterables.transform(_posIterable, blockPos -> null);
     } else {
       addInterpolation = Collections.emptyList();
     }
 
     return new TaskSeries(this, storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation);
+  }
+
+  private @NotNull Iterable<Void> transformEntities() {
+    final Iterable<Void> transformEntities;
+    if (entitiesToAffect != null) {
+      transformEntities = Iterables.transform(() -> entitiesToAffect, entity -> {
+        if (entityTransformer != null) {
+          entityTransformer.accept(entity);
+        }
+        if (posTransformer != null) {
+          final Vec3d transformedPos = posTransformer.apply(entity.getPos());
+          if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
+            serverPlayerEntity.networkHandler.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYaw(), serverPlayerEntity.getPitch(), PositionFlag.VALUES);
+          } else {
+            entity.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z);
+          }
+        }
+        affectedEntities++;
+        return (Void) null;
+      });
+    } else {
+      transformEntities = Collections.emptyList();
+    }
+    return transformEntities;
   }
 
   public static Builder builder(World world, Region region) {
