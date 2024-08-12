@@ -1,0 +1,72 @@
+package pers.solid.ecmd.history;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.mojang.datafixers.util.Pair;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.packet.s2c.play.PositionFlag;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.extensions.IteratorTask;
+import pers.solid.ecmd.util.iterator.IterateUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+public class BlockTransformationHistory extends BlockPlacementHistory {
+  public final List<Triple<@NotNull Entity, @Nullable Pair<@NotNull Consumer<Entity>, @NotNull Consumer<Entity>>, @Nullable Vec3d>> reverseEntities = new ArrayList<>();
+
+  public BlockTransformationHistory(Text name, ServerWorld world, int flag, int modFlag) {
+    super(name, world, flag, modFlag);
+  }
+
+  public BlockTransformationHistory(Text name, ServerWorld world, int flag, int modFlag, Long2ObjectMap<BlockState> oldStates, Long2ObjectMap<NbtCompound> oldEntityData) {
+    super(name, world, flag, modFlag, oldStates, oldEntityData);
+  }
+
+  @Override
+  public @NotNull Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockTransformationHistory> undo(ServerCommandSource source, boolean immediately, boolean undoable) {
+    final var s = super.undo(source, immediately, undoable);
+    final @Nullable IteratorTask<?> superTask = s.getFirst();
+    final @Nullable BlockPlacementHistory superHistory = s.getSecond();
+    final BlockTransformationHistory redoHistory = superHistory == null ? null : new BlockTransformationHistory(superHistory.name, superHistory.world, superHistory.flag, superHistory.modFlag, superHistory.oldStates, superHistory.oldEntityData);
+
+    Iterable<Void> undoEntityTransformation = Iterables.transform(reverseEntities, entry -> {
+      final Entity entity = entry.getLeft();
+      final var pair = entry.getMiddle();
+      final Consumer<Entity> undo = pair == null ? null : pair.getFirst();
+      final @Nullable Vec3d transformedPos = entry.getRight();
+      @Nullable Vec3d oldPos = null;
+      if (undo != null) {
+        undo.accept(entity);
+      }
+      if (transformedPos != null) {
+        oldPos = entity.getPos();
+        if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
+          serverPlayerEntity.networkHandler.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYaw(), serverPlayerEntity.getPitch(), PositionFlag.VALUES);
+        } else {
+          entity.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z);
+        }
+      }
+      if (redoHistory != null) {
+        redoHistory.reverseEntities.add(Triple.of(entity, pair == null ? null : pair.swap(), oldPos));
+      }
+      return null;
+    });
+    final IteratorTask<?> redoTask = superTask == null ? null : new IteratorTask<>(superTask.name, superTask.uuid, Iterators.concat(superTask.delegate(), IterateUtils.batchAndSkip(undoEntityTransformation, 16384, 7).iterator()));
+    if (superTask == null) {
+      IterateUtils.exhaust(undoEntityTransformation.iterator());
+    }
+    return Pair.of(redoTask, redoHistory);
+  }
+}

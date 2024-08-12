@@ -52,22 +52,11 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
       modifiedState = Block.postProcessState(modifiedState, world, pos);
     }
 
-    @Nullable NbtCompound oldEntityData = null;
-    @Nullable BlockEntity oldEntity = null;
     if (history != null) {
-      oldEntity = world.getBlockEntity(pos);
-      if (oldEntity != null) {
-        oldEntityData = oldEntity.createNbt(world.getRegistryManager());
-      }
+      history.recordBlockAndEntity(world, pos, modifiedState);
     }
     boolean result = MixinShared.setBlockStateWithModFlags(world, pos, modifiedState, flags, modFlags);
-    if (result && history != null && !origState.equals(modifiedState)) {
-      history.oldStates.put(pos.asLong(), origState);
-    }
     final BlockEntity blockEntity = world.getBlockEntity(pos);
-    if (history != null && blockEntity != oldEntity) {
-      history.oldEntityData.put(pos.asLong(), oldEntityData);
-    }
     if (blockEntity != null) {
       final NbtCompound modifiedData = blockEntityData.getValue();
       if (modifiedData != null) {

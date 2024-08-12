@@ -3,6 +3,7 @@ package pers.solid.ecmd.block;
 import com.google.common.collect.Iterators;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.Entity;
@@ -14,6 +15,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -21,8 +23,11 @@ import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunctionArgument;
+import pers.solid.ecmd.history.BlockTransformationHistory;
+import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 import pers.solid.ecmd.region.Region;
@@ -45,6 +50,8 @@ public interface BlockTransformationCommand {
   Vec3d transformPosBack(Vec3d transformed);
 
   void transformEntity(@NotNull Entity entity);
+
+  void transformEntityBack(@NotNull Entity entity);
 
   @NotNull
   BlockState transformBlockState(@NotNull BlockState original);
@@ -71,20 +78,24 @@ public interface BlockTransformationCommand {
     final ServerWorld world = source.getWorld();
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     final boolean bypassLimit = keywordArgs.getArg("bypass_limit");
+    final int flag = FillReplaceCommand.getFlags(keywordArgs);
+    final int modFlag = FillReplaceCommand.getModFlags(keywordArgs);
+    final BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(getIteratorTaskName(region), world, flag, modFlag) : null;
     final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(world, region)
-        .setFlags(FillReplaceCommand.getFlags(keywordArgs))
-        .setModFlags(FillReplaceCommand.getModFlags(keywordArgs))
+        .setFlags(flag)
+        .setModFlags(modFlag)
         .transformsBlockPos(this::transformBlockPos)
         .transformsPos(this::transformPos)
         .transformsPosBack(this::transformPosBack)
-        .transformsEntity(this::transformEntity)
+        .transformsEntity(this::transformEntity, this::transformEntityBack)
         .transformsBlockState(keywordArgs.getBoolean("keep_state") ? Function.identity() : this::transformBlockState)
         .affectsOnly(affectOnly == null ? null : affectOnly.apply(source))
         .transformsOnly(transformOnly == null ? null : transformOnly.apply(source))
         .fillRemainingWith(remaining == null ? null : remaining.apply(source))
         .setUnloadedPosBehavior(unloadedPosBehavior)
         .interpolates(keywordArgs.supportsArg("interpolate") && keywordArgs.getBoolean("interpolate"))
-        .bypassLimit(bypassLimit);
+        .bypassLimit(bypassLimit)
+        .history(history != null ? ((ServerCommandSourceAccessor) source).getOutput() : null, history);
     if (keywordArgs.getBoolean("keep_remaining")) {
       builder.keepRemaining();
     }
@@ -98,17 +109,31 @@ public interface BlockTransformationCommand {
 
     final boolean immediately = keywordArgs.getBoolean("immediately");
 
-    Region activeRegion = transformsRegion && player != null ? transformRegion(region) : null;
+    Region transformedActiveRegion = transformsRegion && player != null ? transformRegion(region) : null;
 
     final BlockTransformationTask task = builder.build();
+
+    final @Nullable Region oldActiveRegion; // 仅用于撤销操作
+    if (transformsRegion && player != null && history != null) {
+      oldActiveRegion = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegion();
+    } else {
+      oldActiveRegion = null;
+    }
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
-        if (activeRegion != null) {
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
+      final IteratorTask<?> iteratorTask = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
+        if (transformedActiveRegion != null) {
+          if (history != null) {
+            history.reverseEntities.add(Triple.of(player, Pair.of(
+                player0 -> ((ServerPlayerEntityExtension) player0).ec$setActiveRegion(oldActiveRegion),
+                player0 -> ((ServerPlayerEntityExtension) player0).ec$setActiveRegion(transformedActiveRegion)
+            ), null));
+          }
+          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(transformedActiveRegion);
         }
         notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
       })));
+      history.task = iteratorTask;
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
@@ -117,8 +142,14 @@ public interface BlockTransformationCommand {
       final int affectedBlocks = task.getAffectedBlocks();
       final int affectedEntities = task.getAffectedEntities();
       notifyCompletion(source, affectedBlocks, entitiesToAffect == null ? -1 : affectedEntities);
-      if (transformsRegion && player != null) {
-        ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
+      if (transformedActiveRegion != null) {
+        if (history != null) {
+          history.reverseEntities.add(Triple.of(player, Pair.of(
+              player0 -> ((ServerPlayerEntityExtension) player0).ec$setActiveRegion(oldActiveRegion),
+              player0 -> ((ServerPlayerEntityExtension) player0).ec$setActiveRegion(transformedActiveRegion)
+          ), null));
+        }
+        ((ServerPlayerEntityExtension) player).ec$setActiveRegion(transformedActiveRegion);
       }
       return affectedBlocks + affectedEntities;
     }

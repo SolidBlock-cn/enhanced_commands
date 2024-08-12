@@ -163,6 +163,26 @@ public enum RotateCommand implements CommandRegistrationCallback {
       }
 
       @Override
+      public void transformEntityBack(@NotNull Entity entity) {
+        final float newYaw;
+        if (blockRotation != null) {
+          newYaw = entity.applyRotation(switch (blockRotation) {
+            case NONE -> BlockRotation.NONE;
+            case CLOCKWISE_90 -> BlockRotation.COUNTERCLOCKWISE_90;
+            case CLOCKWISE_180 -> BlockRotation.CLOCKWISE_180;
+            case COUNTERCLOCKWISE_90 -> BlockRotation.CLOCKWISE_90;
+          });
+        } else {
+          newYaw = entity.getYaw() + (float) rotation;
+        }
+        if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
+          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getPitch(), PositionFlag.VALUES);
+        } else {
+          entity.setYaw(newYaw);
+        }
+      }
+
+      @Override
       public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
         return original.rotate(nearestBlockRotation);
       }

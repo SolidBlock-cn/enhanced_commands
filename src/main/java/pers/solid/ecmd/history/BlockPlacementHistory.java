@@ -2,6 +2,7 @@ package pers.solid.ecmd.history;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
+import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -14,20 +15,22 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
+
+import java.util.UUID;
 
 public class BlockPlacementHistory implements History {
   public final Text name;
   public final ServerWorld world;
   public final int flag;
   public final int modFlag;
-  public final Long2ObjectMap<BlockState> oldStates = new Long2ObjectArrayMap<>();
-  public final Long2ObjectMap<NbtCompound> oldEntityData = new Long2ObjectOpenHashMap<>();
+  public final Long2ObjectMap<BlockState> oldStates;
+  public final Long2ObjectMap<NbtCompound> oldEntityData;
   public @Nullable IteratorTask<?> task;
 
   public BlockPlacementHistory(Text name, ServerWorld world, int flag, int modFlag) {
@@ -35,6 +38,17 @@ public class BlockPlacementHistory implements History {
     this.world = world;
     this.flag = flag;
     this.modFlag = modFlag;
+    oldStates = new Long2ObjectArrayMap<>();
+    oldEntityData = new Long2ObjectOpenHashMap<>();
+  }
+
+  protected BlockPlacementHistory(Text name, ServerWorld world, int flag, int modFlag, Long2ObjectMap<BlockState> oldStates, Long2ObjectMap<NbtCompound> oldEntityData) {
+    this.name = name;
+    this.world = world;
+    this.flag = flag;
+    this.modFlag = modFlag;
+    this.oldStates = oldStates;
+    this.oldEntityData = oldEntityData;
   }
 
   @Override
@@ -43,7 +57,7 @@ public class BlockPlacementHistory implements History {
   }
 
   @Override
-  public @Nullable History undo(ServerCommandSource source, boolean immediately, boolean undoable) {
+  public @NotNull Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockPlacementHistory> undo(ServerCommandSource source, boolean immediately, boolean undoable) {
     if (task != null) {
       task.suspended = true;
     }
@@ -55,14 +69,7 @@ public class BlockPlacementHistory implements History {
       mutable.set(posLong);
       final BlockState undoState = entry.getValue();
       if (reverse != null) {
-        final BlockState oldState = world.getBlockState(mutable);
-        if (!oldState.equals(undoState)) {
-          reverse.oldStates.put(posLong, oldState);
-        }
-        final BlockEntity oldEntity = world.getBlockEntity(mutable);
-        if (oldEntity != null) {
-          reverse.oldEntityData.put(posLong, oldEntity.createNbt(world.getRegistryManager()));
-        }
+        reverse.recordBlockAndEntity(world, mutable, undoState);
       }
       MixinShared.setBlockStateWithModFlags(world, mutable, undoState, flag, modFlag);
       final BlockEntity blockEntity = world.getBlockEntity(mutable);
@@ -76,11 +83,23 @@ public class BlockPlacementHistory implements History {
     if (immediately || oldStates.size() <= 16384) {
       IterateUtils.exhaust(iterable.iterator());
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.undo.finished", name), true);
+      return Pair.of(null, reverse);
     } else {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.undo.large_region", oldStates.size()).formatted(Formatting.YELLOW), true);
 
-      ((ThreadExecutorExtension) world.getServer()).addIteratorTask$ec(name, Iterators.concat(IterateUtils.batchAndSkip(iterable.iterator(), 32768, 15), IterateUtils.singletonPeekingIterator(() -> source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.undo.finished", name), true))));
+      final IteratorTask<Void> undoTask = new IteratorTask<>(undoName, UUID.randomUUID(), Iterators.concat(IterateUtils.batchAndSkip(iterable.iterator(), 32768, 15), IterateUtils.singletonPeekingIterator(() -> source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.undo.finished", name), true))));
+      return Pair.of(undoTask, reverse);
     }
-    return reverse;
+  }
+
+  public void recordBlockAndEntity(World world, BlockPos blockPos, @Nullable BlockState newState) {
+    final BlockState oldState = world.getBlockState(blockPos);
+    if (!oldState.equals(newState)) {
+      oldStates.put(blockPos.asLong(), oldState);
+    }
+    final BlockEntity oldEntity = world.getBlockEntity(blockPos);
+    if (oldEntity != null) {
+      oldEntityData.put(blockPos.asLong(), oldEntity.createNbt(world.getRegistryManager()));
+    }
   }
 }

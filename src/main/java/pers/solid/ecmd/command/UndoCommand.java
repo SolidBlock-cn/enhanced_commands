@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.entity.CommandBlockBlockEntity;
 import net.minecraft.command.CommandRegistryAccess;
@@ -15,9 +16,12 @@ import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.extensions.HistoryHolder;
+import pers.solid.ecmd.extensions.IteratorTask;
+import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.history.History;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 
@@ -82,9 +86,12 @@ public enum UndoCommand implements CommandRegistrationCallback {
         throw NO_UNDOABLE_HISTORY.create();
       }
     } else {
-      final History reverse = poll.undo(source, immediately, undoable);
-      if (reverse != null) {
-        historyHolder.addRedoableHistory$ec(reverse);
+      final Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable History> reverse = poll.undo(source, immediately, undoable);
+      if (reverse.getFirst() != null) {
+        ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(reverse.getFirst());
+      }
+      if (reverse.getSecond() != null) {
+        historyHolder.addRedoableHistory$ec(reverse.getSecond());
       }
     }
     return 1;

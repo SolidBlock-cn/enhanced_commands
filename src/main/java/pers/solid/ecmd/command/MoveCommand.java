@@ -101,6 +101,10 @@ public enum MoveCommand implements CommandRegistrationCallback {
       }
 
       @Override
+      public void transformEntityBack(@NotNull Entity entity) {
+      }
+
+      @Override
       public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
         return original;
       }

@@ -93,6 +93,11 @@ public enum MirrorCommand implements CommandRegistrationCallback {
       }
 
       @Override
+      public void transformEntityBack(@NotNull Entity entity) {
+        transformEntity(entity);
+      }
+
+      @Override
       public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
         return FlipStateCallback.getMirroredState(original, axis);
       }
