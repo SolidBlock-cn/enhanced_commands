@@ -19,7 +19,7 @@
 - [`/replace`](replace/zh.md) 和 `//replace`：替换区域内的符合指定谓词的方块。
 - [`/rotate`](rotate/zh.md) 和 `//rotate`：旋转区域内的方块和实体。
 - [`/stack`](stack/zh.md) 和 `//stack`：向一个方向多次复制区域。
-- [`/wall`](wall/zh.md)：填充区域内的四周（墙面）的方块，可一一并填充区域四周以内的方块。
+- [`/wall`](wall/zh.md)：填充区域内的四周（墙面）的方块，可以一并填充区域四周以内的方块。
 
 ## 实体命令
 
@@ -40,23 +40,23 @@
 `/execute` 的各个已经独立的子命令共包括：
 
 - 条件子命令：
-    - `/if`
-    - `/unless`
+  - `/if`
+  - `/unless`
 - 修饰子命令：
-    - `/as`
-    - `/at`
-    - `/positioned`
-    - `/rotated`
-    - `/facing`
-    - `/align`
-    - `/anchored`
-    - `/in`
-    - `/summon`
-    - [`/inregion`](inregion/zh.md)（本模组添加）：在一个区域内的所有方块坐标中分别执行命令。
-        - [`/silenced`](silenced/zh.md)（本模组添加）：执行命令，但是不会在聊天或者控制台产生任何反馈。
-        - [`/for`](for/zh.md)（本模组添加）
+  - `/as`
+  - `/at`
+  - `/positioned`
+  - `/rotated`
+  - `/facing`
+  - `/align`
+  - `/anchored`
+  - `/in`
+  - `/summon`
+  - [`/inregion`](inregion/zh.md)（本模组添加）：在一个区域内的所有方块坐标中分别执行命令。
+    - [`/silenced`](silenced/zh.md)（本模组添加）：执行命令，但是不会在聊天或者控制台产生任何反馈。
+    - [`/for`](for/zh.md)（本模组添加）
 - 存储子命令：
-    - `/store`
+  - `/store`
 
 ## 简化的 `/gamemode` 命令
 
@@ -69,5 +69,6 @@
 
 ## 其他命令
 
+- [`/history`](history/zh.md)：管理操作历史记录。
+- /rand：生成随机数。
 - [`/tasks`](tasks/zh.md)：管理当前服务器中的任务。
-- [`/rand`](rand/zh.md)：生成随机数。

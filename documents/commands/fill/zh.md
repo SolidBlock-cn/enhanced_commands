@@ -8,7 +8,7 @@
 
 ## 语法
 
-`/fill <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process | unloaded_pos | suppress_initial_check | suppress_replaced_check | force]`
+`/fill <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process | unloaded_pos | suppress_initial_check | suppress_replaced_check | force | undoable]`
 
 `//fill ...` 相当于 `/fill 玩家的活动区域 ...`。`//f` 是 `//fill` 的简写。
 
@@ -72,6 +72,10 @@
 #### `force`
 
 布尔值，默认为 `false`。若设置 `true`，相当于设置了以下参数：`force_state=true update_neighbors=false suppress_initial_check=true suppress_replaced_check=true`。
+
+#### `undoable`
+
+布尔值，默认为 `true`。指定该操作是否可撤销，可通过 [`/undo` 命令](../undo/zh.md)撤销方块操作。
 
 ## 示例
 
