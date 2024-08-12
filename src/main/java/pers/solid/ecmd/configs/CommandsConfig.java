@@ -7,4 +7,5 @@ public class CommandsConfig {
   public static CommandsConfig CURRENT = DEFAULT;
 
   public boolean enableDebugCommands = FabricLoader.getInstance().isDevelopmentEnvironment();
+  public int maxHistoryCount = 50;
 }

@@ -20,8 +20,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.ModifiableWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeKeys;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
@@ -76,7 +78,7 @@ public final class MixinShared {
     MixinShared.suppressOnStateReplaced = false;
   }
 
-  public static boolean setBlockStateWithModFlags(World world, BlockPos blockPos, BlockState blockState, int flags, int modFlags) {
+  public static boolean setBlockStateWithModFlags(@NotNull ModifiableWorld world, BlockPos blockPos, BlockState blockState, int flags, int modFlags) {
     MixinShared.implementModFlag(modFlags);
     boolean result;
     try {

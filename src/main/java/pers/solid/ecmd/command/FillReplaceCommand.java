@@ -28,8 +28,12 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.extensions.HistoryHolder;
+import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
@@ -100,14 +104,14 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.fill.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
   public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT);
+    return setBlocksInRegion(region, blockFunction, source, predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT, true);
   }
 
   public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, predicate, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), getFlags(kwArgs), getModFlags(kwArgs), kwArgs.getArg("unloaded_pos"));
+    return setBlocksInRegion(region, blockFunction, source, predicate, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), getFlags(kwArgs), getModFlags(kwArgs), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
-  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior) throws CommandSyntaxException {
+  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
     if (!bypassLimit && region.numberOfBlocksAffected() > REGION_SIZE_LIMIT) {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), REGION_SIZE_LIMIT);
     }
@@ -139,9 +143,11 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       stream = region.stream();
     }
 
+    final Text taskName = Text.translatable("enhanced_commands.commands.fill.task_name", region.asString());
+    final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;
     if (predicate == null) {
       mainIterator = stream.<Void>map(blockPos -> {
-            if (blockFunction.setBlock(world, blockPos, flags, modFlags)) {
+            if (blockFunction.setBlock(world, blockPos, flags, modFlags, history)) {
               numbersAffected.increment();
             }
             return null;
@@ -160,7 +166,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
           })
           .iterator();
       Iterable<Void> placingIteration = () -> posThatMatch.longStream().<Void>mapToObj(blockPos -> {
-            if (blockFunction.setBlock(world, mutable.set(blockPos), flags, modFlags)) {
+            if (blockFunction.setBlock(world, mutable.set(blockPos), flags, modFlags, history)) {
               numbersAffected.increment();
             }
             return null;
@@ -175,9 +181,17 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     } : "enhanced_commands.commands.fill.complete", numbersAffected.getValue()).enhanced$$(), true));
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
+    if (history != null) {
+      if (((ServerCommandSourceAccessor) source).getOutput() instanceof HistoryHolder historyHolder) {
+        historyHolder.addUndoableHistory$ec(history);
+      }
+    }
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
-      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhanced_commands.commands.fill.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));
+      final IteratorTask<?> task = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(iterator, 32768, 15));
+      if (history != null) {
+        history.task = task;
+      }
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {

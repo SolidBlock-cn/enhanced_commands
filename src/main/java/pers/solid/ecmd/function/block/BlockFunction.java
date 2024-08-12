@@ -18,8 +18,10 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.mixin.MixinShared;
@@ -39,14 +41,33 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
   }
 
   default boolean setBlock(World world, BlockPos pos, int flags, int modFlags) {
+    return setBlock(world, pos, flags, modFlags, null);
+  }
+
+  default boolean setBlock(World world, BlockPos pos, int flags, int modFlags, @Nullable BlockPlacementHistory history) {
     final BlockState origState = world.getBlockState(pos);
     MutableObject<NbtCompound> blockEntityData = new MutableObject<>(null);
     BlockState modifiedState = getModifiedState(origState, origState, world, pos, flags, blockEntityData);
     if ((modFlags & FillReplaceCommand.POST_PROCESS_FLAG) != 0) {
       modifiedState = Block.postProcessState(modifiedState, world, pos);
     }
+
+    @Nullable NbtCompound oldEntityData = null;
+    @Nullable BlockEntity oldEntity = null;
+    if (history != null) {
+      oldEntity = world.getBlockEntity(pos);
+      if (oldEntity != null) {
+        oldEntityData = oldEntity.createNbt(world.getRegistryManager());
+      }
+    }
     boolean result = MixinShared.setBlockStateWithModFlags(world, pos, modifiedState, flags, modFlags);
+    if (result && history != null && !origState.equals(modifiedState)) {
+      history.oldStates.put(pos.asLong(), origState);
+    }
     final BlockEntity blockEntity = world.getBlockEntity(pos);
+    if (history != null && blockEntity != oldEntity) {
+      history.oldEntityData.put(pos.asLong(), oldEntityData);
+    }
     if (blockEntity != null) {
       final NbtCompound modifiedData = blockEntityData.getValue();
       if (modifiedData != null) {

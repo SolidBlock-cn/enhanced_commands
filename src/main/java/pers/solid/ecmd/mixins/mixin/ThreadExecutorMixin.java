@@ -21,18 +21,18 @@ public class ThreadExecutorMixin implements ThreadExecutorExtension {
   private final Queue<IteratorTask<?>> iteratorTasks = new ConcurrentLinkedQueue<>();
 
   @Override
-  public void ec_addIteratorTask(IteratorTask<?> task) {
+  public void addIteratorTask$ec(IteratorTask<?> task) {
     iteratorTasks.add(task);
     uuidToTask.put(task.uuid, task);
   }
 
   @Override
-  public @NotNull Queue<IteratorTask<?>> ec_getIteratorTasks() {
+  public @NotNull Queue<IteratorTask<?>> getIteratorTasks$ec() {
     return iteratorTasks;
   }
 
   @Override
-  public @NotNull Map<UUID, IteratorTask<?>> ec_getUUIDToIteratorTasks() {
+  public @NotNull Map<UUID, IteratorTask<?>> getUUIDToIteratorTasks$ec() {
     return uuidToTask;
   }
 }

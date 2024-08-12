@@ -31,7 +31,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     final SuggestionProvider<ServerCommandSource> taskUuidSuggestion = (context, builder) -> {
-      final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) context.getSource().getServer()).ec_getUUIDToIteratorTasks();
+      final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) context.getSource().getServer()).getUUIDToIteratorTasks$ec();
       return CommandSource.suggestMatching(uuidToTasks.keySet().stream().map(UUID::toString), builder);
     };
     dispatcher.register(ModCommands.literalR2("tasks")
@@ -62,7 +62,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
   }
 
   private static int executeCountTasks(MinecraftServer server, CommandContext<ServerCommandSource> context) {
-    final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).ec_getIteratorTasks();
+    final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).getIteratorTasks$ec();
     final int size = iteratorTasks.size();
     if (size == 0) {
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tasks.count.none", size), false);
@@ -73,7 +73,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
   }
 
   private static int executeClearTasks(MinecraftServer server, CommandContext<ServerCommandSource> context) {
-    final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).ec_getIteratorTasks();
+    final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).getIteratorTasks$ec();
     final int size = iteratorTasks.size();
     iteratorTasks.clear();
     if (size == 0) {
@@ -87,10 +87,10 @@ public enum TasksCommand implements CommandRegistrationCallback {
   private static final DynamicCommandExceptionType TASK_UUID_DOES_NOT_EXIST = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.tasks.not_exist", o));
 
   private static int executeRemoveTask(MinecraftServer server, CommandContext<ServerCommandSource> context, UUID uuid) throws CommandSyntaxException {
-    final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) server).ec_getUUIDToIteratorTasks();
+    final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) server).getUUIDToIteratorTasks$ec();
     if (uuidToTasks.containsKey(uuid)) {
       final IteratorTask<?> remove = uuidToTasks.remove(uuid);
-      ((ThreadExecutorExtension) server).ec_getIteratorTasks().remove(remove);
+      ((ThreadExecutorExtension) server).getIteratorTasks$ec().remove(remove);
       if (remove != null) {
         context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tasks.remove.success", remove.name), true);
         return 1;
@@ -119,7 +119,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
   }
 
   private static int executeSetTaskSuspension(MinecraftServer server, CommandContext<ServerCommandSource> context, UUID uuid, boolean suspension) throws CommandSyntaxException {
-    final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) server).ec_getUUIDToIteratorTasks();
+    final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) server).getUUIDToIteratorTasks$ec();
     if (uuidToTasks.containsKey(uuid)) {
       final IteratorTask<?> iteratorTask = uuidToTasks.get(uuid);
       if (iteratorTask != null) {
@@ -148,7 +148,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
   }
 
   private static int executeExhaustTask(MinecraftServer server, CommandContext<ServerCommandSource> context, UUID uuid, int limit) throws CommandSyntaxException {
-    final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) server).ec_getUUIDToIteratorTasks();
+    final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) server).getUUIDToIteratorTasks$ec();
     if (uuidToTasks.containsKey(uuid)) {
       final IteratorTask<?> iteratorTask = uuidToTasks.get(uuid);
       if (iteratorTask != null) {
@@ -160,7 +160,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
         }
         if (!iteratorTask.hasNext()) {
           uuidToTasks.remove(iteratorTask.uuid);
-          ((ThreadExecutorExtension) server).ec_getIteratorTasks().remove(iteratorTask);
+          ((ThreadExecutorExtension) server).getIteratorTasks$ec().remove(iteratorTask);
         }
         context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tasks.exhaust.success", iteratorTask.name), true);
         return 1;
@@ -173,7 +173,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
   }
 
   private static int executeListTasks(MinecraftServer server, CommandContext<ServerCommandSource> context, int limit) {
-    final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).ec_getIteratorTasks();
+    final Queue<IteratorTask<?>> iteratorTasks = ((ThreadExecutorExtension) server).getIteratorTasks$ec();
     final int size = iteratorTasks.size();
 
     if (size == 0) {

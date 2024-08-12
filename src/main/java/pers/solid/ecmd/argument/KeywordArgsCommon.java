@@ -91,6 +91,7 @@ public final class KeywordArgsCommon {
       .addOptionalArg("suppress_initial_check", BoolArgumentType.bool(), false)
       .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
       .addOptionalArg("force", BoolArgumentType.bool(), false)
+      .addOptionalArg("undoable", BoolArgumentType.bool(), true)
       .build());
   public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> BLOCK_TRANSFORMATION = register("block_transformation", registryAccess -> KeywordArgsArgumentType.builderFromShared(FILLING, registryAccess)
       .addOptionalArg("affect_entities", EntityPredicateArgumentType.entityPredicate(registryAccess), null)

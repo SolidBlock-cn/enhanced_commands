@@ -19,20 +19,22 @@ import java.util.UUID;
 public interface ThreadExecutorExtension {
   Logger LOGGER = LoggerFactory.getLogger(ThreadExecutorExtension.class);
 
-  default void ec_addIteratorTask(IteratorTask<?> task) {
-    ec_getIteratorTasks().add(task);
-    ec_getUUIDToIteratorTasks().put(task.uuid, task);
+  default void addIteratorTask$ec(IteratorTask<?> task) {
+    getIteratorTasks$ec().add(task);
+    getUUIDToIteratorTasks$ec().put(task.uuid, task);
   }
 
-  default void ec_addIteratorTask(Text name, Iterator<?> iterator) {
-    ec_addIteratorTask(new IteratorTask<>(name, UUID.randomUUID(), iterator));
+  default IteratorTask<?> addIteratorTask$ec(Text name, Iterator<?> iterator) {
+    final IteratorTask<?> task = new IteratorTask<>(name, UUID.randomUUID(), iterator);
+    addIteratorTask$ec(task);
+    return task;
   }
 
   @NotNull
-  Queue<IteratorTask<?>> ec_getIteratorTasks();
+  Queue<IteratorTask<?>> getIteratorTasks$ec();
 
   @NotNull
-  Map<UUID, IteratorTask<?>> ec_getUUIDToIteratorTasks();
+  Map<UUID, IteratorTask<?>> getUUIDToIteratorTasks$ec();
 
   /**
    * The method is used to handle tasks, such as those created by {@link FillReplaceCommand} when handling quantities of blocks.
@@ -40,7 +42,7 @@ public interface ThreadExecutorExtension {
    * @see pers.solid.ecmd.command.TasksCommand
    */
   default void ec_advanceTasks() {
-    final Queue<IteratorTask<?>> iteratorTasks = ec_getIteratorTasks();
+    final Queue<IteratorTask<?>> iteratorTasks = getIteratorTasks$ec();
     final Iterator<IteratorTask<?>> limit = Iterables.limit(iteratorTasks, 8).iterator();
     while (limit.hasNext()) {
       final IteratorTask<?> task = limit.next();
@@ -49,7 +51,7 @@ public interface ThreadExecutorExtension {
         // Remove the task when completed.
         LOGGER.info("Task {} completed.", task);
         limit.remove();
-        ec_getUUIDToIteratorTasks().remove(task.uuid);
+        getUUIDToIteratorTasks$ec().remove(task.uuid);
         continue;
       }
       try {
@@ -57,7 +59,7 @@ public interface ThreadExecutorExtension {
       } catch (Throwable throwable) {
         LOGGER.error("Error when executing task {}, removing!", task, throwable);
         limit.remove();
-        ec_getUUIDToIteratorTasks().remove(task.uuid);
+        getUUIDToIteratorTasks$ec().remove(task.uuid);
       }
     }
   }

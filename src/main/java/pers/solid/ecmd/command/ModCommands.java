@@ -53,6 +53,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     FoodCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     HealthCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    HistoryCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     MirrorCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     MoveCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     OutlineCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -67,6 +68,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     TestArgCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestForCommands.INSTANCE.register(dispatcher, registryAccess, environment);
     TpRelCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    UndoCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     EnhancedWeatherCommand.INSTANCE.register(dispatcher, registryAccess, environment);
   }
 

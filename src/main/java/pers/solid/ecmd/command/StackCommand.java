@@ -298,7 +298,7 @@ public enum StackCommand implements CommandRegistrationCallback {
     final boolean immediately = keywordArgs.getBoolean("immediately");
     if (!immediately && region.numberOfBlocksAffected() * stackAmount > 16384) {
       // The region is too large. Send a server task.
-      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(Text.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount)), UnloadedPosException.catching(iterator));
+      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(Text.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount)), UnloadedPosException.catching(iterator));
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {

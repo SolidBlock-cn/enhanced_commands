@@ -102,7 +102,7 @@ public interface BlockTransformationCommand {
 
     final BlockTransformationTask task = builder.build();
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      ((ThreadExecutorExtension) source.getServer()).ec_addIteratorTask(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
+      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
         if (activeRegion != null) {
           ((ServerPlayerEntityExtension) player).ec$setActiveRegion(activeRegion);
         }
