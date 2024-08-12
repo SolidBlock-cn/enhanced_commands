@@ -23,6 +23,53 @@ import java.util.stream.Collectors;
 
 public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, @NotNull Either<@NotNull Object2BooleanMap<@NotNull String>, @NotNull Boolean>> map) implements EntityPredicateEntry {
   @Override
+  public boolean test(@NotNull Entity entity) {
+    if (!(entity instanceof ServerPlayerEntity serverPlayerEntity)) {
+      return false;
+    } else {
+      PlayerAdvancementTracker advancementTracker = serverPlayerEntity.getAdvancementTracker();
+      ServerAdvancementLoader advancementLoader = serverPlayerEntity.getServer().getAdvancementLoader();
+      for (final var entry : map.entrySet()) {
+        final Identifier advancementId = entry.getKey();
+        final var value = entry.getValue();
+
+        final AdvancementEntry advancementEntry = advancementLoader.get(advancementId);
+        if (advancementEntry == null) {
+          return false;
+        }
+        final AdvancementProgress progress = advancementTracker.getProgress(advancementEntry);
+
+        if (value.left().isPresent()) {
+          final Object2BooleanMap<String> expectedProgress = value.left().get();
+
+          for (var progressEntry : expectedProgress.object2BooleanEntrySet()) {
+            final String criterionName = progressEntry.getKey();
+            final CriterionProgress criterionProgress = progress.getCriterionProgress(criterionName);
+            if (criterionProgress == null) {
+              // the criterion does not exist -> false
+              return false;
+            }
+            final boolean expectedValue = progressEntry.getBooleanValue();
+            final boolean actualValue = criterionProgress.isObtained();
+            if (expectedValue != actualValue) {
+              return false;
+            }
+          }
+        }
+        if (value.right().isPresent()) {
+          final boolean expectedValue = value.right().get();
+          final boolean actualValue = progress.isDone();
+          if (expectedValue != actualValue) {
+            return false;
+          }
+        }
+      }
+
+    }
+    return true;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof final ServerPlayerEntity player)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.not_player", displayName));

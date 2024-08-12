@@ -1,10 +1,8 @@
 package pers.solid.ecmd.predicate.entity;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -16,27 +14,6 @@ import pers.solid.ecmd.util.bridge.BridgeIntRange;
  * 测试实体的某一特定属性的谓词信息，可在测试时提供详细的文本描述，以及对应的字符串内的表示形式。
  */
 public interface EntityPredicateEntry extends EntityPredicate {
-  @Override
-  default boolean test(Entity entity) {
-    return false;
-  }
-
-  /**
-   * 测试实体并返回描述信息。调用时请使用此类，但覆盖时请覆盖 {@link #testAndDescribe(Entity, Text)}。
-   */
-  @ApiStatus.NonExtendable
-  default TestResult testAndDescribe(Entity entity) throws CommandSyntaxException {
-    return testAndDescribe(entity, TextUtil.styled(entity.getDisplayName(), Styles.TARGET));
-  }
-
-  /**
-   * 测试实体并返回描述信息，实现接口应覆盖此方法，但通常不要直接调用此方法，但是如果需要对同一个实体多次调用此方法，则可以使用此方法并共用 {@code displayName} 参数。使用 {@code displayName} 是考虑到其会被多次用到，为了避免多次创建其对象而直接使用共用的此对象。
-   *
-   * @param entity      被测试的实体。
-   * @param displayName 被测试的实体的显示名称。
-   */
-  TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException;
-
   /**
    * 将此谓词转换为实体选择器中的选项的形式，例如 {@code key=probability} 或 {@code key=!probability}.
    */

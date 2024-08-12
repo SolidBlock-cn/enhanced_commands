@@ -3,10 +3,17 @@ package pers.solid.ecmd.predicate.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
 public record NameEntityPredicateEntry(String expectedName, boolean hasNegation) implements EntityPredicateEntry {
+  @Override
+  public boolean test(@NotNull Entity entity) {
+    final String actualName = entity.getName().getString();
+    return actualName.equals(expectedName) != hasNegation;
+  }
+
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     final String actualName = entity.getName().getString();

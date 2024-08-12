@@ -23,7 +23,7 @@ public final class StringUtil {
     if (min.isPresent() && min.equals(max)) {
       return min.toString();
     }
-    return Objects.toString(min, "") + ".." + Objects.toString(max, "");
+    return min.map(Objects::toString).orElse("") + ".." + max.map(Objects::toString).orElse("");
   }
 
   public static String wrapRange(FloatRangeArgument numberRange) {

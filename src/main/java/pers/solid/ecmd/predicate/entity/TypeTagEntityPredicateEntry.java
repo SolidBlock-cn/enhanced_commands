@@ -4,11 +4,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tagKey, boolean hasNegation) implements EntityPredicateEntry {
+  @Override
+  public boolean test(@NotNull Entity entity) {
+    return entity.getType().isIn(tagKey) != hasNegation;
+  }
+
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     final EntityType<?> type = entity.getType();

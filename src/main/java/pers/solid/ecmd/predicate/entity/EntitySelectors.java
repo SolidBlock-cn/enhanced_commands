@@ -1,12 +1,9 @@
 package pers.solid.ecmd.predicate.entity;
 
-import com.google.common.base.Predicate;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 
@@ -39,9 +36,5 @@ public final class EntitySelectors {
     } else {
       return entitySelectorReader.read();
     }
-  }
-
-  public static Predicate<Entity> readOmittibleEntityPredicate(@NotNull EntitySelectorReader entitySelectorReader, ServerCommandSource source) throws CommandSyntaxException {
-    return SelectorEntityPredicate.asPredicate(readOmittibleEntitySelector(entitySelectorReader), source);
   }
 }

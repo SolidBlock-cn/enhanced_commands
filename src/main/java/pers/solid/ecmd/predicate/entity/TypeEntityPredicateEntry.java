@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -13,7 +14,7 @@ import java.util.Objects;
 
 public record TypeEntityPredicateEntry(EntityType<?> expectedType, boolean hasNegation) implements EntityPredicateEntry {
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     return Objects.equals(expectedType, entity.getType()) != hasNegation;
   }
 

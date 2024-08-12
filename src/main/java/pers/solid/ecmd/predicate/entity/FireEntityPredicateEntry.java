@@ -2,6 +2,7 @@ package pers.solid.ecmd.predicate.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
@@ -9,7 +10,7 @@ public record FireEntityPredicateEntry(BridgeIntRange intRange, boolean inverted
   public static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.fire");
 
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     return intRange.test(entity.getFireTicks()) != inverted;
   }
 

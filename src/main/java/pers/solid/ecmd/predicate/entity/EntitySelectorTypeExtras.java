@@ -92,7 +92,7 @@ public final class EntitySelectorTypeExtras {
   public static final Map<String, Consumer<EntitySelectorReader>> EXTRA_READER_ATTRIBUTES = Util.make(new HashMap<>(), map -> {
     final Consumer<EntitySelectorReader> excludesPlayersConsumer = reader -> {
       reader.excludesEntityType();
-      reader.extension$ec().addPredicateAndDescription(new TypeEntityPredicateEntry(EntityType.PLAYER, true));
+      reader.addPredicate(new TypeEntityPredicateEntry(EntityType.PLAYER, true));
     };
     map.put(NEAREST_NON_PLAYER, excludesPlayersConsumer);
     map.put(NEAREST_NON_PLAYER2, excludesPlayersConsumer);
@@ -101,9 +101,12 @@ public final class EntitySelectorTypeExtras {
     map.put(RANDOM_NON_PLAYER, excludesPlayersConsumer);
     map.put(RANDOM_NON_PLAYER2, excludesPlayersConsumer);
     map.put(ALL_INCLUDING_DEAD, reader -> ((EntitySelectorReaderAccessor) reader).getPredicates().clear());
-    map.put(PETS, reader -> reader.extension$ec().addPredicateAndDescription(source -> {
-      final Entity sender = source.getEntityOrThrow();
-      return new OwnerEntityPredicateEntry(entity -> entity == sender, false);
-    }));
+    map.put(PETS, reader -> {
+      EntitySelectorReaderExtras extras = reader.extension$ec();
+      extras.addFunction(source -> {
+        final Entity sender = source.getEntityOrThrow();
+        return new OwnerEntityPredicateEntry(new SenderOnlyEntityPredicate(sender), false);
+      });
+    });
   });
 }

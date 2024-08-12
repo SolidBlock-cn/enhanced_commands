@@ -25,10 +25,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.predicate.entity.EntityEffectPredicate;
 import net.minecraft.registry.Registries;
@@ -41,12 +37,11 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -64,6 +59,7 @@ import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -261,7 +257,7 @@ public class EntitySelectorOptionsExtension {
       reader.extension$ec().addFunction(source -> {
         final Region region;
         region = regionArgument.toAbsoluteRegion(source);
-        return entity -> region.contains(entity.getPos());
+        return new RegionEntityPredicateEntry(region);
       });
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.region"));
 
@@ -277,7 +273,7 @@ public class EntitySelectorOptionsExtension {
       }
 
       // 在左方括号的后面，开始解析实体谓词。
-      ImmutableList.Builder<EntitySelector> entitySelectors = new ImmutableList.Builder<>();
+      ImmutableList.Builder<FailableFunction<ServerCommandSource, EntityPredicate, CommandSyntaxException>> entityPredicates = new ImmutableList.Builder<>();
       while (true) {
         stringReader.skipWhitespace();
         if (stringReader.canRead() && stringReader.peek() == ']') {
@@ -289,7 +285,7 @@ public class EntitySelectorOptionsExtension {
         final int cursorBeforeRead = stringReader.getCursor();
         try {
           final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
-          entitySelectors.add(entitySelector);
+          entityPredicates.add(source -> new SelectorEntityPredicate(entitySelector, source));
         } catch (CommandSyntaxException e) {
           reader.setSuggestionProvider((builder, consumer) -> newReader.listSuggestions(builder, suggestionsBuilder -> {
             consumer.accept(suggestionsBuilder);
@@ -327,8 +323,9 @@ public class EntitySelectorOptionsExtension {
         throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "]");
       }
 
-      final ImmutableList<EntitySelector> build = entitySelectors.build();
-      reader.extension$ec().addPredicateAndDescription(source -> new AlternativesEntityPredicateEntry(build, source, inverted));
+      final ImmutableList<FailableFunction<ServerCommandSource, EntityPredicate, CommandSyntaxException>> build = entityPredicates.build();
+      EntitySelectorReaderExtras extras = reader.extension$ec();
+      extras.addFunction(source -> new AlternativesEntityPredicateEntry(IterateUtils.transformFailableImmutableList(build, input -> input.apply(source)), source, inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
 
     putOption("health", reader -> {
@@ -340,12 +337,12 @@ public class EntitySelectorOptionsExtension {
       final String unquotedString = stringReader.readUnquotedString();
       if ("max".equals(unquotedString)) {
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.extension$ec().addPredicateAndDescription(new HealthMaxEntityPredicateEntry(inverted));
+        reader.addPredicate(new HealthMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
         final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.extension$ec().addPredicateAndDescription(new HealthEntityPredicateEntry(floatRange, inverted));
+        reader.addPredicate(new HealthEntityPredicateEntry(floatRange, inverted));
       }
       markParamAsUsed(reader, "health", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "health"), Text.translatable("enhanced_commands.argument.entity.options.health"));
@@ -359,12 +356,12 @@ public class EntitySelectorOptionsExtension {
       final String unquotedString = stringReader.readUnquotedString();
       if ("max".equals(unquotedString)) {
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.extension$ec().addPredicateAndDescription(new AirMaxEntityPredicateEntry(inverted));
+        reader.addPredicate(new AirMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
         final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
         reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
-        reader.extension$ec().addPredicateAndDescription(new AirEntityPredicateEntry(intRange, inverted));
+        reader.addPredicate(new AirEntityPredicateEntry(intRange, inverted));
       }
       markParamAsUsed(reader, "air", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "air"), Text.translatable("enhanced_commands.argument.entity.options.air"));
@@ -375,7 +372,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "food", inverted);
       final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
-      reader.extension$ec().addPredicateAndDescription(new FoodEntityPredicateEntry(intRange, inverted));
+      reader.addPredicate(new FoodEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "food", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "food"), Text.translatable("enhanced_commands.argument.entity.options.food"));
     markRequiringUniqueNoMixture("food");
@@ -385,7 +382,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "saturation", inverted);
       final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
-      reader.extension$ec().addPredicateAndDescription(new SaturationEntityPredicateEntry(floatRange, inverted));
+      reader.addPredicate(new SaturationEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "saturation", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "saturation"), Text.translatable("enhanced_commands.argument.entity.options.saturation"));
     markRequiringUniqueNoMixture("saturation");
@@ -395,7 +392,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "exhaustion", inverted);
       final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
       reader.setIncludesNonPlayers(false);
-      reader.extension$ec().addPredicateAndDescription(new ExhaustionEntityPredicateEntry(floatRange, inverted));
+      reader.addPredicate(new ExhaustionEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "exhaustion", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "exhaustion"), Text.translatable("enhanced_commands.argument.entity.options.exhaustion"));
     markRequiringUniqueNoMixture("exhaustion");
@@ -404,7 +401,7 @@ public class EntitySelectorOptionsExtension {
       final boolean inverted = reader.readNegationCharacter();
       checkNoInversionMix(reader, "fire", inverted);
       final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
-      reader.extension$ec().addPredicateAndDescription(new FireEntityPredicateEntry(intRange, inverted));
+      reader.addPredicate(new FireEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "fire", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "fire"), Text.translatable("enhanced_commands.argument.entity.options.fire"));
     markRequiringUniqueNoMixture("fire");
@@ -417,7 +414,7 @@ public class EntitySelectorOptionsExtension {
       final String s = reader.getReader().readUnquotedString();
       final EntityPose entityPose = PoseEntityPredicateEntry.ENTITY_POSE_NAMES.inverse().get(s);
       if (entityPose != null) {
-        reader.extension$ec().addPredicateAndDescription(new PoseEntityPredicateEntry(entityPose, inverted));
+        reader.addPredicate(new PoseEntityPredicateEntry(entityPose, inverted));
         markParamAsUsed(reader, "pose", inverted);
       } else {
         final int cursorAfter = reader.getReader().getCursor();
@@ -482,7 +479,8 @@ public class EntitySelectorOptionsExtension {
           }
         }
 
-        reader.extension$ec().addPredicateAndDescription(source -> {
+        EntitySelectorReaderExtras extras = reader.extension$ec();
+        extras.addFunction(source -> {
           final ImmutableMap.Builder<PosArgument, BlockPredicate> newMapBuilder = new ImmutableMap.Builder<>();
           for (final var entry : map.entrySet()) {
             final var posArgument = entry.getKey();
@@ -495,7 +493,8 @@ public class EntitySelectorOptionsExtension {
         parser.suggestionProviders.clear();
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions(reader.extension$ec().context, suggestionsBuilder));
         final BlockPredicateArgument parse = BlockPredicateArgument.parse(MixinShared.getCommandRegistryAccess(), parser, false);
-        reader.extension$ec().addPredicateAndDescription(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
+        EntitySelectorReaderExtras extras = reader.extension$ec();
+        extras.addFunction(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
       }
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.block"));
 
@@ -551,13 +550,13 @@ public class EntitySelectorOptionsExtension {
           }
         }
 
-        reader.extension$ec().addPredicateAndDescription(entry);
+        reader.addPredicate(entry);
       } else {
         final boolean inverted = reader.readNegationCharacter();
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries(), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref -> ref.value().getName()));
         final StatusEffect value = type.parse(stringReader).value();
 
-        reader.extension$ec().addPredicateAndDescription(new EffectEntityPredicateEntry(value, inverted));
+        reader.addPredicate(new EffectEntityPredicateEntry(value, inverted));
       }
     }, reader -> isNeverPositivelyUsed(reader, "effect"), Text.translatable("enhanced_commands.entity_predicate.effect"));
 
@@ -570,12 +569,13 @@ public class EntitySelectorOptionsExtension {
         final char peek = stringReader.peek();
         if (peek == ']' || peek == ',' || peek == ';') {
           // 在 'owner=' 或 'owner=!' 后没有接任何值时，使用 null 值
-          reader.extension$ec().addPredicateAndDescription(new OwnerEntityPredicateEntry(null, inverted));
+          reader.addPredicate(new OwnerEntityPredicateEntry(null, inverted));
           return;
         }
       }
       final EntitySelector value = EntitySelectors.readOmittibleEntitySelector(reader);
-      reader.extension$ec().addPredicateAndDescription(source -> new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value, source), inverted));
+      EntitySelectorReaderExtras extras = reader.extension$ec();
+      extras.addFunction(source -> new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value, source), inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.owner"));
   }
 
@@ -593,7 +593,7 @@ public class EntitySelectorOptionsExtension {
       final boolean inverted = reader.readNegationCharacter();
       reader.setSuggestionProvider(BOOLEAN_SUGGEST);
       final boolean expected = inverted != reader.getReader().readBoolean();
-      reader.extension$ec().addPredicateAndDescription(new SimpleBooleanEntityPredicateEntry(predicate, expected, baseTranslationKey + "." + true, baseTranslationKey + "." + false, id));
+      reader.addPredicate(new SimpleBooleanEntityPredicateEntry(predicate, expected, baseTranslationKey + "." + true, baseTranslationKey + "." + false, id));
       // 对于布尔值，使用否定的直接替换其效果，仍视为未被取反的谓词
       markParamAsUsed(reader, id, false);
     }, reader -> isNeverPositivelyUsed(reader, id), Text.translatable(baseTranslationKey));
@@ -696,7 +696,7 @@ public class EntitySelectorOptionsExtension {
         // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
       }
 
-      reader.extension$ec().addPredicateAndDescription(new TypesEntityPredicateEntry(values, hasNegation));
+      reader.addPredicate(new TypesEntityPredicateEntry(values, hasNegation));
       return true;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
@@ -745,19 +745,10 @@ public class EntitySelectorOptionsExtension {
         // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
       }
 
-      reader.addPredicate(entity -> {
-        if (entity instanceof final ServerPlayerEntity serverPlayerEntity) {
-          GameMode actualGameMode = serverPlayerEntity.interactionManager.getGameMode();
-          return hasNegation != parsedGameModes.contains(actualGameMode);
-        } else {
-          return false;
-        }
-      });
-      reader.extension$ec().addDescription(source -> new GameModeEntityPredicateEntry.Multiple(parsedGameModes, hasNegation));
+      reader.addPredicate(new GameModeEntityPredicateEntry.Multiple(parsedGameModes, hasNegation));
       return false;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
-      reader.extension$ec().addDescription(source -> new GameModeEntityPredicateEntry.Single(gameMode, hasNegation));
       return true;
     }
   }
@@ -848,23 +839,7 @@ public class EntitySelectorOptionsExtension {
     if (stringReader.canRead() && stringReader.peek() == '{') {
       reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
       final LootCondition lootCondition = ParsingUtil.parseNbt(stringReader, LootCondition.CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
-      reader.addPredicate(entity -> {
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
-          return false;
-        } else {
-          if (lootCondition == null) {
-            return false;
-          } else {
-            LootContext lootContext = new LootContext.Builder(new LootContextParameterSet.Builder(serverWorld)
-                .add(LootContextParameters.THIS_ENTITY, entity)
-                .add(LootContextParameters.ORIGIN, entity.getPos())
-                .build(LootContextTypes.SELECTOR))
-                .build(Optional.empty());
-            return hasNegation ^ lootCondition.test(lootContext);
-          }
-        }
-      });
-      reader.extension$ec().addDescription(source -> new LootTablePredicateAnonymousEntityPredicateEntry(lootCondition, hasNegation));
+      reader.addPredicate(new LootTablePredicateAnonymousEntityPredicateEntry(lootCondition, hasNegation));
       return true;
     }
     return false;

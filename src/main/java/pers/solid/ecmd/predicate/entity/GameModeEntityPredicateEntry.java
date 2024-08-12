@@ -7,6 +7,7 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -14,7 +15,14 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.Collection;
 
 public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
+  boolean test(@NotNull ServerPlayerEntity player);
+
   TestResult testAndDescribe(ServerPlayerEntity player, Text displayName);
+
+  @Override
+  default boolean test(@NotNull Entity entity) {
+    return entity instanceof ServerPlayerEntity player && test(player);
+  }
 
   @Override
   default TestResult testAndDescribe(Entity entity, Text displayName) {
@@ -32,6 +40,11 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
     }
 
     @Override
+    public boolean test(@NotNull ServerPlayerEntity player) {
+      return (player.interactionManager.getGameMode() == gameMode) != hasNegation;
+    }
+
+    @Override
     public TestResult testAndDescribe(ServerPlayerEntity player, Text displayName) {
       final GameMode actualMode = player.interactionManager.getGameMode();
       final boolean gameModeMatches = actualMode == gameMode;
@@ -44,6 +57,11 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
     @Override
     public String toOptionEntry() {
       return "gamemode=" + StringUtils.join(Collections2.transform(gameModes, GameMode::asString), ',');
+    }
+
+    @Override
+    public boolean test(@NotNull ServerPlayerEntity player) {
+      return gameModes.contains(player.interactionManager.getGameMode()) != hasNegation;
     }
 
     @Override

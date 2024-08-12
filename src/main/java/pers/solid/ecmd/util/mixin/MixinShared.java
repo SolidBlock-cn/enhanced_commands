@@ -112,7 +112,7 @@ public final class MixinShared {
     if (commandRegistryAccessReference == null) {
       EnhancedCommands.LOGGER.warn("Enhanced Commands mod: There is no CommandRegistryAccess object stored, which should not have happened. Is it called before commands are registered?");
     } else {
-      EnhancedCommands.LOGGER.warn("Enhanced Commands mod: The CommandRegistryAccess object seems removed as garbage, which should not have happened. Is is called after the server closes or player leaves world?");
+      EnhancedCommands.LOGGER.warn("Enhanced Commands mod: The CommandRegistryAccess object seems removed as garbage, which should not have happened. Is is called after the server closes or player leaves sourceWorld?");
     }
     final CommandRegistryAccess backup = CommandManager.createRegistryAccess(DynamicRegistryManager.of(Registries.REGISTRIES));
     commandRegistryAccessReference = new SoftReference<>(backup);

@@ -29,7 +29,7 @@ public record PoseEntityPredicateEntry(@NotNull EntityPose expected, boolean inv
       .build();
 
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     return (entity.getPose() == expected) != inverted;
   }
 

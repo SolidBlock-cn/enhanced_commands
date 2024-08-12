@@ -3,6 +3,7 @@ package pers.solid.ecmd.predicate.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 
@@ -10,7 +11,7 @@ public record HealthEntityPredicateEntry(BridgeFloatRange floatRange, boolean in
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.health");
 
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     return entity instanceof LivingEntity livingEntity && (livingEntity.getHealth() == livingEntity.getMaxHealth()) != inverted;
   }
 

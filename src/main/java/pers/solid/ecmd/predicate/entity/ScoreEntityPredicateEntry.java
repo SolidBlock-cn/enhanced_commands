@@ -11,6 +11,7 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -23,11 +24,36 @@ import java.util.stream.Stream;
 
 public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expectedScore, List<Pair<String, NumberRange.IntRange>> invertedScores) implements EntityPredicateEntry {
   @Override
+  public boolean test(@NotNull Entity entity) {
+    final ServerScoreboard scoreboard = entity.getServer().getScoreboard();
+    for (var triple : Iterables.concat(
+        Iterables.transform(expectedScore.entrySet(), entry -> Triple.of(entry.getKey(), entry.getValue(), false)),
+        Iterables.transform(invertedScores, input -> Triple.of(input.left(), input.right(), true))
+    )) {
+      ScoreboardObjective objective = scoreboard.getNullableObjective(triple.getLeft());
+      if (objective == null) {
+        return false;
+      }
+
+      final ReadableScoreboardScore score = scoreboard.getScore(entity, objective);
+      if (score == null) {
+        return false;
+      }
+
+      int scoreValue = score.getScore();
+      final boolean inverted = triple.getRight();
+      final NumberRange.IntRange intRange = triple.getMiddle();
+      final boolean test = intRange.test(scoreValue);
+      if (test == inverted) return false;
+    }
+    return true;
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     boolean result = true;
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
     final ServerScoreboard scoreboard = entity.getServer().getScoreboard();
-    String entityName = entity.getNameForScoreboard();
     for (var triple : Iterables.concat(
         Iterables.transform(expectedScore.entrySet(), entry -> Triple.of(entry.getKey(), entry.getValue(), false)),
         Iterables.transform(invertedScores, input -> Triple.of(input.left(), input.right(), true))
@@ -69,9 +95,9 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
 
   @Override
   public String toOptionEntry() {
-    return "scores={" + Stream.concat(
+    return Stream.concat(
         expectedScore.entrySet().stream().map(entry -> entry.getKey() + "=" + StringUtil.wrapRange(entry.getValue())),
         invertedScores.stream().map(pair -> pair.left() + "=!" + StringUtil.wrapRange(pair.right()))
-    ).collect(Collectors.joining(", ")) + "}";
+    ).collect(Collectors.joining(", ", "scores={", "}"));
   }
 }

@@ -21,8 +21,7 @@ import java.util.function.Predicate;
 public class EntitySelectorExtras {
   public static final Logger LOGGER = LoggerFactory.getLogger(EntitySelectorExtras.class);
   public ServerCommandSource source;
-  public @Nullable List<FailableFunction<ServerCommandSource, Predicate<Entity>, CommandSyntaxException>> predicateFunctions = null;
-  public @Nullable List<FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException>> predicateDescriptions = null;
+  public @Nullable List<FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException>> predicateFunctions = null;
   public Predicate<Entity> actualExtraPredicate = entity -> {
     EnhancedCommands.LOGGER.warn("Warning! There is no ServerCommandSource yet for {}!", EntitySelectorExtras.this);
     return false;

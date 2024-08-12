@@ -9,6 +9,7 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -16,7 +17,26 @@ import pers.solid.ecmd.util.bridge.LootBridge;
 
 import java.util.Optional;
 
-public record LootTablePredicateEntityPredicateEntry(Identifier predicateId, boolean hasNegation) implements EntityPredicateEntry {
+public record LootTablePredicateEntityPredicateEntry(@NotNull Identifier predicateId, boolean hasNegation) implements EntityPredicateEntry {
+  @Override
+  public boolean test(@NotNull Entity entity) {
+    if (!(entity.getWorld() instanceof final ServerWorld serverWorld)) {
+      return false;
+    } else {
+      Optional<LootCondition> lootCondition = LootBridge.getLootCondition(serverWorld, predicateId);
+      if (lootCondition.isEmpty()) {
+        return false;
+      } else {
+        LootContext lootContext = new LootContext.Builder(new LootContextParameterSet.Builder(serverWorld)
+            .add(LootContextParameters.THIS_ENTITY, entity)
+            .add(LootContextParameters.ORIGIN, entity.getPos())
+            .build(LootContextTypes.SELECTOR)).build(Optional.empty());
+        final boolean test = lootCondition.get().test(lootContext);
+        return hasNegation ^ test;
+      }
+    }
+  }
+
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity.getWorld() instanceof final ServerWorld serverWorld)) {

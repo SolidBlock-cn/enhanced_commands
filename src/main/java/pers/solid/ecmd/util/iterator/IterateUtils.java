@@ -24,8 +24,8 @@ public final class IterateUtils {
   /**
    * 返回一个仅产生一个 {@code null} 的流，这个流在运行过程中会执行一次 {@code runnable}。例如：
    * <pre>{@code
-   *  singletonPeekingStream(() -> System.out.println("Hello world!")).toList();
-   *  // 输出 "Hello world!"，同时返回一个含有单个 null 的列表。
+   *  singletonPeekingStream(() -> System.out.println("Hello sourceWorld!")).toList();
+   *  // 输出 "Hello sourceWorld!"，同时返回一个含有单个 null 的列表。
    * }</pre>
    *
    * @param runnable 流在运行中需要运行的 {@link Runnable}。
@@ -39,11 +39,11 @@ public final class IterateUtils {
   /**
    * 返回一个仅产生一个 {@code null} 的迭代器，这个迭代器在运行过程中会执行一次 {@code runnable}。例如：
    * <pre>{@code
-   *  var iterator = singletonPeekingIterator(() -> System.out.println("Hello world!"));
+   *  var iterator = singletonPeekingIterator(() -> System.out.println("Hello sourceWorld!"));
    *  while (iterator.hasNext()) {
    *    System.out.println(iterator.next());
    *  }
-   *  // 输出 "Hello world!"，同时输入一个 null。
+   *  // 输出 "Hello sourceWorld!"，同时输入一个 null。
    * }</pre>
    *
    * @param runnable 迭代器在迭代过程中需要运行的 {@link Runnable}。

@@ -5,10 +5,22 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
 public record TeamEntityPredicateEntry(String expectedTeamName, boolean hasNegation) implements EntityPredicateEntry {
+  @Override
+  public boolean test(@NotNull Entity entity) {
+    if (!(entity instanceof LivingEntity)) {
+      return false;
+    } else {
+      AbstractTeam abstractTeam = entity.getScoreboardTeam();
+      String string2 = abstractTeam == null ? "" : abstractTeam.getName();
+      return string2.equals(expectedTeamName) != hasNegation;
+    }
+  }
+
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     if (!(entity instanceof LivingEntity)) {

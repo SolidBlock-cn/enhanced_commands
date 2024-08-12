@@ -3,13 +3,14 @@ package pers.solid.ecmd.predicate.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry {
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     return (entity.getAir() == entity.getMaxAir()) != inverted;
   }
 

@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -42,4 +43,7 @@ public interface EntitySelectorAccessor {
 
   @Invoker
   Box callGetOffsetBox(Vec3d offset);
+
+  @Accessor
+  List<Predicate<Entity>> getPredicates();
 }

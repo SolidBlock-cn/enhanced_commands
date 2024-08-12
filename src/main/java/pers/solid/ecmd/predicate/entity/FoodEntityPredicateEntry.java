@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
@@ -11,7 +12,7 @@ public record FoodEntityPredicateEntry(BridgeIntRange intRange, boolean inverted
   private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.food");
 
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     return entity instanceof final PlayerEntity player && intRange.test(player.getHungerManager().getFoodLevel()) != inverted;
   }
 

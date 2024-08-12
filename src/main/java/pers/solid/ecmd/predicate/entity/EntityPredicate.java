@@ -5,6 +5,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -21,7 +23,7 @@ import java.util.function.Predicate;
  * @see net.minecraft.loot.condition.EntityPropertiesLootCondition
  * @see EntityPredicateArgument
  */
-public interface EntityPredicate extends Predicate<Entity> {
+public interface EntityPredicate extends Predicate<@NotNull Entity> {
   /**
    * 测试实体是否符合条件。
    *
@@ -29,22 +31,33 @@ public interface EntityPredicate extends Predicate<Entity> {
    * @return 如果实体满足条件，则为 {@code true}
    */
   @Override
-  boolean test(Entity entity);
+  boolean test(@NotNull Entity entity);
 
-  static TestResult successResult(Entity entity) {
+  static TestResult successResult(@NotNull Entity entity) {
     return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
 
-  static TestResult failResult(Entity entity) {
+  static TestResult failResult(@NotNull Entity entity) {
     return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.fail", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
 
-  static TestResult successOrFail(boolean successes, Entity entity) {
+  static TestResult successOrFail(boolean successes, @NotNull Entity entity) {
     return successes ? successResult(entity) : failResult(entity);
   }
 
-  default TestResult testAndDescribe(Entity entity) throws CommandSyntaxException {
-    final boolean test = test(entity);
-    return successOrFail(test, entity);
+  /**
+   * 测试实体并返回描述信息。调用时请使用此类，但覆盖时请覆盖 {@link #testAndDescribe(Entity, Text)}。
+   */
+  @ApiStatus.NonExtendable
+  default TestResult testAndDescribe(@NotNull Entity entity) throws CommandSyntaxException {
+    return testAndDescribe(entity, TextUtil.styled(entity.getDisplayName(), Styles.TARGET));
   }
+
+  /**
+   * 测试实体并返回描述信息，实现接口应覆盖此方法，但通常不要直接调用此方法，但是如果需要对同一个实体多次调用此方法，则可以使用此方法并共用 {@code displayName} 参数。使用 {@code displayName} 是考虑到其会被多次用到，为了避免多次创建其对象而直接使用共用的此对象。
+   *
+   * @param entity      被测试的实体。
+   * @param displayName 被测试的实体的显示名称。
+   */
+  TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException;
 }

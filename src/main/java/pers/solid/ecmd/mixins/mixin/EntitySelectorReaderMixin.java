@@ -29,9 +29,9 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.ext.EntitySelectorReaderExtension;
 import pers.solid.ecmd.predicate.entity.*;
-import pers.solid.ecmd.util.parse.ParsingUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -69,6 +69,9 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @Shadow
   private boolean hasLimit;
 
+  @Shadow
+  public abstract void addPredicate(Predicate<Entity> predicate);
+
   @Inject(method = "readArguments", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readString()Ljava/lang/String;", remap = false), slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorOptions;getHandler(Lnet/minecraft/command/EntitySelectorReader;Ljava/lang/String;I)Lnet/minecraft/command/EntitySelectorOptions$SelectorHandler;")), locals = LocalCapture.CAPTURE_FAILSOFT)
   private void setCursorBeforeOptionName(CallbackInfo ci, int i) {
     extension$ec().cursorBeforeOptionName = i; // cursor
@@ -98,15 +101,15 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @Inject(method = "buildPredicate", at = @At("HEAD"))
   private void buildPredicateDescriptions(CallbackInfo ci) {
     if (pitchRange != FloatRangeArgument.ANY) {
-      extension$ec().addDescription(source -> new RotationPredicateEntry(BridgeFloatRange.fromVanilla(pitchRange), "pitch", Entity::getPitch, rotationPredicate(pitchRange, Entity::getPitch)));
+      addPredicate(new RotationPredicateEntry(BridgeFloatRange.fromVanilla(pitchRange), "pitch", Entity::getPitch, rotationPredicate(pitchRange, Entity::getPitch)));
     }
 
     if (yawRange != FloatRangeArgument.ANY) {
-      extension$ec().addDescription(source -> new RotationPredicateEntry(BridgeFloatRange.fromVanilla(yawRange), "yaw", Entity::getYaw, rotationPredicate(yawRange, Entity::getYaw)));
+      addPredicate(new RotationPredicateEntry(BridgeFloatRange.fromVanilla(yawRange), "yaw", Entity::getYaw, rotationPredicate(yawRange, Entity::getYaw)));
     }
 
     if (!levelRange.isDummy()) {
-      extension$ec().addDescription(source -> new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), false));
+      addPredicate(new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), false));
     }
   }
 
@@ -119,7 +122,6 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
     final EntitySelectorExtras extras = EntitySelectorExtras.getOf(returnValue);
     final EntitySelectorReaderExtras selfExtras = extension$ec();
     extras.predicateFunctions = selfExtras.predicateFunctions;
-    extras.predicateDescriptions = selfExtras.predicateDescriptions;
     extras.collector = selfExtras.atVariable != null ? EntitySelectorCollector.NAMES.get(selfExtras.atVariable) : null;
   }
 

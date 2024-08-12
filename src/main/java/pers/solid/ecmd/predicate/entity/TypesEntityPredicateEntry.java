@@ -10,6 +10,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 
 public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<EntityType<?>>>> values, boolean inverted) implements EntityPredicateEntry {
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     return Iterables.any(values, either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().isIn(tag))) != inverted;
   }
 

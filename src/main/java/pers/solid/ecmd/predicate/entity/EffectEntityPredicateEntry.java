@@ -6,11 +6,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TestResult;
 
 public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted) implements EntityPredicateEntry {
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return false;
     }

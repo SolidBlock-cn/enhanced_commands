@@ -2,12 +2,13 @@ package pers.solid.ecmd.predicate.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
 public record AirEntityPredicateEntry(BridgeIntRange intRange, boolean inverted) implements EntityPredicateEntry {
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     return intRange.test(entity.getAir()) != inverted;
   }
 

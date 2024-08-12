@@ -10,6 +10,7 @@ import net.minecraft.predicate.NumberRange;
 import net.minecraft.predicate.entity.EntityEffectPredicate;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
 
@@ -17,7 +18,7 @@ import java.util.*;
 
 public record EffectsEntityPredicateEntry(Map<RegistryEntry<StatusEffect>, EntityEffectPredicate.EffectData> effects, Set<RegistryEntry<StatusEffect>> inverted) implements EntityPredicateEntry {
   @Override
-  public boolean test(Entity entity) {
+  public boolean test(@NotNull Entity entity) {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return false;
     }

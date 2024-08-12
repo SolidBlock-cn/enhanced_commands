@@ -2,22 +2,26 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.EntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.Collection;
 
-public record AlternativesEntityPredicateEntry(Collection<EntitySelector> entitySelectors, ServerCommandSource serverCommandSource, boolean inverted) implements EntityPredicateEntry {
+public record AlternativesEntityPredicateEntry(Collection<EntityPredicate> entityPredicates, ServerCommandSource serverCommandSource, boolean inverted) implements EntityPredicateEntry {
+  @Override
+  public boolean test(@NotNull Entity entity) {
+    return entityPredicates.stream().anyMatch(entityPredicate -> entityPredicate.test(entity));
+  }
+
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     boolean result = false;
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
-    for (EntitySelector entitySelector : entitySelectors) {
-      final SelectorEntityPredicate selectorEntityPredicate = new SelectorEntityPredicate(entitySelector, serverCommandSource);
-      final TestResult oneResult = selectorEntityPredicate.testAndDescribe(entity);
+    for (EntityPredicate entityPredicate : entityPredicates) {
+      final TestResult oneResult = entityPredicate.testAndDescribe(entity);
       attachments.add(oneResult);
       result |= oneResult.successes();
     }

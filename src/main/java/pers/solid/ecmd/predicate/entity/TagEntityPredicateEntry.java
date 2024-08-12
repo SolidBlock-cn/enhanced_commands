@@ -11,6 +11,15 @@ import java.util.Set;
 
 public record TagEntityPredicateEntry(@NotNull String tagName, boolean hasNegation) implements EntityPredicateEntry {
   @Override
+  public boolean test(@NotNull Entity entity) {
+    if (tagName.isEmpty()) {
+      return entity.getCommandTags().isEmpty() != hasNegation;
+    } else {
+      return entity.getCommandTags().contains(tagName) != hasNegation;
+    }
+  }
+
+  @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) {
     final Set<String> commandTags = entity.getCommandTags();
     if (tagName.isEmpty()) {

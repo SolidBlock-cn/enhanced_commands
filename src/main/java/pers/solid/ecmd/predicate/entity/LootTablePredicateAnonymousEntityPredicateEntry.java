@@ -10,9 +10,11 @@ import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.bridge.LootBridge;
 
 import java.util.Optional;
 
@@ -34,6 +36,12 @@ public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition loot
         return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail_anonymous", displayName, TextUtil.literal(test).styled(Styles.ACTUAL), TextUtil.literal(!hasNegation).styled(Styles.EXPECTED)));
       }
     }
+  }
+
+  @Override
+  public boolean test(@NotNull Entity entity) {
+    final LootContext context = LootBridge.createContextForEntity(entity, (ServerWorld) entity.getWorld());
+    return lootCondition.test(context);
   }
 
   @Override
