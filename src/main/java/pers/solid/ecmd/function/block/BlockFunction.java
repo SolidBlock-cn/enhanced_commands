@@ -11,6 +11,10 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryElementCodec;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -19,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.history.BlockPlacementHistory;
@@ -31,8 +36,11 @@ import pers.solid.ecmd.util.mixin.MixinShared;
  */
 public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgument {
   BlockFunction EMPTY = EmptyBlockFunction.INSTANCE;
+  RegistryKey<Registry<BlockFunction>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("block_function"));
   Codec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.getCodec().dispatch(BlockFunction::getType, BlockFunctionType::getCodec);
   Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC);
+  // todo try accepting id with omitted ns
+  Codec<RegistryEntry<BlockFunction>> ENTRY_CODEC = RegistryElementCodec.of(REGISTRY_KEY, CODEC);
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));
 

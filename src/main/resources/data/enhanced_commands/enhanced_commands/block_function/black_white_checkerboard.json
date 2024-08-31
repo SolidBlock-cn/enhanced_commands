@@ -1,0 +1,10 @@
+{
+  "type": "enhanced_commands:checkerboard",
+  "predicates": {
+    "weighted": false,
+    "elements": [
+      "black_wool",
+      "white_wool"
+    ]
+  }
+}

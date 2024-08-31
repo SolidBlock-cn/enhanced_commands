@@ -42,6 +42,7 @@ public final class BlockFunctionTypes {
   public static final BlockFunctionType<MirrorBlockFunction> MIRROR = register(MirrorBlockFunction.Type.MIRROR_TYPE, "mirror");
   public static final BlockFunctionType<CheckerboardBlockFunction> CHECKERBOARD = register(CheckerboardBlockFunction.Type.CHECKERBOARD_TYPE, "checkerboard");
   public static final BlockFunctionType<CheckerboardTagBlockFunction> CHECKERBOARD_TAG = register(CheckerboardTagBlockFunction.Type.CHECKERBOARD_TAG_TYPE, "checkerboard-tag");
+  public static final BlockFunctionType<ReferenceBlockFunction> REFERENCE = register(ReferenceBlockFunction.ReferenceType.INSTANCE, "reference");
 
   private BlockFunctionTypes() {
   }

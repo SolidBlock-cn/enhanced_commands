@@ -3,6 +3,7 @@ package pers.solid.ecmd;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +12,10 @@ import pers.solid.ecmd.argument.ModArgumentTypes;
 import pers.solid.ecmd.command.ModCommands;
 import pers.solid.ecmd.curve.CurveTypes;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionTypes;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
 import pers.solid.ecmd.predicate.entity.EntitySelectorOptionsExtension;
 import pers.solid.ecmd.region.RegionTypes;
@@ -51,5 +54,9 @@ public class EnhancedCommands implements ModInitializer {
       ((ThreadExecutorExtension) server).ec_advanceTasks();
       server.getProfiler().pop();
     });
+
+    // 资源包
+    DynamicRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC);
+    DynamicRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC);
   }
 }
