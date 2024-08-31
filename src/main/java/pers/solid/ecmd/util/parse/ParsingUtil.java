@@ -134,21 +134,17 @@ public final class ParsingUtil {
    * @param parseUnit 解析括号内的内容。
    * @throws CommandSyntaxException 当有左括号但缺失右括号时。
    */
-  public static <T, E extends Throwable> @Nullable T parseParentheses(FailableSupplier<T, E> parseUnit, SuggestedParser parser) throws E, CommandSyntaxException {
+  public static <T, E extends Throwable> @Nullable T parseParentheses(FailableSupplier<T, E> parseUnit, SuggestedParser<?> parser) throws E, CommandSyntaxException {
     final StringReader reader = parser.reader;
-    parser.suggestionProviders.add((context, suggestionsBuilder) -> {
-      if (suggestionsBuilder.getRemaining().isEmpty()) suggestionsBuilder.suggest("(");
-    });
+    parser.addSuggestion((context, suggestionsBuilder) -> suggestString("(", suggestionsBuilder).buildFuture());
     if (reader.canRead() && reader.peek() == '(') {
       reader.skip();
       reader.skipWhitespace();
       final T parse = parseUnit.get();
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> {
-        if (suggestionsBuilder.getRemaining().isEmpty()) suggestionsBuilder.suggest(")");
-      });
+      parser.setSuggestion((context, suggestionsBuilder) -> suggestString(")", suggestionsBuilder).buildFuture());
       reader.skipWhitespace();
       reader.expect(')');
-      parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
+      parser.clearSuggestion();
       return parse;
     } else {
       return null;
@@ -164,19 +160,19 @@ public final class ParsingUtil {
    * @param joiningStringTooltip 当为 {@code joiningString} 提供建议时，应该显示的提示文本（tooltip）。
    * @param allowsSparse         是否允许各值与间隔字符串之间存在空白字符。
    */
-  public static <T, E extends Throwable> T parseUnifiable(FailableSupplier<T, E> parseUnit, FailableFunction<List<T>, T, E> merger, String joiningString, Message joiningStringTooltip, SuggestedParser parser, boolean allowsSparse) throws E {
+  public static <T, E extends Throwable> T parseUnifiable(FailableSupplier<T, E> parseUnit, FailableFunction<List<T>, T, E> merger, String joiningString, Message joiningStringTooltip, SuggestedParser<?> parser, boolean allowsSparse) throws E {
     final T first = parseUnit.get();
     final StringReader reader = parser.reader;
     final int cursorBeforeWhite = reader.getCursor();
     int cursorAfterLastUnit = cursorBeforeWhite;
     if (allowsSparse) reader.skipWhitespace();
-    parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder));
+    parser.orSuggestIfEmpty((context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder).buildFuture());
     if (reader.getString().startsWith(joiningString, reader.getCursor())) {
       final List<T> units = new ArrayList<>();
       units.add(first);
       while (reader.getString().startsWith(joiningString, reader.getCursor())) {
         reader.setCursor(reader.getCursor() + joiningString.length());
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         if (allowsSparse) reader.skipWhitespace();
         units.add(parseUnit.get());
         cursorAfterLastUnit = reader.getCursor();

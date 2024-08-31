@@ -32,7 +32,7 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
   }
 
   @Override
-  default void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  default void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     // after the left parentheses
     parser.reader.skipWhitespace();
 
@@ -40,10 +40,11 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
 
     // when allows zero params, deal with empty
     if (paramsCount >= minParamsCount()) {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> {
+      parser.addSuggestion((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           suggestionsBuilder.suggest(rightParString());
         }
+        return suggestionsBuilder.buildFuture();
       });
     }
     if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
@@ -55,12 +56,12 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
       }
     }
     while (true) {
-      parser.suggestionProviders.clear();
+      parser.clearSuggestion();
       parseParameter(registryAccess, parser, paramsCount, suggestionsOnly);
       paramsCount++;
       parser.reader.skipWhitespace();
       final int finalParamsCount = paramsCount;
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> {
+      parser.addSuggestion((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           if (finalParamsCount < maxParamsCount()) {
             suggestionsBuilder.suggest(separatorString());
@@ -69,6 +70,7 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
             suggestionsBuilder.suggest(rightParString());
           }
         }
+        return suggestionsBuilder.buildFuture();
       });
       // end of an expression, except a comma or right parentheses
       if (!parser.reader.canRead()) {
@@ -87,7 +89,7 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
         }
         parser.reader.skip();
         parser.reader.skipWhitespace();
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
       } else if (parser.reader.peek() == rightPar()) {
         if (paramsCount < minParamsCount()) {
           throw PARAMS_TOO_FEW.createWithContext(parser.reader, paramsCount, minParamsCount());
@@ -104,5 +106,5 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
    *
    * @param paramIndex 参数的位置。例如，解析第一个参数时，{@code paramIndex} 为 0。
    */
-  void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
+  void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
 }

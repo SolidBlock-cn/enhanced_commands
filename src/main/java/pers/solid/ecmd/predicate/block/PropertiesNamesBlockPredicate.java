@@ -82,10 +82,10 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     }
 
     @Override
-    public @Nullable PropertiesNamesBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder));
+    public @Nullable PropertiesNamesBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockPredicateSuggestedParser suggestedParser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser);
+        final SimpleBlockPredicateSuggestedParser<?> suggestedParser = new SimpleBlockPredicateSuggestedParser<>(registryAccess, parser);
         suggestedParser.parsePropertyNames();
         return new PropertiesNamesBlockPredicate(suggestedParser.propertyNamePredicates);
       } else {

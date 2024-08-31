@@ -94,8 +94,8 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tags, @NotNull @Unmodifia
     }
 
     @Override
-    public @Nullable TagBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser0);
+    public @Nullable TagBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      SimpleBlockPredicateSuggestedParser<?> parser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         return new TagBlockPredicate(parser.tagId.getTag(), parser.propertyNamePredicates);

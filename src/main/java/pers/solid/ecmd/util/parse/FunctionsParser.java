@@ -34,10 +34,10 @@ public class FunctionsParser<T> implements Parser<T> {
   }
 
   @Override
-  public T parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+  public T parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
     final StringReader reader = parser.reader;
     final int cursorOnStart = reader.getCursor();
-    parser.suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(functions, suggestionsBuilder, s -> s + "(", tooltipProvider::apply));
+    parser.addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(functions, suggestionsBuilder, s -> s + "(", tooltipProvider::apply));
     final String unquotedString = reader.readUnquotedString();
     if (!unquotedString.isEmpty() && reader.canRead() && reader.peek() == '(') {
       final FunctionLikeParser<? extends T> functionParamsParser = parserFactory.apply(unquotedString);

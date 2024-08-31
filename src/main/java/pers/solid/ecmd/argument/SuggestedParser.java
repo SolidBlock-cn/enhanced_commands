@@ -6,6 +6,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
@@ -16,11 +17,12 @@ import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.parse.SuggestionProvider;
+import pers.solid.ecmd.util.parse.SuggestionAppender;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,17 +32,17 @@ import java.util.function.Function;
 
 /**
  * <p>此类用于在解析一段内容的同时提供建议，相当于一次性完成 {@link ArgumentType#parse(StringReader)} 和 {@link ArgumentType#listSuggestions(CommandContext, SuggestionsBuilder)} 的两个工作，但需要注意的是，对于 {@link ArgumentType} 而言，这个解析过程仍会运行两遍，一遍用于解析结果，一遍用于提供建议。
- * <p>为了更灵活地控制建议提供过程，此类允许一次性提供多个建议。解析过程结束时（包括抛出 {@link CommandSyntaxException} 时），{@link #reader} 所在的 {@link StringReader#cursor cursor} 就是建议的起始位置，而这是位置也正是 {@link CommandSyntaxException} 的 cursor 位置。如果由于某些原因必须指定命令建议的起始位置，可以使用 {@link SuggestionProvider#offset(SuggestionProvider.Offset)} 作为建议内容。
+ * <p>为了更灵活地控制建议提供过程，此类允许一次性提供多个建议。解析过程结束时（包括抛出 {@link CommandSyntaxException} 时），{@link #reader} 所在的 {@link StringReader#cursor cursor} 就是建议的起始位置，而这是位置也正是 {@link CommandSyntaxException} 的 cursor 位置。如果由于某些原因必须指定命令建议的起始位置，可以使用 {@link SuggestionAppender#offset(SuggestionAppender.Offset)} 作为建议内容。
  */
-public class SuggestedParser {
+public class SuggestedParser<S> {
   /**
    * 此对象的基于的 {@link StringReader} 对象，会直接用于解析。在提供建议时，也会基于此对象的 {@link StringReader#string string} 和 {@link StringReader#cursor cursor} 来提供建议。
    */
   public final StringReader reader;
   /**
-   * 在当前解析过程中所需要提供的建议。解析的过程不提供具体的建议，只指定如何提供建议（{@link SuggestionProvider}）。可以提供多种不同的建议。
+   * 在当前解析过程中所需要提供的建议。解析的过程不提供具体的建议，只指定如何提供建议（{@link SuggestionAppender}）。可以提供多种不同的建议。
    */
-  public final List<SuggestionProvider> suggestionProviders;
+  protected final List<SuggestionProvider<S>> suggestions;
 
   public SuggestedParser(String string) {
     this(new StringReader(string));
@@ -50,9 +52,46 @@ public class SuggestedParser {
     this(reader, new ArrayList<>());
   }
 
-  public SuggestedParser(StringReader reader, List<SuggestionProvider> suggestionProviders) {
+  protected SuggestedParser(StringReader reader, List<SuggestionProvider<S>> suggestions) {
     this.reader = reader;
-    this.suggestionProviders = suggestionProviders;
+    this.suggestions = suggestions;
+  }
+
+  public void setSuggestion(SuggestionProvider<S> suggestion) {
+    this.suggestions.clear();
+    this.suggestions.add(suggestion);
+  }
+
+  public void addSuggestion(SuggestionProvider<S> suggestion) {
+    this.suggestions.add(suggestion);
+  }
+
+  public @Unmodifiable List<SuggestionProvider<S>> getAllSuggestions() {
+    return List.copyOf(suggestions);
+  }
+
+  public void replaceAllSuggestions(List<SuggestionProvider<S>> suggestions) {
+    this.suggestions.clear();
+    this.suggestions.addAll(suggestions);
+  }
+
+  public void clearSuggestion() {
+    this.suggestions.clear();
+  }
+
+  public SuggestionProvider<S> getMergedSuggestion() {
+    if (suggestions.isEmpty()) {
+      return (context, builder) -> builder.buildFuture();
+    } else if (suggestions.size() == 1) {
+      return suggestions.getFirst();
+    }
+    final List<SuggestionProvider<S>> copy = List.copyOf(suggestions);
+    return (context, builder) -> buildSuggestions(copy, context, builder);
+  }
+
+  public void orSuggestIfEmpty(SuggestionProvider<S> suggestionProvider) {
+    final SuggestionProvider<S> mergedSuggestion = getMergedSuggestion();
+    setSuggestion((context, builder) -> mergedSuggestion.getSuggestions(context, builder).thenCombine(suggestionProvider.getSuggestions(context, builder), (suggestions1, suggestions2) -> suggestions1.isEmpty() ? suggestions2 : suggestions1));
   }
 
   /**
@@ -61,34 +100,34 @@ public class SuggestedParser {
   public Function<ServerCommandSource, Vec3i> parseAndSuggestVec3i() throws CommandSyntaxException {
     final StringReader reader = this.reader;
     {
-      suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
+      setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
       final int cursorBeforeDirection = reader.getCursor();
       final String unquotedString = this.reader.readUnquotedString();
       final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
       if (byName != null) {
-        suggestionProviders.remove(suggestionProviders.size() - 1);
+        clearSuggestion();
         return source -> byName.apply(source).getVector();
       } else {
         this.reader.setCursor(cursorBeforeDirection);
       }
     }
     final int x = reader.readInt();
-    suggestionProviders.remove(suggestionProviders.size() - 1);
+    clearSuggestion();
     ParsingUtil.expectAndSkipWhitespace(reader);
     {
-      suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
+      setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
       final int cursorBeforeDirection = reader.getCursor();
       final String unquotedString = this.reader.readUnquotedString();
       final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
       if (byName != null) {
-        suggestionProviders.remove(suggestionProviders.size() - 1);
+        clearSuggestion();
         return source -> byName.apply(source).getVector().multiply(x);
       } else {
         this.reader.setCursor(cursorBeforeDirection);
       }
     }
     final int y = reader.readInt();
-    suggestionProviders.remove(suggestionProviders.size() - 1);
+    clearSuggestion();
     ParsingUtil.expectAndSkipWhitespace(reader);
     final int z = reader.readInt();
     final Vec3i vec3i = new Vec3i(x, y, z);
@@ -101,34 +140,34 @@ public class SuggestedParser {
   public Function<ServerCommandSource, Vec3d> parseAndSuggestVec3d() throws CommandSyntaxException {
     final StringReader reader = this.reader;
     {
-      suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
+      setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
       final int cursorBeforeDirection = reader.getCursor();
       final String unquotedString = reader.readUnquotedString();
       final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
       if (byName != null) {
-        suggestionProviders.remove(suggestionProviders.size() - 1);
+        clearSuggestion();
         return source -> Vec3d.of(byName.apply(source).getVector());
       } else {
         reader.setCursor(cursorBeforeDirection);
       }
     }
     final double x = reader.readDouble();
-    suggestionProviders.remove(suggestionProviders.size() - 1);
+    clearSuggestion();
     ParsingUtil.expectAndSkipWhitespace(reader);
     {
-      suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
+      setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
       final int cursorBeforeDirection = reader.getCursor();
       final String unquotedString = reader.readUnquotedString();
       final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
       if (byName != null) {
-        suggestionProviders.remove(suggestionProviders.size() - 1);
+        clearSuggestion();
         return source -> Vec3d.of(byName.apply(source).getVector()).multiply(x);
       } else {
         reader.setCursor(cursorBeforeDirection);
       }
     }
     final double y = reader.readDouble();
-    suggestionProviders.remove(suggestionProviders.size() - 1);
+    clearSuggestion();
     ParsingUtil.expectAndSkipWhitespace(reader);
     final double z = reader.readDouble();
     final Vec3d vec3d = new Vec3d(x, y, z);
@@ -173,7 +212,7 @@ public class SuggestedParser {
       this.reader.setCursor(cursorBeforeDouble);
       throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidDouble().createWithContext(reader, substring), cursorAfterNumber);
     }
-    suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("deg", "rad", "turn"), suggestionsBuilder));
+    setSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("deg", "rad", "turn"), suggestionsBuilder));
     final int cursorBeforeUnit = reader.getCursor();
     while (reader.canRead()) {
       final char peek = reader.peek();
@@ -192,13 +231,13 @@ public class SuggestedParser {
         throw ModCommandExceptionTypes.ANGLE_UNIT_EXPECTED.createWithContext(reader, substring);
       }
     } else if ("deg".equals(unit)) {
-      suggestionProviders.remove(suggestionProviders.size() - 1);
+      clearSuggestion();
       return radians ? Math.toRadians(v) : v;
     } else if ("rad".equals(unit)) {
-      suggestionProviders.remove(suggestionProviders.size() - 1);
+      clearSuggestion();
       return radians ? v : Math.toDegrees(v);
     } else if ("turn".equals(unit)) {
-      suggestionProviders.remove(suggestionProviders.size() - 1);
+      clearSuggestion();
       return (radians ? Math.PI * 2 : 360) * v;
     } else {
       final int cursorAfterUnit = reader.getCursor();
@@ -208,43 +247,50 @@ public class SuggestedParser {
   }
 
   /**
-   * 根据 {@link #suggestionProviders} 中的内容提供建议，并会进行合并。
+   * 根据 {@link #suggestions} 中的内容提供建议。
    *
    * @see com.mojang.brigadier.CommandDispatcher#getCompletionSuggestions(ParseResults, int)
    */
-  public CompletableFuture<Suggestions> buildSuggestions(CommandContext<?> context, SuggestionsBuilder builder) {
-    if (suggestionProviders.isEmpty()) {
+  public CompletableFuture<Suggestions> buildSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+    return buildSuggestions(suggestions, context, builder);
+  }
+
+  /**
+   * 根据 {@link #suggestions} 中的内容提供建议。
+   *
+   * @see com.mojang.brigadier.CommandDispatcher#getCompletionSuggestions(ParseResults, int)
+   */
+  public static <S> CompletableFuture<Suggestions> buildSuggestions(List<SuggestionProvider<S>> suggestions, CommandContext<S> context, SuggestionsBuilder builder) {
+    if (suggestions == null) {
       return Suggestions.empty();
     }
     final List<CompletableFuture<Suggestions>> completableFutures = new ArrayList<>();
-    for (SuggestionProvider suggestionProvider : suggestionProviders) {
-      if (suggestionProvider instanceof SuggestionProvider.Offset offset) {
-        final CompletableFuture<Suggestions> future = offset.apply(context, builder);
-        completableFutures.add(future);
-      } else {
-        suggestionProvider.accept(context, builder);
+    for (SuggestionProvider<S> suggestionProvider : suggestions) {
+      try {
+        completableFutures.add(suggestionProvider.getSuggestions(context, builder));
+      } catch (CommandSyntaxException ignored) {
       }
     }
-    final CompletableFuture<Suggestions> directFuture = builder.buildFuture();
     if (completableFutures.isEmpty()) {
-      return directFuture;
+      return builder.buildFuture();
+    } else if (completableFutures.size() == 1) {
+      return completableFutures.getFirst();
     } else {
-      completableFutures.add(directFuture);
       final CompletableFuture<Suggestions> result = new CompletableFuture<>();
       CompletableFuture.allOf(completableFutures.toArray(CompletableFuture[]::new))
           .thenRun(() -> {
-            final List<Suggestions> suggestions = new ArrayList<>();
+            final List<Suggestions> results = new ArrayList<>();
             for (final CompletableFuture<Suggestions> future : completableFutures) {
-              suggestions.add(future.join());
+              results.add(future.join());
             }
-            result.complete(Suggestions.merge(reader.getString(), suggestions));
+            result.complete(Suggestions.merge(builder.getInput(), results));
           });
       return result;
     }
   }
 
   public <T> @NotNull T parseAndSuggestValues(Iterable<@Nullable T> iterable, Function<@NotNull T, String> suggestions, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
-    this.suggestionProviders.add((context, builder) -> CommandSource.suggestMatching(iterable, builder, suggestions, tooltip));
+    setSuggestion((context, builder) -> CommandSource.suggestMatching(iterable, builder, suggestions, tooltip));
     return ParsingUtil.parseValues(this.reader, valueGetter);
   }
 
@@ -265,10 +311,10 @@ public class SuggestedParser {
    */
   public <T> T parseAndSuggestArgument(ArgumentType<T> argumentType) throws CommandSyntaxException {
     final int cursorBeforeParse = reader.getCursor();
-    suggestionProviders.add(SuggestionProvider.offset((context, builder) -> {
+    setSuggestion((context, builder) -> {
       final SuggestionsBuilder builderOffset = builder.createOffset(cursorBeforeParse);
       return argumentType.listSuggestions(context, builderOffset);
-    }));
+    });
     return argumentType.parse(reader);
   }
 }

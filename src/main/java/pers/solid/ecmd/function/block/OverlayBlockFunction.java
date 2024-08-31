@@ -55,7 +55,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     private final List<BlockFunctionArgument> blockFunctions = new ArrayList<>();
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> {
         final ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
         for (BlockFunctionArgument blockFunction : blockFunctions) {
@@ -66,7 +66,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       blockFunctions.add(BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly));
     }
   }

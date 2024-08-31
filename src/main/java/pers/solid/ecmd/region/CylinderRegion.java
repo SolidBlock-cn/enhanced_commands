@@ -161,12 +161,12 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> new CylinderRegion(radius, height, center.toAbsolutePos(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         final int cursorBeforeReadDouble = parser.reader.getCursor();
         radius = parser.reader.readDouble();

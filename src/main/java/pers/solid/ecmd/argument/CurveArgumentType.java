@@ -36,14 +36,14 @@ public record CurveArgumentType(CommandRegistryAccess registryAccess) implements
 
   @Override
   public CurveArgument<?> parse(StringReader reader) throws CommandSyntaxException {
-    return CurveArgument.parse(registryAccess, new SuggestedParser(reader), false);
+    return CurveArgument.parse(registryAccess, new SuggestedParser<>(reader), false);
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser parser = new SuggestedParser(stringReader);
+    final SuggestedParser<S> parser = new SuggestedParser<>(stringReader);
     try {
       CurveArgument.parse(registryAccess, parser, true);
     } catch (CommandSyntaxException ignore) {

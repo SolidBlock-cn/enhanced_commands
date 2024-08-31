@@ -40,7 +40,7 @@ public record BlockNbtDataArgument(PosArgument posArgument) implements NbtSource
     return new BlockNbtData(new BlockDataObject(blockEntity(source, pos), pos));
   }
 
-  public static BlockNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public static BlockNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
     final PosArgument posArgument = parser.parseAndSuggestArgument(EnhancedPosArgumentType.blockPos());
     return new BlockNbtDataArgument(posArgument);

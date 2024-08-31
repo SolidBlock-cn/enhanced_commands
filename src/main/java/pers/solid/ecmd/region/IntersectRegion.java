@@ -123,12 +123,12 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     private final List<RegionArgument> regions = new ArrayList<>();
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> new IntersectRegion(IterateUtils.transformFailableImmutableList(regions, regionArgument -> regionArgument.toAbsoluteRegion(source)));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       regions.add(RegionArgument.parse(registryAccess, parser, suggestionsOnly));
     }
   }

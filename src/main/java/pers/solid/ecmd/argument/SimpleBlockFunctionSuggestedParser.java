@@ -1,5 +1,6 @@
 package pers.solid.ecmd.argument;
 
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -13,13 +14,13 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.property.*;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.parse.SuggestionProvider;
+import pers.solid.ecmd.util.parse.SuggestionAppender;
 
 import java.util.*;
 
 import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 
-public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedParser {
+public class SimpleBlockFunctionSuggestedParser<S> extends SimpleBlockSuggestedParser<S> {
   public final List<PropertyFunction<?>> propertyFunctions = new ArrayList<>();
   public final Set<Property<?>> mentionedProperties = new HashSet<>();
   public final List<PropertyNameFunction> propertyNameFunctions = new ArrayList<>();
@@ -37,8 +38,8 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   private boolean must = false;
   private int cursorBeforeGeneralFunction = -1;
 
-  public SimpleBlockFunctionSuggestedParser(CommandRegistryAccess registryAccess, SuggestedParser parser) {
-    super(registryAccess, parser.reader, parser.suggestionProviders);
+  public SimpleBlockFunctionSuggestedParser(CommandRegistryAccess registryAccess, SuggestedParser<S> parser) {
+    super(registryAccess, parser);
   }
 
   @NotNull
@@ -59,19 +60,19 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
 
   @Override
   protected <T extends Comparable<T>> void parsePropertyNameValue(Property<T> property, Comparator comparator) throws CommandSyntaxException {
-    suggestionProviders.clear();
+    clearSuggestion();
     addSpecialPropertyValueSuggestions();
-    suggestionProviders.add((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder));
+    addSuggestion((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder));
     if (reader.canRead()) {
       if (reader.peek() == '*') {
         propertyFunctions.add(new RandomPropertyFunction<>(property, must));
         reader.skip();
-        suggestionProviders.clear();
+        clearSuggestion();
         return;
       } else if (reader.peek() == '~') {
         propertyFunctions.add(new BypassingPropertyFunction<>(property, must));
         reader.skip();
-        suggestionProviders.clear();
+        clearSuggestion();
         return;
       }
     }
@@ -80,7 +81,7 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
     final Optional<T> parse = property.parse(valueName);
     if (parse.isPresent()) {
       propertyFunctions.add(new SimplePropertyFunction<>(property, parse.get(), must));
-      suggestionProviders.clear();
+      clearSuggestion();
     } else {
       final int cursorAfterParseValue = reader.getCursor();
       this.reader.setCursor(cursorBeforeParseValue);
@@ -89,11 +90,12 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   }
 
   private void addSpecialPropertyValueSuggestions() {
-    suggestionProviders.add((context, suggestionsBuilder) -> {
+    addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("*", Text.translatable("enhanced_commands.block_function.random_value"));
         suggestionsBuilder.suggest("~", Text.translatable("enhanced_commands.block_function.originalValue"));
       }
+      return suggestionsBuilder.buildFuture();
     });
   }
 
@@ -103,7 +105,7 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
     // 增加了一个属性之后，需要检查是否已经有通用属性函数，且该函数是否是多余的（即已被所有其他属性指定）。
     mentionedProperties.add(property);
     if (block != null && exceptionForGeneralProperty != null && exceptionForGeneralProperty.containsAll(block.getStateManager().getProperties())) {
-      suggestionProviders.clear();
+      clearSuggestion();
       reader.setCursor(cursorBeforeGeneralFunction);
       throw EXHAUSTED_GENERAL_PROPERTIES.createWithContext(reader);
     }
@@ -113,17 +115,17 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   @Override
   protected void parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException {
     mentionedPropertyNames.add(propertyName);
-    suggestionProviders.clear();
+    clearSuggestion();
     addSpecialPropertyValueSuggestions();
     if (reader.canRead()) {
       if (reader.peek() == '*') {
         propertyNameFunctions.add(new RandomPropertyNameFunction(propertyName, must));
         reader.skip();
-        suggestionProviders.clear();
+        clearSuggestion();
       } else if (reader.peek() == '~') {
         propertyNameFunctions.add(new BypassingPropertyNameFunction(propertyName, must));
         reader.skip();
-        suggestionProviders.clear();
+        clearSuggestion();
       }
     }
     final int cursorBeforeValue = reader.getCursor();
@@ -131,17 +133,17 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
     final int cursorAfterValue = reader.getCursor();
     addTagPropertiesValueSuggestions(propertyName);
     if (tagId != null) {
-      final SuggestionProvider tagPropertiesValueSuggestion = suggestionProviders.get(suggestionProviders.size() - 1);
-      suggestionProviders.clear();
-      suggestionProviders.add(SuggestionProvider.offset((context, suggestionsBuilder) -> {
+      final SuggestionAppender tagPropertiesValueSuggestion = null; // todo
+      setSuggestion((context, suggestionsBuilder) -> {
         final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursorBeforeValue);
         tagPropertiesValueSuggestion.accept(context, offset);
         final SuggestionsBuilder offset2 = suggestionsBuilder.createOffset(cursorAfterValue);
-        PROPERTY_FINISHED.accept(context, offset2);
+        // todo optimize
+        PROPERTY_FINISHED.getSuggestions((CommandContext<Object>) context, offset2);
         return offset.buildFuture().thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
-      }));
+      });
     } else {
-      suggestionProviders.clear();
+      clearSuggestion();
       addPropertiesFinishedSuggestions();
     }
     propertyNameFunctions.add(new SimplePropertyNameFunction(propertyName, valueName, must));
@@ -150,7 +152,7 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
 
   @Override
   protected void addComparatorTypeSuggestions() {
-    suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("=", "=="), suggestionsBuilder));
+    addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("=", "=="), suggestionsBuilder));
   }
 
   @Override
@@ -158,9 +160,10 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
     final boolean propertiesExhausted = block != null && mentionedProperties.containsAll(block.getStateManager().getProperties());
     if (exceptionForGeneralProperty == null) {
       if (!propertiesExhausted) {
-        suggestionProviders.add((context, suggestionsBuilder) -> {
+        addSuggestion((context, suggestionsBuilder) -> {
           ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_function.property.all_random"), suggestionsBuilder);
           ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.property.all_original"), suggestionsBuilder);
+          return suggestionsBuilder.buildFuture();
         });
       }
     }
@@ -174,7 +177,7 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
           throw withCursorEnd(EXHAUSTED_GENERAL_PROPERTIES.createWithContext(reader), reader.getCursor() + 1);
         }
         reader.skip();
-        suggestionProviders.clear();
+        clearSuggestion();
         exceptionForGeneralProperty = mentionedProperties;
         propertyFunctions.add(peek == '*' ? new AllRandomPropertyFunction(exceptionForGeneralProperty) : new AllOriginalPropertyFunction(exceptionForGeneralProperty));
         return;
@@ -186,9 +189,10 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
   @Override
   protected void parsePropertyNameEntry() throws CommandSyntaxException {
     if (exceptionForGeneralPropertyName == null) {
-      suggestionProviders.add((context, suggestionsBuilder) -> {
+      addSuggestion((context, suggestionsBuilder) -> {
         ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_function.property.all_random"), suggestionsBuilder);
         ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.property.all_original"), suggestionsBuilder);
+        return suggestionsBuilder.buildFuture();
       });
     }
     if (reader.canRead()) {
@@ -198,7 +202,7 @@ public class SimpleBlockFunctionSuggestedParser extends SimpleBlockSuggestedPars
           throw withCursorEnd(DUPLICATE_GENERAL_PROPERTY_FUNCTION.createWithContext(reader), reader.getCursor() + 1);
         }
         reader.skip();
-        suggestionProviders.clear();
+        clearSuggestion();
         exceptionForGeneralPropertyName = mentionedPropertyNames;
         propertyNameFunctions.add(peek == '*' ? new AllRandomPropertyNameFunction(exceptionForGeneralPropertyName) : new AllOriginalPropertyNameFunctions(exceptionForGeneralPropertyName));
         return;

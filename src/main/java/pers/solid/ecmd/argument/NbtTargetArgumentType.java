@@ -51,7 +51,7 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
     reader.setCursor(builder.getStart());
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final SuggestedParser suggestedParser = new SuggestedParser(reader);
+    final SuggestedParser<S> suggestedParser = new SuggestedParser<>(reader);
     final NbtTargetArgument nbtTargetArgument;
     try {
       nbtTargetArgument = NbtDataRegistry.handleTarget(s, registryAccess, suggestedParser, true);

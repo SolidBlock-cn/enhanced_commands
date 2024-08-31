@@ -146,7 +146,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     private ExposureType exposureType;
 
     @Override
-    public ExposeBlockPredicate getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public ExposeBlockPredicate getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return new ExposeBlockPredicate(exposureType, directions.isEmpty() ? List.of(Direction.values()) : List.copyOf(directions));
     }
 
@@ -161,22 +161,23 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         exposureType = parser.parseAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
       } else if (paramIndex == 1) {
         do {
-          parser.suggestionProviders.clear();
+          parser.clearSuggestion();
           parser.reader.skipWhitespace();
           if (directions.isEmpty()) {
-            parser.suggestionProviders.add((context, suggestionsBuilder) -> {
+            parser.addSuggestion((context, suggestionsBuilder) -> {
               ParsingUtil.suggestString("all", Text.translatable("enhanced_commands.direction.all"), suggestionsBuilder);
               ParsingUtil.suggestString("horizontal", Text.translatable("enhanced_commands.direction.horizontal"), suggestionsBuilder);
               ParsingUtil.suggestString("vertical", Text.translatable("enhanced_commands.direction.vertical"), suggestionsBuilder);
+              return suggestionsBuilder.buildFuture();
             });
           }
-          parser.suggestionProviders.add((context, builder) -> ParsingUtil.suggestDirections(builder));
+          parser.addSuggestion((context, builder) -> ParsingUtil.suggestDirections(builder));
           final int cursorBeforeReadString = parser.reader.getCursor();
           final String id = parser.reader.readString();
           if (id.isEmpty())

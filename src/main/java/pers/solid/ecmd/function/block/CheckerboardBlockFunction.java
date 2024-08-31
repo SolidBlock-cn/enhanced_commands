@@ -66,7 +66,7 @@ public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> fun
     }
 
     @Override
-    protected BlockFunctionArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    protected BlockFunctionArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       return BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
     }
   }

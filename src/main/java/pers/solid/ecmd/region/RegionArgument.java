@@ -12,7 +12,7 @@ import pers.solid.ecmd.util.parse.Parser;
  */
 public interface RegionArgument {
   @NotNull
-  static RegionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static RegionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final int cursorOnStart = parser.reader.getCursor();
     for (Parser<RegionArgument> argumentParser : RegionTypes.PARSERS) {
       parser.reader.setCursor(cursorOnStart);

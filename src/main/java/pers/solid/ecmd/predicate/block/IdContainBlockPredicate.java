@@ -81,13 +81,13 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     }
 
     @Override
-    public IdContainBlockPredicate getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) { // @formatter:on
+    public IdContainBlockPredicate getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) { // @formatter:on
       return new IdContainBlockPredicate(pattern);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      parser.suggestionProviders.clear();
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      parser.clearSuggestion();
       pattern = ParsingUtil.readRegex(parser.reader);
     }
   }

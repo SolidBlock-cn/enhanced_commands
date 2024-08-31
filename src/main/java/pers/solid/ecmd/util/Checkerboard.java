@@ -86,7 +86,7 @@ public interface Checkerboard<T> {
     }
 
     @Override
-    public T getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException {
+    public T getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
       if (weightSum == 0) {
         final int cursorEnd = parser.reader.getCursor();
         parser.reader.setCursor(cursorBeforeFunctionName);
@@ -106,24 +106,24 @@ public interface Checkerboard<T> {
 
     protected abstract T getParseResult(Vec3d floor, Vec3d scale, Vec3d offset);
 
-    protected abstract T parseElement(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
+    protected abstract T parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException;
 
     @Override
-    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
       parseEntryList(registryAccess, parser, suggestionsOnly, reader);
       // 等待关键字的部分
 
       // 解析坐标轴尺寸的部分
-      parser.suggestionProviders.clear();
+      parser.clearSuggestion();
       reader.skipWhitespace();
 
       parseParameters(parser, reader);
     }
 
-    private void parseParameters(SuggestedParser parser, StringReader reader) throws CommandSyntaxException {
+    private void parseParameters(SuggestedParser<?> parser, StringReader reader) throws CommandSyntaxException {
       while (true) {
-        parser.suggestionProviders.add((context, suggestionsBuilder) -> {
+        parser.addSuggestion((context, suggestionsBuilder) -> {
           if (floor == null) {
             ParsingUtil.suggestString("floor", suggestionsBuilder);
           }
@@ -133,6 +133,7 @@ public interface Checkerboard<T> {
           if (offset == null) {
             ParsingUtil.suggestString("offset", suggestionsBuilder);
           }
+          return suggestionsBuilder.buildFuture();
         });
 
         final int cursorBeforeKeyword = reader.getCursor();
@@ -143,7 +144,7 @@ public interface Checkerboard<T> {
         final int cursorAfterKeyword = reader.getCursor();
         switch (keyword) {
           case "floor" -> {
-            parser.suggestionProviders.clear();
+            parser.clearSuggestion();
             if (floor != null) {
               reader.setCursor(cursorBeforeKeyword);
               throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
@@ -152,7 +153,7 @@ public interface Checkerboard<T> {
             floor = ParsingUtil.parseShortenableVec3d(reader);
           }
           case "scale" -> {
-            parser.suggestionProviders.clear();
+            parser.clearSuggestion();
             if (scale != null) {
               reader.setCursor(cursorBeforeKeyword);
               throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
@@ -161,7 +162,7 @@ public interface Checkerboard<T> {
             scale = ParsingUtil.parseShortenableVec3d(reader);
           }
           case "offset" -> {
-            parser.suggestionProviders.clear();
+            parser.clearSuggestion();
             if (offset != null) {
               reader.setCursor(cursorBeforeKeyword);
               throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
@@ -179,7 +180,7 @@ public interface Checkerboard<T> {
       }
     }
 
-    protected void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, StringReader reader) throws CommandSyntaxException {
+    protected void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, StringReader reader) throws CommandSyntaxException {
       this.pairs = new ArrayList<>();
 
       if (reader.canRead() && reader.peek() == rightPar()) {
@@ -188,7 +189,7 @@ public interface Checkerboard<T> {
 
       // 解析方块函数的部分
       while (true) {
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         final T parse = parseElement(registryAccess, parser, suggestionsOnly);
         reader.skipWhitespace();
         if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
@@ -208,9 +209,9 @@ public interface Checkerboard<T> {
         }
 
         reader.skipWhitespace();
-        parser.suggestionProviders.add((context, suggestionsBuilder) -> suggestionsBuilder
+        parser.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder
             .suggest(rightParString())
-            .suggest(separatorString()));
+            .suggest(separatorString()).buildFuture());
         if (!reader.canRead()) {
           break;
         }

@@ -25,14 +25,14 @@ public final class NbtDataRegistry {
     registerTarget(type, handler);
   }
 
-  public static NbtSourceArgument handleSource(String type, CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public static NbtSourceArgument handleSource(String type, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     if (!SOURCES.containsKey(type)) {
       return null;
     }
     return SOURCES.get(type).handle(registryAccess, parser, suggestionsOnly);
   }
 
-  public static NbtTargetArgument handleTarget(String type, CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public static NbtTargetArgument handleTarget(String type, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     if (!TARGETS.containsKey(type)) {
       return null;
     }
@@ -51,7 +51,7 @@ public final class NbtDataRegistry {
   }
 
   public interface Handler<T> {
-    T handle(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException;
+    T handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException;
   }
 
   public static void init() {

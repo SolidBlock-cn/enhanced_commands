@@ -34,7 +34,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   @Override
   public Double parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeAngle = reader.getCursor();
-    final double result = new SuggestedParser(reader, new ArrayList<>()).parseAndSuggestAngle(returnRadians);
+    final double result = new SuggestedParser<>(reader, new ArrayList<>()).parseAndSuggestAngle(returnRadians);
     final int cursorAfterAngle = reader.getCursor();
     if (result < min) {
       reader.setCursor(cursorBeforeAngle);
@@ -51,7 +51,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     final StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser parser = new SuggestedParser(stringReader);
+    final SuggestedParser<S> parser = new SuggestedParser<>(stringReader);
     try {
       parser.parseAndSuggestAngle(returnRadians);
     } catch (CommandSyntaxException ignore) {}

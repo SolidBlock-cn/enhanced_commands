@@ -34,7 +34,7 @@ public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, Argume
 
   @Override
   public NbtFunction parse(StringReader reader) throws CommandSyntaxException {
-    final NbtFunctionSuggestedParser parser = new NbtFunctionSuggestedParser(reader);
+    final NbtFunctionSuggestedParser<?> parser = new NbtFunctionSuggestedParser(reader);
     return onlyCompounds ? parser.parseCompound(false) : parser.parseFunction(false, false);
   }
 
@@ -42,7 +42,7 @@ public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, Argume
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final NbtFunctionSuggestedParser parser = new NbtFunctionSuggestedParser(stringReader);
+    final NbtFunctionSuggestedParser<S> parser = new NbtFunctionSuggestedParser(stringReader);
     try {
       if (onlyCompounds) {
         parser.parseCompound(false);

@@ -85,12 +85,12 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     private BlockFunctionArgument blockFunction = null;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> new StonecutBlockFunction(blockFunction == null ? EMPTY : blockFunction.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       blockFunction = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
     }
 

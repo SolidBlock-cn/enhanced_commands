@@ -56,8 +56,8 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder));
+    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
       boolean negates = false;
       boolean suffixed = false;
       while (parser.reader.canRead() && parser.reader.peek() == '!') {

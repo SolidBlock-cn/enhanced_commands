@@ -110,13 +110,13 @@ public final class IdContainBlockFunction implements BlockFunction {
     }
 
     @Override
-    public IdContainBlockFunction getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public IdContainBlockFunction getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return new IdContainBlockFunction(pattern);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      parser.suggestionProviders.clear();
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+      parser.clearSuggestion();
       pattern = ParsingUtil.readRegex(parser.reader);
     }
   }

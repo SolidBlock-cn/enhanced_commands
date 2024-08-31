@@ -7,11 +7,11 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import java.util.concurrent.CompletableFuture;
 
 @FunctionalInterface
-public interface SuggestionProvider {
+public interface SuggestionAppender {
   void accept(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder);
 
   @FunctionalInterface
-  interface Offset extends SuggestionProvider {
+  interface Offset extends SuggestionAppender {
     CompletableFuture<Suggestions> apply(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder);
 
     @Override

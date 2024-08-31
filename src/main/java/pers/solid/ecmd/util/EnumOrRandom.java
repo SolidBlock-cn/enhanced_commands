@@ -38,12 +38,13 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
   /**
    * @see net.minecraft.command.argument.EnumArgumentType#parse(StringReader)
    */
-  static <E extends Enum<E> & StringIdentifiable> EnumOrRandom<E> parseAndSuggest(E[] values, com.mojang.serialization.Codec<E> codec, SuggestedParser parser) throws CommandSyntaxException {
-    parser.suggestionProviders.add((context, suggestionsBuilder) -> {
+  static <E extends Enum<E> & StringIdentifiable> EnumOrRandom<E> parseAndSuggest(E[] values, com.mojang.serialization.Codec<E> codec, SuggestedParser<?> parser) throws CommandSyntaxException {
+    parser.addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("*");
       }
       CommandSource.suggestMatching(Arrays.stream(values).map(StringIdentifiable::asString), suggestionsBuilder);
+      return suggestionsBuilder.buildFuture();
     });
     if (parser.reader.canRead() && parser.reader.peek() == '*') {
       parser.reader.skip();

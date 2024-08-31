@@ -74,7 +74,7 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
     }
 
     @Override
-    protected BlockPredicateArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    protected BlockPredicateArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       return BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
     }
   }

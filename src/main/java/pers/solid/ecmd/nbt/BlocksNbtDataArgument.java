@@ -32,14 +32,14 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, NbtConcentrat
     return getBlockNbtData(source);
   }
 
-  public static BlocksNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean requiresConcentration) throws CommandSyntaxException {
+  public static BlocksNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean requiresConcentration) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
     final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, suggestionsOnly);
-    parser.suggestionProviders.clear();
+    parser.clearSuggestion();
     if (requiresConcentration) {
       ParsingUtil.expectAndSkipWhitespace(parser.reader);
       final NbtConcentrationType nbtConcentrationType = parser.parseAndSuggestEnums(NbtConcentrationType.values(), NbtConcentrationType::getDisplayName, NbtConcentrationType.CODEC);
-      parser.suggestionProviders.clear();
+      parser.clearSuggestion();
       return new BlocksNbtDataArgument(regionArgument, nbtConcentrationType);
     } else {
       return new BlocksNbtDataArgument(regionArgument, null);

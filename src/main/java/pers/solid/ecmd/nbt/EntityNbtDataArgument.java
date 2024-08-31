@@ -24,7 +24,7 @@ public record EntityNbtDataArgument(EntitySelector entitySelector) implements Nb
     return getEntityNbtData(source);
   }
 
-  public static EntityNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public static EntityNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
     final EntitySelector selector = parser.parseAndSuggestArgument(EntityArgumentType.entity());
     return new EntityNbtDataArgument(selector);

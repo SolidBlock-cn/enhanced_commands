@@ -69,13 +69,13 @@ public record AnyBlockPredicate(List<BlockPredicate> blockPredicates) implements
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final BlockPredicateArgument parse = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
       blockPredicates.add(parse);
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, input -> input.apply(source)));
     }
   }

@@ -24,14 +24,14 @@ public record BlockFunctionArgumentType(CommandRegistryAccess registryAccess) im
 
   @Override
   public BlockFunctionArgument parse(StringReader reader) throws CommandSyntaxException {
-    return BlockFunctionArgument.parse(registryAccess, new SuggestedParser(reader), false, false);
+    return BlockFunctionArgument.parse(registryAccess, new SuggestedParser<>(reader), false, false);
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser parser = new SuggestedParser(stringReader);
+    final SuggestedParser<S> parser = new SuggestedParser<>(stringReader);
     try {
       BlockFunctionArgument.parse(registryAccess, parser, true, false);
     } catch (CommandSyntaxException ignore) {

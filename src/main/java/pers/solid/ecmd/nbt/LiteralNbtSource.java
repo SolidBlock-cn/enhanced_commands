@@ -29,9 +29,9 @@ public record LiteralNbtSource(CompoundNbtFunction nbtFunction) implements NbtSo
     return this;
   }
 
-  public static LiteralNbtSource handle(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public static LiteralNbtSource handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
-    final CompoundNbtFunction compoundNbtFunction = new NbtFunctionSuggestedParser(parser.reader, parser.suggestionProviders).parseCompound(false);
+    final CompoundNbtFunction compoundNbtFunction = new NbtFunctionSuggestedParser<>(parser).parseCompound(false);
     return new LiteralNbtSource(compoundNbtFunction);
   }
 }

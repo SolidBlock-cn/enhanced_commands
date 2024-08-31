@@ -22,7 +22,6 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.parse.SuggestionProvider;
 
 import java.util.Optional;
 
@@ -53,19 +52,19 @@ public record ReferenceBlockFunction(RegistryEntry<BlockFunction> entry) impleme
     }
 
     @Override
-    public BlockFunctionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.block_predicate.reference"), suggestionsBuilder));
+    public BlockFunctionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.block_predicate.reference"), suggestionsBuilder).buildFuture());
       boolean suffixed = false;
       while (parser.reader.canRead() && parser.reader.peek() == '$') {
         parser.reader.skip();
         suffixed = true;
       }
       if (!suffixed) return null;
-      parser.suggestionProviders.clear();
+      parser.clearSuggestion();
 
       // try to optimize with id?
       final int cursorBeforeId = parser.reader.getCursor();
-      parser.suggestionProviders.add(SuggestionProvider.offset((context, builder) -> {
+      parser.addSuggestion((context, builder) -> {
         if (context.getSource() instanceof ServerCommandSource) {
           return CommandSource.suggestIdentifiers(registryAccess.getWrapperOrThrow(BlockFunction.REGISTRY_KEY).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
         } else if (context.getSource() instanceof CommandSource commandSource) {
@@ -73,7 +72,7 @@ public record ReferenceBlockFunction(RegistryEntry<BlockFunction> entry) impleme
         } else {
           return Suggestions.empty();
         }
-      }));
+      });
       if (allowSparse) parser.reader.skipWhitespace();
       final Identifier id = Identifier.fromCommandInput(parser.reader);
       final int cursorAfterId = parser.reader.getCursor();

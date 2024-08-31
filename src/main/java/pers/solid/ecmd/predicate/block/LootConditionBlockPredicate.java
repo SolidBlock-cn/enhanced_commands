@@ -26,7 +26,6 @@ import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.bridge.LootBridge;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.parse.SuggestionProvider;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -88,7 +87,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
       if (id != null) {
         return source -> {
           final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = registryAccess.createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
@@ -106,14 +105,14 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
       final int cursorBeforeId = parser.reader.getCursor();
-      parser.suggestionProviders.add(SuggestionProvider.offset((context1, suggestionsBuilder1) -> getLootConditionIdSuggestions(context1, suggestionsBuilder1, cursorBeforeId)));
+      parser.setSuggestion((context1, suggestionsBuilder1) -> getLootConditionIdSuggestions(context1, suggestionsBuilder1, cursorBeforeId));
       if (reader.canRead()) {
         final char peek = reader.peek();
         if (peek == '{' || peek == '[' || StringReader.isQuotedStringStart(peek)) {
-          parser.suggestionProviders.clear();
+          parser.clearSuggestion();
           this.anonymous = ParsingUtil.parseNbt(reader, LootCondition.CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
           return;
         }
@@ -124,14 +123,13 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
       this.cursorAfterId = reader.getCursor();
       if (!reader.canRead() && suggestionsOnly) {
         // 在提供建议的过程中，如果后面没有内容，则提前中断建议，不提供“,”或“)”的建议。
-        parser.suggestionProviders.remove(parser.suggestionProviders.size() - 1);
-        parser.suggestionProviders.add(SuggestionProvider.offset((context, suggestionsBuilder) -> getLootConditionIdSuggestions(context, suggestionsBuilder, cursorBeforeId).thenCompose(suggestions -> {
+        parser.setSuggestion((context, suggestionsBuilder) -> getLootConditionIdSuggestions(context, suggestionsBuilder, cursorBeforeId).thenCompose(suggestions -> {
           if (suggestions.isEmpty()) {
             return suggestionsBuilder.suggest(")").buildFuture();
           } else {
             return CompletableFuture.completedFuture(suggestions);
           }
-        })));
+        }));
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ")");
       }
     }

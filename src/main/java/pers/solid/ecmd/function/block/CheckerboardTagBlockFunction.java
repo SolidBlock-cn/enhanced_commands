@@ -127,9 +127,9 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     }
 
     @Override
-    protected void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, StringReader reader) throws CommandSyntaxException {
+    protected void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, StringReader reader) throws CommandSyntaxException {
       weightSum = 1;
-      final SimpleBlockFunctionSuggestedParser parser0 = new SimpleBlockFunctionSuggestedParser(registryAccess, parser);
+      final SimpleBlockFunctionSuggestedParser<?> parser0 = new SimpleBlockFunctionSuggestedParser(registryAccess, parser);
       parser0.parseBlockTagId();
       tagKey = parser0.tagId;
       reader.skipWhitespace();
@@ -144,7 +144,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     }
 
     @Override
-    protected BlockFunctionArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) {
+    protected BlockFunctionArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) {
       throw new UnsupportedOperationException();
     }
   }

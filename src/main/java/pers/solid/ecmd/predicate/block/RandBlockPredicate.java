@@ -78,7 +78,7 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
     private @NotNull BlockPredicateArgument predicate = ConstantBlockPredicate.ALWAYS_TRUE;
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> new RandBlockPredicate(value, predicate.apply(source));
     }
 
@@ -92,7 +92,7 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         value = parser.reader.readFloat();
         if (value > 1) {

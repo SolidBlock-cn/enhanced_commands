@@ -43,11 +43,11 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable UseOriginalBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.use_original"), suggestionsBuilder));
+    public @Nullable UseOriginalBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) {
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.use_original"), suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '~') {
         parser.reader.skip();
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         return USE_ORIGINAL;
       }
       return null;

@@ -29,7 +29,7 @@ public enum NbtPredicateArgumentType implements ArgumentType<NbtPredicate>, Argu
 
   @Override
   public NbtPredicate parse(StringReader reader) throws CommandSyntaxException {
-    final NbtPredicateSuggestedParser parser = new NbtPredicateSuggestedParser(reader);
+    final NbtPredicateSuggestedParser<?> parser = new NbtPredicateSuggestedParser<>(reader);
     return onlyCompounds ? parser.parseCompound(false, false) : parser.parsePredicate(false, false);
   }
 
@@ -37,7 +37,7 @@ public enum NbtPredicateArgumentType implements ArgumentType<NbtPredicate>, Argu
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final NbtPredicateSuggestedParser parser = new NbtPredicateSuggestedParser(stringReader);
+    final NbtPredicateSuggestedParser<S> parser = new NbtPredicateSuggestedParser<>(stringReader);
     try {
       if (onlyCompounds) {
         parser.parseCompound(false, false);

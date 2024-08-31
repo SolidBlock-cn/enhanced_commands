@@ -60,7 +60,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     private BlockPredicateArgument blockPredicate;
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       Preconditions.checkNotNull(relPos, "relPos (argument 1)");
       Preconditions.checkNotNull(blockPredicate, "predicate (argument 2)");
       return source -> new RelBlockPredicate(relPos.apply(source), blockPredicate.apply(source));
@@ -77,7 +77,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         relPos = parser.parseAndSuggestVec3i();
       } else if (paramIndex == 1) {

@@ -87,8 +87,8 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
     }
 
     @Override
-    public @NotNull BlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser parser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser0);
+    public @NotNull BlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      SimpleBlockPredicateSuggestedParser<?> parser = new SimpleBlockPredicateSuggestedParser<>(registryAccess, parser0);
       parser.parseBlockId();
       parser.parseProperties();
       return new SimpleBlockPredicate(parser.block, parser.propertyPredicates);

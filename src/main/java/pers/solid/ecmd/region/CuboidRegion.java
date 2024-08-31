@@ -183,7 +183,7 @@ public record CuboidRegion(Box box) implements Region {
     private PosArgument to;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       if (to == null) {
         if (EnhancedPosArgument.isInt(from)) {
           return source -> new SingleBlockPosRegion(from.toAbsoluteBlockPos(source));
@@ -196,7 +196,7 @@ public record CuboidRegion(Box box) implements Region {
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {
         from = parser.parseAndSuggestArgument(type);

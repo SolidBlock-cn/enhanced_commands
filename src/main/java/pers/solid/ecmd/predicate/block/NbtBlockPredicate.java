@@ -62,10 +62,10 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     }
 
     @Override
-    public @Nullable NbtBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder));
+    public @Nullable NbtBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '{') {
-        return new NbtBlockPredicate(new NbtPredicateSuggestedParser(parser.reader, parser.suggestionProviders).parseCompound(false, false));
+        return new NbtBlockPredicate(new NbtPredicateSuggestedParser<>(parser).parseCompound(false, false));
       } else {
         return null;
       }

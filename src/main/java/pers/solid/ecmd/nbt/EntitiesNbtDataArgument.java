@@ -23,16 +23,16 @@ public record EntitiesNbtDataArgument(EntitySelector entitySelector, NbtConcentr
     return getEntitiesNbtData(source);
   }
 
-  public static EntitiesNbtDataArgument handle(SuggestedParser suggestedParser, boolean requiresConcentration) throws CommandSyntaxException {
+  public static EntitiesNbtDataArgument handle(SuggestedParser<?> suggestedParser, boolean requiresConcentration) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(suggestedParser.reader);
     final EntitySelector selector = suggestedParser.parseAndSuggestArgument(EntityArgumentType.entities());
     if (suggestedParser.reader.canRead()) {
-      suggestedParser.suggestionProviders.clear();
+      suggestedParser.clearSuggestion();
     }
     if (requiresConcentration) {
       ParsingUtil.expectAndSkipWhitespace(suggestedParser.reader);
       final NbtConcentrationType nbtConcentrationType = suggestedParser.parseAndSuggestEnums(NbtConcentrationType.values(), NbtConcentrationType::getDisplayName, NbtConcentrationType.CODEC);
-      suggestedParser.suggestionProviders.clear();
+      suggestedParser.clearSuggestion();
       return new EntitiesNbtDataArgument(selector, nbtConcentrationType);
     } else {
       return new EntitiesNbtDataArgument(selector, null);

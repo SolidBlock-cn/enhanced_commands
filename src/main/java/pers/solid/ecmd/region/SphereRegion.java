@@ -109,12 +109,12 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     private double radius;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> new SphereRegion(radius, centerPos.toAbsolutePos(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {
         radius = parser.reader.readDouble();

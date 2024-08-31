@@ -99,14 +99,14 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     private int dimensionNumber = 0;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
       final int paramY = dimensionNumber < 2 ? x : y;
       final int paramZ = dimensionNumber < 3 ? x : z;
       return source -> new OutwardsRegion(center.toAbsoluteBlockPos(source), x, paramY, paramZ);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 0) {
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
         center = parser.parseAndSuggestArgument(argumentType);

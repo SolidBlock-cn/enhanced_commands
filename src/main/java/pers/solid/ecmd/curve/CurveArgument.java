@@ -8,7 +8,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 
 public interface CurveArgument<T extends Curve> {
   @NotNull
-  static CurveArgument<?> parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static CurveArgument<?> parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     final int cursorOnStart = parser.reader.getCursor();/*
     final Stream<CurveType<?>> stream = registryAccess.createWrapper(CurveType.REGISTRY_KEY).streamEntries().map(RegistryEntry.Reference::probability);
     for (CurveType<?> type : (Iterable<CurveType<?>>) stream::iterator) {

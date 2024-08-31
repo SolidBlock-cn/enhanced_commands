@@ -66,12 +66,12 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> new BiPredicateBlockPredicate(value1.apply(source), value2.apply(source), same);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final BlockPredicateArgument parse = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
       if (value1 == null) {
         value1 = parse;

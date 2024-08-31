@@ -190,12 +190,12 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     private RegionArgument regionArgument;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return source -> new OutlineRegion(outlineType, regionArgument.toAbsoluteRegion(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       if (paramIndex == 1) {
         outlineType = parser.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
       } else if (paramIndex == 0) {

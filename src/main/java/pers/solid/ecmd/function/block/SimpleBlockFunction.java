@@ -61,8 +61,8 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
     }
 
     @Override
-    public @NotNull SimpleBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockFunctionSuggestedParser parser = new SimpleBlockFunctionSuggestedParser(registryAccess, parser0);
+    public @NotNull SimpleBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+      SimpleBlockFunctionSuggestedParser<?> parser = new SimpleBlockFunctionSuggestedParser(registryAccess, parser0);
       parser.parseBlockId();
       parser.parseProperties();
       return new SimpleBlockFunction(parser.block, parser.propertyFunctions);

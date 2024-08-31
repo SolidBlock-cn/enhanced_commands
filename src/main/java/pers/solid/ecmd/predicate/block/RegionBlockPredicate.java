@@ -54,12 +54,12 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
     private RegionArgument regionArgument;
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) {
+    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
       return serverCommandSource -> new RegionBlockPredicate(regionArgument.toAbsoluteRegion(serverCommandSource));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       regionArgument = RegionArgument.parse(registryAccess, parser, suggestionsOnly);
     }
 

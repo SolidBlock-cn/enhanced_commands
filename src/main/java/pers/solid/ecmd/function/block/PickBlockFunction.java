@@ -73,7 +73,7 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions) implement
     boolean weighted = false;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException {
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
       if (weighted) {
         final double sum = pairs.stream().mapToDouble(ObjectDoublePair::rightDouble).sum();
         if (sum == 0) {
@@ -98,7 +98,7 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions) implement
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       final BlockFunctionArgument parse = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
       parser.reader.skipWhitespace();
       if (parser.reader.canRead() && StringReader.isAllowedNumber(parser.reader.peek())) {

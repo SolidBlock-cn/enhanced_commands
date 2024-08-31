@@ -19,11 +19,11 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<RegionArgumen
   private static final MapCodec<Region> CODEC = MapCodec.assumeMapUnsafe(Codec.of(Encoder.error("Cannot encode"), Decoder.error("Region NBT cannot hold this type of region")));
 
   @Override
-  public RegionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
-    parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.region.active_region"), suggestionsBuilder));
+  public RegionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+    parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.region.active_region"), suggestionsBuilder).buildFuture());
     if (parser.reader.canRead() && parser.reader.peek() == '$') {
       parser.reader.skip();
-      parser.suggestionProviders.clear();
+      parser.clearSuggestion();
       return source -> ((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow();
     } else {
       return null;

@@ -208,7 +208,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     private @Nullable DoubleDoublePair range;
 
     @Override
-    public CurveArgument<CircleCurve> getParseResult(CommandRegistryAccess registryAccess, SuggestedParser parser) throws CommandSyntaxException {
+    public CurveArgument<CircleCurve> getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
       if (this.radius == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, "radius");
       }
@@ -230,7 +230,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
       parseRadius(parser, suggestionsOnly);
       while (true) {
         final int cursorBeforeWhite = parser.reader.getCursor();
@@ -248,29 +248,29 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     /**
      * 解析半径。即：{@code <double> | from (<vector> | <double> <direction>)}。
      */
-    private void parseRadius(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    private void parseRadius(SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
       final int cursorBeforeKeyword = reader.getCursor();
       final String unquotedString = reader.readUnquotedString();
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder));
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
       if ("from".equals(unquotedString)) {
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         ParsingUtil.expectAndSkipWhitespace(reader);
         radius = Either.right(parser.parseAndSuggestVec3d());
       } else {
         reader.setCursor(cursorBeforeKeyword);
-        if (!CommandSource.shouldSuggest(reader.getRemaining(), "from")) parser.suggestionProviders.clear();
+        if (!CommandSource.shouldSuggest(reader.getRemaining(), "from")) parser.clearSuggestion();
 
         radius = Either.left(reader.readDouble());
       }
     }
 
-    private boolean parseAdditionalParameters(SuggestedParser parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      parser.suggestionProviders.clear();
-      parser.suggestionProviders.add((context, suggestionsBuilder) -> {
+    private boolean parseAdditionalParameters(SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      parser.setSuggestion((context, suggestionsBuilder) -> {
         if (center == null) ParsingUtil.suggestString("at", suggestionsBuilder);
         if (around == null) CommandSource.suggestMatching(List.of("around", "facing", "rotated"), suggestionsBuilder);
         if (range == null) ParsingUtil.suggestString("ranging", suggestionsBuilder);
+        return suggestionsBuilder.buildFuture();
       });
       final int cursorBeforeKeyword = parser.reader.getCursor();
       final String unquotedString = parser.reader.readUnquotedString();
@@ -281,7 +281,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
           parser.reader.setCursor(cursorBeforeKeyword);
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
         }
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         ParsingUtil.expectAndSkipWhitespace(parser.reader);
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
         center = parser.parseAndSuggestArgument(argumentType);
@@ -290,7 +290,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
           parser.reader.setCursor(cursorBeforeKeyword);
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
         }
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         ParsingUtil.expectAndSkipWhitespace(parser.reader);
         switch (unquotedString) {
           case "around" -> {
@@ -318,7 +318,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
           parser.reader.setCursor(cursorBeforeKeyword);
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
         }
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         ParsingUtil.expectAndSkipWhitespace(parser.reader);
         range = parseAngleRange(parser);
       } else {
@@ -328,9 +328,9 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
       return false;
     }
 
-    private DoubleDoublePair parseAngleRange(SuggestedParser parser) throws CommandSyntaxException {
+    private DoubleDoublePair parseAngleRange(SuggestedParser<?> parser) throws CommandSyntaxException {
       final double firstAngle = parser.parseAndSuggestAngle(true);
-      parser.suggestionProviders.clear();
+      parser.clearSuggestion();
       final StringReader reader = parser.reader;
       final int cursorBeforeWhitespace = reader.getCursor();
       reader.skipWhitespace();
@@ -338,7 +338,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
         reader.setCursor(reader.getCursor() + "..".length());
         reader.skipWhitespace();
         final double secondAngle = parser.parseAndSuggestAngle(true);
-        parser.suggestionProviders.clear();
+        parser.clearSuggestion();
         return DoubleDoublePair.of(firstAngle, secondAngle);
       } else {
         reader.setCursor(cursorBeforeWhitespace);

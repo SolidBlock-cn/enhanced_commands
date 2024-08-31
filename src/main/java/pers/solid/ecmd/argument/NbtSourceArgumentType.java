@@ -35,7 +35,7 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
   public NbtSourceArgument parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtSourceArgument nbtSourceArgument = NbtDataRegistry.handleSource(s, registryAccess, new SuggestedParser(reader), false);
+    final NbtSourceArgument nbtSourceArgument = NbtDataRegistry.handleSource(s, registryAccess, new SuggestedParser<>(reader), false);
     if (nbtSourceArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -52,7 +52,7 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
     final int cursorAfterString = reader.getCursor();
-    final SuggestedParser suggestedParser = new SuggestedParser(reader);
+    final SuggestedParser<S> suggestedParser = new SuggestedParser<S>(reader);
     final NbtSourceArgument nbtSourceArgument;
     try {
       nbtSourceArgument = NbtDataRegistry.handleSource(s, registryAccess, suggestedParser, true);

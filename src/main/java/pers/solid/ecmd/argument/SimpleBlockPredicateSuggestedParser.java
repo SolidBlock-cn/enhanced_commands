@@ -1,7 +1,9 @@
 package pers.solid.ecmd.argument;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.command.CommandRegistryAccess;
@@ -15,22 +17,23 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.predicate.property.*;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.parse.SuggestionProvider;
+import pers.solid.ecmd.util.parse.SuggestionAppender;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 /**
  * @see net.minecraft.command.argument.BlockArgumentParser
  */
-public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedParser {
+public class SimpleBlockPredicateSuggestedParser<S> extends SimpleBlockSuggestedParser<S> {
   public static final Text MATCH_ANY_VALUE = Text.translatable("enhanced_commands.block_predicate.any_value");
   public static final Text MATCH_NONE_VALUE = Text.translatable("enhanced_commands.block_predicate.none_value");
   public final List<PropertyPredicate<?>> propertyPredicates = new ArrayList<>();
   public final List<PropertyNamePredicate> propertyNamePredicates = new ArrayList<>();
 
-  public SimpleBlockPredicateSuggestedParser(CommandRegistryAccess registryAccess, SuggestedParser parser) {
-    super(registryAccess, parser.reader, parser.suggestionProviders);
+  public SimpleBlockPredicateSuggestedParser(CommandRegistryAccess registryAccess, SuggestedParser<S> parser) {
+    super(registryAccess, parser);
   }
 
   @NotNull
@@ -64,24 +67,24 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
 
   @Override
   protected <T extends Comparable<T>> void parsePropertyNameValue(Property<T> property, Comparator comparator) throws CommandSyntaxException {
-    suggestionProviders.clear();
+    clearSuggestion();
     final boolean usingEqual = comparator == Comparator.EQ || comparator == Comparator.NE;
     if (usingEqual) {
       addSpecialPropertyValueSuggestions();
     }
-    suggestionProviders.add((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder));
+    addSuggestion((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder));
     if (usingEqual) {
       if (reader.canRead() && reader.peek() == '*') {
         propertyPredicates.add(new ExistencePropertyPredicate<>(property, comparator == Comparator.EQ));
         reader.skip();
-        suggestionProviders.clear();
+        clearSuggestion();
         return;
       }
     }
     final LinkedHashSet<T> values = new LinkedHashSet<>(1);
-    suggestionProviders.clear();
+    clearSuggestion();
     while (true) {
-      suggestionProviders.add((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder, t -> !values.contains(t)));
+      addSuggestion((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder, t -> !values.contains(t)));
       final int cursorBeforeParseValue = reader.getCursor();
       final String valueName = reader.readString();
       final Optional<T> parse = property.parse(valueName);
@@ -94,7 +97,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
         throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(this.reader, valueName), cursorAfterParseValue);
       } else {
         values.add(parse.get());
-        suggestionProviders.clear();
+        clearSuggestion();
       }
       if (!usingEqual) break;
 
@@ -115,12 +118,12 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
   }
 
 
-  protected static <T extends Comparable<T>> void suggestValuesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder, Predicate<T> predicate) {
-    CommandSource.suggestMatching(property.getValues().stream().filter(predicate).map(property::name), suggestionsBuilder);
+  protected static <T extends Comparable<T>> CompletableFuture<Suggestions> suggestValuesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder, Predicate<T> predicate) {
+    return CommandSource.suggestMatching(property.getValues().stream().filter(predicate).map(property::name), suggestionsBuilder);
   }
 
   private void addSpecialPropertyValueSuggestions() {
-    suggestionProviders.add((context, suggestionsBuilder) -> {
+    addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         final String input = suggestionsBuilder.getInput().stripTrailing();
         if (input.endsWith("!=") || input.endsWith("=!")) {
@@ -129,6 +132,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
           suggestionsBuilder.suggest("*", MATCH_ANY_VALUE);
         }
       }
+      return suggestionsBuilder.buildFuture();
     });
   }
 
@@ -137,7 +141,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
    */
   @Override
   protected void parsePropertyNameValue(String propertyName, Comparator comparator) throws CommandSyntaxException {
-    suggestionProviders.clear();
+    clearSuggestion();
     final boolean usingEqual = comparator == Comparator.EQ || comparator == Comparator.NE;
     if (usingEqual) {
       addSpecialPropertyValueSuggestions();
@@ -148,13 +152,13 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
         if (reader.peek() == '*') {
           propertyNamePredicates.add(new ExistencePropertyNamePredicate(propertyName, comparator == Comparator.EQ));
           reader.skip();
-          suggestionProviders.clear();
+          clearSuggestion();
           return;
         }
       }
     }
     final LinkedHashSet<String> values = new LinkedHashSet<>(1);
-    final SuggestionProvider propertyValueSuggestion = (context, suggestionsBuilder) -> {
+    final SuggestionAppender propertyValueSuggestion = (context, suggestionsBuilder) -> {
       if (tagId != null) {
         for (RegistryEntry<Block> registryEntry : this.tagId) {
           Block block = registryEntry.value();
@@ -166,7 +170,7 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
       }
     };
     while (true) {
-      suggestionProviders.clear();
+      clearSuggestion();
       final int cursorBeforeValue = reader.getCursor();
       final String valueName = this.reader.readString();
       final int cursorAfterValue = reader.getCursor();
@@ -176,13 +180,13 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
       }
       values.add(valueName);
 
-      suggestionProviders.add(SuggestionProvider.offset((context, suggestionsBuilder) -> {
+      addSuggestion((context, suggestionsBuilder) -> {
         final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursorBeforeValue);
         propertyValueSuggestion.accept(context, offset);
         final SuggestionsBuilder offset2 = suggestionsBuilder.createOffset(cursorAfterValue);
-        PROPERTY_FINISHED.accept(context, offset2);
+        PROPERTY_FINISHED.getSuggestions((CommandContext<Object>) context, offset2);
         return offset.buildFuture().thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
-      }));
+      });
       if (!usingEqual) break;
 
       reader.skipWhitespace();
@@ -209,6 +213,6 @@ public class SimpleBlockPredicateSuggestedParser extends SimpleBlockSuggestedPar
 
   @Override
   protected void addComparatorTypeSuggestions() {
-    suggestionProviders.add((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).map(Comparator::asString), suggestionsBuilder));
+    addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).map(Comparator::asString), suggestionsBuilder));
   }
 }
