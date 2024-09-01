@@ -9,6 +9,8 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryElementCodec;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -26,6 +28,7 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
   Codec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.getCodec().dispatch(BlockPredicate::getType, BlockPredicateType::getCodec);
   Codec<BlockPredicate> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), SimpleBlockPredicate::block), MAP_CODEC);
   RegistryKey<Registry<BlockPredicate>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("block_predicate"));
+  Codec<RegistryEntry<BlockPredicate>> ENTRY_CODEC = RegistryElementCodec.of(REGISTRY_KEY, CODEC);
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
 

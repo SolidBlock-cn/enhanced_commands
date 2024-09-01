@@ -41,6 +41,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<RegionBlockPredicate> REGION = register(RegionBlockPredicate.Type.REGION_TYPE, "region");
   public static final LootConditionBlockPredicate.Type LOOT_CONDITION = register(LootConditionBlockPredicate.Type.LOOT_CONDITION_TYPE, "loot_condition");
   public static final CheckerboardBlockPredicate.Type CHECKERBOARD = register(CheckerboardBlockPredicate.Type.CHECKERBOARD_TYPE, "checkerboard");
+  public static final ReferenceBlockPredicate.ReferenceType REFERENCE = register(ReferenceBlockPredicate.ReferenceType.INSTANCE, "reference");
 
   private BlockPredicateTypes() {
   }

@@ -34,6 +34,8 @@ public final class ModCommandExceptionTypes {
   public static final DynamicCommandExceptionType CANNOT_PARSE = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.cannot_parse", reason));
   public static final DynamicCommandExceptionType MALFORMED_JSON = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.malformed_json", reason));
   public static final DynamicCommandExceptionType UNKNOWN_LOOT_TABLE_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.unknown_loot_table_predicate", reason));
+  public static final DynamicCommandExceptionType UNKNOWN_BLOCK_FUNCTION_ID = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.block_function.reference.unknown_id", reason));
+  public static final DynamicCommandExceptionType UNKNOWN_BLOCK_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.block_predicate.reference.unknown_id", reason));
   public static final DynamicCommandExceptionType INVALID_LOOT_TABLE = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.invalid_loot_table", reason));
   public static final SimpleCommandExceptionType EXPECTED_WHITESPACE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.parsing.expected_whitespace"));
 
