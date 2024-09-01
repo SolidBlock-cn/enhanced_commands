@@ -166,7 +166,7 @@ public final class ParsingUtil {
     final int cursorBeforeWhite = reader.getCursor();
     int cursorAfterLastUnit = cursorBeforeWhite;
     if (allowsSparse) reader.skipWhitespace();
-    parser.orSuggestIfEmpty((context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder).buildFuture());
+    parser.addSuggestion((context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder).buildFuture());
     if (reader.getString().startsWith(joiningString, reader.getCursor())) {
       final List<T> units = new ArrayList<>();
       units.add(first);

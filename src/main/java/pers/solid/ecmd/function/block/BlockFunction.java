@@ -38,7 +38,7 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
   BlockFunction EMPTY = EmptyBlockFunction.INSTANCE;
   RegistryKey<Registry<BlockFunction>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("block_function"));
   Codec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.getCodec().dispatch(BlockFunction::getType, BlockFunctionType::getCodec);
-  Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC);
+  Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC, blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? s : null);
   // todo try accepting id with omitted ns
   Codec<RegistryEntry<BlockFunction>> ENTRY_CODEC = RegistryElementCodec.of(REGISTRY_KEY, CODEC);
 

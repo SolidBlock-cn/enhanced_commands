@@ -65,7 +65,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
 
       // try to optimize with id?
       final int cursorBeforeId = parser.reader.getCursor();
-      parser.addSuggestion((context, builder) -> {
+      parser.setSuggestion((context, builder) -> {
         if (context.getSource() instanceof ServerCommandSource) {
           return CommandSource.suggestIdentifiers(registryAccess.getWrapperOrThrow(registryKey).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
         } else if (context.getSource() instanceof CommandSource commandSource) {
@@ -74,6 +74,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
           return Suggestions.empty();
         }
       });
+      parser.terminateSuggestionsIfNotEmpty();
       if (allowSparse) parser.reader.skipWhitespace();
       final Identifier id = Identifier.fromCommandInput(parser.reader);
       final int cursorAfterId = parser.reader.getCursor();

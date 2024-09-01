@@ -5,6 +5,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -75,23 +76,27 @@ public class SuggestedParser<S> {
     this.suggestions.addAll(suggestions);
   }
 
+  public void terminateSuggestionsIfNotEmpty() {
+    suggestions.add(Special.TERMINATE_IF_NOT_EMPTY.forceCast());
+  }
+
+  public enum Special implements SuggestionProvider<Void> {
+    TERMINATE, TERMINATE_IF_NOT_EMPTY;
+    public static final Suggestions TERMINATE_IF_NOT_EMPTY_SUGGESTIONS = new Suggestions(StringRange.at(114514), List.of());
+
+    @SuppressWarnings("unchecked")
+    public <S> SuggestionProvider<S> forceCast() {
+      return (SuggestionProvider<S>) this;
+    }
+
+    @Override
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<Void> context, SuggestionsBuilder builder) {
+      return CompletableFuture.completedFuture(TERMINATE_IF_NOT_EMPTY_SUGGESTIONS);
+    }
+  }
+
   public void clearSuggestion() {
     this.suggestions.clear();
-  }
-
-  public SuggestionProvider<S> getMergedSuggestion() {
-    if (suggestions.isEmpty()) {
-      return (context, builder) -> builder.buildFuture();
-    } else if (suggestions.size() == 1) {
-      return suggestions.getFirst();
-    }
-    final List<SuggestionProvider<S>> copy = List.copyOf(suggestions);
-    return (context, builder) -> buildSuggestions(copy, context, builder);
-  }
-
-  public void orSuggestIfEmpty(SuggestionProvider<S> suggestionProvider) {
-    final SuggestionProvider<S> mergedSuggestion = getMergedSuggestion();
-    setSuggestion((context, builder) -> mergedSuggestion.getSuggestions(context, builder).thenCombine(suggestionProvider.getSuggestions(context, builder), (suggestions1, suggestions2) -> suggestions1.isEmpty() ? suggestions2 : suggestions1));
   }
 
   /**
@@ -266,6 +271,9 @@ public class SuggestedParser<S> {
     }
     final List<CompletableFuture<Suggestions>> completableFutures = new ArrayList<>();
     for (SuggestionProvider<S> suggestionProvider : suggestions) {
+      if (suggestionProvider == Special.TERMINATE) {
+        break;
+      }
       try {
         completableFutures.add(suggestionProvider.getSuggestions(context, builder));
       } catch (CommandSyntaxException ignored) {
@@ -281,7 +289,16 @@ public class SuggestedParser<S> {
           .thenRun(() -> {
             final List<Suggestions> results = new ArrayList<>();
             for (final CompletableFuture<Suggestions> future : completableFutures) {
-              results.add(future.join());
+              final Suggestions join = future.join();
+              if (join == Special.TERMINATE_IF_NOT_EMPTY_SUGGESTIONS) {
+                // future == null，表示需要标识当建议项不为 null 时，直接结束建议。
+                if (!(results.isEmpty() || results.getLast().isEmpty())) {
+                  break;
+                } else {
+                  continue;
+                }
+              }
+              results.add(join);
             }
             result.complete(Suggestions.merge(builder.getInput(), results));
           });

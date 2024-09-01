@@ -3,13 +3,13 @@ package pers.solid.ecmd.util.codec;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Decoder;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -90,10 +90,12 @@ public final class CodecUtil {
   }
 
   /**
-   * 组合两个 codec。反序列化过程中，当读取到字符串值时，按照 {@code stringBased} 读取，如果读取出错，则正常抛出错误。其他情况下按照 {@code mapBased} 读取。反序列化时一律按照 {@code mapBased} 反序列化。
+   * <p>组合两个 codec。
+   * <p>反序列化过程中，当读取到字符串值时，按照 {@code stringBased} 读取，如果读取出错，则正常抛出错误。其他情况下按照 {@code mapBased} 读取。
+   * <p>序列化时，根据 {@code function} 进行转化，如果能转化（即结果不为 {@code null}），则按 {@code stringBased} 进行序列化，否则按照 {@code mapBased} 进行序列化。
    */
-  public static <A> Codec<A> combined(Codec<? extends A> stringBased, Codec<A> mapBased) {
-    return Codec.of(mapBased, new Decoder<>() {
+  public static <A, B extends A> Codec<A> combined(Codec<B> stringBased, Codec<A> mapBased, Function<A, @Nullable B> function) {
+    return new Codec<>() {
       @Override
       public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> ops, T input) {
         final DataResult<String> stringResult = ops.getStringValue(input);
@@ -101,9 +103,19 @@ public final class CodecUtil {
       }
 
       @Override
-      public String toString() {
-        return stringBased + " or " + mapBased;
+      public <T> DataResult<T> encode(A input, DynamicOps<T> ops, T prefix) {
+        final B cast = function.apply(input);
+        if (cast == null) {
+          return mapBased.encode(input, ops, prefix);
+        } else {
+          return stringBased.encode(cast, ops, prefix);
+        }
       }
-    }, "combined(" + stringBased.toString() + ", " + mapBased.toString() + ")");
+
+      @Override
+      public String toString() {
+        return "combined(" + stringBased.toString() + ", " + mapBased.toString() + ")";
+      }
+    };
   }
 }

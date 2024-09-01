@@ -50,7 +50,7 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
     if (!(parseUnit instanceof PropertiesNamesBlockPredicate) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
       // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
       // 尝试读取属性
-      parser.orSuggestIfEmpty((context, suggestionsBuilder) -> {
+      parser.addSuggestion((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           suggestionsBuilder.suggest("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES);
         }
@@ -63,7 +63,7 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
       } else propertyNamePredicates = null;
     } else propertyNamePredicates = null;
     NbtPredicate nbtPredicate;
-    parser.orSuggestIfEmpty((context, suggestionsBuilder) -> {
+    parser.addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("{", NbtPredicateSuggestedParser.START_OF_COMPOUND);
       }

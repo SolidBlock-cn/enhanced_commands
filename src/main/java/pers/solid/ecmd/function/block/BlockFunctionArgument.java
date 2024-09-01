@@ -57,10 +57,11 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
       return parseUnit;
     }
     List<PropertyNameFunction> propertyNameFunctions;
+
     if (!(parseUnit instanceof PropertyNamesBlockFunction) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
       // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
       // 尝试读取属性
-      parser.orSuggestIfEmpty((context, builder) -> builder.suggest("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES).buildFuture());
+      parser.addSuggestion((context, builder) -> builder.suggest("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
         final SimpleBlockFunctionSuggestedParser<S> suggestedParser = new SimpleBlockFunctionSuggestedParser<>(registryAccess, parser);
         suggestedParser.parsePropertyNames();
@@ -72,7 +73,7 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
       propertyNameFunctions = null;
     }
     CompoundNbtFunction nbtFunction;
-    parser.orSuggestIfEmpty((context, suggestionsBuilder) -> suggestionsBuilder.suggest("{", NbtPredicateSuggestedParser.START_OF_COMPOUND).buildFuture());
+    parser.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("{", NbtPredicateSuggestedParser.START_OF_COMPOUND).buildFuture());
     if (parser.reader.canRead() && parser.reader.peek() == '{') {
       // 尝试读取 NBT
       nbtFunction = new NbtFunctionSuggestedParser<>(parser).parseCompound(false);

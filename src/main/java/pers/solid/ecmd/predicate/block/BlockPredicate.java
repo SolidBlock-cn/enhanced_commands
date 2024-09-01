@@ -26,7 +26,7 @@ import java.util.function.Predicate;
 
 public interface BlockPredicate extends Predicate<CachedBlockPosition>, ExpressionConvertible, BlockPredicateArgument {
   Codec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.getCodec().dispatch(BlockPredicate::getType, BlockPredicateType::getCodec);
-  Codec<BlockPredicate> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), SimpleBlockPredicate::block), MAP_CODEC);
+  Codec<BlockPredicate> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), SimpleBlockPredicate::block), MAP_CODEC, blockPredicate -> blockPredicate instanceof SimpleBlockPredicate s && s.properties().isEmpty() ? s : null);
   RegistryKey<Registry<BlockPredicate>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("block_predicate"));
   Codec<RegistryEntry<BlockPredicate>> ENTRY_CODEC = RegistryElementCodec.of(REGISTRY_KEY, CODEC);
 
