@@ -24,6 +24,10 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
       Vec3d.CODEC.optionalFieldOf("offset", Vec3d.ZERO).forGetter(CheckerboardBlockPredicate::offset)
   ).apply(i, CheckerboardBlockPredicate::new));
 
+  public CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> predicates) {
+    this(predicates, Vec3d.ZERO, UNIT, Vec3d.ZERO);
+  }
+
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     final BlockPredicate entry = getEntry(predicates, cachedBlockPosition.getBlockPos());

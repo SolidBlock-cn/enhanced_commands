@@ -94,3 +94,9 @@ publishing {
         // retrieving dependencies.
     }
 }
+
+
+fabricApi {
+    // 启用数据生成
+    configureDataGeneration()
+}

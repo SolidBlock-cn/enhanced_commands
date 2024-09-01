@@ -18,6 +18,9 @@
     ],
     "main": [
       "pers.solid.ecmd.EnhancedCommands"
+    ],
+    "fabric-datagen": [
+      "pers.solid.ecmd.data.EnhancedCommandsDataGenerator"
     ]
   },
 

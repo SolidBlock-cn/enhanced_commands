@@ -26,6 +26,10 @@ import java.util.stream.Collectors;
 public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
   public static final MapCodec<SimpleBlockFunction> CODEC = Registries.BLOCK.getCodec().dispatchMap("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
 
+  public SimpleBlockFunction(Block block) {
+    this(block, Collections.emptyList());
+  }
+
   @Override
   public @NotNull String asString() {
     final StringBuilder stringBuilder = new StringBuilder(Registries.BLOCK.getId(block).toString());

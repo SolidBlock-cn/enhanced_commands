@@ -26,6 +26,10 @@ public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> fun
       Vec3d.CODEC.optionalFieldOf("offset", Vec3d.ZERO).forGetter(CheckerboardBlockFunction::offset)
   ).apply(i, CheckerboardBlockFunction::new));
 
+  public CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> functions) {
+    this(functions, Vec3d.ZERO, UNIT, Vec3d.ZERO);
+  }
+
   @Override
   @NotNull
   public BlockFunctionType<?> getType() {

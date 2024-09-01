@@ -24,11 +24,16 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
   public static final MapCodec<SimpleBlockPredicate> CODEC = Registries.BLOCK.getCodec().dispatchMap("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
+
+  public SimpleBlockPredicate(Block block) {
+    this(block, Collections.emptyList());
+  }
 
 
   @Override
