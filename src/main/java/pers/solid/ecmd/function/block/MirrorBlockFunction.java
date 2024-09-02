@@ -35,7 +35,7 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
   }
 
   @Override
-  public @NotNull BlockFunctionType<MirrorBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.MIRROR;
   }
 

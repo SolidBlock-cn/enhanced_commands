@@ -46,7 +46,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
   }
 
   @Override
-  public @NotNull RegionType<UnionRegion> getType() {
+  public @NotNull Type getType() {
     return RegionTypes.UNION;
   }
 

@@ -86,7 +86,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.PROPERTIES_NBT_COMBINATION;
   }
 

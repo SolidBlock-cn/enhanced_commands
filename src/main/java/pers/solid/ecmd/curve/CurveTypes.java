@@ -5,13 +5,13 @@ import net.minecraft.registry.Registry;
 import pers.solid.ecmd.EnhancedCommands;
 
 public final class CurveTypes {
-  public static final StraightCurve.Type STRAIGHT = register(StraightCurve.Type.INSTANCE, "straight");
-  public static final CircleCurve.Type CIRCLE = register(CircleCurve.Type.INSTANCE, "circle");
+  public static final StraightCurve.Type STRAIGHT = register("straight", StraightCurve.Type.INSTANCE);
+  public static final CircleCurve.Type CIRCLE = register("circle", CircleCurve.Type.INSTANCE);
 
   private CurveTypes() {
   }
 
-  public static <T extends CurveType<?>> T register(T curveType, String name) {
+  public static <T extends CurveType<?>> T register(String name, T curveType) {
     return Registry.register(CurveType.REGISTRY, EnhancedCommands.id(name), curveType);
   }
 

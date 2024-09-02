@@ -57,7 +57,7 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockFunctionType<IdContainBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.ID_CONTAIN;
   }
 

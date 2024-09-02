@@ -53,7 +53,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
   }
 
   @Override
-  public @NotNull BlockFunctionType<PropertiesNbtCombinationBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.PROPERTIES_NBT_COMBINATION;
   }
 

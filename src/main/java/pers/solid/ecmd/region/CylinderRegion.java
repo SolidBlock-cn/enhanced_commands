@@ -112,7 +112,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull RegionType<CylinderRegion> getType() {
+  public @NotNull Type getType() {
     return RegionTypes.CYLINDER;
   }
 

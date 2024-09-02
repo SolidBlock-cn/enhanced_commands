@@ -50,7 +50,7 @@ public record AllBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.ALL;
   }
 

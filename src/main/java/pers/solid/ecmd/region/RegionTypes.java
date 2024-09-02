@@ -22,26 +22,26 @@ public final class RegionTypes {
     return regionType == null ? null : regionType.tooltip();
   }));
 
-  public static final SingleBlockPosRegion.Type SINGLE = register(SingleBlockPosRegion.Type.INSTANCE, "single");
-  public static final CuboidRegion.Type CUBOID = register(CuboidRegion.Type.CUBOID_TYPE, "cuboid");
-  public static final SphereRegion.Type SPHERE = register(SphereRegion.Type.SPHERE_TYPE, "sphere");
-  public static final IntersectRegion.Type INTERSECT = register(IntersectRegion.Type.INTERSECT_TYPE, "intersect");
-  public static final UnionRegion.Type UNION = register(UnionRegion.Type.UNION_TYPE, "union");
-  public static final OutlineRegion.Type OUTLINE = register(OutlineRegion.Type.OUTLINE_TYPE, "outline");
-  public static final CylinderRegion.Type CYLINDER = register(CylinderRegion.Type.CYLINDER_TYPE, "cylinder");
-  public static final HollowCylinderRegion.Type HOLLOW_CYLINDER = register(HollowCylinderRegion.Type.HOLLOW_CYLINDER_TYPE, "hollow_cylinder");
-  public static final CuboidOutlineRegion.Type CUBOID_OUTLINE = register(CuboidOutlineRegion.Type.CUBOID_OUTLINE_TYPE, "cuboid_outline");
-  public static final CuboidWallRegion.Type CUBOID_WALL = register(CuboidWallRegion.Type.CUBOID_WALL_TYPE, "cuboid_wall");
-  public static final OutwardsRegion.Type OUTWARDS = register(OutwardsRegion.Type.INSTANCE, "outwards");
-  public static final ActiveRegionType ACTIVE_REGION = register(ActiveRegionType.TYPE, "active_region");
+  public static final SingleBlockPosRegion.Type SINGLE = register("single", SingleBlockPosRegion.Type.INSTANCE);
+  public static final CuboidRegion.Type CUBOID = register("cuboid", CuboidRegion.Type.CUBOID_TYPE);
+  public static final SphereRegion.Type SPHERE = register("sphere", SphereRegion.Type.SPHERE_TYPE);
+  public static final IntersectRegion.Type INTERSECT = register("intersect", IntersectRegion.Type.INTERSECT_TYPE);
+  public static final UnionRegion.Type UNION = register("union", UnionRegion.Type.UNION_TYPE);
+  public static final OutlineRegion.Type OUTLINE = register("outline", OutlineRegion.Type.OUTLINE_TYPE);
+  public static final CylinderRegion.Type CYLINDER = register("cylinder", CylinderRegion.Type.CYLINDER_TYPE);
+  public static final HollowCylinderRegion.Type HOLLOW_CYLINDER = register("hollow_cylinder", HollowCylinderRegion.Type.HOLLOW_CYLINDER_TYPE);
+  public static final CuboidOutlineRegion.Type CUBOID_OUTLINE = register("cuboid_outline", CuboidOutlineRegion.Type.CUBOID_OUTLINE_TYPE);
+  public static final CuboidWallRegion.Type CUBOID_WALL = register("cuboid_wall", CuboidWallRegion.Type.CUBOID_WALL_TYPE);
+  public static final OutwardsRegion.Type OUTWARDS = register("outwards", OutwardsRegion.Type.INSTANCE);
+  public static final ActiveRegionType ACTIVE_REGION = register("active_region", ActiveRegionType.TYPE);
 
-  public static final RegionSelection.Type BUILDER = register(RegionSelection.Type.INSTANCE, "builder");
+  public static final RegionSelection.Type BUILDER = register("builder", RegionSelection.Type.INSTANCE);
 
   private RegionTypes() {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T extends RegionType<?>> T register(T value, String name) {
+  private static <T extends RegionType<?>> T register(String name, T value) {
     final String functionName = value.functionName();
     if (functionName != null) {
       FUNCTIONS.put(functionName, value);

@@ -107,7 +107,7 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
   }
 
   @Override
-  public @NotNull RegionType<HollowCylinderRegion> getType() {
+  public @NotNull Type getType() {
     return RegionTypes.HOLLOW_CYLINDER;
   }
 

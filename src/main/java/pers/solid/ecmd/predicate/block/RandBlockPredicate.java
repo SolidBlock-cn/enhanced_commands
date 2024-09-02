@@ -60,7 +60,7 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.RAND;
   }
 

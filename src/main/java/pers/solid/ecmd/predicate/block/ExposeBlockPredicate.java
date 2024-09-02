@@ -69,7 +69,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.EXPOSE;
   }
 

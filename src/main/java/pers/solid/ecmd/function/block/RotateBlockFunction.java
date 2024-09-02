@@ -29,7 +29,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
   }
 
   @Override
-  public @NotNull BlockFunctionType<RotateBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.ROTATE;
   }
 

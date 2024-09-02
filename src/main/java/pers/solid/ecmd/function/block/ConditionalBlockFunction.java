@@ -45,7 +45,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
   }
 
   @Override
-  public @NotNull BlockFunctionType<ConditionalBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.CONDITIONAL;
   }
 

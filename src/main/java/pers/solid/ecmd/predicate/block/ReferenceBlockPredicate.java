@@ -25,7 +25,7 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
   }
 
   @Override
-  public @NotNull ReferenceType getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.REFERENCE;
   }
 
@@ -36,13 +36,13 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
 
   @Override
   public CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-    return ReferenceType.INSTANCE.createExceptionForUnknownId(reader, identifier);
+    return Type.INSTANCE.createExceptionForUnknownId(reader, identifier);
   }
 
-  public static class ReferenceType extends ReferenceEntry.PrefixedIdParser<BlockPredicateArgument, BlockPredicate> implements BlockPredicateType<ReferenceBlockPredicate> {
-    public static final ReferenceType INSTANCE = new ReferenceType();
+  public static class Type extends ReferenceEntry.PrefixedIdParser<BlockPredicateArgument, BlockPredicate> implements BlockPredicateType<ReferenceBlockPredicate> {
+    public static final Type INSTANCE = new Type();
 
-    protected ReferenceType() {
+    protected Type() {
       super('$', Text.translatable("enhanced_commands.block_predicate.reference"), BlockPredicate.REGISTRY_KEY);
     }
 

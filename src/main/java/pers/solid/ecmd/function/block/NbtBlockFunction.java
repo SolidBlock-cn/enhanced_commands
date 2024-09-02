@@ -33,7 +33,7 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
   }
 
   @Override
-  public @NotNull BlockFunctionType<NbtBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.NBT;
   }
 

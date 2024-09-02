@@ -39,7 +39,7 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
   }
 
   @Override
-  public @NotNull BlockFunctionType<DryBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.DRY;
   }
 

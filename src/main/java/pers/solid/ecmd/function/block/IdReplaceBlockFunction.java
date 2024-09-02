@@ -65,7 +65,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public @NotNull BlockFunctionType<IdReplaceBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.ID_REPLACE;
   }
 

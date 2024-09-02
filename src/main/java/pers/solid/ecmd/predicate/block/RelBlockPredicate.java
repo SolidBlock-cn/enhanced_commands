@@ -37,7 +37,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.REL;
   }
 

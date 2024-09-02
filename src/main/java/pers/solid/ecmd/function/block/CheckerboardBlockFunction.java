@@ -32,7 +32,7 @@ public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> fun
 
   @Override
   @NotNull
-  public BlockFunctionType<?> getType() {
+  public Type getType() {
     return BlockFunctionTypes.CHECKERBOARD;
   }
 

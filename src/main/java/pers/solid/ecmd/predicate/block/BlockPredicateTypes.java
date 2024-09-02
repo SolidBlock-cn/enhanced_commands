@@ -23,31 +23,32 @@ public final class BlockPredicateTypes {
   public static final Parser<BlockPredicateArgument> PARENTHESES_PARSER = (registryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly, true), parser);
   public static final Parser<BlockPredicateArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
   public static final List<Parser<BlockPredicateArgument>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
-  public static final BlockPredicateType<SimpleBlockPredicate> SIMPLE = register(SimpleBlockPredicate.Type.SIMPLE_TYPE, "simple");
-  public static final BlockPredicateType<NegatingBlockPredicate> NEGATING = register(NegatingBlockPredicate.Type.NEGATING_TYPE, "negating");
-  public static final BlockPredicateType<HorizontalOffsetBlockPredicate> HORIZONTAL_OFFSET = register(HorizontalOffsetBlockPredicate.Type.HORIZONTAL_OFFSET_TYPE, "horizontal_offset");
-  public static final BlockPredicateType<PropertiesNamesBlockPredicate> PROPERTY_NAMES = register(PropertiesNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE, "property_names");
-  public static final BlockPredicateType<NbtBlockPredicate> NBT = register(NbtBlockPredicate.Type.NBT_TYPE, "nbt");
-  public static final BlockPredicateType<PropertiesNbtCombinationBlockPredicate> PROPERTIES_NBT_COMBINATION = register(PropertiesNbtCombinationBlockPredicate.Type.PROPERTIES_NBT_COMBINATION_TYPE, "properties_nbt_combination");
-  public static final BlockPredicateType<ConstantBlockPredicate> CONSTANT = register(ConstantBlockPredicate.Type.CONSTANT_TYPE, "constant");
-  public static final BlockPredicateType<TagBlockPredicate> TAG = register(TagBlockPredicate.Type.TAG_TYPE, "tag");
-  public static final BlockPredicateType<AnyBlockPredicate> ANY = register(AnyBlockPredicate.Type.ANY_TYPE, "any");
-  public static final BlockPredicateType<AllBlockPredicate> ALL = register(AllBlockPredicate.Type.ALL_TYPE, "all");
-  public static final BlockPredicateType<RandBlockPredicate> RAND = register(RandBlockPredicate.Type.RAND_TYPE, "rand");
-  public static final BlockPredicateType<BiPredicateBlockPredicate> BI_PREDICATE = register(BiPredicateBlockPredicate.Type.BI_PREDICATE_TYPE, "bi_predicate");
-  public static final BlockPredicateType<RelBlockPredicate> REL = register(RelBlockPredicate.Type.REL_TYPE, "rel");
-  public static final BlockPredicateType<ExposeBlockPredicate> EXPOSE = register(ExposeBlockPredicate.Type.EXPOSE_TYPE, "expose");
-  public static final BlockPredicateType<IdContainBlockPredicate> ID_CONTAIN = register(IdContainBlockPredicate.Type.ID_CONTAIN_TYPE, "id_contain");
-  public static final BlockPredicateType<RegionBlockPredicate> REGION = register(RegionBlockPredicate.Type.REGION_TYPE, "region");
-  public static final LootConditionBlockPredicate.Type LOOT_CONDITION = register(LootConditionBlockPredicate.Type.LOOT_CONDITION_TYPE, "loot_condition");
-  public static final CheckerboardBlockPredicate.Type CHECKERBOARD = register(CheckerboardBlockPredicate.Type.CHECKERBOARD_TYPE, "checkerboard");
-  public static final ReferenceBlockPredicate.ReferenceType REFERENCE = register(ReferenceBlockPredicate.ReferenceType.INSTANCE, "reference");
+
+  public static final SimpleBlockPredicate.Type SIMPLE = register("simple", SimpleBlockPredicate.Type.SIMPLE_TYPE);
+  public static final NegatingBlockPredicate.Type NEGATING = register("negating", NegatingBlockPredicate.Type.NEGATING_TYPE);
+  public static final HorizontalOffsetBlockPredicate.Type HORIZONTAL_OFFSET = register("horizontal_offset", HorizontalOffsetBlockPredicate.Type.HORIZONTAL_OFFSET_TYPE);
+  public static final PropertiesNamesBlockPredicate.Type PROPERTY_NAMES = register("property_names", PropertiesNamesBlockPredicate.Type.PROPERTY_NAMES_TYPE);
+  public static final NbtBlockPredicate.Type NBT = register("nbt", NbtBlockPredicate.Type.NBT_TYPE);
+  public static final PropertiesNbtCombinationBlockPredicate.Type PROPERTIES_NBT_COMBINATION = register("properties_nbt_combination", PropertiesNbtCombinationBlockPredicate.Type.PROPERTIES_NBT_COMBINATION_TYPE);
+  public static final ConstantBlockPredicate.Type CONSTANT = register("constant", ConstantBlockPredicate.Type.CONSTANT_TYPE);
+  public static final TagBlockPredicate.Type TAG = register("tag", TagBlockPredicate.Type.TAG_TYPE);
+  public static final AnyBlockPredicate.Type ANY = register("any", AnyBlockPredicate.Type.ANY_TYPE);
+  public static final AllBlockPredicate.Type ALL = register("all", AllBlockPredicate.Type.ALL_TYPE);
+  public static final RandBlockPredicate.Type RAND = register("rand", RandBlockPredicate.Type.RAND_TYPE);
+  public static final BiPredicateBlockPredicate.Type BI_PREDICATE = register("bi_predicate", BiPredicateBlockPredicate.Type.BI_PREDICATE_TYPE);
+  public static final RelBlockPredicate.Type REL = register("rel", RelBlockPredicate.Type.REL_TYPE);
+  public static final ExposeBlockPredicate.Type EXPOSE = register("expose", ExposeBlockPredicate.Type.EXPOSE_TYPE);
+  public static final IdContainBlockPredicate.Type ID_CONTAIN = register("id_contain", IdContainBlockPredicate.Type.ID_CONTAIN_TYPE);
+  public static final RegionBlockPredicate.Type REGION = register("region", RegionBlockPredicate.Type.REGION_TYPE);
+  public static final LootConditionBlockPredicate.Type LOOT_CONDITION = register("loot_condition", LootConditionBlockPredicate.Type.LOOT_CONDITION_TYPE);
+  public static final CheckerboardBlockPredicate.Type CHECKERBOARD = register("checkerboard", CheckerboardBlockPredicate.Type.CHECKERBOARD_TYPE);
+  public static final ReferenceBlockPredicate.Type REFERENCE = register("reference", ReferenceBlockPredicate.Type.INSTANCE);
 
   private BlockPredicateTypes() {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T extends BlockPredicateType<?>> T register(T value, String name) {
+  private static <T extends BlockPredicateType<?>> T register(String name, T value) {
     if (value != SimpleBlockPredicate.Type.SIMPLE_TYPE && value instanceof Parser<?> parser) {
       PARSERS.add((Parser<BlockPredicateArgument>) parser);
     }

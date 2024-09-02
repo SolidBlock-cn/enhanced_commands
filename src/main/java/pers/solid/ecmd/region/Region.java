@@ -3,12 +3,16 @@ package pers.solid.ecmd.region;
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.GeoUtil;
 
@@ -21,16 +25,8 @@ import java.util.stream.Stream;
  */
 @Unmodifiable
 public interface Region extends Iterable<BlockPos>, ExpressionConvertible, RegionArgument {
+  RegistryKey<Registry<Region>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region"));
   Codec<Region> CODEC = RegionType.REGISTRY.getCodec().dispatch(Region::getType, RegionType::getCodec);
-
-  static @NotNull Region fromNbt(@NotNull NbtElement nbtElement) {
-    return CODEC.decode(NbtOps.INSTANCE, nbtElement).getOrThrow().getFirst();
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <R extends Region> NbtElement encode(Codec<R> codec, Region region) {
-    return codec.encodeStart(NbtOps.INSTANCE, (R) region).result().orElseThrow();
-  }
 
   /**
    * 判断方块坐标是否在该区域内。其默认的实现方式是判断方块坐标的中心位置。
@@ -170,10 +166,5 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
   @Override
   default Region toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException {
     return this;
-  }
-
-  @ApiStatus.NonExtendable
-  default NbtElement createNbt() {
-    return encode(CODEC, this);
   }
 }

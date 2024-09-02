@@ -23,34 +23,35 @@ public final class BlockFunctionTypes {
   public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (registryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly, true), parser);
   public static final Parser<BlockFunctionArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
   public static final List<Parser<BlockFunctionArgument>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
-  public static final BlockFunctionType<SimpleBlockFunction> SIMPLE = register(SimpleBlockFunction.Type.SIMPLE_TYPE, "simple");
-  public static final BlockFunctionType<PropertyNamesBlockFunction> PROPERTY_NAMES = register(PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE, "property_names");
-  public static final BlockFunctionType<NbtBlockFunction> NBT = register(NbtBlockFunction.Type.NBT_TYPE, "nbt");
-  public static final BlockFunctionType<PropertiesNbtCombinationBlockFunction> PROPERTIES_NBT_COMBINATION = register(PropertiesNbtCombinationBlockFunction.Type.PROPERTIES_NBT_COMBINATION_TYPE, "properties_nbt_combination");
-  public static final BlockFunctionType<EmptyBlockFunction> EMPTY = register(EmptyBlockFunction.INSTANCE, "empty");
-  public static final BlockFunctionType<RandomBlockFunction> RANDOM = register(RandomBlockFunction.Type.RANDOM_TYPE, "random");
-  public static final BlockFunctionType<TagBlockFunction> TAG = register(TagBlockFunction.Type.TAG_TYPE, "tag");
-  public static final BlockFunctionType<UseOriginalBlockFunction> USE_ORIGINAL = register(UseOriginalBlockFunction.Type.USE_ORIGINAL_TYPE, "use_original");
-  public static final BlockFunctionType<PickBlockFunction> PICK = register(PickBlockFunction.Type.PICK_TYPE, "pick");
-  public static final BlockFunctionType<DryBlockFunction> DRY = register(DryBlockFunction.Type.DRY_TYPE, "dry");
-  public static final BlockFunctionType<OverlayBlockFunction> OVERLAY = register(OverlayBlockFunction.Type.OVERLAY_TYPE, "overlay");
-  public static final BlockFunctionType<FilterBlockFunction> FILTER = register(FilterBlockFunction.Type.FILTER_TYPE, "filter");
-  public static final BlockFunctionType<IdContainBlockFunction> ID_CONTAIN = register(IdContainBlockFunction.Type.ID_CONTAIN_TYPE, "id_contain");
-  public static final BlockFunctionType<StonecutBlockFunction> STONE_CUT = register(StonecutBlockFunction.Type.STONE_CUT_TYPE, "stonecut");
-  public static final BlockFunctionType<ConditionalBlockFunction> CONDITIONAL = register(ConditionalBlockFunction.Type.CONDITIONAL_TYPE, "conditional");
-  public static final ConditionsBlockFunction.Type CONDITIONS = register(ConditionsBlockFunction.Type.CONDITIONS_TYPE, "conditions");
-  public static final BlockFunctionType<IdReplaceBlockFunction> ID_REPLACE = register(IdReplaceBlockFunction.Type.ID_REPLACE_TYPE, "id_replace");
-  public static final BlockFunctionType<RotateBlockFunction> ROTATE = register(RotateBlockFunction.Type.ROTATE_TYPE, "rotate");
-  public static final BlockFunctionType<MirrorBlockFunction> MIRROR = register(MirrorBlockFunction.Type.MIRROR_TYPE, "mirror");
-  public static final BlockFunctionType<CheckerboardBlockFunction> CHECKERBOARD = register(CheckerboardBlockFunction.Type.CHECKERBOARD_TYPE, "checkerboard");
-  public static final BlockFunctionType<CheckerboardTagBlockFunction> CHECKERBOARD_TAG = register(CheckerboardTagBlockFunction.Type.CHECKERBOARD_TAG_TYPE, "checkerboard-tag");
-  public static final BlockFunctionType<ReferenceBlockFunction> REFERENCE = register(ReferenceBlockFunction.ReferenceType.INSTANCE, "reference");
+
+  public static final SimpleBlockFunction.Type SIMPLE = register("simple", SimpleBlockFunction.Type.SIMPLE_TYPE);
+  public static final PropertyNamesBlockFunction.Type PROPERTY_NAMES = register("property_names", PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE);
+  public static final NbtBlockFunction.Type NBT = register("nbt", NbtBlockFunction.Type.NBT_TYPE);
+  public static final PropertiesNbtCombinationBlockFunction.Type PROPERTIES_NBT_COMBINATION = register("properties_nbt_combination", PropertiesNbtCombinationBlockFunction.Type.PROPERTIES_NBT_COMBINATION_TYPE);
+  public static final EmptyBlockFunction EMPTY = register("empty", EmptyBlockFunction.INSTANCE);
+  public static final RandomBlockFunction.Type RANDOM = register("random", RandomBlockFunction.Type.RANDOM_TYPE);
+  public static final TagBlockFunction.Type TAG = register("tag", TagBlockFunction.Type.TAG_TYPE);
+  public static final UseOriginalBlockFunction.Type USE_ORIGINAL = register("use_original", UseOriginalBlockFunction.Type.USE_ORIGINAL_TYPE);
+  public static final PickBlockFunction.Type PICK = register("pick", PickBlockFunction.Type.PICK_TYPE);
+  public static final DryBlockFunction.Type DRY = register("dry", DryBlockFunction.Type.DRY_TYPE);
+  public static final OverlayBlockFunction.Type OVERLAY = register("overlay", OverlayBlockFunction.Type.OVERLAY_TYPE);
+  public static final FilterBlockFunction.Type FILTER = register("filter", FilterBlockFunction.Type.FILTER_TYPE);
+  public static final IdContainBlockFunction.Type ID_CONTAIN = register("id_contain", IdContainBlockFunction.Type.ID_CONTAIN_TYPE);
+  public static final StonecutBlockFunction.Type STONE_CUT = register("stonecut", StonecutBlockFunction.Type.STONE_CUT_TYPE);
+  public static final ConditionalBlockFunction.Type CONDITIONAL = register("conditional", ConditionalBlockFunction.Type.CONDITIONAL_TYPE);
+  public static final ConditionsBlockFunction.Type CONDITIONS = register("conditions", ConditionsBlockFunction.Type.CONDITIONS_TYPE);
+  public static final IdReplaceBlockFunction.Type ID_REPLACE = register("id_replace", IdReplaceBlockFunction.Type.ID_REPLACE_TYPE);
+  public static final RotateBlockFunction.Type ROTATE = register("rotate", RotateBlockFunction.Type.ROTATE_TYPE);
+  public static final MirrorBlockFunction.Type MIRROR = register("mirror", MirrorBlockFunction.Type.MIRROR_TYPE);
+  public static final CheckerboardBlockFunction.Type CHECKERBOARD = register("checkerboard", CheckerboardBlockFunction.Type.CHECKERBOARD_TYPE);
+  public static final CheckerboardTagBlockFunction.Type CHECKERBOARD_TAG = register("checkerboard-tag", CheckerboardTagBlockFunction.Type.CHECKERBOARD_TAG_TYPE);
+  public static final ReferenceBlockFunction.Type REFERENCE = register("reference", ReferenceBlockFunction.Type.INSTANCE);
 
   private BlockFunctionTypes() {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T extends BlockFunctionType<?>> T register(T value, String name) {
+  private static <T extends BlockFunctionType<?>> T register(String name, T value) {
     if (value != SimpleBlockFunction.Type.SIMPLE_TYPE && value instanceof Parser<?> parser) {
       PARSERS.add((Parser<BlockFunctionArgument>) parser);
     }

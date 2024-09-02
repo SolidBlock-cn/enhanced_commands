@@ -122,7 +122,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
   }
 
   @Override
-  public @NotNull CurveType<StraightCurve> getType() {
+  public @NotNull Type getType() {
     return Type.INSTANCE;
   }
 

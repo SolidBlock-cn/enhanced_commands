@@ -49,7 +49,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.NBT;
   }
 

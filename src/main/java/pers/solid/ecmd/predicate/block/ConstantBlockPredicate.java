@@ -32,7 +32,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.CONSTANT;
   }
 

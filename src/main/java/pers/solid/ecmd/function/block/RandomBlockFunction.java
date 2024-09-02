@@ -56,7 +56,7 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockFunctionType<RandomBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.RANDOM;
   }
 

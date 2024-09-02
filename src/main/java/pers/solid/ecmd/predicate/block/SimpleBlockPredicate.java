@@ -79,7 +79,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.SIMPLE;
   }
 

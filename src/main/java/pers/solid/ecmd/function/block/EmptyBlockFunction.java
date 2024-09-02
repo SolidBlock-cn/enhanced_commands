@@ -18,8 +18,8 @@ public enum EmptyBlockFunction implements BlockFunction, BlockFunctionType<Empty
   }
 
   @Override
-  public @NotNull BlockFunctionType<?> getType() {
-    return this;
+  public @NotNull EmptyBlockFunction getType() {
+    return BlockFunctionTypes.EMPTY;
   }
 
   @Override

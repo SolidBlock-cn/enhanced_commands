@@ -69,7 +69,7 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.PROPERTY_NAMES;
   }
 

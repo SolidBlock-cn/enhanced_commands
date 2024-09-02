@@ -39,7 +39,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   }
 
   @Override
-  public @NotNull BlockPredicateType<IdContainBlockPredicate> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.ID_CONTAIN;
   }
 

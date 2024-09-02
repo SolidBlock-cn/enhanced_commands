@@ -38,7 +38,7 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
   }
 
   @Override
-  public @NotNull BlockFunctionType<PropertyNamesBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.PROPERTY_NAMES;
   }
 

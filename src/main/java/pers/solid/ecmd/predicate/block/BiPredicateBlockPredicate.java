@@ -39,7 +39,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.BI_PREDICATE;
   }
 

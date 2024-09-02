@@ -45,7 +45,7 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.CHECKERBOARD;
   }
 

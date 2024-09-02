@@ -49,7 +49,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   }
 
   @Override
-  public @NotNull RegionType<IntersectRegion> getType() {
+  public @NotNull Type getType() {
     return RegionTypes.INTERSECT;
   }
 

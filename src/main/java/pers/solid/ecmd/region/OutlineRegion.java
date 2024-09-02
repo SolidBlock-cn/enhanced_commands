@@ -72,7 +72,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   @Override
-  public @NotNull RegionType<OutlineRegion> getType() {
+  public @NotNull Type getType() {
     return RegionTypes.OUTLINE;
   }
 

@@ -40,12 +40,11 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions) implement
   public static final MapCodec<PickBlockFunction> CODEC = WeightedList.createMapCodec(BlockFunction.CODEC).xmap(PickBlockFunction::new, PickBlockFunction::functions);
 
   @Override
-  @NotNull
-  public BlockFunctionType<PickBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.PICK;
   }
 
-  enum Type implements BlockFunctionType<PickBlockFunction> {
+  public enum Type implements BlockFunctionType<PickBlockFunction> {
     PICK_TYPE;
 
     @Override

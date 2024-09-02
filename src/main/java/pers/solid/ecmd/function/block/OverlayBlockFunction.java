@@ -38,7 +38,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
   }
 
   @Override
-  public @NotNull BlockFunctionType<OverlayBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.OVERLAY;
   }
 

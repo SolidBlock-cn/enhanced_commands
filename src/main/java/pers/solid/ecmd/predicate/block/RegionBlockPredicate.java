@@ -37,7 +37,7 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.REGION;
   }
 

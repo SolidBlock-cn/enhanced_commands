@@ -18,6 +18,7 @@ import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
 import pers.solid.ecmd.predicate.entity.EntitySelectorOptionsExtension;
+import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.regionselection.WandEvent;
@@ -58,5 +59,6 @@ public class EnhancedCommands implements ModInitializer {
     // 资源包
     DynamicRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC);
     DynamicRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC);
+    DynamicRegistries.register(Region.REGISTRY_KEY, Region.CODEC);
   }
 }

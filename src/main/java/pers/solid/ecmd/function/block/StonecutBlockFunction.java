@@ -68,7 +68,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
   }
 
   @Override
-  public @NotNull BlockFunctionType<StonecutBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.STONE_CUT;
   }
 

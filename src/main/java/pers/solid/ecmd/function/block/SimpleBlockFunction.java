@@ -52,7 +52,7 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
   }
 
   @Override
-  public @NotNull BlockFunctionType<SimpleBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.SIMPLE;
   }
 

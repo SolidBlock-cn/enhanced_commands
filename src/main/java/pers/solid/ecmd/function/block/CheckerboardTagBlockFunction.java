@@ -53,7 +53,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   }
 
   @Override
-  public @NotNull BlockFunctionType<?> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.CHECKERBOARD_TAG;
   }
 

@@ -30,7 +30,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockFunctionType<UseOriginalBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.USE_ORIGINAL;
   }
 

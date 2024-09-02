@@ -47,7 +47,7 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
   }
 
   @Override
-  public @NotNull BlockFunctionType<FilterBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.FILTER;
   }
 

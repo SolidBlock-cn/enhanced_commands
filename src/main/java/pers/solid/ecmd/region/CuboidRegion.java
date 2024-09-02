@@ -129,7 +129,7 @@ public record CuboidRegion(Box box) implements Region {
   }
 
   @Override
-  public @NotNull RegionType<?> getType() {
+  public @NotNull Type getType() {
     return RegionTypes.CUBOID;
   }
 

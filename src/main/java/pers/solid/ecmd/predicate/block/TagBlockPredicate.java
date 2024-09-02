@@ -85,7 +85,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.TAG;
   }
 

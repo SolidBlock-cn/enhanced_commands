@@ -57,7 +57,7 @@ public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull L
   }
 
   @Override
-  public @NotNull BlockFunctionType<TagBlockFunction> getType() {
+  public @NotNull Type getType() {
     return BlockFunctionTypes.TAG;
   }
 

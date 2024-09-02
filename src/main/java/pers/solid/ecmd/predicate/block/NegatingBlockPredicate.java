@@ -43,7 +43,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.NEGATING;
   }
 

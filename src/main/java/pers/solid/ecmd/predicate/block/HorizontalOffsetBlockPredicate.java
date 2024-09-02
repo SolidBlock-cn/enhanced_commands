@@ -58,7 +58,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public @NotNull Type getType() {
     return BlockPredicateTypes.HORIZONTAL_OFFSET;
   }
 

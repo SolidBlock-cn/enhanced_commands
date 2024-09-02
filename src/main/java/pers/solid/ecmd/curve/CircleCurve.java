@@ -155,7 +155,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
   }
 
   @Override
-  public @NotNull CurveType<CircleCurve> getType() {
+  public @NotNull Type getType() {
     return Type.INSTANCE;
   }
 
