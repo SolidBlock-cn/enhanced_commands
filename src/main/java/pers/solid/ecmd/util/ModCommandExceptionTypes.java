@@ -21,9 +21,9 @@ public final class ModCommandExceptionTypes {
   public static final Dynamic2CommandExceptionType ITEM_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((itemId, itemName) -> Text.translatable("enhanced_commands.argument.item.feature_required", itemId, itemName));
   public static final Dynamic2CommandExceptionType ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((itemId, itemName) -> Text.translatable("enhanced_commands.argument.entity_type.feature_required", itemId, itemName));
   public static final Dynamic2CommandExceptionType BIOME_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((biomeId, biomeName) -> Text.translatable("enhanced_commands.argument.biome.feature_required", biomeId, biomeName));
-  public static final Dynamic2CommandExceptionType EXPECTED_2_SYMBOLS = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.parsing.expected.2", a, b));
-  public static final Dynamic3CommandExceptionType EXPECTED_3_SYMBOLS = new Dynamic3CommandExceptionType((a, b, c) -> Text.translatable("enhanced_commands.parsing.expected.3", a, b, c));
-  public static final Dynamic4CommandExceptionType EXPECTED_4_SYMBOLS = new Dynamic4CommandExceptionType((a, b, c, d) -> Text.translatable("enhanced_commands.parsing.expected.4", a, b, c, d));
+  public static final Dynamic2CommandExceptionType EXPECTED_2_SYMBOLS = new Dynamic2CommandExceptionType((a, b) -> Text.stringifiedTranslatable("enhanced_commands.parsing.expected.2", a, b));
+  public static final Dynamic3CommandExceptionType EXPECTED_3_SYMBOLS = new Dynamic3CommandExceptionType((a, b, c) -> Text.stringifiedTranslatable("enhanced_commands.parsing.expected.3", a, b, c));
+  public static final Dynamic4CommandExceptionType EXPECTED_4_SYMBOLS = new Dynamic4CommandExceptionType((a, b, c, d) -> Text.stringifiedTranslatable("enhanced_commands.parsing.expected.4", a, b, c, d));
   public static final DynamicCommandExceptionType UNKNOWN_KEYWORD = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.unknown_keyword", o));
   public static final DynamicCommandExceptionType UNKNOWN_FUNCTION = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.unknown_function", o));
   public static final DynamicCommandExceptionType DUPLICATE_KEYWORD = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.duplicate_keyword", o));

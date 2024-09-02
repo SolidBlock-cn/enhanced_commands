@@ -3,6 +3,7 @@ package pers.solid.ecmd.argument;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.block.Block;
@@ -17,7 +18,6 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.predicate.property.*;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.parse.SuggestionAppender;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -146,7 +146,7 @@ public class SimpleBlockPredicateSuggestedParser<S> extends SimpleBlockSuggested
     if (usingEqual) {
       addSpecialPropertyValueSuggestions();
     }
-    addTagPropertiesValueSuggestions(propertyName);
+    addSuggestion(getTagPropertiesValueSuggestions(this.tagId, propertyName));
     if (reader.canRead()) {
       if (usingEqual) {
         if (reader.peek() == '*') {
@@ -158,16 +158,17 @@ public class SimpleBlockPredicateSuggestedParser<S> extends SimpleBlockSuggested
       }
     }
     final LinkedHashSet<String> values = new LinkedHashSet<>(1);
-    final SuggestionAppender propertyValueSuggestion = (context, suggestionsBuilder) -> {
+    final SuggestionProvider<S> propertyValueSuggestion = (context, builder) -> {
       if (tagId != null) {
         for (RegistryEntry<Block> registryEntry : this.tagId) {
           Block block = registryEntry.value();
           Property<?> property = block.getStateManager().getProperty(propertyName);
           if (property != null) {
-            suggestValueNamesForProperty(property, suggestionsBuilder, s -> !values.contains(s));
+            suggestValueNamesForProperty(property, builder, s -> !values.contains(s));
           }
         }
       }
+      return builder.buildFuture();
     };
     while (true) {
       clearSuggestion();
@@ -182,10 +183,9 @@ public class SimpleBlockPredicateSuggestedParser<S> extends SimpleBlockSuggested
 
       addSuggestion((context, suggestionsBuilder) -> {
         final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursorBeforeValue);
-        propertyValueSuggestion.accept(context, offset);
         final SuggestionsBuilder offset2 = suggestionsBuilder.createOffset(cursorAfterValue);
         PROPERTY_FINISHED.getSuggestions((CommandContext<Object>) context, offset2);
-        return offset.buildFuture().thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
+        return propertyValueSuggestion.getSuggestions(context, offset).thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
       });
       if (!usingEqual) break;
 

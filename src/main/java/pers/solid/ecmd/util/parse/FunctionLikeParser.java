@@ -48,11 +48,11 @@ public interface FunctionLikeParser<T> extends Parser<T> {
   default T parseAfterLeftParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     parseWithinParenthesis(registryAccess, parser, suggestionsOnly);
     parser.reader.skipWhitespace();
-    parser.setSuggestion((context, suggestionsBuilder) -> {
-      if (suggestionsBuilder.getRemaining().isEmpty()) {
-        suggestionsBuilder.suggest(rightParString());
+    parser.addSuggestion((context, builder) -> {
+      if (builder.getRemaining().isEmpty()) {
+        builder.suggest(rightParString());
       }
-      return suggestionsBuilder.buildFuture();
+      return builder.buildFuture();
     });
     if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
       parser.reader.skip();

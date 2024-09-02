@@ -20,7 +20,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
 
   @Override
   public @NotNull String asString() {
-    if (predicate instanceof NegatingBlockPredicate) {
+    if (predicate instanceof NegatingBlockPredicate || predicate instanceof ConstantBlockPredicate) {
       return "!(" + predicate.asString() + ")";
     } else {
       return "!" + predicate.asString();
@@ -67,6 +67,11 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
       }
       if (!suffixed) return null;
       if (allowsSparse) parser.reader.skipWhitespace();
+      if (negates && parser.reader.canRead() && parser.reader.peek() == '*') {
+        // 此时同时读取“!*”方块谓词。
+        parser.reader.skip();
+        return ConstantBlockPredicate.ALWAYS_FALSE;
+      }
       final BlockPredicateArgument parse = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
       if (negates) {
         return source -> new NegatingBlockPredicate(parse.apply(source));

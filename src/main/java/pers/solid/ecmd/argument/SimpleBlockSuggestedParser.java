@@ -325,10 +325,9 @@ public abstract class SimpleBlockSuggestedParser<S> extends SuggestedParser<S> {
     });
   }
 
-  protected void addTagPropertiesValueSuggestions(String propertyName) {
-    if (this.tagId != null) {
-      addSuggestion((context, suggestionsBuilder) -> {
-        for (RegistryEntry<Block> registryEntry : this.tagId) {
+  protected static <T> SuggestionProvider<T> getTagPropertiesValueSuggestions(@NotNull RegistryEntryList.Named<Block> tagId, String propertyName) {
+    return (context, suggestionsBuilder) -> {
+      for (RegistryEntry<Block> registryEntry : tagId) {
           Block block = registryEntry.value();
           Property<?> property = block.getStateManager().getProperty(propertyName);
           if (property != null) {
@@ -336,8 +335,7 @@ public abstract class SimpleBlockSuggestedParser<S> extends SuggestedParser<S> {
           }
         }
         return suggestionsBuilder.buildFuture();
-      });
-    }
+    };
   }
 
   protected abstract <T extends Comparable<T>> void parsePropertyNameValue(Property<T> property, Comparator comparator) throws CommandSyntaxException;

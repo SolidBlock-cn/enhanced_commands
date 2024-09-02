@@ -3,6 +3,7 @@ package pers.solid.ecmd.argument;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
@@ -14,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.property.*;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.parse.SuggestionAppender;
 
 import java.util.*;
 
@@ -131,16 +131,13 @@ public class SimpleBlockFunctionSuggestedParser<S> extends SimpleBlockSuggestedP
     final int cursorBeforeValue = reader.getCursor();
     final String valueName = this.reader.readString();
     final int cursorAfterValue = reader.getCursor();
-    addTagPropertiesValueSuggestions(propertyName);
     if (tagId != null) {
-      final SuggestionAppender tagPropertiesValueSuggestion = null; // todo
+      final SuggestionProvider<S> sp = getTagPropertiesValueSuggestions(tagId, propertyName);
       setSuggestion((context, suggestionsBuilder) -> {
         final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursorBeforeValue);
-        tagPropertiesValueSuggestion.accept(context, offset);
         final SuggestionsBuilder offset2 = suggestionsBuilder.createOffset(cursorAfterValue);
-        // todo optimize
         PROPERTY_FINISHED.getSuggestions((CommandContext<Object>) context, offset2);
-        return offset.buildFuture().thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
+        return sp.getSuggestions(context, offset).thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
       });
     } else {
       clearSuggestion();

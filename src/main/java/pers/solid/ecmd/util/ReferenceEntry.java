@@ -63,7 +63,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
 
       parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString(Character.toString(prefix), tooltip, suggestionsBuilder).buildFuture());
       boolean suffixed = false;
-      while (parser.reader.canRead() && parser.reader.peek() == prefix) {
+      if (parser.reader.canRead() && parser.reader.peek() == prefix) {
         parser.reader.skip();
         suffixed = true;
       }

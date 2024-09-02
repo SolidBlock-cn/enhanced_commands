@@ -40,11 +40,11 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
 
     // when allows zero params, deal with empty
     if (paramsCount >= minParamsCount()) {
-      parser.addSuggestion((context, suggestionsBuilder) -> {
-        if (suggestionsBuilder.getRemaining().isEmpty()) {
-          suggestionsBuilder.suggest(rightParString());
+      parser.addSuggestion((context, builder) -> {
+        if (builder.getRemaining().isEmpty()) {
+          builder.suggest(rightParString());
         }
-        return suggestionsBuilder.buildFuture();
+        return builder.buildFuture();
       });
     }
     if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
@@ -61,16 +61,16 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
       paramsCount++;
       parser.reader.skipWhitespace();
       final int finalParamsCount = paramsCount;
-      parser.addSuggestion((context, suggestionsBuilder) -> {
-        if (suggestionsBuilder.getRemaining().isEmpty()) {
+      parser.addSuggestion((context, builder) -> {
+        if (builder.getRemaining().isEmpty()) {
           if (finalParamsCount < maxParamsCount()) {
-            suggestionsBuilder.suggest(separatorString());
+            builder.suggest(separatorString());
           }
           if (finalParamsCount >= minParamsCount()) {
-            suggestionsBuilder.suggest(rightParString());
+            builder.suggest(rightParString());
           }
         }
-        return suggestionsBuilder.buildFuture();
+        return builder.buildFuture();
       });
       // end of an expression, except a comma or right parentheses
       if (!parser.reader.canRead()) {

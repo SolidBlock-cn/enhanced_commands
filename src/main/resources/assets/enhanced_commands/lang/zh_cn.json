@@ -110,6 +110,7 @@
   "enhanced_commands.block_function.checkerboard": "棋盘格",
   "enhanced_commands.block_function.checkerboard-tag": "标签的棋盘格",
   "enhanced_commands.block_function.conditional": "当方块谓词通过时使用此函数",
+  "enhanced_commands.block_function.conditions": "多个条件",
   "enhanced_commands.block_function.dry": "从方块中移除流体",
   "enhanced_commands.block_function.filter": "当谓词通过时应用方块函数",
   "enhanced_commands.block_function.id_contain": "随机选择id符合正则表达式的方块",

@@ -23,7 +23,6 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-import pers.solid.ecmd.util.parse.SuggestionAppender;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +32,7 @@ import java.util.function.Function;
 
 /**
  * <p>此类用于在解析一段内容的同时提供建议，相当于一次性完成 {@link ArgumentType#parse(StringReader)} 和 {@link ArgumentType#listSuggestions(CommandContext, SuggestionsBuilder)} 的两个工作，但需要注意的是，对于 {@link ArgumentType} 而言，这个解析过程仍会运行两遍，一遍用于解析结果，一遍用于提供建议。
- * <p>为了更灵活地控制建议提供过程，此类允许一次性提供多个建议。解析过程结束时（包括抛出 {@link CommandSyntaxException} 时），{@link #reader} 所在的 {@link StringReader#cursor cursor} 就是建议的起始位置，而这是位置也正是 {@link CommandSyntaxException} 的 cursor 位置。如果由于某些原因必须指定命令建议的起始位置，可以使用 {@link SuggestionAppender#offset(SuggestionAppender.Offset)} 作为建议内容。
+ * <p>为了更灵活地控制建议提供过程，此类允许一次性提供多个建议。解析过程结束时（包括抛出 {@link CommandSyntaxException} 时），{@link #reader} 所在的 {@link StringReader#cursor cursor} 就是调用 {@link SuggestionProvider} 的 {offset} 的初始位置，而这是位置也正是 {@link CommandSyntaxException} 的 cursor 位置。
  */
 public class SuggestedParser<S> {
   /**
@@ -41,7 +40,7 @@ public class SuggestedParser<S> {
    */
   public final StringReader reader;
   /**
-   * 在当前解析过程中所需要提供的建议。解析的过程不提供具体的建议，只指定如何提供建议（{@link SuggestionAppender}）。可以提供多种不同的建议。
+   * 在当前解析过程中所需要提供的建议。解析的过程不提供具体的建议，只指定如何提供建议（{@link SuggestionProvider}）。可以提供多种不同的建议。
    */
   protected final List<SuggestionProvider<S>> suggestions;
 
