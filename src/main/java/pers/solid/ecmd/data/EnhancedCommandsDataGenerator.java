@@ -9,5 +9,6 @@ public class EnhancedCommandsDataGenerator implements DataGeneratorEntrypoint {
     final FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
     pack.addProvider(BlockFunctionDataGeneration::new);
     pack.addProvider(BlockPredicateDataGeneration::new);
+    pack.addProvider(BlockTagDataGenerator::new);
   }
 }

@@ -1,6 +1,8 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
@@ -12,18 +14,32 @@ import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 public enum ConstantBlockPredicate implements BlockPredicate {
-  ALWAYS_TRUE;
+  ALWAYS_TRUE(true),
+  ALWAYS_FALSE(false);
+  private final boolean value;
 
-  public static final MapCodec<ConstantBlockPredicate> CODEC = MapCodec.unit(ConstantBlockPredicate.ALWAYS_TRUE);
+  public static final MapCodec<ConstantBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.BOOL.optionalFieldOf("value", true).forGetter(ConstantBlockPredicate::value)).apply(i, ConstantBlockPredicate::of));
+
+  ConstantBlockPredicate(boolean value) {
+    this.value = value;
+  }
+
+  public boolean value() {
+    return value;
+  }
+
+  public static ConstantBlockPredicate of(boolean value) {
+    return value ? ALWAYS_TRUE : ALWAYS_FALSE;
+  }
 
   @Override
   public @NotNull String asString() {
-    return "*";
+    return value ? "*" : "!*";
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return true;
+    return value;
   }
 
   @Override

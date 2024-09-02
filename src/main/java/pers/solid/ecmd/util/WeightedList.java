@@ -67,6 +67,11 @@ public sealed interface WeightedList<E> {
       this.sum = entries.stream().mapToDouble(ObjectDoublePair::rightDouble).sum();
     }
 
+    @SafeVarargs
+    public Weighted(ObjectDoublePair<E>... entries) {
+      this(List.of(entries));
+    }
+
     @Override
     public E getRandom(Random random) {
       final double height = random.nextDouble() * sum;

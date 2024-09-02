@@ -71,7 +71,7 @@ public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull L
 
     @Override
     public @Nullable TagBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockFunctionSuggestedParser<?> parser = new SimpleBlockFunctionSuggestedParser(registryAccess, parser0);
+      SimpleBlockFunctionSuggestedParser<?> parser = new SimpleBlockFunctionSuggestedParser<>(registryAccess, parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         final TagKey<Block> tagKey = parser.tagId.getTag();

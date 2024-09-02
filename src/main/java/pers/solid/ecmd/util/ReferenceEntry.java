@@ -74,7 +74,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final int cursorBeforeId = parser.reader.getCursor();
       parser.setSuggestion((context, builder) -> {
         if (context.getSource() instanceof ServerCommandSource) {
-          return CommandSource.suggestIdentifiers(registryAccess.getWrapperOrThrow(registryKey).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
+          return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(registryAccess.getWrapperOrThrow(registryKey).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
         } else if (context.getSource() instanceof CommandSource commandSource) {
           return commandSource.getCompletions(context);
         } else {
@@ -83,7 +83,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       });
       parser.terminateSuggestionsIfNotEmpty();
       if (allowSparse) parser.reader.skipWhitespace();
-      final Identifier id = Identifier.fromCommandInput(parser.reader);
+      final Identifier id = DefaultNamespace.ENHANCED_COMMANDS.fromStringReader(parser.reader);
       final int cursorAfterId = parser.reader.getCursor();
       return getResultByEntrySupplier(() -> {
         final Optional<RegistryEntry.Reference<E>> entry = registryAccess.createRegistryLookup().getOptionalEntry(registryKey, RegistryKey.of(registryKey, id));

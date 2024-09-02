@@ -46,7 +46,7 @@ public class EnhancedCommands implements ModInitializer {
 
     // 注册命令
     CommandRegistrationCallback.EVENT.register(ModCommands.INSTANCE);
-    FlipStateCallback.EVENT.register(FlipStateCallback.DEFAULT);
+    FlipStateCallback.registerDefaultEvent();
     WandEvent.registerEvents();
 
     // 注册服务器运行任务的事件

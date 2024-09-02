@@ -12,13 +12,14 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
+import java.util.Collections;
 import java.util.Set;
 
 public record AllOriginalPropertyNameFunctions(@NotNull Set<String> except) implements GeneralPropertyFunction.OfName {
-  public static final MapCodec<AllOriginalPropertyNameFunctions> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(AllOriginalPropertyNameFunctions::new, CodecUtil.optionalField("except", Codec.STRING.listOf().<Set<String>>xmap(ImmutableSet::copyOf, ImmutableList::copyOf), ImmutableSet.of()).forGetter(AllOriginalPropertyNameFunctions::except)));
+  public static final MapCodec<AllOriginalPropertyNameFunctions> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(AllOriginalPropertyNameFunctions::new, CodecUtil.optionalField("except", Codec.STRING.listOf().<Set<String>>xmap(ImmutableSet::copyOf, ImmutableList::copyOf), Collections.emptySet()).forGetter(AllOriginalPropertyNameFunctions::except)));
 
   public AllOriginalPropertyNameFunctions() {
-    this(ImmutableSet.of());
+    this(Collections.emptySet());
   }
 
   @Override

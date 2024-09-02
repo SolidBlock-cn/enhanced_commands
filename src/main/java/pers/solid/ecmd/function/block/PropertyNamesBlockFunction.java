@@ -24,6 +24,10 @@ import java.util.stream.Collectors;
 public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> functions) implements BlockFunction {
   public static final MapCodec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::functions)));
 
+  public PropertyNamesBlockFunction(@NotNull PropertyNameFunction... functions) {
+    this(List.of(functions));
+  }
+
   @Override
   public @NotNull String asString() {
     return "[" + functions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(",")) + "]";
@@ -52,7 +56,7 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
 
     @Override
     public @Nullable BlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      parser.setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
         final SimpleBlockFunctionSuggestedParser<?> suggestedParser = new SimpleBlockFunctionSuggestedParser<>(registryAccess, parser);
         suggestedParser.parsePropertyNames();

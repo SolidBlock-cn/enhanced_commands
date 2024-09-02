@@ -11,10 +11,15 @@ import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
+import java.util.Collections;
 import java.util.Set;
 
 public record AllRandomPropertyNameFunction(@NotNull Set<String> except) implements GeneralPropertyFunction.OfName {
   public static final MapCodec<AllRandomPropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(AllRandomPropertyNameFunction::new, Codec.STRING.listOf().<Set<String>>xmap(ImmutableSet::copyOf, ImmutableList::copyOf).fieldOf("except").forGetter(AllRandomPropertyNameFunction::except)));
+
+  public AllRandomPropertyNameFunction() {
+    this(Collections.emptySet());
+  }
 
   @Override
   public @NotNull String asString() {

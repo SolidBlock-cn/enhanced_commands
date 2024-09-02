@@ -31,7 +31,6 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
   Codec<RegistryEntry<BlockPredicate>> ENTRY_CODEC = RegistryElementCodec.of(REGISTRY_KEY, CODEC);
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
-  NegatingBlockPredicate EMPTY = new NegatingBlockPredicate(ConstantBlockPredicate.ALWAYS_TRUE);
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
     return BlockPredicateArgument.parse(registryAccess, new SuggestedParser<>(s), false).apply(source);

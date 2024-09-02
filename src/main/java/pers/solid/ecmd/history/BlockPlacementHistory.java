@@ -3,7 +3,7 @@ package pers.solid.ecmd.history;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.block.BlockState;
@@ -38,7 +38,7 @@ public class BlockPlacementHistory implements History {
     this.world = world;
     this.flag = flag;
     this.modFlag = modFlag;
-    oldStates = new Long2ObjectArrayMap<>();
+    oldStates = new Long2ObjectLinkedOpenHashMap<>();
     oldEntityData = new Long2ObjectOpenHashMap<>();
   }
 
