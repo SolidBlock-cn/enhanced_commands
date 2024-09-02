@@ -27,7 +27,7 @@ import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import java.util.List;
 
 public record StonecutBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
-  public static final MapCodec<StonecutBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(StonecutBlockFunction::function)));
+  public static final MapCodec<StonecutBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EmptyBlockFunction.INSTANCE).forGetter(StonecutBlockFunction::function)));
 
   @Override
   public @NotNull String asString() {
@@ -86,7 +86,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
-      return source -> new StonecutBlockFunction(blockFunction == null ? EMPTY : blockFunction.apply(source));
+      return source -> new StonecutBlockFunction(blockFunction == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
     }
 
     @Override

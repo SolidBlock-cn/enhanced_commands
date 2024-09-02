@@ -1,6 +1,5 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -23,12 +22,18 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.parse.Parser;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull List<PropertyNameFunction> properties) implements BlockFunction {
-  public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.entryList(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", ImmutableList.of()).forGetter(f -> f.properties)));
+  public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.entryList(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
+  // todo: consider using tag key as component
+
+  public TagBlockFunction(@NotNull RegistryEntryList<Block> tag) {
+    this(tag, Collections.emptyList());
+  }
 
   @Override
   public @NotNull String asString() {

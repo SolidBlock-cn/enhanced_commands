@@ -36,15 +36,15 @@ public class BlockPredicateDataGeneration extends FabricDynamicRegistryProvider 
                 BlockPredicate.EMPTY
             )),
                 Vec3d.ZERO,
-                new Vec3d(1, 0, 0),
+                new Vec3d(0, 1, 1),
                 Vec3d.ZERO
             ))),
             Vec3d.ZERO,
-            new Vec3d(0, 1, 0),
+            new Vec3d(1, 0, 1),
             Vec3d.ZERO
         ))),
         Vec3d.ZERO,
-        new Vec3d(0, 0, 1),
+        new Vec3d(1, 1, 0),
         Vec3d.ZERO
     ));
   }

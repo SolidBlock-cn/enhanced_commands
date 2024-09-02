@@ -4,19 +4,24 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 
-public record ReferenceBlockPredicate(RegistryEntry<BlockPredicate> entry) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
-  public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(BlockPredicate.ENTRY_CODEC, ReferenceBlockPredicate::new);
+public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
+  public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(BlockPredicate.REGISTRY_KEY, ReferenceBlockPredicate::new);
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return value().test(cachedBlockPosition);
+    try {
+      return value(cachedBlockPosition.getWorld().getRegistryManager()).test(cachedBlockPosition);
+    } catch (CommandSyntaxException e) {
+      throw new CommandRuntimeException(e);
+    }
   }
 
   @Override
@@ -26,7 +31,12 @@ public record ReferenceBlockPredicate(RegistryEntry<BlockPredicate> entry) imple
 
   @Override
   public @NotNull String asString() {
-    return "$" + entry.getIdAsString();
+    return "$" + id.getValue();
+  }
+
+  @Override
+  public CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
+    return ReferenceType.INSTANCE.createExceptionForUnknownId(reader, identifier);
   }
 
   public static class ReferenceType extends ReferenceEntry.PrefixedIdParser<BlockPredicateArgument, BlockPredicate> implements BlockPredicateType<ReferenceBlockPredicate> {
@@ -42,7 +52,7 @@ public record ReferenceBlockPredicate(RegistryEntry<BlockPredicate> entry) imple
     }
 
     @Override
-    protected BlockPredicateArgument getResultByEntrySupplier(FailableSupplier<RegistryEntry<BlockPredicate>, CommandSyntaxException> supplier) {
+    protected BlockPredicateArgument getResultByEntrySupplier(FailableSupplier<RegistryKey<BlockPredicate>, CommandSyntaxException> supplier) {
       return source -> new ReferenceBlockPredicate(supplier.get());
     }
 

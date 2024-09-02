@@ -3,13 +3,13 @@ package pers.solid.ecmd.util;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -30,15 +30,22 @@ import java.util.function.Function;
  * @param <E> 该类的 entry 的类型。
  */
 public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
-  static <T extends ReferenceEntry<T, E>, E> MapCodec<T> createCodec(Codec<RegistryEntry<E>> entryCodec, Function<RegistryEntry<E>, T> function) {
-    return RecordCodecBuilder.mapCodec(i -> i.group(entryCodec.fieldOf("id").forGetter(ReferenceEntry::entry)).apply(i, function));
+  static <T extends ReferenceEntry<T, E>, E> MapCodec<T> createCodec(RegistryKey<Registry<E>> registryKey, Function<RegistryKey<E>, T> function) {
+    return RecordCodecBuilder.mapCodec(i -> i.group(RegistryKey.createCodec(registryKey).fieldOf("id").forGetter(ReferenceEntry::id)).apply(i, function));
   }
 
-  RegistryEntry<E> entry();
+  RegistryKey<E> id();
 
-  default E value() {
-    return entry().value();
+  default RegistryEntry.Reference<E> getEntry(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    final RegistryKey<E> id = id();
+    return registryLookup.getWrapperOrThrow(id.getRegistryRef()).getOptional(id).orElseThrow(() -> createExceptionForUnknownId(null, id.getValue().toString()));
   }
+
+  default E value(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    return getEntry(registryLookup).value();
+  }
+
+  CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier);
 
   abstract class PrefixedIdParser<T, E> implements Parser<T> {
     private final char prefix;
@@ -84,11 +91,11 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
           parser.reader.setCursor(cursorBeforeId);
           throw CommandSyntaxExceptionExtension.withCursorEnd(createExceptionForUnknownId(parser.reader, id.toString()), cursorAfterId);
         }
-        return entry.get();
+        return entry.get().registryKey();
       });
     }
 
-    protected abstract T getResultByEntrySupplier(FailableSupplier<RegistryEntry<E>, CommandSyntaxException> supplier);
+    protected abstract T getResultByEntrySupplier(FailableSupplier<RegistryKey<E>, CommandSyntaxException> supplier);
 
     protected abstract CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier);
   }

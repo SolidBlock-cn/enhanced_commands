@@ -18,24 +18,28 @@ import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import java.util.ArrayList;
 import java.util.List;
 
-public record AnyBlockPredicate(List<BlockPredicate> blockPredicates) implements BlockPredicate {
-  public static final MapCodec<AnyBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("block_predicates").forGetter(AnyBlockPredicate::blockPredicates)).apply(i, AnyBlockPredicate::new));
+public record AnyBlockPredicate(List<BlockPredicate> predicates) implements BlockPredicate {
+  public static final MapCodec<AnyBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("predicates").forGetter(AnyBlockPredicate::predicates)).apply(i, AnyBlockPredicate::new));
+
+  public AnyBlockPredicate(BlockPredicate... predicates) {
+    this(List.of(predicates));
+  }
 
   @Override
   public @NotNull String asString() {
-    return "any(" + String.join(", ", Collections2.transform(blockPredicates, ExpressionConvertible::asString)) + ")";
+    return "any(" + String.join(", ", Collections2.transform(predicates, ExpressionConvertible::asString)) + ")";
   }
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return blockPredicates.stream().anyMatch(blockPredicate -> blockPredicate.test(cachedBlockPosition));
+    return predicates.stream().anyMatch(blockPredicate -> blockPredicate.test(cachedBlockPosition));
   }
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final ImmutableList.Builder<TestResult> results = new ImmutableList.Builder<>();
     int successes = 0;
-    for (BlockPredicate blockPredicate : blockPredicates) {
+    for (BlockPredicate blockPredicate : predicates) {
       TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition);
       results.add(testResult);
       if (testResult.successes())

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boolean allowsMerge) implements NbtFunction {
   public static final Codec<CompoundNbtFunction> CODEC = Codec.STRING.flatXmap(s -> {
     try {
-      return DataResult.success(new NbtFunctionSuggestedParser(new StringReader(s)).parseCompound(false));
+      return DataResult.success(new NbtFunctionSuggestedParser<>(new StringReader(s)).parseCompound(false));
     } catch (CommandSyntaxException e) {
       return DataResult.error(e::getMessage);
     }

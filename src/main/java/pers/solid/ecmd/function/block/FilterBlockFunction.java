@@ -26,7 +26,7 @@ import pers.solid.ecmd.util.parse.FunctionParamsParser;
  * 注意：此方法不一定能够正常地对方块实体进行检测。
  */
 public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull BlockPredicate predicate, @NotNull BlockFunction elseFunction) implements BlockFunction {
-  public static final MapCodec<FilterBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(FilterBlockFunction::new, BlockFunction.CODEC.fieldOf("function").forGetter(FilterBlockFunction::function), BlockPredicate.CODEC.fieldOf("predicate").forGetter(FilterBlockFunction::predicate), BlockFunction.CODEC.optionalFieldOf("else", EMPTY).forGetter(FilterBlockFunction::elseFunction)));
+  public static final MapCodec<FilterBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(FilterBlockFunction::new, BlockFunction.CODEC.fieldOf("function").forGetter(FilterBlockFunction::function), BlockPredicate.CODEC.fieldOf("predicate").forGetter(FilterBlockFunction::predicate), BlockFunction.CODEC.optionalFieldOf("else", EmptyBlockFunction.INSTANCE).forGetter(FilterBlockFunction::elseFunction)));
 
   @Override
   public @NotNull String asString() {
@@ -67,7 +67,7 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
-      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? EMPTY : elseFunction.apply(source));
+      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : elseFunction.apply(source));
     }
 
     @Override

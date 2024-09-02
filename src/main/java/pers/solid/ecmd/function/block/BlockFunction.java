@@ -35,7 +35,6 @@ import pers.solid.ecmd.util.mixin.MixinShared;
  * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockStateArgument} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
  */
 public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgument {
-  BlockFunction EMPTY = EmptyBlockFunction.INSTANCE;
   RegistryKey<Registry<BlockFunction>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("block_function"));
   Codec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.getCodec().dispatch(BlockFunction::getType, BlockFunctionType::getCodec);
   Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC, blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? s : null);
@@ -99,6 +98,6 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
   }
 
   default boolean isEmpty() {
-    return this == EMPTY;
+    return this == EmptyBlockFunction.INSTANCE;
   }
 }

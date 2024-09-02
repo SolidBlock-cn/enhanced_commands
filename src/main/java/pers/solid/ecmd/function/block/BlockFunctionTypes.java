@@ -38,6 +38,7 @@ public final class BlockFunctionTypes {
   public static final BlockFunctionType<IdContainBlockFunction> ID_CONTAIN = register(IdContainBlockFunction.Type.ID_CONTAIN_TYPE, "id_contain");
   public static final BlockFunctionType<StonecutBlockFunction> STONE_CUT = register(StonecutBlockFunction.Type.STONE_CUT_TYPE, "stonecut");
   public static final BlockFunctionType<ConditionalBlockFunction> CONDITIONAL = register(ConditionalBlockFunction.Type.CONDITIONAL_TYPE, "conditional");
+  public static final ConditionsBlockFunction.Type CONDITIONS = register(ConditionsBlockFunction.Type.CONDITIONS_TYPE, "conditions");
   public static final BlockFunctionType<IdReplaceBlockFunction> ID_REPLACE = register(IdReplaceBlockFunction.Type.ID_REPLACE_TYPE, "id_replace");
   public static final BlockFunctionType<RotateBlockFunction> ROTATE = register(RotateBlockFunction.Type.ROTATE_TYPE, "rotate");
   public static final BlockFunctionType<MirrorBlockFunction> MIRROR = register(MirrorBlockFunction.Type.MIRROR_TYPE, "mirror");

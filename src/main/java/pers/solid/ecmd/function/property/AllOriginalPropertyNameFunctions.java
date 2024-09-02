@@ -10,11 +10,16 @@ import net.minecraft.state.property.Property;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Set;
 
 public record AllOriginalPropertyNameFunctions(@NotNull Set<String> except) implements GeneralPropertyFunction.OfName {
-  public static final MapCodec<AllOriginalPropertyNameFunctions> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(AllOriginalPropertyNameFunctions::new, Codec.STRING.listOf().<Set<String>>xmap(ImmutableSet::copyOf, ImmutableList::copyOf).fieldOf("except").forGetter(AllOriginalPropertyNameFunctions::except)));
+  public static final MapCodec<AllOriginalPropertyNameFunctions> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(AllOriginalPropertyNameFunctions::new, CodecUtil.optionalField("except", Codec.STRING.listOf().<Set<String>>xmap(ImmutableSet::copyOf, ImmutableList::copyOf), ImmutableSet.of()).forGetter(AllOriginalPropertyNameFunctions::except)));
+
+  public AllOriginalPropertyNameFunctions() {
+    this(ImmutableSet.of());
+  }
 
   @Override
   public @NotNull String asString() {

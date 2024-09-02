@@ -23,11 +23,15 @@ import pers.solid.ecmd.util.parse.FunctionParamsParser;
  * </blockquote>
  */
 public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNull BlockFunction functionIfTrue, @NotNull BlockFunction functionIfFalse) implements BlockFunction {
-  public static final MapCodec<ConditionalBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(ConditionalBlockFunction::new, BlockPredicate.CODEC.fieldOf("condition").forGetter(ConditionalBlockFunction::condition), BlockFunction.CODEC.fieldOf("then").forGetter(ConditionalBlockFunction::functionIfTrue), BlockFunction.CODEC.optionalFieldOf("else", BlockFunction.EMPTY).forGetter(ConditionalBlockFunction::functionIfFalse)));
+  public static final MapCodec<ConditionalBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(ConditionalBlockFunction::new, BlockPredicate.CODEC.fieldOf("condition").forGetter(ConditionalBlockFunction::condition), BlockFunction.CODEC.fieldOf("then").forGetter(ConditionalBlockFunction::functionIfTrue), BlockFunction.CODEC.optionalFieldOf("else", EmptyBlockFunction.INSTANCE).forGetter(ConditionalBlockFunction::functionIfFalse)));
+
+  public ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNull BlockFunction functionIfTrue) {
+    this(condition, functionIfTrue, EmptyBlockFunction.INSTANCE);
+  }
 
   @Override
   public @NotNull String asString() {
-    return "if(" + condition.asString() + ", " + functionIfTrue.asString() + (functionIfFalse == BlockFunction.EMPTY ? "" : ", " + functionIfFalse.asString()) + ")";
+    return "if(" + condition.asString() + ", " + functionIfTrue.asString() + (functionIfFalse == EmptyBlockFunction.INSTANCE ? "" : ", " + functionIfFalse.asString()) + ")";
   }
 
   @Override
@@ -60,7 +64,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
-      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? BlockFunction.EMPTY : valueIfFalse.apply(source));
+      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : valueIfFalse.apply(source));
     }
 
     @Override

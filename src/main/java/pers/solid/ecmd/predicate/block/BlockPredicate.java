@@ -34,7 +34,7 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
   NegatingBlockPredicate EMPTY = new NegatingBlockPredicate(ConstantBlockPredicate.ALWAYS_TRUE);
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return BlockPredicateArgument.parse(registryAccess, new SuggestedParser(s), false).apply(source);
+    return BlockPredicateArgument.parse(registryAccess, new SuggestedParser<>(s), false).apply(source);
   }
 
   static TestResult successResult(BlockPos blockPos) {

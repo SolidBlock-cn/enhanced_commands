@@ -31,6 +31,10 @@ public sealed interface WeightedList<E> {
   }
 
   record Uniform<E>(List<E> elements) implements WeightedList<E> {
+    public Uniform(E... elements) {
+      this(List.of(elements));
+    }
+
     @Override
     public E getRandom(Random random) {
       return elements.get(random.nextInt(elements.size()));

@@ -82,7 +82,8 @@ public final class CodecUtil {
 
   /**
    * 可选字段的 codec，在反序列化值时，当字段不存在时，会采用其 {@code Optional.empty()}。与原版不同的时，当字段有值但是有错误时，不会采用默认值，而是抛出此错误。
-   * @param name 字段的名称。
+   *
+   * @param name         字段的名称。
    * @param elementCodec 该字段的元素的 codec。
    */
   public static <A> StrictOptionalFieldCodec<Optional<A>> optionalField(@NotNull String name, @NotNull Codec<A> elementCodec) {

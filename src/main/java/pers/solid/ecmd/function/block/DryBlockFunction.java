@@ -19,7 +19,7 @@ import pers.solid.ecmd.util.parse.FunctionParamsParser;
  * 去除方块函数中的流体，并将 waterlogged 设为 false。这不一定总是能够成功。
  */
 public record DryBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
-  public static final MapCodec<DryBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockFunction.CODEC.optionalFieldOf("function", EMPTY).forGetter(DryBlockFunction::function)).apply(i, DryBlockFunction::new));
+  public static final MapCodec<DryBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockFunction.CODEC.optionalFieldOf("function", EmptyBlockFunction.INSTANCE).forGetter(DryBlockFunction::function)).apply(i, DryBlockFunction::new));
 
   @Override
   public @NotNull String asString() {
@@ -57,7 +57,7 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
-      return source -> new DryBlockFunction(blockFunction == null ? EMPTY : blockFunction.apply(source));
+      return source -> new DryBlockFunction(blockFunction == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
     }
 
     @Override

@@ -27,7 +27,7 @@ public class StrictOptionalFieldCodec<A> extends MapCodec<A> {
   /**
    * 字段的名称。
    */
-  private final @NotNull String name;
+  final @NotNull String name;
   /**
    * 字段的元素的 codec。
    */
