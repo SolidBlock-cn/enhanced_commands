@@ -97,26 +97,18 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
 
   @Override
   public @NotNull RegionSelection expanded(int offset, Direction direction) {
-    final boolean negative = direction.getDirection() == Direction.AxisDirection.NEGATIVE;
+    final Vec3i vector = direction.getVector();
     final Direction.Axis axis = direction.getAxis();
-    final int firstCoordination = first.getComponentAlongAxis(axis);
-    final int secondCoordination = second.getComponentAlongAxis(axis);
-
-    if (!negative) {
-      offset = -offset;
-    }
-    if (firstCoordination > secondCoordination == negative) {
-      switch (axis) {
-        case X -> first = first.add(offset, 0, 0);
-        case Y -> first = first.add(0, offset, 0);
-        case Z -> first = first.add(0, 0, offset);
-      }
+    int unitPosOffset = vector.getComponentAlongAxis(axis);
+    int coord1 = first.getComponentAlongAxis(axis);
+    int coord2 = second.getComponentAlongAxis(axis);
+    if ((coord1 > coord2) == (unitPosOffset > 0)) {
+      // unitPosOffset > 0，且 coord1 较大，或者两个都相反，
+      // 此时修改 first
+      first = first.add(vector.multiply(offset));
     } else {
-      switch (axis) {
-        case X -> second = second.add(offset, 0, 0);
-        case Y -> second = second.add(0, offset, 0);
-        case Z -> second = second.add(0, 0, offset);
-      }
+      // 此时修改 second
+      second = second.add(vector.multiply(offset));
     }
     resetCalculation();
     return this;

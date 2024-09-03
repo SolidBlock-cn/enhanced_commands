@@ -1,7 +1,6 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -28,65 +27,21 @@ import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.function.BiFunction;
 
+import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
+import static com.mojang.brigadier.arguments.DoubleArgumentType.getDouble;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static pers.solid.ecmd.argument.AxisArgumentType.axis;
+import static pers.solid.ecmd.argument.AxisArgumentType.getAxis;
+import static pers.solid.ecmd.argument.DirectionArgumentType.direction;
+import static pers.solid.ecmd.argument.DirectionArgumentType.getDirection;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum ActiveRegionCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final LiteralCommandNode<ServerCommandSource> literalCommandNode = dispatcher.register(literalR2("activeregion")
-        .then(literal("get")
-            .executes(ActiveRegionCommand::executeGet))
-        .then(literal("set")
-            .then(argument("region", RegionArgumentType.region(registryAccess))
-                .executes(ActiveRegionCommand::executeSet)))
-        .then(literal("remove")
-            .executes(ActiveRegionCommand::executeRemove))
-        .then(literal("move")
-            .executes(context -> executeMoveDirection(1, DirectionArgument.FRONT.apply(context.getSource()), context))
-            .then(argument("amount", DoubleArgumentType.doubleArg())
-                .executes(context -> executeMoveDirection(DoubleArgumentType.getDouble(context, "amount"), DirectionArgument.FRONT.apply(context.getSource()), context))
-                .then(argument("direction", DirectionArgumentType.direction())
-                    .executes(context -> executeMoveDirection(DoubleArgumentType.getDouble(context, "amount"), DirectionArgumentType.getDirection(context, "direction"), context))))
-            .then(argument("x", DoubleArgumentType.doubleArg())
-                .then(argument("y", DoubleArgumentType.doubleArg())
-                    .then(argument("z", DoubleArgumentType.doubleArg())
-                        .executes(ActiveRegionCommand::executeMoveVector)))))
-        .then(literal("rotate")
-            .then(argument("rotation", BlockRotationArgumentType.blockRotation())
-                .executes(context -> executeRotate(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), BlockRotationArgumentType.getBlockRotation(context, "rotation"), context))
-                .then(argument("pivot", EnhancedPosArgumentType.posPreferringCenteredInt())
-                    .executes(context -> executeRotate(EnhancedPosArgumentType.getPos(context, "pivot"), BlockRotationArgumentType.getBlockRotation(context, "rotation"), context)))))
-        .then(literal("mirror")
-            .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), AxisArgument.FRONT_BACK.apply(context.getSource()), context))
-            .then(argument("axis", AxisArgumentType.axis(false))
-                .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), AxisArgumentType.getAxis(context, "axis"), context))
-                .then(argument("pivot", EnhancedPosArgumentType.posPreferringCenteredInt())
-                    .executes(context -> executeMirror(EnhancedPosArgumentType.getPos(context, "pivot"), AxisArgumentType.getAxis(context, "axis"), context)))))
-        .then(literal("expand")
-            .executes(context -> executeExpandDirection(1, DirectionArgument.FRONT.apply(context.getSource()), context))
-            .then(argument("direction", DirectionArgumentType.direction())
-                .executes(context -> executeExpandDirection(1, DirectionArgumentType.getDirection(context, "direction"), context))
-                .then(argument("offset", DoubleArgumentType.doubleArg())
-                    .executes(context -> executeExpandDirection(DoubleArgumentType.getDouble(context, "offset"), DirectionArgumentType.getDirection(context, "direction"), context))))
-            .then(argument("axis", AxisArgumentType.axis(true))
-                .executes(context -> executeExpandAxis(1, AxisArgumentType.getAxis(context, "axis"), context))
-                .then(argument("offset", DoubleArgumentType.doubleArg())
-                    .executes(context -> executeExpandAxis(DoubleArgumentType.getDouble(context, "offset"), AxisArgumentType.getAxis(context, "axis"), context))))
-            .then(argument("direction_type", new SimpleEnumArgumentTypes.DirectionTypeArgumentType())
-                .executes(context -> executeExpandDirectionType(1, context.getArgument("direction_type", Direction.Type.class), context))
-                .then(argument("offset", DoubleArgumentType.doubleArg())
-                    .executes(context -> executeExpandDirectionType(DoubleArgumentType.getDouble(context, "offset"), context.getArgument("direction_type", Direction.Type.class), context))))
-            .then(literal("all")
-                .executes(context -> executeExpandAllDirections(1, context))
-                .then(argument("offset", DoubleArgumentType.doubleArg())
-                    .executes(context -> executeExpandAllDirections(DoubleArgumentType.getDouble(context, "offset"), context)))))
-    );
-    dispatcher.register(literalR2("ar").redirect(literalCommandNode));
-  }
+  public static final SimpleCommandExceptionType UNSUPPORTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.activeregion.unsupported"));
+  public static final DynamicCommandExceptionType UNSUPPORTED_WITH_REASON = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.activeregion.unsupported_with_region", o));
 
   public static int executeGet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
@@ -114,9 +69,6 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     return 1;
   }
 
-  public static final SimpleCommandExceptionType UNSUPPORTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.activeregion.unsupported"));
-  public static final DynamicCommandExceptionType UNSUPPORTED_WITH_REASON = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.activeregion.unsupported_with_region", o));
-
   public static <T, R> R invokeOperationOrThrow(FailableFunction<T, R, CommandSyntaxException> function, T input) throws CommandSyntaxException {
     try {
       return function.apply(input);
@@ -134,7 +86,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   }
 
   public static int executeMoveVector(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeMoveVector(DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z"), context);
+    return executeMoveVector(getDouble(context, "x"), getDouble(context, "y"), getDouble(context, "z"), context);
   }
 
   public static int executeMoveVector(double x, double y, double z, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -152,7 +104,6 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   public static int executeMirror(Vec3d pivot, Direction.Axis axis, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return executeRegionModification(region -> region.mirrored(axis, pivot), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.mirror.single", TextUtil.styled(serverPlayerEntity.getName(), Styles.TARGET), TextUtil.literal(region).styled(Styles.RESULT)), context);
   }
-
 
   public static int executeExpandDirection(double offset, Direction direction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return executeRegionModification(region -> region.expanded(offset, direction), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.expand.direction.single", TextUtil.styled(serverPlayerEntity.getName(), Styles.TARGET), TextUtil.literal(offset), TextUtil.wrapDirection(direction), TextUtil.literal(region).styled(Styles.RESULT)), context);
@@ -180,5 +131,59 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     ((ServerPlayerEntityExtension) player).ec$setActiveRegion(operatedRegion);
     source.sendFeedback$ecBridge(() -> messageSingle.apply(player, operatedRegion), true);
     return 1;
+  }
+
+  @Override
+  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    final LiteralCommandNode<ServerCommandSource> literalCommandNode = dispatcher.register(literalR2("activeregion")
+        .then(literal("get")
+            .executes(ActiveRegionCommand::executeGet))
+        .then(literal("set")
+            .then(argument("region", RegionArgumentType.region(registryAccess))
+                .executes(ActiveRegionCommand::executeSet)))
+        .then(literal("remove")
+            .executes(ActiveRegionCommand::executeRemove))
+        .then(literal("move")
+            .executes(context -> executeMoveDirection(1, DirectionArgument.FRONT.apply(context.getSource()), context))
+            .then(argument("amount", doubleArg())
+                .executes(context -> executeMoveDirection(getDouble(context, "amount"), DirectionArgument.FRONT.apply(context.getSource()), context))
+                .then(argument("direction", direction())
+                    .executes(context -> executeMoveDirection(getDouble(context, "amount"), getDirection(context, "direction"), context))))
+            .then(argument("x", doubleArg())
+                .then(argument("y", doubleArg())
+                    .then(argument("z", doubleArg())
+                        .executes(ActiveRegionCommand::executeMoveVector)))))
+        .then(literal("rotate")
+            .then(argument("rotation", BlockRotationArgumentType.blockRotation())
+                .executes(context -> executeRotate(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), BlockRotationArgumentType.getBlockRotation(context, "rotation"), context))
+                .then(argument("pivot", EnhancedPosArgumentType.posPreferringCenteredInt())
+                    .executes(context -> executeRotate(EnhancedPosArgumentType.getPos(context, "pivot"), BlockRotationArgumentType.getBlockRotation(context, "rotation"), context)))))
+        .then(literal("mirror")
+            .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), AxisArgument.FRONT_BACK.apply(context.getSource()), context))
+            .then(argument("axis", axis(false))
+                .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.toAbsolutePos(context.getSource()), getAxis(context, "axis"), context))
+                .then(argument("pivot", EnhancedPosArgumentType.posPreferringCenteredInt())
+                    .executes(context -> executeMirror(EnhancedPosArgumentType.getPos(context, "pivot"), getAxis(context, "axis"), context)))))
+        .then(literal("expand")
+            .executes(context -> executeExpandDirection(1, DirectionArgument.FRONT.apply(context.getSource()), context))
+            .then(argument("offset", doubleArg())
+                .executes(context -> executeExpandDirection(getDouble(context, "offset"), DirectionArgument.FRONT.apply(context.getSource()), context))
+                .then(argument("direction", direction())
+                    .executes(context -> executeExpandDirection(getDouble(context, "offset"), getDirection(context, "direction"), context)))
+                .then(argument("axis", axis(true))
+                    .executes(context -> executeExpandAxis(getDouble(context, "offset"), getAxis(context, "axis"), context)))
+                .then(argument("direction_type", new SimpleEnumArgumentTypes.DirectionTypeArgumentType())
+                    .executes(context -> executeExpandDirectionType(getDouble(context, "offset"), context.getArgument("direction_type", Direction.Type.class), context)))
+                .then(literal("all")
+                    .executes(context -> executeExpandAllDirections(getDouble(context, "offset"), context))))
+            .then(argument("direction", direction())
+                .executes(context -> executeExpandDirection(1, getDirection(context, "direction"), context)))
+            .then(argument("axis", axis(true))
+                .executes(context -> executeExpandAxis(1, getAxis(context, "axis"), context)))
+            .then(argument("direction_type", new SimpleEnumArgumentTypes.DirectionTypeArgumentType())
+                .executes(context -> executeExpandDirectionType(1, context.getArgument("direction_type", Direction.Type.class), context)))
+            .then(literal("all")
+                .executes(context -> executeExpandAllDirections(1, context)))));
+    dispatcher.register(literalR2("ar").redirect(literalCommandNode));
   }
 }
