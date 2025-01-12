@@ -16,6 +16,7 @@ public enum TestForCommands implements CommandRegistrationCallback {
     TestForBiomeCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlockCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlockInfoCommand.INSTANCE.addArguments(literal, registryAccess, environment);
+    TestForBlocksCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForEntityCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     dispatcher.register(literal);
   }

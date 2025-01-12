@@ -131,9 +131,7 @@ public abstract class SimpleBlockSuggestedParser<S> extends SuggestedParser<S> {
       parsePropertyEntry();
       reader.skipWhitespace();
 
-      if (true) {// todo check
-        addPropertiesFinishedSuggestions();
-      }
+      addPropertiesFinishedSuggestions();
       if (parsePropertyEntryEnd()) return;
     }
     throw BlockArgumentParser.UNCLOSED_PROPERTIES_EXCEPTION.createWithContext(this.reader);

@@ -1,0 +1,19 @@
+{
+  "type": "enhanced_commands:checkerboard",
+  "predicates": {
+    "elements": [
+      "minecraft:red_concrete",
+      "minecraft:orange_concrete",
+      "minecraft:yellow_concrete",
+      "minecraft:lime_concrete",
+      "minecraft:blue_concrete",
+      "minecraft:purple_concrete"
+    ],
+    "weighted": false
+  },
+  "scale": [
+    2.0,
+    2.0,
+    2.0
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "type": "enhanced_commands:any",
+  "predicates": [
+    {
+      "type": "enhanced_commands:tag",
+      "tag": "minecraft:replaceable"
+    },
+    {
+      "type": "enhanced_commands:tag",
+      "tag": "minecraft:leaves"
+    },
+    {
+      "type": "enhanced_commands:tag",
+      "tag": "minecraft:wart_blocks"
+    },
+    {
+      "type": "enhanced_commands:tag",
+      "tag": "minecraft:logs"
+    },
+    {
+      "type": "enhanced_commands:tag",
+      "tag": "c:buds"
+    },
+    "minecraft:glowstone"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "type": "enhanced_commands:checkerboard",
+  "predicates": {
+    "elements": [
+      {
+        "type": "enhanced_commands:constant"
+      },
+      {
+        "type": "enhanced_commands:constant",
+        "value": false
+      }
+    ],
+    "weighted": false
+  }
+}

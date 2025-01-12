@@ -1,0 +1,142 @@
+{
+  "type": "enhanced_commands:conditions",
+  "conditions": [
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:nether_fungus"
+      },
+      "then": {
+        "type": "enhanced_commands:tag",
+        "tag": "#minecraft:small_flowers"
+      }
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:nether_roots"
+      },
+      "then": "minecraft:short_grass"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:nether_natural_stem"
+      },
+      "then": "minecraft:oak_log"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:nether_natural_hyphae"
+      },
+      "then": "minecraft:oak_wood"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:nether_stripped_stem"
+      },
+      "then": "minecraft:stripped_oak_log"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:nether_stripped_hyphae"
+      },
+      "then": "minecraft:stripped_oak_wood"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "minecraft:wart_blocks"
+      },
+      "then": {
+        "type": "enhanced_commands:simple",
+        "block": "minecraft:oak_leaves",
+        "properties": [
+          {
+            "type": "simple",
+            "property": "persistent",
+            "value": "false"
+          }
+        ]
+      }
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:nether_vines"
+      },
+      "then": "minecraft:vine"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:natualize_ignore"
+      },
+      "then": {
+        "type": "enhanced_commands:empty"
+      }
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:horizontal_offset",
+        "block_predicate": {
+          "type": "enhanced_commands:tag",
+          "tag": "enhanced_commands:natualize_ignore"
+        },
+        "offset": 1
+      },
+      "then": "minecraft:grass_block"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:any",
+        "predicates": [
+          {
+            "type": "enhanced_commands:horizontal_offset",
+            "block_predicate": {
+              "type": "enhanced_commands:tag",
+              "tag": "enhanced_commands:natualize_ignore"
+            },
+            "offset": 2
+          },
+          {
+            "type": "enhanced_commands:horizontal_offset",
+            "block_predicate": {
+              "type": "enhanced_commands:tag",
+              "tag": "enhanced_commands:natualize_ignore"
+            },
+            "offset": 3
+          },
+          {
+            "type": "enhanced_commands:horizontal_offset",
+            "block_predicate": {
+              "type": "enhanced_commands:tag",
+              "tag": "enhanced_commands:natualize_ignore"
+            },
+            "offset": 4
+          }
+        ]
+      },
+      "then": "minecraft:dirt"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:any",
+        "predicates": [
+          {
+            "type": "enhanced_commands:tag",
+            "tag": "c:ores"
+          },
+          "minecraft:stone"
+        ]
+      },
+      "else": "minecraft:stone",
+      "then": {
+        "type": "enhanced_commands:empty"
+      }
+    }
+  ]
+}

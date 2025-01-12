@@ -1,0 +1,14 @@
+{
+  "type": "enhanced_commands:pick",
+  "entries": [
+    {
+      "element": "minecraft:nether_bricks",
+      "weight": 0.6
+    },
+    {
+      "element": "minecraft:cracked_nether_bricks",
+      "weight": 0.4
+    }
+  ],
+  "weighted": true
+}

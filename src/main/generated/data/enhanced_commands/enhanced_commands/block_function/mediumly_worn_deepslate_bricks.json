@@ -1,0 +1,14 @@
+{
+  "type": "enhanced_commands:pick",
+  "entries": [
+    {
+      "element": "minecraft:deepslate_bricks",
+      "weight": 0.6
+    },
+    {
+      "element": "minecraft:cracked_deepslate_bricks",
+      "weight": 0.4
+    }
+  ],
+  "weighted": true
+}

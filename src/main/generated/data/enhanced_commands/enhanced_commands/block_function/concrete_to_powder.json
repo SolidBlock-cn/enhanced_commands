@@ -1,0 +1,5 @@
+{
+  "type": "enhanced_commands:id_replace",
+  "pattern": "_concrete$",
+  "replacement": "_concrete_powder"
+}
