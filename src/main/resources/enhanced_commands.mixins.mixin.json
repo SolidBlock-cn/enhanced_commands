@@ -24,7 +24,6 @@
     "RegistryEntryPredicateArgumentTypeMixin",
     "RegistryEntryReferenceArgumentTypeMixin",
     "ServerPlayerEntityMixin",
-    "SharedConstantsTempMixin",
     "StringReaderMixin",
     "ThreadExecutorMixin",
     "TranslatableTextContentMixin",
