@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.exception.StopIterationException;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -56,6 +57,8 @@ public interface ThreadExecutorExtension {
       }
       try {
         task.next();
+      } catch (StopIterationException exception) {
+        limit.remove();
       } catch (Throwable throwable) {
         LOGGER.error("Error when executing task {}, removing!", task, throwable);
         limit.remove();

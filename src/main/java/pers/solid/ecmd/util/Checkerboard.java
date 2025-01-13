@@ -60,10 +60,10 @@ public interface Checkerboard<T> {
     final Vec3d scale = scale();
     final Vec3d offset = offset();
     if (!floor.equals(Vec3d.ZERO)) {
-      sb.append(" floor ").append(StringUtil.wrapPosition(floor));
+      sb.append(" floor ").append(StringUtil.wrapVector(floor));
     }
     if (!scale.equals(UNIT)) {
-      sb.append(" scale ").append(StringUtil.wrapPosition(scale));
+      sb.append(" scale ").append(StringUtil.wrapVector(scale));
     }
     if (!offset.equals(Vec3d.ZERO)) {
       sb.append(" offset ").append(offset);

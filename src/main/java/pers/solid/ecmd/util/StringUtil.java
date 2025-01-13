@@ -3,6 +3,7 @@ package pers.solid.ecmd.util;
 import net.minecraft.command.FloatRangeArgument;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.util.math.Position;
+import net.minecraft.util.math.Vec3i;
 
 import java.util.Objects;
 
@@ -13,7 +14,11 @@ public final class StringUtil {
   private StringUtil() {
   }
 
-  public static String wrapPosition(Position position) {
+  public static String wrapVector(Vec3i vec3i) {
+    return vec3i.getX() + " " + vec3i.getY() + " " + vec3i.getZ();
+  }
+
+  public static String wrapVector(Position position) {
     return position.getX() + " " + position.getY() + " " + position.getZ();
   }
 

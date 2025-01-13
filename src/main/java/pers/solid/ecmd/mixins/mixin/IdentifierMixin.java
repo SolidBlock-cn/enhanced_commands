@@ -27,7 +27,7 @@ public abstract class IdentifierMixin {
     return original || isUpperCase(reader.peek());
   }
 
-  @Inject(method = {"fromCommandInput", "fromCommandInputNonEmpty"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;readString(Lcom/mojang/brigadier/StringReader;)Ljava/lang/String;", remap = false, shift = At.Shift.AFTER))
+  @Inject(method = {"fromCommandInput", "fromCommandInputNonEmpty"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;readString(Lcom/mojang/brigadier/StringReader;)Ljava/lang/String;", shift = At.Shift.AFTER))
   private static void storeCursor(StringReader reader, CallbackInfoReturnable<Identifier> cir, @Share("cursorAfterString") LocalIntRef cursorAfterString) {
     cursorAfterString.set(reader.getCursor());
   }
