@@ -113,7 +113,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
 
   @Override
   public @NotNull String asString() {
-    return "straight(%s, %s)".formatted(StringUtil.wrapPosition(from), StringUtil.wrapPosition(to));
+    return "straight(%s, %s)".formatted(StringUtil.wrapVector(from), StringUtil.wrapVector(to));
   }
 
   @Override

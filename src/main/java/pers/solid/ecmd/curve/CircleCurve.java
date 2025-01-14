@@ -112,10 +112,10 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
       if (radius.subtract(1, 0, 0).equals(Vec3d.ZERO)) {
         if (minAngle == FULL_MIN && maxAngle == FULL_MAX) {
           // 表示一个最简单的旋转，绕 y 轴正方向，从 x 正方向开始旋转一周
-          return "circle(%s at %s)".formatted(radius.y, StringUtil.wrapPosition(center));
+          return "circle(%s at %s)".formatted(radius.y, StringUtil.wrapVector(center));
         } else {
           // 表示绕 y 轴正方向，从 x 正方向开始旋转一个特定的范围
-          return "circle(%s at %s ranging %s)".formatted(radius.y, StringUtil.wrapPosition(center), wrapRadRange(minAngle, maxAngle));
+          return "circle(%s at %s ranging %s)".formatted(radius.y, StringUtil.wrapVector(center), wrapRadRange(minAngle, maxAngle));
         }
       }
     }
@@ -123,12 +123,12 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
       // 这种情况下，由于本来就是旋转一整周，因此没有必要指定开始坐标。
       if (radius.dotProduct(axis) == 0) {
         // 半径向量和轴向量垂直。
-        return "circle(%s at %s around %s)".formatted(radius.length(), StringUtil.wrapPosition(center), wrapVector(axis));
+        return "circle(%s at %s around %s)".formatted(radius.length(), StringUtil.wrapVector(center), wrapVector(axis));
       } else {
-        return "circle(from %s at %s around %s)".formatted(wrapRadius(radius), StringUtil.wrapPosition(center), wrapVector(axis));
+        return "circle(from %s at %s around %s)".formatted(wrapRadius(radius), StringUtil.wrapVector(center), wrapVector(axis));
       }
     } else {
-      return "circle(from %s at %s around %s ranging %s)".formatted(wrapRadius(radius), StringUtil.wrapPosition(center), wrapVector(axis), wrapRadRange(minAngle, maxAngle));
+      return "circle(from %s at %s around %s ranging %s)".formatted(wrapRadius(radius), StringUtil.wrapVector(center), wrapVector(axis), wrapRadRange(minAngle, maxAngle));
     }
   }
 
@@ -168,11 +168,11 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
   }
 
   public static String wrapVector(Vec3d vec3d) {
-    return StringUtil.wrapPosition(vec3d);
+    return StringUtil.wrapVector(vec3d);
   }
 
   public static String wrapRadius(Vec3d vec3d) {
-    return StringUtil.wrapPosition(vec3d);
+    return StringUtil.wrapVector(vec3d);
   }
 
 

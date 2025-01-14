@@ -15,6 +15,7 @@ public enum TestForCommands implements CommandRegistrationCallback {
     final LiteralArgumentBuilder<ServerCommandSource> literal = ModCommands.literalR2("testfor");
     TestForBiomeCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlockCommand.INSTANCE.addArguments(literal, registryAccess, environment);
+    TestForBlocksCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlockInfoCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlocksCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForEntityCommand.INSTANCE.addArguments(literal, registryAccess, environment);

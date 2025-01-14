@@ -13,8 +13,8 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.parse.ParsingUtil;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 public record BlockNbtDataArgument(PosArgument posArgument) implements NbtSourceArgument, NbtTargetArgument {
   public static final Dynamic2CommandExceptionType BLOCK_IS_NOT_ENTITY = new Dynamic2CommandExceptionType((pos, name) -> Text.translatable("enhanced_commands.nbt.block_is_not_entity", pos, name));
