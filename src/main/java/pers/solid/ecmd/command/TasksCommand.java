@@ -19,7 +19,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.exception.StopIterationException;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -154,13 +153,10 @@ public enum TasksCommand implements CommandRegistrationCallback {
       final IteratorTask<?> iteratorTask = uuidToTasks.get(uuid);
       if (iteratorTask != null) {
         context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tasks.exhaust.start", iteratorTask.name), true);
-        try {
-          if (limit <= 0) {
-            IterateUtils.exhaust(iteratorTask);
-          } else {
-            IterateUtils.exhaust(Iterators.limit(iteratorTask, limit));
-          }
-        } catch (StopIterationException ignored) {
+        if (limit <= 0) {
+          IterateUtils.exhaust(iteratorTask);
+        } else {
+          IterateUtils.exhaust(Iterators.limit(iteratorTask, limit));
         }
         if (!iteratorTask.hasNext()) {
           uuidToTasks.remove(iteratorTask.uuid);

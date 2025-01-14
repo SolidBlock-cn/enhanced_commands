@@ -18,9 +18,9 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import pers.solid.ecmd.argument.*;
-import pers.solid.ecmd.exception.StopIterationException;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
@@ -88,8 +88,9 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     MutableInt blocksCounted = new MutableInt();
     MutableInt blocksMatched = new MutableInt();
     MutableInt blocksSkipped = unloadedPosBehavior == UnloadedPosBehavior.SKIP ? new MutableInt() : null;
+    MutableBoolean shouldBreak = new MutableBoolean();
 
-    final Iterable<Void> calculation = Iterables.transform(region, blockPos -> {
+    final Iterable<Void> calculation = Iterables.transform(region.stream().takeWhile(i -> !shouldBreak.booleanValue())::iterator, blockPos -> {
       final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
       if (cachedBlockPosition.getBlockState() == null) {
         if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
@@ -97,7 +98,8 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
           return null;
         } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.broken").formatted(Formatting.YELLOW), false);
-          throw StopIterationException.INSTANCE;
+          shouldBreak.setTrue();
+          return null;
         }
       }
       blocksCounted.increment();
@@ -107,11 +109,13 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       if (testType == TestType.ANY && test) {
         source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.any.true", TextUtil.wrapVector(blockPos.toImmutable()), cachedBlockPosition.getBlockState().getBlock().getName()).styled(Styles.TRUE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
         returnValue.setValue(0);
-        throw StopIterationException.INSTANCE;
+        shouldBreak.setTrue();
+        return null;
       } else if (testType == TestType.ALL && !test) {
         source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.all.false", TextUtil.wrapVector(blockPos.toImmutable()), cachedBlockPosition.getBlockState().getBlock().getName()).styled(Styles.FALSE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
         returnValue.setValue(1);
-        throw StopIterationException.INSTANCE;
+        shouldBreak.setTrue();
+        return null;
       }
       return null;
     });
@@ -156,7 +160,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         final int counted = blocksCounted.intValue();
         final int matched = blocksMatched.intValue();
         final double proportion = 100d * matched / counted;
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.proportion.result", TextUtil.literal(counted).styled(Styles.RESULT), TextUtil.literal(matched).styled(Styles.RESULT), Text.literal(proportion + "&").styled(Styles.RESULT)).enhanced$$(), false);
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.proportion.result", TextUtil.literal(counted).styled(Styles.RESULT), TextUtil.literal(matched).styled(Styles.RESULT), Text.literal(Double.isFinite(proportion) ? proportion + "%" : String.valueOf(proportion)).styled(Styles.RESULT)).enhanced$$(), false);
         returnValue.setValue(proportion * 100);
       });
     };
@@ -169,10 +173,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.large_region", Long.toString(region.numberOfBlocksAffected())).enhanced$$().formatted(Formatting.YELLOW), true);
       return 1;
     } else {
-      try {
-        IterateUtils.exhaust(mainIterable.iterator());
-      } catch (StopIterationException ignored) {
-      }
+      IterateUtils.exhaust(mainIterable.iterator());
       return returnValue.shortValue();
     }
   }
