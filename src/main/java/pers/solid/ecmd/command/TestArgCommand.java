@@ -38,8 +38,11 @@ import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
+import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.region.Region;
@@ -271,11 +274,14 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               int numOfNotIteratedButMatch = 0;
               final ImmutableSet<BlockPos> collect = region.stream().map(BlockPos::toImmutable).collect(ImmutableSet.toImmutableSet());
               final Set<BlockPos> iteratedNearby = new HashSet<>();
+              final BlockPlacementHistory history = new BlockPlacementHistory(Text.translatable("enhanced_commands.commands.testarg.region.illustrate.task_name", region.asString()), world, Block.NOTIFY_LISTENERS, 0);
               for (BlockPos blockPos : collect) {
                 if (region.contains(blockPos)) {
+                  history.recordBlockAndEntity(world, blockPos, Blocks.GLASS.getDefaultState());
                   world.setBlockState(blockPos, Blocks.GLASS.getDefaultState(), Block.NOTIFY_LISTENERS);
                 } else {
                   numOfIteratedButNotMatch++;
+                  history.recordBlockAndEntity(world, blockPos, Blocks.RED_STAINED_GLASS.getDefaultState());
                   world.setBlockState(blockPos, Blocks.RED_STAINED_GLASS.getDefaultState(), Block.NOTIFY_LISTENERS);
                 }
                 for (Direction direction : Direction.values()) {
@@ -283,6 +289,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                   if (!collect.contains(offset) && !iteratedNearby.contains(offset)) {
                     if (region.contains(offset)) {
                       numOfNotIteratedButMatch++;
+                      history.recordBlockAndEntity(world, blockPos, Blocks.ORANGE_STAINED_GLASS.getDefaultState());
                       world.setBlockState(offset, Blocks.ORANGE_STAINED_GLASS.getDefaultState(), Block.NOTIFY_LISTENERS);
                     }
                     iteratedNearby.add(offset);
@@ -291,7 +298,10 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               }
               final int finalNumOfIteratedButNotMatch = numOfIteratedButNotMatch;
               final int finalNumOfNotIteratedButMatch = numOfNotIteratedButMatch;
-              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.region.verify.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), false);
+              if (((ServerCommandSourceAccessor) context.getSource()).getOutput() instanceof final HistoryHolder holder) {
+                holder.addUndoableHistory$ec(history);
+              }
+              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.region.illustrate.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), false);
               return numOfIteratedButNotMatch;
             }))
     );

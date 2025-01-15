@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull List<PropertyNameFunction> properties) implements BlockFunction {
   public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.entryList(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
-  // todo: consider using tag key as component
 
   public TagBlockFunction(@NotNull RegistryEntryList<Block> tag) {
     this(tag, Collections.emptyList());

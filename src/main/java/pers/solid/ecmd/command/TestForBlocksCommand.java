@@ -169,7 +169,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       final Text taskName = Text.translatable("enhanced_commands.commands.testfor.blocks.task_name", region.asString());
-      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(mainIterable.iterator(), 32768, 15));
+      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(mainIterable.iterator(), 32768, 3));
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.large_region", Long.toString(region.numberOfBlocksAffected())).enhanced$$().formatted(Formatting.YELLOW), true);
       return 1;
     } else {

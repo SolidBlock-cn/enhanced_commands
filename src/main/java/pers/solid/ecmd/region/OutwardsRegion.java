@@ -66,7 +66,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
 
   @Override
   public @NotNull String asString() {
-    return "outwards(%s %s %s, %s %s %s)".formatted(Integer.toString(center.getX()), Integer.toString(center.getY()), Integer.toString(center.getZ()), Integer.toString(x), Integer.toString(y), Integer.toString(z));
+    return "outwards(%s %s %s, %s %s %s)".formatted(Integer.toString(x), Integer.toString(y), Integer.toString(z), Integer.toString(center.getX()), Integer.toString(center.getY()), Integer.toString(center.getZ()));
   }
 
   public enum Type implements RegionType<OutwardsRegion> {
@@ -94,7 +94,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   }
 
   public static final class Parser implements FunctionParamsParser<RegionArgument> {
-    private PosArgument center;
+    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
     private int x, y, z;
     private int dimensionNumber = 0;
 
@@ -107,10 +107,10 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
 
     @Override
     public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      if (paramIndex == 0) {
+      if (paramIndex == 1) {
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
         center = parser.parseAndSuggestArgument(argumentType);
-      } else if (paramIndex == 1) {
+      } else if (paramIndex == 0) {
         final StringReader reader = parser.reader;
         x = reader.readInt();
         dimensionNumber = 1;

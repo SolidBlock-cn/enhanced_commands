@@ -34,7 +34,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
     final String id = Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString();
-    final boolean matches = pattern.matcher(id).matches();
+    final boolean matches = pattern.matcher(id).find();
     return TestResult.of(matches, Text.translatable("enhanced_commands.block_predicate.id_contain." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(Styles.EXPECTED), Text.literal(id).styled(Styles.ACTUAL)));
   }
 
