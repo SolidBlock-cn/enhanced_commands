@@ -12,6 +12,7 @@ import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.OutlineRegion;
+import pers.solid.ecmd.util.MoonPhase;
 
 import java.util.function.Function;
 
@@ -53,4 +54,12 @@ public final class SimpleEnumArgumentTypes {
       });
     }
   }
+
+
+  public static final class MoonPhaseArgumentType extends SimpleEnumArgumentType<MoonPhase> {
+    public MoonPhaseArgumentType() {
+      super(MoonPhase.VALUES, MoonPhase::asString, MoonPhase.CODEC::byId, moonPhase -> moonPhase.displayName);
+    }
+  }
+
 }

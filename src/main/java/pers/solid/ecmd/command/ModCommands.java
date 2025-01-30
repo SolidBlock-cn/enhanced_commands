@@ -55,6 +55,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     HealthCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     HistoryCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     MirrorCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    MoonCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     MoveCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     OutlineCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     PileCommand.INSTANCE.register(dispatcher, registryAccess, environment);

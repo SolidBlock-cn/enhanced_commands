@@ -40,9 +40,7 @@ public class EntitySelectorExtras {
 
   public void updateSource(@NotNull ServerCommandSource source) throws CommandSyntaxException {
     if (!source.equals(this.source)) {
-      if (this.source != null) {
-        LOGGER.warn("Changing source for a same entity selector object ({}) from {} to {}!", this, this.source, source);
-      }
+      // todo is it safe to change to another source?
       this.source = source;
       actualExtraPredicate = createUpdatedPredicate(source);
     }

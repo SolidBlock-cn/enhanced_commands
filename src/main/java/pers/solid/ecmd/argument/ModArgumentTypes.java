@@ -20,6 +20,7 @@ public class ModArgumentTypes {
     register("direction", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::direction));
     register("direction_type", SimpleEnumArgumentTypes.DirectionTypeArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.DirectionTypeArgumentType::new));
     register("entity_predicate", EntityPredicateArgumentType.class, ConstantArgumentSerializer.of(EntityPredicateArgumentType::new));
+    register("moon_phase", SimpleEnumArgumentTypes.MoonPhaseArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.MoonPhaseArgumentType::new));
     register("nbt_function", NbtFunctionArgumentType.class, NbtFunctionArgumentType.Serializer.INSTANCE);
     register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
     register("nbt_source", NbtSourceArgumentType.class, ConstantArgumentSerializer.of(NbtSourceArgumentType::new));
