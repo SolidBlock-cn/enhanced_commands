@@ -12,12 +12,12 @@
 - [`/convertblock`](convertblock/zh.md)：将方块转换为特定的实体（如展示实体、下落的方块）。
 - [`/convertblocks`](convertblocks/zh.md) 和 `//convertblocks`：将区域内的方块转换为特定的实体。
 - [`/draw`](draw/zh.md)：在世界内绘制一条曲线。
-- [`/fill`](fill/zh.md)、`//fill` 和 `//f`：设置区域内的方块。
 - [`/mirror`](mirror/zh.md) 和 `//mirror`：镜像（翻转）区域内的方块和实体。
 - [`/move`](move/zh.md) 和 `//move`：移动区域内的方块和实体。
 - [`/outline`](outline/zh.md)：填充区域边缘位置的方块，可以一并填充区域边缘以内的方块。
 - [`/replace`](replace/zh.md) 和 `//replace`：替换区域内的符合指定谓词的方块。
 - [`/rotate`](rotate/zh.md) 和 `//rotate`：旋转区域内的方块和实体。
+- [`/setblocks`](fill/zh.md)、`//setblocks` 和 `//f`：设置区域内的方块。
 - [`/stack`](stack/zh.md) 和 `//stack`：向一个方向多次复制区域。
 - [`/wall`](wall/zh.md)：填充区域内的四周（墙面）的方块，可以一并填充区域四周以内的方块。
 

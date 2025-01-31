@@ -81,11 +81,11 @@ public enum DrawCommand implements CommandRegistrationCallback {
         })
         .map(blockPos -> null)
         .iterator();
-    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.complete", numbersAffected.getValue()).enhanced$$(), true)));
+    final Iterator<?> iterator = Iterators.concat(mainIterator, IterateUtils.singletonPeekingIterator(() -> source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.getValue()).enhanced$$(), true)));
     if (!immediately && estimatedIterationAmount > 16384) {
       // The region is too large. Send a server task.
       ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(Text.translatable("enhanced_commands.commands.draw.task_name", curve.asString()), IterateUtils.batchAndSkip(iterator, 32768, 15));
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", estimatedIterationAmount).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", estimatedIterationAmount).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

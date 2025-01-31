@@ -19,9 +19,9 @@
 
 ### 关键字参数
 
-**此命令支持 [`/fill`](../fill/zh.md) 和 [`/move`](../move/zh.md) 中的所有关键字参数。**
+**此命令支持 [`/setblocks`](../setblocks/zh.md) 和 [`/move`](../move/zh.md) 中的所有关键字参数。**
 
-除了 `/fill` 和 `/move` 中的关键字参数外，`/mirror` 和 `//mirror` 还支持以下关键字参数：
+除了 `/setblocks` 和 `/move` 中的关键字参数外，`/mirror` 和 `//mirror` 还支持以下关键字参数：
 
 - `pivot`：镜像时所影响围绕的点。必须是[方块坐标](/documents/arguments/pos/zh.md)。如果未指定，则使用执行源所在的方块坐标。
 

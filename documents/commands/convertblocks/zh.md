@@ -35,7 +35,7 @@
 
 #### `unloaded_pos`
 
-和 [`/fill`](../fill/zh.md) 的 `unloaded_pos` 参数相同。
+和 [`/setblocks`](../setblocks/zh.md) 的 `unloaded_pos` 参数相同。
 
 ## 示例
 

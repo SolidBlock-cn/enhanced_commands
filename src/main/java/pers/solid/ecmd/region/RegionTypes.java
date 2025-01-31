@@ -14,7 +14,7 @@ import java.util.Map;
 
 public final class RegionTypes {
   public static final Map<String, RegionType<?>> FUNCTIONS = new LinkedHashMap<>();
-  public static final List<Parser<RegionArgument>> PARSERS = Lists.newArrayList(new FunctionsParser<>(FUNCTIONS.keySet(), s -> {
+  public static final List<Parser<RegionArgument>> PARSERS = Lists.newArrayList(SingleBlockPosRegion.BareParser.INSTANCE, new FunctionsParser<>(FUNCTIONS.keySet(), s -> {
     final RegionType<?> regionType = FUNCTIONS.get(s);
     return regionType == null ? null : regionType.functionParamsParser();
   }, s -> {

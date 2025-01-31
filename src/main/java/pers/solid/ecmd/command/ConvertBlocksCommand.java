@@ -152,9 +152,9 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> {
       if (hasUnloaded.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.broken").styled(Styles.ACTUAL), false);
         } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.skipped").styled(Styles.ACTUAL), false);
         }
       }
       source.sendFeedback$ecBridge(() -> feedback.apply(numbersAffected.intValue()), true);
@@ -163,7 +163,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
 
     if (!keywordArgs.getBoolean("immediately") && region.numberOfBlocksAffected() > 2048) {
       ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(Text.translatable("enhanced_commands.commands.convertblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

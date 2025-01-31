@@ -55,20 +55,21 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final int SUPPRESS_INITIAL_CHECK_FLAG = 2;
   public static final int SUPPRESS_REPLACED_CHECK_FLAG = 4;
 
-  public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.commands.fill.region_too_large", a, b));
+  public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.commands.setblocks.region_too_large", a, b));
   public static final int REGION_SIZE_LIMIT = 16777215;
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    LiteralArgumentBuilder<ServerCommandSource> directBuilder = literalR2("fill");
-    LiteralArgumentBuilder<ServerCommandSource> indirectBuilder = literalR2("/fill");
+    LiteralArgumentBuilder<ServerCommandSource> directBuilder = literalR2("setblocks");
+    LiteralArgumentBuilder<ServerCommandSource> indirectBuilder = literalR2("/setblocks");
     final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess).build();
-    final LiteralCommandNode<ServerCommandSource> fillNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(registryAccess)).then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+    final LiteralCommandNode<ServerCommandSource> setBlocksNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(registryAccess)).then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
         .executes(context -> execute(context, null))
         .then(argument("keyword_args", keywordArgs)
             .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build()).build());
 
-    dispatcher.register(literalR2("/f").forward(fillNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
+    dispatcher.register(literalR2("/s").forward(setBlocksNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
+    dispatcher.register(literalR2("s").redirect(setBlocksNode));
 
     ModCommands.registerWithRegionArgumentModification(dispatcher,
         literalR2("replace"),
@@ -101,7 +102,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     return setBlocksFromKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate, kwArgs);
   }
 
-  public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.fill.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
+  public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
   public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
     return setBlocksInRegion(region, blockFunction, source, predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT, true);
@@ -143,7 +144,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       stream = region.stream();
     }
 
-    final Text taskName = Text.translatable("enhanced_commands.commands.fill.task_name", region.asString());
+    final Text taskName = Text.translatable("enhanced_commands.commands.setblocks.task_name", region.asString());
     final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;
     if (predicate == null) {
       mainIterator = stream.<Void>map(blockPos -> {
@@ -175,10 +176,10 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       mainIterator = Iterables.concat(() -> testPosIteration, placingIteration).iterator();
     }
     final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> source.sendFeedback$ecBridge(() -> Text.translatable(hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
-      case SKIP -> "enhanced_commands.commands.fill.complete_skipped";
-      case BREAK -> "enhanced_commands.commands.fill.complete_broken";
-      default -> "enhanced_commands.commands.fill.complete";
-    } : "enhanced_commands.commands.fill.complete", numbersAffected.getValue()).enhanced$$(), true));
+      case SKIP -> "enhanced_commands.commands.setblocks.complete_skipped";
+      case BREAK -> "enhanced_commands.commands.setblocks.complete_broken";
+      default -> "enhanced_commands.commands.setblocks.complete";
+    } : "enhanced_commands.commands.setblocks.complete", numbersAffected.getValue()).enhanced$$(), true));
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (history != null) {
@@ -192,7 +193,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       if (history != null) {
         history.task = task;
       }
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

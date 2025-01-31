@@ -1,8 +1,10 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandRegistryAccess;
@@ -16,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -78,7 +81,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
 
     @Override
     public FunctionParamsParser<RegionArgument> functionParamsParser() {
-      return Parser.INSTANCE;
+      return FunctionParser.INSTANCE;
     }
 
     @Override
@@ -87,7 +90,33 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     }
   }
 
-  public enum Parser implements FunctionParamsParser<RegionArgument> {
+  /**
+   * 直接将坐标形式的内容解析为区域，例如 {@code 1 2 3} 等价于 {@code single(1 2 3)}，{@code ~~~} 等价于 {@code single(~~~)}。
+   */
+  public enum BareParser implements Parser<RegionArgument> {
+    INSTANCE;
+
+    @Override
+    public RegionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+      final StringReader reader = parser.reader;
+      final int cursorBeforeParse = reader.getCursor();
+      final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.blockPos();
+      parser.addSuggestion((context, builder) -> {
+        final SuggestionsBuilder builderOffset = builder.createOffset(cursorBeforeParse);
+        return argumentType.listSuggestions(context, builderOffset);
+      });
+      if (reader.canRead()) {
+        final char peek = reader.peek();
+        if (StringReader.isAllowedNumber(peek) || peek == '~' || peek == '^') {
+          final PosArgument posArgument = argumentType.parse(reader);
+          return source -> new SingleBlockPosRegion(posArgument.toAbsoluteBlockPos(source));
+        }
+      }
+      return null;
+    }
+  }
+
+  public enum FunctionParser implements FunctionParamsParser<RegionArgument> {
     INSTANCE;
     private PosArgument posArgument;
 

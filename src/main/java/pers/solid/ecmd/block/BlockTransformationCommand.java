@@ -134,7 +134,7 @@ public interface BlockTransformationCommand {
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
       })));
       history.task = iteratorTask;
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(task.transformBlocks().getImmediateTask());
@@ -158,9 +158,9 @@ public interface BlockTransformationCommand {
   private static void notifyUnloadedPos(BlockTransformationTask task, UnloadedPosBehavior unloadedPosBehavior, ServerCommandSource source) {
     if (task.hasUnloadedPos) {
       if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.broken").styled(Styles.ACTUAL), false);
       } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.skipped").styled(Styles.ACTUAL), false);
       }
     }
   }

@@ -15,7 +15,7 @@
 
 ### 关键字参数
 
-此命令支持以下关键字参数： `skip_light_update`、`notify_listeners`、`notify_neighbors`、`force_state`、`suppress_initial_check`、`suppress_replaced_check`、`force`，其用法与 [`/fill`](../fill/zh.md) 中的参数相同。但是与 `/fill` 不同的是，`/convertblock` 的 `force_state` 的默认值为 `true`，而不是 `false`。
+此命令支持以下关键字参数： `skip_light_update`、`notify_listeners`、`notify_neighbors`、`force_state`、`suppress_initial_check`、`suppress_replaced_check`、`force`，其用法与 [`/setblocks`](../setblocks/zh.md) 中的参数相同。但是与 `/setblocks` 不同的是，`/convertblock` 的 `force_state` 的默认值为 `true`，而不是 `false`。
 
 此命令还支持以下关键字参数：
 

@@ -1,9 +1,12 @@
 package pers.solid.ecmd.command;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.entity.CommandBlockBlockEntity;
@@ -99,13 +102,18 @@ public enum UndoCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(literalR2("undo")
-        .executes(context -> executeUndo(context.getSource(), ((ServerCommandSourceAccessor) context.getSource()).getOutput(), false, true, false))
+    final LiteralArgumentBuilder<ServerCommandSource> historyLiteral = literalR2("history");
+    final Command<ServerCommandSource> undoExecution, redoExecution;
+    final LiteralCommandNode<ServerCommandSource> undoNode = literalR2("undo")
+        .executes(undoExecution = context -> executeUndo(context.getSource(), ((ServerCommandSourceAccessor) context.getSource()).getOutput(), false, true, false))
         .then(argument("keyword_args", KEYWORD_ARGS)
-            .executes(context -> executeUndo(context.getSource(), getKeywordArgs(context, "keyword_args"), false))));
-    dispatcher.register(literalR2("redo")
-        .executes(context -> executeUndo(context.getSource(), ((ServerCommandSourceAccessor) context.getSource()).getOutput(), false, true, true))
+            .executes(context -> executeUndo(context.getSource(), getKeywordArgs(context, "keyword_args"), false))).build();
+    final LiteralCommandNode<ServerCommandSource> redoNode = literalR2("redo")
+        .executes(redoExecution = context -> executeUndo(context.getSource(), ((ServerCommandSourceAccessor) context.getSource()).getOutput(), false, true, true))
         .then(argument("keyword_args", KEYWORD_ARGS)
-            .executes(context -> executeUndo(context.getSource(), getKeywordArgs(context, "keyword_args"), true))));
+            .executes(context -> executeUndo(context.getSource(), getKeywordArgs(context, "keyword_args"), true))).build();
+    dispatcher.register(historyLiteral.then(undoNode).then(redoNode));
+    dispatcher.register(literalR2("undo").redirect(undoNode).executes(undoExecution));
+    dispatcher.register(literalR2("redo").redirect(redoNode).executes(redoExecution));
   }
 }

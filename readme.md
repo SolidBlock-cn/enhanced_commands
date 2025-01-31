@@ -13,8 +13,8 @@
 借助此模组，你可以输入以下命令：
 
 - 简化的游戏模式参数：`/gamemode c`、`/gmc`、`/kill @e[m=1]`
-- 更加复杂的方块：`/fill sphere(5) red_wool|white_wool`
-- 甚至还可以强制放置方块而忽略更新？？比如，让水和熔岩亲密接触：`/fill cuboid(~-3~-1~-3 ~3~-1~3) lava|water force=true`
+- 更加复杂的方块：`/setblocks sphere(5) red_wool|white_wool`
+- 甚至还可以强制放置方块而忽略更新？？比如，让水和熔岩亲密接触：`/setblocks cuboid(~-3~-1~-3 ~3~-1~3) lava|water force=true`
 - 简化的 /execute 命令：`/if block ~~~ idcontain(concrete) kill @p[type=creeper]`
 - 修改实体的生命：`/health set @e[health=11..] 10`
 - 将方块转换为下落的方块：`/convertblock ~~~ falling_block`

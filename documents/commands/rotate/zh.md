@@ -31,9 +31,9 @@
 
 ### 关键字参数
 
-**此命令支持 [`/fill`](../fill/zh.md) 和 [`/move`](../move/zh.md) 中的所有关键字参数。**
+**此命令支持 [`/setblocks`](../setblocks/zh.md) 和 [`/move`](../move/zh.md) 中的所有关键字参数。**
 
-除了 `/fill` 和 `/move` 中的关键字参数外，`/rotate` 和 `//rotate` 还支持以下关键字参数：
+除了 `/setblocks` 和 `/move` 中的关键字参数外，`/rotate` 和 `//rotate` 还支持以下关键字参数：
 
 - `interpolate`：布尔值，表示旋转时是否进行插值。对于围绕坐标轴且旋转角度为 90deg 的倍数的旋转，通常不需要插值。
 - `pivot`：[坐标](/documents/arguments/pos/zh.md)，旋转的中心点。必须是方块坐标。如果未指定，则默认为执行源所在的坐标。

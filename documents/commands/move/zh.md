@@ -29,9 +29,9 @@
 
 ### 关键字参数
 
-**此命令支持 [`/fill`](../fill/zh.md) 中的所有关键字参数。**
+**此命令支持 [`/setblocks`](../setblocks/zh.md) 中的所有关键字参数。**
 
-除了 `/fill` 中的关键字参数外，`/move` 和 `//move` 还支持以下参数：
+除了 `/setblocks` 中的关键字参数外，`/move` 和 `//move` 还支持以下参数：
 
 - `affect_entities`：实体选择器，表示需要影响的实体，如 `@e`。如未指定（即默认情况），则不影响任何实体（包括物品展示框等）。
 - `affect_only`：[方块谓词](/documents/arguments/block_predicate/zh.md)，无论是移动方块，还是移动方块后删除或替换原方块，均只影响符合则方块谓词的方块。

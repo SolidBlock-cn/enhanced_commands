@@ -280,9 +280,9 @@ public enum StackCommand implements CommandRegistrationCallback {
     Iterator<?> iterator = Iterators.concat(UnloadedPosException.catching(Iterators.concat(iterators.iterator())), IterateUtils.singletonPeekingIterator(() -> {
       if (hasUnloadedPos.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.broken").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.broken").styled(Styles.ACTUAL), false);
         } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.skipped").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.skipped").styled(Styles.ACTUAL), false);
         }
       }
       if (affectEntities != null) {
@@ -299,7 +299,7 @@ public enum StackCommand implements CommandRegistrationCallback {
     if (!immediately && region.numberOfBlocksAffected() * stackAmount > 16384) {
       // The region is too large. Send a server task.
       ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(Text.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount)), UnloadedPosException.catching(iterator));
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.fill.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);
