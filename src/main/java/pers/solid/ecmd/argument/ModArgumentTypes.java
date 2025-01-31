@@ -12,24 +12,20 @@ import pers.solid.ecmd.EnhancedCommands;
 public class ModArgumentTypes {
   public static void init() {
     register("angle", AngleArgumentType.class, AngleArgumentType.Serializer.INSTANCE);
-    register("axis", AxisArgumentType.class, AxisArgumentType.Serializer.INSTANCE);
     register("block_predicate", BlockPredicateArgumentType.class, ConstantArgumentSerializer.of(BlockPredicateArgumentType::new));
     register("block_function", BlockFunctionArgumentType.class, ConstantArgumentSerializer.of(BlockFunctionArgumentType::new));
-    register("concentration_type", ConcentrationTypeArgumentType.class, ConstantArgumentSerializer.of(ConcentrationTypeArgumentType::new));
     register("curve", CurveArgumentType.class, ConstantArgumentSerializer.of(CurveArgumentType::new));
     register("direction", DirectionArgumentType.class, ConstantArgumentSerializer.of(DirectionArgumentType::direction));
-    register("direction_type", SimpleEnumArgumentTypes.DirectionTypeArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.DirectionTypeArgumentType::new));
     register("entity_predicate", EntityPredicateArgumentType.class, ConstantArgumentSerializer.of(EntityPredicateArgumentType::new));
-    register("moon_phase", SimpleEnumArgumentTypes.MoonPhaseArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.MoonPhaseArgumentType::new));
     register("nbt_function", NbtFunctionArgumentType.class, NbtFunctionArgumentType.Serializer.INSTANCE);
     register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
     register("nbt_source", NbtSourceArgumentType.class, ConstantArgumentSerializer.of(NbtSourceArgumentType::new));
     register("nbt_target", NbtTargetArgumentType.class, ConstantArgumentSerializer.of(NbtTargetArgumentType::new));
     register("keyword_args", KeywordArgsArgumentType.class, KeywordArgsArgumentSerializer.INSTANCE);
     registerTrustingType("omitted_registry_entry", OmittedRegistryEntryArgumentType.class, OmittedRegistryEntryArgumentType.Serializer.INSTANCE);
-    register("outline_type", SimpleEnumArgumentTypes.OutlineTypeArgumentType.class, ConstantArgumentSerializer.of(SimpleEnumArgumentTypes.OutlineTypeArgumentType::new));
     register("pos", EnhancedPosArgumentType.class, EnhancedPosArgumentType.Serializer.INSTANCE);
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));
+    register("simple_enum", SimpleEnumArgumentType.class, SimpleEnumArgumentType.Serializer.INSTANCE);
     register("string_enum", StringEnumArgumentType.class, StringEnumArgumentType.Serializer.INSTANCE);
     register("test_type", TestTypeArgumentType.class, ConstantArgumentSerializer.of(TestTypeArgumentType::new));
     register("unloaded_pos_behavior", UnloadedPosBehaviorArgumentType.class, ConstantArgumentSerializer.of(UnloadedPosBehaviorArgumentType::new));

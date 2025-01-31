@@ -19,10 +19,14 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.function.FailableFunction;
-import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.argument.AxisArgument;
+import pers.solid.ecmd.argument.DirectionArgument;
+import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.RegionArgumentType;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.function.BiFunction;
@@ -31,10 +35,9 @@ import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
 import static com.mojang.brigadier.arguments.DoubleArgumentType.getDouble;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
-import static pers.solid.ecmd.argument.AxisArgumentType.axis;
-import static pers.solid.ecmd.argument.AxisArgumentType.getAxis;
 import static pers.solid.ecmd.argument.DirectionArgumentType.direction;
 import static pers.solid.ecmd.argument.DirectionArgumentType.getDirection;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.*;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum ActiveRegionCommand implements CommandRegistrationCallback {
@@ -172,7 +175,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
                     .executes(context -> executeExpandDirection(getDouble(context, "offset"), getDirection(context, "direction"), context)))
                 .then(argument("axis", axis(true))
                     .executes(context -> executeExpandAxis(getDouble(context, "offset"), getAxis(context, "axis"), context)))
-                .then(argument("direction_type", new SimpleEnumArgumentTypes.DirectionTypeArgumentType())
+                .then(argument("direction_type", simpleEnum(CommandEnumType.DIRECTION_TYPE))
                     .executes(context -> executeExpandDirectionType(getDouble(context, "offset"), context.getArgument("direction_type", Direction.Type.class), context)))
                 .then(literal("all")
                     .executes(context -> executeExpandAllDirections(getDouble(context, "offset"), context))))
@@ -180,7 +183,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
                 .executes(context -> executeExpandDirection(1, getDirection(context, "direction"), context)))
             .then(argument("axis", axis(true))
                 .executes(context -> executeExpandAxis(1, getAxis(context, "axis"), context)))
-            .then(argument("direction_type", new SimpleEnumArgumentTypes.DirectionTypeArgumentType())
+            .then(argument("direction_type", simpleEnum(CommandEnumType.DIRECTION_TYPE))
                 .executes(context -> executeExpandDirectionType(1, context.getArgument("direction_type", Direction.Type.class), context)))
             .then(literal("all")
                 .executes(context -> executeExpandAllDirections(1, context)))));

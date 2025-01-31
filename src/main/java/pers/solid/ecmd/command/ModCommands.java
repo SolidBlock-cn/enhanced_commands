@@ -16,10 +16,12 @@ import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableConsumer;
 import pers.solid.ecmd.argument.NbtTargetArgumentType;
 import pers.solid.ecmd.configs.CommandsConfig;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
+import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
@@ -110,4 +112,19 @@ public enum ModCommands implements CommandRegistrationCallback {
   public static FailableConsumer<NbtElement, CommandSyntaxException> consumerOf(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     return consumerOf(context, "target", "path");
   }
+
+  /**
+   * 因原方法涉及非公开类，无法通过 mixin 取代，故需要重新做一遍方法。
+   */
+  public static ArgumentBuilder<ServerCommandSource, ?> addConditionLogic(CommandNode<ServerCommandSource> root, ArgumentBuilder<ServerCommandSource, ?> builder, boolean positive, Predicate<CommandContext<ServerCommandSource>> condition) {
+    return builder.fork(root, (context) -> ExecuteCommandAccessor.callGetSourceOrEmptyForConditionFork(context, positive, condition.test(context))).executes((context) -> {
+      if (positive == condition.test(context)) {
+        context.getSource().sendFeedback(() -> Text.translatable("commands.execute.conditional.pass"), false);
+        return 1;
+      } else {
+        throw ExecuteCommandAccessor.getCONDITIONAL_FAIL_EXCEPTION().create();
+      }
+    });
+  }
+
 }

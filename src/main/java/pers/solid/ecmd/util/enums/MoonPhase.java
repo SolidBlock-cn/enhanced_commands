@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util;
+package pers.solid.ecmd.util.enums;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.render.WorldRenderer;

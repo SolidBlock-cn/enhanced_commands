@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.enums.OutlineType;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.ArrayList;
@@ -21,9 +22,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, CylinderRegion region) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
+public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion region) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
   public static final MapCodec<HollowCylinderRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-          OutlineRegion.OutlineType.OUTLINE_TYPE_FIELD.forGetter(HollowCylinderRegion::outlineType),
+          OutlineType.OUTLINE_TYPE_FIELD.forGetter(HollowCylinderRegion::outlineType),
           CylinderRegion.CODEC.fieldOf("region").forGetter(HollowCylinderRegion::region))
       .apply(i, HollowCylinderRegion::new));
 
@@ -31,10 +32,10 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
     return Vector2d.distance(vec3d.x, vec3d.z, cylinderRegion.center().x, cylinderRegion.center().z) <= cylinderRegion.radius();
   }
 
-  public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineRegion.OutlineType outlineType, BlockPos testPos) {
+  public static boolean horizontallyWithinHollowCylinder(CylinderRegion cylinderRegion, OutlineType outlineType, BlockPos testPos) {
     outlineType = switch (outlineType) {
-      case OUTLINE -> OutlineRegion.OutlineType.WALL;
-      case OUTLINE_CONNECTED -> OutlineRegion.OutlineType.WALL_CONNECTED;
+      case OUTLINE -> OutlineType.WALL;
+      case OUTLINE_CONNECTED -> OutlineType.WALL_CONNECTED;
       default -> outlineType;
     };
     return outlineType.modifiedTest(blockPos -> {
@@ -52,13 +53,13 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
   public boolean contains(@NotNull Vec3i vec3i) {
     final long topHeight = region.getTopHeight();
     final long bottomHeight = region.getBottomHeight();
-    if (outlineType == OutlineRegion.OutlineType.OUTLINE || outlineType == OutlineRegion.OutlineType.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineType.FLOOR_AND_CEIL) {
+    if (outlineType == OutlineType.OUTLINE || outlineType == OutlineType.OUTLINE_CONNECTED || outlineType == OutlineType.FLOOR_AND_CEIL) {
       // match the top or bottom ceiling
       if (vec3i.getY() == bottomHeight || vec3i.getY() == topHeight) {
         return horizontallyWithinCylinder(region, Vec3d.ofCenter(vec3i));
       }
     }
-    if (outlineType != OutlineRegion.OutlineType.FLOOR_AND_CEIL) {
+    if (outlineType != OutlineType.FLOOR_AND_CEIL) {
       // match the walls
       if (vec3i.getY() >= bottomHeight && vec3i.getY() <= topHeight) {
         return horizontallyWithinHollowCylinder(region, outlineType, new BlockPos(vec3i));
@@ -81,7 +82,7 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
 
     final Iterable<BlockPos> iterable = BlockPos.iterate(MathHelper.ceil(center.x - radius - 0.5), 0, MathHelper.ceil(center.z - radius - 0.5), MathHelper.floor(center.x + radius - 0.5), 0, MathHelper.floor(center.z + radius - 0.5));
     final Stream<BlockPos> flatOutlineRoundStream = Streams.stream(iterable).filter(blockPos -> horizontallyWithinHollowCylinder(region, outlineType, blockPos));
-    if (outlineType == OutlineRegion.OutlineType.OUTLINE || outlineType == OutlineRegion.OutlineType.OUTLINE_CONNECTED || outlineType == OutlineRegion.OutlineType.FLOOR_AND_CEIL) {
+    if (outlineType == OutlineType.OUTLINE || outlineType == OutlineType.OUTLINE_CONNECTED || outlineType == OutlineType.FLOOR_AND_CEIL) {
       if (topHeight == bottomHeight) {
         return Streams.stream(iterable).map(blockPos -> blockPos.withY(bottomHeight));
       } else if (topHeight < bottomHeight) {
@@ -91,7 +92,7 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
       // add top and bottom ceiling
       parts.add(Streams.stream(iterable).filter(blockPos -> horizontallyWithinCylinder(region, Vec3d.ofCenter(blockPos))).flatMap(blockPos -> Stream.of(blockPos.withY(topHeight), blockPos.withY(bottomHeight))));
       // add walls that excluded the top and bottom ceiling
-      if (outlineType != OutlineRegion.OutlineType.FLOOR_AND_CEIL && topHeight - 1 > bottomHeight + 1) {
+      if (outlineType != OutlineType.FLOOR_AND_CEIL && topHeight - 1 > bottomHeight + 1) {
         parts.add(flatOutlineRoundStream.flatMap(blockPos -> BlockPos.stream(blockPos.getX(), bottomHeight + 1, blockPos.getZ(), blockPos.getX(), topHeight - 1, blockPos.getZ()).map(BlockPos::toImmutable)));
       }
       return parts.stream().flatMap(Function.identity());
@@ -160,7 +161,7 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
     private double radius;
     private double height = 1;
     private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
-    private OutlineRegion.OutlineType type = OutlineRegion.OutlineType.WALL;
+    private OutlineType type = OutlineType.WALL;
 
     @Override
     public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
@@ -187,7 +188,7 @@ public record HollowCylinderRegion(OutlineRegion.OutlineType outlineType, Cylind
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
         center = parser.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 3) {
-        type = parser.parseAndSuggestEnums(OutlineRegion.OutlineType.values(), OutlineRegion.OutlineType::getDisplayName, OutlineRegion.OutlineType.CODEC);
+        type = parser.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
       }
     }
 

@@ -21,7 +21,7 @@ import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 import java.util.Iterator;
 
 /**
- * 数据的聚合类型，用于处理一组原始类型的数据。注意：必须是直接处理原始类型的数据，不对任何值进行装箱。为了提高性能，这里尽可能地避免了将可迭代的对象转换为流。。
+ * 数据的聚合类型，用于处理一组原始类型的数据。注意：必须是直接处理原始类型的数据，不对任何值进行装箱。为了提高性能，这里尽可能地避免了将可迭代的对象转换为流。
  */
 public enum ConcentrationType implements StringIdentifiable {
   FIRST("first", false) {

@@ -42,10 +42,10 @@ public enum MirrorCommand implements CommandRegistrationCallback {
         literalR2("mirror"),
         literalR2("/mirror"),
         argument("region", RegionArgumentType.region(registryAccess))
-            .then(argument("axis", AxisArgumentType.axis(false))
-                .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
+            .then(argument("axis", SimpleEnumArgumentType.axis(false))
+                .executes(context -> executeMirror(SimpleEnumArgumentType.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeMirror(AxisArgumentType.getAxis(context, "axis"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
+                    .executes(context -> executeMirror(SimpleEnumArgumentType.getAxis(context, "axis"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
             .executes(context -> executeMirror(AxisArgument.FRONT_BACK.apply(context.getSource()), keywordArgs.defaultArgs(), context))
     );
   }

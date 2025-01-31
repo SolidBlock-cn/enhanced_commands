@@ -16,7 +16,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import pers.solid.ecmd.argument.ConcentrationTypeArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.util.Styles;
@@ -27,6 +26,8 @@ import java.util.Collections;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.concentrationType;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.getConcentrationType;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum FireCommand implements CommandRegistrationCallback {
@@ -42,8 +43,8 @@ public enum FireCommand implements CommandRegistrationCallback {
             .executes(context -> executeGetFire(context, Collections.singleton(context.getSource().getEntityOrThrow()), null))
             .then(argument("entities", EntityArgumentType.entities())
                 .executes(context -> executeGetFire(context, EntityArgumentType.getEntities(context, "entities"), ConcentrationType.AVERAGE))
-                .then(argument("concentration_type", ConcentrationTypeArgumentType.concentrationType())
-                    .executes(context -> executeGetFire(context, EntityArgumentType.getEntities(context, "entities"), ConcentrationTypeArgumentType.getConcentrationType(context, "concentration_type"))))))
+                .then(argument("concentration_type", concentrationType())
+                    .executes(context -> executeGetFire(context, EntityArgumentType.getEntities(context, "entities"), getConcentrationType(context, "concentration_type"))))))
         .then(literal("set")
             .then(argument("entities", EntityArgumentType.entities())
                 .then(argument("time", TimeArgumentType.time())

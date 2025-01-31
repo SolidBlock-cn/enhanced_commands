@@ -2,10 +2,13 @@ package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.argument.NumberRangeArgumentType;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.vehicle.AbstractMinecartEntity;
 import net.minecraft.server.command.CommandManager;
@@ -15,10 +18,11 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.GameRules;
-import pers.solid.ecmd.argument.SimpleEnumArgumentTypes;
-import pers.solid.ecmd.util.MoonPhase;
+import pers.solid.ecmd.argument.SimpleEnumArgumentType;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.enums.CommandEnumType;
+import pers.solid.ecmd.util.enums.MoonPhase;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -33,18 +37,14 @@ public enum MoonCommand implements CommandRegistrationCallback {
         .then(literal("get")
             .executes(MoonCommand::executeGetPhase))
         .then(literal("set")
-            .then(argument("moon_phase", new SimpleEnumArgumentTypes.MoonPhaseArgumentType())
+            .then(argument("moon_phase", SimpleEnumArgumentType.simpleEnum(CommandEnumType.MOON_PHASE))
                 .executes(MoonCommand::executeSetPhase)))
         .then(literal("rotate")
             .executes(context -> executeRotatePhase(context, 1))
             .then(argument("steps", IntegerArgumentType.integer())
-                .executes(context -> executeRotatePhase(context, IntegerArgumentType.getInteger(context, "steps")))))/*
-        .then(literal("if")
-            .then(literal("phase"))
-            .then(literal("completeness")))
-        .then(literal("unless")
-            .then(literal("phase"))
-            .then(literal("completeness")))*/);
+                .executes(context -> executeRotatePhase(context, IntegerArgumentType.getInteger(context, "steps")))))
+        .then(addConditionArguments(dispatcher.getRoot(), literal("if"), true, registryAccess))
+        .then(addConditionArguments(dispatcher.getRoot(), literal("unless"), false, registryAccess)));
 
     dispatcher.register(literal("jadeplate").redirect(moonNode));
   }
@@ -116,5 +116,13 @@ public enum MoonCommand implements CommandRegistrationCallback {
     final MoonPhase moonPhase = MoonPhase.byNumericId(world.getMoonPhase());
     source.sendFeedback$ecBridge(() -> steps >= 0 ? Text.translatable("enhanced_commands.commands.moon.phase.rotate.next", TextUtil.literal(steps).styled(Styles.TARGET), TextUtil.styled(moonPhase.displayName, Styles.RESULT)) : Text.translatable("enhanced_commands.commands.moon.phase.rotate.previous", TextUtil.literal(-steps).styled(Styles.TARGET), TextUtil.styled(moonPhase.displayName, Styles.RESULT)), true);
     return 1;
+  }
+
+  private static <X extends ArgumentBuilder<ServerCommandSource, X>> X addConditionArguments(CommandNode<ServerCommandSource> root, X argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
+    return argumentBuilder
+        .then(literal("phase")
+            .then(ModCommands.addConditionLogic(root, argument("moon_phase", SimpleEnumArgumentType.simpleEnum(CommandEnumType.MOON_PHASE)), positive, context -> context.getSource().getWorld().getMoonPhase() == context.getArgument("moon_phase", MoonPhase.class).ordinal())))
+        .then(literal("size")
+            .then(ModCommands.addConditionLogic(root, argument("size", NumberRangeArgumentType.floatRange()), positive, context -> NumberRangeArgumentType.FloatRangeArgumentType.getRangeArgument(context, "size").test(context.getSource().getWorld().getMoonSize()))));
   }
 }

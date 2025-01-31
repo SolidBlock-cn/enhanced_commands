@@ -22,6 +22,7 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.regionselection.WandEvent;
+import pers.solid.ecmd.util.enums.CommandEnumType;
 
 public class EnhancedCommands implements ModInitializer {
   public static final String MOD_ID = "enhanced_commands";
@@ -37,6 +38,7 @@ public class EnhancedCommands implements ModInitializer {
   public void onInitialize() {
     BlockPredicateTypes.init();
     BlockFunctionTypes.init();
+    CommandEnumType.init();
     CurveTypes.init();
     NbtDataRegistry.init();
     RegionTypes.init();

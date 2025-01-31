@@ -37,8 +37,8 @@ import static net.minecraft.command.argument.ItemStackArgumentType.getItemStackA
 import static net.minecraft.command.argument.ItemStackArgumentType.itemStack;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
-import static pers.solid.ecmd.argument.ConcentrationTypeArgumentType.concentrationType;
-import static pers.solid.ecmd.argument.ConcentrationTypeArgumentType.getConcentrationType;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.concentrationType;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.getConcentrationType;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum FoodCommand implements CommandRegistrationCallback {

@@ -33,12 +33,12 @@ import static net.minecraft.command.argument.NbtPathArgumentType.getNbtPath;
 import static net.minecraft.command.argument.NbtPathArgumentType.nbtPath;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
-import static pers.solid.ecmd.argument.ConcentrationTypeArgumentType.concentrationType;
-import static pers.solid.ecmd.argument.ConcentrationTypeArgumentType.getConcentrationType;
 import static pers.solid.ecmd.argument.NbtSourceArgumentType.getNbtSource;
 import static pers.solid.ecmd.argument.NbtSourceArgumentType.nbtSource;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.getNbtTarget;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.concentrationType;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.getConcentrationType;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum AirCommand implements CommandRegistrationCallback {
