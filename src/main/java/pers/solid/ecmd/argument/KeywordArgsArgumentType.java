@@ -59,11 +59,13 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
     final MutableObject<SuggestionProvider<S>> mutableObject = new MutableObject<>();
     try {
       parseAndSuggest(reader, mutableObject);
-    } catch (CommandSyntaxException ignored) {}
+    } catch (CommandSyntaxException ignored) {
+    }
     if (mutableObject.getValue() != null) {
       try {
         return mutableObject.getValue().getSuggestions(context, builder);
-      } catch (CommandSyntaxException ignored) {}
+      } catch (CommandSyntaxException ignored) {
+      }
     }
     return Suggestions.empty();
   }

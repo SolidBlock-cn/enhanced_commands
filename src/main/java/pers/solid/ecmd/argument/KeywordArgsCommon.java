@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.BlockTransformationTask;
-import pers.solid.ecmd.util.UnloadedPosBehavior;
+import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 
 import java.util.function.Function;
 

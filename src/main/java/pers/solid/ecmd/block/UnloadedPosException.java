@@ -11,7 +11,9 @@ import java.util.Iterator;
 public final class UnloadedPosException extends RuntimeException {
   public final BlockPos unloadedPos;
 
-  public UnloadedPosException(BlockPos unloadedPos) {this.unloadedPos = unloadedPos;}
+  public UnloadedPosException(BlockPos unloadedPos) {
+    this.unloadedPos = unloadedPos;
+  }
 
   public static <T> Iterable<T> catching(Iterable<T> t) {
     return () -> new CatchingIterator<>(t.iterator(), e -> {

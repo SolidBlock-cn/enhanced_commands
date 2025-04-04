@@ -54,7 +54,8 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
     final SuggestedParser<S> parser = new SuggestedParser<>(stringReader);
     try {
       parser.parseAndSuggestAngle(returnRadians);
-    } catch (CommandSyntaxException ignore) {}
+    } catch (CommandSyntaxException ignore) {
+    }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
     return parser.buildSuggestions(context, builderOffset);
   }

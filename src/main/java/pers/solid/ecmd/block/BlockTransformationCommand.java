@@ -32,7 +32,7 @@ import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.UnloadedPosBehavior;
+import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 

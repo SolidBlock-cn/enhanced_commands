@@ -11,7 +11,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.math.Checkerboard;
+import pers.solid.ecmd.math.WeightedList;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collections;

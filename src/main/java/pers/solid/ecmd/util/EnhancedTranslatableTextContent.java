@@ -188,11 +188,13 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
       } else if (arg instanceof StringVisitable stringVisitable) {
         try {
           return Integer.parseInt(stringVisitable.getString());
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
       } else if (arg instanceof String s) {
         try {
           return Integer.parseInt(s);
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
       }
     }
     return 0;

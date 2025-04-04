@@ -19,8 +19,8 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.Checkerboard;
-import pers.solid.ecmd.util.WeightedList;
+import pers.solid.ecmd.math.Checkerboard;
+import pers.solid.ecmd.math.WeightedList;
 
 import java.util.Objects;
 import java.util.stream.Collectors;

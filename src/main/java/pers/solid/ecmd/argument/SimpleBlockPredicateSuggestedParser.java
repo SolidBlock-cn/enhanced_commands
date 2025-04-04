@@ -15,8 +15,8 @@ import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.predicate.property.*;
+import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 import java.util.*;

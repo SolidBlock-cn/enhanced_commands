@@ -51,15 +51,16 @@ import java.util.function.Function;
  * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code [length] <direction>}。
  * <p>当半径指定为标量时，其方向为轴向量与 y 轴正方向的向量积的方向，若轴向量为 y 轴正方向或负方向，则其方向为 x 轴正方向或负方向。
  *
- * @param radius 圆的半径，是一个相对向量。
- * @param center 圆的中心。
- * @param axis   旋转轴，通常应该要和 {@code radius} 垂直。
+ * @param radius   圆的半径，是一个相对向量。
+ * @param center   圆的中心。
+ * @param axis     旋转轴，通常应该要和 {@code radius} 垂直。
  * @param minAngle 初始旋转角。
  * @param maxAngle 终止旋转角。
  */
 public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngle, double maxAngle) implements Curve {
   public static final double FULL_MIN = 0;
   public static final double FULL_MAX = 2d * Math.PI;
+
   @Override
   public @NotNull Iterator<Vec3d> iteratePoints(Number interval) {
     return new AbstractIterator<>() {
@@ -97,12 +98,12 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
 
   @Override
   public @NotNull CircleCurve rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
-    return new CircleCurve(GeoUtil.rotate(radius, blockRotation, Vec3d.ZERO), GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(axis, blockRotation, Vec3d.ZERO), minAngle,maxAngle);
+    return new CircleCurve(GeoUtil.rotate(radius, blockRotation, Vec3d.ZERO), GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(axis, blockRotation, Vec3d.ZERO), minAngle, maxAngle);
   }
 
   @Override
   public @NotNull CircleCurve mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
-    return new CircleCurve(GeoUtil.mirror(radius, axis, Vec3d.ZERO), GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.axis, axis, Vec3d.ZERO), minAngle,maxAngle);
+    return new CircleCurve(GeoUtil.mirror(radius, axis, Vec3d.ZERO), GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.axis, axis, Vec3d.ZERO), minAngle, maxAngle);
   }
 
   @Override
@@ -225,7 +226,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
           }
           return crossProduct.multiply(d);
         }, f -> f.apply(source));
-        return new CircleCurve(radius, absoluteCenter, around, range == null ? FULL_MIN:range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
+        return new CircleCurve(radius, absoluteCenter, around, range == null ? FULL_MIN : range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
       };
     }
 

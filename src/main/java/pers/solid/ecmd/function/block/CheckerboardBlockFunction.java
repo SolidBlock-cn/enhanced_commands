@@ -13,9 +13,9 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.Checkerboard;
+import pers.solid.ecmd.math.Checkerboard;
+import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.WeightedList;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> functions, @NotNull Vec3d floor, @NotNull Vec3d scale, @NotNull Vec3d offset) implements BlockFunction, Checkerboard<BlockFunction> {

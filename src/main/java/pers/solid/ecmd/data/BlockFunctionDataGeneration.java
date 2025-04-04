@@ -19,6 +19,7 @@ import pers.solid.ecmd.function.block.*;
 import pers.solid.ecmd.function.property.AllOriginalPropertyNameFunctions;
 import pers.solid.ecmd.function.property.AllRandomPropertyNameFunction;
 import pers.solid.ecmd.function.property.SimplePropertyFunction;
+import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.predicate.block.AnyBlockPredicate;
 import pers.solid.ecmd.predicate.block.HorizontalOffsetBlockPredicate;
 import pers.solid.ecmd.predicate.block.SimpleBlockPredicate;
@@ -26,7 +27,6 @@ import pers.solid.ecmd.predicate.block.TagBlockPredicate;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.predicate.property.ComparisonPropertyPredicate;
 import pers.solid.ecmd.tag.ModBlockTags;
-import pers.solid.ecmd.util.WeightedList;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -113,20 +113,20 @@ public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
     entries.add(of("air_checkerboard"), new CheckerboardBlockFunction(new WeightedList.Uniform<>(new SimpleBlockFunction(Blocks.AIR), EmptyBlockFunction.INSTANCE)));
     entries.add(of("air_grid"), new CheckerboardBlockFunction(
         new WeightedList.Uniform<>(
-        new SimpleBlockFunction(Blocks.AIR),
-            new CheckerboardBlockFunction(new WeightedList.Uniform<>(
             new SimpleBlockFunction(Blocks.AIR),
-                new CheckerboardBlockFunction(new WeightedList.Uniform<>(
+            new CheckerboardBlockFunction(new WeightedList.Uniform<>(
                 new SimpleBlockFunction(Blocks.AIR),
-                EmptyBlockFunction.INSTANCE
+                new CheckerboardBlockFunction(new WeightedList.Uniform<>(
+                    new SimpleBlockFunction(Blocks.AIR),
+                    EmptyBlockFunction.INSTANCE
                 ),
-                Vec3d.ZERO,
+                    Vec3d.ZERO,
                     new Vec3d(1, 0, 0),
-                Vec3d.ZERO
+                    Vec3d.ZERO
                 )),
-            Vec3d.ZERO,
+                Vec3d.ZERO,
                 new Vec3d(0, 1, 0),
-            Vec3d.ZERO
+                Vec3d.ZERO
             )),
         Vec3d.ZERO,
         new Vec3d(0, 0, 1),

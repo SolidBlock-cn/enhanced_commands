@@ -15,8 +15,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import pers.solid.ecmd.math.ConcentrationType;
+import pers.solid.ecmd.math.EnumOrRandom;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.EnumOrRandom;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 
 import java.util.Collection;

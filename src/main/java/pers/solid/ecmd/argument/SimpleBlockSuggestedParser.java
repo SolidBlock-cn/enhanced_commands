@@ -326,13 +326,13 @@ public abstract class SimpleBlockSuggestedParser<S> extends SuggestedParser<S> {
   protected static <T> SuggestionProvider<T> getTagPropertiesValueSuggestions(@NotNull RegistryEntryList.Named<Block> tagId, String propertyName) {
     return (context, suggestionsBuilder) -> {
       for (RegistryEntry<Block> registryEntry : tagId) {
-          Block block = registryEntry.value();
-          Property<?> property = block.getStateManager().getProperty(propertyName);
-          if (property != null) {
-            suggestValuesForProperty(property, suggestionsBuilder);
-          }
+        Block block = registryEntry.value();
+        Property<?> property = block.getStateManager().getProperty(propertyName);
+        if (property != null) {
+          suggestValuesForProperty(property, suggestionsBuilder);
         }
-        return suggestionsBuilder.buildFuture();
+      }
+      return suggestionsBuilder.buildFuture();
     };
   }
 

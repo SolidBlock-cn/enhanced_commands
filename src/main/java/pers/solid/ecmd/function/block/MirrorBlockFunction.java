@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.util.EnumOrRandom;
+import pers.solid.ecmd.math.EnumOrRandom;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.List;

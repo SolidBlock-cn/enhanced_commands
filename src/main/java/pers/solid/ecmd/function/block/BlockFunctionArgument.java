@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
-import pers.solid.ecmd.util.WeightedList;
+import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -77,7 +77,9 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
     if (parser.reader.canRead() && parser.reader.peek() == '{') {
       // 尝试读取 NBT
       nbtFunction = new NbtFunctionSuggestedParser<>(parser).parseCompound(false);
-    } else {nbtFunction = null;}
+    } else {
+      nbtFunction = null;
+    }
     if (propertyNameFunctions != null || nbtFunction != null) {
       return source -> new PropertiesNbtCombinationBlockFunction(parseUnit.apply(source), propertyNameFunctions == null ? null : new PropertyNamesBlockFunction(propertyNameFunctions), nbtFunction == null ? null : new NbtBlockFunction(nbtFunction));
     }

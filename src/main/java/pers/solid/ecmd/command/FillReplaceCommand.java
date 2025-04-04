@@ -37,7 +37,7 @@ import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
-import pers.solid.ecmd.util.UnloadedPosBehavior;
+import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 

@@ -124,9 +124,15 @@ public enum TpRelCommand implements CommandRegistrationCallback {
     Vec3d vec3d = null;
     Vec2f vec2f;
     Set<PositionFlag> set = EnumSet.noneOf(PositionFlag.class);
-    if (location.isXRelative()) {set.add(PositionFlag.X);}
-    if (location.isYRelative()) {set.add(PositionFlag.Y);}
-    if (location.isZRelative()) {set.add(PositionFlag.Z);}
+    if (location.isXRelative()) {
+      set.add(PositionFlag.X);
+    }
+    if (location.isYRelative()) {
+      set.add(PositionFlag.Y);
+    }
+    if (location.isZRelative()) {
+      set.add(PositionFlag.Z);
+    }
     if (rotation == null) {
       set.add(PositionFlag.X_ROT);
       set.add(PositionFlag.Y_ROT);

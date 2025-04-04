@@ -9,8 +9,8 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.Vec3d;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.predicate.block.*;
-import pers.solid.ecmd.util.WeightedList;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

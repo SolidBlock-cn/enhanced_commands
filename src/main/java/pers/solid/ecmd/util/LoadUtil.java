@@ -5,7 +5,8 @@ import net.minecraft.world.WorldView;
 
 @SuppressWarnings("deprecation")
 public final class LoadUtil {
-  private LoadUtil() {}
+  private LoadUtil() {
+  }
 
   public static boolean isPosLoaded(WorldView worldView, int minX, int minZ, int maxX, int maxZ) {
     return worldView.isPosLoaded(minX, minZ) && worldView.isPosLoaded(minX, maxZ) && worldView.isPosLoaded(maxX, minZ) && worldView.isPosLoaded(maxX, maxZ);

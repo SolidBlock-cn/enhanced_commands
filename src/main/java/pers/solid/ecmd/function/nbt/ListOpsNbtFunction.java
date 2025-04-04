@@ -82,7 +82,8 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, Int2Object
       targetList.clear();
       try {
         targetList.addAll(Lists.transform(valueReplacements, nbtFunction -> nbtFunction.apply(null)));
-      } catch (UnsupportedOperationException ignored) {}
+      } catch (UnsupportedOperationException ignored) {
+      }
     }
     if (positionalFunctions != null) {
       for (Int2ObjectMap.Entry<NbtFunction> entry : positionalFunctions.int2ObjectEntrySet()) {
@@ -93,7 +94,8 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, Int2Object
         }
         try {
           targetList.setElement(index, function.apply(targetList.get(index)));
-        } catch (UnsupportedOperationException | IndexOutOfBoundsException ignored) {}
+        } catch (UnsupportedOperationException | IndexOutOfBoundsException ignored) {
+        }
       }
     }
     if (positionalInsertions != null) {
@@ -106,7 +108,8 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, Int2Object
         }
         try {
           targetList.addAll(index, Lists.transform(function, f -> f.apply(null)));
-        } catch (IndexOutOfBoundsException | UnsupportedOperationException ignored) {}
+        } catch (IndexOutOfBoundsException | UnsupportedOperationException ignored) {
+        }
       });
     }
     return targetList;

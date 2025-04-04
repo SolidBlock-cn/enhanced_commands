@@ -6,7 +6,8 @@ import java.util.Iterator;
 
 /**
  * An iterator that executes several times of another iterator. It is similar to {@link Iterators#partition(Iterator, int)}, but will not group each batch as a list, because it consumes more memory and calculation.
- * @param forward The iterator to be used.
+ *
+ * @param forward   The iterator to be used.
  * @param batchSize In each {@link #next()}, how many times it will be executed.
  * @see com.google.common.collect.Iterators
  * @see com.google.common.collect.Iterators#partition(Iterator, int)

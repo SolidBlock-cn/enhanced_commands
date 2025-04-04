@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Contract;
  * <pre>red green <u>[cursor]</u>water<u>[cursorEnd]</u> blue yellow</pre>
  * <p>这样，显示错误时，就能够精准地显示出是哪一部分出现的错误：
  * <pre>red green <span style="color:maroon">»</span><u>water</u><span style="color:maroon">«</span> blue yellow<span><-[此处]</span></pre>
+ *
  * @see pers.solid.ecmd.mixins.impl.CommandSyntaxExceptionExtensionImpl
  */
 public interface CommandSyntaxExceptionExtension {

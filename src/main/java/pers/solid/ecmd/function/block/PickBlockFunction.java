@@ -16,9 +16,9 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.WeightedList;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.ArrayList;
@@ -54,17 +54,17 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions) implement
   }
 
 
-    @Override
-    public @NotNull String asString() {
-      return functions.asStringStream(ExpressionConvertible::asString).collect(Collectors.joining(",", "pick(", ")"));
-    }
+  @Override
+  public @NotNull String asString() {
+    return functions.asStringStream(ExpressionConvertible::asString).collect(Collectors.joining(",", "pick(", ")"));
+  }
 
 
-    @Override
-    public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-      final Random random = world.getRandom();
-      return functions.getRandom(random).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
-    }
+  @Override
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+    final Random random = world.getRandom();
+    return functions.getRandom(random).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+  }
 
 
   public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
