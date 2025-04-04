@@ -10,5 +10,7 @@ public class EnhancedCommandsDataGenerator implements DataGeneratorEntrypoint {
     pack.addProvider(BlockFunctionDataGeneration::new);
     pack.addProvider(BlockPredicateDataGeneration::new);
     pack.addProvider(BlockTagDataGenerator::new);
+    pack.addProvider(FlatLevelGeneratorPresetDataGeneration::new);
+    pack.addProvider(FlatLevelGeneratorPresetTagProvider::new);
   }
 }

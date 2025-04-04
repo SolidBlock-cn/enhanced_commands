@@ -1,0 +1,26 @@
+{
+  "display": "minecraft:sculk_sensor",
+  "settings": {
+    "biome": "minecraft:deep_dark",
+    "features": true,
+    "lakes": false,
+    "layers": [
+      {
+        "block": "minecraft:bedrock",
+        "height": 1
+      },
+      {
+        "block": "minecraft:stone",
+        "height": 59
+      },
+      {
+        "block": "minecraft:dirt",
+        "height": 3
+      },
+      {
+        "block": "minecraft:sculk",
+        "height": 1
+      }
+    ]
+  }
+}

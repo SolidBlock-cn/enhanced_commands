@@ -1,0 +1,38 @@
+{
+  "display": "minecraft:ice",
+  "settings": {
+    "biome": "minecraft:frozen_ocean",
+    "features": true,
+    "lakes": false,
+    "layers": [
+      {
+        "block": "minecraft:bedrock",
+        "height": 1
+      },
+      {
+        "block": "minecraft:deepslate",
+        "height": 15
+      },
+      {
+        "block": "minecraft:stone",
+        "height": 22
+      },
+      {
+        "block": "minecraft:dirt",
+        "height": 5
+      },
+      {
+        "block": "minecraft:gravel",
+        "height": 5
+      },
+      {
+        "block": "minecraft:water",
+        "height": 15
+      },
+      {
+        "block": "minecraft:ice",
+        "height": 1
+      }
+    ]
+  }
+}

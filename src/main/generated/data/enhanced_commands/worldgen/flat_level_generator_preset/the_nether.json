@@ -1,0 +1,18 @@
+{
+  "display": "minecraft:netherrack",
+  "settings": {
+    "biome": "minecraft:nether_wastes",
+    "features": true,
+    "lakes": true,
+    "layers": [
+      {
+        "block": "minecraft:bedrock",
+        "height": 1
+      },
+      {
+        "block": "minecraft:netherrack",
+        "height": 63
+      }
+    ]
+  }
+}

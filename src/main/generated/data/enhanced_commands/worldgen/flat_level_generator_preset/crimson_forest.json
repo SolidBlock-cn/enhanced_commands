@@ -1,0 +1,22 @@
+{
+  "display": "minecraft:crimson_fence",
+  "settings": {
+    "biome": "minecraft:crimson_forest",
+    "features": true,
+    "lakes": true,
+    "layers": [
+      {
+        "block": "minecraft:bedrock",
+        "height": 1
+      },
+      {
+        "block": "minecraft:netherrack",
+        "height": 62
+      },
+      {
+        "block": "minecraft:crimson_nylium",
+        "height": 1
+      }
+    ]
+  }
+}

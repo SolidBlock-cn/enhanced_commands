@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'fabric-loom' version '1.10-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -16,10 +16,16 @@ repositories {
     // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
-    maven {
-        url "https://cursemaven.com"
-        content {
-            includeGroup "curse.maven"
+    // Mods on Modrinth
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
         }
     }
 }
@@ -33,8 +39,9 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-    // IMBlockerFabric 模组
-    modImplementation "curse.maven:imblockerfabric-399225:${project.imblocker_version}"
+    if (project.hasProperty('imblocker_version') && !project.imblocker_version.isEmpty()) {
+        modRuntimeOnly "maven.modrinth:imblocker-original:$project.imblocker_version"
+    }
 }
 
 processResources {
@@ -96,7 +103,18 @@ publishing {
 }
 
 
+loom {
+    runs {
+        client {
+            programArg "-username=Solid"
+        }
+    }
+}
+
+
 fabricApi {
     // 启用数据生成
-    configureDataGeneration()
+    configureDataGeneration() {
+        client = true
+    }
 }
