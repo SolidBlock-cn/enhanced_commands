@@ -82,7 +82,6 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
 
   /**
    * 区域沿指定坐标轴延伸浮点数值后的区域。
-   *
    */
   default @NotNull RegionSelection expanded(double offset, Direction.Axis axis) {
     throw new UnsupportedOperationException();
@@ -90,7 +89,6 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
 
   /**
    * 区域往指定方向延伸浮点数值后的区域，被延伸的那一侧是沿该方向最远的一侧。
-   *
    */
   default @NotNull RegionSelection expanded(double offset, Direction direction) {
     throw new UnsupportedOperationException();

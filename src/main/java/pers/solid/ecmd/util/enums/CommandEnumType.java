@@ -13,6 +13,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.AxisArgument;
 import pers.solid.ecmd.argument.SimpleEnumArgumentType;
 import pers.solid.ecmd.math.ConcentrationType;
+import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.codec.EnumCodec;
 
 import java.util.function.Function;
@@ -30,6 +31,7 @@ public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, 
   public static final Text VERTICAL_TEXT = Text.translatable("enhanced_commands.direction_type.vertical");
   public static final RegistryKey<Registry<CommandEnumType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("command_enum_type"));
   public static final Registry<CommandEnumType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
+
   public static final CommandEnumType<AxisArgument> AXIS = register("axis", new CommandEnumType<>(AxisArgument.VALUES, AxisArgument.CODEC, AxisArgument::getDisplayName));
   public static final CommandEnumType<AxisArgument> AXIS_EXCLUDING_RANDOM = register("axis", new CommandEnumType<>(AxisArgument.VALUES_EXCEPT_RANDOM, AxisArgument.CODEC, AxisArgument::getDisplayName));
   public static final CommandEnumType<ConcentrationType> CONCENTRATION_TYPE = register("concentration_type", new CommandEnumType<>(ImmutableList.copyOf(ConcentrationType.values()), ConcentrationType.CODEC, ConcentrationType::getDisplayName));
@@ -45,6 +47,7 @@ public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, 
     case VERTICAL -> VERTICAL_TEXT;
   }));
   public static final CommandEnumType<MoonPhase> MOON_PHASE = register("moon_phase", new CommandEnumType<>(MoonPhase.VALUES, MoonPhase.CODEC, moonPhase -> moonPhase.displayName));
+  public static final CommandEnumType<NbtConcentrationType> NBT_CONCENTRATION_TYPE = register("nbt_concentration_type", new CommandEnumType<>(ImmutableList.copyOf(NbtConcentrationType.values()), NbtConcentrationType.CODEC, NbtConcentrationType::getDisplayName));
   public static final CommandEnumType<OutlineType> OUTLINE_TYPE = register("outline_type", new CommandEnumType<>(ImmutableList.copyOf(OutlineType.values()), OutlineType.CODEC, OutlineType::getDisplayName));
 
   private static <X extends CommandEnumType<E>, E extends Enum<E>> X register(String name, X commandEnumType) {

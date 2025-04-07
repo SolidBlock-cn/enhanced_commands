@@ -9,11 +9,10 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.function.FailableFunction;
-import pers.solid.ecmd.math.NbtConcentrationType;
 
 public record StorageNbtData(DataCommandStorage dataCommandStorage, Identifier id) implements NbtSource.Single, NbtTarget {
   @Override
-  public Text feedbackQuery(NbtElement nbtElement, NbtConcentrationType nbtConcentrationType) {
+  public Text feedbackQuery(NbtElement nbtElement) {
     return Text.translatable("commands.data.storage.query", this.id, NbtHelper.toPrettyPrintedText(nbtElement));
   }
 

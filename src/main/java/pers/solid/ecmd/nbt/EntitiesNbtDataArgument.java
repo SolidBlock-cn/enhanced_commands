@@ -30,7 +30,7 @@ public record EntitiesNbtDataArgument(EntitySelector entitySelector, NbtConcentr
       suggestedParser.clearSuggestion();
     }
     if (requiresConcentration) {
-      ParsingUtil.expectAndSkipWhitespace(suggestedParser.reader);
+      NbtSource.expectConcentrationType(suggestedParser.reader);
       final NbtConcentrationType nbtConcentrationType = suggestedParser.parseAndSuggestEnums(NbtConcentrationType.values(), NbtConcentrationType::getDisplayName, NbtConcentrationType.CODEC);
       suggestedParser.clearSuggestion();
       return new EntitiesNbtDataArgument(selector, nbtConcentrationType);

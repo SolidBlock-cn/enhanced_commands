@@ -10,12 +10,11 @@ import net.minecraft.text.Text;
 import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
-import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 public record LiteralNbtSource(CompoundNbtFunction nbtFunction) implements NbtSource.Single, NbtSourceArgument {
   @Override
-  public Text feedbackQuery(NbtElement nbtElement, NbtConcentrationType nbtConcentrationType) {
+  public Text feedbackQuery(NbtElement nbtElement) {
     return Text.translatable("enhanced_commands.nbt.literal.query", NbtHelper.toPrettyPrintedText(nbtElement));
   }
 

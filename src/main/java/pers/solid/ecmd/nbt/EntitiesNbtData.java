@@ -1,6 +1,5 @@
 package pers.solid.ecmd.nbt;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
@@ -13,15 +12,15 @@ import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.NbtConcentrationType;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collection;
 import java.util.UUID;
-import java.util.function.Function;
 
 public record EntitiesNbtData(Collection<? extends Entity> entities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtSource, NbtTarget {
   @Override
-  public <T> Collection<T> getNbts(Function<NbtCompound, T> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
-    return entities.stream().map(NbtPredicate::entityToNbt).map(mappingFunction).collect(ImmutableList.toImmutableList());
+  public <T> Collection<T> getNbts(FailableFunction<NbtCompound, T, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
+    return IterateUtils.transformFailableImmutableList(entities, entity -> mappingFunction.apply(NbtPredicate.entityToNbt(entity)));
   }
 
   @Override
@@ -30,8 +29,12 @@ public record EntitiesNbtData(Collection<? extends Entity> entities, NbtConcentr
   }
 
   @Override
-  public Text feedbackQuery(NbtElement nbtElement, NbtConcentrationType nbtConcentrationType) {
-    return Text.translatable("enhanced_commands.nbt.entities.query", entities.size(), NbtHelper.toPrettyPrintedText(nbtElement)).enhanced$$();
+  public Text feedbackQuery(NbtElement nbtElement) {
+    if (entities.size() == 1) {
+      return Text.translatable("commands.data.entity.query", entities.iterator().next().getDisplayName(), NbtHelper.toPrettyPrintedText(nbtElement));
+    } else {
+      return Text.translatable("enhanced_commands.nbt.entities.query", entities.size(), NbtHelper.toPrettyPrintedText(nbtElement)).enhanced$$();
+    }
   }
 
   @Override
@@ -54,6 +57,10 @@ public record EntitiesNbtData(Collection<? extends Entity> entities, NbtConcentr
 
   @Override
   public Text feedbackModify() {
-    return Text.translatable("enhanced_commands.nbt.entities.modify", entities.size()).enhanced$$();
+    if (entities.size() == 1) {
+      return Text.translatable("commands.data.entity.modified", entities.iterator().next().getDisplayName());
+    } else {
+      return Text.translatable("enhanced_commands.nbt.entities.modify", entities.size()).enhanced$$();
+    }
   }
 }

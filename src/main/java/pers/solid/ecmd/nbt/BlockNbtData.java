@@ -7,11 +7,10 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableFunction;
-import pers.solid.ecmd.math.NbtConcentrationType;
 
 public record BlockNbtData(BlockDataObject blockDataObject) implements NbtSource.Single, NbtTarget {
   @Override
-  public Text feedbackQuery(NbtElement element, NbtConcentrationType nbtConcentrationType) {
+  public Text feedbackQuery(NbtElement element) {
     return blockDataObject.feedbackQuery(element);
   }
 

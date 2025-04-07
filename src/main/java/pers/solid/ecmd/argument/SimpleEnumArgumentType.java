@@ -16,6 +16,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.math.EnumOrRandom;
+import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 
@@ -47,8 +48,17 @@ public final class SimpleEnumArgumentType<E extends Enum<E>> implements Argument
     return new SimpleEnumArgumentType<>(CommandEnumType.CONCENTRATION_TYPE);
   }
 
+  public static SimpleEnumArgumentType<NbtConcentrationType> nbtConcentrationType() {
+    return new SimpleEnumArgumentType<>(CommandEnumType.NBT_CONCENTRATION_TYPE);
+  }
+
   public static ConcentrationType getConcentrationType(CommandContext<?> context, String name) {
     return context.getArgument(name, ConcentrationType.class);
+  }
+
+
+  public static NbtConcentrationType getNbtConcentrationType(CommandContext<?> context, String name) {
+    return context.getArgument(name, NbtConcentrationType.class);
   }
 
   @SuppressWarnings("unchecked")

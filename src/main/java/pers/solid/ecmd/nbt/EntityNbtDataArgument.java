@@ -2,7 +2,6 @@ package pers.solid.ecmd.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.EntityDataObject;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
@@ -11,7 +10,7 @@ import pers.solid.ecmd.util.parse.ParsingUtil;
 
 public record EntityNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument, NbtTargetArgument {
   public EntityNbtData getEntityNbtData(ServerCommandSource source) throws CommandSyntaxException {
-    return new EntityNbtData(new EntityDataObject(entitySelector.getEntity(source)));
+    return new EntityNbtData(entitySelector.getEntity(source));
   }
 
   @Override

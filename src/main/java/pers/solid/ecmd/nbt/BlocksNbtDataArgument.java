@@ -37,7 +37,7 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, NbtConcentrat
     final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, suggestionsOnly);
     parser.clearSuggestion();
     if (requiresConcentration) {
-      ParsingUtil.expectAndSkipWhitespace(parser.reader);
+      NbtSource.expectConcentrationType(parser.reader);
       final NbtConcentrationType nbtConcentrationType = parser.parseAndSuggestEnums(NbtConcentrationType.values(), NbtConcentrationType::getDisplayName, NbtConcentrationType.CODEC);
       parser.clearSuggestion();
       return new BlocksNbtDataArgument(regionArgument, nbtConcentrationType);

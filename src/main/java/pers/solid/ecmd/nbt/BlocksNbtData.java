@@ -1,25 +1,27 @@
 package pers.solid.ecmd.nbt;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.NbtConcentrationType;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collection;
-import java.util.function.Function;
 
 public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtSource, NbtTarget {
   @Override
-  public <T> Collection<T> getNbts(Function<NbtCompound, T> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
-    return blockEntities.stream().map(blockEntity -> blockEntity.createNbtWithIdentifyingData(registryLookup)).map(mappingFunction).collect(ImmutableList.toImmutableList());
+  public <T> Collection<T> getNbts(FailableFunction<NbtCompound, T, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
+    return IterateUtils.transformFailableImmutableList(blockEntities, blockEntity -> mappingFunction.apply(blockEntity.createNbtWithIdentifyingData(registryLookup)));
   }
 
   @Override
@@ -28,8 +30,13 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrat
   }
 
   @Override
-  public Text feedbackQuery(NbtElement nbtElement, NbtConcentrationType nbtConcentrationType) {
-    return Text.translatable("enhanced_commands.nbt.blocks.query", blockEntities.size(), nbtElement).enhanced$$();
+  public Text feedbackQuery(NbtElement nbtElement) {
+    if (blockEntities.size() == 1) {
+      final BlockPos pos = blockEntities.iterator().next().getPos();
+      return Text.translatable("commands.data.block.query", pos.getX(), pos.getY(), pos.getZ(), NbtHelper.toPrettyPrintedText(nbtElement));
+    } else {
+      return Text.translatable("enhanced_commands.nbt.blocks.query", blockEntities.size(), NbtHelper.toPrettyPrintedText(nbtElement)).enhanced$$();
+    }
   }
 
   @Override
@@ -37,7 +44,10 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrat
     for (BlockEntity blockEntity : blockEntities) {
       blockEntity.read(nbt, registryLookup);
       blockEntity.markDirty();
-      blockEntity.getWorld().updateListeners(blockEntity.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_ALL);
+      final World world = blockEntity.getWorld();
+      if (world != null) {
+        world.updateListeners(blockEntity.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_ALL);
+      }
     }
   }
 
@@ -46,12 +56,21 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrat
     for (BlockEntity blockEntity : blockEntities) {
       blockEntity.read(operator.apply(blockEntity.createNbtWithIdentifyingData(registryLookup)), registryLookup);
       blockEntity.markDirty();
-      blockEntity.getWorld().updateListeners(blockEntity.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_ALL);
+      final World world = blockEntity.getWorld();
+      if (world != null) {
+        world.updateListeners(blockEntity.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_ALL);
+      }
     }
   }
 
   @Override
   public Text feedbackModify() {
-    return Text.translatable("enhanced_commands.nbt.blocks.modify", blockEntities.size()).enhanced$$();
+    if (blockEntities.size() == 1) {
+      final BlockEntity blockEntity = blockEntities.iterator().next();
+      final BlockPos pos = blockEntity.getPos();
+      return Text.translatable("commands.data.block.modified", pos.getX(), pos.getY(), pos.getZ());
+    } else {
+      return Text.translatable("enhanced_commands.nbt.blocks.modify", blockEntities.size()).enhanced$$();
+    }
   }
 }
