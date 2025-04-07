@@ -6,7 +6,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Range;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,7 +36,7 @@ public sealed interface WeightedList<E> {
    * @return 指定位置的元素。
    */
   default E getClampedElement(@Range(from = 0, to = 1) double position) {
-    return getElementAt(position / size());
+    return getElementAt(position * size());
   }
 
   Stream<String> asStringStream(Function<E, String> converter);
@@ -42,6 +44,11 @@ public sealed interface WeightedList<E> {
   default String asString(Function<E, String> converter) {
     return asStringStream(converter).collect(Collectors.joining(", "));
   }
+
+  /**
+   * 转换该列表中的元素，不影响次序、权重等信息。返回的结果是不可修改的。
+   */
+  <R, Ex extends Throwable> WeightedList<R> transform(FailableFunction<E, R, Ex> transformer) throws Ex;
 
   static <E> MapCodec<WeightedList<E>> createMapCodec(Codec<E> elementCodec) {
     final MapCodec<Uniform<E>> uniform = Uniform.createMapCodec(elementCodec);
@@ -71,6 +78,11 @@ public sealed interface WeightedList<E> {
     @Override
     public Stream<String> asStringStream(Function<E, String> converter) {
       return elements.stream().map(converter);
+    }
+
+    @Override
+    public <R, Ex extends Throwable> WeightedList<R> transform(FailableFunction<E, R, Ex> transformer) throws Ex {
+      return new Uniform<>(IterateUtils.transformFailableImmutableList(elements, transformer));
     }
 
     public static <E> MapCodec<Uniform<E>> createMapCodec(Codec<E> elemenetCodec) {
@@ -126,6 +138,11 @@ public sealed interface WeightedList<E> {
     @Override
     public Stream<String> asStringStream(Function<E, String> converter) {
       return entries.stream().map(pair -> pair.left() + " " + pair.rightDouble());
+    }
+
+    @Override
+    public <R, Ex extends Throwable> WeightedList<R> transform(FailableFunction<E, R, Ex> transformer) throws Ex {
+      return new Weighted<>(IterateUtils.transformFailableImmutableList(entries, pair -> ObjectDoublePair.of(transformer.apply(pair.left()), pair.rightDouble())));
     }
 
     public List<ObjectDoublePair<E>> entries() {

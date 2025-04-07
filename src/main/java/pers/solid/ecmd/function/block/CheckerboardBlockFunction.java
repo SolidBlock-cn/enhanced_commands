@@ -3,7 +3,6 @@ package pers.solid.ecmd.function.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -16,7 +15,6 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 
 public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> functions, @NotNull Vec3d floor, @NotNull Vec3d scale, @NotNull Vec3d offset) implements BlockFunction, Checkerboard<BlockFunction> {
   public static final MapCodec<CheckerboardBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -62,11 +60,7 @@ public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> fun
   public static class Parser extends CheckerboardParser<BlockFunctionArgument> {
     @Override
     protected BlockFunctionArgument getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
-      if (weighted) {
-        return source -> new CheckerboardBlockFunction(new WeightedList.Weighted<>(IterateUtils.transformFailableImmutableList(pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble()))), floor, scale, offset);
-      } else {
-        return source -> new CheckerboardBlockFunction(new WeightedList.Uniform<>(IterateUtils.transformFailableImmutableList(pairs, pair -> pair.left().apply(source))), floor, scale, offset);
-      }
+      return source -> new CheckerboardBlockFunction(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), floor, scale, offset);
     }
 
     @Override

@@ -3,7 +3,6 @@ package pers.solid.ecmd.predicate.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
@@ -16,7 +15,6 @@ import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collections;
 
@@ -74,11 +72,7 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
   public static class Parser extends CheckerboardParser<BlockPredicateArgument> {
     @Override
     protected BlockPredicateArgument getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
-      if (weighted) {
-        return source -> new CheckerboardBlockPredicate(new WeightedList.Weighted<>(IterateUtils.transformFailableImmutableList(pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble()))), floor, scale, offset);
-      } else {
-        return source -> new CheckerboardBlockPredicate(new WeightedList.Uniform<>(IterateUtils.transformFailableImmutableList(pairs, pair -> pair.left().apply(source))), floor, scale, offset);
-      }
+      return source -> new CheckerboardBlockPredicate(weightedList.transform(blockPredicateArgument -> blockPredicateArgument.apply(source)), floor, scale, offset);
     }
 
     @Override

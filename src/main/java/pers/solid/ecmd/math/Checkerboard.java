@@ -2,20 +2,15 @@ package pers.solid.ecmd.math;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.function.block.PickBlockFunction;
+import pers.solid.ecmd.function.block.WeightedListParser;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 import static pers.solid.ecmd.util.ModCommandExceptionTypes.DUPLICATE_KEYWORD;
@@ -73,13 +68,12 @@ public interface Checkerboard<T> {
   }
 
   abstract class CheckerboardParser<T> implements FunctionLikeParser<T> {
-    public boolean weighted = false;
     protected Vec3d scale = null;
     protected Vec3d floor = null;
-    protected double weightSum = 0;
     protected Vec3d offset = null;
     protected int cursorBeforeFunctionName;
-    public List<ObjectDoublePair<T>> pairs;
+    public WeightedListParser<T> weightedListParser = WeightedListParser.of((registryAccess, parser, suggestionsOnly, allowSparse) -> parseElement(registryAccess, parser, suggestionsOnly));
+    protected WeightedList<T> weightedList;
 
     @Override
     public void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
@@ -88,11 +82,6 @@ public interface Checkerboard<T> {
 
     @Override
     public T getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
-      if (weightSum == 0) {
-        final int cursorEnd = parser.reader.getCursor();
-        parser.reader.setCursor(cursorBeforeFunctionName);
-        throw withCursorEnd(PickBlockFunction.SUM_ZERO.createWithContext(parser.reader), cursorEnd);
-      }
       if (scale == null) {
         scale = UNIT;
       }
@@ -113,6 +102,7 @@ public interface Checkerboard<T> {
     public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
       parseEntryList(registryAccess, parser, suggestionsOnly);
+      parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).buildFuture());
       // 等待关键字的部分
 
       // 解析坐标轴尺寸的部分
@@ -120,6 +110,10 @@ public interface Checkerboard<T> {
       reader.skipWhitespace();
 
       parseParameters(parser, reader);
+    }
+
+    protected void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      weightedList = weightedListParser.parse(registryAccess, parser, suggestionsOnly, suggestionsOnly);
     }
 
     protected void parseParameters(SuggestedParser<?> parser, StringReader reader) throws CommandSyntaxException {
@@ -178,53 +172,6 @@ public interface Checkerboard<T> {
         } // end switch
 
         reader.skipWhitespace();
-      }
-    }
-
-    public void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      this.pairs = new ArrayList<>();
-      final StringReader reader = parser.reader;
-
-      if (reader.canRead() && reader.peek() == rightPar()) {
-        throw FunctionParamsParser.PARAMS_TOO_FEW.createWithContext(reader, 0, 1);
-      }
-
-      // 解析方块函数的部分
-      while (true) {
-        parser.clearSuggestion();
-        final T parse = parseElement(registryAccess, parser, suggestionsOnly);
-        reader.skipWhitespace();
-        if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
-          final int cursorBeforeDouble = reader.getCursor();
-          final double weight = reader.readDouble();
-          final int cursorAfterDouble = reader.getCursor();
-          if (weight < 0) {
-            reader.setCursor(cursorBeforeDouble);
-            throw withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, weight), cursorAfterDouble);
-          }
-          weightSum += weight;
-          weighted |= weight != 1;
-          pairs.add(ObjectDoublePair.of(parse, weight));
-        } else {
-          pairs.add(ObjectDoublePair.of(parse, 1));
-          weightSum += 1;
-        }
-
-        reader.skipWhitespace();
-        parser.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder
-            .suggest(rightParString())
-            .suggest(separatorString()).buildFuture());
-        if (!reader.canRead()) {
-          break;
-        }
-        reader.skipWhitespace();
-        final char peek = reader.peek();
-        if (peek == ',') {
-          reader.skip();
-          reader.skipWhitespace();
-        } else {
-          break;
-        }
       }
     }
   }

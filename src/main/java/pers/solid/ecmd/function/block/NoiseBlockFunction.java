@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.AbstractNbtNumber;
@@ -28,7 +27,6 @@ import pers.solid.ecmd.argument.NbtFunctionArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 
 import java.util.WeakHashMap;
@@ -47,7 +45,7 @@ public record NoiseBlockFunction(long seed, DoublePerlinNoiseSampler.NoiseParame
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     final DoublePerlinNoiseSampler noiseSampler = SAMPLERS.computeIfAbsent(this, self -> DoublePerlinNoiseSampler.create(new CheckedRandom(seed), noiseParameters));
     double noiseValue = noiseSampler.sample((double) pos.getX() * scale, (double) pos.getY() * scale, (double) pos.getZ() * scale);
-    double d = MathHelper.clamp(((double) 1.0F + noiseValue) / (double) 2.0F, (double) 0.0F, 0.9999);
+    double d = MathHelper.clamp((1.0d + noiseValue) / 2.0d, 0.0F, 0.9999);
     return list.getClampedElement(d).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
   }
 
@@ -95,13 +93,9 @@ public record NoiseBlockFunction(long seed, DoublePerlinNoiseSampler.NoiseParame
         }
         case 3 -> scale = parser.reader.readFloat();
         case 4 -> {
-          final CheckerboardBlockFunction.Parser checkerParser = new CheckerboardBlockFunction.Parser();
-          checkerParser.parseEntryList(registryAccess, parser, suggestionsOnly);
-          if (checkerParser.weighted) {
-            list = source -> new WeightedList.Weighted<>(IterateUtils.transformFailableImmutableList(checkerParser.pairs, pair -> ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble())));
-          } else {
-            list = source -> new WeightedList.Uniform<>(IterateUtils.transformFailableImmutableList(checkerParser.pairs, pair -> pair.left().apply(source)));
-          }
+          final WeightedListParser<BlockFunctionArgument> weightedListParser = WeightedListParser.of(BlockFunctionArgument::parse);
+          final WeightedList<BlockFunctionArgument> parsedList = weightedListParser.parse(registryAccess, parser, suggestionsOnly, true);
+          list = source -> parsedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source));
         }
       }
     }

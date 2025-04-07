@@ -129,7 +129,6 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     @Override
     public void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
-      weightSum = 1;
       final SimpleBlockFunctionSuggestedParser<?> parser0 = new SimpleBlockFunctionSuggestedParser<>(registryAccess, parser);
       parser0.parseBlockTagId();
       tagKey = parser0.tagId;
