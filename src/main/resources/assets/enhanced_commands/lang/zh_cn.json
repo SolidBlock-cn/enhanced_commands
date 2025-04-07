@@ -36,6 +36,7 @@
   "enhanced_commands.argument.entity.selector.leasher": "拴着该实体的实体",
   "enhanced_commands.argument.entity.selector.nearest_entity": "最近的实体",
   "enhanced_commands.argument.entity.selector.nearest_non_player": "最近的非玩家实体",
+  "enhanced_commands.argument.entity.selector.no_entity": "没有实体",
   "enhanced_commands.argument.entity.selector.origin": "实体的来源实体",
   "enhanced_commands.argument.entity.selector.owner": "实体的驯养者",
   "enhanced_commands.argument.entity.selector.passengers": "实体的骑乘者",

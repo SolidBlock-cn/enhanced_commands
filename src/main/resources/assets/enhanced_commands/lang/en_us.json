@@ -36,6 +36,7 @@
   "enhanced_commands.argument.entity.selector.leasher": "Entities who leash the entity",
   "enhanced_commands.argument.entity.selector.nearest_entity": "Nearest entity",
   "enhanced_commands.argument.entity.selector.nearest_non_player": "Nearest non-player entity",
+  "enhanced_commands.argument.entity.selector.no_entity": "No entity",
   "enhanced_commands.argument.entity.selector.origin": "Entity that the entity is from",
   "enhanced_commands.argument.entity.selector.owner": "Tamer of entity",
   "enhanced_commands.argument.entity.selector.passengers": "Passengers of entity",

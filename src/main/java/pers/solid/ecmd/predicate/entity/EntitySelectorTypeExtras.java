@@ -22,7 +22,11 @@ import java.util.function.Consumer;
  * 本类提供了与原版不同的更多实体选择器的类型。
  */
 public final class EntitySelectorTypeExtras {
+  public static final String NO_ENTITY = "0";
   public static final String ALL_INCLUDING_DEAD = "E";
+  /**
+   * 选择最近的实体。由于 1.21 开始原版就加入了这一选择器，故在 1.21 以上的模组中不再添加，仅保留此字段。
+   */
   public static final String NEAREST_ENTITY = "n";
   public static final String RANDOM_ENTITY = "R";
   public static final String FURTHEST_ENTITY = "f";
@@ -44,8 +48,9 @@ public final class EntitySelectorTypeExtras {
   public static final String CONTROLLER = "controller";
 
   public static final Map<String, Text> EXTRA_NAMES = Util.make(new HashMap<>(), map -> {
+    map.put(NO_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.no_entity"));
     map.put(ALL_INCLUDING_DEAD, Text.translatable("enhanced_commands.argument.entity.selector.all_including_dead"));
-    map.put(NEAREST_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.nearest_entity"));
+//    map.put(NEAREST_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.nearest_entity"));
     map.put(RANDOM_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.random_entity"));
     map.put(FURTHEST_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.furthest_entity"));
 
@@ -69,7 +74,7 @@ public final class EntitySelectorTypeExtras {
   });
 
   public static final Object2IntMap<String> EXTRA_LIMITS = Util.make(new Object2IntOpenHashMap<>(), map -> {
-    map.put(NEAREST_ENTITY, 1);
+//    map.put(NEAREST_ENTITY, 1);
     map.put(RANDOM_ENTITY, 1);
     map.put(FURTHEST_ENTITY, 1);
     map.put(NEAREST_NON_PLAYER, 1);
@@ -80,7 +85,7 @@ public final class EntitySelectorTypeExtras {
   });
   public static final Set<String> FORCE_ONE_LIMIT = Sets.newHashSet(OWNER, VEHICLE, LEASHER, ORIGIN, ATTACKER, TARGET, CONTROLLER, CONTROLLING_VEHICLE);
   public static final Map<String, BiConsumer<Vec3d, List<? extends Entity>>> EXTRA_SORTERS = Util.make(new HashMap<>(), map -> {
-    map.put(NEAREST_ENTITY, EntitySelectorReader.NEAREST);
+//    map.put(NEAREST_ENTITY, EntitySelectorReader.NEAREST);
     map.put(RANDOM_ENTITY, EntitySelectorReader.RANDOM);
     map.put(FURTHEST_ENTITY, EntitySelectorReader.FURTHEST);
     map.put(NEAREST_NON_PLAYER, EntitySelectorReader.NEAREST);
@@ -90,6 +95,7 @@ public final class EntitySelectorTypeExtras {
     map.put(RANDOM_NON_PLAYER2, EntitySelectorReader.RANDOM);
   });
   public static final Map<String, Consumer<EntitySelectorReader>> EXTRA_READER_ATTRIBUTES = Util.make(new HashMap<>(), map -> {
+    map.put(NO_ENTITY, entitySelectorReader -> entitySelectorReader.setLimit(0));
     final Consumer<EntitySelectorReader> excludesPlayersConsumer = reader -> {
       reader.excludesEntityType();
       reader.addPredicate(new TypeEntityPredicateEntry(EntityType.PLAYER, true));
