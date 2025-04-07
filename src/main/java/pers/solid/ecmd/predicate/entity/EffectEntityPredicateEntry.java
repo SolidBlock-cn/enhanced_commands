@@ -7,6 +7,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 
 public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted) implements EntityPredicateEntry {
@@ -34,7 +35,7 @@ public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return "effect=" + (inverted ? "!" : "") + Registries.STATUS_EFFECT.getId(expected);
   }
 }

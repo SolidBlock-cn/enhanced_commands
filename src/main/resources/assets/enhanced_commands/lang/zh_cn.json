@@ -568,6 +568,7 @@
   "enhanced_commands.entity_predicate.effect.pass": "%s的效果测试通过，因为以下测试通过：",
   "enhanced_commands.entity_predicate.effect.true_advanced": "%s拥有状态效果%s，且符合要求",
   "enhanced_commands.entity_predicate.effect.true_dummy": "%s拥有状态效果%s",
+  "enhanced_commands.entity_predicate.empty": "选择器“@0”表示不选择实体，因此这个测试没有实体能通过",
   "enhanced_commands.entity_predicate.enabled_feature.false": "由于必需的功能标签，%s在当前世界未启用",
   "enhanced_commands.entity_predicate.enabled_feature.true": "%s在当前世界已启用，满足所有必需的功能标签",
   "enhanced_commands.entity_predicate.exhaustion": "消耗度",

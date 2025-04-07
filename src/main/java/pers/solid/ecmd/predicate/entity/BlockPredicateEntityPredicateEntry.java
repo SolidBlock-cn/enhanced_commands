@@ -5,6 +5,7 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -28,7 +29,7 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate blockPredicate) 
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return "block=" + blockPredicate.asString();
   }
 }

@@ -641,7 +641,7 @@ public class EntitySelectorOptionsExtension {
    * 此方法用于 mixin。此方法同时还会添加游戏模式谓词描述。
    */
   @ApiStatus.Internal
-  public static boolean mixinReadMultipleTypes(EntitySelectorReader reader, boolean hasNegation, @NotNull Either<EntityType<?>, TagKey<EntityType<?>>> already) throws CommandSyntaxException {
+  public static boolean mixinReadMultipleTypes(EntitySelectorReader reader, boolean inverted, @NotNull Either<EntityType<?>, TagKey<EntityType<?>>> already) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
     final int cursorBeforeWhite = stringReader.getCursor();
     stringReader.skipWhitespace();
@@ -696,7 +696,7 @@ public class EntitySelectorOptionsExtension {
         // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
       }
 
-      reader.addPredicate(new TypesEntityPredicateEntry(values, hasNegation));
+      reader.addPredicate(new TypesEntityPredicateEntry(values, inverted));
       return true;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
@@ -711,7 +711,7 @@ public class EntitySelectorOptionsExtension {
    * @see EntitySelectorOptionsMixin#readMultipleGameModes(EntitySelectorReader, Predicate, boolean, GameMode)
    */
   @ApiStatus.Internal
-  public static boolean mixinReadMultipleGameModes(EntitySelectorReader reader, boolean hasNegation, @NotNull GameMode gameMode) throws CommandSyntaxException {
+  public static boolean mixinReadMultipleGameModes(EntitySelectorReader reader, boolean inverted, @NotNull GameMode gameMode) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
     final int cursorBeforeWhite = stringReader.getCursor();
     stringReader.skipWhitespace();
@@ -745,7 +745,7 @@ public class EntitySelectorOptionsExtension {
         // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
       }
 
-      reader.addPredicate(new GameModeEntityPredicateEntry.Multiple(parsedGameModes, hasNegation));
+      reader.addPredicate(new GameModeEntityPredicateEntry.Multiple(parsedGameModes, inverted));
       return false;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
@@ -825,7 +825,7 @@ public class EntitySelectorOptionsExtension {
     };
   }
 
-  public static boolean mixinReadLiteralPredicate(EntitySelectorReader reader, boolean hasNegation, StringReader stringReader) throws CommandSyntaxException {
+  public static boolean mixinReadLiteralPredicate(EntitySelectorReader reader, boolean inverted, StringReader stringReader) throws CommandSyntaxException {
     reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
       final CommandContext<?> context = reader.extension$ec().context;
       if (context != null && context.getSource() instanceof ServerCommandSource source) {
@@ -839,7 +839,7 @@ public class EntitySelectorOptionsExtension {
     if (stringReader.canRead() && stringReader.peek() == '{') {
       reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
       final LootCondition lootCondition = ParsingUtil.parseNbt(stringReader, LootCondition.CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
-      reader.addPredicate(new LootTablePredicateAnonymousEntityPredicateEntry(lootCondition, hasNegation));
+      reader.addPredicate(new LootTablePredicateAnonymousEntityPredicateEntry(lootCondition, inverted));
       return true;
     }
     return false;

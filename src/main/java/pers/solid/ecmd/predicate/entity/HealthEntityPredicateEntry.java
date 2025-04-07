@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 
@@ -25,7 +26,7 @@ public record HealthEntityPredicateEntry(BridgeFloatRange floatRange, boolean in
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return "health=" + (inverted ? "!" : "") + floatRange.asString();
   }
 }

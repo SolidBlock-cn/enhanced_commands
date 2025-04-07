@@ -11,6 +11,7 @@ import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -18,7 +19,7 @@ import pers.solid.ecmd.util.bridge.LootBridge;
 
 import java.util.Optional;
 
-public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition lootCondition, boolean hasNegation) implements EntityPredicateEntry {
+public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition lootCondition, boolean inverted) implements EntityPredicateEntry {
   @Override
   public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
     if (!(entity.getWorld() instanceof final ServerWorld serverWorld)) {
@@ -30,10 +31,10 @@ public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition loot
           .build(LootContextTypes.SELECTOR))
           .build(Optional.empty());
       final boolean test = lootCondition.test(lootContext);
-      if (hasNegation ^ test) {
+      if (inverted ^ test) {
         return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.predicate.pass_anonymous", displayName, TextUtil.literal(test).styled(Styles.ACTUAL)));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail_anonymous", displayName, TextUtil.literal(test).styled(Styles.ACTUAL), TextUtil.literal(!hasNegation).styled(Styles.EXPECTED)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail_anonymous", displayName, TextUtil.literal(test).styled(Styles.ACTUAL), TextUtil.literal(!inverted).styled(Styles.EXPECTED)));
       }
     }
   }
@@ -45,7 +46,7 @@ public record LootTablePredicateAnonymousEntityPredicateEntry(LootCondition loot
   }
 
   @Override
-  public String toOptionEntry() {
-    return "predicate=" + (hasNegation ? "!" : "") + LootCondition.CODEC.encodeStart(JsonOps.INSTANCE, lootCondition).getOrThrow();
+  public @Nullable String toOptionEntry() {
+    return "predicate=" + (inverted ? "!" : "") + LootCondition.CODEC.encodeStart(JsonOps.INSTANCE, lootCondition).getOrThrow();
   }
 }

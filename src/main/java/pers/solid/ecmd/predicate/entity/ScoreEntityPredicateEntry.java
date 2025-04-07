@@ -12,6 +12,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -94,7 +95,7 @@ public record ScoreEntityPredicateEntry(Map<String, NumberRange.IntRange> expect
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return Stream.concat(
         expectedScore.entrySet().stream().map(entry -> entry.getKey() + "=" + StringUtil.wrapRange(entry.getValue())),
         invertedScores.stream().map(pair -> pair.left() + "=!" + StringUtil.wrapRange(pair.right()))

@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.Collection;
@@ -41,7 +42,7 @@ public record AlternativesEntityPredicateEntry(Collection<EntityPredicate> entit
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return "alternatives=" + (inverted ? "!" : "") + "[...]";
   }
 }

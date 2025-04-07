@@ -8,6 +8,7 @@ import net.minecraft.text.Texts;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -33,15 +34,15 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
     }
   }
 
-  record Single(GameMode gameMode, boolean hasNegation) implements GameModeEntityPredicateEntry {
+  record Single(GameMode gameMode, boolean inverted) implements GameModeEntityPredicateEntry {
     @Override
-    public String toOptionEntry() {
+    public @Nullable String toOptionEntry() {
       return "gamemode=" + gameMode.asString();
     }
 
     @Override
     public boolean test(@NotNull ServerPlayerEntity player) {
-      return (player.interactionManager.getGameMode() == gameMode) != hasNegation;
+      return (player.interactionManager.getGameMode() == gameMode) != inverted;
     }
 
     @Override
@@ -49,19 +50,19 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
       final GameMode actualMode = player.interactionManager.getGameMode();
       final boolean gameModeMatches = actualMode == gameMode;
       final Text actualText = TextUtil.styled(actualMode.getTranslatableName(), Styles.ACTUAL);
-      return TestResult.of(gameModeMatches != hasNegation, gameModeMatches ? Text.translatable("enhanced_commands.entity_predicate.gamemode.positive_single", displayName, actualText) : Text.translatable("enhanced_commands.entity_predicate.gamemode.negative_single", displayName, actualText, TextUtil.styled(gameMode.getTranslatableName(), Styles.EXPECTED)));
+      return TestResult.of(gameModeMatches != inverted, gameModeMatches ? Text.translatable("enhanced_commands.entity_predicate.gamemode.positive_single", displayName, actualText) : Text.translatable("enhanced_commands.entity_predicate.gamemode.negative_single", displayName, actualText, TextUtil.styled(gameMode.getTranslatableName(), Styles.EXPECTED)));
     }
   }
 
-  record Multiple(Collection<GameMode> gameModes, boolean hasNegation) implements GameModeEntityPredicateEntry {
+  record Multiple(Collection<GameMode> gameModes, boolean inverted) implements GameModeEntityPredicateEntry {
     @Override
-    public String toOptionEntry() {
+    public @Nullable String toOptionEntry() {
       return "gamemode=" + StringUtils.join(Collections2.transform(gameModes, GameMode::asString), ',');
     }
 
     @Override
     public boolean test(@NotNull ServerPlayerEntity player) {
-      return gameModes.contains(player.interactionManager.getGameMode()) != hasNegation;
+      return gameModes.contains(player.interactionManager.getGameMode()) != inverted;
     }
 
     @Override
@@ -70,7 +71,7 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
       final boolean gameModeMatches = gameModes.contains(actualMode);
       final Text actualText = actualMode.getTranslatableName();
       final Text expectedText = Texts.join(gameModes, Texts.DEFAULT_SEPARATOR_TEXT, gameMode -> TextUtil.styled(gameMode.getTranslatableName(), Styles.EXPECTED));
-      return TestResult.of(gameModeMatches != hasNegation, gameModeMatches ? Text.translatable("enhanced_commands.entity_predicate.gamemode.positive_multiple", displayName, actualText, expectedText) : Text.translatable("enhanced_commands.entity_predicate.gamemode.negative_single", displayName, actualText, expectedText));
+      return TestResult.of(gameModeMatches != inverted, gameModeMatches ? Text.translatable("enhanced_commands.entity_predicate.gamemode.positive_multiple", displayName, actualText, expectedText) : Text.translatable("enhanced_commands.entity_predicate.gamemode.negative_single", displayName, actualText, expectedText));
     }
   }
 }

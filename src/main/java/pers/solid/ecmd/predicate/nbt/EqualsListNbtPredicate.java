@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
 
-public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expected, boolean negated) implements NbtPredicate {
+public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expected, boolean inverted) implements NbtPredicate {
   @Override
   public @NotNull String asString() {
     return asString(true);
@@ -16,23 +16,23 @@ public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expect
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? "= " : "") + "[" + expected.stream().map(nbtPredicate -> nbtPredicate.asString(true)).collect(Collectors.joining(", ")) + "]";
+    return (inverted ? "!" : "") + (requirePrefix ? "= " : "") + "[" + expected.stream().map(nbtPredicate -> nbtPredicate.asString(true)).collect(Collectors.joining(", ")) + "]";
   }
 
   @Override
   public boolean test(@NotNull NbtElement nbtElement) {
     if (!(nbtElement instanceof final NbtList nbtList))
-      return negated;
+      return inverted;
     if (nbtList.size() != expected.size())
-      return negated;
+      return inverted;
     final ListIterator<@NotNull NbtPredicate> listIterator = expected.listIterator();
     while (listIterator.hasNext()) {
       final int nextIndex = listIterator.nextIndex();
       if (!listIterator.next().test(nbtList.get(nextIndex))) {
-        return negated;
+        return inverted;
       }
     }
-    return !negated;
+    return !inverted;
   }
 
   @Override

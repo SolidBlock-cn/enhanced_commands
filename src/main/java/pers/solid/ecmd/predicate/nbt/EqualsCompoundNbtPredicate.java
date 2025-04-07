@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull NbtPredicate> map, boolean negated) implements NbtPredicate {
-  public static final MapCodec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("map").forGetter(EqualsCompoundNbtPredicate::map), Codec.BOOL.fieldOf("negated").forGetter(EqualsCompoundNbtPredicate::negated)));
+  public static final MapCodec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("map").forGetter(EqualsCompoundNbtPredicate::map), Codec.BOOL.fieldOf("inverted").forGetter(EqualsCompoundNbtPredicate::negated)));
 
   @Override
   public @NotNull String asString() {

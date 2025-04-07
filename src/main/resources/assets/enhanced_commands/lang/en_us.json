@@ -568,6 +568,7 @@
   "enhanced_commands.entity_predicate.effect.pass": "%s passes the effect test because all of the following tests pass:",
   "enhanced_commands.entity_predicate.effect.true_advanced": "%s is with status effect of %s and it meets the requirements",
   "enhanced_commands.entity_predicate.effect.true_dummy": "%s is with status effect of %s",
+  "enhanced_commands.entity_predicate.empty": "Selector '@0' means selecting no entities, so no entity can pass this test",
   "enhanced_commands.entity_predicate.enabled_feature.false": "%s is not enabled in the current world due to required feature flags",
   "enhanced_commands.entity_predicate.enabled_feature.true": "%s is enabled in the current world, meeting all required feature flags",
   "enhanced_commands.entity_predicate.exhaustion": "exhaustion level",

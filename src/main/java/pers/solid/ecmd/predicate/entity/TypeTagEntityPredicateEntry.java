@@ -5,14 +5,15 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
-public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tagKey, boolean hasNegation) implements EntityPredicateEntry {
+public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tagKey, boolean inverted) implements EntityPredicateEntry {
   @Override
   public boolean test(@NotNull Entity entity) {
-    return entity.getType().isIn(tagKey) != hasNegation;
+    return entity.getType().isIn(tagKey) != inverted;
   }
 
   @Override
@@ -20,14 +21,14 @@ public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tagKey, boolean 
     final EntityType<?> type = entity.getType();
     final boolean isInTag = type.isIn(tagKey);
     if (isInTag) {
-      return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.type.in_tag", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tagKey.id()).styled(Styles.EXPECTED)));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.type.in_tag", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tagKey.id()).styled(Styles.EXPECTED)));
     } else {
-      return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.type.not_in_tag", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tagKey.id()).styled(Styles.EXPECTED)));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.type.not_in_tag", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tagKey.id()).styled(Styles.EXPECTED)));
     }
   }
 
   @Override
-  public String toOptionEntry() {
-    return "type=" + (hasNegation ? "!" : "") + "#" + tagKey.id().toString();
+  public @Nullable String toOptionEntry() {
+    return "type=" + (inverted ? "!" : "") + "#" + tagKey.id().toString();
   }
 }

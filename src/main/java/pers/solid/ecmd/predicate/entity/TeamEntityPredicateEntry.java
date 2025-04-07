@@ -6,10 +6,11 @@ import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
-public record TeamEntityPredicateEntry(String expectedTeamName, boolean hasNegation) implements EntityPredicateEntry {
+public record TeamEntityPredicateEntry(String expectedTeamName, boolean inverted) implements EntityPredicateEntry {
   @Override
   public boolean test(@NotNull Entity entity) {
     if (!(entity instanceof LivingEntity)) {
@@ -17,7 +18,7 @@ public record TeamEntityPredicateEntry(String expectedTeamName, boolean hasNegat
     } else {
       AbstractTeam abstractTeam = entity.getScoreboardTeam();
       String string2 = abstractTeam == null ? "" : abstractTeam.getName();
-      return string2.equals(expectedTeamName) != hasNegation;
+      return string2.equals(expectedTeamName) != inverted;
     }
   }
 
@@ -30,26 +31,26 @@ public record TeamEntityPredicateEntry(String expectedTeamName, boolean hasNegat
       String actualTeamName = abstractTeam == null ? "" : abstractTeam.getName();
       if (actualTeamName.equals(expectedTeamName)) {
         if (abstractTeam == null) {
-          return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.team.true_nil", displayName));
+          return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.team.true_nil", displayName));
         } else {
-          return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.team.true", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL)));
+          return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.team.true", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL)));
         }
       } else {
         if (expectedTeamName.isEmpty()) {
-          return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.team.false_expect_nil", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL)));
+          return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.team.false_expect_nil", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL)));
         }
         final MutableText expectedText = Text.literal(expectedTeamName).styled(Styles.EXPECTED);
         if (abstractTeam == null) {
-          return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.team.false_nil", displayName, expectedText));
+          return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.team.false_nil", displayName, expectedText));
         } else {
-          return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.team.false", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL), expectedText));
+          return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.team.false", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL), expectedText));
         }
       }
     }
   }
 
   @Override
-  public String toOptionEntry() {
-    return "team=" + (hasNegation ? "!" : "") + expectedTeamName;
+  public @Nullable String toOptionEntry() {
+    return "team=" + (inverted ? "!" : "") + expectedTeamName;
   }
 }

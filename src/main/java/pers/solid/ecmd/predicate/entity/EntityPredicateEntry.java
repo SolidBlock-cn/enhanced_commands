@@ -3,6 +3,7 @@ package pers.solid.ecmd.predicate.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -15,9 +16,9 @@ import pers.solid.ecmd.util.bridge.BridgeIntRange;
  */
 public interface EntityPredicateEntry extends EntityPredicate {
   /**
-   * 将此谓词转换为实体选择器中的选项的形式，例如 {@code key=probability} 或 {@code key=!probability}.
+   * 将此谓词转换为实体选择器中的选项的形式，例如 {@code key=probability} 或 {@code key=!probability}。特定情况下可返回 {@code null}。
    */
-  String toOptionEntry();
+  @Nullable String toOptionEntry();
 
   /**
    * 测试实体的某个整数属性，并返回 {@link TestResult} 以描述其值是否在指定的范围内。

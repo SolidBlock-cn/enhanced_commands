@@ -6,16 +6,17 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Objects;
 
-public record TypeEntityPredicateEntry(EntityType<?> expectedType, boolean hasNegation) implements EntityPredicateEntry {
+public record TypeEntityPredicateEntry(EntityType<?> expectedType, boolean inverted) implements EntityPredicateEntry {
   @Override
   public boolean test(@NotNull Entity entity) {
-    return Objects.equals(expectedType, entity.getType()) != hasNegation;
+    return Objects.equals(expectedType, entity.getType()) != inverted;
   }
 
   @Override
@@ -24,14 +25,14 @@ public record TypeEntityPredicateEntry(EntityType<?> expectedType, boolean hasNe
     final boolean equals = Objects.equals(actualType, expectedType);
     final MutableText actualText = TextUtil.styled(actualType.getName(), Styles.ACTUAL);
     if (equals) {
-      return TestResult.of(!hasNegation, Text.translatable("enhanced_commands.entity_predicate.type.equal", displayName, actualText));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.type.equal", displayName, actualText));
     } else {
-      return TestResult.of(hasNegation, Text.translatable("enhanced_commands.entity_predicate.type.not_equal", displayName, actualText, TextUtil.styled(expectedType.getName(), Styles.EXPECTED)));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.type.not_equal", displayName, actualText, TextUtil.styled(expectedType.getName(), Styles.EXPECTED)));
     }
   }
 
   @Override
-  public String toOptionEntry() {
-    return "type=" + (hasNegation ? "!" : "") + Registries.ENTITY_TYPE.getId(expectedType);
+  public @Nullable String toOptionEntry() {
+    return "type=" + (inverted ? "!" : "") + Registries.ENTITY_TYPE.getId(expectedType);
   }
 }

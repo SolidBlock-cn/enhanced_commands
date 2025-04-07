@@ -7,9 +7,10 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 
-public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound expectedNbt, boolean hasNegation) implements EntityPredicateEntry {
+public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound expectedNbt, boolean inverted) implements EntityPredicateEntry {
   @Override
   public boolean test(@NotNull Entity entity) {
     NbtCompound actualNbt = entity.writeNbt(new NbtCompound());
@@ -20,7 +21,7 @@ public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound expectedNbt, 
       }
     }
 
-    return NbtHelper.matches(expectedNbt, actualNbt, true) != hasNegation;
+    return NbtHelper.matches(expectedNbt, actualNbt, true) != inverted;
   }
 
   @Override
@@ -34,7 +35,7 @@ public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound expectedNbt, 
     }
 
     boolean matches = NbtHelper.matches(expectedNbt, actualNbt, true);
-    final boolean result = matches != hasNegation;
+    final boolean result = matches != inverted;
     if (matches) {
       return TestResult.of(result, Text.translatable("enhanced_commands.entity_predicate.nbt.pass", entity));
     } else {
@@ -43,7 +44,7 @@ public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound expectedNbt, 
   }
 
   @Override
-  public String toOptionEntry() {
-    return "nbt=" + (hasNegation ? "!" : "") + expectedNbt;
+  public @Nullable String toOptionEntry() {
+    return "nbt=" + (inverted ? "!" : "") + expectedNbt;
   }
 }

@@ -149,8 +149,8 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @ModifyArg(method = "method_9982", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> addNamePredicateInformation(Predicate<Entity> predicate, @Local boolean hasNegation, @Local String expectedName) {
-    return new ForwardedEntityPredicateEntry(predicate, new NameEntityPredicateEntry(expectedName, hasNegation));
+  private static Predicate<Entity> addNamePredicateInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local String expectedName) {
+    return new ForwardedEntityPredicateEntry(predicate, new NameEntityPredicateEntry(expectedName, inverted));
   }
 
   @Inject(method = "method_9981", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;setCursor(I)V", remap = false, shift = At.Shift.BEFORE))
@@ -279,23 +279,23 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @WrapWithCondition(method = "method_9948", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static boolean readMultipleGameModes(EntitySelectorReader reader, Predicate<Entity> predicate, @Local boolean hasNegation, @Local @NotNull GameMode gameMode) throws CommandSyntaxException {
+  private static boolean readMultipleGameModes(EntitySelectorReader reader, Predicate<Entity> predicate, @Local boolean inverted, @Local @NotNull GameMode gameMode) throws CommandSyntaxException {
     // 尝试读取更多的游戏模式，即允许多个值。
     if (!EntitySelectorParsingConfig.CURRENT.allowMultipleGameModes) {
       return true;
     }
-    return EntitySelectorOptionsExtension.mixinReadMultipleGameModes(reader, hasNegation, gameMode);
+    return EntitySelectorOptionsExtension.mixinReadMultipleGameModes(reader, inverted, gameMode);
   }
 
 
   @ModifyArg(method = "method_9948", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> addGameModeInformation(Predicate<Entity> predicate, @Local boolean hasNegation, @Local @NotNull GameMode gameMode) {
-    return new ForwardedEntityPredicateEntry(predicate, new GameModeEntityPredicateEntry.Single(gameMode, hasNegation));
+  private static Predicate<Entity> addGameModeInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local @NotNull GameMode gameMode) {
+    return new ForwardedEntityPredicateEntry(predicate, new GameModeEntityPredicateEntry.Single(gameMode, inverted));
   }
 
   @ModifyArg(method = "method_9951", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> addSelectsTeamInformation(Predicate<Entity> predicate, @Local boolean hasNegation, @Local String expectedTeamName) {
-    return new ForwardedEntityPredicateEntry(predicate, new TeamEntityPredicateEntry(expectedTeamName, hasNegation));
+  private static Predicate<Entity> addSelectsTeamInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local String expectedTeamName) {
+    return new ForwardedEntityPredicateEntry(predicate, new TeamEntityPredicateEntry(expectedTeamName, inverted));
   }
 
   @Inject(method = "method_9973", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorOptions;INAPPLICABLE_OPTION_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", shift = At.Shift.BEFORE))
@@ -337,34 +337,34 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V", ordinal = 0, shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/registry/tag/TagKey;of(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/util/Identifier;)Lnet/minecraft/registry/tag/TagKey;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
-  private static void acceptMultipleTypesOnEntry(EntitySelectorReader reader, CallbackInfo ci, int cursorBeforeNegation, boolean hasNegation, TagKey<EntityType<?>> tagKey) throws CommandSyntaxException {
+  private static void acceptMultipleTypesOnEntry(EntitySelectorReader reader, CallbackInfo ci, int cursorBeforeNegation, boolean inverted, TagKey<EntityType<?>> tagKey) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.allowMultipleTypes) {
       return;
     }
-    if (EntitySelectorOptionsExtension.mixinReadMultipleTypes(reader, hasNegation, Either.right(tagKey))) {
+    if (EntitySelectorOptionsExtension.mixinReadMultipleTypes(reader, inverted, Either.right(tagKey))) {
       ci.cancel();
     }
   }
 
   @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V", shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
-  private static void acceptMultipleTypesOnTag(EntitySelectorReader reader, CallbackInfo ci, int cursorBeforeNegation, boolean hasNegation, Identifier identifier, EntityType<?> entityType) throws CommandSyntaxException {
+  private static void acceptMultipleTypesOnTag(EntitySelectorReader reader, CallbackInfo ci, int cursorBeforeNegation, boolean inverted, Identifier identifier, EntityType<?> entityType) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.allowMultipleTypes) {
       return;
     }
-    if (EntitySelectorOptionsExtension.mixinReadMultipleTypes(reader, hasNegation, Either.left(entityType))) {
+    if (EntitySelectorOptionsExtension.mixinReadMultipleTypes(reader, inverted, Either.left(entityType))) {
       reader.setIncludesNonPlayers(true);
       ci.cancel();
     }
   }
 
   @ModifyArg(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;readTagCharacter()Z"), to = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")))
-  private static Predicate<Entity> addEntityTypeTagInformation(Predicate<Entity> predicate, @Local boolean hasNegation, @Local TagKey<EntityType<?>> tagKey) {
-    return new ForwardedEntityPredicateEntry(predicate, new TypeTagEntityPredicateEntry(tagKey, hasNegation));
+  private static Predicate<Entity> addEntityTypeTagInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local TagKey<EntityType<?>> tagKey) {
+    return new ForwardedEntityPredicateEntry(predicate, new TypeTagEntityPredicateEntry(tagKey, inverted));
   }
 
   @ModifyArg(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/registry/Registries;ENTITY_TYPE:Lnet/minecraft/registry/DefaultedRegistry;")))
-  private static Predicate<Entity> addEntityTypeInformation(Predicate<Entity> predicate, @Local boolean hasNegation, @Local EntityType<?> expectedType) {
-    return new ForwardedEntityPredicateEntry(predicate, new TypeEntityPredicateEntry(expectedType, hasNegation));
+  private static Predicate<Entity> addEntityTypeInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local EntityType<?> expectedType) {
+    return new ForwardedEntityPredicateEntry(predicate, new TypeEntityPredicateEntry(expectedType, inverted));
   }
 
   @Inject(method = "method_17961", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;setCursor(I)V", remap = false, shift = At.Shift.BEFORE))
@@ -401,13 +401,13 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @ModifyArg(method = "method_9968", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> addTagInformation(Predicate<Entity> predicate, @Local boolean hasNegation, @Local String tagName) {
-    return new ForwardedEntityPredicateEntry(predicate, new TagEntityPredicateEntry(tagName, hasNegation));
+  private static Predicate<Entity> addTagInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local String tagName) {
+    return new ForwardedEntityPredicateEntry(predicate, new TagEntityPredicateEntry(tagName, inverted));
   }
 
   @ModifyArg(method = "method_9966", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> addNbtInformation(Predicate<Entity> predicate, @Local boolean hasNegation, @Local NbtCompound nbtCompound) {
-    return new ForwardedEntityPredicateEntry(predicate, new NbtMatchingEntityPredicateEntry(nbtCompound, hasNegation));
+  private static Predicate<Entity> addNbtInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local NbtCompound nbtCompound) {
+    return new ForwardedEntityPredicateEntry(predicate, new NbtMatchingEntityPredicateEntry(nbtCompound, inverted));
   }
 
   /**
@@ -649,7 +649,7 @@ public abstract class EntitySelectorOptionsMixin {
 
 
   @ModifyArg(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> addPredicateInformqtion(Predicate<Entity> predicate, @Local boolean hasNegation, @Local RegistryKey<LootCondition> registryKey) {
-    return new ForwardedEntityPredicateEntry(predicate, new LootTablePredicateEntityPredicateEntry(registryKey.getValue(), hasNegation));
+  private static Predicate<Entity> addPredicateInformqtion(Predicate<Entity> predicate, @Local boolean inverted, @Local RegistryKey<LootCondition> registryKey) {
+    return new ForwardedEntityPredicateEntry(predicate, new LootTablePredicateEntityPredicateEntry(registryKey.getValue(), inverted));
   }
 }

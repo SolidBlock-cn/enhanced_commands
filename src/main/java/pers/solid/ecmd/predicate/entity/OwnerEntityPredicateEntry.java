@@ -75,7 +75,7 @@ public record OwnerEntityPredicateEntry(@Nullable EntityPredicate entityPredicat
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return "tamer=" + (inverted ? "!" : "") + (entityPredicate == null ? "" : "[...]");
   }
 }

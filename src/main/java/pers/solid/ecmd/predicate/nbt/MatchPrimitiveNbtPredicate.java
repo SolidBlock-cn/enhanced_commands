@@ -13,7 +13,7 @@ import pers.solid.ecmd.util.TextUtil;
  *   3b match 3 -> false
  * </pre>
  */
-public record MatchPrimitiveNbtPredicate(NbtElement expected, boolean negated) implements NbtPredicate {
+public record MatchPrimitiveNbtPredicate(NbtElement expected, boolean inverted) implements NbtPredicate {
   @Override
   public @NotNull String asString() {
     return asString(false);
@@ -21,12 +21,12 @@ public record MatchPrimitiveNbtPredicate(NbtElement expected, boolean negated) i
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(expected);
+    return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(expected);
   }
 
   @Override
   public boolean test(@NotNull NbtElement nbtElement) {
-    return NbtHelper.matches(nbtElement, expected, true) != negated;
+    return NbtHelper.matches(nbtElement, expected, true) != inverted;
   }
 
   @Override

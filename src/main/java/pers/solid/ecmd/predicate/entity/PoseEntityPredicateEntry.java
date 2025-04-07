@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
@@ -45,7 +46,7 @@ public record PoseEntityPredicateEntry(@NotNull EntityPose expected, boolean inv
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return "pose=" + (inverted ? "!" : "") + ENTITY_POSE_NAMES.get(expected);
   }
 }

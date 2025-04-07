@@ -7,6 +7,7 @@ import net.minecraft.command.argument.PosArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.TestResult;
 
@@ -45,7 +46,7 @@ public record BlockPredicatesEntityPredicateEntry(Map<PosArgument, BlockPredicat
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return "block=" + map.entrySet().stream().map(entry -> "<" + entry.getKey().toString() + "> = " + entry.getValue().asString()).collect(Collectors.joining(", ", "{", "}"));
   }
 }

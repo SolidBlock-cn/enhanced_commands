@@ -10,6 +10,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -17,7 +18,7 @@ import pers.solid.ecmd.util.bridge.LootBridge;
 
 import java.util.Optional;
 
-public record LootTablePredicateEntityPredicateEntry(@NotNull Identifier predicateId, boolean hasNegation) implements EntityPredicateEntry {
+public record LootTablePredicateEntityPredicateEntry(@NotNull Identifier predicateId, boolean inverted) implements EntityPredicateEntry {
   @Override
   public boolean test(@NotNull Entity entity) {
     if (!(entity.getWorld() instanceof final ServerWorld serverWorld)) {
@@ -32,7 +33,7 @@ public record LootTablePredicateEntityPredicateEntry(@NotNull Identifier predica
             .add(LootContextParameters.ORIGIN, entity.getPos())
             .build(LootContextTypes.SELECTOR)).build(Optional.empty());
         final boolean test = lootCondition.get().test(lootContext);
-        return hasNegation ^ test;
+        return inverted ^ test;
       }
     }
   }
@@ -51,17 +52,17 @@ public record LootTablePredicateEntityPredicateEntry(@NotNull Identifier predica
             .add(LootContextParameters.ORIGIN, entity.getPos())
             .build(LootContextTypes.SELECTOR)).build(Optional.empty());
         final boolean test = lootCondition.get().test(lootContext);
-        if (hasNegation ^ test) {
+        if (inverted ^ test) {
           return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.predicate.pass", displayName, TextUtil.literal(predicateId).styled(Styles.TARGET), TextUtil.literal(test).styled(Styles.ACTUAL)));
         } else {
-          return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail", displayName, TextUtil.literal(predicateId).styled(Styles.TARGET), TextUtil.literal(test).styled(Styles.ACTUAL), TextUtil.literal(!hasNegation).styled(Styles.EXPECTED)));
+          return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.fail", displayName, TextUtil.literal(predicateId).styled(Styles.TARGET), TextUtil.literal(test).styled(Styles.ACTUAL), TextUtil.literal(!inverted).styled(Styles.EXPECTED)));
         }
       }
     }
   }
 
   @Override
-  public String toOptionEntry() {
+  public @Nullable String toOptionEntry() {
     return null;
   }
 }
