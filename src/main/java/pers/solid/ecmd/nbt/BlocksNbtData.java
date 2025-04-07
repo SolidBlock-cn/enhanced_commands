@@ -11,17 +11,21 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.NbtConcentrationType;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collection;
 
-public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtSource, NbtTarget {
+public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtTarget<BlockEntity> {
+
   @Override
-  public <T> Collection<T> getNbts(FailableFunction<NbtCompound, T, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
-    return IterateUtils.transformFailableImmutableList(blockEntities, blockEntity -> mappingFunction.apply(blockEntity.createNbtWithIdentifyingData(registryLookup)));
+  public Collection<BlockEntity> values() {
+    return blockEntities;
+  }
+
+  @Override
+  public NbtCompound getNbtFor(BlockEntity source, @NotNull RegistryWrapper.WrapperLookup registryLookup) {
+    return source.createNbtWithIdentifyingData(registryLookup);
   }
 
   @Override
@@ -40,26 +44,12 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrat
   }
 
   @Override
-  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-    for (BlockEntity blockEntity : blockEntities) {
-      blockEntity.read(nbt, registryLookup);
-      blockEntity.markDirty();
-      final World world = blockEntity.getWorld();
-      if (world != null) {
-        world.updateListeners(blockEntity.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_ALL);
-      }
-    }
-  }
-
-  @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    for (BlockEntity blockEntity : blockEntities) {
-      blockEntity.read(operator.apply(blockEntity.createNbtWithIdentifyingData(registryLookup)), registryLookup);
-      blockEntity.markDirty();
-      final World world = blockEntity.getWorld();
-      if (world != null) {
-        world.updateListeners(blockEntity.getPos(), blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_ALL);
-      }
+  public void setNbtFor(BlockEntity target, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    target.read(nbt, registryLookup);
+    target.markDirty();
+    final World world = target.getWorld();
+    if (world != null) {
+      world.updateListeners(target.getPos(), target.getCachedState(), target.getCachedState(), Block.NOTIFY_ALL);
     }
   }
 

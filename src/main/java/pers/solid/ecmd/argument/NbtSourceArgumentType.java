@@ -18,24 +18,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtSourceArgument> {
+public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtSourceArgument<?>> {
   public static NbtSourceArgumentType nbtSource(CommandRegistryAccess registryAccess) {
     return new NbtSourceArgumentType(registryAccess);
   }
 
-  public static NbtSourceArgument getNbtSourceArgument(CommandContext<?> context, String name) {
+  public static NbtSourceArgument<?> getNbtSourceArgument(CommandContext<?> context, String name) {
     return context.getArgument(name, NbtSourceArgument.class);
   }
 
-  public static NbtSource getNbtSource(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static NbtSource<?> getNbtSource(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     return getNbtSourceArgument(context, name).getNbtSource(context.getSource());
   }
 
   @Override
-  public NbtSourceArgument parse(StringReader reader) throws CommandSyntaxException {
+  public NbtSourceArgument<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtSourceArgument nbtSourceArgument = NbtDataRegistry.handleSource(s, registryAccess, new SuggestedParser<>(reader), false);
+    final NbtSourceArgument<?> nbtSourceArgument = NbtDataRegistry.handleSource(s, registryAccess, new SuggestedParser<>(reader), false);
     if (nbtSourceArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -52,8 +52,8 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
     final int cursorAfterString = reader.getCursor();
-    final SuggestedParser<S> suggestedParser = new SuggestedParser<S>(reader);
-    final NbtSourceArgument nbtSourceArgument;
+    final SuggestedParser<S> suggestedParser = new SuggestedParser<>(reader);
+    final NbtSourceArgument<?> nbtSourceArgument;
     try {
       nbtSourceArgument = NbtDataRegistry.handleSource(s, registryAccess, suggestedParser, true);
       if (nbtSourceArgument == null) {

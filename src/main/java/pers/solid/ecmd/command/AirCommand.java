@@ -57,9 +57,9 @@ public enum AirCommand implements CommandRegistrationCallback {
                         .then(argument("target", nbtTarget(registryAccess))
                             .then(argument("path", nbtPath())
                                 .executes(context -> {
-                                  final NbtTarget target = getNbtTarget(context, "target");
+                                  final NbtTarget<?> target = getNbtTarget(context, "target");
                                   final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
-                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.modifyNbt(path, nbt, context.getSource().getRegistryManager()));
+                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.setNbtPath(path, nbt, context.getSource().getRegistryManager()));
                                 })))))))
         .then(literal("set")
             .then(argument("entities", entities())
@@ -145,8 +145,7 @@ public enum AirCommand implements CommandRegistrationCallback {
         entity.setAir(value);
       }
       context.getSource().sendFeedback$ecBridge(() -> {
-        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)};
-        return Text.translatable("enhanced_commands.commands.air.set.multiple", args).enhanced$$();
+        return Text.translatable("enhanced_commands.commands.air.set.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)).enhanced$$();
       }, true);
       return size;
     }

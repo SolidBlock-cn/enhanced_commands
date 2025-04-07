@@ -4,11 +4,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-public record EntityNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument, NbtTargetArgument {
+public record EntityNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument<Entity>, NbtTargetArgument {
   public EntityNbtData getEntityNbtData(ServerCommandSource source) throws CommandSyntaxException {
     return new EntityNbtData(entitySelector.getEntity(source));
   }

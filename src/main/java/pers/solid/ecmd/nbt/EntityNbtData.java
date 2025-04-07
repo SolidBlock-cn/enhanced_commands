@@ -8,34 +8,34 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
-import org.apache.commons.lang3.function.FailableFunction;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public record EntityNbtData(Entity entity) implements NbtSource.Single, NbtTarget {
+public record EntityNbtData(Entity entity) implements NbtTarget.Single<Entity> {
+  @Override
+  public Entity value() {
+    return entity;
+  }
+
+
   @Override
   public Text feedbackQuery(NbtElement nbtElement) {
     return Text.translatable("commands.data.entity.query", this.entity.getDisplayName(), NbtHelper.toPrettyPrintedText(nbtElement));
   }
 
   @Override
-  public NbtCompound getNbt() {
-    return NbtPredicate.entityToNbt(this.entity);
+  public NbtCompound getNbtFor(Entity source, @NotNull RegistryWrapper.WrapperLookup registryLookup) {
+    return NbtPredicate.entityToNbt(source);
   }
 
   @Override
-  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    UUID uUID = this.entity.getUuid();
-    this.entity.readNbt(nbt);
-    this.entity.setUuid(uUID);
+  public void setNbtFor(Entity target, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    UUID uUID = target.getUuid();
+    target.readNbt(nbt);
+    target.setUuid(uUID);
   }
 
-  @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    UUID uUID = this.entity.getUuid();
-    this.entity.readNbt(getNbt());
-    this.entity.setUuid(uUID);
-  }
 
   @Override
   public Text feedbackModify() {

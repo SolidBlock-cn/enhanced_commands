@@ -3,14 +3,17 @@ package pers.solid.ecmd.nbt;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-public record EntitiesNbtDataArgument(EntitySelector entitySelector, NbtConcentrationType nbtConcentrationType) implements NbtSourceArgument, NbtTargetArgument {
+import java.util.Collections;
+
+public record EntitiesNbtDataArgument(EntitySelector entitySelector, NbtConcentrationType nbtConcentrationType) implements NbtSourceArgument<Entity>, NbtTargetArgument<Entity> {
   public EntitiesNbtData getEntitiesNbtData(ServerCommandSource source) throws CommandSyntaxException {
-    return new EntitiesNbtData(entitySelector.getEntities(source), nbtConcentrationType, source.getWorld().getRandom());
+    return new EntitiesNbtData(Collections.unmodifiableCollection(entitySelector.getEntities(source)), nbtConcentrationType, source.getWorld().getRandom());
   }
 
   @Override

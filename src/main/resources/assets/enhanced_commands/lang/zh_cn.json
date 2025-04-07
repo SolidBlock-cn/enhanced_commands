@@ -677,7 +677,7 @@
   "enhanced_commands.moon_phase.waxing_gibbous": "盈凸月",
   "enhanced_commands.nbt.block_is_not_entity": "位于%s的方块是%s，不是方块实体，无法拥有NBT数据",
   "enhanced_commands.nbt.blocks.modify": "修改了%s个方块实体的数据",
-  "enhanced_commands.nbt.blocks.query": "%s个方块拥有NBT数据：",
+  "enhanced_commands.nbt.blocks.query": "%s个方块拥有NBT数据：%s",
   "enhanced_commands.nbt.entities.modify": "已修改%s个实体的数据",
   "enhanced_commands.nbt.entities.query": "%s个实体拥有以下NBT数据：%s",
   "enhanced_commands.nbt.literal.query": "指定的NBT为：%s",

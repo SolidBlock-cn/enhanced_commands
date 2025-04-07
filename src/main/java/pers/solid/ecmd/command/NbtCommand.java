@@ -33,17 +33,17 @@ public enum NbtCommand implements CommandRegistrationCallback {
   public void register(CommandDispatcher<ServerCommandSource> commandDispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
     commandDispatcher.register(literal("nbt")
         .then(literal("get")
-            .then(argument("source", nbtSource(commandRegistryAccess))
-                .executes(context -> executeGet(getNbtSource(context, "source"), context))
+            .then(argument("blockEntity", nbtSource(commandRegistryAccess))
+                .executes(context -> executeGet(getNbtSource(context, "blockEntity"), context))
                 .then(argument("path", NbtPathArgumentType.nbtPath())
-                    .executes(context -> executeGet(getNbtSource(context, "source"), NbtPathArgumentType.getNbtPath(context, "path"), context)))))
+                    .executes(context -> executeGet(getNbtSource(context, "blockEntity"), NbtPathArgumentType.getNbtPath(context, "path"), context)))))
         .then(literal("set")
-            .then(argument("target", nbtTarget(commandRegistryAccess))
+            .then(argument("entity", nbtTarget(commandRegistryAccess))
                 .then(argument("nbt_function", NbtFunctionArgumentType.ELEMENT)
-                    .executes(context -> executeSet(getNbtTarget(context, "target"), getNbtFunction(context, "nbt_function"), context))))));
+                    .executes(context -> executeSet(getNbtTarget(context, "entity"), getNbtFunction(context, "nbt_function"), context))))));
   }
 
-  private int executeGet(NbtSource nbtSource, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private int executeGet(NbtSource<?> nbtSource, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final Collection<NbtCompound> nbts = nbtSource.getNbts(source.getRegistryManager());
     final NbtElement concentratedNbts = nbtSource.getConcentratedNbts(FailableFunction.identity(), source.getWorld().getRegistryManager());
@@ -51,7 +51,7 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return nbts.size();
   }
 
-  private int executeGet(NbtSource nbtSource, NbtPathArgumentType.NbtPath nbtPath, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private int executeGet(NbtSource<?> nbtSource, NbtPathArgumentType.NbtPath nbtPath, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final Collection<NbtCompound> nbts = nbtSource.getNbts(source.getRegistryManager());
     final NbtElement concentratedNbts = nbtSource.getConcentratedNbts(nbtPath, source.getWorld().getRegistryManager());
@@ -59,9 +59,9 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return nbts.size();
   }
 
-  private int executeSet(NbtTarget target, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private int executeSet(NbtTarget<?> target, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    target.changeNbt(nbtCompound -> nbtFunction.apply(nbtCompound) instanceof final NbtCompound newCompound ? newCompound : nbtCompound, source.getRegistryManager());
+    target.transformNbt(nbtCompound -> nbtFunction.apply(nbtCompound) instanceof final NbtCompound newCompound ? newCompound : nbtCompound, source.getRegistryManager());
     source.sendFeedback$ecBridge(target::feedbackModify, true);
     return 1; // 应该修改为执行成功数量
   }

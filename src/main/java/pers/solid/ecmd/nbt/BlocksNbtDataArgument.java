@@ -14,7 +14,7 @@ import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Objects;
 
-public record BlocksNbtDataArgument(RegionArgument regionArgument, NbtConcentrationType nbtConcentrationType) implements NbtSourceArgument, NbtTargetArgument {
+public record BlocksNbtDataArgument(RegionArgument regionArgument, NbtConcentrationType nbtConcentrationType) implements NbtSourceArgument<BlockEntity>, NbtTargetArgument<BlockEntity> {
   public BlocksNbtData getBlockNbtData(ServerCommandSource source) throws CommandSyntaxException {
     final Region region = regionArgument.toAbsoluteRegion(source);
     final ServerWorld world = source.getWorld();

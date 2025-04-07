@@ -3,7 +3,6 @@ package pers.solid.ecmd.nbt;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.command.BlockDataObject;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.server.command.ServerCommandSource;
@@ -16,7 +15,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-public record BlockNbtDataArgument(PosArgument posArgument) implements NbtSourceArgument, NbtTargetArgument {
+public record BlockNbtDataArgument(PosArgument posArgument) implements NbtSourceArgument<BlockEntity>, NbtTargetArgument<BlockEntity> {
   public static final Dynamic2CommandExceptionType BLOCK_IS_NOT_ENTITY = new Dynamic2CommandExceptionType((pos, name) -> Text.translatable("enhanced_commands.nbt.block_is_not_entity", pos, name));
 
   public @NotNull BlockEntity blockEntity(ServerCommandSource source, BlockPos pos) throws CommandSyntaxException {
@@ -29,15 +28,15 @@ public record BlockNbtDataArgument(PosArgument posArgument) implements NbtSource
   }
 
   @Override
-  public NbtSource getNbtSource(ServerCommandSource source) throws CommandSyntaxException {
+  public NbtSource<BlockEntity> getNbtSource(ServerCommandSource source) throws CommandSyntaxException {
     final BlockPos pos = posArgument.toAbsoluteBlockPos(source);
-    return new BlockNbtData(new BlockDataObject(blockEntity(source, pos), pos));
+    return new BlockNbtData(blockEntity(source, pos));
   }
 
   @Override
-  public NbtTarget getNbtTarget(ServerCommandSource source) throws CommandSyntaxException {
+  public NbtTarget<BlockEntity> getNbtTarget(ServerCommandSource source) throws CommandSyntaxException {
     final BlockPos pos = posArgument.toAbsoluteBlockPos(source);
-    return new BlockNbtData(new BlockDataObject(blockEntity(source, pos), pos));
+    return new BlockNbtData(blockEntity(source, pos));
   }
 
   public static BlockNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {

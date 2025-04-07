@@ -1,36 +1,49 @@
 package pers.solid.ecmd.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.BlockDataObject;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
-import org.apache.commons.lang3.function.FailableFunction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
-public record BlockNbtData(BlockDataObject blockDataObject) implements NbtSource.Single, NbtTarget {
+public record BlockNbtData(BlockEntity blockEntity) implements NbtTarget.Single<BlockEntity> {
+  @Override
+  public BlockEntity value() {
+    return blockEntity;
+  }
+
   @Override
   public Text feedbackQuery(NbtElement element) {
-    return blockDataObject.feedbackQuery(element);
+    final BlockPos pos = blockEntity.getPos();
+    return Text.translatable("commands.data.block.query", pos.getX(), pos.getY(), pos.getZ(), NbtHelper.toPrettyPrintedText(element));
   }
 
   @Override
-  public NbtCompound getNbt() {
-    return blockDataObject.getNbt();
+  public NbtCompound getNbtFor(BlockEntity source, @NotNull RegistryWrapper.WrapperLookup registryLookup) {
+    return source.createNbtWithIdentifyingData(registryLookup);
   }
 
   @Override
-  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-    blockDataObject.setNbt(nbt);
-  }
-
-  @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    blockDataObject.setNbt(operator.apply(blockDataObject.getNbt()));
+  public void setNbtFor(BlockEntity target, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    BlockState blockState = target.getCachedState();
+    target.read(nbt, registryLookup);
+    target.markDirty();
+    final World world = target.getWorld();
+    if (world != null) {
+      world.updateListeners(target.getPos(), blockState, blockState, 3);
+    }
   }
 
   @Override
   public Text feedbackModify() {
-    return blockDataObject.feedbackModify();
+    final BlockPos pos = blockEntity.getPos();
+    return Text.translatable("commands.data.block.modified", pos.getX(), pos.getY(), pos.getZ());
   }
 }
+

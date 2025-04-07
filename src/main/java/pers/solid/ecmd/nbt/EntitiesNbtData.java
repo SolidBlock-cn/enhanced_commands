@@ -9,18 +9,21 @@ import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
-import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.NbtConcentrationType;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collection;
 import java.util.UUID;
 
-public record EntitiesNbtData(Collection<? extends Entity> entities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtSource, NbtTarget {
+public record EntitiesNbtData(Collection<Entity> entities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtTarget<Entity> {
   @Override
-  public <T> Collection<T> getNbts(FailableFunction<NbtCompound, T, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
-    return IterateUtils.transformFailableImmutableList(entities, entity -> mappingFunction.apply(NbtPredicate.entityToNbt(entity)));
+  public Collection<Entity> values() {
+    return entities;
+  }
+
+  @Override
+  public NbtCompound getNbtFor(Entity source, @NotNull RegistryWrapper.WrapperLookup registryLookup) {
+    return NbtPredicate.entityToNbt(source);
   }
 
   @Override
@@ -38,21 +41,10 @@ public record EntitiesNbtData(Collection<? extends Entity> entities, NbtConcentr
   }
 
   @Override
-  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    for (Entity entity : entities) {
-      UUID uuid = entity.getUuid();
-      entity.readNbt(nbt);
-      entity.setUuid(uuid);
-    }
-  }
-
-  @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    for (Entity entity : entities) {
-      UUID uuid = entity.getUuid();
-      entity.readNbt(operator.apply(NbtPredicate.entityToNbt(entity)));
-      entity.setUuid(uuid);
-    }
+  public void setNbtFor(Entity target, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    UUID uuid = target.getUuid();
+    target.readNbt(nbt);
+    target.setUuid(uuid);
   }
 
   @Override

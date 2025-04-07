@@ -18,24 +18,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtTargetArgument> {
+public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtTargetArgument<?>> {
   public static NbtTargetArgumentType nbtTarget(CommandRegistryAccess registryAccess) {
     return new NbtTargetArgumentType(registryAccess);
   }
 
-  public static NbtTargetArgument getNbtTargetArgument(CommandContext<?> context, String name) {
+  public static NbtTargetArgument<?> getNbtTargetArgument(CommandContext<?> context, String name) {
     return context.getArgument(name, NbtTargetArgument.class);
   }
 
-  public static NbtTarget getNbtTarget(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     return getNbtTargetArgument(context, name).getNbtTarget(context.getSource());
   }
 
   @Override
-  public NbtTargetArgument parse(StringReader reader) throws CommandSyntaxException {
+  public NbtTargetArgument<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtTargetArgument nbtTargetArgument = NbtDataRegistry.handleTarget(s, registryAccess, new SuggestedParser(reader), false);
+    final NbtTargetArgument<?> nbtTargetArgument = NbtDataRegistry.handleTarget(s, registryAccess, new SuggestedParser(reader), false);
     if (nbtTargetArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -52,7 +52,7 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
     final SuggestedParser<S> suggestedParser = new SuggestedParser<>(reader);
-    final NbtTargetArgument nbtTargetArgument;
+    final NbtTargetArgument<?> nbtTargetArgument;
     try {
       nbtTargetArgument = NbtDataRegistry.handleTarget(s, registryAccess, suggestedParser, true);
       if (nbtTargetArgument == null) {

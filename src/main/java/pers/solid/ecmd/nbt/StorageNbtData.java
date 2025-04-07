@@ -8,31 +8,26 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.function.FailableFunction;
+import org.jetbrains.annotations.NotNull;
 
-public record StorageNbtData(DataCommandStorage dataCommandStorage, Identifier id) implements NbtSource.Single, NbtTarget {
+public record StorageNbtData(DataCommandStorage storage, Identifier value) implements NbtTarget.Single<Identifier> {
   @Override
   public Text feedbackQuery(NbtElement nbtElement) {
-    return Text.translatable("commands.data.storage.query", this.id, NbtHelper.toPrettyPrintedText(nbtElement));
+    return Text.translatable("commands.data.storage.query", this.value, NbtHelper.toPrettyPrintedText(nbtElement));
   }
 
   @Override
-  public NbtCompound getNbt() {
-    return dataCommandStorage.get(id);
+  public NbtCompound getNbtFor(Identifier source, @NotNull RegistryWrapper.WrapperLookup registryLookup) {
+    return this.storage.get(source);
   }
 
   @Override
-  public void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-    dataCommandStorage.set(id, nbt);
-  }
-
-  @Override
-  public void changeNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    setNbt(operator.apply(getNbt()), registryLookup);
+  public void setNbtFor(Identifier target, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    storage.set(target, nbt);
   }
 
   @Override
   public Text feedbackModify() {
-    return Text.translatable("commands.data.storage.modified", this.id);
+    return Text.translatable("commands.data.storage.modified", this.value);
   }
 }

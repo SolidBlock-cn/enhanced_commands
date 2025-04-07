@@ -11,17 +11,29 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 
-public interface NbtSource {
+/**
+ * NBT 的来源。可以是方块、实体或者存储。
+ *
+ * @param <T> 包含 NBT 数据的对象，如方块实体、实体等。
+ */
+public interface NbtSource<T> {
+  Collection<T> values();
+
+  NbtCompound getNbtFor(T source, RegistryWrapper.@NotNull WrapperLookup registryLookup);
+
   default Collection<NbtCompound> getNbts(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     return getNbts(FailableFunction.identity(), registryLookup);
   }
 
-  <T> Collection<T> getNbts(FailableFunction<NbtCompound, T, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException;
+  default <R> Collection<R> getNbts(FailableFunction<NbtCompound, R, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
+    return IterateUtils.transformFailableImmutableList(values(), value -> mappingFunction.apply(getNbtFor(value, registryLookup)));
+  }
 
   NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) throws CommandSyntaxException;
 
@@ -51,12 +63,21 @@ public interface NbtSource {
 
   Text feedbackQuery(NbtElement nbtElement);
 
-  interface Single extends NbtSource {
-    NbtCompound getNbt();
+  interface Single<T> extends NbtSource<T> {
+    T value();
 
     @Override
-    default <T> Collection<T> getNbts(FailableFunction<NbtCompound, T, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
-      return Collections.singletonList(mappingFunction.apply(getNbt()));
+    default Collection<T> values() {
+      return Collections.singletonList(value());
+    }
+
+    default NbtCompound getNbt(RegistryWrapper.@NotNull WrapperLookup registryLookup) {
+      return getNbtFor(value(), registryLookup);
+    }
+
+    @Override
+    default <R> Collection<R> getNbts(FailableFunction<NbtCompound, R, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
+      return Collections.singletonList(mappingFunction.apply(getNbt(registryLookup)));
     }
 
     @Override
@@ -76,8 +97,5 @@ public interface NbtSource {
       throw EXPECTED_WHITESPACE_AND_CONCENTRATION_TYPE.createWithContext(reader);
     }
     reader.skipWhitespace();
-    if (!reader.canRead()) {
-      throw EXPECTED_CONCENTRATION_TYPE.createWithContext(reader);
-    }
   }
 }
