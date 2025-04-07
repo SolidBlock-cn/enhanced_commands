@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
+import org.jetbrains.annotations.Range;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +17,25 @@ import java.util.stream.Stream;
 public sealed interface WeightedList<E> {
   E getRandom(Random random);
 
+  /**
+   * 获取位于绝对位置的元素。当该列表为均匀列表时，相同于获取特定元素下标的元素。
+   *
+   * @param position 元素位置，对于均匀列表相当于元素下标。
+   * @return 指定位置的元素。
+   */
   E getElementAt(double position);
+
+  double size();
+
+  /**
+   * 获取位于相对于整个列表位置（0 到 1 之间的双精度浮点）的元素。
+   *
+   * @param position 在整个列表中的相对位置，一般是 0 到 1 之间。
+   * @return 指定位置的元素。
+   */
+  default E getClampedElement(@Range(from = 0, to = 1) double position) {
+    return getElementAt(position / size());
+  }
 
   Stream<String> asStringStream(Function<E, String> converter);
 
@@ -31,6 +50,7 @@ public sealed interface WeightedList<E> {
   }
 
   record Uniform<E>(List<E> elements) implements WeightedList<E> {
+    @SafeVarargs
     public Uniform(E... elements) {
       this(List.of(elements));
     }
@@ -55,6 +75,11 @@ public sealed interface WeightedList<E> {
 
     public static <E> MapCodec<Uniform<E>> createMapCodec(Codec<E> elemenetCodec) {
       return RecordCodecBuilder.mapCodec(i -> i.group(elemenetCodec.listOf().fieldOf("elements").forGetter(Uniform::elements)).apply(i, Uniform::new));
+    }
+
+    @Override
+    public double size() {
+      return elements.size();
     }
   }
 
@@ -83,7 +108,6 @@ public sealed interface WeightedList<E> {
       position = MathHelper.floorMod(position, sum);
       double stackedHeight = 0;
 
-      // 注意：pairs 中的各浮点数的总和应该为 1。
       for (ObjectDoublePair<E> pair : entries) {
         stackedHeight += pair.rightDouble();
         if (position < stackedHeight) {
@@ -92,6 +116,11 @@ public sealed interface WeightedList<E> {
       }
 
       return null;
+    }
+
+    @Override
+    public double size() {
+      return sum;
     }
 
     @Override

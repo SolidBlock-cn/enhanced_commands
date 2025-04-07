@@ -43,6 +43,7 @@ public final class BlockFunctionTypes {
   public static final IdReplaceBlockFunction.Type ID_REPLACE = register("id_replace", IdReplaceBlockFunction.Type.ID_REPLACE_TYPE);
   public static final RotateBlockFunction.Type ROTATE = register("rotate", RotateBlockFunction.Type.ROTATE_TYPE);
   public static final MirrorBlockFunction.Type MIRROR = register("mirror", MirrorBlockFunction.Type.MIRROR_TYPE);
+  public static final NoiseBlockFunction.Type NOISE = register("noise", NoiseBlockFunction.Type.INSTANCE);
   public static final CheckerboardBlockFunction.Type CHECKERBOARD = register("checkerboard", CheckerboardBlockFunction.Type.CHECKERBOARD_TYPE);
   public static final CheckerboardTagBlockFunction.Type CHECKERBOARD_TAG = register("checkerboard-tag", CheckerboardTagBlockFunction.Type.CHECKERBOARD_TAG_TYPE);
   public static final ReferenceBlockFunction.Type REFERENCE = register("reference", ReferenceBlockFunction.Type.INSTANCE);
@@ -74,6 +75,7 @@ public final class BlockFunctionTypes {
     map.put("idreplace", IdReplaceBlockFunction.Parser::new);
     map.put("rotate", RotateBlockFunction.Parser::new);
     map.put("mirror", MirrorBlockFunction.Parser::new);
+    map.put("noise", NoiseBlockFunction.Parser::new);
     map.put("checkerboard", CheckerboardBlockFunction.Parser::new);
     map.put("checkerboard-tag", CheckerboardTagBlockFunction.Parser::new);
   }
@@ -90,6 +92,7 @@ public final class BlockFunctionTypes {
     map.put("idreplace", Text.translatable("enhanced_commands.block_function.id_replace"));
     map.put("rotate", Text.translatable("enhanced_commands.block_function.rotate"));
     map.put("mirror", Text.translatable("enhanced_commands.block_function.mirror"));
+    map.put("noise", Text.translatable("enhanced_commands.block_function.noise"));
     map.put("checkerboard", Text.translatable("enhanced_commands.block_function.checkerboard"));
     map.put("checkerboard-tag", Text.translatable("enhanced_commands.block_function.checkerboard-tag"));
   }

@@ -73,13 +73,13 @@ public interface Checkerboard<T> {
   }
 
   abstract class CheckerboardParser<T> implements FunctionLikeParser<T> {
-    protected boolean weighted = false;
+    public boolean weighted = false;
     protected Vec3d scale = null;
     protected Vec3d floor = null;
     protected double weightSum = 0;
     protected Vec3d offset = null;
     protected int cursorBeforeFunctionName;
-    protected List<ObjectDoublePair<T>> pairs;
+    public List<ObjectDoublePair<T>> pairs;
 
     @Override
     public void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
@@ -112,7 +112,7 @@ public interface Checkerboard<T> {
     @Override
     public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
-      parseEntryList(registryAccess, parser, suggestionsOnly, reader);
+      parseEntryList(registryAccess, parser, suggestionsOnly);
       // 等待关键字的部分
 
       // 解析坐标轴尺寸的部分
@@ -122,7 +122,7 @@ public interface Checkerboard<T> {
       parseParameters(parser, reader);
     }
 
-    private void parseParameters(SuggestedParser<?> parser, StringReader reader) throws CommandSyntaxException {
+    protected void parseParameters(SuggestedParser<?> parser, StringReader reader) throws CommandSyntaxException {
       while (true) {
         parser.addSuggestion((context, suggestionsBuilder) -> {
           if (floor == null) {
@@ -181,8 +181,9 @@ public interface Checkerboard<T> {
       }
     }
 
-    protected void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, StringReader reader) throws CommandSyntaxException {
+    public void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       this.pairs = new ArrayList<>();
+      final StringReader reader = parser.reader;
 
       if (reader.canRead() && reader.peek() == rightPar()) {
         throw FunctionParamsParser.PARAMS_TOO_FEW.createWithContext(reader, 0, 1);
