@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -22,7 +23,11 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
     try {
-      return value(world.getRegistryManager()).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      // todo 考虑一项更好的措施，使得 world.getRegistryManager() 返回的注册表管理器也能访问这里面的注册表（原版的配方、战利品表等是不能访问的）
+      if (!(world instanceof ServerWorld serverWorld)) {
+        return blockState;
+      }
+      return value(serverWorld.getServer().getReloadableRegistries().getRegistryManager()).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
     }

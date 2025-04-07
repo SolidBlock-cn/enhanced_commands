@@ -8,6 +8,7 @@
     "EntitySelectorExtensionImpl",
     "EntitySelectorReaderExtensionImpl",
     "MutableTextExtensionImpl",
+    "ReloadRegistriesMixin",
     "ServerCommandSourceExtensionImpl"
   ],
   "client": [

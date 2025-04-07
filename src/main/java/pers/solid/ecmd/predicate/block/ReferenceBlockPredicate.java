@@ -5,7 +5,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.world.WorldView;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
@@ -18,7 +20,11 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     try {
-      return value(cachedBlockPosition.getWorld().getRegistryManager()).test(cachedBlockPosition);
+      final WorldView world = cachedBlockPosition.getWorld();
+      if (!(world instanceof ServerWorld serverWorld)) {
+        return false;
+      }
+      return value(serverWorld.getServer().getReloadableRegistries().getRegistryManager()).test(cachedBlockPosition);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
     }

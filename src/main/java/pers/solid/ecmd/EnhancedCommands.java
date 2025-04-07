@@ -3,7 +3,6 @@ package pers.solid.ecmd;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +21,7 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.regionselection.WandEvent;
+import pers.solid.ecmd.registry.EnhancedReloadableRegistries;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 
 public class EnhancedCommands implements ModInitializer {
@@ -59,8 +59,8 @@ public class EnhancedCommands implements ModInitializer {
     });
 
     // 资源包
-    DynamicRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC);
-    DynamicRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC);
-    DynamicRegistries.register(Region.REGISTRY_KEY, Region.CODEC);
+    EnhancedReloadableRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC);
+    EnhancedReloadableRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC);
+    EnhancedReloadableRegistries.register(Region.REGISTRY_KEY, Region.CODEC);
   }
 }

@@ -43,7 +43,7 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));
 
   static @NotNull BlockFunction parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return BlockFunctionArgument.parse(registryAccess, new SuggestedParser(s), false).apply(source);
+    return BlockFunctionArgument.parse(registryAccess, new SuggestedParser<>(s), false).apply(source);
   }
 
   default boolean setBlock(World world, BlockPos pos, int flags, int modFlags) {
