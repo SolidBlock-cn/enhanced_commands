@@ -10,7 +10,7 @@
 - `minecraft:redstone_lamp[lit=true]`：亮着的红石灯。
 - `minecraft:repeating_command_block{Auto: true}`：自动执行的循环型命令方块。
 
-## 复合方块谓词
+## 复合方块函数
 
 多个方块函数可以进行复合，从而产生更加复杂的方块函数。
 
