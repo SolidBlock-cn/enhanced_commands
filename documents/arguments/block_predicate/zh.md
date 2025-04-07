@@ -56,6 +56,7 @@
 - [`checkerboard([方块谓词], ...)`](checkerboard/zh.md)：按照棋盘格计算的方块谓词。
 - [`expose(<暴露类型>, <方向> ...)`](expose/zh.md)：检测方块是否在指定的方向上以指定的方式暴露。
 - [`idcontain(<正则表达式>)`](idcontain/zh.md)：检测方块的 ID 是否含有特定的正则表达式。
+- [`noise(<方块谓词> [权重], ...; ...)`](noise/zh.md)：噪声。
 - [`predicate(<战利品表谓词>|<战利品表 json>)`](predicate/zh.md)：检测方块是否符合指定的战利品表谓词。
 - [`rand(<概率>, [方块谓词])`](rand/zh.md)：只有在指定的概率下通过。
 - [`region(<区域>)`](region/zh.md)：只有当方块在指定的区域内时通过。

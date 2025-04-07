@@ -10,17 +10,21 @@
 - 比例：默认为 `(1, 1, 1)`。对于零值，该坐标轴上将不会有棋盘格图案，但是不影响棋盘格。对于非零值，该坐标轴上的棋盘格图案会变大，并可能使图案接近与格纹。
 - 偏移：默认为 `(0, 0, 0)`，使整个棋盘格图案沿着该坐标偏移。
 
-对于坐标为 $(x, y, z)$ 的方块，如果向下取整、比例和偏移值分别为 $F$、$s$ 和 $o$，第 $n$（$1\le n\le m, n\in N$）个方块函数及其权重分别为 $a_n$ 和 $w_n$，则计算方块坐标的方式为：
+对于坐标为 $(x, y, z)$ 的方块，如果向下取整、比例和偏移值分别为 $F$、$s$ 和 $o$，第 $n$（$1\leqslant n\leqslant m, n\in \mathbf N$）个方块函数及其权重分别为 $a_n$ 和 $w_n$，则计算方块坐标的方式为：
 
 > 设 $f(a, b) = \begin{cases}a & a = 0 \\ floor\left(\dfrac{a}{b}\right) & a \ne 0 \end{cases}$，$g(a, b)=\begin{cases}a & a=0 \\ floor\left(\dfrac{a}{b}\right) & a\ne 0\end{cases}$
 >
-> 取 $v = g\left(f\left(x - o_x, F_x\right), s_x\right) + g\left(f\left(y - o_y, F_y\right), s_y\right) + g\left(f\left(z - o_z, F_z\right), s_z\right)$
+> 取 $$
+v = g\left(f\left(x - o_x, F_x\right), s_x\right) + g\left(f\left(y - o_y, F_y\right), s_y\right) + g\left(f\left(z - o_z, F_z\right), s_z\right)
+$$
 >
-> 计算各方块函数的权重之和：$w = \displaystyle\sum_{n=1}^{m}{w_n}$
+> 计算各方块函数的权重之和：$$
+w = \displaystyle\sum_{n=1}^{m}{w_n}
+$$
 >
 > 设 $v'$ = $v \mod w$
 >
-> 则坐标为 $(x, y, z)$ 的方块使用的方块函数为 $a_i$，其中 $i$ 是满足 $\displaystyle\sum_{n=1}^{i} \ge v'$ 的最小值。
+> 则坐标为 $(x, y, z)$ 的方块使用的方块函数为 $a_i$，其中 $i$ 是满足 $\displaystyle\sum_{n=1}^{i} \geqslant v'$ 的最小值。
 >
 > 特别地，当 $w_1 = w_2 = … = w_m$，则坐标为 $(x,y,z)$ 使用的方块函数为 $a_i$，其中 $i = floor(v')$。
 
@@ -28,7 +32,7 @@
 
 - `checkerboard(<方块函数 1> [权重 1], <方块函数 2> [权重 2] ... [参数])`
 
-方块函数至少要有 1 个。权重不能为负数，可以为小数或 0，但各项的权重之和不能为 0，每项的权重未指定时，默认为 1。
+方块函数至少要有 1 个。权重不能为负数，可以为 0，但各项的权重之和不能为 0，每项的权重未指定时，默认为 1。
 
 `参数` 的语法由以下部分任意排列（不可重复）：
 

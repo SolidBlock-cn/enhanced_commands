@@ -39,6 +39,7 @@ public final class BlockPredicateTypes {
   public static final RelBlockPredicate.Type REL = register("rel", RelBlockPredicate.Type.REL_TYPE);
   public static final ExposeBlockPredicate.Type EXPOSE = register("expose", ExposeBlockPredicate.Type.EXPOSE_TYPE);
   public static final IdContainBlockPredicate.Type ID_CONTAIN = register("id_contain", IdContainBlockPredicate.Type.ID_CONTAIN_TYPE);
+  public static final NoiseBlockPredicate.Type NOISE = register("noise", NoiseBlockPredicate.Type.NOISE_TYPE);
   public static final RegionBlockPredicate.Type REGION = register("region", RegionBlockPredicate.Type.REGION_TYPE);
   public static final LootConditionBlockPredicate.Type LOOT_CONDITION = register("loot_condition", LootConditionBlockPredicate.Type.LOOT_CONDITION_TYPE);
   public static final CheckerboardBlockPredicate.Type CHECKERBOARD = register("checkerboard", CheckerboardBlockPredicate.Type.CHECKERBOARD_TYPE);
@@ -62,6 +63,7 @@ public final class BlockPredicateTypes {
     map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), false));
     map.put("expose", ExposeBlockPredicate.Parser::new);
     map.put("idcontain", IdContainBlockPredicate.Parser::new);
+    map.put("noise", NoiseBlockPredicate.Parser::new);
     map.put("predicate", LootConditionBlockPredicate.Parser::new);
     map.put("rand", RandBlockPredicate.Parser::new);
     map.put("region", RegionBlockPredicate.Parser::new);
@@ -76,6 +78,7 @@ public final class BlockPredicateTypes {
     map.put("diff", Text.translatable("enhanced_commands.block_predicate.bi_predicate_diff"));
     map.put("expose", Text.translatable("enhanced_commands.block_predicate.expose"));
     map.put("idcontain", Text.translatable("enhanced_commands.block_predicate.id_contain"));
+    map.put("noise", Text.translatable("enhanced_commands.block_predicate.noise"));
     map.put("predicate", Text.translatable("enhanced_commands.block_predicate.loot_condition"));
     map.put("rand", Text.translatable("enhanced_commands.block_predicate.probability"));
     map.put("region", Text.translatable("enhanced_commands.block_predicate.region"));
