@@ -8,13 +8,14 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.block.WeightedListParser;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 import static pers.solid.ecmd.util.ModCommandExceptionTypes.DUPLICATE_KEYWORD;
-import static pers.solid.ecmd.util.ModCommandExceptionTypes.UNKNOWN_KEYWORD;
 
 /**
  * 用于棋盘格相关代码的共通接口。
@@ -41,12 +42,9 @@ public interface Checkerboard<T> {
     if (floor.x != 0) x = Math.floor(x / floor.x);
     if (floor.y != 0) y = Math.floor(y / floor.y);
     if (floor.z != 0) z = Math.floor(z / floor.z);
-    if (scale.x == 0) x = 0;
-    else x /= scale.x;
-    if (scale.y == 0) y = 0;
-    else y /= scale.y;
-    if (scale.z == 0) z = 0;
-    else z /= scale.z;
+    x *= scale.x;
+    y *= scale.y;
+    z *= scale.z;
     double v = x + y + z;
     return entries.getElementAt(v);
   }
@@ -102,76 +100,99 @@ public interface Checkerboard<T> {
     public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
       parseEntryList(registryAccess, parser, suggestionsOnly);
-      parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).buildFuture());
+      parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
       // 等待关键字的部分
 
       // 解析坐标轴尺寸的部分
       parser.clearSuggestion();
       reader.skipWhitespace();
+      if (reader.canRead() && reader.peek() == ';') {
+        reader.skip();
+        reader.skipWhitespace();
 
-      parseParameters(parser, reader);
+        parseParameters(registryAccess, parser, reader, suggestionsOnly);
+      }
     }
 
     protected void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       weightedList = weightedListParser.parse(registryAccess, parser, suggestionsOnly, suggestionsOnly);
     }
 
-    protected void parseParameters(SuggestedParser<?> parser, StringReader reader) throws CommandSyntaxException {
+    protected void parseParameters(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, StringReader reader, boolean suggestionsOnly) throws CommandSyntaxException {
       while (true) {
-        parser.addSuggestion((context, suggestionsBuilder) -> {
-          if (floor == null) {
-            ParsingUtil.suggestString("floor", suggestionsBuilder);
-          }
-          if (scale == null) {
-            ParsingUtil.suggestString("scale", suggestionsBuilder);
-          }
-          if (offset == null) {
-            ParsingUtil.suggestString("offset", suggestionsBuilder);
-          }
-          return suggestionsBuilder.buildFuture();
-        });
+        parseParameter(registryAccess, parser, suggestionsOnly);
 
-        final int cursorBeforeKeyword = reader.getCursor();
-        final String keyword = reader.readUnquotedString();
-        if (keyword.isEmpty()) {
+        parser.reader.skipWhitespace();
+        parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(",").buildFuture());
+        if (parser.reader.canRead() && parser.reader.peek() == ',') {
+          parser.reader.skip();
+          parser.reader.skipWhitespace();
+        } else {
           break;
         }
-        final int cursorAfterKeyword = reader.getCursor();
-        switch (keyword) {
-          case "floor" -> {
-            parser.clearSuggestion();
-            if (floor != null) {
-              reader.setCursor(cursorBeforeKeyword);
-              throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
-            }
-            ParsingUtil.expectAndSkipWhitespace(reader);
-            floor = ParsingUtil.parseShortenableVec3d(reader);
-          }
-          case "scale" -> {
-            parser.clearSuggestion();
-            if (scale != null) {
-              reader.setCursor(cursorBeforeKeyword);
-              throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
-            }
-            ParsingUtil.expectAndSkipWhitespace(reader);
-            scale = ParsingUtil.parseShortenableVec3d(reader);
-          }
-          case "offset" -> {
-            parser.clearSuggestion();
-            if (offset != null) {
-              reader.setCursor(cursorBeforeKeyword);
-              throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
-            }
-            ParsingUtil.expectAndSkipWhitespace(reader);
-            offset = ParsingUtil.parseShortenableVec3d(reader);
-          }
-          default -> {
-            reader.setCursor(cursorBeforeKeyword);
-            throw withCursorEnd(UNKNOWN_KEYWORD.createWithContext(reader, keyword), cursorAfterKeyword);
-          }
-        } // end switch
+      }
+    }
 
-        reader.skipWhitespace();
+
+    protected void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      final StringReader reader = parser.reader;
+      parser.addSuggestion((context, suggestionsBuilder) -> {
+        if (floor == null) {
+          ParsingUtil.suggestString("floor", suggestionsBuilder);
+        }
+        if (scale == null) {
+          ParsingUtil.suggestString("scale", suggestionsBuilder);
+        }
+        if (offset == null) {
+          ParsingUtil.suggestString("offset", suggestionsBuilder);
+        }
+        return suggestionsBuilder.buildFuture();
+      });
+      final int cursorBeforeKeyword = reader.getCursor();
+      final String paramName = reader.readUnquotedString();
+      final int cursorAfterKeyword = reader.getCursor();
+      parser.setSuggestion((commandContext, suggestionsBuilder) -> {
+        if (floor == null) ParsingUtil.suggestString("floor=", suggestionsBuilder);
+        if (scale == null) ParsingUtil.suggestString("scale=", suggestionsBuilder);
+        if (offset == null) ParsingUtil.suggestString("offset=", suggestionsBuilder);
+        return suggestionsBuilder.buildFuture();
+      });
+
+      switch (paramName) {
+        case "floor", "scale", "offset" -> {
+          reader.skipWhitespace();
+          parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest("=").buildFuture());
+          reader.expect('=');
+          reader.skipWhitespace();
+        }
+        default -> {
+          reader.setCursor(cursorBeforeKeyword);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(reader, paramName), cursorAfterKeyword);
+        }
+      }
+
+      switch (paramName) {
+        case "floor" -> {
+          parser.clearSuggestion();
+          if (floor != null) {
+            reader.setCursor(cursorBeforeKeyword);
+            throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterKeyword);
+          }
+          ParsingUtil.expectAndSkipWhitespace(reader);
+          floor = ParsingUtil.parseShortenableVec3d(reader);
+        }
+        case "scale" -> {
+          if (scale != null) {
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterKeyword);
+          }
+          scale = ParsingUtil.parseShortenableVec3d(reader);
+        }
+        case "offset" -> {
+          if (offset != null) {
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterKeyword);
+          }
+          offset = ParsingUtil.parseShortenableVec3d(reader);
+        }
       }
     }
   }

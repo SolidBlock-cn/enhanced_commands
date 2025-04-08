@@ -4,19 +4,17 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
-import net.minecraft.util.math.random.CheckedRandom;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.block.WeightedListParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.RandomizedSeedHolder;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -33,22 +31,38 @@ public interface Noise {
   int DEFAULT_FIRST_OCTAVE = -1;
   DoubleList DEFAULT_AMPLITUDES = DoubleList.of(1);
   Vec3d UNIT = new Vec3d(1, 1, 1);
-  WeakHashMap<Noise, Int2ObjectMap<DoublePerlinNoiseSampler>> SAMPLER_CACHE = new WeakHashMap<>();
 
-  /**
-   * 该噪声的种子。如果不存在，则表示随机的噪声。
-   */
-  OptionalLong seed();
+  Properties properties();
+
+  RandomizedSeedHolder seedHolder();
+
+  default long currentSeed() {
+    return seedHolder().seed();
+  }
+
+  default OptionalLong seed() {
+    return properties().seed();
+  }
 
   /**
    * 噪声的参数。
    */
-  DoublePerlinNoiseSampler.NoiseParameters noiseParameters();
+  default DoublePerlinNoiseSampler.NoiseParameters noiseParameters() {
+    return properties().noiseParameters();
+  }
 
   /**
    * 噪声的缩放，其三个值会依次应用于坐标的三个值中。
    */
-  Vec3d scale();
+  default Vec3d scale() {
+    return properties().scale();
+  }
+
+  default Vec3d offset() {
+    return properties().offset();
+  }
+
+  WeakHashMap<Long, WeakHashMap<DoublePerlinNoiseSampler.NoiseParameters, DoublePerlinNoiseSampler>> SAMPLER_CACHE = new WeakHashMap<>();
 
   /**
    * 作为参数的部分将其转换为字符串。
@@ -67,6 +81,9 @@ public interface Noise {
     if (!scale().equals(UNIT)) {
       stringJoiner.add("scale=" + StringUtil.wrapVector(scale()));
     }
+    if (!offset().equals(Vec3d.ZERO)) {
+      stringJoiner.add("offset=" + StringUtil.wrapVector(offset()));
+    }
     return stringJoiner.toString();
   }
 
@@ -74,12 +91,16 @@ public interface Noise {
    * 返回用于采样的噪声对象。通常来说，该对象第一次生成时创建，然后被缓存。
    */
   default DoublePerlinNoiseSampler getSampler(Random random) {
-    return SAMPLER_CACHE.computeIfAbsent(this, noise -> new Int2ObjectOpenHashMap<>()).computeIfAbsent(System.identityHashCode(this), self -> DoublePerlinNoiseSampler.create(new CheckedRandom(seed().orElseGet(random::nextLong)), noiseParameters()));
+    final long currentSeed = currentSeed();
+    return SAMPLER_CACHE.computeIfAbsent(currentSeed, x -> new WeakHashMap<>()).computeIfAbsent(noiseParameters(), noiseParameters -> DoublePerlinNoiseSampler.create(Random.create(currentSeed), noiseParameters));
   }
 
   default <T> T sample(Random random, @NotNull WeightedList<T> weightedList, double x, double y, double z) {
     final DoublePerlinNoiseSampler noiseSampler = getSampler(random);
     final Vec3d scale = scale();
+    x -= offset().x;
+    y -= offset().y;
+    z -= offset().z;
     double noiseValue = noiseSampler.sample(x * scale.x, y * scale.y, z * scale.z);
     double d = MathHelper.clamp((1.0d + noiseValue) / 2.0d, 0.0F, 0.9999);
     return weightedList.getClampedElement(d);
@@ -95,6 +116,7 @@ public interface Noise {
     protected DoubleList amplitudes;
     protected Vec3d scale;
     protected WeightedList<T> weightedList;
+    protected Vec3d offset;
 
     protected abstract T parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException;
 
@@ -102,7 +124,7 @@ public interface Noise {
     public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       weightedList = WeightedListParser.of(this::parseElement).parse(registryAccess, parser, suggestionsOnly, suggestionsOnly);
       final StringReader reader = parser.reader;
-      parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(";").buildFuture());
+      parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
 
       reader.skipWhitespace();
       if (reader.canRead() && reader.peek() == ';') {
@@ -114,6 +136,7 @@ public interface Noise {
       if (firstOctave == null) firstOctave = DEFAULT_FIRST_OCTAVE;
       if (amplitudes == null) amplitudes = DEFAULT_AMPLITUDES;
       if (scale == null) scale = UNIT;
+      if (offset == null) offset = Vec3d.ZERO;
     }
 
     protected void parseParameters(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
@@ -125,7 +148,6 @@ public interface Noise {
         if (parser.reader.canRead() && parser.reader.peek() == ',') {
           parser.reader.skip();
           parser.reader.skipWhitespace();
-          continue;
         } else {
           break;
         }
@@ -142,11 +164,12 @@ public interface Noise {
         if (firstOctave == null) ParsingUtil.suggestString("first_octave=", suggestionsBuilder);
         if (amplitudes == null) ParsingUtil.suggestString("amplitudes=", suggestionsBuilder);
         if (scale == null) ParsingUtil.suggestString("scale=", suggestionsBuilder);
+        if (offset == null) ParsingUtil.suggestString("offset=", suggestionsBuilder);
         return suggestionsBuilder.buildFuture();
       });
 
       switch (paramName) {
-        case "seed", "first_octave", "amplitudes", "scale" -> {
+        case "seed", "first_octave", "amplitudes", "scale", "offset" -> {
           reader.skipWhitespace();
           parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest("=").buildFuture());
           reader.expect('=');
@@ -161,19 +184,19 @@ public interface Noise {
       switch (paramName) {
         case "seed" -> {
           if (seed.isPresent()) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, paramName), cursorAfterParamName);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
           }
           seed = OptionalLong.of(reader.readLong());
         }
         case "first_octave" -> {
           if (firstOctave != null) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, paramName), cursorAfterParamName);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
           }
           firstOctave = reader.readInt();
         }
         case "amplitudes" -> {
           if (amplitudes != null) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, paramName), cursorAfterParamName);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
           }
           final DoubleList doubles = new DoubleArrayList();
           while (reader.canRead()) {
@@ -190,8 +213,22 @@ public interface Noise {
 
           amplitudes = DoubleList.of(doubles.toDoubleArray());
         }
-        case "scale" -> scale = ParsingUtil.parseShortenableVec3d(reader);
+        case "scale" -> {
+          if (scale != null) {
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
+          }
+          scale = ParsingUtil.parseShortenableVec3d(reader);
+        }
+        case "offset" -> {
+          if (offset != null) {
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
+          }
+          offset = ParsingUtil.parseShortenableVec3d(reader);
+        }
       }
     }
+  }
+
+  record Properties(OptionalLong seed, DoublePerlinNoiseSampler.NoiseParameters noiseParameters, Vec3d scale, Vec3d offset) {
   }
 }

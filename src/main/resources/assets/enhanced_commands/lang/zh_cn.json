@@ -765,14 +765,5 @@
   "enhanced_commands.region_selection.sphere.set_center": "球的中心点已设置为%s",
   "enhanced_commands.region_selection.sphere.set_radius": "已调整球的半径以适应%s",
   "enhanced_commands.region_selection.sphere.statistics": "球的半径当前为%s",
-  "flat_world_preset.enhanced_commands.crimson_forest": "绯红森林",
-  "flat_world_preset.enhanced_commands.deep_dark": "深暗之域",
-  "flat_world_preset.enhanced_commands.flower_forest": "繁花森林",
-  "flat_world_preset.enhanced_commands.frozen_ocean": "冻洋",
-  "flat_world_preset.enhanced_commands.mushroom_field": "蘑菇地",
-  "flat_world_preset.enhanced_commands.savanna": "热带草原",
-  "flat_world_preset.enhanced_commands.the_nether": "下界",
-  "flat_world_preset.enhanced_commands.warm_ocean": "暖海",
-  "flat_world_preset.enhanced_commands.warped_forest": "诡异森林",
   "item.enhanced_commands.region_selection_tool": "区域选择工具"
 }

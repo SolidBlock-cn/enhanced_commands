@@ -1,17 +1,20 @@
 {
   "type": "enhanced_commands:checkerboard",
+  "floor": [
+    1.0,
+    1.0,
+    1.0
+  ],
   "predicates": {
     "elements": [
-      "minecraft:light_blue_concrete",
-      "minecraft:pink_concrete",
       "minecraft:white_concrete",
-      "minecraft:pink_concrete"
+      "minecraft:black_concrete"
     ],
     "weighted": false
   },
   "scale": [
-    2.0,
-    2.0,
-    2.0
+    0.25,
+    0.25,
+    0.25
   ]
 }

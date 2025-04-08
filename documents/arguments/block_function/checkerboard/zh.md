@@ -7,15 +7,15 @@
 棋盘格有三个参数：向下取整（`floor`）、缩放（`scale`）和偏移（`offset`），都是三元向量，其效果分别如下：
 
 - 向下取整：默认为 `(0, 0, 0)`。如果设为非零，那么非零的那个分量会作为除数，除坐标并向下取整，从而使棋盘格图案的棋盘变大。
-- 缩放：默认为 `(1, 1, 1)`。对于零值，该坐标轴上将不会有棋盘格图案，但是不影响棋盘格。对于非零值，该坐标轴上的棋盘格图案会变大，并可能使图案接近与格纹。
+- 缩放：默认为 `(1, 1, 1)`。一般来说在 0 到 1 之间。对于零值，该坐标轴上将不会有棋盘格图案，但是不影响棋盘格。
 - 偏移：默认为 `(0, 0, 0)`，使整个棋盘格图案沿着该坐标偏移。
 
 对于坐标为 $(x, y, z)$ 的方块，如果向下取整、缩放和偏移值分别为 $F$、$s$ 和 $o$，第 $n$（$1\leqslant n\leqslant m, n\in \mathbf N$）个方块函数及其权重分别为 $a_n$ 和 $w_n$，则计算方块坐标的方式为：
 
-> 设 $f(a, b) = \begin{cases}a & a = 0 \\ floor\left(\dfrac{a}{b}\right) & a \ne 0 \end{cases}$，$g(a, b)=\begin{cases}a & a=0 \\ floor\left(\dfrac{a}{b}\right) & a\ne 0\end{cases}$
+> 设 $f(a, b) = \begin{cases}a & a = 0 \\ floor\left(\dfrac{a}{b}\right) & a \ne 0 \end{cases}$，
 >
 > 取 $$
-v = g\left(f\left(x - o_x, F_x\right), s_x\right) + g\left(f\left(y - o_y, F_y\right), s_y\right) + g\left(f\left(z - o_z, F_z\right), s_z\right)
+v = f\left(x - o_x, F_x\right) s_x + f\left(y - o_y, F_y\right) s_y + f\left(z - o_z, F_z\right) s_z
 $$
 >
 > 计算各方块函数的权重之和：$$
@@ -37,7 +37,7 @@ $$
 `参数` 的语法由以下部分任意排列（不可重复）：
 
 - `floor <x> [y] [z]`：增大棋盘格的单元大小。
-- `scale <x> [y] [z]`：增加棋盘格的缩放，可能形成条纹。
+- `scale <x> [y] [z]`：设备棋盘格的坐标的缩放，可能形成条纹。
 - `offset <x> [y] [z]`：设置棋盘格的偏移值。
 
 上述参数中，如果 `[y]` 未指定，则值为 `<x>`。如果 `[y]` 和 `[z]` 均未指定，则值为 `<x>`。
@@ -54,7 +54,7 @@ $$
 - `checkerboard(white_wool 0, black_wool 0)`：无效，因为各个方块函数的权重之和为 0。
 - `checkerboard(white_wool, black_wool floor 2)`：由白色羊毛和黑色羊毛组成的棋盘格，每格的大小为 2×2×2 的立方体。
 - `checkerboard(white_wool, black_wool floor 2 3 4)`：由白色羊毛和黑色羊毛组成的棋盘格，每格的大小为 2×3×4 的立方体。
-- `checkerboard(white_wool, black wool scale 2)`：由白色羊毛和黑色羊毛组成的棋盘格，每次计算时各坐标均除以 2。
+- `checkerboard(white_wool, black wool scale 0.5)`：由白色羊毛和黑色羊毛组成的棋盘格，每次计算时各坐标均除以 2。
 - `checkerboard(white_wool, black wool scale 1 0 1)`：由白色羊毛和黑色羊毛组成的棋盘格，其中棋盘格忽略 y 坐标。
 - `checkerboard(white_wool, black wool offset 1 0 0)`：由白色羊毛和黑色羊毛组成的棋盘格，但是棋盘整体沿 `(1, 0, 0)` 的方向移动。
-- `checkerboard(white_wool 1 gray_wool 2, black wool 1 floor 2 scale 2 offset 0 1 0)`：含有所有参数的棋盘格的方块函数。
+- `checkerboard(white_wool 1 gray_wool 2, black wool 1 floor 2 scale 0.5 offset 0 1 0)`：含有所有参数的棋盘格的方块函数。

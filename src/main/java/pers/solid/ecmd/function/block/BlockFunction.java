@@ -18,6 +18,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Contract;
@@ -98,5 +99,14 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
 
   default boolean isEmpty() {
     return this == EmptyBlockFunction.INSTANCE;
+  }
+
+  /**
+   * 取消该对象的缓存状态。例如，对于 {@link NoiseBlockFunction} 而言，调用一次该方法将会使其重新生成采样器，其种子可能随机生成。
+   *
+   * @return
+   */
+  default BlockFunction getRefreshed(Random random) {
+    return this;
   }
 }

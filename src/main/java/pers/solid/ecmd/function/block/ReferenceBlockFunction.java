@@ -9,16 +9,28 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
+import pers.solid.ecmd.util.IdentityReference;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 
-public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements BlockFunction, ReferenceEntry<ReferenceBlockFunction, BlockFunction> {
+import java.util.Objects;
+import java.util.WeakHashMap;
+
+public final class ReferenceBlockFunction implements BlockFunction, ReferenceEntry<ReferenceBlockFunction, BlockFunction> {
   public static final MapCodec<ReferenceBlockFunction> CODEC = ReferenceEntry.createCodec(BlockFunction.REGISTRY_KEY, ReferenceBlockFunction::new);
+  private final RegistryKey<BlockFunction> id;
+  private transient final IdentityReference ref = new IdentityReference();
+  private final WeakHashMap<IdentityReference, BlockFunction> REF_CACHE = new WeakHashMap<>();
+
+  public ReferenceBlockFunction(RegistryKey<BlockFunction> id) {
+    this.id = id;
+  }
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
@@ -27,7 +39,9 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
       if (!(world instanceof ServerWorld serverWorld)) {
         return blockState;
       }
-      return value(serverWorld.getServer().getReloadableRegistries().getRegistryManager()).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      final Random random = serverWorld.getRandom();
+      final BlockFunction value = value(serverWorld.getServer().getReloadableRegistries().getRegistryManager());
+      return REF_CACHE.computeIfAbsent(ref, identityReference -> value.getRefreshed(random)).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
     }
@@ -48,7 +62,31 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
     return Type.INSTANCE.createExceptionForUnknownId(reader, identifier);
   }
 
-  public static class Type extends ReferenceEntry.PrefixedIdParser<BlockFunctionArgument, BlockFunction> implements BlockFunctionType<ReferenceBlockFunction> {
+  @Override
+  public RegistryKey<BlockFunction> id() {
+    return id;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) return true;
+    if (obj == null || obj.getClass() != this.getClass()) return false;
+    var that = (ReferenceBlockFunction) obj;
+    return Objects.equals(this.id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
+
+  @Override
+  public String toString() {
+    return "ReferenceBlockFunction[" +
+        "id=" + id + ']';
+  }
+
+  public static class Type extends PrefixedIdParser<BlockFunctionArgument, BlockFunction> implements BlockFunctionType<ReferenceBlockFunction> {
     public static final Type INSTANCE = new Type();
 
     protected Type() {
