@@ -5,6 +5,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
 import org.jetbrains.annotations.NotNull;
@@ -12,8 +14,12 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.Styles;
+import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
+import java.util.List;
 import java.util.OptionalLong;
 
 public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties properties) implements BlockPredicate, Noise {
@@ -34,6 +40,15 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3d.of(cachedBlockPosition.getBlockPos())).test(cachedBlockPosition, context);
+  }
+
+  @Override
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+    final BlockPos blockPos = cachedBlockPosition.getBlockPos();
+    final long actualSeed = seed().orElseGet(() -> context.getSeed(this));
+    final double sampleValue = getSampleValue(actualSeed, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    final TestResult testResult = list.getClampedElement(sampleValue).testAndDescribe(cachedBlockPosition, context);
+    return TestResult.of(testResult.successes(), Text.translatable("enhanced_commands.block_predicate.noise.result", TextUtil.wrapVector(blockPos).styled(Styles.TARGET), TextUtil.literal(actualSeed).styled(Styles.TARGET), TextUtil.literal(sampleValue).styled(Styles.RESULT)), List.of(testResult));
   }
 
   @Override

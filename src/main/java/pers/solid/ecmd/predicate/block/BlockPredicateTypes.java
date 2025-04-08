@@ -34,7 +34,7 @@ public final class BlockPredicateTypes {
   public static final TagBlockPredicate.Type TAG = register("tag", TagBlockPredicate.Type.TAG_TYPE);
   public static final AnyBlockPredicate.Type ANY = register("any", AnyBlockPredicate.Type.ANY_TYPE);
   public static final AllBlockPredicate.Type ALL = register("all", AllBlockPredicate.Type.ALL_TYPE);
-  public static final RandBlockPredicate.Type RAND = register("rand", RandBlockPredicate.Type.RAND_TYPE);
+  public static final ProbabilityBlockPredicate.Type RAND = register("rand", ProbabilityBlockPredicate.Type.RAND_TYPE);
   public static final BiPredicateBlockPredicate.Type BI_PREDICATE = register("bi_predicate", BiPredicateBlockPredicate.Type.BI_PREDICATE_TYPE);
   public static final RelBlockPredicate.Type REL = register("rel", RelBlockPredicate.Type.REL_TYPE);
   public static final ExposeBlockPredicate.Type EXPOSE = register("expose", ExposeBlockPredicate.Type.EXPOSE_TYPE);
@@ -65,7 +65,7 @@ public final class BlockPredicateTypes {
     map.put("idcontain", IdContainBlockPredicate.Parser::new);
     map.put("noise", NoiseBlockPredicate.Parser::new);
     map.put("predicate", LootConditionBlockPredicate.Parser::new);
-    map.put("rand", RandBlockPredicate.Parser::new);
+    map.put("probability", ProbabilityBlockPredicate.Parser::new);
     map.put("region", RegionBlockPredicate.Parser::new);
     map.put("rel", RelBlockPredicate.Parser::new);
     map.put("same", () -> new BiPredicateBlockPredicate.Parser("same", Text.translatable("enhanced_commands.block_predicate.bi_predicate_same"), true));
@@ -80,7 +80,7 @@ public final class BlockPredicateTypes {
     map.put("idcontain", Text.translatable("enhanced_commands.block_predicate.id_contain"));
     map.put("noise", Text.translatable("enhanced_commands.block_predicate.noise"));
     map.put("predicate", Text.translatable("enhanced_commands.block_predicate.loot_condition"));
-    map.put("rand", Text.translatable("enhanced_commands.block_predicate.probability"));
+    map.put("probability", Text.translatable("enhanced_commands.block_predicate.probability"));
     map.put("region", Text.translatable("enhanced_commands.block_predicate.region"));
     map.put("rel", Text.translatable("enhanced_commands.block_predicate.rel"));
     map.put("same", Text.translatable("enhanced_commands.block_predicate.bi_predicate_same"));

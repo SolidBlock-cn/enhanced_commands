@@ -87,6 +87,11 @@ public interface Noise {
   }
 
   default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, double x, double y, double z) {
+    final double d = getSampleValue(seed, x, y, z);
+    return weightedList.getClampedElement(d);
+  }
+
+  default double getSampleValue(long seed, double x, double y, double z) {
     final DoublePerlinNoiseSampler noiseSampler = getSampler(seed);
     final Vec3d scale = scale();
     x -= offset().x;
@@ -94,7 +99,7 @@ public interface Noise {
     z -= offset().z;
     double noiseValue = noiseSampler.sample(x * scale.x, y * scale.y, z * scale.z);
     double d = MathHelper.clamp((1.0d + noiseValue) / 2.0d, 0.0F, 0.9999);
-    return weightedList.getClampedElement(d);
+    return d;
   }
 
   default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, Vec3d pos) {
