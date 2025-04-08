@@ -17,18 +17,18 @@ We know that only the following selectors are provided in vanilla:
 
 Besides the several entity selectors provided in vanilla, the mod provides some extra entity selectors, which can be used very conveniently.
 
-- `@0`: No entities, which means selecting no entities. The selector is usually used in specific occasions where no entities need to be selected.
+- `@0`: No entities, which means selecting no entities. The selector is usually used on specific occasions where no entities need to be selected.
 - `@E`: All entities, including dead entities. In vanilla, `@a` can select dead players, while `@e` only selects entities not dead. The mod's `@E` can select dead entities.
 - `@n`: The nearest entity (removed since 1.21 as vanilla already supported it).
 - `@R`: A random entity.
 - `@f`: The furthest entity.
-- `@nn`: The nearest entity expect players.
+- `@nn`: The nearest entity except players.
 - `@pn`: Equivalent to `@nn`.
 - `@en`: All entities expect players.
-- `@fn`: The furthest entity expect players.
-- `@rn`: A random entity expect players.
+- `@fn`: The furthest entity except players.
+- `@rn`: A random entity except players.
 - `@Rn`: Equivalent to `@rn`.
-- `@pets`: All entities tamed by th current entity, equivalent to `@e[owner=@s]` in effect.
+- `@pets`: All entities tamed by the current entity, equivalent to `@e[owner=@s]` in effect.
 - `@owner`: The owner of the current entity. For example, if the executor of the command is a tamed wolf or horse, `@owner` will select the player taming the wolf or horse. Similar to `/execute on owner`.
 - `@vehicle`: The entity that the current entity is riding. For example, if the executor of the command sits in a boat, `@vehicle` will select the boat. Similar to `/execute on vehicle`.
 - `@passengers`: All entities riding the current entity. For example, if the executor of the command is a boat, `@passengers` will select entities sitting on the boat, similar to `/execute on passengers`.
@@ -36,21 +36,21 @@ Besides the several entity selectors provided in vanilla, the mod provides some 
 - `@origin`: The origin of the entity. For example, if the executor of the command is a snowball, `@origin` will select the player that threw the snowball. Similar to `/execute on origin`.
 - `@attacker`: The attacker of the current entity. Similar to `/execute on attacker`.
 - `@target`: The target of the current entity. Similar to `/execute on targets`.
-- `@controlling_vehicle`: Selects the entity that the current entity is riding and controlling. For example, if a player and a villager sit on a same boat, as only players control boats, when the executor of the command is a player, the selector will select the boat, while when the executor is the village, the selector cannot select the boat.
-- `@controller`: Selects the entity riding and controlling the current entity. For example, if a player and a villager sit on a same boat, when the executor of the command is the boat, the selector will select the player instead of the villager.
+- `@controlling_vehicle`: Selects the entity that the current entity is riding and controlling. For example, if a player and a villager sit on the same boat, as only players control boats, when the executor of the command is a player, the selector will select the boat, while when the executor is the village, the selector can’t select the boat.
+- `@controller`: Selects the entity riding and controlling the current entity. For example, if a player and a villager sit on the same boat, when the executor of the command is the boat, the selector will select the player instead of the villager.
 
 ### Specifying `type` for `@p` and `@r`
 
 Vanilla `@p` and `@r` only select players. To select the nearest entity of other types, you must use `@e[type=..., sort=nearest/furthest]`, which is too inconvenient! (Selector `@n` is added since 1.21.) But it's good that the mod modified it: if you use `@p` and `@r`, you can also select entities of other types. For example:
 
 - `@p[type=creeper]`: Selects the nearest creeper.
-- `@p[type=!creeper]`: Selects the nearest entity which is not a creeper.
+- `@p[type=!creeper]`: Selects the nearest entity that is not a creeper.
 - `@r[type=cow]`: Selects a random cow.
-- `@r[type=!player]`: Selects a random entity which is not a player.
+- `@r[type=!player]`: Selects a random entity that is not a player.
 
 ### Specifying multiple types
 
-The vanilla `type` parameter can only specify one type or tag. The mod modified it so the selector can specify entities of multiple types or tags, but duplications are not allowed. For example:
+The vanilla `type` parameter can only specify one type or tag. The mod modified it so the selector can specify entities of multiple types or tags, but duplications aren’t allowed. For example:
 
 - `@p[type=cat|wolf]`: The nearest cat or wolf.
 - `@e[type=player|iron_golem]`: All players or iron golems.
@@ -60,9 +60,9 @@ The vanilla `type` parameter can only specify one type or tag. The mod modified 
 
 If you remember playing old versions, you may know that the syntax of entity selectors was quite simple. For example, `c` to limit the count (now we use `limit`), `r` and `rm` to limit the furthest and nearest distance (now we use `range`). The syntax now is too complicated! The mod brings back old syntax back.
 
-- `c` is equivalent to `limit`. You cannot use both `c` and `limit`.
+- `c` is equivalent to `limit`. You can’t use both `c` and `limit`.
 - `r` and `rm` means the furthest and nearest distance, equivalent to `distance=<rm>..<r>`. If `r` and `rm` are specified, `distance` cannot be used.
-- `m` is equivalent to `gamemode`. You cannot use both `m` and `gamemode`.
+- `m` is equivalent to `gamemode`. You can’t use both `m` and `gamemode`.
 
 For example:
 
@@ -74,9 +74,9 @@ For example:
     - Equivalent to `@e[distance=3..5]`.
 - `@e[c=5,limit=6]`: Invalid, as `c` and `limit` are duplicate.
 - `@s[c=5]`: Invalid, as `@s` cannot specify entity amounts.
-- `@e[r=3,rm=5]`: Invalid, because the furthest distance cannot be lower than the nearest distance.
+- `@e[r=3,rm=5]`: Invalid, because the furthest distance can’t be lower than the nearest distance.
 
-> Note: The mod does not support `rx`, `rxm`, `ry` and `rym` yet.
+> Note: The mod doesn’t support `rx`, `rxm`, `ry` and `rym` yet.
 
 ### Simplified gamemode aliases and using multiple gamemodes.
 
@@ -99,7 +99,7 @@ Besides, the mod supports selecting multiple gamemodes (duplications not allowed
 
 ### Providing suggestions for more occasions
 
-When typing entity selectors in vanilla, where some contents such as advancements and score terms are needed, no suggestions are provided, causing some inconvenience when we type commands. The mod improves it, allowing displaying suggestions in the following situations:
+When typing entity selectors in vanilla, where some contents such as advancements and score terms are needed, no suggestions are provided, causing some inconvenience when we type commands. The mod improves it, allowing it to display suggestions in the following situations:
 
 - Advancement ids, such as `@e[advancements={ <- [here]`
 - Criterion names of advancements (compared to vanilla, quoted strings are allowed here, and when the string contains some special characters, suggestions are provided with quotation marks). For example: `@e[advancements={<id> = <- [here]`
@@ -108,24 +108,24 @@ When typing entity selectors in vanilla, where some contents such as advancement
 
 ### More conditions to be inverted
 
-In vanilla, some options or entity selectors can be inverted with a `!` mark, such as `@e[type=!player]`, which means all entities that are not players. The mod makes the feature support more occasions, including:
+In vanilla, some options or entity selectors can be inverted with a `!` mark, such as `@e[type=!player]`, which means all entities that aren’t players. The mod makes the feature support more occasions, including:
 
 - Inverting when selecting experience levels, such as:
-    - `@a[level=!2]`: Selects players whose experience levels are not 2.
-    - `@a[level=!2..3]`: Selects players whose experience levels are not between 2 and 3.
-  > Note: As long as experience levels are specified, even if the condition is inverted, the selected cannot select any entities other than players.
+    - `@a[level=!2]`: Selects players whose experience levels aren’t 2.
+    - `@a[level=!2..3]`: Selects players whose experience levels aren’t between 2 and 3.
+  > Note: As long as experience levels are specified, even if the condition is inverted, the selected can’t select any entities other than players.
 - Inverting when selecting scores, such as:
     - `@e[scores={a=!2}]`: Selects entities whose value in score "a" is not 2.
     - `@e[scores={a=!3, b=!5..6}]`: Selects entities whose value in score "a" is not 3 and value in score "b" is not between 5 and 6.
-  > Note: Even if inverted, when the score objective does not exist, or the entity does not have a score in this objective, the entity cannot be selected. For example, `@e[scores={a=!2}]` to be described most accurately, is when the score "a" exists, selecting players who have a value on this score objective, which does not equal to 2.
+  > Note: Even if inverted, when the score objective doesn’t exist, or the entity doesn’t have a score in this objective, the entity can’t be selected. For example, `@e[scores={a=!2}]` to be described most accurately, is when the score "a" exists, selecting players who have a value on this score objective, which does not equal to 2.
 
-### Specifying loot predicate jsons
+### Specifying loot predicate JSONs
 
 The loot predicate is a strong functionality of Minecraft, which supports some complicated judgements on conditions. However, loot predicates are defined in datapacks, and the storage is slightly complicated. With this mod, you can specify a loot predicate directly in the command without a datapack.
 
-Compared to vanilla, for convenience, the json parsing here is lenient, supporting unquoted string. It is also supported to add a `!` after the `=` to invert the predicate. You can also invert by using `{condition: inverted, term: {...}}`.
+Compared to vanilla, for convenience, the JSON parsing here is lenient, supporting unquoted string. It is also supported to add a `!` after the `=` to invert the predicate. You can also invert by using `{condition: inverted, term: {...}}`.
 
-Where you type loot predicates, directly type the json, and the command will be parsed directly during compilation, quite convenient. For example:
+Where you type loot predicates, directly type the JSON, and the command will be parsed directly during compilation, quite convenient. For example:
 
 - `@e[predicate={condition: entity_properties, entity: this, predicate: {flags: {is_sneaking: true}}}]`: Sneaking entities.
 - `@e[predicate={condition: location_check, predicate: {biome: badlands}}]`: Entities in the badlands biome.
@@ -134,7 +134,7 @@ Where you type loot predicates, directly type the json, and the command will be 
 
 ### Better error tips
 
-When you type something wrong in the entity selector, including wrong parameters, or some parameters that do not exist or are duplicate, the mod provides more detailed error tips, such as noticing some parameter is duplicate, or not supported in the specific entity selector.
+When you type something wrong in the entity selector, including wrong parameters, or some parameters that don’t exist or are duplicate, the mod provides more detailed error tips, such as noticing some parameter is duplicate, or not supported in the specific entity selector.
 
 ## Extra parameters
 
@@ -144,14 +144,14 @@ On the basis of vanilla entity selector, the mod adds some extra parameters to s
 
 Tests the air value of the entity. Accepts int ranges or the keyword `max` which means the max air value. Can be inverted.
 
-- `@e[air=5..]`: Selects entities whose air values are not less than 5.
+- `@e[air=5..]`: Selects entities whose air values aren’t less than 5.
 - `@a[air=!..0]`: Selects entities whose air values are greater than 0.
 
 See [the `/air` command](/documents/commands/air/en.md).
 
 ### alternatives
 
-Specifying multiple entity predicates. The entity only needs to pass one of the predicate test. Values of the parameters are wrapped in a square bracket, with multiple entity predicates inside; multiple entity predicates are separated with comma. The parameter cannot be inverted yet.
+Specifying multiple entity predicates. The entity only needs to pass one of the predicate tests. Values of the parameters are wrapped in a square bracket, with multiple entity predicates inside; multiple entity predicates are separated with comma. The parameter can’t be inverted yet.
 
 - `@e[alternatives=[[type=cow], [type=sheep]]]`: Selects all cows and sheep.
 - `@a[alternatives=[Player1, Player2]]`: Selects Player1 and Player2.
@@ -159,10 +159,10 @@ Specifying multiple entity predicates. The entity only needs to pass one of the 
 
 ### baby
 
-Tests whether the entity is baby. If the entity type does not support baby entities, entities will be seen as non-babies.
+Tests whether the entity is a baby. If the entity type doesn’t support baby entities, entities will be seen as non-babies.
 
 - `@e[baby=true]`: Selects all baby entities.
-- `@e[baby=false]`: Selects all entities who are not babies (including entities who cannot be babies).
+- `@e[baby=false]`: Selects all entities who aren’t babies (including entities who can’t be babies).
 
 The parameter can be inverted. For example, `@e[baby=!true]` is equivalent to `@e[baby=false]`.
 
@@ -195,7 +195,7 @@ See [the `/food` command](/documents/commands/food/en.md).
 
 ### health
 
-Tests the health value of entities. Accepts a range, or the keyword `max`. The parameter can be inverted. This parameter only selects health values of living entities. Entities such as minecarts and dropped items also have their special health values but cannot be used to select by the entity selector.
+Tests the health value of entities. Accepts a range, or the keyword `max`. The parameter can be inverted. This parameter only selects health values of living entities. Entities such as minecarts and dropped items also have their special health values but can’t be used to select by the entity selector.
 
 - `@e[health=20]`: Selects living entities whose health value is 20.
 - `@e[health=!20]`: Selects living entities whose health value is not 20.
@@ -206,7 +206,7 @@ See [the `/health` command](/documents/commands/health/en.md).
 
 ### on_fire
 
-Tests whether the entity is on fire. Accepts a boolean value. If the entity is immune to fire, they are seen as not on fire.
+Tests whether the entity is on fire. Accepts a boolean value. If the entity is immune to fire, they’re seen as not on fire.
 
 - `@e[on_fire=true]`: Selects entities on fire (and not immune to fire).
 - `@e[on_fire=false]`: Selects entities not on fire (or immune to fire).
@@ -217,15 +217,15 @@ This parameter can be inverted. For example, `@e[on_fire=true]` and `@e[on_fire=
 
 Filter by entities' owners. The value can be an [entity predicate](../entity_predicate/en.md) or no value.
 
-This option can be inverted, When no value is specified, it selects untamed entities, including untamable entities.
+This option can be inverted. When no value is specified, it selects untamed entities, including untamable entities.
 
 - `@e[owner=]`: Selects all entities not tamed, including untamable entities.
 - `@e[owner=!]`: Selects all tamed entities, regardless of the owner (can be players no in the current world).
 
-If a selector is provided as a value, then no matter inverted or not, entities cannot be selected when they are untamable, the owner does not exist, or not in this world.
+If a selector is provided as a value, then no matter inverted or not, entities can’t be selected when they’re untamable, the owner doesn’t exist, or not in this world.
 
 - `@e[owner=<实体谓词>]`: Selects all tamed entities whose owners match the specified entity predicate.
-- `@e[owner=!<实体谓词>]`: Selects all tamed entities whose owners do not match the specified entity predicate.
+- `@e[owner=!<实体谓词>]`: Selects all tamed entities whose owners don’t match the specified entity predicate.
 
 For example:
 

@@ -8,7 +8,7 @@
 
 ## 语法
 
-`/setblocks <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process | unloaded_pos | suppress_initial_check | suppress_replaced_check | force | undoable]`
+`/setblocks <区域> <方块> [关键字参数：immediately | bypass_limit | skip_light_update | notify_listeners | notify_neighbors | force_state | post_process | unloaded_pos | suppress_initial_check | suppress_replaced_check | force | undoable | seed]`
 
 `//setblocks ...` 相当于 `/setblocks 玩家的活动区域 ...`。`/s` 是 `/setblocks` 的简写，`//s` 是 `//setblocks` 的简写。
 
@@ -76,6 +76,12 @@
 #### `undoable`
 
 布尔值，默认为 `true`。指定该操作是否可撤销，可通过 [`/undo` 命令](../undo/zh.md)撤销方块操作。
+
+#### `seed`
+
+长整型，用于涉及到的方块谓词和方块函数的种子。如果未指定，则是随机的。相同的种子会得到相同的结果。一些方块谓词和方块函数支持自己设定种子，这种情况下将忽略这个参数。
+
+> 如果有涉及到多个带有随机性但未自身指定种子的对象（例如 `random()` 方块函数、`pick()` 方块函数、`noise()` 方块函数，在没有添加 `seed = <种子>` 的情况下），那么这些对象各自所使用的种子并不相同，但是当此命令参数的种子确定时，这些对象所使用的种子也是确定的。如果这些对象交换顺序，那么这些对象所使用的种子也可能交换顺序。
 
 ## 示例
 

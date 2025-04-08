@@ -1,4 +1,4 @@
-# `checkerboard()`
+# `checkerboard()`：迷人的棋盘格图案
 
 此[方块函数](../zh.md)生成一个棋盘格的图案。可以指定棋盘格的大小和坐标运算格式。
 
@@ -6,9 +6,9 @@
 
 棋盘格有三个参数：向下取整（`floor`）、缩放（`scale`）和偏移（`offset`），都是三元向量，其效果分别如下：
 
-- 向下取整：默认为 `(0, 0, 0)`。如果设为非零，那么非零的那个分量会作为除数，除坐标并向下取整，从而使棋盘格图案的棋盘变大。
-- 缩放：默认为 `(1, 1, 1)`。一般来说在 0 到 1 之间。对于零值，该坐标轴上将不会有棋盘格图案，但是不影响棋盘格。
-- 偏移：默认为 `(0, 0, 0)`，使整个棋盘格图案沿着该坐标偏移。
+- 向下取整：默认为 `0 0 0`。如果设为非零，那么非零的那个分量会作为除数，除坐标并向下取整，从而使棋盘格图案的棋盘变大。
+- 缩放：默认为 `1 1 1`。一般来说在 0 到 1 之间。对于零值，该坐标轴上将不会有棋盘格图案，但是不影响棋盘格。
+- 偏移：默认为 `0 0 0`，使整个棋盘格图案沿着该坐标偏移。
 
 对于坐标为 $(x, y, z)$ 的方块，如果向下取整、缩放和偏移值分别为 $F$、$s$ 和 $o$，第 $n$（$1\leqslant n\leqslant m, n\in \mathbf N$）个方块函数及其权重分别为 $a_n$ 和 $w_n$，则计算方块坐标的方式为：
 
@@ -30,19 +30,28 @@ $$
 
 ## 语法
 
-- `checkerboard(<方块函数 1> [权重 1], <方块函数 2> [权重 2] ... [参数])`
+- `checkerboard(<方块函数 1> [权重 1], <方块函数 2> [权重 2] ...)`
+- `checkerboard(<方块函数 1> [权重 1], <方块函数 2> [权重 2] ...; floor = <x> [y] [z], scale = <x> [y] [z], offset = <x> [y] [z]`
 
 方块函数至少要有 1 个。权重不能为负数，可以为 0，但各项的权重之和不能为 0，每项的权重未指定时，默认为 1。
 
-`参数` 的语法由以下部分任意排列（不可重复）：
+## 参数
 
-- `floor <x> [y] [z]`：增大棋盘格的单元大小。
-- `scale <x> [y] [z]`：设备棋盘格的坐标的缩放，可能形成条纹。
-- `offset <x> [y] [z]`：设置棋盘格的偏移值。
+该方块函数支持一些命名参数。命名参数与前面的方块函数列表之前用分号隔开。各命名参数用逗号隔开，可调换顺序，但是不可重复。
+
+### `floor`
+
+1~3 个整数。增大棋盘格的单元大小。
+
+### `scale`
+
+1~3 个整数。设置棋盘格的坐标的缩放，可以形成条纹。
+
+### `offset`
+
+1~3 个整数。设置棋盘格的偏移值。
 
 上述参数中，如果 `[y]` 未指定，则值为 `<x>`。如果 `[y]` 和 `[z]` 均未指定，则值为 `<x>`。
-
-请注意，方块函数列表之前的各个元素用逗号隔开，方块函数列表与参数之间，以及多个参数之间，用空格隔开。
 
 ## 示例
 
@@ -52,9 +61,10 @@ $$
 - `checkerboard(white_wool 2, black_wool)`：由白色羊毛和黑色羊毛组成的棋盘格。用 3 除 $v$，整除或余 1 时为白色羊毛，余 2 时为黑色羊毛。
 - `checkerboard(white_wool 1.5, black_wool)`：由白色羊毛和黑色羊毛组成的棋盘格。
 - `checkerboard(white_wool 0, black_wool 0)`：无效，因为各个方块函数的权重之和为 0。
-- `checkerboard(white_wool, black_wool floor 2)`：由白色羊毛和黑色羊毛组成的棋盘格，每格的大小为 2×2×2 的立方体。
-- `checkerboard(white_wool, black_wool floor 2 3 4)`：由白色羊毛和黑色羊毛组成的棋盘格，每格的大小为 2×3×4 的立方体。
-- `checkerboard(white_wool, black wool scale 0.5)`：由白色羊毛和黑色羊毛组成的棋盘格，每次计算时各坐标均除以 2。
-- `checkerboard(white_wool, black wool scale 1 0 1)`：由白色羊毛和黑色羊毛组成的棋盘格，其中棋盘格忽略 y 坐标。
-- `checkerboard(white_wool, black wool offset 1 0 0)`：由白色羊毛和黑色羊毛组成的棋盘格，但是棋盘整体沿 `(1, 0, 0)` 的方向移动。
-- `checkerboard(white_wool 1 gray_wool 2, black wool 1 floor 2 scale 0.5 offset 0 1 0)`：含有所有参数的棋盘格的方块函数。
+- `checkerboard(white_wool, black_wool ; floor = 2)`：由白色羊毛和黑色羊毛组成的棋盘格，每格的大小为 2×2×2 的立方体。
+- `checkerboard(white_wool, black_wool ; floor = 2 3 4)`：由白色羊毛和黑色羊毛组成的棋盘格，每格的大小为 2×3×4 的立方体。
+- `checkerboard(white_wool, black wool ; scale = 0.5)`：由白色羊毛和黑色羊毛组成的棋盘格，每次计算时各坐标均除以 2。
+- `checkerboard(white_wool, black wool ; scale = 1 0 1)`：由白色羊毛和黑色羊毛组成的棋盘格，其中棋盘格忽略 y 坐标。
+- `checkerboard(white_wool, black wool ; offset = 1 0 0)`：由白色羊毛和黑色羊毛组成的棋盘格，但是棋盘整体沿 `(1, 0, 0)` 的方向移动。
+- `checkerboard(white_wool 1 gray_wool 2, black wool 1; floor = 2, scale = 0.5, offset = 0 1 0, seed = 15)`：含有所有参数的棋盘格的方块函数。
+- `checkerboard(white_wool, black wool ; scale = 0.2, scale = 5)`：无效的方块函数，因为有重复的参数。
