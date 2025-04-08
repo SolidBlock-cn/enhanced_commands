@@ -61,9 +61,9 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions) implement
 
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    final Random random = world.getRandom();
-    return functions.getRandom(random).getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+    final Random random = context.getSplitter(this).split(pos);
+    return functions.getRandom(random).getModifiedState(blockState, origState, world, pos, blockEntityData, context);
   }
 
 

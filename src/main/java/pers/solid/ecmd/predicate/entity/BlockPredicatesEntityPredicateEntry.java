@@ -9,6 +9,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.predicate.block.BlockPredicateContext;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.Map;
@@ -20,7 +21,7 @@ public record BlockPredicatesEntityPredicateEntry(Map<PosArgument, BlockPredicat
     for (Map.Entry<PosArgument, BlockPredicate> entry : map.entrySet()) {
       final var key = entry.getKey();
       final var value = entry.getValue();
-      if (!value.test(new CachedBlockPosition(entity.getWorld(), key.toAbsoluteBlockPos(entity.getCommandSource()), false))) {
+      if (!value.test(new CachedBlockPosition(entity.getWorld(), key.toAbsoluteBlockPos(entity.getCommandSource()), false), new BlockPredicateContext(entity.getRandom(), null))) {
         return false;
       }
     }
@@ -34,7 +35,7 @@ public record BlockPredicatesEntityPredicateEntry(Map<PosArgument, BlockPredicat
     for (Map.Entry<PosArgument, BlockPredicate> entry : map.entrySet()) {
       final var key = entry.getKey();
       final var value = entry.getValue();
-      final TestResult testResult = value.testAndDescribe(new CachedBlockPosition(entity.getWorld(), key.toAbsoluteBlockPos(entity.getCommandSource()), false));
+      final TestResult testResult = value.testAndDescribe(new CachedBlockPosition(entity.getWorld(), key.toAbsoluteBlockPos(entity.getCommandSource()), false), new BlockPredicateContext(entity.getRandom(), null));
       attachments.add(testResult);
       result &= testResult.successes();
     }

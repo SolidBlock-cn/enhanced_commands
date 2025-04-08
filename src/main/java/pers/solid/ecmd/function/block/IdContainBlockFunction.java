@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
@@ -48,12 +49,13 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     final Block[] blocks = getBlocks(world);
+    final Random random = context.getSplitter(this).split(pos);
     if (blocks.length == 0) {
       return blockState;
     }
-    return blocks[world.getRandom().nextInt(blocks.length)].getDefaultState();
+    return blocks[random.nextInt(blocks.length)].getDefaultState();
   }
 
   @Override

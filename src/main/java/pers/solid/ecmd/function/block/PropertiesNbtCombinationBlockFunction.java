@@ -58,13 +58,13 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    blockState = base.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+    blockState = base.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     if (properties != null) {
-      blockState = properties.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      blockState = properties.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     }
     if (nbt != null) {
-      blockState = nbt.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      blockState = nbt.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     }
     return blockState;
   }

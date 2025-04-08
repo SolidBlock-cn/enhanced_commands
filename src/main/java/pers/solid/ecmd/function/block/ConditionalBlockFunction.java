@@ -35,12 +35,12 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, pos, false);
-    if (condition.test(cachedBlockPosition)) {
-      return functionIfTrue.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+    if (condition.test(cachedBlockPosition, context)) {
+      return functionIfTrue.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     } else {
-      return functionIfFalse.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      return functionIfFalse.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     }
   }
 

@@ -48,7 +48,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
     final boolean inTag = blockState.isIn(tag);
     if (!inTag) {
@@ -62,7 +62,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
     final boolean inTag = blockState.isIn(tag);
     boolean successes = true;
@@ -99,7 +99,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
 
     @Override
     public @Nullable TagBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser<?> parser = new SimpleBlockPredicateSuggestedParser(registryAccess, parser0);
+      SimpleBlockPredicateSuggestedParser<?> parser = new SimpleBlockPredicateSuggestedParser<>(registryAccess, parser0);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         return new TagBlockPredicate(parser.tagId.getTag(), parser.propertyNamePredicates);

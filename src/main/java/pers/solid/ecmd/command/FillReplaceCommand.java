@@ -32,6 +32,7 @@ import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
@@ -105,14 +106,14 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
   public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, predicate, false, false, Block.NOTIFY_LISTENERS, 0, UnloadedPosBehavior.REJECT, true);
+    return setBlocksInRegion(region, blockFunction, source, predicate, false, false, new BlockFunctionContext(Block.NOTIFY_LISTENERS, 0, source.getWorld().getRandom(), null), UnloadedPosBehavior.REJECT, true);
   }
 
   public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, predicate, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), getFlags(kwArgs), getModFlags(kwArgs), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
+    return setBlocksInRegion(region, blockFunction, source, predicate, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getWorld().getRandom(), kwArgs.getArg("seed")), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
-  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, int flags, int modFlags, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
+  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
     if (!bypassLimit && region.numberOfBlocksAffected() > REGION_SIZE_LIMIT) {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), REGION_SIZE_LIMIT);
     }
@@ -145,10 +146,10 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     }
 
     final Text taskName = Text.translatable("enhanced_commands.commands.setblocks.task_name", region.asString());
-    final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;
+    final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, context.flags, context.modFlags) : null;
     if (predicate == null) {
       mainIterator = stream.<Void>map(blockPos -> {
-            if (blockFunction.setBlock(world, blockPos, flags, modFlags, history)) {
+            if (blockFunction.setBlock(world, blockPos, context, history)) {
               numbersAffected.increment();
             }
             return null;
@@ -167,7 +168,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
           })
           .iterator();
       Iterable<Void> placingIteration = () -> posThatMatch.longStream().<Void>mapToObj(blockPos -> {
-            if (blockFunction.setBlock(world, mutable.set(blockPos), flags, modFlags, history)) {
+            if (blockFunction.setBlock(world, mutable.set(blockPos), context, history)) {
               numbersAffected.increment();
             }
             return null;

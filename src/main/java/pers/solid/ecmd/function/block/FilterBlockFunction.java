@@ -34,15 +34,15 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     final NbtCompound valueBeforeModify = blockEntityData.getValue();
-    final BlockState newState = function.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+    final BlockState newState = function.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, pos, false);
-    if (predicate.test(cachedBlockPosition)) {
+    if (predicate.test(cachedBlockPosition, context)) {
       return newState;
     } else {
       blockEntityData.setValue(valueBeforeModify);
-      return elseFunction.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      return elseFunction.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     }
   }
 

@@ -26,9 +26,11 @@ import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunctionArgument;
+import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
+import pers.solid.ecmd.predicate.block.BlockPredicateContext;
 import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.Styles;
@@ -78,12 +80,13 @@ public interface BlockTransformationCommand {
     final ServerWorld world = source.getWorld();
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     final boolean bypassLimit = keywordArgs.getArg("bypass_limit");
-    final int flag = FillReplaceCommand.getFlags(keywordArgs);
-    final int modFlag = FillReplaceCommand.getModFlags(keywordArgs);
-    final BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(getIteratorTaskName(region), world, flag, modFlag) : null;
+    final int flags = FillReplaceCommand.getFlags(keywordArgs);
+    final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
+    final @Nullable Long seed = keywordArgs.getArg("seed");
+    final BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(getIteratorTaskName(region), world, flags, modFlags) : null;
     final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(world, region)
-        .setFlags(flag)
-        .setModFlags(modFlag)
+        .setBlockPredicateContext(new BlockPredicateContext(world.getRandom(), seed))
+        .setBlockFunctionContext(new BlockFunctionContext(flags, modFlags, world.getRandom(), seed))
         .transformsBlockPos(this::transformBlockPos)
         .transformsPos(this::transformPos)
         .transformsPosBack(this::transformPosBack)

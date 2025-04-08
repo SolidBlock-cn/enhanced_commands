@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
@@ -34,9 +35,10 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+    final Random random = context.getSplitter(this).split(pos);
     for (PropertyNameFunction propertyNameFunction : functions) {
-      blockState = propertyNameFunction.getModifiedState(origState, blockState, world.getRandom());
+      blockState = propertyNameFunction.getModifiedState(origState, blockState, random);
     }
     return blockState;
   }

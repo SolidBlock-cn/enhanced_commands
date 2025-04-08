@@ -27,16 +27,16 @@ public record AllBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return predicates.stream().allMatch(blockPredicate -> blockPredicate.test(cachedBlockPosition));
+  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+    return predicates.stream().allMatch(blockPredicate -> blockPredicate.test(cachedBlockPosition, context));
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     final ImmutableList.Builder<TestResult> results = new ImmutableList.Builder<>();
     int successes = 0;
     for (BlockPredicate blockPredicate : predicates) {
-      TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition);
+      TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition, context);
       results.add(testResult);
       if (testResult.successes())
         successes++;

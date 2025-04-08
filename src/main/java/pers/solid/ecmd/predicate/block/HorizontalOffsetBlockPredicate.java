@@ -38,15 +38,15 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
-    return blockPredicate.test(new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().up(offset), false));
+  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+    return blockPredicate.test(new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().up(offset), false), context);
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     final MutableText description;
     final CachedBlockPosition offsetPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().up(offset), false);
-    final TestResult attachment = blockPredicate.testAndDescribe(offsetPosition);
+    final TestResult attachment = blockPredicate.testAndDescribe(offsetPosition, context);
     final boolean successes = attachment.successes();
     final String string = successes ? "pass" : "fail";
     if (offset > 0) {

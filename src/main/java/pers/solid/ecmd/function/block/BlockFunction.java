@@ -21,7 +21,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
@@ -47,14 +46,15 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
     return BlockFunctionArgument.parse(registryAccess, new SuggestedParser<>(s), false).apply(source);
   }
 
-  default boolean setBlock(World world, BlockPos pos, int flags, int modFlags) {
-    return setBlock(world, pos, flags, modFlags, null);
+  default boolean setBlock(World world, BlockPos pos, BlockFunctionContext context) {
+    return setBlock(world, pos, context, null);
   }
 
-  default boolean setBlock(World world, BlockPos pos, int flags, int modFlags, @Nullable BlockPlacementHistory history) {
+  default boolean setBlock(World world, BlockPos pos, BlockFunctionContext context, @Nullable BlockPlacementHistory history) {
     final BlockState origState = world.getBlockState(pos);
     MutableObject<NbtCompound> blockEntityData = new MutableObject<>(null);
-    BlockState modifiedState = getModifiedState(origState, origState, world, pos, flags, blockEntityData);
+    BlockState modifiedState = getModifiedState(origState, origState, world, pos, blockEntityData, context);
+    final int modFlags = context.modFlags;
     if ((modFlags & FillReplaceCommand.POST_PROCESS_FLAG) != 0) {
       modifiedState = Block.postProcessState(modifiedState, world, pos);
     }
@@ -62,7 +62,7 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
     if (history != null) {
       history.recordBlockAndEntity(world, pos, modifiedState);
     }
-    boolean result = MixinShared.setBlockStateWithModFlags(world, pos, modifiedState, flags, modFlags);
+    boolean result = MixinShared.setBlockStateWithModFlags(world, pos, modifiedState, context.flags, modFlags);
     final BlockEntity blockEntity = world.getBlockEntity(pos);
     if (blockEntity != null) {
       final NbtCompound modifiedData = blockEntityData.getValue();
@@ -81,13 +81,12 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
    * @param origState       在整个修改过程之前，所使用的方块状态。当不同的多个方块函数依次使用时，此参数均不改变。
    * @param world           当前所在的世界。
    * @param pos             正在修改的方块所在的坐标。
-   * @param flags           正在修改的方块修改时的 flags。
    * @param blockEntityData 此参数用于在修改方块的过程中一并修改方块实体。在完成对方块状态的修改后，才会将这个数据并入到方块实体中。
+   * @param context         正在修改的方块修改时的 flags。
    * @return 修改后的方块状态。
    */
-  @Contract(mutates = "param6")
   @NotNull
-  BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData);
+  BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context);
 
   @NotNull
   BlockFunctionType<?> getType();
@@ -103,8 +102,6 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
 
   /**
    * 取消该对象的缓存状态。例如，对于 {@link NoiseBlockFunction} 而言，调用一次该方法将会使其重新生成采样器，其种子可能随机生成。
-   *
-   * @return
    */
   default BlockFunction getRefreshed(Random random) {
     return this;

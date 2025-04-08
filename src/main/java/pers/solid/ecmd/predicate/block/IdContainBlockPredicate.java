@@ -27,12 +27,12 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     return pattern.matcher(Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString()).find();
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     final String id = Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString();
     final boolean matches = pattern.matcher(id).find();
     return TestResult.of(matches, Text.translatable("enhanced_commands.block_predicate.id_contain." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(Styles.EXPECTED), Text.literal(id).styled(Styles.ACTUAL)));
@@ -47,10 +47,10 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if (!(o instanceof IdContainBlockPredicate that))
+    if (!(o instanceof IdContainBlockPredicate(Pattern pattern1)))
       return false;
 
-    return pattern.pattern().equals(that.pattern.pattern());
+    return pattern.pattern().equals(pattern1.pattern());
   }
 
   @Override

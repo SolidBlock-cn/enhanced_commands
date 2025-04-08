@@ -55,7 +55,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     final Block block = blockState.getBlock();
     final String old = Registries.BLOCK.getId(block).toString();
     final String replaced = pattern.matcher(old).replaceAll(replacement);

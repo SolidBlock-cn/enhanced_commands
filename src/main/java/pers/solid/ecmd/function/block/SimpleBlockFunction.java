@@ -42,9 +42,9 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     BlockState stateToPlace = block.getDefaultState();
-    final Random random = world.getRandom();
+    final Random random = context.getSplitter(this).split(pos);
     for (PropertyFunction<?> propertyFunction : properties) {
       stateToPlace = propertyFunction.getModifiedState(stateToPlace, origState, random);
     }

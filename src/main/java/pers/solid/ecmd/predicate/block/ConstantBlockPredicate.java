@@ -38,12 +38,12 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     return value;
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.constant.pass"));
   }
 

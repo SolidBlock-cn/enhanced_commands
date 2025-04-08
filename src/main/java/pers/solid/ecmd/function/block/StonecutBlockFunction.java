@@ -35,8 +35,8 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    blockState = function.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+    blockState = function.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     final Item item = blockState.getBlock().asItem();
     if (item == Items.AIR) {
       return blockState;

@@ -9,8 +9,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.WorldAccess;
-import org.apache.commons.lang3.RandomUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.Styles;
@@ -38,18 +36,18 @@ public record RandBlockPredicate(float probability, @NotNull BlockPredicate pred
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
-    final Random random = ((WorldAccess) cachedBlockPosition.getWorld()).getRandom();
+  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+    final Random random = context.getSplitter(this).split(cachedBlockPosition.getBlockPos());
     if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
       return random.nextFloat() < probability;
     } else {
-      return random.nextFloat() < probability && predicate.test(cachedBlockPosition);
+      return random.nextFloat() < probability && predicate.test(cachedBlockPosition, context);
     }
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
-    final float nextFloat = RandomUtils.nextFloat(0, 1);
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+    final float nextFloat = context.getSplitter(this).split(cachedBlockPosition.getBlockPos()).nextFloat();
     final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(Styles.ACTUAL);
     final MutableText o2 = Text.literal(String.valueOf(probability)).styled(Styles.EXPECTED);
     if (nextFloat < probability) {

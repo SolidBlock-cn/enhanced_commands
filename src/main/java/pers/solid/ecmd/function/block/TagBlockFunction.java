@@ -13,6 +13,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
@@ -45,12 +46,13 @@ public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull L
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    final Optional<RegistryEntry<Block>> random = tag.getRandom(world.getRandom());
-    if (random.isEmpty()) return blockState;
-    BlockState state = random.get().value().getDefaultState();
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+    final Random random = context.getSplitter(this).split(pos);
+    final Optional<RegistryEntry<Block>> randomTag = tag.getRandom(random);
+    if (randomTag.isEmpty()) return blockState;
+    BlockState state = randomTag.get().value().getDefaultState();
     for (PropertyNameFunction propertyNameFunction : properties) {
-      state = propertyNameFunction.getModifiedState(origState, state, world.getRandom());
+      state = propertyNameFunction.getModifiedState(origState, state, random);
     }
     return state;
   }

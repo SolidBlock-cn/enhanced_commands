@@ -47,7 +47,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     final Block entry = getEntry(weightedList, pos);
     return entry == null ? blockState : entry.getDefaultState();
   }

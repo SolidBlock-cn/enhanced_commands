@@ -27,8 +27,8 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
-    BlockState state = function.getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+    BlockState state = function.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     if (state.contains(Properties.WATERLOGGED)) {
       state = state.with(Properties.WATERLOGGED, false);
     }

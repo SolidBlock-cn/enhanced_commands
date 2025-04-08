@@ -2,6 +2,7 @@ package pers.solid.ecmd.argument;
 
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
@@ -92,6 +93,7 @@ public final class KeywordArgsCommon {
       .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
       .addOptionalArg("force", BoolArgumentType.bool(), false)
       .addOptionalArg("undoable", BoolArgumentType.bool(), true)
+      .addOptionalArg("seed", LongArgumentType.longArg(), null)
       .build());
   public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> BLOCK_TRANSFORMATION = register("block_transformation", registryAccess -> KeywordArgsArgumentType.builderFromShared(FILLING, registryAccess)
       .addOptionalArg("affect_entities", EntityPredicateArgumentType.entityPredicate(registryAccess), null)

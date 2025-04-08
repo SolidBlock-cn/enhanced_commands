@@ -23,11 +23,13 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
+import pers.solid.ecmd.predicate.block.BlockPredicateContext;
 import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
@@ -76,6 +78,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     boolean bypassLimit = keywordArgs.getBoolean("bypass_limit");
     UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     CompoundNbtFunction nbtFunction = keywordArgs.getArg("nbt");
+    final @Nullable Long seed = keywordArgs.getArg("seed");
     if (!bypassLimit && region.numberOfBlocksAffected() > 16383) {
       throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), 16383);
     }
@@ -136,7 +139,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
       final BlockPos.Mutable mutable = new BlockPos.Mutable();
       Iterator<Void> testPosIterator = stream.<Void>map(blockPos -> {
             final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, true);
-            if (predicate.test(cachedBlockPosition)) {
+            if (predicate.test(cachedBlockPosition, new BlockPredicateContext(world.getRandom(), seed))) {
               posThatMatch.add(blockPos.asLong());
             }
             return null;

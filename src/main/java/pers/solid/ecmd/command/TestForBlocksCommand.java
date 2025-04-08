@@ -20,9 +20,11 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.predicate.block.BlockPredicateContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.StringUtil;
@@ -75,6 +77,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     final boolean bypassLimit = keywordArgs.getBoolean("bypass_limit");
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     final Region region = RegionArgumentType.getRegion(context, "region");
+    final @Nullable Long seed = keywordArgs.getArg("seed");
 
     if (!bypassLimit && region.numberOfBlocksAffected() > FillReplaceCommand.REGION_SIZE_LIMIT) {
       throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), FillReplaceCommand.REGION_SIZE_LIMIT);
@@ -107,7 +110,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         }
       }
       blocksCounted.increment();
-      final boolean test = blockPredicate.test(cachedBlockPosition);
+      final boolean test = blockPredicate.test(cachedBlockPosition, new BlockPredicateContext(world.getRandom(), seed));
       if (test) blocksMatched.increment();
 
       if (testType == TestType.ANY && test) {

@@ -64,7 +64,7 @@ public final class LootBridge {
     return parseLootCondition(wrapperLookup, jsonElement).getOrThrow(exceptionSupplier);
   }
 
-  public static LootContext createContextForBlock(CachedBlockPosition cachedBlockPosition, ServerWorld serverWorld) {
+  public static LootContext createContextForBlock(CachedBlockPosition cachedBlockPosition, ServerWorld serverWorld, long seed) {
     final LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverWorld)
         .add(LootContextParameters.ORIGIN, cachedBlockPosition.getBlockPos().toCenterPos())
         .add(LootContextParameters.BLOCK_STATE, cachedBlockPosition.getBlockState())
@@ -72,7 +72,7 @@ public final class LootBridge {
         .addOptional(LootContextParameters.TOOL, ItemStack.EMPTY)
         .build(LootContextTypes.BLOCK);
     return new LootContext.Builder(lootContextParameterSet)
-        .random(serverWorld.random)
+        .random(seed)
         .build(Optional.empty());
   }
 

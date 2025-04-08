@@ -14,7 +14,6 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.block.WeightedListParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.RandomizedSeedHolder;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -33,12 +32,6 @@ public interface Noise {
   Vec3d UNIT = new Vec3d(1, 1, 1);
 
   Properties properties();
-
-  RandomizedSeedHolder seedHolder();
-
-  default long currentSeed() {
-    return seedHolder().seed();
-  }
 
   default OptionalLong seed() {
     return properties().seed();
@@ -90,13 +83,12 @@ public interface Noise {
   /**
    * 返回用于采样的噪声对象。通常来说，该对象第一次生成时创建，然后被缓存。
    */
-  default DoublePerlinNoiseSampler getSampler(Random random) {
-    final long currentSeed = currentSeed();
-    return SAMPLER_CACHE.computeIfAbsent(currentSeed, x -> new WeakHashMap<>()).computeIfAbsent(noiseParameters(), noiseParameters -> DoublePerlinNoiseSampler.create(Random.create(currentSeed), noiseParameters));
+  default DoublePerlinNoiseSampler getSampler(long seed) {
+    return SAMPLER_CACHE.computeIfAbsent(seed, x -> new WeakHashMap<>()).computeIfAbsent(noiseParameters(), noiseParameters -> DoublePerlinNoiseSampler.create(Random.create(seed), noiseParameters));
   }
 
-  default <T> T sample(Random random, @NotNull WeightedList<T> weightedList, double x, double y, double z) {
-    final DoublePerlinNoiseSampler noiseSampler = getSampler(random);
+  default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, double x, double y, double z) {
+    final DoublePerlinNoiseSampler noiseSampler = getSampler(seed);
     final Vec3d scale = scale();
     x -= offset().x;
     y -= offset().y;
@@ -106,8 +98,8 @@ public interface Noise {
     return weightedList.getClampedElement(d);
   }
 
-  default <T> T sample(Random random, @NotNull WeightedList<T> weightedList, Vec3d pos) {
-    return sample(random, weightedList, pos.x, pos.y, pos.z);
+  default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, Vec3d pos) {
+    return sample(seed, weightedList, pos.x, pos.y, pos.z);
   }
 
   abstract class Parser<T> implements FunctionLikeParser<T> {

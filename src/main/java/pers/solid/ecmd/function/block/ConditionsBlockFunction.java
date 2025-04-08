@@ -32,15 +32,15 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, pos, false);
     for (ConditionalBlockFunction function : conditions) {
-      if (function.condition().test(cachedBlockPosition)) {
-        return function.functionIfTrue().getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      if (function.condition().test(cachedBlockPosition, context)) {
+        return function.functionIfTrue().getModifiedState(blockState, origState, world, pos, blockEntityData, context);
       }
     }
     if (!conditions.isEmpty()) {
-      return conditions.getLast().getModifiedState(blockState, origState, world, pos, flags, blockEntityData);
+      return conditions.getLast().getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     } else {
       return origState;
     }

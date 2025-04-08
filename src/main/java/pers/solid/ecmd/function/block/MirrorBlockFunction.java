@@ -30,7 +30,7 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     return blockState.mirror(mirror.apply(world.getRandom()));
   }
 

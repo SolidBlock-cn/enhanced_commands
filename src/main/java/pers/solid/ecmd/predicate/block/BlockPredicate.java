@@ -15,6 +15,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.WorldAccess;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -49,11 +51,17 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
     return successes ? successResult(blockPos) : failResult(blockPos);
   }
 
+  @ApiStatus.NonExtendable
   @Override
-  boolean test(CachedBlockPosition cachedBlockPosition);
+  default boolean test(CachedBlockPosition cachedBlockPosition) {
+    final Random random = ((WorldAccess) cachedBlockPosition.getWorld()).getRandom();
+    return test(cachedBlockPosition, new BlockPredicateContext(random, null));
+  }
 
-  default TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
-    final boolean test = test(cachedBlockPosition);
+  boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context);
+
+  default TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+    final boolean test = test(cachedBlockPosition, context);
     return successOrFail(test, cachedBlockPosition.getBlockPos());
   }
 
@@ -65,12 +73,4 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
     return this;
   }
 
-  /**
-   * 取消该对象的缓存状态。例如，对于 {@link NoiseBlockPredicate} 而言，调用一次该方法将会使其重新生成采样器，其种子可能随机生成。
-   *
-   * @return
-   */
-  default BlockPredicate getRefreshed(Random random) {
-    return this;
-  }
 }

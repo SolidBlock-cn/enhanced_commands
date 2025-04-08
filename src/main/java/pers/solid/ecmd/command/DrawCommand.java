@@ -20,6 +20,7 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.region.SphereRegion;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
@@ -76,7 +77,7 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
     mainIterator = stream
         .peek(blockPos -> {
-          if (block.setBlock(world, blockPos, flags, modFlags))
+          if (block.setBlock(world, blockPos, new BlockFunctionContext(flags, modFlags, world.random, null)))
             numbersAffected.increment();
         })
         .map(blockPos -> null)

@@ -9,10 +9,10 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionArgument;
+import pers.solid.ecmd.function.block.BlockFunctionContext;
 
 import java.util.Set;
 
@@ -46,7 +46,7 @@ public class ForwardedBlockStateArgument extends BlockStateArgument {
   @Override
   public boolean setBlockState(ServerWorld world, BlockPos pos, int flags) {
     if (sourcedBlockFunction != null) {
-      return sourcedBlockFunction.setBlock(world, pos, flags, FillReplaceCommand.POST_PROCESS_FLAG);
+      return sourcedBlockFunction.setBlock(world, pos, new BlockFunctionContext(flags, 0, world.random, null));
     } else {
       return false;
     }

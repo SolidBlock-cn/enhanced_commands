@@ -75,12 +75,14 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
   private static int executeTestForBlockPredicate(CommandContext<ServerCommandSource> context, boolean forceLoad) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
+    // todo 考虑在 /testfor 命令加入种子
+
     // 检查方块的代码在后面
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(source.getWorld(), blockPos, forceLoad);
     if (cachedBlockPosition.getBlockState() == null) {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
-    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition);
+    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition, null);
     testResult.sendMessage(source);
     return BooleanUtils.toInteger(testResult.successes());
   }

@@ -45,12 +45,12 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, int flags, MutableObject<NbtCompound> blockEntityData) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     final Block[] blocks = getBlocks(world.getRegistryManager(), world.getEnabledFeatures());
     if (blocks.length == 0) {
       return blockState;
     }
-    final Random random = world.getRandom();
+    final Random random = context.getSplitter(this).split(pos);
     final Block block = blocks[random.nextInt(blocks.length)];
     return StateUtil.getBlockWithRandomProperties(block, random);
   }

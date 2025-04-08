@@ -4,10 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.argument.BlockPredicateArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
-import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
-import pers.solid.ecmd.predicate.block.NbtBlockPredicate;
-import pers.solid.ecmd.predicate.block.PropertiesNbtCombinationBlockPredicate;
+import net.minecraft.world.WorldAccess;
+import pers.solid.ecmd.predicate.block.*;
 
 public class ForwardingBlockPredicateArgument implements BlockPredicateArgumentType.BlockPredicate {
   private final BlockPredicateArgument modBlockPredicate;
@@ -25,7 +23,7 @@ public class ForwardingBlockPredicateArgument implements BlockPredicateArgumentT
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition) {
     if (sourcedBlockPredicate != null) {
-      return sourcedBlockPredicate.test(cachedBlockPosition);
+      return sourcedBlockPredicate.test(cachedBlockPosition, new BlockPredicateContext(((WorldAccess) cachedBlockPosition.getWorld()).getRandom(), null));
     }
     return false;
   }

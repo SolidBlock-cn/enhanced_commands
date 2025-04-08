@@ -28,13 +28,13 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     final BlockEntity blockEntity = cachedBlockPosition.getBlockEntity();
     return blockEntity != null && nbtPredicate.test(blockEntity.createNbt(cachedBlockPosition.getWorld().getRegistryManager()));
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     final BlockEntity blockEntity = cachedBlockPosition.getBlockEntity();
     final MutableText nameText = cachedBlockPosition.getBlockState().getBlock().getName();
     final MutableText posText = TextUtil.wrapVector(cachedBlockPosition.getBlockPos());

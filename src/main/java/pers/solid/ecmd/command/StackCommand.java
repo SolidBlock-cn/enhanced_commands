@@ -31,11 +31,13 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
+import pers.solid.ecmd.predicate.block.BlockPredicateContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.Styles;
@@ -157,6 +159,8 @@ public enum StackCommand implements CommandRegistrationCallback {
         throw UNLOADED_TARGET.create();
       }
     }
+    final @Nullable Long seed = keywordArgs.getArg("seed");
+    final BlockPredicateContext blockPredicateContext = new BlockPredicateContext(world.getRandom(), seed);
 
     final Long2ReferenceMap<BlockState> sourceStates = new Long2ReferenceLinkedOpenHashMap<>();
     final Long2ReferenceMap<NbtCompound> sourceBlockEntities = new Long2ReferenceLinkedOpenHashMap<>();
@@ -193,7 +197,7 @@ public enum StackCommand implements CommandRegistrationCallback {
     final Stream<Void> collectBlocks = stream
         .map(blockPos -> {
           final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-          if (transformOnly == null || transformOnly.test(cachedBlockPosition)) {
+          if (transformOnly == null || transformOnly.test(cachedBlockPosition, blockPredicateContext)) {
             sourceStates.put(blockPos.asLong(), cachedBlockPosition.getBlockState());
             if (cachedBlockPosition.getBlockEntity() != null) {
               sourceBlockEntities.put(blockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt(world.getRegistryManager()));
@@ -242,7 +246,7 @@ public enum StackCommand implements CommandRegistrationCallback {
       }
       final Stream<Void> affectBlocksStream = targetPosStream
           .map(entry -> {
-            if (affectOnly == null || affectOnly.test(new CachedBlockPosition(world, posToPlace, false))) {
+            if (affectOnly == null || affectOnly.test(new CachedBlockPosition(world, posToPlace, false), blockPredicateContext)) {
               boolean modofied = MixinShared.setBlockStateWithModFlags(world, posToPlace, entry.getValue(), FillReplaceCommand.getFlags(keywordArgs), FillReplaceCommand.getModFlags(keywordArgs));
 
               final BlockEntity blockEntity = world.getBlockEntity(posToPlace);

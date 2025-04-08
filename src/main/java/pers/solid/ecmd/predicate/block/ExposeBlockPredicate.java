@@ -40,7 +40,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     for (Direction direction : directions) {
       var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
       if (exposureType.test(offsetCachedBlockPosition, direction))
@@ -50,7 +50,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
     List<TestResult> testResults = new ArrayList<>();
     boolean result = false;
     for (Direction direction : directions) {
