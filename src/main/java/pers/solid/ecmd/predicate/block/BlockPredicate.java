@@ -53,6 +53,7 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
 
   @ApiStatus.NonExtendable
   @Override
+  @Deprecated
   default boolean test(CachedBlockPosition cachedBlockPosition) {
     final Random random = ((WorldAccess) cachedBlockPosition.getWorld()).getRandom();
     return test(cachedBlockPosition, new BlockPredicateContext(random, null));

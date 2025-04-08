@@ -43,7 +43,6 @@ import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.Iterator;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -92,28 +91,28 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   /**
    * Execute the command with the default parameters.
    */
-  private static int execute(CommandContext<ServerCommandSource> context, Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
+  private static int execute(CommandContext<ServerCommandSource> context, BlockPredicate predicate) throws CommandSyntaxException {
     return setBlocksWithDefaultKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate);
   }
 
   /**
    * Execute the command with the parameters read from args.
    */
-  private static int execute(CommandContext<ServerCommandSource> context, Predicate<CachedBlockPosition> predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
+  private static int execute(CommandContext<ServerCommandSource> context, BlockPredicate predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
     return setBlocksFromKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate, kwArgs);
   }
 
   public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
-  public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate) throws CommandSyntaxException {
+  public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate) throws CommandSyntaxException {
     return setBlocksInRegion(region, blockFunction, source, predicate, false, false, new BlockFunctionContext(Block.NOTIFY_LISTENERS, 0, source.getWorld().getRandom(), null), UnloadedPosBehavior.REJECT, true);
   }
 
-  public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
+  public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
     return setBlocksInRegion(region, blockFunction, source, predicate, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getWorld().getRandom(), kwArgs.getArg("seed")), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
-  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable Predicate<CachedBlockPosition> predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
+  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
     if (!bypassLimit && region.numberOfBlocksAffected() > REGION_SIZE_LIMIT) {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), REGION_SIZE_LIMIT);
     }
@@ -161,7 +160,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       Iterator<Void> testPosIteration = stream.<Void>map(blockPos -> {
             if (blockPos == null) return null;
             final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, true);
-            if (predicate.test(cachedBlockPosition)) {
+            if (predicate.test(cachedBlockPosition, context)) {
               posThatMatch.add(blockPos.asLong());
             }
             return null;

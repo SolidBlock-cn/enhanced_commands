@@ -24,6 +24,7 @@ import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
@@ -49,7 +50,7 @@ public abstract class SimpleBlockSuggestedParser<S> extends SuggestedParser<S> {
   protected final CommandRegistryAccess registryAccess;
   public Block block;
   public Identifier blockId;
-  public RegistryEntryList.Named<Block> tagId;
+  public @Nullable RegistryEntryList.Named<Block> tagId;
 
   public SimpleBlockSuggestedParser(CommandRegistryAccess registryAccess, StringReader reader) {
     super(reader);

@@ -146,7 +146,9 @@ public class SimpleBlockPredicateSuggestedParser<S> extends SimpleBlockSuggested
     if (usingEqual) {
       addSpecialPropertyValueSuggestions();
     }
-    addSuggestion(getTagPropertiesValueSuggestions(this.tagId, propertyName));
+    if (this.tagId != null) {
+      addSuggestion(getTagPropertiesValueSuggestions(this.tagId, propertyName));
+    }
     if (reader.canRead()) {
       if (usingEqual) {
         if (reader.peek() == '*') {
