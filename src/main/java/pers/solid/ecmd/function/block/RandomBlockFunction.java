@@ -1,6 +1,8 @@
 package pers.solid.ecmd.function.block;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
@@ -15,17 +17,35 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.StateUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.parse.FunctionLikeParser;
+import pers.solid.ecmd.util.parse.NamedParamListParser;
 import pers.solid.ecmd.util.parse.Parser;
+
+import java.util.Collection;
+import java.util.OptionalLong;
+import java.util.Set;
 
 /**
  * 此方块函数可以产生任意的方块的任意方块状态，无论其原先的方块是什么。
  */
 public final class RandomBlockFunction implements BlockFunction {
-  public static final MapCodec<RandomBlockFunction> CODEC = MapCodec.unit(RandomBlockFunction::new);
+  public static final MapCodec<RandomBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.optionalLongFieldOf("seed").forGetter(RandomBlockFunction::seed)).apply(i, RandomBlockFunction::new));
   private transient FeatureSet featureSet;
   private transient Block[] blocks;
+  private final OptionalLong seed;
+  public static final RandomBlockFunction RANDOM_SEED = new RandomBlockFunction(OptionalLong.empty());
+
+  public OptionalLong seed() {
+    return seed;
+  }
+
+  public RandomBlockFunction(OptionalLong seed) {
+    this.seed = seed;
+  }
 
   private @NotNull Block[] getBlocks(DynamicRegistryManager rm, FeatureSet fs) {
     if (blocks == null || featureSet != fs) {
@@ -41,6 +61,9 @@ public final class RandomBlockFunction implements BlockFunction {
 
   @Override
   public @NotNull String asString() {
+    if (seed.isPresent()) {
+      return "random(seed = " + seed.getAsLong() + ")";
+    }
     return "*";
   }
 
@@ -50,7 +73,7 @@ public final class RandomBlockFunction implements BlockFunction {
     if (blocks.length == 0) {
       return blockState;
     }
-    final Random random = context.getSplitter(this).split(pos);
+    final Random random = context.getSplitterForOptionalSeed(this, seed).split(pos);
     final Block block = blocks[random.nextInt(blocks.length)];
     return StateUtil.getBlockWithRandomProperties(block, random);
   }
@@ -92,9 +115,40 @@ public final class RandomBlockFunction implements BlockFunction {
       if (parser.reader.canRead() && parser.reader.peek() == '*') {
         parser.reader.skip();
         parser.clearSuggestion();
-        return new RandomBlockFunction();
+        return RANDOM_SEED;
       }
       return null;
+    }
+  }
+
+  public static class RandFuncParser implements FunctionLikeParser<BlockFunctionArgument>, NamedParamListParser {
+    protected OptionalLong seed = OptionalLong.empty();
+    private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
+
+    @Override
+    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+      return source -> new RandomBlockFunction(seed);
+    }
+
+    @Override
+    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      parser.clearSuggestion();
+      parseNamedParameters(registryAccess, parser, suggestionsOnly);
+    }
+
+    @Override
+    public @Unmodifiable Collection<String> supportedParams() {
+      return SUPPORTED_PARAMS;
+    }
+
+    @Override
+    public boolean isDuplicateParamName(String paramName) {
+      return seed.isPresent();
+    }
+
+    @Override
+    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      seed = OptionalLong.of(parser.reader.readLong());
     }
   }
 }

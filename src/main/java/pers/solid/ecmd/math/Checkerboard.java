@@ -6,16 +6,16 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.block.WeightedListParser;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
+import pers.solid.ecmd.util.parse.NamedParamListParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
-import static pers.solid.ecmd.util.ModCommandExceptionTypes.DUPLICATE_KEYWORD;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * 用于棋盘格相关代码的共通接口。
@@ -65,13 +65,19 @@ public interface Checkerboard<T> {
     return sb;
   }
 
-  abstract class CheckerboardParser<T> implements FunctionLikeParser<T> {
+  abstract class CheckerboardParser<T> implements FunctionLikeParser<T>, NamedParamListParser {
+    protected final Set<String> SUPPORTED_PARAMS = Set.of("scale", "floor", "offset");
+    public WeightedListParser<T> weightedListParser = WeightedListParser.of((registryAccess, parser, suggestionsOnly, allowSparse) -> parseElement(registryAccess, parser, suggestionsOnly));
     protected Vec3d scale = null;
     protected Vec3d floor = null;
     protected Vec3d offset = null;
     protected int cursorBeforeFunctionName;
-    public WeightedListParser<T> weightedListParser = WeightedListParser.of((registryAccess, parser, suggestionsOnly, allowSparse) -> parseElement(registryAccess, parser, suggestionsOnly));
     protected WeightedList<T> weightedList;
+
+    @Override
+    public @Unmodifiable Collection<String> supportedParams() {
+      return SUPPORTED_PARAMS;
+    }
 
     @Override
     public void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
@@ -109,8 +115,9 @@ public interface Checkerboard<T> {
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
+        parser.clearSuggestion();
 
-        parseParameters(registryAccess, parser, reader, suggestionsOnly);
+        parseNamedParameters(registryAccess, parser, suggestionsOnly);
       }
     }
 
@@ -118,81 +125,24 @@ public interface Checkerboard<T> {
       weightedList = weightedListParser.parse(registryAccess, parser, suggestionsOnly, suggestionsOnly);
     }
 
-    protected void parseParameters(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, StringReader reader, boolean suggestionsOnly) throws CommandSyntaxException {
-      while (true) {
-        parseParameter(registryAccess, parser, suggestionsOnly);
-
-        parser.reader.skipWhitespace();
-        parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(",").buildFuture());
-        if (parser.reader.canRead() && parser.reader.peek() == ',') {
-          parser.reader.skip();
-          parser.reader.skipWhitespace();
-        } else {
-          break;
-        }
-      }
+    @Override
+    public boolean isDuplicateParamName(String paramName) {
+      return switch (paramName) {
+        case "floor" -> floor != null;
+        case "scale" -> scale != null;
+        case "offset" -> offset != null;
+        default -> false;
+      };
     }
 
-
-    protected void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    @Override
+    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
       final StringReader reader = parser.reader;
-      parser.addSuggestion((context, suggestionsBuilder) -> {
-        if (floor == null) {
-          ParsingUtil.suggestString("floor", suggestionsBuilder);
-        }
-        if (scale == null) {
-          ParsingUtil.suggestString("scale", suggestionsBuilder);
-        }
-        if (offset == null) {
-          ParsingUtil.suggestString("offset", suggestionsBuilder);
-        }
-        return suggestionsBuilder.buildFuture();
-      });
-      final int cursorBeforeKeyword = reader.getCursor();
-      final String paramName = reader.readUnquotedString();
-      final int cursorAfterKeyword = reader.getCursor();
-      parser.setSuggestion((commandContext, suggestionsBuilder) -> {
-        if (floor == null) ParsingUtil.suggestString("floor=", suggestionsBuilder);
-        if (scale == null) ParsingUtil.suggestString("scale=", suggestionsBuilder);
-        if (offset == null) ParsingUtil.suggestString("offset=", suggestionsBuilder);
-        return suggestionsBuilder.buildFuture();
-      });
 
       switch (paramName) {
-        case "floor", "scale", "offset" -> {
-          reader.skipWhitespace();
-          parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest("=").buildFuture());
-          reader.expect('=');
-          reader.skipWhitespace();
-        }
-        default -> {
-          reader.setCursor(cursorBeforeKeyword);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(reader, paramName), cursorAfterKeyword);
-        }
-      }
-
-      switch (paramName) {
-        case "floor" -> {
-          parser.clearSuggestion();
-          if (floor != null) {
-            reader.setCursor(cursorBeforeKeyword);
-            throw withCursorEnd(DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterKeyword);
-          }
-          ParsingUtil.expectAndSkipWhitespace(reader);
-          floor = ParsingUtil.parseShortenableVec3d(reader);
-        }
-        case "scale" -> {
-          if (scale != null) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterKeyword);
-          }
-          scale = ParsingUtil.parseShortenableVec3d(reader);
-        }
-        case "offset" -> {
-          if (offset != null) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterKeyword);
-          }
-          offset = ParsingUtil.parseShortenableVec3d(reader);
-        }
+        case "floor" -> floor = ParsingUtil.parseShortenableVec3d(reader);
+        case "scale" -> scale = ParsingUtil.parseShortenableVec3d(reader);
+        case "offset" -> offset = ParsingUtil.parseShortenableVec3d(reader);
       }
     }
   }

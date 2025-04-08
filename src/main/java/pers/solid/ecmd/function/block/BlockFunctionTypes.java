@@ -73,6 +73,7 @@ public final class BlockFunctionTypes {
     map.put("if", ConditionalBlockFunction.Parser::new);
     map.put("ifs", ConditionsBlockFunction.Parser::new);
     map.put("idreplace", IdReplaceBlockFunction.Parser::new);
+    map.put("random", RandomBlockFunction.RandFuncParser::new);
     map.put("rotate", RotateBlockFunction.Parser::new);
     map.put("mirror", MirrorBlockFunction.Parser::new);
     map.put("noise", NoiseBlockFunction.Parser::new);
@@ -90,6 +91,7 @@ public final class BlockFunctionTypes {
     map.put("if", Text.translatable("enhanced_commands.block_function.conditional"));
     map.put("ifs", Text.translatable("enhanced_commands.block_function.conditions"));
     map.put("idreplace", Text.translatable("enhanced_commands.block_function.id_replace"));
+    map.put("random", Text.translatable("enhanced_commands.block_function.random"));
     map.put("rotate", Text.translatable("enhanced_commands.block_function.rotate"));
     map.put("mirror", Text.translatable("enhanced_commands.block_function.mirror"));
     map.put("noise", Text.translatable("enhanced_commands.block_function.noise"));

@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.StateManager;
@@ -12,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -118,5 +121,25 @@ public final class CodecUtil {
         return "combined(" + stringBased.toString() + ", " + mapBased.toString() + ")";
       }
     };
+  }
+
+  /**
+   * 与 {@code Codec.INT.optionalFieldOf} 类似，但是其类型为 {@code OptionalInt} 而非 {@code Optional<Integer>}，从而减少不必要的装箱与拆箱。
+   *
+   * @see Codec#INT
+   * @see Codec#optionalFieldOf
+   */
+  public MapCodec<OptionalInt> optionalIntFieldOf(String name) {
+    return Codec.INT.optionalFieldOf(name).xmap(ol -> ol.map(OptionalInt::of).orElseGet(OptionalInt::empty), optionalInt -> optionalInt.isEmpty() ? Optional.empty() : Optional.of(optionalInt.getAsInt()));
+  }
+
+  /**
+   * 与 {@code Codec.LONG.optionalFieldOf} 类似，但是其类型为 {@code OptionalLong} 而非 {@code Optional<Long>}，从而减少不必要的装箱与拆箱。
+   *
+   * @see Codec#LONG
+   * @see Codec#optionalFieldOf
+   */
+  public static MapCodec<OptionalLong> optionalLongFieldOf(String name) {
+    return Codec.LONG.optionalFieldOf(name).xmap(ol -> ol.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isEmpty() ? Optional.empty() : Optional.of(optionalLong.getAsLong()));
   }
 }

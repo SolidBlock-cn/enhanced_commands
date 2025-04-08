@@ -6,10 +6,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.SeedStorage;
 
+import java.util.OptionalLong;
+
 public class BlockPredicateContext {
   public final Random random;
   private @Nullable Long seed;
-  private @Nullable SeedStorage splitterStorage;
+  private @Nullable SeedStorage<Object> splitterStorage;
 
   public BlockPredicateContext(Random random, @Nullable Long seed) {
     this.random = random;
@@ -24,9 +26,9 @@ public class BlockPredicateContext {
     }
   }
 
-  protected @NotNull SeedStorage getSplitterStorage() {
+  protected @NotNull SeedStorage<Object> getSplitterStorage() {
     if (splitterStorage == null) {
-      return splitterStorage = new SeedStorage(getSeed());
+      return splitterStorage = new SeedStorage<>(getSeed());
     } else {
       return splitterStorage;
     }
@@ -38,5 +40,13 @@ public class BlockPredicateContext {
 
   public @NotNull RandomSplitter getSplitter(Object key) {
     return getSplitterStorage().getSplitter(key);
+  }
+
+  public @NotNull RandomSplitter getSplitterForSeed(long seed) {
+    return getSplitterStorage().getSplitterForSeed(seed);
+  }
+
+  public @NotNull RandomSplitter getSplitterForOptionalSeed(Object key, OptionalLong seed) {
+    return seed.isPresent() ? getSplitterForSeed(seed.getAsLong()) : getSplitter(key);
   }
 }

@@ -1,11 +1,10 @@
 package pers.solid.ecmd.function.block;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.MapCodec;
-import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
@@ -15,14 +14,17 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.WeightedList;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.parse.FunctionLikeParser;
+import pers.solid.ecmd.util.parse.NamedParamListParser;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.OptionalLong;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -35,9 +37,13 @@ import java.util.stream.Collectors;
  * <p>
  * 允许零值，但总和不能为零。
  */
-public record PickBlockFunction(WeightedList<BlockFunction> functions) implements BlockFunction {
+public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalLong seed) implements BlockFunction {
   public static final SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.pick.zero_sum"));
-  public static final MapCodec<PickBlockFunction> CODEC = WeightedList.createMapCodec(BlockFunction.CODEC).xmap(PickBlockFunction::new, PickBlockFunction::functions);
+  public static final MapCodec<PickBlockFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(WeightedList.createMapCodec(BlockFunction.CODEC).forGetter(PickBlockFunction::functions), CodecUtil.optionalLongFieldOf("seed").forGetter(PickBlockFunction::seed)).apply(instance, PickBlockFunction::new));
+
+  public PickBlockFunction(WeightedList<BlockFunction> functions) {
+    this(functions, OptionalLong.empty());
+  }
 
   @Override
   public @NotNull Type getType() {
@@ -56,68 +62,56 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions) implement
 
   @Override
   public @NotNull String asString() {
-    return functions.asStringStream(ExpressionConvertible::asString).collect(Collectors.joining(",", "pick(", ")"));
+    return functions.asStringStream(ExpressionConvertible::asString).collect(Collectors.joining(", ", "pick(", (seed.isPresent() ? "; seed = " + seed.getAsLong() : "") + ")"));
   }
 
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    final Random random = context.getSplitter(this).split(pos);
+    final Random random = context.getSplitterForOptionalSeed(this, seed).split(pos);
     return functions.getRandom(random).getModifiedState(blockState, origState, world, pos, blockEntityData, context);
   }
 
 
-  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
-    final List<ObjectDoublePair<BlockFunctionArgument>> pairs = new ArrayList<>();
-    boolean weighted = false;
+  public static class Parser implements FunctionLikeParser<BlockFunctionArgument>, NamedParamListParser {
+    private WeightedList<BlockFunctionArgument> weightedList;
+    private OptionalLong seed = OptionalLong.empty();
+    private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 
     @Override
     public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
-      if (weighted) {
-        final double sum = pairs.stream().mapToDouble(ObjectDoublePair::rightDouble).sum();
-        if (sum == 0) {
-          throw SUM_ZERO.createWithContext(parser.reader);
-        }
-        return source -> {
-          ImmutableList.Builder<ObjectDoublePair<BlockFunction>> builder = new ImmutableList.Builder<>();
-          for (ObjectDoublePair<BlockFunctionArgument> pair : pairs) {
-            builder.add(ObjectDoublePair.of(pair.left().apply(source), pair.rightDouble() / sum));
-          }
-          return new PickBlockFunction(new WeightedList.Weighted<>(builder.build()));
-        };
-      } else {
-        return source -> {
-          ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
-          for (ObjectDoublePair<BlockFunctionArgument> pair : pairs) {
-            builder.add(pair.left().apply(source));
-          }
-          return new PickBlockFunction(new WeightedList.Uniform<>(builder.build()));
-        };
+      return source -> new PickBlockFunction(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), seed);
+    }
+
+    @Override
+    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      final WeightedListParser<BlockFunctionArgument> weightedListParser = WeightedListParser.of(BlockFunctionArgument::parse);
+      final StringReader reader = parser.reader;
+
+      weightedList = weightedListParser.parse(registryAccess, parser, suggestionsOnly, true);
+
+      if (reader.canRead() && reader.peek() == ';') {
+        reader.skip();
+        reader.skipWhitespace();
+        parser.clearSuggestion();
+
+        parseNamedParameters(registryAccess, parser, suggestionsOnly);
       }
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      final BlockFunctionArgument parse = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
-      parser.reader.skipWhitespace();
-      if (parser.reader.canRead() && StringReader.isAllowedNumber(parser.reader.peek())) {
-        final int cursorBeforeDouble = parser.reader.getCursor();
-        final double weight = parser.reader.readDouble();
-        final int cursorAfterDouble = parser.reader.getCursor();
-        if (weight < 0) {
-          parser.reader.setCursor(cursorBeforeDouble);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, weight), cursorAfterDouble);
-        }
-        weighted = true;
-        pairs.add(ObjectDoublePair.of(parse, weight));
-      } else {
-        pairs.add(ObjectDoublePair.of(parse, 1));
-      }
+    public @Unmodifiable Collection<String> supportedParams() {
+      return SUPPORTED_PARAMS;
     }
 
     @Override
-    public int minParamsCount() {
-      return 1;
+    public boolean isDuplicateParamName(String paramName) {
+      return seed.isPresent();
+    }
+
+    @Override
+    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      seed = OptionalLong.of(parser.reader.readLong());
     }
   }
 }

@@ -1,5 +1,6 @@
 package pers.solid.ecmd.math;
 
+import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
@@ -9,18 +10,17 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
 import net.minecraft.util.math.random.Random;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.block.WeightedListParser;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
+import pers.solid.ecmd.util.parse.NamedParamListParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-import java.util.OptionalLong;
-import java.util.StringJoiner;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -30,6 +30,7 @@ public interface Noise {
   int DEFAULT_FIRST_OCTAVE = -1;
   DoubleList DEFAULT_AMPLITUDES = DoubleList.of(1);
   Vec3d UNIT = new Vec3d(1, 1, 1);
+  WeakHashMap<Long, WeakHashMap<DoublePerlinNoiseSampler.NoiseParameters, DoublePerlinNoiseSampler>> SAMPLER_CACHE = new WeakHashMap<>();
 
   Properties properties();
 
@@ -55,27 +56,25 @@ public interface Noise {
     return properties().offset();
   }
 
-  WeakHashMap<Long, WeakHashMap<DoublePerlinNoiseSampler.NoiseParameters, DoublePerlinNoiseSampler>> SAMPLER_CACHE = new WeakHashMap<>();
-
   /**
    * 作为参数的部分将其转换为字符串。
    */
   default String asParametersString() {
     final StringJoiner stringJoiner = new StringJoiner(", ");
     if (seed().isPresent()) {
-      stringJoiner.add("seed=" + seed().getAsLong());
+      stringJoiner.add("seed = " + seed().getAsLong());
     }
     if (noiseParameters().firstOctave() != DEFAULT_FIRST_OCTAVE) {
-      stringJoiner.add("first_octave=" + noiseParameters().firstOctave());
+      stringJoiner.add("first_octave = " + noiseParameters().firstOctave());
     }
     if (!noiseParameters().amplitudes().equals(DEFAULT_AMPLITUDES)) {
-      stringJoiner.add("amplitudes=" + noiseParameters().amplitudes().doubleStream().mapToObj(Double::toString).collect(Collectors.joining(" ")));
+      stringJoiner.add("amplitudes = " + noiseParameters().amplitudes().doubleStream().mapToObj(Double::toString).collect(Collectors.joining(" ")));
     }
     if (!scale().equals(UNIT)) {
-      stringJoiner.add("scale=" + StringUtil.wrapVector(scale()));
+      stringJoiner.add("scale = " + StringUtil.wrapVector(scale()));
     }
     if (!offset().equals(Vec3d.ZERO)) {
-      stringJoiner.add("offset=" + StringUtil.wrapVector(offset()));
+      stringJoiner.add("offset = " + StringUtil.wrapVector(offset()));
     }
     return stringJoiner.toString();
   }
@@ -102,15 +101,21 @@ public interface Noise {
     return sample(seed, weightedList, pos.x, pos.y, pos.z);
   }
 
-  abstract class Parser<T> implements FunctionLikeParser<T> {
+  abstract class Parser<T> implements FunctionLikeParser<T>, NamedParamListParser {
     protected OptionalLong seed = OptionalLong.empty();
     protected Integer firstOctave;
     protected DoubleList amplitudes;
     protected Vec3d scale;
     protected WeightedList<T> weightedList;
     protected Vec3d offset;
+    protected Set<String> SUPPORTED_PARAMS = ImmutableSet.of("first_octave", "amplitudes", "scale", "offset", "seed");
 
     protected abstract T parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException;
+
+    @Override
+    public @Unmodifiable Collection<String> supportedParams() {
+      return SUPPORTED_PARAMS;
+    }
 
     @Override
     public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
@@ -122,102 +127,58 @@ public interface Noise {
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
+        parser.clearSuggestion();
 
-        parseParameters(registryAccess, parser, suggestionsOnly);
+        parseNamedParameters(registryAccess, parser, suggestionsOnly);
       }
+    }
+
+    @Override
+    public boolean isDuplicateParamName(String paramName) {
+      return switch (paramName) {
+        case "seed" -> seed.isPresent();
+        case "first_octave" -> firstOctave != null;
+        case "amplitudes" -> amplitudes != null;
+        case "scale" -> scale != null;
+        case "offset" -> offset != null;
+        default -> false;
+      };
+    }
+
+    @Override
+    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+      final StringReader reader = parser.reader;
+
+      switch (paramName) {
+        case "seed" -> seed = OptionalLong.of(reader.readLong());
+        case "first_octave" -> firstOctave = reader.readInt();
+        case "amplitudes" -> {
+          final DoubleList doubles = new DoubleArrayList();
+          int cursorAfterDouble = reader.getCursor(); // before whitespace
+          while (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
+            doubles.add(reader.readDouble());
+            cursorAfterDouble = reader.getCursor();
+            reader.skipWhitespace();
+          }
+
+          reader.setCursor(cursorAfterDouble);
+
+          amplitudes = DoubleList.of(doubles.toDoubleArray());
+        }
+        case "scale" -> scale = ParsingUtil.parseShortenableVec3d(reader);
+        case "offset" -> offset = ParsingUtil.parseShortenableVec3d(reader);
+      }
+    }
+
+    @MustBeInvokedByOverriders
+    @Override
+    public T getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+      // 补充未设置的值。
       if (firstOctave == null) firstOctave = DEFAULT_FIRST_OCTAVE;
       if (amplitudes == null) amplitudes = DEFAULT_AMPLITUDES;
       if (scale == null) scale = UNIT;
       if (offset == null) offset = Vec3d.ZERO;
-    }
-
-    protected void parseParameters(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      while (true) {
-        parseParameter(registryAccess, parser, suggestionsOnly);
-
-        parser.reader.skipWhitespace();
-        parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(",").buildFuture());
-        if (parser.reader.canRead() && parser.reader.peek() == ',') {
-          parser.reader.skip();
-          parser.reader.skipWhitespace();
-        } else {
-          break;
-        }
-      }
-    }
-
-    protected void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      final StringReader reader = parser.reader;
-      final int cursorBeforeParamName = reader.getCursor();
-      final String paramName = reader.readUnquotedString();
-      final int cursorAfterParamName = reader.getCursor();
-      parser.setSuggestion((commandContext, suggestionsBuilder) -> {
-        if (seed.isEmpty()) ParsingUtil.suggestString("seed=", suggestionsBuilder);
-        if (firstOctave == null) ParsingUtil.suggestString("first_octave=", suggestionsBuilder);
-        if (amplitudes == null) ParsingUtil.suggestString("amplitudes=", suggestionsBuilder);
-        if (scale == null) ParsingUtil.suggestString("scale=", suggestionsBuilder);
-        if (offset == null) ParsingUtil.suggestString("offset=", suggestionsBuilder);
-        return suggestionsBuilder.buildFuture();
-      });
-
-      switch (paramName) {
-        case "seed", "first_octave", "amplitudes", "scale", "offset" -> {
-          reader.skipWhitespace();
-          parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest("=").buildFuture());
-          reader.expect('=');
-          reader.skipWhitespace();
-        }
-        default -> {
-          reader.setCursor(cursorBeforeParamName);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
-        }
-      }
-
-      switch (paramName) {
-        case "seed" -> {
-          if (seed.isPresent()) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
-          }
-          seed = OptionalLong.of(reader.readLong());
-        }
-        case "first_octave" -> {
-          if (firstOctave != null) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
-          }
-          firstOctave = reader.readInt();
-        }
-        case "amplitudes" -> {
-          if (amplitudes != null) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
-          }
-          final DoubleList doubles = new DoubleArrayList();
-          while (reader.canRead()) {
-            doubles.add(reader.readDouble());
-            final int cursorAfterDouble = reader.getCursor();
-            reader.skipWhitespace();
-            if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
-              continue;
-            } else {
-              reader.setCursor(cursorAfterDouble);
-              break;
-            }
-          }
-
-          amplitudes = DoubleList.of(doubles.toDoubleArray());
-        }
-        case "scale" -> {
-          if (scale != null) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
-          }
-          scale = ParsingUtil.parseShortenableVec3d(reader);
-        }
-        case "offset" -> {
-          if (offset != null) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, paramName), cursorAfterParamName);
-          }
-          offset = ParsingUtil.parseShortenableVec3d(reader);
-        }
-      }
+      return null;
     }
   }
 

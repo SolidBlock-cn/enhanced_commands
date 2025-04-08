@@ -183,7 +183,7 @@ public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
         new Vec3d(0, 0, 1),
         Vec3d.ZERO
     ));
-    entries.add(of("any_dried_block"), new DryBlockFunction(new RandomBlockFunction()));
+    entries.add(of("any_dried_block"), new DryBlockFunction(RandomBlockFunction.RANDOM_SEED));
     entries.add(of("white_gray_stone_checker"), new CheckerboardBlockFunction(new WeightedList.Uniform<>(
         new ReferenceBlockFunction(of("white_colors")),
         new ReferenceBlockFunction(of("gray_colors"))

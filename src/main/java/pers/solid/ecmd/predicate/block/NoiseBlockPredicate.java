@@ -1,7 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
@@ -13,15 +12,15 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
-import java.util.Optional;
 import java.util.OptionalLong;
 
 public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties properties) implements BlockPredicate, Noise {
 
   public static final MapCodec<NoiseBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
       WeightedList.createMapCodec(BlockPredicate.CODEC).fieldOf("list").forGetter(NoiseBlockPredicate::list),
-      Codec.LONG.optionalFieldOf("seed").xmap(ol -> ol.map(OptionalLong::of).orElseGet(OptionalLong::empty), ol -> ol.isEmpty() ? Optional.empty() : Optional.of(ol.getAsLong())).forGetter(NoiseBlockPredicate::seed),
+      CodecUtil.optionalLongFieldOf("seed").forGetter(NoiseBlockPredicate::seed),
       DoublePerlinNoiseSampler.NoiseParameters.CODEC.fieldOf("parameters").forGetter(NoiseBlockPredicate::noiseParameters),
       Vec3d.CODEC.optionalFieldOf("scale", UNIT).forGetter(NoiseBlockPredicate::scale),
       Vec3d.CODEC.optionalFieldOf("offset", Vec3d.ZERO).forGetter(NoiseBlockPredicate::offset)
@@ -34,7 +33,7 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
-    return sample(context.getSeed(this), list, Vec3d.of(cachedBlockPosition.getBlockPos())).test(cachedBlockPosition, context);
+    return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3d.of(cachedBlockPosition.getBlockPos())).test(cachedBlockPosition, context);
   }
 
   @Override
@@ -67,6 +66,7 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
 
     @Override
     public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+      super.getParseResult(registryAccess, parser);
       return source -> new NoiseBlockPredicate(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), seed, new DoublePerlinNoiseSampler.NoiseParameters(firstOctave, amplitudes), scale, offset);
     }
   }

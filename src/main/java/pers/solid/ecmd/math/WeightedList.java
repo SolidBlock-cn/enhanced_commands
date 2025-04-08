@@ -137,7 +137,7 @@ public sealed interface WeightedList<E> {
 
     @Override
     public Stream<String> asStringStream(Function<E, String> converter) {
-      return entries.stream().map(pair -> pair.left() + " " + pair.rightDouble());
+      return entries.stream().map(pair -> converter.apply(pair.left()) + " " + pair.rightDouble());
     }
 
     @Override

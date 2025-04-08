@@ -26,17 +26,17 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class CheckerboardTagBlockFunction implements BlockFunction, Checkerboard<Block> {
-  private final RegistryEntryList<Block> entryList;
-  private final WeightedList<Block> weightedList;
-  private final @NotNull Vec3d floor;
-  private final @NotNull Vec3d scale;
-  private final @NotNull Vec3d offset;
   public static final MapCodec<CheckerboardTagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       RegistryCodecs.entryList(RegistryKeys.BLOCK).fieldOf("tag").forGetter(CheckerboardTagBlockFunction::entryList),
       Vec3d.CODEC.optionalFieldOf("floor", Vec3d.ZERO).forGetter(CheckerboardTagBlockFunction::floor),
       Vec3d.CODEC.optionalFieldOf("scale", UNIT).forGetter(CheckerboardTagBlockFunction::scale),
       Vec3d.CODEC.optionalFieldOf("offset", Vec3d.ZERO).forGetter(CheckerboardTagBlockFunction::offset)
   ).apply(i, CheckerboardTagBlockFunction::new));
+  private final RegistryEntryList<Block> entryList;
+  private final WeightedList<Block> weightedList;
+  private final @NotNull Vec3d floor;
+  private final @NotNull Vec3d scale;
+  private final @NotNull Vec3d offset;
 
   public CheckerboardTagBlockFunction(@NotNull RegistryEntryList<Block> entryList, @NotNull Vec3d floor, @NotNull Vec3d scale, @NotNull Vec3d offset) {
     this.entryList = entryList;
