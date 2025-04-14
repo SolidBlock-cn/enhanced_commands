@@ -68,3 +68,7 @@ $$
 - `checkerboard(white_wool, black wool ; offset = 1 0 0)`：由白色羊毛和黑色羊毛组成的棋盘格，但是棋盘整体沿 `(1, 0, 0)` 的方向移动。
 - `checkerboard(white_wool 1 gray_wool 2, black wool 1; floor = 2, scale = 0.5, offset = 0 1 0, seed = 15)`：含有所有参数的棋盘格的方块函数。
 - `checkerboard(white_wool, black wool ; scale = 0.2, scale = 5)`：无效的方块函数，因为有重复的参数。
+
+## 参见
+
+- [`checkerboard()` 方块谓词](../../block_predicate/checkerboard/zh.md)

@@ -49,11 +49,11 @@ public enum TasksCommand implements CommandRegistrationCallback {
                 .executes(context -> executeSetTaskSuspension(context.getSource().getServer(), context, UuidArgumentType.getUuid(context, "uuid"), false))))
         .then(CommandManager.literal("clear")
             .executes(context -> executeClearTasks(context.getSource().getServer(), context)))
-        .then(CommandManager.literal("exhaust")
+        .then(CommandManager.literal("sprint")
             .then(CommandManager.argument("uuid", UuidArgumentType.uuid()).suggests(taskUuidSuggestion)
-                .executes(context -> executeExhaustTask(context.getSource().getServer(), context, UuidArgumentType.getUuid(context, "uuid"), 0))
+                .executes(context -> executeSprintTask(context.getSource().getServer(), context, UuidArgumentType.getUuid(context, "uuid"), 0))
                 .then(CommandManager.argument("limit", IntegerArgumentType.integer(1))
-                    .executes(context -> executeExhaustTask(context.getSource().getServer(), context, UuidArgumentType.getUuid(context, "uuid"), IntegerArgumentType.getInteger(context, "limit"))))))
+                    .executes(context -> executeSprintTask(context.getSource().getServer(), context, UuidArgumentType.getUuid(context, "uuid"), IntegerArgumentType.getInteger(context, "limit"))))))
         .then(CommandManager.literal("list")
             .executes(context -> executeListTasks(context.getSource().getServer(), context, 10))
             .then(CommandManager.argument("limit", IntegerArgumentType.integer(1, 30))
@@ -110,8 +110,8 @@ public enum TasksCommand implements CommandRegistrationCallback {
     return Text.translatable("enhanced_commands.commands.tasks.continue").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks continue " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.tasks.continue.tooltip"))));
   }
 
-  private static MutableText createExhaustButton(UUID uuid) {
-    return Text.translatable("enhanced_commands.commands.tasks.exhaust").styled(style -> style.withUnderline(true).withColor(Formatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks exhaust " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.tasks.exhaust.tooltip"))));
+  private static MutableText createSprintButton(UUID uuid) {
+    return Text.translatable("enhanced_commands.commands.tasks.sprint").styled(style -> style.withUnderline(true).withColor(Formatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks sprint " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.tasks.sprint.tooltip"))));
   }
 
   private static MutableText createRemoveButton(UUID uuid) {
@@ -147,12 +147,12 @@ public enum TasksCommand implements CommandRegistrationCallback {
     throw TASK_UUID_DOES_NOT_EXIST.create(uuid.toString());
   }
 
-  private static int executeExhaustTask(MinecraftServer server, CommandContext<ServerCommandSource> context, UUID uuid, int limit) throws CommandSyntaxException {
+  private static int executeSprintTask(MinecraftServer server, CommandContext<ServerCommandSource> context, UUID uuid, int limit) throws CommandSyntaxException {
     final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) server).getUUIDToIteratorTasks$ec();
     if (uuidToTasks.containsKey(uuid)) {
       final IteratorTask<?> iteratorTask = uuidToTasks.get(uuid);
       if (iteratorTask != null) {
-        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tasks.exhaust.start", iteratorTask.name), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tasks.sprint.start", iteratorTask.name), true);
         if (limit <= 0) {
           IterateUtils.exhaust(iteratorTask);
         } else {
@@ -162,7 +162,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
           uuidToTasks.remove(iteratorTask.uuid);
           ((ThreadExecutorExtension) server).getIteratorTasks$ec().remove(iteratorTask);
         }
-        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tasks.exhaust.success", iteratorTask.name), true);
+        context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tasks.sprint.success", iteratorTask.name), true);
         return 1;
       } else {
         uuidToTasks.remove(uuid);
@@ -191,7 +191,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
         } else {
           list.add(createSuspendButton(iteratorTask.uuid));
         }
-        list.add(createExhaustButton(iteratorTask.uuid));
+        list.add(createSprintButton(iteratorTask.uuid));
         list.add(createRemoveButton(iteratorTask.uuid));
         message.append(ScreenTexts.LINE_BREAK).append(Text.literal(" - ").formatted(Formatting.GRAY).append(Text.translatable("enhanced_commands.commands.tasks.buttons", Texts.join(list, Text.literal("|")))).append(ScreenTexts.SPACE).append(iteratorTask.name));
       }

@@ -1,15 +1,21 @@
 # 方块谓词
 
-**方块谓词**（block predicate）是指用于判断世界内的一个特定方块的条件。这种[参数类型](../zh.md)可用于对特定的方块进行筛选。
+**方块谓词**（block predicate）是指用于判断世界内的一个特定方块的条件，这个方块可能符合此谓词（测试通过），也可能不符合此谓词（测试失败）。这种[参数类型](../zh.md)可用于针对方块进行条件判断，以及在修改方块时筛选方块。
 
 ## 基本用法
 
-方块谓词可以像原版一样，使用方块 ID 和标签来匹配方块，同时还可以指定方块状态属性和 NBT 数据。例如：
+方块谓词可以像原版一样，使用[方块 ID](simple/zh.md) 和[标签](tag/zh.md)来匹配方块（可以省略命名空间），同时还可以指定[方块状态属性](properties/zh.md)和 [NBT 数据](nbt/zh.md)。例如：
 
 - `minecraft:stone`：当方块是石头时通过
-- `#minecraft:wool`：当方块是任意一种颜色的羊毛时通过
+- `#minecraft:wool`：当方块是任意一种颜色的羊毛（拥有 `#minecraft:wool` 标签）时通过
 - `minecraft:redstone_lamp[lit=true]`：当方块是亮着的红石灯时通过
-- `#stairs[waterlogged=false]`：当方块是含水的任意一种楼梯时通过
+- `#stairs[waterlogged=false]`：当方块是含水的任意一种楼梯（拥有 `#minecraft:stairs` 标签）时通过
+
+方块状态属性和 NBT 支持更高级的语法。例如：
+
+- `furnace[facing!=top]`：当方块是熔炉且不是朝向上方时通过
+- `wheat[age>3]`：当方块是小麦且生长阶段大于 3 时通过
+- `#stairs[facing=east|west]`：当方块是任意一种楼梯（拥有 `#minecraft:stairs` 标签）且朝向东或西时通过
 
 ## 复合方块谓词
 
