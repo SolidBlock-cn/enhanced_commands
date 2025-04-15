@@ -124,7 +124,7 @@ public enum NbtConcentrationType implements StringIdentifiable {
   },
   LIST("list") {
     @Override
-    public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) throws CommandSyntaxException {
+    public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) {
       final NbtList list = new NbtList();
       Iterables.addAll(list, elements);
       return list;
@@ -144,11 +144,25 @@ public enum NbtConcentrationType implements StringIdentifiable {
       }
       return list.get(random.nextInt(list.size()));
     }
+  },
+  ALL("all") {
+    @Override
+    public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) throws CommandSyntaxException {
+      final Iterator<? extends NbtElement> iterator = elements.iterator();
+      if (iterator.hasNext()) {
+        final NbtElement next = iterator.next();
+        if (!iterator.hasNext()) {
+          return next;
+        }
+      }
+      throw CANNOT_CONCENTRATE.create();
+    }
   };
 
   public static final SimpleCommandExceptionType NO_DATA_TO_BE_CONCENTRATED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_concentration_type.no_data"));
   public static final Dynamic2CommandExceptionType MIXED_TYPE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.nbt_concentration_type.mixed_type", a, b));
   public static final DynamicCommandExceptionType UNSUPPORTED_TYPE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.nbt_concentration_type.unsupported_type", o));
+  public static final SimpleCommandExceptionType CANNOT_CONCENTRATE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_concentration_type.not_supported"));
   public static final StringIdentifiableCodec<NbtConcentrationType> CODEC = StringIdentifiableCodec.create(NbtConcentrationType.values());
 
   private final String name;

@@ -1,14 +1,19 @@
 package pers.solid.ecmd.nbt;
 
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -20,8 +25,21 @@ public record EntityNbtData(Entity entity) implements NbtTarget.Single<Entity> {
 
 
   @Override
-  public Text feedbackQuery(NbtElement nbtElement) {
-    return Text.translatable("commands.data.entity.query", this.entity.getDisplayName(), NbtHelper.toPrettyPrintedText(nbtElement));
+  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException {
+    final NbtCompound nbt = getNbt(source.getRegistryManager());
+    if (path == null) {
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.entity.query", this.entity.getDisplayName(), NbtHelper.toPrettyPrintedText(nbt)), false);
+      return NbtSource.toInt(nbt);
+    }
+    final NbtElement nbtAtPath = Iterables.getOnlyElement(path.get(nbt));
+    if (scale == 1) {
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.entity.query_path", this.entity.getDisplayName(), path.toString(), NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
+      return NbtSource.toInt(nbtAtPath);
+    } else {
+      final double scaledValue = NbtSource.scaleNbt(nbtAtPath, scale, path);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.entity.query_scale", this.entity.getDisplayName(), path.toString(), scale, NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
+      return MathHelper.floor(scaledValue);
+    }
   }
 
   @Override

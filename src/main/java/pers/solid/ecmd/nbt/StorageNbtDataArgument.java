@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-public record StorageNbtDataArgument(Identifier id) implements NbtSourceArgument, NbtTargetArgument {
+public record StorageNbtDataArgument(Identifier id) implements NbtSourceArgument<Identifier>, NbtTargetArgument<Identifier> {
   public StorageNbtData getNbtData(ServerCommandSource source) {
     return new StorageNbtData(source.getServer().getDataCommandStorage(), id);
   }

@@ -1,21 +1,22 @@
 package pers.solid.ecmd.nbt;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.*;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.iterator.IterateUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.NoSuchElementException;
+import java.util.Map;
 
 /**
  * NBT 的来源。可以是方块、实体或者存储。
@@ -23,45 +24,77 @@ import java.util.NoSuchElementException;
  * @param <T> 包含 NBT 数据的对象，如方块实体、实体等。
  */
 public interface NbtSource<T> {
-  Collection<T> values();
+  DynamicCommandExceptionType QUERY_SCALE_NOT_NUMBER = new DynamicCommandExceptionType((path) -> Text.translatable("enhanced_commands.nbt.query_scale_not_number", path.toString()));
+  int QUERY_LIMIT = 12;
 
-  NbtCompound getNbtFor(T source, RegistryWrapper.@NotNull WrapperLookup registryLookup);
-
-  default Collection<NbtCompound> getNbts(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    return getNbts(FailableFunction.identity(), registryLookup);
+  /**
+   * 类似于原版的行为，返回指定的 nbt 数值在缩放后的值。如果 nbt 的值不是数字，则抛出错误。
+   */
+  static double scaleNbt(NbtElement nbtElement, double scale, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
+    if (nbtElement instanceof AbstractNbtNumber number) {
+      return number.doubleValue() * scale;
+    } else {
+      throw QUERY_SCALE_NOT_NUMBER.create(path);
+    }
   }
 
-  default <R> Collection<R> getNbts(FailableFunction<NbtCompound, R, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
-    return IterateUtils.transformFailableImmutableList(values(), value -> mappingFunction.apply(getNbtFor(value, registryLookup)));
-  }
-
-  NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) throws CommandSyntaxException;
-
-  default NbtElement getConcentratedNbts(FailableFunction<NbtCompound, ? extends NbtElement, CommandSyntaxException> mappingFunction, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    return concentrateNbts(getNbts(mappingFunction, registryLookup));
-  }
-
-  default NbtElement getConcentratedNbts(NbtPathArgumentType.NbtPath path, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    try {
-      return getConcentratedNbts(element -> {
-        try {
-          return Iterables.getOnlyElement(path.get(element));
-        } catch (CommandSyntaxException e) {
-          throw new RuntimeException(e);
-        }
-      }, registryLookup);
-    } catch (NoSuchElementException | IllegalArgumentException e) {
-      throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.getMessage());
-    } catch (RuntimeException e) {
-      if (e.getCause() instanceof CommandSyntaxException e1) {
-        throw e1;
-      } else {
-        throw e;
+  /**
+   * 类似于原版的行为，将 nbtElement 转换为数字，可以是其包含的元素的数量，作为命令的返回值。
+   */
+  static int toInt(NbtElement nbtElement) {
+    switch (nbtElement) {
+      case NbtInt nbtInt -> {
+        return nbtInt.intValue();
+      }
+      case NbtLong nbtLong -> {
+        return nbtLong.intValue();
+      }
+      case NbtShort nbtShort -> {
+        return nbtShort.intValue();
+      }
+      case AbstractNbtNumber nbtNumber -> {
+        return MathHelper.floor(nbtNumber.doubleValue());
+      }
+      case AbstractNbtList<?> nbtList -> {
+        return nbtList.size();
+      }
+      case NbtCompound nbtCompound -> {
+        return nbtCompound.getSize();
+      }
+      default -> {
+        return 1;
       }
     }
   }
 
-  Text feedbackQuery(NbtElement nbtElement);
+  Collection<T> values();
+
+  NbtCompound getNbtFor(T source, RegistryWrapper.@NotNull WrapperLookup registryLookup);
+
+  default Map<T, NbtCompound> getNbts(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    return getNbts(FailableFunction.identity(), registryLookup);
+  }
+
+  default Map<T, NbtElement> getNbts(@Nullable NbtPathArgumentType.NbtPath nbtPath, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    return getNbts(nbtPath == null ? nbtCompound -> nbtCompound : nbtCompound -> Iterables.getOnlyElement(nbtPath.get(nbtCompound)), registryLookup);
+  }
+
+  default <R> Map<T, R> getNbts(FailableFunction<NbtCompound, R, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
+    final ImmutableMap.Builder<T, R> builder = new ImmutableMap.Builder<>();
+    for (T value : values()) {
+      builder.put(value, mappingFunction.apply(getNbtFor(value, registryLookup)));
+    }
+    return builder.build();
+  }
+
+  NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) throws CommandSyntaxException;
+
+  int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException;
+
+  default NbtElement getConcentratedNbts(@Nullable NbtPathArgumentType.NbtPath path, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    final Map<T, NbtElement> nbts = getNbts(path, registryLookup);
+    return concentrateNbts(nbts.values());
+  }
 
   interface Single<T> extends NbtSource<T> {
     T value();
@@ -76,26 +109,13 @@ public interface NbtSource<T> {
     }
 
     @Override
-    default <R> Collection<R> getNbts(FailableFunction<NbtCompound, R, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
-      return Collections.singletonList(mappingFunction.apply(getNbt(registryLookup)));
+    default <R> Map<T, R> getNbts(FailableFunction<NbtCompound, R, CommandSyntaxException> mappingFunction, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
+      return Map.of(value(), mappingFunction.apply(getNbt(registryLookup)));
     }
 
     @Override
     default NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) {
       return Iterables.getOnlyElement(nbtElements);
     }
-  }
-
-  SimpleCommandExceptionType EXPECTED_WHITESPACE_AND_CONCENTRATION_TYPE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.parsing.expected_whitespace_and_concentration_type"));
-  SimpleCommandExceptionType EXPECTED_CONCENTRATION_TYPE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.parsing.expected_concentration_type"));
-
-  /**
-   * 在读取了 NBT 来源的数据之后，如果必须指定聚合类型，则调用此方法以提醒输入者需要聚合类型。该方法也将自动跳过聚合类型前的空格。
-   */
-  static void expectConcentrationType(StringReader reader) throws CommandSyntaxException {
-    if (!reader.canRead() || !Character.isWhitespace(reader.peek())) {
-      throw EXPECTED_WHITESPACE_AND_CONCENTRATION_TYPE.createWithContext(reader);
-    }
-    reader.skipWhitespace();
   }
 }

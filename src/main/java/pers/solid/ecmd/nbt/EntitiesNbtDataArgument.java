@@ -26,16 +26,20 @@ public record EntitiesNbtDataArgument(EntitySelector entitySelector, NbtConcentr
     return getEntitiesNbtData(source);
   }
 
-  public static EntitiesNbtDataArgument handle(SuggestedParser<?> suggestedParser, boolean requiresConcentration) throws CommandSyntaxException {
-    ParsingUtil.expectAndSkipWhitespace(suggestedParser.reader);
-    final EntitySelector selector = suggestedParser.parseAndSuggestArgument(EntityArgumentType.entities());
-    if (suggestedParser.reader.canRead()) {
-      suggestedParser.clearSuggestion();
+  public static EntitiesNbtDataArgument handle(SuggestedParser<?> parser, boolean hasConcentration) throws CommandSyntaxException {
+    ParsingUtil.expectAndSkipWhitespace(parser.reader);
+    final EntitySelector selector = parser.parseAndSuggestArgument(EntityArgumentType.entities());
+    if (parser.reader.canRead()) {
+      parser.clearSuggestion();
     }
-    if (requiresConcentration) {
-      NbtSource.expectConcentrationType(suggestedParser.reader);
-      final NbtConcentrationType nbtConcentrationType = suggestedParser.parseAndSuggestEnums(NbtConcentrationType.values(), NbtConcentrationType::getDisplayName, NbtConcentrationType.CODEC);
-      suggestedParser.clearSuggestion();
+    if (hasConcentration) {
+      final int cursorBeforeWhite = parser.reader.getCursor();
+      parser.reader.skipWhitespace();
+      if (cursorBeforeWhite == parser.reader.getCursor()) {
+        return new EntitiesNbtDataArgument(selector, NbtConcentrationType.ALL);
+      }
+      final NbtConcentrationType nbtConcentrationType = parser.parseAndSuggestEnums(NbtConcentrationType.values(), NbtConcentrationType::getDisplayName, NbtConcentrationType.CODEC);
+      parser.clearSuggestion();
       return new EntitiesNbtDataArgument(selector, nbtConcentrationType);
     } else {
       return new EntitiesNbtDataArgument(selector, null);

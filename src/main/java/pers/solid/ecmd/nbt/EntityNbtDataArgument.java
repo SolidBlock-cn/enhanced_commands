@@ -9,7 +9,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-public record EntityNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument<Entity>, NbtTargetArgument {
+public record EntityNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument<Entity>, NbtTargetArgument<Entity> {
   public EntityNbtData getEntityNbtData(ServerCommandSource source) throws CommandSyntaxException {
     return new EntityNbtData(entitySelector.getEntity(source));
   }

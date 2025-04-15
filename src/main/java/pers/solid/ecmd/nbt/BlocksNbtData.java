@@ -1,22 +1,36 @@
 package pers.solid.ecmd.nbt;
 
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtInt;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.screen.ScreenTexts;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
+import pers.solid.ecmd.util.TextUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtTarget<BlockEntity> {
+public record BlocksNbtData(Collection<BlockEntity> blockEntities, @Nullable NbtConcentrationType nbtConcentrationType, Random random) implements NbtTarget<BlockEntity> {
 
   @Override
   public Collection<BlockEntity> values() {
@@ -30,16 +44,62 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, NbtConcentrat
 
   @Override
   public NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) throws CommandSyntaxException {
+    if (nbtConcentrationType == null) {
+      return NbtInt.of(nbtElements.size());
+    }
     return nbtConcentrationType.concentrate(nbtElements, random);
   }
 
   @Override
-  public Text feedbackQuery(NbtElement nbtElement) {
-    if (blockEntities.size() == 1) {
-      final BlockPos pos = blockEntities.iterator().next().getPos();
-      return Text.translatable("commands.data.block.query", pos.getX(), pos.getY(), pos.getZ(), NbtHelper.toPrettyPrintedText(nbtElement));
+  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException {
+    if (blockEntities.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
+      return new BlockNbtData(blockEntities.iterator().next()).executeQuery(source, path, scale);
+    }
+    final Map<BlockEntity, NbtElement> nbts = getNbts(path, source.getRegistryManager());
+    final Object2DoubleMap<BlockEntity> scaledNbts;
+    if (scale != 1 && path != null) {
+      scaledNbts = new Object2DoubleOpenHashMap<>();
+      for (Map.Entry<BlockEntity, NbtElement> entry : nbts.entrySet()) {
+        scaledNbts.put(entry.getKey(), NbtSource.scaleNbt(entry.getValue(), scale, path));
+      }
     } else {
-      return Text.translatable("enhanced_commands.nbt.blocks.query", blockEntities.size(), NbtHelper.toPrettyPrintedText(nbtElement)).enhanced$$();
+      scaledNbts = null;
+    }
+
+    if (nbtConcentrationType == NbtConcentrationType.ALL) {
+      source.sendFeedback$ecBridge(() -> {
+        List<Text> texts = new ArrayList<>();
+        texts.add(Text.translatable("enhanced_commands.nbt.blocks.query.header", Math.min(nbts.size(), QUERY_LIMIT)).enhanced$$().formatted(Formatting.AQUA));
+        for (var entry : Iterables.limit(nbts.entrySet(), QUERY_LIMIT)) {
+          final BlockEntity blockEntity = entry.getKey();
+          final BlockPos pos = blockEntity.getPos();
+          if (path == null) {
+            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.nbt.block.query", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), NbtHelper.toPrettyPrintedText(entry.getValue()))));
+          } else if (scale == 1) {
+            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.nbt.block.query_path", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), path.toString(), NbtHelper.toPrettyPrintedText(entry.getValue()))));
+          } else {
+            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.nbt.block.query_scale", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), path.toString(), scale, scaledNbts.getOrDefault(blockEntity, 0))));
+          }
+        }
+        if (nbts.size() > QUERY_LIMIT) {
+          texts.add(Text.translatable("enhanced_commands.nbt.query_limit_notice").formatted(Formatting.YELLOW));
+        }
+        return ScreenTexts.joinLines(texts);
+      }, false);
+      return nbts.size();
+    }
+
+    final NbtElement concentratedNbts = concentrateNbts(nbts.values());
+    if (path == null) {
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.blocks.query", blockEntities.size(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
+      return NbtSource.toInt(concentratedNbts);
+    } else if (scale == 1) {
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.blocks.query_path", blockEntities.size(), path.toString(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
+      return NbtSource.toInt(concentratedNbts);
+    } else {
+      final double scaledConcentratedNbt = NbtSource.scaleNbt(concentratedNbts, scale, path);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.blocks.query_scale", blockEntities.size(), path.toString(), scale, scaledConcentratedNbt).enhanced$$(), false);
+      return MathHelper.floor(scaledConcentratedNbt);
     }
   }
 
