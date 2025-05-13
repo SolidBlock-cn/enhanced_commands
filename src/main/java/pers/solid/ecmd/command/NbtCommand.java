@@ -44,8 +44,13 @@ public enum NbtCommand implements CommandRegistrationCallback {
                         .executes(context -> executeGet(getNbtSource(context, "source"), getNbtPath(context, "path"), getDouble(context, "scale"), context))))))
         .then(literal("set")
             .then(argument("target", nbtTarget(commandRegistryAccess))
-                .then(argument("nbt_function", NbtFunctionArgumentType.ELEMENT)
-                    .executes(context -> executeSet(getNbtTarget(context, "target"), getNbtFunction(context, "nbt_function"), context)))))
+                .then(argument("path", nbtPath())
+                    .then(argument("nbt_function", NbtFunctionArgumentType.ELEMENT)
+                        .executes(context -> executeSet(getNbtTarget(context, "target"), getNbtPath(context, "path"), getNbtFunction(context, "nbt_function"), context))))))
+        .then(literal("merge")
+            .then(argument("target", nbtTarget(commandRegistryAccess))
+                .then(argument("nbt_function", NbtFunctionArgumentType.COMPOUND)
+                    .executes(context -> executeMerge(getNbtTarget(context, "target"), getNbtFunction(context, "nbt_function"), context)))))
         .then(literal("replace")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("nbt_predicate", NbtPredicateArgumentType.ELEMENT)
@@ -63,7 +68,14 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return nbtSource.executeQuery(source, nbtPath, scale);
   }
 
-  private static int executeSet(NbtTarget<?> target, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private static int executeSet(NbtTarget<?> target, NbtPathArgumentType.NbtPath nbtPath, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    final ServerCommandSource source = context.getSource();
+    target.transformNbtInPath(nbtPath, nbtFunction::apply, source.getRegistryManager());
+    source.sendFeedback$ecBridge(target::feedbackModify, true);
+    return 1; // 应该修改为执行成功数量
+  }
+
+  private static int executeMerge(NbtTarget<?> target, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     target.transformNbt(nbtCompound -> nbtFunction.apply(nbtCompound) instanceof final NbtCompound newCompound ? newCompound : nbtCompound, source.getRegistryManager());
     source.sendFeedback$ecBridge(target::feedbackModify, true);

@@ -70,7 +70,7 @@ public record EntitiesNbtData(Collection<Entity> entities, NbtConcentrationType 
           }
         }
         if (nbts.size() > QUERY_LIMIT) {
-          texts.add(Text.translatable("enhanced_commands.nbt.query_limit_notice").formatted(Formatting.YELLOW));
+          texts.add(Text.translatable("enhanced_commands.nbt.query_limit_notice", QUERY_LIMIT).formatted(Formatting.YELLOW));
         }
         return ScreenTexts.joinLines(texts);
       }, false);

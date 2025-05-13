@@ -59,7 +59,7 @@ public enum AirCommand implements CommandRegistrationCallback {
                                 .executes(context -> {
                                   final NbtTarget<?> target = getNbtTarget(context, "target");
                                   final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
-                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.setNbtPath(path, nbt, context.getSource().getRegistryManager()));
+                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.setNbtInPath(path, nbt, context.getSource().getRegistryManager()));
                                 })))))))
         .then(literal("set")
             .then(argument("entities", entities())

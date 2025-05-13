@@ -107,7 +107,7 @@ public enum ModCommands implements CommandRegistrationCallback {
   public static FailableConsumer<NbtElement, CommandSyntaxException> consumerOf(CommandContext<ServerCommandSource> context, String targetArgName, String pathArgName) throws CommandSyntaxException {
     final NbtTarget<?> target = NbtTargetArgumentType.getNbtTarget(context, targetArgName);
     final NbtPathArgumentType.NbtPath path = NbtPathArgumentType.getNbtPath(context, pathArgName);
-    return nbt -> target.setNbtPath(path, nbt, context.getSource().getRegistryManager());
+    return nbt -> target.setNbtInPath(path, nbt, context.getSource().getRegistryManager());
   }
 
   public static FailableConsumer<NbtElement, CommandSyntaxException> consumerOf(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

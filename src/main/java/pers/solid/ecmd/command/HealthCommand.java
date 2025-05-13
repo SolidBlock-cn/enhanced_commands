@@ -125,7 +125,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
       final float health = livingEntity.getHealth();
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(health).styled(Styles.RESULT)), false);
       if (nbtTarget != null && nbtPath != null) {
-        nbtTarget.setNbtPath(nbtPath, NbtFloat.of(health), context.getSource().getRegistryManager());
+        nbtTarget.setNbtInPath(nbtPath, NbtFloat.of(health), context.getSource().getRegistryManager());
       }
       return (int) (health * scale);
     } else {
@@ -141,7 +141,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
       final double result = concentrationType.concentrateFloat(floats);
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.get.multiple", floats.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.floatToString(result)).styled(Styles.RESULT)).enhanced$$(), false);
       if (nbtTarget != null && nbtPath != null) {
-        nbtTarget.setNbtPath(nbtPath, concentrationType.floatToNbt(result), context.getSource().getRegistryManager());
+        nbtTarget.setNbtInPath(nbtPath, concentrationType.floatToNbt(result), context.getSource().getRegistryManager());
       }
       return (int) (result * scale);
     }

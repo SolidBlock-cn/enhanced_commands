@@ -33,6 +33,16 @@ public interface NbtTarget<T> extends NbtSource<T> {
     }
   }
 
+  default void transformNbtInPathFor(T target, NbtPathArgumentType.NbtPath nbtPath, FailableFunction<NbtElement, NbtElement, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    setNbtInPathFor(target, nbtPath, operator.apply(getNbtFor(target, registryLookup)), registryLookup);
+  }
+
+  default void transformNbtInPath(NbtPathArgumentType.NbtPath nbtPath, FailableFunction<NbtElement, NbtElement, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    for (T value : values()) {
+      transformNbtInPathFor(value, nbtPath, operator, registryLookup);
+    }
+  }
+
   default void modifyNbtFor(T target, FailableConsumer<NbtCompound, CommandSyntaxException> consumer, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     transformNbtFor(target, nbtCompound -> {
       consumer.accept(nbtCompound);
@@ -47,13 +57,13 @@ public interface NbtTarget<T> extends NbtSource<T> {
     }
   }
 
-  default void setNbtPathFor(T target, NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+  default void setNbtInPathFor(T target, NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     modifyNbtFor(target, nbt -> nbtPath.put(nbt, element), registryLookup);
   }
 
-  default void setNbtPath(NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+  default void setNbtInPath(NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     for (T value : values()) {
-      setNbtPathFor(value, nbtPath, element, registryLookup);
+      setNbtInPathFor(value, nbtPath, element, registryLookup);
     }
   }
 
@@ -83,8 +93,8 @@ public interface NbtTarget<T> extends NbtSource<T> {
     }
 
     @Override
-    default void setNbtPath(NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-      setNbtPathFor(value(), nbtPath, element, registryLookup);
+    default void setNbtInPath(NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+      setNbtInPathFor(value(), nbtPath, element, registryLookup);
     }
   }
 }
