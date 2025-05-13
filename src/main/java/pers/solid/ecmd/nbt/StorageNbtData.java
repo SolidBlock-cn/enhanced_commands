@@ -12,12 +12,14 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.math.NbtConcentrationType;
 
 public record StorageNbtData(DataCommandStorage storage, Identifier value) implements NbtTarget.Single<Identifier> {
   @Override
-  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException {
+  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     final NbtElement nbt = getNbt(path, source.getRegistryManager());
     if (path == null) {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.storage.query", value, NbtHelper.toPrettyPrintedText(nbt)), false);

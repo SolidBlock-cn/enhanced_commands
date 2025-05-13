@@ -11,8 +11,10 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.math.NbtConcentrationType;
 
 import java.util.UUID;
 
@@ -24,7 +26,7 @@ public record EntityNbtData(Entity entity) implements NbtTarget.Single<Entity> {
 
 
   @Override
-  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException {
+  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     final NbtElement nbt = getNbt(path, source.getRegistryManager());
     if (path == null) {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.entity.query", this.entity.getDisplayName(), NbtHelper.toPrettyPrintedText(nbt)), false);

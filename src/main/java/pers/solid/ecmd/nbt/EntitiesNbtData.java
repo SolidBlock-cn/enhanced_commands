@@ -23,7 +23,7 @@ import pers.solid.ecmd.math.NbtConcentrationType;
 
 import java.util.*;
 
-public record EntitiesNbtData(Collection<Entity> entities, NbtConcentrationType nbtConcentrationType, Random random) implements NbtTarget<Entity> {
+public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<Entity> {
   @Override
   public Collection<Entity> values() {
     return entities;
@@ -35,14 +35,9 @@ public record EntitiesNbtData(Collection<Entity> entities, NbtConcentrationType 
   }
 
   @Override
-  public NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) throws CommandSyntaxException {
-    return nbtConcentrationType.concentrate(nbtElements, random);
-  }
-
-  @Override
-  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException {
+  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     if (entities.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
-      return new EntityNbtData(entities.iterator().next()).executeQuery(source, path, scale);
+      return new EntityNbtData(entities.iterator().next()).executeQuery(source, path, scale, nbtConcentrationType, random);
     }
     final Map<Entity, NbtElement> nbts = getNbts(path, source.getRegistryManager());
     final Object2DoubleMap<Entity> scaledNbts;
@@ -77,7 +72,7 @@ public record EntitiesNbtData(Collection<Entity> entities, NbtConcentrationType 
       return nbts.size();
     }
 
-    final NbtElement concentratedNbts = concentrateNbts(nbts.values());
+    final NbtElement concentratedNbts = nbtConcentrationType.concentrate(nbts.values(), random);
     if (path == null) {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.entities.query", entities.size(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
       return NbtSource.toInt(concentratedNbts);

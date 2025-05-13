@@ -12,9 +12,11 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.TextUtil;
 
 public record BlockNbtData(BlockEntity blockEntity) implements NbtTarget.Single<BlockEntity> {
@@ -24,7 +26,7 @@ public record BlockNbtData(BlockEntity blockEntity) implements NbtTarget.Single<
   }
 
   @Override
-  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException {
+  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     final BlockPos pos = blockEntity.getPos();
 
     final NbtElement nbt = getNbt(path, source.getRegistryManager());

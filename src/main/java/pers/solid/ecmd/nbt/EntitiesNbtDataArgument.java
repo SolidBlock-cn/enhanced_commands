@@ -6,14 +6,13 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collections;
 
-public record EntitiesNbtDataArgument(EntitySelector entitySelector, NbtConcentrationType nbtConcentrationType) implements NbtSourceArgument<Entity>, NbtTargetArgument<Entity> {
+public record EntitiesNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument<Entity>, NbtTargetArgument<Entity> {
   public EntitiesNbtData getEntitiesNbtData(ServerCommandSource source) throws CommandSyntaxException {
-    return new EntitiesNbtData(Collections.unmodifiableCollection(entitySelector.getEntities(source)), nbtConcentrationType, source.getWorld().getRandom());
+    return new EntitiesNbtData(Collections.unmodifiableCollection(entitySelector.getEntities(source)));
   }
 
   @Override
@@ -26,23 +25,12 @@ public record EntitiesNbtDataArgument(EntitySelector entitySelector, NbtConcentr
     return getEntitiesNbtData(source);
   }
 
-  public static EntitiesNbtDataArgument handle(SuggestedParser<?> parser, boolean hasConcentration) throws CommandSyntaxException {
+  public static EntitiesNbtDataArgument handle(SuggestedParser<?> parser) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
     final EntitySelector selector = parser.parseAndSuggestArgument(EntityArgumentType.entities());
     if (parser.reader.canRead()) {
       parser.clearSuggestion();
     }
-    if (hasConcentration) {
-      final int cursorBeforeWhite = parser.reader.getCursor();
-      parser.reader.skipWhitespace();
-      if (cursorBeforeWhite == parser.reader.getCursor()) {
-        return new EntitiesNbtDataArgument(selector, NbtConcentrationType.ALL);
-      }
-      final NbtConcentrationType nbtConcentrationType = parser.parseAndSuggestEnums(NbtConcentrationType.values(), NbtConcentrationType::getDisplayName, NbtConcentrationType.CODEC);
-      parser.clearSuggestion();
-      return new EntitiesNbtDataArgument(selector, nbtConcentrationType);
-    } else {
-      return new EntitiesNbtDataArgument(selector, null);
-    }
+    return new EntitiesNbtDataArgument(selector);
   }
 }

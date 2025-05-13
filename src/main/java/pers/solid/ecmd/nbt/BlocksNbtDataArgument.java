@@ -11,7 +11,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.WorldChunk;
 import pers.solid.ecmd.argument.SuggestedParser;
-import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -21,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public record BlocksNbtDataArgument(RegionArgument regionArgument, NbtConcentrationType nbtConcentrationType) implements NbtSourceArgument<BlockEntity>, NbtTargetArgument<BlockEntity> {
+public record BlocksNbtDataArgument(RegionArgument regionArgument) implements NbtSourceArgument<BlockEntity>, NbtTargetArgument<BlockEntity> {
   public BlocksNbtData getBlockNbtData(ServerCommandSource source) throws CommandSyntaxException {
     final Region region = regionArgument.toAbsoluteRegion(source);
     final ServerWorld world = source.getWorld();
@@ -37,7 +36,7 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, NbtConcentrat
       }
       blockEntities = affectedChunks.stream().flatMap(worldChunk -> worldChunk.getBlockEntities().entrySet().stream()).filter(entry -> region.contains(entry.getKey())).map(Map.Entry::getValue).collect(ImmutableList.toImmutableList());
     }
-    return new BlocksNbtData(blockEntities, nbtConcentrationType, source.getWorld().getRandom());
+    return new BlocksNbtData(blockEntities);
   }
 
   @Override
@@ -50,21 +49,10 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, NbtConcentrat
     return getBlockNbtData(source);
   }
 
-  public static BlocksNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean requiresConcentration) throws CommandSyntaxException {
+  public static BlocksNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
     final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, suggestionsOnly);
     parser.clearSuggestion();
-    if (requiresConcentration) {
-      final int cursorBeforeWhite = parser.reader.getCursor();
-      parser.reader.skipWhitespace();
-      if (cursorBeforeWhite == parser.reader.getCursor()) {
-        return new BlocksNbtDataArgument(regionArgument, NbtConcentrationType.ALL);
-      }
-      final NbtConcentrationType nbtConcentrationType = parser.parseAndSuggestEnums(NbtConcentrationType.values(), NbtConcentrationType::getDisplayName, NbtConcentrationType.CODEC);
-      parser.clearSuggestion();
-      return new BlocksNbtDataArgument(regionArgument, nbtConcentrationType);
-    } else {
-      return new BlocksNbtDataArgument(regionArgument, null);
-    }
+    return new BlocksNbtDataArgument(regionArgument);
   }
 }

@@ -1,7 +1,6 @@
 package pers.solid.ecmd.nbt;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -11,8 +10,10 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.math.NbtConcentrationType;
 
 import java.util.*;
 
@@ -97,13 +98,11 @@ public interface NbtSource<T> {
     return builder.build();
   }
 
-  NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) throws CommandSyntaxException;
+  int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException;
 
-  int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException;
-
-  default NbtElement getConcentratedNbts(@Nullable NbtPathArgumentType.NbtPath path, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+  default NbtElement getConcentratedNbts(@Nullable NbtPathArgumentType.NbtPath path, RegistryWrapper.WrapperLookup registryLookup, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     final Map<T, NbtElement> nbts = getNbts(path, registryLookup);
-    return concentrateNbts(nbts.values());
+    return nbtConcentrationType.concentrate(nbts.values(), random);
   }
 
   interface Single<T> extends NbtSource<T> {
@@ -121,11 +120,6 @@ public interface NbtSource<T> {
     @Override
     default Map<T, NbtElement> getNbts(NbtPathArgumentType.@Nullable NbtPath path, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
       return Map.of(value(), getNbt(path, registryLookup));
-    }
-
-    @Override
-    default NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) {
-      return Iterables.getOnlyElement(nbtElements);
     }
   }
 }

@@ -9,15 +9,17 @@ import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import pers.solid.ecmd.argument.KeywordArgs;
+import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.argument.NbtFunctionArgumentType;
 import pers.solid.ecmd.argument.NbtPredicateArgumentType;
 import pers.solid.ecmd.function.nbt.NbtFunction;
+import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
-import static com.mojang.brigadier.arguments.DoubleArgumentType.getDouble;
 import static net.minecraft.command.argument.NbtPathArgumentType.getNbtPath;
 import static net.minecraft.command.argument.NbtPathArgumentType.nbtPath;
 import static net.minecraft.server.command.CommandManager.argument;
@@ -28,6 +30,7 @@ import static pers.solid.ecmd.argument.NbtSourceArgumentType.getNbtSource;
 import static pers.solid.ecmd.argument.NbtSourceArgumentType.nbtSource;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.getNbtTarget;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.nbtConcentrationType;
 
 public enum NbtCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -37,11 +40,17 @@ public enum NbtCommand implements CommandRegistrationCallback {
     commandDispatcher.register(literal("nbt")
         .then(literal("get")
             .then(argument("source", nbtSource(commandRegistryAccess))
-                .executes(context -> executeGet(getNbtSource(context, "source"), context))
+                .executes(context -> executeGet(getNbtSource(context, "source"), NbtConcentrationType.ALL, context))
                 .then(argument("path", nbtPath())
-                    .executes(context -> executeGet(getNbtSource(context, "source"), getNbtPath(context, "path"), 1, context))
-                    .then(argument("scale", doubleArg())
-                        .executes(context -> executeGet(getNbtSource(context, "source"), getNbtPath(context, "path"), getDouble(context, "scale"), context))))))
+                    .executes(context -> executeGetInPath(getNbtSource(context, "source"), getNbtPath(context, "path"), NbtConcentrationType.ALL, 1, context))
+                    .then(argument("keyword_args", KeywordArgsArgumentType.builder()
+                        .addOptionalArg("scale", doubleArg(), 1d)
+                        .addOptionalArg("concentration_type", nbtConcentrationType(), NbtConcentrationType.ALL)
+                        .build())
+                        .executes(context -> {
+                          final KeywordArgs keywordArgs = KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args");
+                          return executeGetInPath(getNbtSource(context, "source"), getNbtPath(context, "path"), keywordArgs.getArg("concentration_type"), keywordArgs.getDouble("scale"), context);
+                        })))))
         .then(literal("set")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("path", nbtPath())
@@ -58,14 +67,14 @@ public enum NbtCommand implements CommandRegistrationCallback {
                         .executes(context -> executeReplace(getNbtTarget(context, "target"), getNbtPredicate(context, "nbt_predicate"), getNbtFunction(context, "nbt_function"), context)))))));
   }
 
-  private static int executeGet(NbtSource<?> nbtSource, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private static int executeGet(NbtSource<?> nbtSource, NbtConcentrationType nbtConcentrationType, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    return nbtSource.executeQuery(source, null, 1);
+    return nbtSource.executeQuery(source, null, 1, nbtConcentrationType, source.getWorld().getRandom());
   }
 
-  private static int executeGet(NbtSource<?> nbtSource, NbtPathArgumentType.NbtPath nbtPath, double scale, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private static int executeGetInPath(NbtSource<?> nbtSource, NbtPathArgumentType.NbtPath nbtPath, NbtConcentrationType nbtConcentrationType, double scale, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    return nbtSource.executeQuery(source, nbtPath, scale);
+    return nbtSource.executeQuery(source, nbtPath, scale, nbtConcentrationType, source.getWorld().getRandom());
   }
 
   private static int executeSet(NbtTarget<?> target, NbtPathArgumentType.NbtPath nbtPath, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

@@ -17,6 +17,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.ConcentrationType;
+import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.Styles;
@@ -37,8 +38,7 @@ import static pers.solid.ecmd.argument.NbtSourceArgumentType.getNbtSource;
 import static pers.solid.ecmd.argument.NbtSourceArgumentType.nbtSource;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.getNbtTarget;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
-import static pers.solid.ecmd.argument.SimpleEnumArgumentType.concentrationType;
-import static pers.solid.ecmd.argument.SimpleEnumArgumentType.getConcentrationType;
+import static pers.solid.ecmd.argument.SimpleEnumArgumentType.*;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum HealthCommand implements CommandRegistrationCallback {
@@ -91,10 +91,9 @@ public enum HealthCommand implements CommandRegistrationCallback {
                             .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getSourceEntityHealth(context, getConcentrationType(context, "source_concentration_type")))))))
                     .then(argument("source", nbtSource(registryAccess))
                         .then(argument("path", nbtPath())
-                            .executes(context -> {
-                              final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
-                              return executeSetHealth(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path, context.getSource().getRegistryManager()), path).floatValue());
-                            }))))))
+                            .executes(context -> executeSetHealthFromSource(context, getNbtPath(context, "path"), NbtConcentrationType.FIRST))
+                            .then(argument("concentration_type", nbtConcentrationType())
+                                .executes(context -> executeSetHealthFromSource(context, getNbtPath(context, "path"), getNbtConcentrationType(context, "concentration_type")))))))))
         .then(literal("add")
             .executes(context -> executeAddHealth(context, Collections.singleton(context.getSource().getEntityOrThrow())))
             .then(argument("entities", entities())
@@ -107,6 +106,10 @@ public enum HealthCommand implements CommandRegistrationCallback {
                 .executes(context -> executeRemoveHealth(context, getEntities(context, "entities")))
                 .then(argument("probability", floatArg())
                     .executes(context -> executeRemoveHealth(context, getEntities(context, "entities"), getFloat(context, "probability")))))));
+  }
+
+  private int executeSetHealthFromSource(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path, NbtConcentrationType nbtConcentrationType) throws CommandSyntaxException {
+    return executeSetHealth(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path, context.getSource().getRegistryManager(), nbtConcentrationType, context.getSource().getWorld().getRandom()), path).floatValue());
   }
 
   public static final DynamicCommandExceptionType NOT_LIVING = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.health.get.single.not_living", o));

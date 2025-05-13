@@ -10,7 +10,6 @@ import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtInt;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.command.ServerCommandSource;
@@ -30,7 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public record BlocksNbtData(Collection<BlockEntity> blockEntities, @Nullable NbtConcentrationType nbtConcentrationType, Random random) implements NbtTarget<BlockEntity> {
+public record BlocksNbtData(Collection<BlockEntity> blockEntities) implements NbtTarget<BlockEntity> {
 
   @Override
   public Collection<BlockEntity> values() {
@@ -43,17 +42,9 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, @Nullable Nbt
   }
 
   @Override
-  public NbtElement concentrateNbts(Collection<? extends NbtElement> nbtElements) throws CommandSyntaxException {
-    if (nbtConcentrationType == null) {
-      return NbtInt.of(nbtElements.size());
-    }
-    return nbtConcentrationType.concentrate(nbtElements, random);
-  }
-
-  @Override
-  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException {
+  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     if (blockEntities.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
-      return new BlockNbtData(blockEntities.iterator().next()).executeQuery(source, path, scale);
+      return new BlockNbtData(blockEntities.iterator().next()).executeQuery(source, path, scale, nbtConcentrationType, random);
     }
     final Map<BlockEntity, NbtElement> nbts = getNbts(path, source.getRegistryManager());
     final Object2DoubleMap<BlockEntity> scaledNbts;
@@ -89,7 +80,7 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities, @Nullable Nbt
       return nbts.size();
     }
 
-    final NbtElement concentratedNbts = concentrateNbts(nbts.values());
+    final NbtElement concentratedNbts = nbtConcentrationType.concentrate(nbts.values(), random);
     if (path == null) {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.blocks.query", blockEntities.size(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
       return NbtSource.toInt(concentratedNbts);
