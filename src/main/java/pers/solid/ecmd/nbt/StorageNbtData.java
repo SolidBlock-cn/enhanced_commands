@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 public record StorageNbtData(DataCommandStorage storage, Identifier value) implements NbtTarget.Single<Identifier> {
   @Override
   public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale) throws CommandSyntaxException {
-    final NbtCompound nbt = getNbt(source.getRegistryManager());
+    final NbtElement nbt = getNbt(path, source.getRegistryManager());
     if (path == null) {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.storage.query", value, NbtHelper.toPrettyPrintedText(nbt)), false);
       return NbtSource.toInt(nbt);
