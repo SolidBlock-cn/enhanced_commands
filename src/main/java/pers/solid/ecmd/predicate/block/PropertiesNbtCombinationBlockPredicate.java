@@ -47,11 +47,11 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
     if (properties == null && nbt == null) {
       throw new IllegalArgumentException("The property names and nbt predicate cannot be both null. In that case, directly use the first block predicate.");
     }
-    if (base instanceof NbtPredicate) {
-      throw new IllegalArgumentException("The base cannot be NbtPredicate or PropertyNamesPredicate");
+    if (base instanceof NbtBlockPredicate) {
+      throw new IllegalArgumentException("The base cannot be NbtBlockPredicate or PropertyNamesBlockPredicate");
     }
     if (base instanceof PropertiesNamesBlockPredicate && properties != null) {
-      throw new IllegalArgumentException("The properties must be null when the base is instance of PropertyNamesPredicate");
+      throw new IllegalArgumentException("The properties must be null when the base is instance of PropertyNamesBlockPredicate");
     }
   }
 

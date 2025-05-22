@@ -71,7 +71,7 @@ public interface NbtSource<T> {
 
   NbtCompound getNbtFor(T source, @NotNull RegistryWrapper.WrapperLookup registryLookup);
 
-  default NbtElement getNbtFor(T source, @Nullable NbtPathArgumentType.NbtPath path, @NotNull RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+  default NbtElement getNbtInPathFor(T source, @Nullable NbtPathArgumentType.NbtPath path, @NotNull RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     final NbtCompound nbt = getNbtFor(source, registryLookup);
     if (path == null) {
       return nbt;
@@ -86,11 +86,11 @@ public interface NbtSource<T> {
     }
   }
 
-  default Map<T, NbtElement> getNbts(@Nullable NbtPathArgumentType.NbtPath path, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+  default Map<T, NbtElement> getNbtsInPath(@Nullable NbtPathArgumentType.NbtPath path, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     final ImmutableMap.Builder<T, NbtElement> builder = new ImmutableMap.Builder<>();
     for (T value : values()) {
       try {
-        builder.put(value, getNbtFor(value, path, registryLookup));
+        builder.put(value, getNbtInPathFor(value, path, registryLookup));
       } catch (CommandSyntaxException e) {
         // skip
       }
@@ -101,7 +101,7 @@ public interface NbtSource<T> {
   int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException;
 
   default NbtElement getConcentratedNbts(@Nullable NbtPathArgumentType.NbtPath path, RegistryWrapper.WrapperLookup registryLookup, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
-    final Map<T, NbtElement> nbts = getNbts(path, registryLookup);
+    final Map<T, NbtElement> nbts = getNbtsInPath(path, registryLookup);
     return nbtConcentrationType.concentrate(nbts.values(), random);
   }
 
@@ -114,11 +114,11 @@ public interface NbtSource<T> {
     }
 
     default NbtElement getNbt(NbtPathArgumentType.@Nullable NbtPath path, RegistryWrapper.@NotNull WrapperLookup registryLookup) throws CommandSyntaxException {
-      return getNbtFor(value(), path, registryLookup);
+      return getNbtInPathFor(value(), path, registryLookup);
     }
 
     @Override
-    default Map<T, NbtElement> getNbts(NbtPathArgumentType.@Nullable NbtPath path, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+    default Map<T, NbtElement> getNbtsInPath(NbtPathArgumentType.@Nullable NbtPath path, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
       return Map.of(value(), getNbt(path, registryLookup));
     }
   }

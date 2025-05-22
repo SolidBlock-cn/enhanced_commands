@@ -9,10 +9,14 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
+import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.nbt.BlocksNbtDataArgument;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.nbt.NbtTargetArgument;
+import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,12 +27,20 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
     return new NbtTargetArgumentType(registryAccess);
   }
 
-  public static NbtTargetArgument<?> getNbtTargetArgument(CommandContext<?> context, String name) {
-    return context.getArgument(name, NbtTargetArgument.class);
+  public static NbtTargetArgument<?> getNbtTargetArgument(CommandContext<?> context, String name, @Nullable BlockPredicateArgument blockPredicateArgument) {
+    final NbtTargetArgument<?> argument = context.getArgument(name, NbtTargetArgument.class);
+    if (argument instanceof BlocksNbtDataArgument blocksNbtDataArgument && blockPredicateArgument != null) {
+      return new BlocksNbtDataArgument(blocksNbtDataArgument.regionArgument(), blockPredicateArgument);
+    }
+    return argument;
+  }
+
+  public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name, @Nullable BlockPredicateArgument blockPredicateArgument) throws CommandSyntaxException {
+    return getNbtTargetArgument(context, name, blockPredicateArgument).getNbtTarget(context.getSource());
   }
 
   public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return getNbtTargetArgument(context, name).getNbtTarget(context.getSource());
+    return getNbtTargetArgument(context, name, ((CommandContextAccessor<?>) context).getArguments().containsKey("keyword_args") ? KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getArg("affect_only") : null).getNbtTarget(context.getSource());
   }
 
   @Override

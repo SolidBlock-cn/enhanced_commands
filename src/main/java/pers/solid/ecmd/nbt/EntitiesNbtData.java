@@ -39,7 +39,7 @@ public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<
     if (entities.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
       return new EntityNbtData(entities.iterator().next()).executeQuery(source, path, scale, nbtConcentrationType, random);
     }
-    final Map<Entity, NbtElement> nbts = getNbts(path, source.getRegistryManager());
+    final Map<Entity, NbtElement> nbts = getNbtsInPath(path, source.getRegistryManager());
     final Object2DoubleMap<Entity> scaledNbts;
     if (scale != 1 && path != null) {
       scaledNbts = new Object2DoubleOpenHashMap<>();

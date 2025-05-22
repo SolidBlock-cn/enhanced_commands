@@ -11,7 +11,9 @@ import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
-public interface NbtPredicate extends ExpressionConvertible {
+import java.util.function.Predicate;
+
+public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull NbtElement> {
   @Override
   @NotNull String asString();
 
@@ -19,6 +21,7 @@ public interface NbtPredicate extends ExpressionConvertible {
     return asString();
   }
 
+  @Override
   boolean test(@NotNull NbtElement nbtElement);
 
   @NotNull

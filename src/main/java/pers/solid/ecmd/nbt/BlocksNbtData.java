@@ -46,7 +46,7 @@ public record BlocksNbtData(Collection<BlockEntity> blockEntities) implements Nb
     if (blockEntities.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
       return new BlockNbtData(blockEntities.iterator().next()).executeQuery(source, path, scale, nbtConcentrationType, random);
     }
-    final Map<BlockEntity, NbtElement> nbts = getNbts(path, source.getRegistryManager());
+    final Map<BlockEntity, NbtElement> nbts = getNbtsInPath(path, source.getRegistryManager());
     final Object2DoubleMap<BlockEntity> scaledNbts;
     if (scale != 1 && path != null) {
       scaledNbts = new Object2DoubleOpenHashMap<>();

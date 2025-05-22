@@ -24,6 +24,7 @@ public class ModArgumentTypes {
     register("keyword_args", KeywordArgsArgumentType.class, KeywordArgsArgumentSerializer.INSTANCE);
     registerTrustingType("omitted_registry_entry", OmittedRegistryEntryArgumentType.class, OmittedRegistryEntryArgumentType.Serializer.INSTANCE);
     register("pos", EnhancedPosArgumentType.class, EnhancedPosArgumentType.Serializer.INSTANCE);
+    register("regex", RegexArgumentType.class, ConstantArgumentSerializer.of(() -> RegexArgumentType.REGEX));
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));
     register("simple_enum", SimpleEnumArgumentType.class, SimpleEnumArgumentType.Serializer.INSTANCE);
     register("string_enum", StringEnumArgumentType.class, StringEnumArgumentType.Serializer.INSTANCE);
