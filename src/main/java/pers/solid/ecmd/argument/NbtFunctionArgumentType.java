@@ -12,16 +12,18 @@ import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, ArgumentSerializer.ArgumentTypeProperties<NbtFunctionArgumentType> {
-  COMPOUND(true), ELEMENT(false);
+public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtFunction> {
 
-  private final boolean onlyCompounds;
+  public static NbtFunctionArgumentType compound(CommandRegistryAccess registryAccess) {
+    return new NbtFunctionArgumentType(true, registryAccess);
+  }
 
-  NbtFunctionArgumentType(boolean onlyCompounds) {
-    this.onlyCompounds = onlyCompounds;
+  public static NbtFunctionArgumentType element(CommandRegistryAccess registryAccess) {
+    return new NbtFunctionArgumentType(false, registryAccess);
   }
 
   public static NbtFunction getNbtFunction(CommandContext<?> context, String name) {
@@ -34,7 +36,8 @@ public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, Argume
 
   @Override
   public NbtFunction parse(StringReader reader) throws CommandSyntaxException {
-    final NbtFunctionSuggestedParser<?> parser = new NbtFunctionSuggestedParser<>(reader);
+    final SuggestedParser<?> suggestedParser = new SuggestedParser<>(reader);
+    final NbtFunctionParser<?> parser = new NbtFunctionParser<>(new ParseContext<>(registryAccess, suggestedParser, false, false));
     return onlyCompounds ? parser.parseCompound(false) : parser.parseFunction(false, false);
   }
 
@@ -42,7 +45,8 @@ public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, Argume
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final NbtFunctionSuggestedParser<S> parser = new NbtFunctionSuggestedParser<>(stringReader);
+    final SuggestedParser<S> suggestedParser = new SuggestedParser<>(stringReader);
+    final NbtFunctionParser<S> parser = new NbtFunctionParser<>(new ParseContext<>(registryAccess, suggestedParser, false, false));
     try {
       if (onlyCompounds) {
         parser.parseCompound(false);
@@ -52,40 +56,43 @@ public enum NbtFunctionArgumentType implements ArgumentType<NbtFunction>, Argume
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
-    return parser.buildSuggestions(context, builderOffset);
+    return suggestedParser.buildSuggestions(context, builderOffset);
   }
 
-  @Override
-  public NbtFunctionArgumentType createType(CommandRegistryAccess registryAccess) {
-    return this;
-  }
-
-  @Override
-  public ArgumentSerializer<NbtFunctionArgumentType, ?> getSerializer() {
-    return Serializer.INSTANCE;
-  }
-
-  public enum Serializer implements ArgumentSerializer<NbtFunctionArgumentType, NbtFunctionArgumentType> {
+  public enum Serializer implements ArgumentSerializer<NbtFunctionArgumentType, NbtFunctionArgumentType.Properties> {
     INSTANCE;
 
     @Override
-    public void writePacket(NbtFunctionArgumentType properties, PacketByteBuf buf) {
+    public void writePacket(NbtFunctionArgumentType.Properties properties, PacketByteBuf buf) {
       buf.writeBoolean(properties.onlyCompounds);
     }
 
     @Override
-    public NbtFunctionArgumentType fromPacket(PacketByteBuf buf) {
-      return buf.readBoolean() ? COMPOUND : ELEMENT;
+    public NbtFunctionArgumentType.Properties fromPacket(PacketByteBuf buf) {
+      return new Properties(buf.readBoolean());
     }
 
     @Override
-    public void writeJson(NbtFunctionArgumentType properties, JsonObject json) {
+    public void writeJson(NbtFunctionArgumentType.Properties properties, JsonObject json) {
       json.addProperty("onlyCompounds", properties.onlyCompounds);
     }
 
     @Override
-    public NbtFunctionArgumentType getArgumentTypeProperties(NbtFunctionArgumentType argumentType) {
-      return argumentType;
+    public NbtFunctionArgumentType.Properties getArgumentTypeProperties(NbtFunctionArgumentType argumentType) {
+      return new Properties(argumentType.onlyCompounds);
+    }
+  }
+
+  public record Properties(boolean onlyCompounds) implements ArgumentSerializer.ArgumentTypeProperties<NbtFunctionArgumentType> {
+
+    @Override
+    public NbtFunctionArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+      return new NbtFunctionArgumentType(onlyCompounds, commandRegistryAccess);
+    }
+
+    @Override
+    public ArgumentSerializer<NbtFunctionArgumentType, ?> getSerializer() {
+      return NbtFunctionArgumentType.Serializer.INSTANCE;
     }
   }
 }

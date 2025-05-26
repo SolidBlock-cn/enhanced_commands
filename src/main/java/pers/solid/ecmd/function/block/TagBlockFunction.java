@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
@@ -71,7 +71,7 @@ public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull L
 
     @Override
     public @Nullable TagBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      SimpleBlockFunctionSuggestedParser<?> parser = new SimpleBlockFunctionSuggestedParser<>(parseContext.registryAccess(), parseContext.parser());
+      SimpleBlockFunctionParser<?> parser = new SimpleBlockFunctionParser<>(parseContext);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         final TagKey<Block> tagKey = parser.tagId.getTag();

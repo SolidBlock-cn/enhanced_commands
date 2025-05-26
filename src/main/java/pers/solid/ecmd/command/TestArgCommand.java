@@ -3,7 +3,6 @@ package pers.solid.ecmd.command;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -76,10 +75,10 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     dispatcher.register(literalR2("testarg")
         .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
         .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
-        .then(addNbtProperties(literal("nbt")))
+        .then(addNbtProperties(literal("nbt"), registryAccess))
         .then(addNbtCompoundProperties(literal("nbt_compound")))
-        .then(addNbtPredicateProperties(literal("nbt_predicate")))
-        .then(addNbtFunctionProperties(literal("nbt_function")))
+        .then(addNbtPredicateProperties(literal("nbt_predicate"), registryAccess))
+        .then(addNbtFunctionProperties(literal("nbt_function"), registryAccess))
         .then(addPosProperties(literal("pos")))
         .then(addRegionProperties(literal("region"), registryAccess))
     );
@@ -121,7 +120,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtProperties(T argumentBuilder) {
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
     return argumentBuilder.then(argument("nbt", NbtElementArgumentType.nbtElement())
         .executes(context -> {
           context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(getNbtElement(context, "nbt")), false);
@@ -147,9 +146,9 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final NbtElement nbtElement = getNbtElement(context, "nbt");
               final String s = TextUtil.toSpacedStringNbt(nbtElement);
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(Styles.RESULT)), false);
-              final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser<>(new StringReader(s)).parsePredicate(false, false);
+              final NbtPredicate reparsedPredicate = NbtPredicate.parse(registryAccess, s, context.getSource());
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(Styles.RESULT)), false);
-              final NbtFunction reparsedFunction = new NbtFunctionSuggestedParser<>(new StringReader(s)).parseFunction(false, false);
+              final NbtFunction reparsedFunction = NbtFunction.parse(registryAccess, s, context.getSource());
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
@@ -177,8 +176,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtPredicateProperties(T argumentBuilder) {
-    return argumentBuilder.then(argument("nbt_predicate", NbtPredicateArgumentType.ELEMENT)
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtPredicateProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
+    return argumentBuilder.then(argument("nbt_predicate", NbtPredicateArgumentType.element(registryAccess))
         .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString))
         .then(literal("match")
             .then(argument("nbt_to_test", NbtElementArgumentType.nbtElement())
@@ -192,12 +191,12 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("string")
             .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> new NbtPredicateSuggestedParser<>(new StringReader(s)).parseCompound(false, false))))
+            .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> NbtPredicate.parse(registryAccess, s, context.getSource()))))
     );
   }
 
-  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtFunctionProperties(T argumentBuilder) {
-    return argumentBuilder.then(argument("nbt_function", NbtFunctionArgumentType.ELEMENT)
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addNbtFunctionProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
+    return argumentBuilder.then(argument("nbt_function", NbtFunctionArgumentType.element(registryAccess))
         .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString))
         .then(literal("apply")
             .executes(context -> {
@@ -217,7 +216,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("string")
             .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString, s -> new NbtFunctionSuggestedParser<>(new StringReader(s)).parseFunction(false, false))))
+            .executes(context -> executeStringTest(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString, s -> NbtFunction.parse(registryAccess, s, context.getSource()))))
         .then(literal("nbt")
             .executes(context -> executeCodecShow(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, NbtOps.INSTANCE)))
         .then(literal("json")

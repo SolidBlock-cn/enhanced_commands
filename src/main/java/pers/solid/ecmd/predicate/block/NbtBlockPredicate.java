@@ -10,7 +10,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
+import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.TestResult;
@@ -64,9 +64,9 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     @Override
     public @Nullable NbtBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '{') {
-        return new NbtBlockPredicate(new NbtPredicateSuggestedParser<>(parser).parseCompound(false, false));
+        return new NbtBlockPredicate(new NbtPredicateParser<>(parseContext).parseCompound(false, false));
       } else {
         return null;
       }

@@ -9,8 +9,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
-import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockParser;
+import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -84,9 +84,9 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     @Override
     public @Nullable PropertiesNamesBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockPredicateSuggestedParser<?> suggestedParser = new SimpleBlockPredicateSuggestedParser<>(parseContext.registryAccess(), parser);
+        final SimpleBlockPredicateParser<?> suggestedParser = new SimpleBlockPredicateParser<>(parseContext);
         suggestedParser.parsePropertyNames();
         return new PropertiesNamesBlockPredicate(suggestedParser.propertyNamePredicates);
       } else {

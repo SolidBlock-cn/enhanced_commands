@@ -7,9 +7,9 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
-import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
-import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
+import pers.solid.ecmd.argument.NbtPredicateParser;
+import pers.solid.ecmd.argument.SimpleBlockParser;
+import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
@@ -49,12 +49,12 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
       // 尝试读取属性
       parser.addSuggestion((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
-          suggestionsBuilder.suggest("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES);
+          suggestionsBuilder.suggest("[", SimpleBlockParser.START_OF_PROPERTIES);
         }
         return suggestionsBuilder.buildFuture();
       });
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockPredicateSuggestedParser<S> suggestedParser = new SimpleBlockPredicateSuggestedParser<>(parseContext.registryAccess(), parser);
+        final SimpleBlockPredicateParser<S> suggestedParser = new SimpleBlockPredicateParser<>(parseContext);
         suggestedParser.parsePropertyNames();
         propertyNamePredicates = suggestedParser.propertyNamePredicates;
       } else propertyNamePredicates = null;
@@ -62,13 +62,13 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
     NbtPredicate nbtPredicate;
     parser.addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
-        suggestionsBuilder.suggest("{", NbtPredicateSuggestedParser.START_OF_COMPOUND);
+        suggestionsBuilder.suggest("{", NbtPredicateParser.START_OF_COMPOUND);
       }
       return suggestionsBuilder.buildFuture();
     });
     if (parser.reader.canRead() && parser.reader.peek() == '{') {
       // 尝试读取 NBT
-      nbtPredicate = new NbtPredicateSuggestedParser<>(parser).parseCompound(false, false);
+      nbtPredicate = new NbtPredicateParser<>(parseContext).parseCompound(false, false);
     } else nbtPredicate = null;
     if (propertyNamePredicates != null || nbtPredicate != null) {
       return source -> new PropertiesNbtCombinationBlockPredicate(parseUnit.apply(source), propertyNamePredicates == null ? null : new PropertiesNamesBlockPredicate(propertyNamePredicates), nbtPredicate == null ? null : new NbtBlockPredicate(nbtPredicate));

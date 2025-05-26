@@ -12,7 +12,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.function.property.PropertyFunction;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -65,7 +65,7 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
 
     @Override
     public @NotNull SimpleBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      SimpleBlockFunctionSuggestedParser<?> parser = new SimpleBlockFunctionSuggestedParser<>(parseContext.registryAccess(), parseContext.parser());
+      SimpleBlockFunctionParser<?> parser = new SimpleBlockFunctionParser<>(parseContext);
       parser.parseBlockId();
       parser.parseProperties();
       return new SimpleBlockFunction(parser.block, parser.propertyFunctions);

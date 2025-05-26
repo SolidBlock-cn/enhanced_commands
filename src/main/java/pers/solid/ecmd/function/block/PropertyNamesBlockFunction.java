@@ -11,8 +11,8 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
-import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
+import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -59,9 +59,9 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
     @Override
     public @Nullable BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockFunctionSuggestedParser<?> suggestedParser = new SimpleBlockFunctionSuggestedParser<>(parseContext.registryAccess(), parser);
+        final SimpleBlockFunctionParser<?> suggestedParser = new SimpleBlockFunctionParser<>(parseContext);
         suggestedParser.parsePropertyNames();
         return new PropertyNamesBlockFunction(suggestedParser.propertyNameFunctions);
       } else {

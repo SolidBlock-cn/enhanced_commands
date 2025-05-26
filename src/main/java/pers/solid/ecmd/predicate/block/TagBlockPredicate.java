@@ -14,7 +14,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Styles;
@@ -98,7 +98,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
 
     @Override
     public @Nullable TagBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser<?> parser = new SimpleBlockPredicateSuggestedParser<>(parseContext.registryAccess(), parseContext.parser());
+      SimpleBlockPredicateParser<?> parser = new SimpleBlockPredicateParser<>(parseContext);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         return new TagBlockPredicate(parser.tagId.getTag(), parser.propertyNamePredicates);

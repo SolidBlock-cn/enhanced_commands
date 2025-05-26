@@ -69,7 +69,7 @@ public final class KeywordArgsCommon {
     return Preconditions.checkNotNull(getById(identifier), "unknown keyword args type: %s", identifier);
   }
 
-  public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> CONVERT_BLOCKS = register("convert_blocks", KeywordArgsArgumentType.builder()
+  public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> CONVERT_BLOCKS = register("convert_blocks", registryAccess -> KeywordArgsArgumentType.builder()
       .addOptionalArg("skip_light_update", BoolArgumentType.bool(), false)
       .addOptionalArg("notify_listeners", BoolArgumentType.bool(), true)
       .addOptionalArg("notify_neighbors", BoolArgumentType.bool(), false)
@@ -77,7 +77,7 @@ public final class KeywordArgsCommon {
       .addOptionalArg("suppress_initial_check", BoolArgumentType.bool(), false)
       .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
       .addOptionalArg("force", BoolArgumentType.bool(), false)
-      .addOptionalArg("nbt", NbtFunctionArgumentType.COMPOUND, null)
+      .addOptionalArg("nbt", NbtFunctionArgumentType.compound(registryAccess), null)
       .addOptionalArg("affect_fluid", BoolArgumentType.bool(), false)
       .build());
   public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> FILLING = register("filling", KeywordArgsArgumentType.builder()

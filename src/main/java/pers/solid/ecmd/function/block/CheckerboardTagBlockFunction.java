@@ -16,7 +16,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
@@ -130,7 +130,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     public void parseEntryList(ParseContext<?> parseContext) throws CommandSyntaxException {
       final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
-      final SimpleBlockFunctionSuggestedParser<?> parser0 = new SimpleBlockFunctionSuggestedParser<>(parseContext.registryAccess(), parser);
+      final SimpleBlockFunctionParser<?> parser0 = new SimpleBlockFunctionParser<>(parseContext);
       parser0.parseBlockTagId();
       tagKey = parser0.tagId;
       reader.skipWhitespace();

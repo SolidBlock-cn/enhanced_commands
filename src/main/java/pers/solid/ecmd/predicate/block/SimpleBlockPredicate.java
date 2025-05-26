@@ -12,7 +12,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SimpleBlockPredicateSuggestedParser;
+import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Styles;
@@ -92,7 +92,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
 
     @Override
     public @NotNull BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      SimpleBlockPredicateSuggestedParser<?> parser = new SimpleBlockPredicateSuggestedParser<>(parseContext.registryAccess(), parseContext.parser());
+      SimpleBlockPredicateParser<?> parser = new SimpleBlockPredicateParser<>(parseContext);
       parser.parseBlockId();
       parser.parseProperties();
       return new SimpleBlockPredicate(parser.block, parser.propertyPredicates);

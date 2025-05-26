@@ -10,8 +10,8 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
-import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
+import pers.solid.ecmd.argument.NbtFunctionParser;
+import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
@@ -53,9 +53,9 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
     @Override
     public @Nullable NbtBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateSuggestedParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
+      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '{') {
-        return new NbtBlockFunction(new NbtFunctionSuggestedParser<>(parser).parseCompound(false));
+        return new NbtBlockFunction(new NbtFunctionParser<>(parseContext).parseCompound(false));
       } else {
         return null;
       }

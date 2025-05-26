@@ -2,6 +2,7 @@ package pers.solid.ecmd.function.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -9,8 +10,10 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Objects;
 import java.util.Set;
@@ -19,6 +22,10 @@ import java.util.function.Predicate;
 public interface NbtFunction extends ExpressionConvertible, FailableFunction<@Nullable NbtElement, @NotNull
     NbtElement, CommandSyntaxException>, NbtFunctionArgument {
   Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.getCodec().dispatch(NbtFunction::getType, NbtFunctionType::getCodec);
+
+  static @NotNull NbtFunction parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
+    return NbtFunctionArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(s), false, true), false, false).toAbsolute(source);
+  }
 
   @Override
   @NotNull

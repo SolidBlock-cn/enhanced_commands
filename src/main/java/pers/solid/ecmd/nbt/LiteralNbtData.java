@@ -14,7 +14,7 @@ import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
+import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -68,7 +68,7 @@ public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTar
   public static LiteralNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
     final SuggestedParser<?> parser = parseContext.parser();
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
-    final CompoundNbtFunction compoundNbtFunction = new NbtFunctionSuggestedParser<>(parser).parseCompound(false);
+    final CompoundNbtFunction compoundNbtFunction = new NbtFunctionParser<>(parseContext).parseCompound(false);
     return new LiteralNbtData(new MutableObject<>(compoundNbtFunction.apply(null)));
   }
 }
