@@ -1,5 +1,6 @@
 package pers.solid.ecmd.function.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -15,7 +16,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -92,11 +92,11 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
+      final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
-        pattern = ParsingUtil.readRegex(parser.reader);
+        pattern = ParsingUtil.readRegex(reader);
       } else if (paramIndex == 1) {
-        replacement = parser.reader.readString();
+        replacement = reader.readString();
       }
     }
 

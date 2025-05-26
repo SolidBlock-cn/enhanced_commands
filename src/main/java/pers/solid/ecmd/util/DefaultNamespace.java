@@ -101,9 +101,7 @@ public class DefaultNamespace {
    */
   public CompletableFuture<Suggestions> suggestIdentifiers(Iterable<Identifier> candidates, SuggestionsBuilder builder, String prefix) {
     String string = builder.getRemaining().toLowerCase(Locale.ROOT);
-    CommandSource.forEachMatching(candidates, string, prefix, Function.identity(), (id) -> {
-      builder.suggest(prefix + toSimplerString(id));
-    });
+    CommandSource.forEachMatching(candidates, string, prefix, Function.identity(), (id) -> builder.suggest(prefix + toSimplerString(id)));
     return builder.buildFuture();
   }
 

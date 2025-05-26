@@ -3,7 +3,6 @@ package pers.solid.ecmd.predicate.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
@@ -21,7 +20,7 @@ public record FireEntityPredicateEntry(BridgeIntRange intRange, boolean inverted
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public @NotNull String toOptionEntry() {
     return "fire=" + (inverted ? "!" : "") + intRange.asString();
   }
 }

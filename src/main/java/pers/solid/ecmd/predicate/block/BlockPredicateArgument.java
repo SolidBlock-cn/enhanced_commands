@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -42,31 +41,31 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
     if (parseUnit instanceof NbtPredicate) {
       return parseUnit;
     }
+    final StringReader reader = parseContext.reader();
     List<PropertyNamePredicate> propertyNamePredicates;
-    final SuggestedParser<S> parser = parseContext.parser();
-    if (!(parseUnit instanceof PropertiesNamesBlockPredicate) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
+    if (!(parseUnit instanceof PropertiesNamesBlockPredicate) && reader.canRead(0) && reader.peek(-1) != ']') {
       // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
       // 尝试读取属性
-      parser.addSuggestion((context, suggestionsBuilder) -> {
+      parseContext.addSuggestion((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           suggestionsBuilder.suggest("[", SimpleBlockParser.START_OF_PROPERTIES);
         }
         return suggestionsBuilder.buildFuture();
       });
-      if (parser.reader.canRead() && parser.reader.peek() == '[') {
+      if (reader.canRead() && reader.peek() == '[') {
         final SimpleBlockPredicateParser<S> suggestedParser = new SimpleBlockPredicateParser<>(parseContext);
         suggestedParser.parsePropertyNames();
         propertyNamePredicates = suggestedParser.propertyNamePredicates;
       } else propertyNamePredicates = null;
     } else propertyNamePredicates = null;
     NbtPredicate nbtPredicate;
-    parser.addSuggestion((context, suggestionsBuilder) -> {
+    parseContext.addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("{", NbtPredicateParser.START_OF_COMPOUND);
       }
       return suggestionsBuilder.buildFuture();
     });
-    if (parser.reader.canRead() && parser.reader.peek() == '{') {
+    if (reader.canRead() && reader.peek() == '{') {
       // 尝试读取 NBT
       nbtPredicate = new NbtPredicateParser<>(parseContext).parseCompound(false, false);
     } else nbtPredicate = null;
@@ -78,8 +77,7 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
 
   @NotNull
   static BlockPredicateArgument parseUnit(ParseContext<?> parseContext) throws CommandSyntaxException {
-    final SuggestedParser<?> parser = parseContext.parser();
-    final StringReader reader = parser.reader;
+    final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
     // 刻意将 simple 调整到最后面
     for (Parser<BlockPredicateArgument> argumentParser : Iterables.concat(BlockPredicateTypes.PARSERS, Collections.singleton(SimpleBlockPredicate.Type.SIMPLE_TYPE))) {

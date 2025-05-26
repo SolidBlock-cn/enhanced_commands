@@ -14,7 +14,6 @@ import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -151,25 +150,24 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      final StringReader reader = parser.reader;
+      final StringReader reader = parseContext.reader();
       final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {
-        parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
+        parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
         final int cursorBeforeKeyword = reader.getCursor();
         final String unquotedString = reader.readUnquotedString();
         if (unquotedString.equals("from")) {
-          parser.clearSuggestion();
+          parseContext.clearSuggestion();
           usingKeyword = true;
           ParsingUtil.expectAndSkipWhitespace(reader);
-          from = parser.parseAndSuggestArgument(argumentType);
+          from = parseContext.parseAndSuggestArgument(argumentType);
           ParsingUtil.expectAndSkipWhitespace(reader);
           final int cursorBeforeKeyword2 = reader.getCursor();
-          parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("to", suggestionsBuilder).buildFuture());
+          parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("to", suggestionsBuilder).buildFuture());
           if (reader.readUnquotedString().equals("to")) {
-            parser.clearSuggestion();
+            parseContext.clearSuggestion();
             ParsingUtil.expectAndSkipWhitespace(reader);
-            to = parser.parseAndSuggestArgument(argumentType);
+            to = parseContext.parseAndSuggestArgument(argumentType);
           } else {
             reader.setCursor(cursorBeforeKeyword2);
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "to");
@@ -178,12 +176,12 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
           reader.setCursor(cursorBeforeKeyword);
           if (reader.canRead() && !CommandSource.shouldSuggest(reader.getRemaining().toLowerCase(), "from")) {
             // 避免在输入了部分坐标后仍建议输入 “from” 的情况
-            parser.clearSuggestion();
+            parseContext.clearSuggestion();
           }
-          from = parser.parseAndSuggestArgument(argumentType);
+          from = parseContext.parseAndSuggestArgument(argumentType);
         }
       } else if (paramIndex == 1) {
-        to = parser.parseAndSuggestArgument(argumentType);
+        to = parseContext.parseAndSuggestArgument(argumentType);
       }
     }
 

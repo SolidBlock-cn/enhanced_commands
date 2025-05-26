@@ -11,7 +11,6 @@ import net.minecraft.predicate.entity.EntityEffectPredicate;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
 
@@ -76,7 +75,7 @@ public record EffectsEntityPredicateEntry(Map<RegistryEntry<StatusEffect>, Entit
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     final StringJoiner joiner = new StringJoiner(", ", "{", "}");
     for (var mapEntry : effects.entrySet()) {
       final RegistryEntry<StatusEffect> effectEntry = mapEntry.getKey();

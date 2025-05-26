@@ -61,7 +61,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      rotation = EnumOrRandom.parseAndSuggest(BlockRotation.values(), BlockRotation.CODEC, parseContext.parser());
+      rotation = EnumOrRandom.parseAndSuggest(BlockRotation.values(), BlockRotation.CODEC, parseContext);
     }
   }
 }

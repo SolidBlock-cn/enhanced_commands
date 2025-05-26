@@ -78,7 +78,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        relPos = parseContext.parser().parseAndSuggestVec3i();
+        relPos = parseContext.parseAndSuggestVec3i();
       } else if (paramIndex == 1) {
         blockPredicate = BlockPredicateArgument.parse(parseContext);
       }

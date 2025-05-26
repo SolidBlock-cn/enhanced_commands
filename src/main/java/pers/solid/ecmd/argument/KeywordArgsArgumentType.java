@@ -111,7 +111,7 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
         suggestionProvider.setValue(null);
       }
       if (!reader.canRead()) {
-        // ensure there is at least a whitespace
+        // ensure there is at least whitespace
         break;
       }
       if (suggestionProvider != null) {

@@ -203,10 +203,6 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
 
   public static int getFlags(@NotNull KeywordArgs args) {
     int value = 0;
-    // 此版本不支持：
-    // if (args.getBoolean("skip_light_update")) {
-    //   value |= Block.SKIP_LIGHTING_UPDATES;
-    // }
     if (args.getBoolean("notify_listeners")) {
       value |= Block.NOTIFY_LISTENERS;
     }

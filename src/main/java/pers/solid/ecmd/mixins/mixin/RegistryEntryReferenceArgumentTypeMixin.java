@@ -37,18 +37,18 @@ public abstract class RegistryEntryReferenceArgumentTypeMixin<T> {
   @Final
   private RegistryWrapper<T> registryWrapper;
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/registry/entry/RegistryEntry$Reference;", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;fromCommandInput(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/util/Identifier;", shift = At.Shift.BEFORE))
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/registry/entry/RegistryEntry$Reference;", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;fromCommandInput(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/util/Identifier;"))
   public void injectedParse(StringReader stringReader, CallbackInfoReturnable<RegistryEntry.Reference<T>> cir, @Share("cursorBeforeId") LocalIntRef localIntRef) {
     localIntRef.set(stringReader.getCursor());
   }
 
-  @Inject(method = "listSuggestions", at = @At(value = "RETURN", shift = At.Shift.BEFORE), cancellable = true)
+  @Inject(method = "listSuggestions", at = @At(value = "RETURN"), cancellable = true)
   public <S> void suggestWithTooltip(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
     MixinShared.mixinSuggestWithTooltip(registryRef, registryWrapper, builder, cir);
   }
 
   @ModifyArg(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/registry/entry/RegistryEntry$Reference;", at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElseThrow(Ljava/util/function/Supplier;)Ljava/lang/Object;"))
-  public Supplier<CommandSyntaxException> modifiedParseThrow(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local StringReader stringReader, @Local Identifier identifier) {
+  public Supplier<CommandSyntaxException> modifiedParseThrow(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader, @Local Identifier identifier) {
     return MixinShared.mixinModifiedParseThrow(registryRef, original, localIntRef, stringReader, identifier);
   }
 }

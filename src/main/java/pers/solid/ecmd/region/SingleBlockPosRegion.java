@@ -15,7 +15,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
@@ -98,11 +97,10 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
 
     @Override
     public RegionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      final StringReader reader = parser.reader;
+      final StringReader reader = parseContext.reader();
       final int cursorBeforeParse = reader.getCursor();
       final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.blockPos();
-      parser.addSuggestion((context, builder) -> {
+      parseContext.addSuggestion((context, builder) -> {
         final SuggestionsBuilder builderOffset = builder.createOffset(cursorBeforeParse);
         return argumentType.listSuggestions(context, builderOffset);
       });
@@ -141,7 +139,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
-      posArgument = parseContext.parser().parseAndSuggestArgument(argumentType);
+      posArgument = parseContext.parseAndSuggestArgument(argumentType);
     }
   }
 }

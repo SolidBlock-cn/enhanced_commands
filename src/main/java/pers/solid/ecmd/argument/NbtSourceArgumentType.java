@@ -36,7 +36,7 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
   public NbtSourceArgument<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtSourceArgument<?> nbtSourceArgument = NbtDataRegistry.handleSource(s, new ParseContext<>(registryAccess, new SuggestedParser<>(reader), false, true));
+    final NbtSourceArgument<?> nbtSourceArgument = NbtDataRegistry.handleSource(s, new ParseContext<>(registryAccess, reader, false, true));
     if (nbtSourceArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -53,17 +53,17 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
     final int cursorAfterString = reader.getCursor();
-    final SuggestedParser<S> suggestedParser = new SuggestedParser<>(reader);
     final NbtSourceArgument<?> nbtSourceArgument;
+    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, reader, true, true);
     try {
-      nbtSourceArgument = NbtDataRegistry.handleSource(s, new ParseContext<>(registryAccess, suggestedParser, true, true));
+      nbtSourceArgument = NbtDataRegistry.handleSource(s, parseContext);
       if (nbtSourceArgument == null) {
         reader.setCursor(cursorBeforeString);
         return CommandSource.suggestMatching(NbtDataRegistry.streamSourceTypes(), builder);
       }
     } catch (CommandSyntaxException ignored) {
     }
-    return suggestedParser.buildSuggestions(context, builder.createOffset(reader.getCursor()));
+    return parseContext.buildSuggestions(context, builder.createOffset(reader.getCursor()));
   }
 
   private static final Collection<String> EXAMPLES = List.of("block ~ ~1 ~", "blocks sphere(5) min", "entity @s", "entity Solid", "entity @e[type=pig,limit=1]", "entities @a max", "entities @e random", "store x", "literal {key: probability}");

@@ -11,7 +11,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -112,8 +111,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      final StringReader reader = parser.reader;
+      final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         value = reader.readFloat();
         if (value > 1) {
@@ -129,7 +127,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
-        parser.clearSuggestion();
+        parseContext.clearSuggestion();
 
         parseNamedParameters(parseContext);
       }
@@ -147,7 +145,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
 
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
-      seed = OptionalLong.of(parseContext.parser().reader.readLong());
+      seed = OptionalLong.of(parseContext.reader().readLong());
     }
   }
 }

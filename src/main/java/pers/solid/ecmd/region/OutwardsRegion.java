@@ -14,7 +14,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -107,12 +106,11 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
       if (paramIndex == 1) {
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
-        center = parser.parseAndSuggestArgument(argumentType);
+        center = parseContext.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 0) {
-        final StringReader reader = parser.reader;
+        final StringReader reader = parseContext.reader();
         x = reader.readInt();
         dimensionNumber = 1;
         reader.skipWhitespace();

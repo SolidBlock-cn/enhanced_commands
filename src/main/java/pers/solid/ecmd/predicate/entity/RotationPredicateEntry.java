@@ -5,7 +5,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -34,7 +33,7 @@ public record RotationPredicateEntry(BridgeFloatRange floatRange, @MagicConstant
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return (switch (type) {
       case "pitch" -> "x_rotation";
       case "yaw" -> "y_rotation";

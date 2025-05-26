@@ -1,5 +1,6 @@
 package pers.solid.ecmd.function.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -9,7 +10,6 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -44,11 +44,11 @@ public enum UseOriginalBlockFunction implements BlockFunction {
 
     @Override
     public @Nullable UseOriginalBlockFunction parse(ParseContext<?> parseContext) {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.use_original"), suggestionsBuilder).buildFuture());
-      if (parser.reader.canRead() && parser.reader.peek() == '~') {
-        parser.reader.skip();
-        parser.clearSuggestion();
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.use_original"), suggestionsBuilder).buildFuture());
+      final StringReader reader = parseContext.reader();
+      if (reader.canRead() && reader.peek() == '~') {
+        reader.skip();
+        parseContext.clearSuggestion();
         return USE_ORIGINAL;
       }
       return null;

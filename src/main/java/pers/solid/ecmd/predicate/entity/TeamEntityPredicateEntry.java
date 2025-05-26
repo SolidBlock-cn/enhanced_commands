@@ -6,7 +6,6 @@ import net.minecraft.scoreboard.AbstractTeam;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
@@ -50,7 +49,7 @@ public record TeamEntityPredicateEntry(String expectedTeamName, boolean inverted
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "team=" + (inverted ? "!" : "") + expectedTeamName;
   }
 }

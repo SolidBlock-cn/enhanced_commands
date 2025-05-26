@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 @Mixin(GameModeArgumentType.class)
 public abstract class GameModeArgumentTypeMixin {
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/world/GameMode;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readUnquotedString()Ljava/lang/String;", shift = At.Shift.BEFORE, remap = false))
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/world/GameMode;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readUnquotedString()Ljava/lang/String;", remap = false))
   public void injectedBeforeUnquotedString(StringReader stringReader, CallbackInfoReturnable<GameMode> cir, @Share("cursorBeforeUnquotedString") LocalIntRef localIntRef) {
     localIntRef.set(stringReader.getCursor());
   }
@@ -31,14 +31,14 @@ public abstract class GameModeArgumentTypeMixin {
     localIntRef.set(stringReader.getCursor());
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/world/GameMode;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;byName(Ljava/lang/String;Lnet/minecraft/world/GameMode;)Lnet/minecraft/world/GameMode;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/world/GameMode;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;byName(Ljava/lang/String;Lnet/minecraft/world/GameMode;)Lnet/minecraft/world/GameMode;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   public void injectedParse(StringReader stringReader, CallbackInfoReturnable<GameMode> cir, String string) {
     if (MixinShared.EXTENDED_GAME_MODE_NAMES.containsKey(string)) {
       cir.setReturnValue(MixinShared.EXTENDED_GAME_MODE_NAMES.get(string));
     }
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/world/GameMode;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", shift = At.Shift.BEFORE, remap = false))
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/world/GameMode;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   public void injectedException(StringReader stringReader, CallbackInfoReturnable<GameMode> cir, @Share("cursorBeforeUnquotedString") LocalIntRef localIntRef) {
     stringReader.setCursor(localIntRef.get());
   }

@@ -63,17 +63,17 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
 
     @Override
     public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : valueIfFalse.apply(source));
+      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? EmptyBlockFunction.INSTANCE : valueIfFalse.apply(source));
     }
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        condition = BlockPredicateArgument.parse(parseContext.withAllowSparse(true));
+        condition = BlockPredicateArgument.parse(parseContext);
       } else if (paramIndex == 1) {
-        valueIfTrue = BlockFunctionArgument.parse(parseContext.withAllowSparse(true));
+        valueIfTrue = BlockFunctionArgument.parse(parseContext);
       } else if (paramIndex == 2) {
-        valueIfFalse = BlockFunctionArgument.parse(parseContext.withAllowSparse(true));
+        valueIfFalse = BlockFunctionArgument.parse(parseContext);
       }
     }
 

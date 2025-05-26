@@ -34,7 +34,6 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.accessor.JsonReaderUtilsAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
@@ -134,17 +133,17 @@ public final class ParsingUtil {
    * @param parseUnit 解析括号内的内容。
    * @throws CommandSyntaxException 当有左括号但缺失右括号时。
    */
-  public static <T, E extends Throwable> @Nullable T parseParentheses(FailableSupplier<T, E> parseUnit, SuggestedParser<?> parser) throws E, CommandSyntaxException {
-    final StringReader reader = parser.reader;
-    parser.addSuggestion((context, suggestionsBuilder) -> suggestString("(", suggestionsBuilder).buildFuture());
+  public static <T, E extends Throwable> @Nullable T parseParentheses(FailableSupplier<T, E> parseUnit, ParseContext<?> parseContext) throws E, CommandSyntaxException {
+    final StringReader reader = parseContext.reader();
+    parseContext.addSuggestion((context, suggestionsBuilder) -> suggestString("(", suggestionsBuilder).buildFuture());
     if (reader.canRead() && reader.peek() == '(') {
       reader.skip();
       reader.skipWhitespace();
       final T parse = parseUnit.get();
-      parser.setSuggestion((context, suggestionsBuilder) -> suggestString(")", suggestionsBuilder).buildFuture());
+      parseContext.setSuggestion((context, suggestionsBuilder) -> suggestString(")", suggestionsBuilder).buildFuture());
       reader.skipWhitespace();
       reader.expect(')');
-      parser.clearSuggestion();
+      parseContext.clearSuggestion();
       return parse;
     } else {
       return null;
@@ -158,22 +157,20 @@ public final class ParsingUtil {
    * @param merger               当解析出来了多个 {@code T} 值时，将这多个 {@code T} 值合并为一个值。
    * @param joiningString        多个值之间用于间隔的间隔字符串。
    * @param joiningStringTooltip 当为 {@code joiningString} 提供建议时，应该显示的提示文本（tooltip）。
-   * @param parseContext
    */
   public static <T, E extends Throwable> T parseUnifiable(FailableSupplier<T, E> parseUnit, FailableFunction<List<T>, T, E> merger, String joiningString, Message joiningStringTooltip, ParseContext<?> parseContext) throws E {
     final T first = parseUnit.get();
-    final SuggestedParser<?> parser = parseContext.parser();
-    final StringReader reader = parser.reader;
+    final StringReader reader = parseContext.reader();
     final int cursorBeforeWhite = reader.getCursor();
     int cursorAfterLastUnit = cursorBeforeWhite;
     if (parseContext.allowSparse()) reader.skipWhitespace();
-    parser.addSuggestion((context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder).buildFuture());
+    parseContext.addSuggestion((context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder).buildFuture());
     if (reader.getString().startsWith(joiningString, reader.getCursor())) {
       final List<T> units = new ArrayList<>();
       units.add(first);
       while (reader.getString().startsWith(joiningString, reader.getCursor())) {
         reader.setCursor(reader.getCursor() + joiningString.length());
-        parser.clearSuggestion();
+        parseContext.clearSuggestion();
         if (parseContext.allowSparse()) reader.skipWhitespace();
         units.add(parseUnit.get());
         cursorAfterLastUnit = reader.getCursor();
@@ -190,7 +187,7 @@ public final class ParsingUtil {
   /**
    * 解析一个字符串值，并根据字符串值转换为特定的对象。如果特定的对象为 {@code null}，则抛出异常。
    *
-   * @see SuggestedParser#parseAndSuggestValues
+   * @see ParseContext#parseAndSuggestValues
    */
   public static <T> @NotNull T parseValues(StringReader reader, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     final int cursorBeforeRead = reader.getCursor();

@@ -24,7 +24,7 @@ import pers.solid.ecmd.util.mixin.MixinShared;
 
 @Mixin(CommandManager.class)
 public abstract class CommandManagerMixin {
-  @Inject(method = "checkCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;literal(Ljava/lang/String;)Lnet/minecraft/text/MutableText;", shift = At.Shift.BEFORE), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/text/MutableText;formatted([Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/MutableText;")), locals = LocalCapture.CAPTURE_FAILSOFT)
+  @Inject(method = "checkCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;literal(Ljava/lang/String;)Lnet/minecraft/text/MutableText;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/text/MutableText;formatted([Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/MutableText;")), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void injectedAppendText(ParseResults<ServerCommandSource> parseResults, String command, ServerCommandSource source, CallbackInfoReturnable<ContextChain<ServerCommandSource>> cir, CommandSyntaxException commandSyntaxException, int i, MutableText mutableText) {
     final int cursorEnd = ((CommandSyntaxExceptionExtension) commandSyntaxException).getCursorEnd$ec();
     if (cursorEnd >= i) {

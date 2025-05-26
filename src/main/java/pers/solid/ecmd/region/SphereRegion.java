@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Streams;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
@@ -14,7 +15,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -116,11 +116,11 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
-      final SuggestedParser<?> parser = parseContext.parser();
+      final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
-        radius = parser.reader.readDouble();
+        radius = reader.readDouble();
       } else if (paramIndex == 1) {
-        centerPos = parser.parseAndSuggestArgument(type);
+        centerPos = parseContext.parseAndSuggestArgument(type);
       }
     }
 

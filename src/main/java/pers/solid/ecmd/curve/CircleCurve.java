@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4d;
 import org.joml.Vector3d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
@@ -210,9 +209,8 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
 
     @Override
     public CurveArgument<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
       if (this.radius == null) {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, "radius");
+        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parseContext.reader(), "radius");
       }
       final PosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
       return source -> {
@@ -234,11 +232,10 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       parseRadius(parseContext);
-      final SuggestedParser<?> parser = parseContext.parser();
       while (true) {
-        final int cursorBeforeWhite = parser.reader.getCursor();
-        parser.reader.skipWhitespace();
-        if (parser.reader.getCursor() > cursorBeforeWhite) {
+        final int cursorBeforeWhite = parseContext.reader().getCursor();
+        parseContext.reader().skipWhitespace();
+        if (parseContext.reader().getCursor() > cursorBeforeWhite) {
           if (parseAdditionalParameters(parseContext)) {
             break;
           }
@@ -252,58 +249,56 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
      * 解析半径。即：{@code <double> | from (<vector> | <double> <direction>)}。
      */
     private void parseRadius(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      final StringReader reader = parser.reader;
+      final StringReader reader = parseContext.reader();
       final int cursorBeforeKeyword = reader.getCursor();
       final String unquotedString = reader.readUnquotedString();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
       if ("from".equals(unquotedString)) {
-        parser.clearSuggestion();
+        parseContext.clearSuggestion();
         ParsingUtil.expectAndSkipWhitespace(reader);
-        radius = Either.right(parser.parseAndSuggestVec3d());
+        radius = Either.right(parseContext.parseAndSuggestVec3d());
       } else {
         reader.setCursor(cursorBeforeKeyword);
-        if (!CommandSource.shouldSuggest(reader.getRemaining(), "from")) parser.clearSuggestion();
+        if (!CommandSource.shouldSuggest(reader.getRemaining(), "from")) parseContext.clearSuggestion();
 
         radius = Either.left(reader.readDouble());
       }
     }
 
     private boolean parseAdditionalParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.setSuggestion((context, suggestionsBuilder) -> {
+      parseContext.setSuggestion((context, suggestionsBuilder) -> {
         if (center == null) ParsingUtil.suggestString("at", suggestionsBuilder);
         if (around == null) CommandSource.suggestMatching(List.of("around", "facing", "rotated"), suggestionsBuilder);
         if (range == null) ParsingUtil.suggestString("ranging", suggestionsBuilder);
         return suggestionsBuilder.buildFuture();
       });
-      final int cursorBeforeKeyword = parser.reader.getCursor();
-      final String unquotedString = parser.reader.readUnquotedString();
+      final int cursorBeforeKeyword = parseContext.reader().getCursor();
+      final String unquotedString = parseContext.reader().readUnquotedString();
       if (unquotedString.isEmpty()) {
         return true;
       } else if ("at".equals(unquotedString)) {
         if (center != null) {
-          parser.reader.setCursor(cursorBeforeKeyword);
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
+          parseContext.reader().setCursor(cursorBeforeKeyword);
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
         }
-        parser.clearSuggestion();
-        ParsingUtil.expectAndSkipWhitespace(parser.reader);
+        parseContext.clearSuggestion();
+        ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
-        center = parser.parseAndSuggestArgument(argumentType);
+        center = parseContext.parseAndSuggestArgument(argumentType);
       } else if ("around".equals(unquotedString) || "rotated".equals(unquotedString) || "facing".equals(unquotedString)) {
         if (around != null) {
-          parser.reader.setCursor(cursorBeforeKeyword);
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
+          parseContext.reader().setCursor(cursorBeforeKeyword);
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
         }
-        parser.clearSuggestion();
-        ParsingUtil.expectAndSkipWhitespace(parser.reader);
+        parseContext.clearSuggestion();
+        ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
         switch (unquotedString) {
           case "around" -> {
-            final Function<ServerCommandSource, Vec3d> vec3d = parser.parseAndSuggestVec3d();
+            final Function<ServerCommandSource, Vec3d> vec3d = parseContext.parseAndSuggestVec3d();
             around = (source, ignored) -> vec3d.apply(source);
           }
           case "rotated" -> {
-            final PosArgument posArgument = parser.parseAndSuggestArgument(new RotationArgumentType());
+            final PosArgument posArgument = parseContext.parseAndSuggestArgument(new RotationArgumentType());
             around = (source, ignored) -> {
               final Vec2f rotation = posArgument.toAbsoluteRotation(source);
               return new Vec3d(0, 0, 1).rotateX(-MathHelper.RADIANS_PER_DEGREE * rotation.x).rotateY(-MathHelper.RADIANS_PER_DEGREE * rotation.y);
@@ -311,7 +306,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
           }
           case "facing" -> {
             ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
-            final PosArgument posArgument = parser.parseAndSuggestArgument(argumentType);
+            final PosArgument posArgument = parseContext.parseAndSuggestArgument(argumentType);
             around = (source, center) -> {
               final Vec3d facingTarget = posArgument.toAbsolutePos(source);
               return facingTarget.subtract(center).normalize();
@@ -320,30 +315,30 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
         }
       } else if ("ranging".equals(unquotedString)) {
         if (range == null) {
-          parser.reader.setCursor(cursorBeforeKeyword);
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parser.reader, unquotedString);
+          parseContext.reader().setCursor(cursorBeforeKeyword);
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
         }
-        parser.clearSuggestion();
-        ParsingUtil.expectAndSkipWhitespace(parser.reader);
-        range = parseAngleRange(parser);
+        parseContext.clearSuggestion();
+        ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
+        range = parseAngleRange(parseContext);
       } else {
-        parser.reader.setCursor(cursorBeforeKeyword);
-        throw ModCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(parser.reader, unquotedString);
+        parseContext.reader().setCursor(cursorBeforeKeyword);
+        throw ModCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
       }
       return false;
     }
 
-    private DoubleDoublePair parseAngleRange(SuggestedParser<?> parser) throws CommandSyntaxException {
-      final double firstAngle = parser.parseAndSuggestAngle(true);
-      parser.clearSuggestion();
-      final StringReader reader = parser.reader;
+    private DoubleDoublePair parseAngleRange(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final double firstAngle = parseContext.parseAndSuggestAngle(true);
+      parseContext.clearSuggestion();
+      final StringReader reader = parseContext.reader();
       final int cursorBeforeWhitespace = reader.getCursor();
       reader.skipWhitespace();
       if (reader.getString().startsWith("..", reader.getCursor())) {
         reader.setCursor(reader.getCursor() + "..".length());
         reader.skipWhitespace();
-        final double secondAngle = parser.parseAndSuggestAngle(true);
-        parser.clearSuggestion();
+        final double secondAngle = parseContext.parseAndSuggestAngle(true);
+        parseContext.clearSuggestion();
         return DoubleDoublePair.of(firstAngle, secondAngle);
       } else {
         reader.setCursor(cursorBeforeWhitespace);

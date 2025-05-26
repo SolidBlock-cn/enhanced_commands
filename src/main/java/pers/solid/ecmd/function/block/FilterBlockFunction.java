@@ -66,7 +66,7 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
 
     @Override
     public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : elseFunction.apply(source));
+      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? EmptyBlockFunction.INSTANCE : elseFunction.apply(source));
     }
 
     @Override

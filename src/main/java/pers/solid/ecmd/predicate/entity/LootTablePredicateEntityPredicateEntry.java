@@ -10,7 +10,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -62,7 +61,7 @@ public record LootTablePredicateEntityPredicateEntry(@NotNull Identifier predica
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return null;
   }
 }

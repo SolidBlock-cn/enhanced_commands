@@ -7,7 +7,6 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 
 public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound expectedNbt, boolean inverted) implements EntityPredicateEntry {
@@ -44,7 +43,7 @@ public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound expectedNbt, 
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "nbt=" + (inverted ? "!" : "") + expectedNbt;
   }
 }

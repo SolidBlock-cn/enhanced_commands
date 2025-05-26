@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.function.Predicate;
@@ -28,7 +27,7 @@ public record UnknownEntityPredicateEntry(Predicate<Entity> predicate) implement
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "/* unknown */";
   }
 }

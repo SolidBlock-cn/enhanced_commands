@@ -56,7 +56,7 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
 
     @Override
     public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new DryBlockFunction(blockFunction == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
+      return source -> new DryBlockFunction(blockFunction == null ? EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
     }
 
     @Override

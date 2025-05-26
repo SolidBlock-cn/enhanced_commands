@@ -86,8 +86,8 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      parseContext.parser().clearSuggestion();
-      pattern = ParsingUtil.readRegex(parseContext.parser().reader);
+      parseContext.clearSuggestion();
+      pattern = ParsingUtil.readRegex(parseContext.reader());
     }
   }
 }

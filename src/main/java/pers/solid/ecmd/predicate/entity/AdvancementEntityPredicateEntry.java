@@ -14,7 +14,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -163,7 +162,7 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public @NotNull String toOptionEntry() {
     return "advancements={" + map.entrySet().stream().map(entry -> entry.getKey()
         + "=" + entry.getValue().mapBoth(
         criterionMap -> "{" + criterionMap.object2BooleanEntrySet().stream().map(criterionEntry -> criterionEntry.getKey() + "=" + criterionEntry.getBooleanValue()).collect(Collectors.joining(", ")) + "}",

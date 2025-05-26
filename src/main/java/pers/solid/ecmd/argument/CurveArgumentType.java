@@ -10,6 +10,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.curve.CurveArgument;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,20 +37,20 @@ public record CurveArgumentType(CommandRegistryAccess registryAccess) implements
 
   @Override
   public CurveArgument<?> parse(StringReader reader) throws CommandSyntaxException {
-    return CurveArgument.parse(registryAccess, new SuggestedParser<>(reader), false);
+    return CurveArgument.parse(new ParseContext<>(registryAccess, reader, false, false));
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser<S> parser = new SuggestedParser<>(stringReader);
+    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, stringReader, true, false);
     try {
-      CurveArgument.parse(registryAccess, parser, true);
+      CurveArgument.parse(parseContext);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
-    return parser.buildSuggestions(context, builderOffset);
+    return parseContext.buildSuggestions(context, builderOffset);
   }
 
   @Override

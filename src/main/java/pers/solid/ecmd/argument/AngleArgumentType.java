@@ -11,9 +11,10 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.ArgumentHelper;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.parse.ParseContext;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -34,7 +35,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   @Override
   public Double parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeAngle = reader.getCursor();
-    final double result = new SuggestedParser<>(reader, new ArrayList<>()).parseAndSuggestAngle(returnRadians);
+    final double result = new ParseContext<>(reader).parseAndSuggestAngle(returnRadians);
     final int cursorAfterAngle = reader.getCursor();
     if (result < min) {
       reader.setCursor(cursorBeforeAngle);
@@ -51,7 +52,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     final StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser<S> parser = new SuggestedParser<>(stringReader);
+    final ParseContext<S> parser = new ParseContext<>(stringReader);
     try {
       parser.parseAndSuggestAngle(returnRadians);
     } catch (CommandSyntaxException ignore) {
@@ -61,7 +62,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   }
 
   @Override
-  public String toString() {
+  public @NotNull String toString() {
     if (min == Double.NEGATIVE_INFINITY && max == Double.POSITIVE_INFINITY) {
       return "angle(radians = " + returnRadians + ")";
     } else {

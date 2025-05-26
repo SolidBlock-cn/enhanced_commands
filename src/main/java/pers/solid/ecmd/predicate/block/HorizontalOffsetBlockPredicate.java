@@ -11,7 +11,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -72,15 +71,14 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
 
     @Override
     public @Nullable BlockPredicateArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> {
+      parseContext.addSuggestion((context, suggestionsBuilder) -> {
         ParsingUtil.suggestString("<", BENEATH_BLOCK, suggestionsBuilder);
         ParsingUtil.suggestString(">", ABOVE_BLOCK, suggestionsBuilder);
         return suggestionsBuilder.buildFuture();
       });
       int offset = 0;
       boolean prefixed = false;
-      final StringReader reader = parser.reader;
+      final StringReader reader = parseContext.reader();
       if (!reader.canRead())
         return null;
       while (reader.canRead()) {

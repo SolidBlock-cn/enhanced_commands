@@ -10,7 +10,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.enums.OutlineType;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -135,9 +134,8 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
       if (paramIndex == 1) {
-        outlineType = parser.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
+        outlineType = parseContext.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
       } else if (paramIndex == 0) {
         regionArgument = RegionArgument.parse(parseContext);
       }

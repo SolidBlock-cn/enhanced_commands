@@ -6,7 +6,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -32,7 +31,7 @@ public record TypeEntityPredicateEntry(EntityType<?> expectedType, boolean inver
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "type=" + (inverted ? "!" : "") + Registries.ENTITY_TYPE.getId(expectedType);
   }
 }

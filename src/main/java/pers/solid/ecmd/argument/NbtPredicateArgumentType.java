@@ -31,7 +31,8 @@ public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAcc
 
   @Override
   public NbtPredicate parse(StringReader reader) throws CommandSyntaxException {
-    final NbtPredicateParser<?> parser = new NbtPredicateParser<>(new ParseContext<>(registryAccess, new SuggestedParser<>(reader), false, false));
+    final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader, false, false);
+    final NbtPredicateParser<?> parser = new NbtPredicateParser<>(parseContext);
     return onlyCompounds ? parser.parseCompound(false, false) : parser.parsePredicate(false, false);
   }
 
@@ -39,8 +40,8 @@ public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAcc
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser<S> suggestedParser = new SuggestedParser<>(stringReader);
-    final NbtPredicateParser<S> parser = new NbtPredicateParser<>(new ParseContext<>(registryAccess, suggestedParser, true, false));
+    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, stringReader, true, false);
+    final NbtPredicateParser<S> parser = new NbtPredicateParser<>(parseContext);
     try {
       if (onlyCompounds) {
         parser.parseCompound(false, false);
@@ -50,7 +51,7 @@ public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAcc
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
-    return suggestedParser.buildSuggestions(context, builderOffset);
+    return parseContext.buildSuggestions(context, builderOffset);
   }
 
 

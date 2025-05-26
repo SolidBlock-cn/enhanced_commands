@@ -36,8 +36,8 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
 
   @Override
   public NbtFunction parse(StringReader reader) throws CommandSyntaxException {
-    final SuggestedParser<?> suggestedParser = new SuggestedParser<>(reader);
-    final NbtFunctionParser<?> parser = new NbtFunctionParser<>(new ParseContext<>(registryAccess, suggestedParser, false, false));
+    final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader, false, false);
+    final NbtFunctionParser<?> parser = new NbtFunctionParser<>(parseContext);
     return onlyCompounds ? parser.parseCompound(false) : parser.parseFunction(false, false);
   }
 
@@ -45,8 +45,8 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final SuggestedParser<S> suggestedParser = new SuggestedParser<>(stringReader);
-    final NbtFunctionParser<S> parser = new NbtFunctionParser<>(new ParseContext<>(registryAccess, suggestedParser, false, false));
+    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, stringReader, false, false);
+    final NbtFunctionParser<S> parser = new NbtFunctionParser<>(parseContext);
     try {
       if (onlyCompounds) {
         parser.parseCompound(false);
@@ -56,7 +56,7 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());
-    return suggestedParser.buildSuggestions(context, builderOffset);
+    return parseContext.buildSuggestions(context, builderOffset);
   }
 
   public enum Serializer implements ArgumentSerializer<NbtFunctionArgumentType, NbtFunctionArgumentType.Properties> {

@@ -1,6 +1,7 @@
 package pers.solid.ecmd.function.block;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
@@ -24,7 +25,6 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -44,7 +44,7 @@ public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgum
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));
 
   static @NotNull BlockFunction parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return BlockFunctionArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(s), false, true)).apply(source);
+    return BlockFunctionArgument.parse(new ParseContext<>(registryAccess, new StringReader(s), false, true)).apply(source);
   }
 
   default boolean setBlock(World world, BlockPos pos, BlockFunctionContext context) {

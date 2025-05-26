@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -7,7 +8,6 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
@@ -57,20 +57,20 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
 
     @Override
     public @Nullable BlockPredicateArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
       boolean negates = false;
       boolean suffixed = false;
-      while (parser.reader.canRead() && parser.reader.peek() == '!') {
-        parser.reader.skip();
+      final StringReader reader = parseContext.reader();
+      while (reader.canRead() && reader.peek() == '!') {
+        reader.skip();
         negates = !negates;
         suffixed = true;
       }
       if (!suffixed) return null;
-      if (parseContext.allowSparse()) parser.reader.skipWhitespace();
-      if (negates && parser.reader.canRead() && parser.reader.peek() == '*') {
+      if (parseContext.allowSparse()) reader.skipWhitespace();
+      if (negates && reader.canRead() && reader.peek() == '*') {
         // 此时同时读取“!*”方块谓词。
-        parser.reader.skip();
+        reader.skip();
         return ConstantBlockPredicate.ALWAYS_FALSE;
       }
       final BlockPredicateArgument parse = BlockPredicateArgument.parse(parseContext);

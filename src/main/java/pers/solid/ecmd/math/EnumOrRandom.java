@@ -5,13 +5,14 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.random.Random;
-import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -38,24 +39,25 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringIdentifiable> ext
   /**
    * @see net.minecraft.command.argument.EnumArgumentType#parse(StringReader)
    */
-  static <E extends Enum<E> & StringIdentifiable> EnumOrRandom<E> parseAndSuggest(E[] values, com.mojang.serialization.Codec<E> codec, SuggestedParser<?> parser) throws CommandSyntaxException {
-    parser.addSuggestion((context, suggestionsBuilder) -> {
+  static <E extends Enum<E> & StringIdentifiable> EnumOrRandom<E> parseAndSuggest(E[] values, Codec<E> codec, ParseContext<?> parseContext) throws CommandSyntaxException {
+    parseContext.addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
         suggestionsBuilder.suggest("*");
       }
       CommandSource.suggestMatching(Arrays.stream(values).map(StringIdentifiable::asString), suggestionsBuilder);
       return suggestionsBuilder.buildFuture();
     });
-    if (parser.reader.canRead() && parser.reader.peek() == '*') {
-      parser.reader.skip();
+    final StringReader reader = parseContext.reader();
+    if (reader.canRead() && reader.peek() == '*') {
+      reader.skip();
       return random(values);
     } else {
-      final int cursorBeforeParse = parser.reader.getCursor();
-      final String s = parser.reader.readUnquotedString();
+      final int cursorBeforeParse = reader.getCursor();
+      final String s = reader.readUnquotedString();
       Optional<E> optional = codec instanceof EnumCodec<E> codec1 ? Optional.ofNullable(codec1.byId(s)) : codec.parse(JsonOps.INSTANCE, new JsonPrimitive(s)).result();
       return of(optional.orElseThrow(() -> {
-        parser.reader.setCursor(cursorBeforeParse);
-        return INVALID_ENUM_EXCEPTION.createWithContext(parser.reader, s);
+        reader.setCursor(cursorBeforeParse);
+        return INVALID_ENUM_EXCEPTION.createWithContext(reader, s);
       }));
     }
   }

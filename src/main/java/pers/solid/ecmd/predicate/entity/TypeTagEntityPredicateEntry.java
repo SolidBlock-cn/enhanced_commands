@@ -5,7 +5,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -28,7 +27,7 @@ public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tagKey, boolean 
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "type=" + (inverted ? "!" : "") + "#" + tagKey.id().toString();
   }
 }

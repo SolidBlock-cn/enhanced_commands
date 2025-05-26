@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,7 +12,6 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateParser;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -63,9 +63,9 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
 
     @Override
     public @Nullable NbtBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
-      if (parser.reader.canRead() && parser.reader.peek() == '{') {
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
+      final StringReader reader = parseContext.reader();
+      if (reader.canRead() && reader.peek() == '{') {
         return new NbtBlockPredicate(new NbtPredicateParser<>(parseContext).parseCompound(false, false));
       } else {
         return null;

@@ -1,5 +1,6 @@
 package pers.solid.ecmd.region;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
@@ -12,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -167,24 +167,24 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
+      final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
-        final int cursorBeforeReadDouble = parser.reader.getCursor();
-        radius = parser.reader.readDouble();
+        final int cursorBeforeReadDouble = reader.getCursor();
+        radius = reader.readDouble();
         if (radius < 0) {
-          parser.reader.setCursor(cursorBeforeReadDouble);
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, radius);
+          reader.setCursor(cursorBeforeReadDouble);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, radius);
         }
       } else if (paramIndex == 1) {
-        final int cursorBeforeReadDouble = parser.reader.getCursor();
-        height = parser.reader.readDouble();
+        final int cursorBeforeReadDouble = reader.getCursor();
+        height = reader.readDouble();
         if (height < 0) {
-          parser.reader.setCursor(cursorBeforeReadDouble);
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, height);
+          reader.setCursor(cursorBeforeReadDouble);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, height);
         }
       } else if (paramIndex == 2) {
         final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
-        center = parser.parseAndSuggestArgument(type);
+        center = parseContext.parseAndSuggestArgument(type);
       }
     }
 

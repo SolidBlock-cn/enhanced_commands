@@ -1,5 +1,6 @@
 package pers.solid.ecmd.function.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -17,7 +18,6 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
@@ -109,13 +109,13 @@ public final class RandomBlockFunction implements BlockFunction {
 
     @Override
     public @Nullable RandomBlockFunction parse(ParseContext<?> parseContext) {
-      final SuggestedParser<?> parser = parseContext.parser();
-      if (parser.reader.getRemaining().isEmpty()) {
-        parser.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhanced_commands.block_function.random")).buildFuture());
+      final StringReader reader = parseContext.reader();
+      if (reader.getRemaining().isEmpty()) {
+        parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhanced_commands.block_function.random")).buildFuture());
       }
-      if (parser.reader.canRead() && parser.reader.peek() == '*') {
-        parser.reader.skip();
-        parser.clearSuggestion();
+      if (reader.canRead() && reader.peek() == '*') {
+        reader.skip();
+        parseContext.clearSuggestion();
         return RANDOM_SEED;
       }
       return null;
@@ -133,7 +133,7 @@ public final class RandomBlockFunction implements BlockFunction {
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      parseContext.parser().clearSuggestion();
+      parseContext.clearSuggestion();
       parseNamedParameters(parseContext);
     }
 
@@ -149,7 +149,7 @@ public final class RandomBlockFunction implements BlockFunction {
 
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
-      seed = OptionalLong.of(parseContext.parser().reader.readLong());
+      seed = OptionalLong.of(parseContext.reader().readLong());
     }
   }
 }

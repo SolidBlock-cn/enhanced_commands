@@ -47,7 +47,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
@@ -250,10 +249,11 @@ public class EntitySelectorOptionsExtension {
     }, reader -> reader.getDistance().isDummy() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.rm.description"));
 
     putOption("region", reader -> {
-      final SuggestedParser<Object> parser = new SuggestedParser<>(reader.getReader());
-      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
       final CommandRegistryAccess registryAccess = MixinShared.getCommandRegistryAccess();
-      final RegionArgument regionArgument = RegionArgument.parse(new ParseContext<>(registryAccess, parser, false, true));
+      final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader.getReader(), false, true);
+      //noinspection unchecked
+      reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
+      final RegionArgument regionArgument = RegionArgument.parse(parseContext);
 
       reader.extension$ec().addFunction(source -> {
         final Region region;
@@ -438,7 +438,7 @@ public class EntitySelectorOptionsExtension {
     putOption("block", reader -> {
       final StringReader stringReader = reader.getReader();
       stringReader.skipWhitespace();
-      final SuggestedParser<Object> parser = new SuggestedParser<>(stringReader);
+      final ParseContext<Object> parseContext = new ParseContext<>(stringReader);
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
@@ -448,9 +448,10 @@ public class EntitySelectorOptionsExtension {
             stringReader.skip();
             break;
           }
-          parser.clearSuggestion();
-          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-          final PosArgument posArgument = parser.parseAndSuggestArgument(EnhancedPosArgumentType.blockPos());
+          parseContext.clearSuggestion();
+          //noinspection unchecked
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
+          final PosArgument posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgumentType.blockPos());
 
           stringReader.skipWhitespace();
           if (stringReader.canRead() && stringReader.peek() == '=') {
@@ -461,9 +462,10 @@ public class EntitySelectorOptionsExtension {
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(stringReader, "=");
           }
 
-          parser.clearSuggestion();
-          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-          final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parser, false, true));
+          parseContext.clearSuggestion();
+          //noinspection unchecked
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
+          final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
 
           map.put(posArgument, blockPredicateArgument);
           stringReader.skipWhitespace();
@@ -491,9 +493,10 @@ public class EntitySelectorOptionsExtension {
           return new BlockPredicatesEntityPredicateEntry(newMapBuilder.build());
         });
       } else {
-        parser.clearSuggestion();
-        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-        final BlockPredicateArgument parse = BlockPredicateArgument.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parser, false, true));
+        parseContext.clearSuggestion();
+        //noinspection unchecked
+        reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
+        final BlockPredicateArgument parse = BlockPredicateArgument.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
         EntitySelectorReaderExtras extras = reader.extension$ec();
         extras.addFunction(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
       }

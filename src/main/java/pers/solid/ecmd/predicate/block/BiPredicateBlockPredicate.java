@@ -77,7 +77,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
       } else if (value2 == null) {
         value2 = parse;
       } else {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseContext.parser().reader);
+        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseContext.reader());
       }
     }
 

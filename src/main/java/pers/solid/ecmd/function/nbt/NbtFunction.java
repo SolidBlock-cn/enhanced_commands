@@ -1,5 +1,6 @@
 package pers.solid.ecmd.function.nbt;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.command.CommandRegistryAccess;
@@ -10,7 +11,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -24,7 +24,7 @@ public interface NbtFunction extends ExpressionConvertible, FailableFunction<@Nu
   Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.getCodec().dispatch(NbtFunction::getType, NbtFunctionType::getCodec);
 
   static @NotNull NbtFunction parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return NbtFunctionArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(s), false, true), false, false).toAbsolute(source);
+    return NbtFunctionArgument.parse(new ParseContext<>(registryAccess, new StringReader(s), false, true), false, false).toAbsolute(source);
   }
 
   @Override

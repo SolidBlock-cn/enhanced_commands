@@ -14,7 +14,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.function.FailableSupplier;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
@@ -60,19 +59,19 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
 
     @Override
     public T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString(Character.toString(prefix), tooltip, suggestionsBuilder).buildFuture());
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString(Character.toString(prefix), tooltip, suggestionsBuilder).buildFuture());
       boolean suffixed = false;
-      if (parser.reader.canRead() && parser.reader.peek() == prefix) {
-        parser.reader.skip();
+      final StringReader reader = parseContext.reader();
+      if (reader.canRead() && reader.peek() == prefix) {
+        reader.skip();
         suffixed = true;
       }
       if (!suffixed) return null;
-      parser.clearSuggestion();
+      parseContext.clearSuggestion();
 
       // try to optimize with id?
-      final int cursorBeforeId = parser.reader.getCursor();
-      parser.setSuggestion((context, builder) -> {
+      final int cursorBeforeId = reader.getCursor();
+      parseContext.setSuggestion((context, builder) -> {
         if (context.getSource() instanceof ServerCommandSource) {
           return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(parseContext.registryAccess().getWrapperOrThrow(registryKey).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
         } else if (context.getSource() instanceof CommandSource commandSource) {
@@ -81,15 +80,15 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
           return Suggestions.empty();
         }
       });
-      parser.terminateSuggestionsIfNotEmpty();
-      if (parseContext.allowSparse()) parser.reader.skipWhitespace();
-      final Identifier id = DefaultNamespace.ENHANCED_COMMANDS.fromStringReader(parser.reader);
-      final int cursorAfterId = parser.reader.getCursor();
+      parseContext.terminateSuggestionsIfNotEmpty();
+      if (parseContext.allowSparse()) reader.skipWhitespace();
+      final Identifier id = DefaultNamespace.ENHANCED_COMMANDS.fromStringReader(reader);
+      final int cursorAfterId = reader.getCursor();
       return getResultByEntrySupplier(() -> {
         final Optional<RegistryEntry.Reference<E>> entry = parseContext.registryAccess().createRegistryLookup().getOptionalEntry(registryKey, RegistryKey.of(registryKey, id));
         if (entry.isEmpty()) {
-          parser.reader.setCursor(cursorBeforeId);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(createExceptionForUnknownId(parser.reader, id.toString()), cursorAfterId);
+          reader.setCursor(cursorBeforeId);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(createExceptionForUnknownId(reader, id.toString()), cursorAfterId);
         }
         return entry.get().registryKey();
       });

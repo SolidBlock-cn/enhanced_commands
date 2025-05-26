@@ -1,5 +1,6 @@
 package pers.solid.ecmd.function.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.argument.NbtPredicateParser;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -52,9 +52,9 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
 
     @Override
     public @Nullable NbtBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
-      if (parser.reader.canRead() && parser.reader.peek() == '{') {
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
+      final StringReader reader = parseContext.reader();
+      if (reader.canRead() && reader.peek() == '{') {
         return new NbtBlockFunction(new NbtFunctionParser<>(parseContext).parseCompound(false));
       } else {
         return null;

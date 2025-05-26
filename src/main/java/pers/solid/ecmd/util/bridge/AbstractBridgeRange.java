@@ -41,6 +41,6 @@ public abstract class AbstractBridgeRange<T extends Comparable<T>> implements Br
 
   @Override
   public Optional<T> getConstantValue() {
-    return isExact() ? Optional.of(min) : Optional.empty();
+    return isExact() ? Optional.ofNullable(min) : Optional.empty();
   }
 }

@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
@@ -78,14 +77,13 @@ public interface NamedParamListParser {
   void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException;
 
   default void parseNamedParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
-    final SuggestedParser<?> parser = parseContext.parser();
-    final StringReader reader = parser.reader;
+    final StringReader reader = parseContext.reader();
 
     int paramCount = 0;
     while (true) {
       final char KEY_VALUE_SEP = keyValueSeparator();
       final char PARAMS_SEP = paramSeparator();
-      parser.addSuggestion((commandContext, suggestionsBuilder) -> CommandSource.suggestMatching(supportedParams().stream().filter(this::isValidParamName).map(s -> s + KEY_VALUE_SEP), suggestionsBuilder));
+      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> CommandSource.suggestMatching(supportedParams().stream().filter(this::isValidParamName).map(s -> s + KEY_VALUE_SEP), suggestionsBuilder));
       final int cursorBeforeParamName = reader.getCursor();
       final String paramName = reader.readUnquotedString();
       final int cursorAfterParamName = reader.getCursor();
@@ -97,29 +95,29 @@ public interface NamedParamListParser {
         paramCount++;
       }
 
-      checkParamNameValidity(paramName, parser.reader, cursorBeforeParamName, cursorAfterParamName);
+      checkParamNameValidity(paramName, reader, cursorBeforeParamName, cursorAfterParamName);
 
       reader.skipWhitespace();
 
-      parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(Character.toString(KEY_VALUE_SEP)).buildFuture());
+      parseContext.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(Character.toString(KEY_VALUE_SEP)).buildFuture());
 
       reader.expect(KEY_VALUE_SEP);
       reader.skipWhitespace();
 
-      parser.clearSuggestion();
+      parseContext.clearSuggestion();
       parseNamedParameter(paramName, parseContext);
 
-      parser.reader.skipWhitespace();
+      reader.skipWhitespace();
       if (supportedParams().stream().anyMatch(this::isValidParamName)) {
         // 如果后面没有可用的参数名称了，就不再逗号。
-        parser.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(Character.toString(PARAMS_SEP)).buildFuture());
+        parseContext.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(Character.toString(PARAMS_SEP)).buildFuture());
       } else {
-        parser.clearSuggestion();
+        parseContext.clearSuggestion();
       }
-      if (parser.reader.canRead() && parser.reader.peek() == PARAMS_SEP) {
-        parser.reader.skip();
-        parser.reader.skipWhitespace();
-        parser.clearSuggestion();
+      if (reader.canRead() && reader.peek() == PARAMS_SEP) {
+        reader.skip();
+        reader.skipWhitespace();
+        parseContext.clearSuggestion();
       } else {
         break;
       }

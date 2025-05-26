@@ -8,7 +8,6 @@ import net.minecraft.text.Texts;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -36,7 +35,7 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
 
   record Single(GameMode gameMode, boolean inverted) implements GameModeEntityPredicateEntry {
     @Override
-    public @Nullable String toOptionEntry() {
+    public String toOptionEntry() {
       return "gamemode=" + gameMode.asString();
     }
 
@@ -56,7 +55,7 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry {
 
   record Multiple(Collection<GameMode> gameModes, boolean inverted) implements GameModeEntityPredicateEntry {
     @Override
-    public @Nullable String toOptionEntry() {
+    public String toOptionEntry() {
       return "gamemode=" + StringUtils.join(Collections2.transform(gameModes, GameMode::asString), ',');
     }
 

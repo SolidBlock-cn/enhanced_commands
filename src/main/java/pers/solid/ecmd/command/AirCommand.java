@@ -147,9 +147,7 @@ public enum AirCommand implements CommandRegistrationCallback {
       for (Entity entity : entities) {
         entity.setAir(value);
       }
-      context.getSource().sendFeedback$ecBridge(() -> {
-        return Text.translatable("enhanced_commands.commands.air.set.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)).enhanced$$();
-      }, true);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.set.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)).enhanced$$(), true);
       return size;
     }
   }

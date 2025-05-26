@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -9,7 +10,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.StringIdentifiable;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.NbtPredicateParser;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 import pers.solid.ecmd.util.mixin.MixinShared;
@@ -34,7 +34,7 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
   //  Codec<NbtPredicate> CODEC = Type.CODEC.dispatch(NbtPredicate::getType, Type::getCodec);
   Codec<NbtPredicate> CODEC = Codec.STRING.flatXmap(s -> {
     try {
-      return DataResult.success(new NbtPredicateParser<>(new ParseContext<>(MixinShared.getCommandRegistryAccess(), new SuggestedParser<>(s), false, true)).parsePredicate(false, false));
+      return DataResult.success(new NbtPredicateParser<>(new ParseContext<>(MixinShared.getCommandRegistryAccess(), new StringReader(s), false, true)).parsePredicate(false, false));
     } catch (CommandSyntaxException e) {
       return DataResult.error(e::getMessage);
     }
@@ -42,7 +42,7 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
 
 
   static @NotNull NbtPredicate parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return new NbtPredicateParser<>(new ParseContext<>(MixinShared.getCommandRegistryAccess(), new SuggestedParser<>(s), false, true)).parsePredicate(false, false);
+    return new NbtPredicateParser<>(new ParseContext<>(registryAccess, new StringReader(s), false, true)).parsePredicate(false, false);
   }
 
   enum Type implements StringIdentifiable {

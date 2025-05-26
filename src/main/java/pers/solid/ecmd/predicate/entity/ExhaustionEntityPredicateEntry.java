@@ -5,7 +5,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 
@@ -27,7 +26,7 @@ public record ExhaustionEntityPredicateEntry(BridgeFloatRange floatRange, boolea
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "exhaustion=" + (inverted ? "!" : "") + floatRange.asString();
   }
 }

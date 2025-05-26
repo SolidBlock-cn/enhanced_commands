@@ -184,7 +184,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
           throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
         }
 
-        // whether the coordinate has a tiled. It will be used to parse, instead of identifying the type of coordinate — relative-only argument types can have implicit relative coordinates without a tilde.
+        // whether the coordinate has a tilde. It will be used to parse, instead of identifying the type of coordinate — relative-only argument types can have implicit relative coordinates without a tilde.
         boolean hasTilde = false;
         // whether the coordinate is a relative coordinate.
         boolean isRelative = false;
@@ -385,11 +385,11 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
    */
   public enum NumberType {
     /**
-     * Only accepts integer valueNames. Tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative valueNames.
+     * Only accepts integer valueNames. Tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed with decimal relative valueNames.
      */
     INT_ONLY,
     /**
-     * Accepts both integer and double probability. Pure tilde "~ ~ ~" and tilde with integer valueNames (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative valueNames.
+     * Accepts both integer and double probability. Pure tilde "~ ~ ~" and tilde with integer valueNames (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed with decimal relative valueNames.
      */
     PREFER_INT,
     /**

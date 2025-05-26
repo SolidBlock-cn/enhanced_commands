@@ -1,5 +1,6 @@
 package pers.solid.ecmd.function.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -13,7 +14,6 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -75,70 +75,70 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.reader.skipWhitespace();
+      final StringReader reader = parseContext.reader();
+      reader.skipWhitespace();
 
-      parser.addSuggestion((context, suggestionsBuilder) -> {
+      parseContext.addSuggestion((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
           suggestionsBuilder.suggest(rightParString());
         }
         return suggestionsBuilder.buildFuture();
       });
-      if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
+      if (reader.canRead() && reader.peek() == rightPar()) {
         return;
       }
       while (true) {
-        parser.clearSuggestion();
+        parseContext.clearSuggestion();
         BlockPredicateArgument predicate = BlockPredicateArgument.parse(parseContext);
-        parser.reader.skipWhitespace();
-        parser.addSuggestion((context, builder) -> {
+        reader.skipWhitespace();
+        parseContext.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
             builder.suggest(",");
           }
           return builder.buildFuture();
         });
-        parser.reader.expect(',');
-        parser.reader.skipWhitespace();
-        parser.clearSuggestion();
-        parser.reader.skipWhitespace();
+        reader.expect(',');
+        reader.skipWhitespace();
+        parseContext.clearSuggestion();
+        reader.skipWhitespace();
 
         BlockFunctionArgument functionIfTrue = BlockFunctionArgument.parse(parseContext);
-        parser.reader.skipWhitespace();
-        parser.addSuggestion((context, builder) -> {
+        reader.skipWhitespace();
+        parseContext.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
             builder.suggest(",").suggest(";");
           }
           return builder.buildFuture();
         });
-        if (parser.reader.canRead() && parser.reader.peek() == ',') {
-          parser.reader.skip();
-          parser.reader.skipWhitespace();
-          parser.clearSuggestion();
+        if (reader.canRead() && reader.peek() == ',') {
+          reader.skip();
+          reader.skipWhitespace();
+          parseContext.clearSuggestion();
           BlockFunctionArgument functionIfFalse = BlockFunctionArgument.parse(parseContext);
 
           functions.add(source -> new ConditionalBlockFunction(predicate.apply(source), functionIfTrue.apply(source), functionIfFalse.apply(source)));
         } else {
           functions.add(source -> new ConditionalBlockFunction(predicate.apply(source), functionIfTrue.apply(source)));
         }
-        parser.addSuggestion((context, builder) -> {
+        parseContext.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
             builder.suggest(";").buildFuture();
           }
           return builder.buildFuture();
         });
 
-        if (parser.reader.canRead()) {
-          final char peek = parser.reader.peek();
+        if (reader.canRead()) {
+          final char peek = reader.peek();
           if (peek == ';') {
-            parser.reader.skip();
-            parser.reader.skipWhitespace();
-            parser.clearSuggestion();
+            reader.skip();
+            reader.skipWhitespace();
+            parseContext.clearSuggestion();
             functions.add(source -> new ConditionalBlockFunction(predicate.apply(source), functionIfTrue.apply(source)));
           } else {
             break;
           }
         } else {
-          throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(parser.reader, ",", ";");
+          throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(reader, ",", ";");
         }
       }
     }

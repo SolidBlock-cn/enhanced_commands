@@ -85,14 +85,14 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       final WeightedListParser<BlockFunctionArgument> weightedListParser = WeightedListParser.of((parseContext1) -> BlockFunctionArgument.parse(parseContext));
-      final StringReader reader = parseContext.parser().reader;
+      final StringReader reader = parseContext.reader();
 
       weightedList = weightedListParser.parse(parseContext);
 
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
-        parseContext.parser().clearSuggestion();
+        parseContext.clearSuggestion();
 
         parseNamedParameters(parseContext);
       }
@@ -110,7 +110,7 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
 
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
-      seed = OptionalLong.of(parseContext.parser().reader.readLong());
+      seed = OptionalLong.of(parseContext.reader().readLong());
     }
   }
 }

@@ -27,7 +27,7 @@ public class EnhancedReloadableRegistries {
     final RegistryKey<Registry<T>> registryKey = info.registryKey();
     final Codec<T> codec = info.codec();
     return CompletableFuture.supplyAsync(() -> {
-      MutableRegistry<T> mutableRegistry = new SimpleRegistry<T>(registryKey, Lifecycle.experimental());
+      MutableRegistry<T> mutableRegistry = new SimpleRegistry<>(registryKey, Lifecycle.experimental());
       Map<Identifier, JsonElement> map = new HashMap<>();
       final Identifier registry = registryKey.getValue();
       String string = registry.getNamespace() + "/" + registry.getPath();

@@ -128,17 +128,17 @@ public final class IdContainBlockFunction implements BlockFunction {
 
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
-      seed = OptionalLong.of(parseContext.parser().reader.readLong());
+      seed = OptionalLong.of(parseContext.reader().readLong());
     }
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final StringReader reader = parseContext.parser().reader;
+      final StringReader reader = parseContext.reader();
       pattern = ParsingUtil.readRegex(reader);
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
-        parseContext.parser().clearSuggestion();
+        parseContext.clearSuggestion();
 
         parseNamedParameters(parseContext);
       }

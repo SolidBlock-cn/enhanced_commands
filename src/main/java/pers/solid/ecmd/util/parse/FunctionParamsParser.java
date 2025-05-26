@@ -1,10 +1,10 @@
 package pers.solid.ecmd.util.parse;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 /**
@@ -33,35 +33,35 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
   @Override
   default void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
     // after the left parentheses
-    final SuggestedParser<?> parser = parseContext.parser();
-    parser.reader.skipWhitespace();
+    final StringReader reader = parseContext.reader();
+    reader.skipWhitespace();
 
     int paramsCount = 0;
 
     // when allows zero params, deal with empty
     if (paramsCount >= minParamsCount()) {
-      parser.addSuggestion((context, builder) -> {
+      parseContext.addSuggestion((context, builder) -> {
         if (builder.getRemaining().isEmpty()) {
           builder.suggest(rightParString());
         }
         return builder.buildFuture();
       });
     }
-    if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
+    if (reader.canRead() && reader.peek() == rightPar()) {
       if (paramsCount >= minParamsCount()) {
         // In this case, the parameters are empty
         return;
       } else {
-        throw PARAMS_TOO_FEW.createWithContext(parser.reader, paramsCount, minParamsCount());
+        throw PARAMS_TOO_FEW.createWithContext(reader, paramsCount, minParamsCount());
       }
     }
     while (true) {
-      parser.clearSuggestion();
+      parseContext.clearSuggestion();
       parseParameter(parseContext, paramsCount);
       paramsCount++;
-      parser.reader.skipWhitespace();
+      reader.skipWhitespace();
       final int finalParamsCount = paramsCount;
-      parser.addSuggestion((context, builder) -> {
+      parseContext.addSuggestion((context, builder) -> {
         if (builder.getRemaining().isEmpty()) {
           if (finalParamsCount < maxParamsCount()) {
             builder.suggest(separatorString());
@@ -73,30 +73,30 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
         return builder.buildFuture();
       });
       // end of an expression, except a comma or right parentheses
-      if (!parser.reader.canRead()) {
+      if (!reader.canRead()) {
         if (paramsCount < minParamsCount()) {
           // params not enough, suggest comma
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, separator());
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, separator());
         } else if (paramsCount < maxParamsCount()) {
           // params enough but not full, suggest both
-          throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(parser.reader, separator(), rightPar());
+          throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(reader, separator(), rightPar());
         } else {
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightPar());
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, rightPar());
         }
-      } else if (parser.reader.peek() == separator()) {
+      } else if (reader.peek() == separator()) {
         if (paramsCount >= maxParamsCount()) {
-          throw PARAMS_TOO_MANY.createWithContext(parser.reader, paramsCount + 1, maxParamsCount());
+          throw PARAMS_TOO_MANY.createWithContext(reader, paramsCount + 1, maxParamsCount());
         }
-        parser.reader.skip();
-        parser.reader.skipWhitespace();
-        parser.clearSuggestion();
-      } else if (parser.reader.peek() == rightPar()) {
+        reader.skip();
+        reader.skipWhitespace();
+        parseContext.clearSuggestion();
+      } else if (reader.peek() == rightPar()) {
         if (paramsCount < minParamsCount()) {
-          throw PARAMS_TOO_FEW.createWithContext(parser.reader, paramsCount, minParamsCount());
+          throw PARAMS_TOO_FEW.createWithContext(reader, paramsCount, minParamsCount());
         }
         return;
       } else {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
+        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
       }
     }
   }

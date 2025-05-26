@@ -1,7 +1,7 @@
 package pers.solid.ecmd.util.parse;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import pers.solid.ecmd.argument.SuggestedParser;
 
 public interface FunctionLikeParser<T> extends Parser<T> {
   default char leftPar() {
@@ -30,11 +30,11 @@ public interface FunctionLikeParser<T> extends Parser<T> {
 
   @Override
   default T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-    final SuggestedParser<?> parser = parseContext.parser();
-    if (!(parser.reader.canRead() && parser.reader.peek() == leftPar())) {
+    final StringReader reader = parseContext.reader();
+    if (!(reader.canRead() && reader.peek() == leftPar())) {
       return null;
     }
-    parser.reader.skip();
+    reader.skip();
     return parseAfterLeftParenthesis(parseContext);
   }
 
@@ -43,28 +43,31 @@ public interface FunctionLikeParser<T> extends Parser<T> {
    */
   T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException;
 
+  /**
+   * 解析括号内的内容。此时 {@code parseContext} 中的 {@code allowSparse} 通常应当是 {@code true}。
+   */
   void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException;
 
   default T parseAfterLeftParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-    parseWithinParenthesis(parseContext);
-    final SuggestedParser<?> parser = parseContext.parser();
-    parser.reader.skipWhitespace();
-    parser.addSuggestion((context, builder) -> {
+    parseWithinParenthesis(parseContext.withAllowSparse(true));
+    final StringReader reader = parseContext.reader();
+    reader.skipWhitespace();
+    parseContext.addSuggestion((context, builder) -> {
       if (builder.getRemaining().isEmpty()) {
         builder.suggest(rightParString());
       }
       return builder.buildFuture();
     });
-    if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
-      parser.reader.skip();
-      parser.clearSuggestion();
+    if (reader.canRead() && reader.peek() == rightPar()) {
+      reader.skip();
+      parseContext.clearSuggestion();
       return getParseResult(parseContext);
     }
-    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightPar());
+    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, rightPar());
   }
 
   /**
-   * 指定函数名称，从而让对象知晓是在解析的函数名称。通霄来说，在函数命令是由 {@link FunctionsParser} 解析的，解析后分配各自的 {@link FunctionsParser}。有时抛出的异常的信息中会使用到函数名称。如果不需要使用，可以不实现此方法。
+   * 指定函数名称，从而让对象知晓是在解析的函数名称。通常来说，在函数命令是由 {@link FunctionsParser} 解析的，解析后分配各自的 {@link FunctionsParser}。有时抛出的异常的信息中会使用到函数名称。如果不需要使用，可以不实现此方法。
    */
   default void setFunctionName(String functionName) {
   }

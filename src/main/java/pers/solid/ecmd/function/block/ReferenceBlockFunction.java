@@ -17,8 +17,6 @@ import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 
-import java.util.Objects;
-
 public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements BlockFunction, ReferenceEntry<ReferenceBlockFunction, BlockFunction> {
   public static final MapCodec<ReferenceBlockFunction> CODEC = ReferenceEntry.createCodec(BlockFunction.REGISTRY_KEY, ReferenceBlockFunction::new);
 
@@ -51,19 +49,6 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
     return Type.INSTANCE.createExceptionForUnknownId(reader, identifier);
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == this) return true;
-    if (obj == null || obj.getClass() != this.getClass()) return false;
-    var that = (ReferenceBlockFunction) obj;
-    return Objects.equals(this.id, that.id);
-  }
-
-  @Override
-  public String toString() {
-    return "ReferenceBlockFunction[" +
-        "id=" + id + ']';
-  }
 
   public static class Type extends PrefixedIdParser<BlockFunctionArgument, BlockFunction> implements BlockFunctionType<ReferenceBlockFunction> {
     public static final Type INSTANCE = new Type();

@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Streams;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -19,7 +20,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -142,41 +142,42 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     @Override
     public RegionArgument parseAfterLeftParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       final RegionArgument parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(parseContext);
-      cursorAfter = parseContext.parser().reader.getCursor();
+      cursorAfter = parseContext.reader().getCursor();
       return parsed;
     }
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
+      final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
-        fromPos = parser.parseAndSuggestArgument(type);
-        if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {
-          parser.reader.skipWhitespace();
+        fromPos = parseContext.parseAndSuggestArgument(type);
+        if (reader.canRead() && Character.isWhitespace(reader.peek())) {
+          reader.skipWhitespace();
           // 在有接受到空格后，可直接接受第二个参数
-          if (parser.reader.canRead()) {
-            final char peek = parser.reader.peek();
+          if (reader.canRead()) {
+            final char peek = reader.peek();
             if (peek != ',' && peek != ')') {
-              toPos = parser.parseAndSuggestArgument(type);
+              toPos = parseContext.parseAndSuggestArgument(type);
             }
           }
         }
       } else if (toPos == null && paramIndex == 1) {
-        toPos = parser.parseAndSuggestArgument(type);
+        toPos = parseContext.parseAndSuggestArgument(type);
       } else if (toPos != null) {
-        final int cursorBeforeInt = parser.reader.getCursor();
-        thickness = parser.reader.readInt();
+        final int cursorBeforeInt = reader.getCursor();
+        thickness = reader.readInt();
         if (thickness <= 0) {
-          final int cursorAfterThickness = parser.reader.getCursor();
-          parser.reader.setCursor(cursorBeforeInt);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(NON_POSITIVE_THICKNESS.createWithContext(parser.reader, thickness), cursorAfterThickness);
+          final int cursorAfterThickness = reader.getCursor();
+          reader.setCursor(cursorBeforeInt);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(NON_POSITIVE_THICKNESS.createWithContext(reader, thickness), cursorAfterThickness);
         }
       }
     }
 
     @Override
     public RegionArgument getParseResult(ParseContext<?> parseContext) {
+      final StringReader reader = parseContext.reader();
       return source -> {
         try {
           return createParsedResult(source);
@@ -185,7 +186,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
             if (commandSyntaxException.getInput() != null) {
               throw commandSyntaxException;
             } else {
-              throw CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), parseContext.parser().reader.getString(), cursorBefore), cursorAfter);
+              throw CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), reader.getString(), cursorBefore), cursorAfter);
             }
           } else {
             throw e;

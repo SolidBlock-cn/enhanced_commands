@@ -85,7 +85,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
 
     @Override
     public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new StonecutBlockFunction(blockFunction == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
+      return source -> new StonecutBlockFunction(blockFunction == null ? EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
     }
 
     @Override

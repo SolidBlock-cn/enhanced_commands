@@ -1,11 +1,11 @@
 package pers.solid.ecmd.nbt;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -25,10 +25,10 @@ public record StorageNbtDataArgument(Identifier id) implements NbtSourceArgument
   }
 
   public static StorageNbtDataArgument handle(ParseContext<?> parseContext) throws CommandSyntaxException {
-    final SuggestedParser<?> parser = parseContext.parser();
-    ParsingUtil.expectAndSkipWhitespace(parser.reader);
-    final int cursor = parser.reader.getCursor();
-    parser.setSuggestion((context, suggestionsBuilder) -> {
+    final StringReader reader = parseContext.reader();
+    ParsingUtil.expectAndSkipWhitespace(reader);
+    final int cursor = reader.getCursor();
+    parseContext.setSuggestion((context, suggestionsBuilder) -> {
       if (context.getSource() instanceof ServerCommandSource source) {
         return CommandSource.suggestIdentifiers(source.getServer().getDataCommandStorage().getIds(), suggestionsBuilder.createOffset(cursor));
       } else if (context.getSource() instanceof CommandSource source) {
@@ -37,7 +37,7 @@ public record StorageNbtDataArgument(Identifier id) implements NbtSourceArgument
         return Suggestions.empty();
       }
     });
-    final Identifier identifier = Identifier.fromCommandInput(parser.reader);
+    final Identifier identifier = Identifier.fromCommandInput(reader);
     return new StorageNbtDataArgument(identifier);
   }
 }

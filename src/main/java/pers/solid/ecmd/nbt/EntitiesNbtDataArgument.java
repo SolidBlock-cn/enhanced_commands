@@ -1,11 +1,11 @@
 package pers.solid.ecmd.nbt;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -33,11 +33,11 @@ public record EntitiesNbtDataArgument(EntitySelector entitySelector) implements 
   }
 
   public static EntitiesNbtDataArgument handle(ParseContext<?> parseContext) throws CommandSyntaxException {
-    final SuggestedParser<?> parser = parseContext.parser();
-    ParsingUtil.expectAndSkipWhitespace(parser.reader);
-    final EntitySelector selector = parser.parseAndSuggestArgument(EntityArgumentType.entities());
-    if (parser.reader.canRead()) {
-      parser.clearSuggestion();
+    final StringReader reader = parseContext.reader();
+    ParsingUtil.expectAndSkipWhitespace(reader);
+    final EntitySelector selector = parseContext.parseAndSuggestArgument(EntityArgumentType.entities());
+    if (reader.canRead()) {
+      parseContext.clearSuggestion();
     }
     return new EntitiesNbtDataArgument(selector);
   }

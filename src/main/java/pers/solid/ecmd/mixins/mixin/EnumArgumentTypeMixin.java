@@ -25,13 +25,13 @@ public abstract class EnumArgumentTypeMixin<T extends Enum<T> & StringIdentifiab
   @Final
   private static DynamicCommandExceptionType INVALID_ENUM_EXCEPTION;
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Ljava/lang/Enum;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readUnquotedString()Ljava/lang/String;", shift = At.Shift.BEFORE, remap = false))
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Ljava/lang/Enum;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readUnquotedString()Ljava/lang/String;", remap = false))
   public void injectedParse(StringReader stringReader, CallbackInfoReturnable<T> cir, @Share("cursorBeforeUnquotedString") LocalIntRef localIntRef) {
     localIntRef.set(stringReader.getCursor());
   }
 
   @ModifyArg(method = "parse(Lcom/mojang/brigadier/StringReader;)Ljava/lang/Enum;", at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElseThrow(Ljava/util/function/Supplier;)Ljava/lang/Object;"))
-  public Supplier<CommandSyntaxException> modifiedParse(Supplier<CommandSyntaxException> exceptionSupplier, @Local StringReader stringReader, @Local String string, @Share("cursorBeforeUnquotedString") LocalIntRef localIntRef) {
+  public Supplier<CommandSyntaxException> modifiedParse(Supplier<CommandSyntaxException> exceptionSupplier, @Local(argsOnly = true) StringReader stringReader, @Local String string, @Share("cursorBeforeUnquotedString") LocalIntRef localIntRef) {
     return () -> {
       final int cursorAfterUnquotedString = stringReader.getCursor();
       final int cursorBeforeUnquotedString = localIntRef.get();

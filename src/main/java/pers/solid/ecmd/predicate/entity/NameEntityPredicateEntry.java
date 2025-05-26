@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
@@ -27,7 +26,7 @@ public record NameEntityPredicateEntry(String expectedName, boolean inverted) im
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "propertyName=" + expectedName;
   }
 }

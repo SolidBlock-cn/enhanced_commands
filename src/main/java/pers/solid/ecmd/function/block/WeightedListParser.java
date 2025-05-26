@@ -4,7 +4,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -24,11 +23,11 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
   @Override
   public WeightedList<T> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     parseEntryList(parseContext);
+    final StringReader reader = parseContext.reader();
     if (weightSum == 0) {
-      final SuggestedParser<?> parser = parseContext.parser();
-      final int cursorEnd = parser.reader.getCursor();
-      parser.reader.setCursor(cursorBeforeEntries);
-      throw withCursorEnd(PickBlockFunction.SUM_ZERO.createWithContext(parser.reader), cursorEnd);
+      final int cursorEnd = reader.getCursor();
+      reader.setCursor(cursorBeforeEntries);
+      throw withCursorEnd(PickBlockFunction.SUM_ZERO.createWithContext(reader), cursorEnd);
     }
     if (weighted) {
       return new WeightedList.Weighted<>(pairs);
@@ -41,13 +40,12 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
 
   public void parseEntryList(ParseContext<?> parseContext) throws CommandSyntaxException {
     this.pairs = new ArrayList<>();
-    final SuggestedParser<?> parser = parseContext.parser();
-    final StringReader reader = parser.reader;
+    final StringReader reader = parseContext.reader();
     cursorBeforeEntries = reader.getCursor();
 
     // 解析方块函数的部分
     while (true) {
-      parser.clearSuggestion();
+      parseContext.clearSuggestion();
       final T parse = parseElement(parseContext);
       reader.skipWhitespace();
       if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
@@ -67,7 +65,7 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
       }
 
       reader.skipWhitespace();
-      parser.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder
+      parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder
           .suggest(separatorString()).buildFuture());
       if (!reader.canRead()) {
         break;

@@ -13,7 +13,7 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.function.Function;
 
 /**
- * A region that supports only integer operations. Operations related double will throw {@link UnsupportedOperationException}, unless it equals to the integer.
+ * A region that supports only integer operations. Operations related to double will throw {@link UnsupportedOperationException}, unless it equals to the integer.
  */
 public interface IntBackedRegion extends Region {
   DynamicCommandExceptionType MOVE_MUST_INT = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.exception.move_must_int", o));

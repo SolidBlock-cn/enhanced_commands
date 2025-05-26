@@ -48,7 +48,7 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
   public NbtTargetArgument<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtTargetArgument<?> nbtTargetArgument = NbtDataRegistry.handleTarget(s, new ParseContext<>(registryAccess, new SuggestedParser<>(reader), false, true));
+    final NbtTargetArgument<?> nbtTargetArgument = NbtDataRegistry.handleTarget(s, new ParseContext<>(registryAccess, reader, false, true));
     if (nbtTargetArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -64,17 +64,17 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
     reader.setCursor(builder.getStart());
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final SuggestedParser<S> suggestedParser = new SuggestedParser<>(reader);
     final NbtTargetArgument<?> nbtTargetArgument;
+    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, reader, true, true);
     try {
-      nbtTargetArgument = NbtDataRegistry.handleTarget(s, new ParseContext<>(registryAccess, suggestedParser, true, true));
+      nbtTargetArgument = NbtDataRegistry.handleTarget(s, parseContext);
       if (nbtTargetArgument == null) {
         reader.setCursor(cursorBeforeString);
         return CommandSource.suggestMatching(NbtDataRegistry.streamTargetTypes(), builder);
       }
     } catch (CommandSyntaxException ignored) {
     }
-    return suggestedParser.buildSuggestions(context, builder.createOffset(reader.getCursor()));
+    return parseContext.buildSuggestions(context, builder.createOffset(reader.getCursor()));
   }
 
   private static final Collection<String> EXAMPLES = List.of("block ~ ~1 ~", "blocks sphere(5)", "entity @s", "entity Solid", "entity @e[type=pig,limit=1]", "entities @a", "entities @e", "store x");

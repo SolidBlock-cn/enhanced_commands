@@ -59,7 +59,7 @@ public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
     localIntRef.set(stringReader.getCursor());
   }
 
-  @Inject(method = "listSuggestions", at = @At(value = "RETURN", shift = At.Shift.BEFORE), cancellable = true)
+  @Inject(method = "listSuggestions", at = @At(value = "RETURN"), cancellable = true)
   public <S> void suggestWithTooltip(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
     MixinShared.mixinSuggestWithTooltip(registryRef, registryWrapper, builder, cir);
   }
@@ -125,7 +125,7 @@ public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
     };
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;", at = @At(value = "NEW", target = "(Lnet/minecraft/registry/entry/RegistryEntryList$Named;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$TagBased;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;", at = @At(value = "NEW", target = "(Lnet/minecraft/registry/entry/RegistryEntryList$Named;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$TagBased;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   public void acceptMultipleValuesOnTag(StringReader stringReader, CallbackInfoReturnable<RegistryEntryPredicateArgumentType.EntryPredicate<T>> cir, int cursorBeforeValue, Identifier tagId, TagKey<T> tagKey, RegistryEntryList.Named<T> named) throws CommandSyntaxException {
     if (stringReader.canRead() && stringReader.peek() == '|') {
       final EnhancedEntryPredicate.TagBased<T> firstValue = new EnhancedEntryPredicate.TagBased<>(named);
@@ -145,7 +145,7 @@ public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
     return MixinShared.mixinModifiedParseThrow(registryRef, original, localIntRef, stringReader, identifier);
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;", at = @At(value = "NEW", target = "(Lnet/minecraft/registry/entry/RegistryEntry$Reference;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryBased;", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;", at = @At(value = "NEW", target = "(Lnet/minecraft/registry/entry/RegistryEntry$Reference;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryBased;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   public void acceptMultipleValuesOnEntry(StringReader stringReader, CallbackInfoReturnable<RegistryEntryPredicateArgumentType.EntryPredicate<T>> cir, Identifier identifier2, RegistryKey<T> registryKey, RegistryEntry.Reference<T> reference) throws CommandSyntaxException {
     if (stringReader.canRead() && stringReader.peek() == '|') {
       final EnhancedEntryPredicate.EntryBased<T> firstValue = new EnhancedEntryPredicate.EntryBased<>(reference);

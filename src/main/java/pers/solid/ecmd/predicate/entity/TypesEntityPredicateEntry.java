@@ -11,7 +11,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -38,7 +37,7 @@ public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<Entity
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "type=" + (inverted ? "!" : "") + values.stream().map(either -> either.map(type -> Registries.ENTITY_TYPE.getId(type).toString(), tag -> "#" + tag.id())).collect(Collectors.joining("|"));
   }
 }

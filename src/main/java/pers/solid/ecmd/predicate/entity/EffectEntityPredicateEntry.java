@@ -7,7 +7,6 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 
 public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted) implements EntityPredicateEntry {
@@ -17,7 +16,7 @@ public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted
       return false;
     }
     final var actualEffects = livingEntity.getActiveStatusEffects();
-    return actualEffects.containsKey(expected) != inverted;
+    return actualEffects.containsKey(Registries.STATUS_EFFECT.getEntry(expected)) != inverted;
   }
 
   @Override
@@ -26,7 +25,7 @@ public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
     final var actualEffects = livingEntity.getActiveStatusEffects();
-    final var actual = actualEffects.containsKey(expected);
+    final var actual = actualEffects.containsKey(Registries.STATUS_EFFECT.getEntry(expected));
     if (actual) {
       return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.effect.true_dummy", displayName, expected.getName()));
     } else {
@@ -35,7 +34,7 @@ public record EffectEntityPredicateEntry(StatusEffect expected, boolean inverted
   }
 
   @Override
-  public @Nullable String toOptionEntry() {
+  public String toOptionEntry() {
     return "effect=" + (inverted ? "!" : "") + Registries.STATUS_EFFECT.getId(expected);
   }
 }

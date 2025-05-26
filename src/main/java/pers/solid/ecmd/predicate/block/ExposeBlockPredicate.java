@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.Iterables;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,7 +13,6 @@ import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
@@ -162,25 +162,25 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
+      final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
-        parser.clearSuggestion();
-        exposureType = parser.parseAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
+        parseContext.clearSuggestion();
+        exposureType = parseContext.parseAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);
       } else if (paramIndex == 1) {
         do {
-          parser.clearSuggestion();
-          parser.reader.skipWhitespace();
+          parseContext.clearSuggestion();
+          reader.skipWhitespace();
           if (directions.isEmpty()) {
-            parser.addSuggestion((context, suggestionsBuilder) -> {
+            parseContext.addSuggestion((context, suggestionsBuilder) -> {
               ParsingUtil.suggestString("all", Text.translatable("enhanced_commands.direction.all"), suggestionsBuilder);
               ParsingUtil.suggestString("horizontal", Text.translatable("enhanced_commands.direction.horizontal"), suggestionsBuilder);
               ParsingUtil.suggestString("vertical", Text.translatable("enhanced_commands.direction.vertical"), suggestionsBuilder);
               return suggestionsBuilder.buildFuture();
             });
           }
-          parser.addSuggestion((context, builder) -> ParsingUtil.suggestDirections(builder));
-          final int cursorBeforeReadString = parser.reader.getCursor();
-          final String id = parser.reader.readString();
+          parseContext.addSuggestion((context, builder) -> ParsingUtil.suggestDirections(builder));
+          final int cursorBeforeReadString = reader.getCursor();
+          final String id = reader.readString();
           if (id.isEmpty())
             break;
           if (directions.isEmpty()) {
@@ -201,13 +201,13 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
           }
           final Direction direction = Direction.byName(id);
           if (direction == null) {
-            parser.reader.setCursor(cursorBeforeReadString);
-            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
+            reader.setCursor(cursorBeforeReadString);
+            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
           }
           directions.add(direction);
-        } while (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek()));
+        } while (reader.canRead() && Character.isWhitespace(reader.peek()));
         if (directions.isEmpty()) {
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parser.reader);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
         }
       }
     }

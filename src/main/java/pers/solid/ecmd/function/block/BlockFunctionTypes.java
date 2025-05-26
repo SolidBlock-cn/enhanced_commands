@@ -33,7 +33,7 @@ public final class BlockFunctionTypes {
   /**
    * 解析方块函数中的括号语法。
    */
-  public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(parseContext.withAllowSparse(true)), parseContext.parser());
+  public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(parseContext.withAllowSparse(true)), parseContext);
   /**
    * 解析方块函数中的函数语法、
    */

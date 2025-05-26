@@ -3,6 +3,7 @@ package pers.solid.ecmd.command;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -269,7 +270,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(s), false, true)).toAbsoluteRegion(context.getSource()))))
+            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(new ParseContext<>(registryAccess, new StringReader(s), false, true)).toAbsoluteRegion(context.getSource()))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")

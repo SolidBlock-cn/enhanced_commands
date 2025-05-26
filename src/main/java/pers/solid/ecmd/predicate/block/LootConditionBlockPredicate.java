@@ -19,7 +19,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.bridge.LootBridge;
@@ -92,8 +91,8 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
         return source -> {
           final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = parseContext.registryAccess().createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
           if (lootCondition.isEmpty()) {
-            parseContext.parser().reader.setCursor(cursorBeforeId);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.parser().reader, id.toString()), cursorAfterId);
+            parseContext.reader().setCursor(cursorBeforeId);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);
           }
           return new LootConditionBlockPredicate(lootCondition.get());
         };
@@ -106,14 +105,13 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      final StringReader reader = parser.reader;
-      final int cursorBeforeId = parser.reader.getCursor();
-      parser.setSuggestion((context1, suggestionsBuilder1) -> getLootConditionIdSuggestions(context1, suggestionsBuilder1, cursorBeforeId));
+      final StringReader reader = parseContext.reader();
+      final int cursorBeforeId = reader.getCursor();
+      parseContext.setSuggestion((context1, suggestionsBuilder1) -> getLootConditionIdSuggestions(context1, suggestionsBuilder1, cursorBeforeId));
       if (reader.canRead()) {
         final char peek = reader.peek();
         if (peek == '{' || peek == '[' || StringReader.isQuotedStringStart(peek)) {
-          parser.clearSuggestion();
+          parseContext.clearSuggestion();
           this.anonymous = ParsingUtil.parseNbt(reader, LootCondition.CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
           return;
         }
@@ -124,14 +122,14 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
       this.cursorAfterId = reader.getCursor();
       if (!reader.canRead() && parseContext.suggestionsOnly()) {
         // 在提供建议的过程中，如果后面没有内容，则提前中断建议，不提供“,”或“)”的建议。
-        parser.setSuggestion((context, suggestionsBuilder) -> getLootConditionIdSuggestions(context, suggestionsBuilder, cursorBeforeId).thenCompose(suggestions -> {
+        parseContext.setSuggestion((context, suggestionsBuilder) -> getLootConditionIdSuggestions(context, suggestionsBuilder, cursorBeforeId).thenCompose(suggestions -> {
           if (suggestions.isEmpty()) {
             return suggestionsBuilder.suggest(")").buildFuture();
           } else {
             return CompletableFuture.completedFuture(suggestions);
           }
         }));
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, ")");
+        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, ")");
       }
     }
   }

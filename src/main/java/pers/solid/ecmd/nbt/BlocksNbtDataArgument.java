@@ -68,9 +68,9 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, @Nullable Blo
   }
 
   public static BlocksNbtDataArgument handle(ParseContext<?> parseContext) throws CommandSyntaxException {
-    ParsingUtil.expectAndSkipWhitespace(parseContext.parser().reader);
+    ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
     final RegionArgument regionArgument = RegionArgument.parse(parseContext);
-    parseContext.parser().clearSuggestion();
+    parseContext.clearSuggestion();
     return new BlocksNbtDataArgument(regionArgument);
   }
 }

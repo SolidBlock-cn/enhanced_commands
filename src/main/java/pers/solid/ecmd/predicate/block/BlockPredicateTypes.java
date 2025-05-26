@@ -20,7 +20,7 @@ import java.util.Map;
 public final class BlockPredicateTypes {
   public static final Map<String, Supplier<FunctionLikeParser<? extends BlockPredicateArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockPredicateTypes::registerFunctionNames);
-  public static final Parser<BlockPredicateArgument> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(parseContext), parseContext.parser());
+  public static final Parser<BlockPredicateArgument> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(parseContext.withAllowSparse(true)), parseContext);
   public static final Parser<BlockPredicateArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
   public static final List<Parser<BlockPredicateArgument>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
 

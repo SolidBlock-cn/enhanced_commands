@@ -100,7 +100,7 @@ public final class EntitySelectorTypeExtras {
       entitySelectorReader.addPredicate(EmptyEntityPredicateEntry.INSTANCE);
     });
     final Consumer<EntitySelectorReader> excludesPlayersConsumer = reader -> {
-      reader.excludesEntityType();
+      reader.setExcludesEntityType();
       reader.addPredicate(new TypeEntityPredicateEntry(EntityType.PLAYER, true));
     };
     map.put(NEAREST_NON_PLAYER, excludesPlayersConsumer);

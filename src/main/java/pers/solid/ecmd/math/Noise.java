@@ -12,7 +12,6 @@ import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.block.WeightedListParser;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
@@ -113,7 +112,7 @@ public interface Noise {
     protected Vec3d scale;
     protected WeightedList<T> weightedList;
     protected Vec3d offset;
-    protected Set<String> SUPPORTED_PARAMS = ImmutableSet.of("first_octave", "amplitudes", "scale", "offset", "seed");
+    protected final Set<String> SUPPORTED_PARAMS = ImmutableSet.of("first_octave", "amplitudes", "scale", "offset", "seed");
 
     protected abstract T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
 
@@ -125,15 +124,14 @@ public interface Noise {
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       weightedList = WeightedListParser.of((parseContext1) -> parseElement(parseContext)).parse(parseContext);
-      final SuggestedParser<?> parser = parseContext.parser();
-      final StringReader reader = parser.reader;
-      parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
+      final StringReader reader = parseContext.reader();
+      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
 
       reader.skipWhitespace();
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
-        parser.clearSuggestion();
+        parseContext.clearSuggestion();
 
         parseNamedParameters(parseContext);
       }
@@ -153,7 +151,7 @@ public interface Noise {
 
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
-      final StringReader reader = parseContext.parser().reader;
+      final StringReader reader = parseContext.reader();
 
       switch (paramName) {
         case "seed" -> seed = OptionalLong.of(reader.readLong());

@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -7,7 +8,6 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
@@ -66,11 +66,11 @@ public enum ConstantBlockPredicate implements BlockPredicate {
 
     @Override
     public @Nullable BlockPredicate parse(ParseContext<?> parseContext) {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_predicate.constant"), suggestionsBuilder).buildFuture());
-      if (parser.reader.canRead() && parser.reader.peek() == '*') {
-        parser.reader.skip();
-        parser.clearSuggestion();
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_predicate.constant"), suggestionsBuilder).buildFuture());
+      final StringReader reader = parseContext.reader();
+      if (reader.canRead() && reader.peek() == '*') {
+        reader.skip();
+        parseContext.clearSuggestion();
         return ALWAYS_TRUE;
       } else {
         return null;

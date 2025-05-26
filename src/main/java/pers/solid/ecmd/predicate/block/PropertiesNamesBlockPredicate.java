@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
@@ -83,9 +83,9 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
 
     @Override
     public @Nullable PropertiesNamesBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
-      if (parser.reader.canRead() && parser.reader.peek() == '[') {
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
+      final StringReader reader = parseContext.reader();
+      if (reader.canRead() && reader.peek() == '[') {
         final SimpleBlockPredicateParser<?> suggestedParser = new SimpleBlockPredicateParser<>(parseContext);
         suggestedParser.parsePropertyNames();
         return new PropertiesNamesBlockPredicate(suggestedParser.propertyNamePredicates);

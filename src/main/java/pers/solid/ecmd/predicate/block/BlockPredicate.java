@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
@@ -19,7 +20,6 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -37,7 +37,7 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return BlockPredicateArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(s), false, true)).apply(source);
+    return BlockPredicateArgument.parse(new ParseContext<>(registryAccess, new StringReader(s), false, true)).apply(source);
   }
 
   static TestResult successResult(BlockPos blockPos) {

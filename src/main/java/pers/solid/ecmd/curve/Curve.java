@@ -28,7 +28,7 @@ public interface Curve extends Region {
   }
 
   /**
-   * 沿着这个曲线产生一条像素化的连续的线。这个 BlockPos 有可能是 {@link BlockPos.Mutable}。
+   * 沿着这条曲线产生一条像素化的连续的线。这个 BlockPos 有可能是 {@link BlockPos.Mutable}。
    */
   default @NotNull Iterator<BlockPos> iterator() {
     return streamBlockPos().iterator();
@@ -52,7 +52,7 @@ public interface Curve extends Region {
   }
 
   /**
-   * 沿着这个曲线产生一条像素化的连续的线。这个 BlockPos 有可能是 {@link BlockPos.Mutable}。
+   * 沿着这条曲线产生一条像素化的连续的线。这个 BlockPos 有可能是 {@link BlockPos.Mutable}。
    *
    * @implNote 此方法会被 {@link #iterator()} 使用。如果覆盖了 {@link #iterator()}，那么应该一并覆盖此方法。
    */

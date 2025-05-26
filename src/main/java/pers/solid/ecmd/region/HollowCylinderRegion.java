@@ -1,6 +1,7 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Streams;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
@@ -11,7 +12,6 @@ import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.enums.OutlineType;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -170,26 +170,26 @@ public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion regio
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
+      final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
-        final int cursorBeforeReadDouble = parser.reader.getCursor();
-        radius = parser.reader.readDouble();
+        final int cursorBeforeReadDouble = reader.getCursor();
+        radius = reader.readDouble();
         if (radius < 0) {
-          parser.reader.setCursor(cursorBeforeReadDouble);
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, radius);
+          reader.setCursor(cursorBeforeReadDouble);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, radius);
         }
       } else if (paramIndex == 1) {
-        final int cursorBeforeReadDouble = parser.reader.getCursor();
-        height = parser.reader.readDouble();
+        final int cursorBeforeReadDouble = reader.getCursor();
+        height = reader.readDouble();
         if (height < 0) {
-          parser.reader.setCursor(cursorBeforeReadDouble);
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(parser.reader, 0, height);
+          reader.setCursor(cursorBeforeReadDouble);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, height);
         }
       } else if (paramIndex == 2) {
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
-        center = parser.parseAndSuggestArgument(argumentType);
+        center = parseContext.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 3) {
-        type = parser.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
+        type = parseContext.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
       }
     }
 

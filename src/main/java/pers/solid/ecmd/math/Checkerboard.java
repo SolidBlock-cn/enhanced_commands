@@ -6,7 +6,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.block.WeightedListParser;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
@@ -67,7 +66,7 @@ public interface Checkerboard<T> {
 
   abstract class CheckerboardParser<T> implements FunctionLikeParser<T>, NamedParamListParser {
     protected final Set<String> SUPPORTED_PARAMS = Set.of("scale", "floor", "offset");
-    public WeightedListParser<T> weightedListParser = WeightedListParser.of(this::parseElement);
+    public final WeightedListParser<T> weightedListParser = WeightedListParser.of(this::parseElement);
     protected Vec3d scale = null;
     protected Vec3d floor = null;
     protected Vec3d offset = null;
@@ -104,19 +103,18 @@ public interface Checkerboard<T> {
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final SuggestedParser<?> parser = parseContext.parser();
-      final StringReader reader = parser.reader;
+      final StringReader reader = parseContext.reader();
       parseEntryList(parseContext);
-      parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
+      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
       // 等待关键字的部分
 
       // 解析坐标轴尺寸的部分
-      parser.clearSuggestion();
+      parseContext.clearSuggestion();
       reader.skipWhitespace();
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
-        parser.clearSuggestion();
+        parseContext.clearSuggestion();
 
         parseNamedParameters(parseContext);
       }
@@ -138,7 +136,7 @@ public interface Checkerboard<T> {
 
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
-      final StringReader reader = parseContext.parser().reader;
+      final StringReader reader = parseContext.reader();
 
       switch (paramName) {
         case "floor" -> floor = ParsingUtil.parseShortenableVec3d(reader);

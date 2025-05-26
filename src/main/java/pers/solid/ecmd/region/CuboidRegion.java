@@ -1,5 +1,6 @@
 package pers.solid.ecmd.region;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -14,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -198,21 +198,21 @@ public record CuboidRegion(Box box) implements Region {
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
-      final SuggestedParser<?> parser = parseContext.parser();
+      final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
-        from = parser.parseAndSuggestArgument(type);
-        if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {
-          parser.reader.skipWhitespace();
+        from = parseContext.parseAndSuggestArgument(type);
+        if (reader.canRead() && Character.isWhitespace(reader.peek())) {
+          reader.skipWhitespace();
           // 在有接受到空格后，可直接接受第二个参数
-          if (parser.reader.canRead()) {
-            final char peek = parser.reader.peek();
+          if (reader.canRead()) {
+            final char peek = reader.peek();
             if (peek != ',' && peek != ')') {
-              to = parser.parseAndSuggestArgument(type);
+              to = parseContext.parseAndSuggestArgument(type);
             }
           }
         }
       } else if (paramIndex == 1) {
-        to = parser.parseAndSuggestArgument(type);
+        to = parseContext.parseAndSuggestArgument(type);
       }
     }
 
