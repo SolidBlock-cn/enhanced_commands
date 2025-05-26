@@ -4,17 +4,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> functions, @NotNull Vec3d floor, @NotNull Vec3d scale, @NotNull Vec3d offset) implements BlockFunction, Checkerboard<BlockFunction> {
   public static final MapCodec<CheckerboardBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -64,8 +63,8 @@ public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> fun
     }
 
     @Override
-    protected BlockFunctionArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
+    protected BlockFunctionArgument parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return BlockFunctionArgument.parse(parseContext);
     }
   }
 }

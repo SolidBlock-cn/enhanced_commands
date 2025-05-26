@@ -9,7 +9,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.RotationArgumentType;
@@ -27,6 +26,7 @@ import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Iterator;
@@ -209,7 +209,8 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     private @Nullable DoubleDoublePair range;
 
     @Override
-    public CurveArgument<CircleCurve> getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public CurveArgument<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       if (this.radius == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, "radius");
       }
@@ -231,13 +232,14 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      parseRadius(parser, suggestionsOnly);
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      parseRadius(parseContext);
+      final SuggestedParser<?> parser = parseContext.parser();
       while (true) {
         final int cursorBeforeWhite = parser.reader.getCursor();
         parser.reader.skipWhitespace();
         if (parser.reader.getCursor() > cursorBeforeWhite) {
-          if (parseAdditionalParameters(parser, suggestionsOnly)) {
+          if (parseAdditionalParameters(parseContext)) {
             break;
           }
         } else {
@@ -249,7 +251,8 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     /**
      * 解析半径。即：{@code <double> | from (<vector> | <double> <direction>)}。
      */
-    private void parseRadius(SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    private void parseRadius(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
       final int cursorBeforeKeyword = reader.getCursor();
       final String unquotedString = reader.readUnquotedString();
@@ -266,7 +269,8 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
       }
     }
 
-    private boolean parseAdditionalParameters(SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    private boolean parseAdditionalParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       parser.setSuggestion((context, suggestionsBuilder) -> {
         if (center == null) ParsingUtil.suggestString("at", suggestionsBuilder);
         if (around == null) CommandSource.suggestMatching(List.of("around", "facing", "rotated"), suggestionsBuilder);

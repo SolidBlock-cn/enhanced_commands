@@ -4,7 +4,6 @@ import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -12,9 +11,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -123,13 +122,13 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     private final List<RegionArgument> regions = new ArrayList<>();
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public RegionArgument getParseResult(ParseContext<?> parseContext) {
       return source -> new IntersectRegion(IterateUtils.transformFailableImmutableList(regions, regionArgument -> regionArgument.toAbsoluteRegion(source)));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      regions.add(RegionArgument.parse(registryAccess, parser, suggestionsOnly));
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      regions.add(RegionArgument.parse(parseContext));
     }
   }
 }

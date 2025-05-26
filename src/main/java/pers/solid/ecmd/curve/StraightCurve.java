@@ -5,7 +5,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.util.math.BlockPos;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Iterator;
@@ -142,7 +142,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     private boolean usingKeyword = false;
 
     @Override
-    public CurveArgument<StraightCurve> getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public CurveArgument<StraightCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (from == null || to == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
       }
@@ -150,7 +150,8 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
       final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {

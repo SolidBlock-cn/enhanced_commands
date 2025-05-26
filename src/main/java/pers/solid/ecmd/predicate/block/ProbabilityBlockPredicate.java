@@ -6,7 +6,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.OptionalLong;
@@ -89,7 +89,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
     private OptionalLong seed = OptionalLong.empty();
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) {
       if (predicate == null) {
         predicate = ConstantBlockPredicate.ALWAYS_TRUE;
       }
@@ -111,7 +111,8 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
       if (paramIndex == 0) {
         value = reader.readFloat();
@@ -122,7 +123,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooLow().createWithContext(reader, value, 0);
         }
       } else if (paramIndex == 1) {
-        predicate = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
+        predicate = BlockPredicateArgument.parse(parseContext);
       }
 
       if (reader.canRead() && reader.peek() == ';') {
@@ -130,7 +131,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
         reader.skipWhitespace();
         parser.clearSuggestion();
 
-        parseNamedParameters(registryAccess, parser, suggestionsOnly);
+        parseNamedParameters(parseContext);
       }
     }
 
@@ -145,8 +146,8 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
     }
 
     @Override
-    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      seed = OptionalLong.of(parser.reader.readLong());
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      seed = OptionalLong.of(parseContext.parser().reader.readLong());
     }
   }
 }

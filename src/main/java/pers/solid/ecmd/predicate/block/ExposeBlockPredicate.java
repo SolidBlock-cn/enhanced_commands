@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.ArrayList;
@@ -146,7 +146,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     private ExposureType exposureType;
 
     @Override
-    public ExposeBlockPredicate getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public ExposeBlockPredicate getParseResult(ParseContext<?> parseContext) {
       return new ExposeBlockPredicate(exposureType, directions.isEmpty() ? List.of(Direction.values()) : List.copyOf(directions));
     }
 
@@ -161,7 +161,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       if (paramIndex == 0) {
         parser.clearSuggestion();
         exposureType = parser.parseAndSuggestEnums(ExposureType.values(), ExposureType::getDisplayName, ExposureType.CODEC);

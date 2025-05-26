@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
@@ -17,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.EnumOrRandom;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.List;
 import java.util.function.Function;
@@ -62,12 +62,13 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
     }
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
       return source -> new MirrorBlockFunction(mirror.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final int cursor1 = parser.reader.getCursor();
       parser.setSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("forward", "side"), suggestionsBuilder));
       final String s = parser.reader.readString();

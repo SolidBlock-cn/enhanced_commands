@@ -1,10 +1,10 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 
 /**
@@ -12,11 +12,12 @@ import pers.solid.ecmd.util.parse.Parser;
  */
 public interface RegionArgument {
   @NotNull
-  static RegionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  static RegionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final SuggestedParser<?> parser = parseContext.parser();
     final int cursorOnStart = parser.reader.getCursor();
     for (Parser<RegionArgument> argumentParser : RegionTypes.PARSERS) {
       parser.reader.setCursor(cursorOnStart);
-      final RegionArgument parse = argumentParser.parse(registryAccess, parser, suggestionsOnly, true);
+      final RegionArgument parse = argumentParser.parse(parseContext.withAllowSparse(true));
       if (parse != null) {
         // keep the current position of the cursor
         return parse;

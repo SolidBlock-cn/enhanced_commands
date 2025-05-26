@@ -2,11 +2,11 @@ package pers.solid.ecmd.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 public record StorageNbtDataArgument(Identifier id) implements NbtSourceArgument<Identifier>, NbtTargetArgument<Identifier> {
@@ -24,7 +24,8 @@ public record StorageNbtDataArgument(Identifier id) implements NbtSourceArgument
     return getNbtData(source);
   }
 
-  public static StorageNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public static StorageNbtDataArgument handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final SuggestedParser<?> parser = parseContext.parser();
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
     final int cursor = parser.reader.getCursor();
     parser.setSuggestion((context, suggestionsBuilder) -> {

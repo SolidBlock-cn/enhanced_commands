@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -17,6 +16,7 @@ import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.function.FailableSupplier;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -59,8 +59,8 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
     }
 
     @Override
-    public T parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
-
+    public T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString(Character.toString(prefix), tooltip, suggestionsBuilder).buildFuture());
       boolean suffixed = false;
       if (parser.reader.canRead() && parser.reader.peek() == prefix) {
@@ -74,7 +74,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final int cursorBeforeId = parser.reader.getCursor();
       parser.setSuggestion((context, builder) -> {
         if (context.getSource() instanceof ServerCommandSource) {
-          return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(registryAccess.getWrapperOrThrow(registryKey).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
+          return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(parseContext.registryAccess().getWrapperOrThrow(registryKey).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
         } else if (context.getSource() instanceof CommandSource commandSource) {
           return commandSource.getCompletions(context);
         } else {
@@ -82,11 +82,11 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
         }
       });
       parser.terminateSuggestionsIfNotEmpty();
-      if (allowSparse) parser.reader.skipWhitespace();
+      if (parseContext.allowSparse()) parser.reader.skipWhitespace();
       final Identifier id = DefaultNamespace.ENHANCED_COMMANDS.fromStringReader(parser.reader);
       final int cursorAfterId = parser.reader.getCursor();
       return getResultByEntrySupplier(() -> {
-        final Optional<RegistryEntry.Reference<E>> entry = registryAccess.createRegistryLookup().getOptionalEntry(registryKey, RegistryKey.of(registryKey, id));
+        final Optional<RegistryEntry.Reference<E>> entry = parseContext.registryAccess().createRegistryLookup().getOptionalEntry(registryKey, RegistryKey.of(registryKey, id));
         if (entry.isEmpty()) {
           parser.reader.setCursor(cursorBeforeId);
           throw CommandSyntaxExceptionExtension.withCursorEnd(createExceptionForUnknownId(parser.reader, id.toString()), cursorAfterId);

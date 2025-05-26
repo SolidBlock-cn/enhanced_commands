@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
@@ -14,9 +13,9 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.PropertyFunction;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.Collections;
@@ -65,8 +64,8 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
     }
 
     @Override
-    public @NotNull SimpleBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser0, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-      SimpleBlockFunctionSuggestedParser<?> parser = new SimpleBlockFunctionSuggestedParser<>(registryAccess, parser0);
+    public @NotNull SimpleBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+      SimpleBlockFunctionSuggestedParser<?> parser = new SimpleBlockFunctionSuggestedParser<>(parseContext.registryAccess(), parseContext.parser());
       parser.parseBlockId();
       parser.parseProperties();
       return new SimpleBlockFunction(parser.block, parser.propertyFunctions);

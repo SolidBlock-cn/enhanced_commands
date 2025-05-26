@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,9 +19,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.List;
 
@@ -85,13 +84,13 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     private BlockFunctionArgument blockFunction = null;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
       return source -> new StonecutBlockFunction(blockFunction == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockFunction = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      blockFunction = BlockFunctionArgument.parse(parseContext);
     }
 
     @Override

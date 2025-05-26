@@ -3,7 +3,6 @@ package pers.solid.ecmd.predicate.block;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableFunction;
@@ -15,6 +14,7 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -25,28 +25,25 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
   Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.all.symbol_tooltip");
   Text UNION_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.any.symbol_tooltip");
 
-  static @NotNull BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    return parse(registryAccess, parser, suggestionsOnly, true);
+  static @NotNull BlockPredicateArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    return parseUnion(parseContext);
   }
 
-  static @NotNull BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return parseUnion(registryAccess, parser, suggestionsOnly, allowsSparse);
+  static @NotNull BlockPredicateArgument parseUnion(ParseContext<?> parseContext) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseIntersect(parseContext), predicates -> source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "|", UNION_TOOLTIP, parseContext);
   }
 
-  static @NotNull BlockPredicateArgument parseUnion(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseIntersect(registryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "|", UNION_TOOLTIP, parser, allowsSparse);
+  static @NotNull BlockPredicateArgument parseIntersect(ParseContext<?> parseContext) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseCombination(parseContext), predicates -> source -> new AllBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "&", INTERSECT_TOOLTIP, parseContext);
   }
 
-  static @NotNull BlockPredicateArgument parseIntersect(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseCombination(registryAccess, parser, suggestionsOnly, allowsSparse), predicates -> source -> new AllBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "&", INTERSECT_TOOLTIP, parser, allowsSparse);
-  }
-
-  static @NotNull <S> BlockPredicateArgument parseCombination(CommandRegistryAccess registryAccess, SuggestedParser<S> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
-    final BlockPredicateArgument parseUnit = parseUnit(registryAccess, parser, suggestionsOnly, allowsSparse);
+  static @NotNull <S> BlockPredicateArgument parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
+    final BlockPredicateArgument parseUnit = parseUnit(parseContext);
     if (parseUnit instanceof NbtPredicate) {
       return parseUnit;
     }
     List<PropertyNamePredicate> propertyNamePredicates;
+    final SuggestedParser<S> parser = parseContext.parser();
     if (!(parseUnit instanceof PropertiesNamesBlockPredicate) && parser.reader.canRead(0) && parser.reader.peek(-1) != ']') {
       // 当前面以“]”结尾时，说明已经在其他解析器中读取了属性，此时在这里不再读取任何属性
       // 尝试读取属性
@@ -57,7 +54,7 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
         return suggestionsBuilder.buildFuture();
       });
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockPredicateSuggestedParser<S> suggestedParser = new SimpleBlockPredicateSuggestedParser<>(registryAccess, parser);
+        final SimpleBlockPredicateSuggestedParser<S> suggestedParser = new SimpleBlockPredicateSuggestedParser<>(parseContext.registryAccess(), parser);
         suggestedParser.parsePropertyNames();
         propertyNamePredicates = suggestedParser.propertyNamePredicates;
       } else propertyNamePredicates = null;
@@ -80,13 +77,14 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
   }
 
   @NotNull
-  static BlockPredicateArgument parseUnit(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+  static BlockPredicateArgument parseUnit(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final SuggestedParser<?> parser = parseContext.parser();
     final StringReader reader = parser.reader;
     final int cursorOnStart = reader.getCursor();
     // 刻意将 simple 调整到最后面
     for (Parser<BlockPredicateArgument> argumentParser : Iterables.concat(BlockPredicateTypes.PARSERS, Collections.singleton(SimpleBlockPredicate.Type.SIMPLE_TYPE))) {
       reader.setCursor(cursorOnStart);
-      final BlockPredicateArgument parse = argumentParser.parse(registryAccess, parser, suggestionsOnly, allowsSparse);
+      final BlockPredicateArgument parse = argumentParser.parse(parseContext);
       if (parse != null) {
         return parse;
       }

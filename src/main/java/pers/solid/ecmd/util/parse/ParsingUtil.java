@@ -158,14 +158,15 @@ public final class ParsingUtil {
    * @param merger               当解析出来了多个 {@code T} 值时，将这多个 {@code T} 值合并为一个值。
    * @param joiningString        多个值之间用于间隔的间隔字符串。
    * @param joiningStringTooltip 当为 {@code joiningString} 提供建议时，应该显示的提示文本（tooltip）。
-   * @param allowsSparse         是否允许各值与间隔字符串之间存在空白字符。
+   * @param parseContext
    */
-  public static <T, E extends Throwable> T parseUnifiable(FailableSupplier<T, E> parseUnit, FailableFunction<List<T>, T, E> merger, String joiningString, Message joiningStringTooltip, SuggestedParser<?> parser, boolean allowsSparse) throws E {
+  public static <T, E extends Throwable> T parseUnifiable(FailableSupplier<T, E> parseUnit, FailableFunction<List<T>, T, E> merger, String joiningString, Message joiningStringTooltip, ParseContext<?> parseContext) throws E {
     final T first = parseUnit.get();
+    final SuggestedParser<?> parser = parseContext.parser();
     final StringReader reader = parser.reader;
     final int cursorBeforeWhite = reader.getCursor();
     int cursorAfterLastUnit = cursorBeforeWhite;
-    if (allowsSparse) reader.skipWhitespace();
+    if (parseContext.allowSparse()) reader.skipWhitespace();
     parser.addSuggestion((context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder).buildFuture());
     if (reader.getString().startsWith(joiningString, reader.getCursor())) {
       final List<T> units = new ArrayList<>();
@@ -173,10 +174,10 @@ public final class ParsingUtil {
       while (reader.getString().startsWith(joiningString, reader.getCursor())) {
         reader.setCursor(reader.getCursor() + joiningString.length());
         parser.clearSuggestion();
-        if (allowsSparse) reader.skipWhitespace();
+        if (parseContext.allowSparse()) reader.skipWhitespace();
         units.add(parseUnit.get());
         cursorAfterLastUnit = reader.getCursor();
-        if (allowsSparse) reader.skipWhitespace();
+        if (parseContext.allowSparse()) reader.skipWhitespace();
       }
       reader.setCursor(cursorAfterLastUnit);
       return merger.apply(units);

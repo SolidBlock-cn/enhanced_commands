@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
@@ -15,6 +14,7 @@ import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -161,12 +161,13 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public RegionArgument getParseResult(ParseContext<?> parseContext) {
       return source -> new CylinderRegion(radius, height, center.toAbsolutePos(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       if (paramIndex == 0) {
         final int cursorBeforeReadDouble = parser.reader.getCursor();
         radius = parser.reader.readDouble();

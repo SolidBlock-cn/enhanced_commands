@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -12,11 +11,11 @@ import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.OptionalLong;
 
@@ -62,13 +61,13 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
   public static class Parser extends Noise.Parser<BlockFunctionArgument> {
 
     @Override
-    protected BlockFunctionArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
-      return BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly, true);
+    protected BlockFunctionArgument parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return BlockFunctionArgument.parse(parseContext.withAllowSparse(true));
     }
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
-      super.getParseResult(registryAccess, parser);
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      super.getParseResult(parseContext);
       return source -> new NoiseBlockFunction(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), seed, new DoublePerlinNoiseSampler.NoiseParameters(firstOctave, amplitudes), scale, offset);
     }
   }

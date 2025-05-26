@@ -2,7 +2,6 @@ package pers.solid.ecmd.util.parse;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Contract;
 import pers.solid.ecmd.argument.SuggestedParser;
@@ -32,8 +31,9 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
   }
 
   @Override
-  default void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  default void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
     // after the left parentheses
+    final SuggestedParser<?> parser = parseContext.parser();
     parser.reader.skipWhitespace();
 
     int paramsCount = 0;
@@ -57,7 +57,7 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
     }
     while (true) {
       parser.clearSuggestion();
-      parseParameter(registryAccess, parser, paramsCount, suggestionsOnly);
+      parseParameter(parseContext, paramsCount);
       paramsCount++;
       parser.reader.skipWhitespace();
       final int finalParamsCount = paramsCount;
@@ -106,5 +106,5 @@ public interface FunctionParamsParser<T> extends FunctionLikeParser<T> {
    *
    * @param paramIndex 参数的位置。例如，解析第一个参数时，{@code paramIndex} 为 0。
    */
-  void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException;
+  void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException;
 }

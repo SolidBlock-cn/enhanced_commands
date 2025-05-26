@@ -5,7 +5,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.function.block.WeightedListParser;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.*;
@@ -115,7 +115,7 @@ public interface Noise {
     protected Vec3d offset;
     protected Set<String> SUPPORTED_PARAMS = ImmutableSet.of("first_octave", "amplitudes", "scale", "offset", "seed");
 
-    protected abstract T parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException;
+    protected abstract T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
 
     @Override
     public @Unmodifiable Collection<String> supportedParams() {
@@ -123,8 +123,9 @@ public interface Noise {
     }
 
     @Override
-    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      weightedList = WeightedListParser.of(this::parseElement).parse(registryAccess, parser, suggestionsOnly, suggestionsOnly);
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      weightedList = WeightedListParser.of((parseContext1) -> parseElement(parseContext)).parse(parseContext);
+      final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
       parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
 
@@ -134,7 +135,7 @@ public interface Noise {
         reader.skipWhitespace();
         parser.clearSuggestion();
 
-        parseNamedParameters(registryAccess, parser, suggestionsOnly);
+        parseNamedParameters(parseContext);
       }
     }
 
@@ -151,8 +152,8 @@ public interface Noise {
     }
 
     @Override
-    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      final StringReader reader = parser.reader;
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      final StringReader reader = parseContext.parser().reader;
 
       switch (paramName) {
         case "seed" -> seed = OptionalLong.of(reader.readLong());
@@ -177,7 +178,7 @@ public interface Noise {
 
     @MustBeInvokedByOverriders
     @Override
-    public T getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       // 补充未设置的值。
       if (firstOctave == null) firstOctave = DEFAULT_FIRST_OCTAVE;
       if (amplitudes == null) amplitudes = DEFAULT_AMPLITUDES;

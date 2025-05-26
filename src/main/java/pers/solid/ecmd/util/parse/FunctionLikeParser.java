@@ -1,7 +1,6 @@
 package pers.solid.ecmd.util.parse;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
 import pers.solid.ecmd.argument.SuggestedParser;
 
 public interface FunctionLikeParser<T> extends Parser<T> {
@@ -30,23 +29,25 @@ public interface FunctionLikeParser<T> extends Parser<T> {
   }
 
   @Override
-  default T parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+  default T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final SuggestedParser<?> parser = parseContext.parser();
     if (!(parser.reader.canRead() && parser.reader.peek() == leftPar())) {
       return null;
     }
     parser.reader.skip();
-    return parseAfterLeftParenthesis(registryAccess, parser, suggestionsOnly);
+    return parseAfterLeftParenthesis(parseContext);
   }
 
   /**
    * 在完成所有参数的解析后，返回结果。通常在此接口的实现过程中，解析参数时会设置字段的一些值，此方法则使用字段中的值。
    */
-  T getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException;
+  T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException;
 
-  void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException;
+  void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException;
 
-  default T parseAfterLeftParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    parseWithinParenthesis(registryAccess, parser, suggestionsOnly);
+  default T parseAfterLeftParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+    parseWithinParenthesis(parseContext);
+    final SuggestedParser<?> parser = parseContext.parser();
     parser.reader.skipWhitespace();
     parser.addSuggestion((context, builder) -> {
       if (builder.getRemaining().isEmpty()) {
@@ -57,7 +58,7 @@ public interface FunctionLikeParser<T> extends Parser<T> {
     if (parser.reader.canRead() && parser.reader.peek() == rightPar()) {
       parser.reader.skip();
       parser.clearSuggestion();
-      return getParseResult(registryAccess, parser);
+      return getParseResult(parseContext);
     }
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parser.reader, rightPar());
   }

@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
@@ -19,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.regex.Pattern;
@@ -86,12 +86,13 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     }
 
     @Override
-    public IdReplaceBlockFunction getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public IdReplaceBlockFunction getParseResult(ParseContext<?> parseContext) {
       return new IdReplaceBlockFunction(pattern, replacement);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       if (paramIndex == 0) {
         pattern = ParsingUtil.readRegex(parser.reader);
       } else if (paramIndex == 1) {

@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.RegistryKeys;
@@ -18,10 +17,10 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collection;
@@ -113,7 +112,7 @@ public final class IdContainBlockFunction implements BlockFunction {
     private OptionalLong seed = OptionalLong.empty();
 
     @Override
-    public IdContainBlockFunction getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public IdContainBlockFunction getParseResult(ParseContext<?> parseContext) {
       return new IdContainBlockFunction(pattern, seed);
     }
 
@@ -128,20 +127,20 @@ public final class IdContainBlockFunction implements BlockFunction {
     }
 
     @Override
-    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      seed = OptionalLong.of(parser.reader.readLong());
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      seed = OptionalLong.of(parseContext.parser().reader.readLong());
     }
 
     @Override
-    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      final StringReader reader = parser.reader;
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final StringReader reader = parseContext.parser().reader;
       pattern = ParsingUtil.readRegex(reader);
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
-        parser.clearSuggestion();
+        parseContext.parser().clearSuggestion();
 
-        parseNamedParameters(registryAccess, parser, suggestionsOnly);
+        parseNamedParameters(parseContext);
       }
     }
   }

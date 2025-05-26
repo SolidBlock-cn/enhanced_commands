@@ -5,14 +5,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +58,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     private final List<BlockFunctionArgument> blockFunctions = new ArrayList<>();
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
       return source -> {
         final ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
         for (BlockFunctionArgument blockFunction : blockFunctions) {
@@ -70,8 +69,8 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockFunctions.add(BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly));
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      blockFunctions.add(BlockFunctionArgument.parse(parseContext));
     }
   }
 }

@@ -4,17 +4,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collections;
 
@@ -76,8 +75,8 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
     }
 
     @Override
-    protected BlockPredicateArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      return BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
+    protected BlockPredicateArgument parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return BlockPredicateArgument.parse(parseContext);
     }
   }
 }

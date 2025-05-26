@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryCodecs;
 import net.minecraft.registry.RegistryKeys;
@@ -21,6 +20,7 @@ import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -127,9 +127,10 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     }
 
     @Override
-    public void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseEntryList(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
-      final SimpleBlockFunctionSuggestedParser<?> parser0 = new SimpleBlockFunctionSuggestedParser<>(registryAccess, parser);
+      final SimpleBlockFunctionSuggestedParser<?> parser0 = new SimpleBlockFunctionSuggestedParser<>(parseContext.registryAccess(), parser);
       parser0.parseBlockTagId();
       tagKey = parser0.tagId;
       reader.skipWhitespace();
@@ -144,7 +145,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     }
 
     @Override
-    protected BlockFunctionArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) {
+    protected BlockFunctionArgument parseElement(ParseContext<?> parseContext) {
       throw new UnsupportedOperationException();
     }
   }

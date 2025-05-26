@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKeys;
@@ -23,6 +22,7 @@ import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.Collection;
@@ -108,7 +108,8 @@ public final class RandomBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable RandomBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) {
+    public @Nullable RandomBlockFunction parse(ParseContext<?> parseContext) {
+      final SuggestedParser<?> parser = parseContext.parser();
       if (parser.reader.getRemaining().isEmpty()) {
         parser.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhanced_commands.block_function.random")).buildFuture());
       }
@@ -126,14 +127,14 @@ public final class RandomBlockFunction implements BlockFunction {
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       return source -> new RandomBlockFunction(seed);
     }
 
     @Override
-    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      parser.clearSuggestion();
-      parseNamedParameters(registryAccess, parser, suggestionsOnly);
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      parseContext.parser().clearSuggestion();
+      parseNamedParameters(parseContext);
     }
 
     @Override
@@ -147,8 +148,8 @@ public final class RandomBlockFunction implements BlockFunction {
     }
 
     @Override
-    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      seed = OptionalLong.of(parser.reader.readLong());
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      seed = OptionalLong.of(parseContext.parser().reader.readLong());
     }
   }
 }

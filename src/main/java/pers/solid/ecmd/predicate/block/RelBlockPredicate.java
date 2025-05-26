@@ -5,16 +5,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.List;
 import java.util.function.Function;
@@ -60,7 +59,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     private BlockPredicateArgument blockPredicate;
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) {
       Preconditions.checkNotNull(relPos, "relPos (argument 1)");
       Preconditions.checkNotNull(blockPredicate, "predicate (argument 2)");
       return source -> new RelBlockPredicate(relPos.apply(source), blockPredicate.apply(source));
@@ -77,11 +76,11 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        relPos = parser.parseAndSuggestVec3i();
+        relPos = parseContext.parser().parseAndSuggestVec3i();
       } else if (paramIndex == 1) {
-        blockPredicate = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
+        blockPredicate = BlockPredicateArgument.parse(parseContext);
       }
     }
   }

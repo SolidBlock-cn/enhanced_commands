@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import joptsimple.internal.Strings;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -71,7 +71,8 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       parser.addSuggestion((context, suggestionsBuilder) -> {
         ParsingUtil.suggestString("<", BENEATH_BLOCK, suggestionsBuilder);
         ParsingUtil.suggestString(">", ABOVE_BLOCK, suggestionsBuilder);
@@ -96,8 +97,8 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
         }
       }
       if (!prefixed) return null;
-      if (allowsSparse) reader.skipWhitespace();
-      final BlockPredicateArgument parse = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly, allowsSparse);
+      if (parseContext.allowSparse()) reader.skipWhitespace();
+      final BlockPredicateArgument parse = BlockPredicateArgument.parse(parseContext);
       if (offset != 0) {
         int finalOffset = offset;
         return source -> new HorizontalOffsetBlockPredicate(finalOffset, parse.apply(source));

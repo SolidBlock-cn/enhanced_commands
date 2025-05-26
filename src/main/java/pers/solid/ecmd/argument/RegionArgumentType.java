@@ -11,6 +11,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,7 +47,7 @@ public record RegionArgumentType(CommandRegistryAccess registryAccess) implement
 
   @Override
   public RegionArgument parse(StringReader reader) throws CommandSyntaxException {
-    return RegionArgument.parse(registryAccess, new SuggestedParser<>(reader), false);
+    return RegionArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(reader), false, false));
   }
 
   @Override
@@ -55,7 +56,7 @@ public record RegionArgumentType(CommandRegistryAccess registryAccess) implement
     stringReader.setCursor(builder.getStart());
     final SuggestedParser<S> parser = new SuggestedParser<>(stringReader);
     try {
-      RegionArgument.parse(registryAccess, parser, true);
+      RegionArgument.parse(new ParseContext<>(registryAccess, parser, true, false));
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

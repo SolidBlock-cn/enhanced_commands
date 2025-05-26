@@ -7,7 +7,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
@@ -18,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.Iterator;
@@ -97,7 +97,8 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     INSTANCE;
 
     @Override
-    public RegionArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+    public RegionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
       final int cursorBeforeParse = reader.getCursor();
       final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.blockPos();
@@ -131,16 +132,16 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     }
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public RegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final PosArgument posArgument1 = posArgument;
       posArgument = null;
       return source -> new SingleBlockPosRegion(posArgument1.toAbsoluteBlockPos(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
-      posArgument = parser.parseAndSuggestArgument(argumentType);
+      posArgument = parseContext.parser().parseAndSuggestArgument(argumentType);
     }
   }
 }

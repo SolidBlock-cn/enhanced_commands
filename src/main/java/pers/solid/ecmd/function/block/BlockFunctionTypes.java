@@ -17,11 +17,30 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 本模组的所有方块函数类型。每个类型都需要通过 {@link #register} 方法注册。只有注册了类型的方块函数才能正确编码与解码。
+ */
 public final class BlockFunctionTypes {
+  /**
+   * 所有方块函数的函数式解析器。键为方块函数的名称，值为对应名称的方块函数解析器的 supplier。
+   */
   public static final Map<String, Supplier<FunctionLikeParser<? extends BlockFunctionArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockFunctionTypes::registerFunctions);
+  /**
+   * 所有方块函数的函数语法的名称，将用于命令建议中的提示信息。
+   */
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockFunctionTypes::registerFunctionNames);
-  public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (registryAccess, parser, suggestionsOnly, allowSparse) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly, true), parser);
+
+  /**
+   * 解析方块函数中的括号语法。
+   */
+  public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(parseContext.withAllowSparse(true)), parseContext.parser());
+  /**
+   * 解析方块函数中的函数语法、
+   */
   public static final Parser<BlockFunctionArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
+  /**
+   * 方块函数的所有解析器。注意这个列表是可变的。
+   */
   public static final List<Parser<BlockFunctionArgument>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
 
   public static final SimpleBlockFunction.Type SIMPLE = register("simple", SimpleBlockFunction.Type.SIMPLE_TYPE);

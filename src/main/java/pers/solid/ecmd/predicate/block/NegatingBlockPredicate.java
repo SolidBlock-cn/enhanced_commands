@@ -4,12 +4,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -56,7 +56,8 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    public @Nullable BlockPredicateArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
       boolean negates = false;
       boolean suffixed = false;
@@ -66,13 +67,13 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
         suffixed = true;
       }
       if (!suffixed) return null;
-      if (allowsSparse) parser.reader.skipWhitespace();
+      if (parseContext.allowSparse()) parser.reader.skipWhitespace();
       if (negates && parser.reader.canRead() && parser.reader.peek() == '*') {
         // 此时同时读取“!*”方块谓词。
         parser.reader.skip();
         return ConstantBlockPredicate.ALWAYS_FALSE;
       }
-      final BlockPredicateArgument parse = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
+      final BlockPredicateArgument parse = BlockPredicateArgument.parse(parseContext);
       if (negates) {
         return source -> new NegatingBlockPredicate(parse.apply(source));
       } else {

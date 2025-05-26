@@ -42,29 +42,20 @@ public interface NbtSource<T> {
    * 类似于原版的行为，将 nbtElement 转换为数字，可以是其包含的元素的数量，作为命令的返回值。
    */
   static int toInt(NbtElement nbtElement) {
-    switch (nbtElement) {
-      case NbtInt nbtInt -> {
-        return nbtInt.intValue();
-      }
-      case NbtLong nbtLong -> {
-        return nbtLong.intValue();
-      }
-      case NbtShort nbtShort -> {
-        return nbtShort.intValue();
-      }
-      case AbstractNbtNumber nbtNumber -> {
-        return MathHelper.floor(nbtNumber.doubleValue());
-      }
-      case AbstractNbtList<?> nbtList -> {
-        return nbtList.size();
-      }
-      case NbtCompound nbtCompound -> {
-        return nbtCompound.getSize();
-      }
-      default -> {
-        return 1;
-      }
+    if (Objects.requireNonNull(nbtElement) instanceof NbtInt nbtInt) {
+      return nbtInt.intValue();
+    } else if (nbtElement instanceof NbtLong nbtLong) {
+      return nbtLong.intValue();
+    } else if (nbtElement instanceof NbtShort nbtShort) {
+      return nbtShort.intValue();
+    } else if (nbtElement instanceof AbstractNbtNumber nbtNumber) {
+      return MathHelper.floor(nbtNumber.doubleValue());
+    } else if (nbtElement instanceof AbstractNbtList<?> nbtList) {
+      return nbtList.size();
+    } else if (nbtElement instanceof NbtCompound nbtCompound) {
+      return nbtCompound.getSize();
     }
+    return 1;
   }
 
   Collection<T> values();

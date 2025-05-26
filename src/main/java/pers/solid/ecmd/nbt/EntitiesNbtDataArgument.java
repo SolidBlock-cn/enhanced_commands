@@ -6,6 +6,7 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collections;
@@ -31,7 +32,8 @@ public record EntitiesNbtDataArgument(EntitySelector entitySelector) implements 
     return getEntitiesNbtData(source);
   }
 
-  public static EntitiesNbtDataArgument handle(SuggestedParser<?> parser) throws CommandSyntaxException {
+  public static EntitiesNbtDataArgument handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final SuggestedParser<?> parser = parseContext.parser();
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
     final EntitySelector selector = parser.parseAndSuggestArgument(EntityArgumentType.entities());
     if (parser.reader.canRead()) {

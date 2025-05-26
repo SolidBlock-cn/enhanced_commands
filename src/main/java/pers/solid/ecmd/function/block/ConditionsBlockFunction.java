@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.dynamic.Codecs;
@@ -19,6 +18,7 @@ import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,12 +69,13 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
     private final List<FailableFunction<ServerCommandSource, BlockFunction, CommandSyntaxException>> functions = new ArrayList<>();
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       return source -> new ConditionsBlockFunction(IterateUtils.transformFailableImmutableList(functions, function -> (ConditionalBlockFunction) function.apply(source)));
     }
 
     @Override
-    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       parser.reader.skipWhitespace();
 
       parser.addSuggestion((context, suggestionsBuilder) -> {
@@ -88,7 +89,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
       }
       while (true) {
         parser.clearSuggestion();
-        BlockPredicateArgument predicate = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
+        BlockPredicateArgument predicate = BlockPredicateArgument.parse(parseContext);
         parser.reader.skipWhitespace();
         parser.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
@@ -101,7 +102,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
         parser.clearSuggestion();
         parser.reader.skipWhitespace();
 
-        BlockFunctionArgument functionIfTrue = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
+        BlockFunctionArgument functionIfTrue = BlockFunctionArgument.parse(parseContext);
         parser.reader.skipWhitespace();
         parser.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
@@ -113,7 +114,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
           parser.reader.skip();
           parser.reader.skipWhitespace();
           parser.clearSuggestion();
-          BlockFunctionArgument functionIfFalse = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
+          BlockFunctionArgument functionIfFalse = BlockFunctionArgument.parse(parseContext);
 
           functions.add(source -> new ConditionalBlockFunction(predicate.apply(source), functionIfTrue.apply(source), functionIfFalse.apply(source)));
         } else {

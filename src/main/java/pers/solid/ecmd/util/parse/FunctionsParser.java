@@ -4,7 +4,6 @@ import com.google.common.base.Functions;
 import com.google.common.base.Supplier;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Nullables;
@@ -34,7 +33,8 @@ public class FunctionsParser<T> implements Parser<T> {
   }
 
   @Override
-  public T parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
+  public T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final SuggestedParser<?> parser = parseContext.parser();
     final StringReader reader = parser.reader;
     final int cursorOnStart = reader.getCursor();
     parser.addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(functions, suggestionsBuilder, s -> s + "(", tooltipProvider::apply));
@@ -45,7 +45,7 @@ public class FunctionsParser<T> implements Parser<T> {
         functionParamsParser.setFunctionName(unquotedString);
         functionParamsParser.setCursorBeforeFunctionName(cursorOnStart);
         reader.skip();
-        return functionParamsParser.parseAfterLeftParenthesis(registryAccess, parser, suggestionsOnly);
+        return functionParamsParser.parseAfterLeftParenthesis(parseContext);
       } else {
         final int cursorAfterFunctionName = reader.getCursor();
         reader.setCursor(cursorOnStart);

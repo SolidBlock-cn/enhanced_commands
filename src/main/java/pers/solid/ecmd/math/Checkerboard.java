@@ -2,7 +2,6 @@ package pers.solid.ecmd.math;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +11,7 @@ import pers.solid.ecmd.function.block.WeightedListParser;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collection;
@@ -67,7 +67,7 @@ public interface Checkerboard<T> {
 
   abstract class CheckerboardParser<T> implements FunctionLikeParser<T>, NamedParamListParser {
     protected final Set<String> SUPPORTED_PARAMS = Set.of("scale", "floor", "offset");
-    public WeightedListParser<T> weightedListParser = WeightedListParser.of((registryAccess, parser, suggestionsOnly, allowSparse) -> parseElement(registryAccess, parser, suggestionsOnly));
+    public WeightedListParser<T> weightedListParser = WeightedListParser.of(this::parseElement);
     protected Vec3d scale = null;
     protected Vec3d floor = null;
     protected Vec3d offset = null;
@@ -85,7 +85,7 @@ public interface Checkerboard<T> {
     }
 
     @Override
-    public T getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (scale == null) {
         scale = UNIT;
       }
@@ -100,12 +100,13 @@ public interface Checkerboard<T> {
 
     protected abstract T getParseResult(Vec3d floor, Vec3d scale, Vec3d offset);
 
-    protected abstract T parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException;
+    protected abstract T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
 
     @Override
-    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
-      parseEntryList(registryAccess, parser, suggestionsOnly);
+      parseEntryList(parseContext);
       parser.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
       // 等待关键字的部分
 
@@ -117,12 +118,12 @@ public interface Checkerboard<T> {
         reader.skipWhitespace();
         parser.clearSuggestion();
 
-        parseNamedParameters(registryAccess, parser, suggestionsOnly);
+        parseNamedParameters(parseContext);
       }
     }
 
-    protected void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      weightedList = weightedListParser.parse(registryAccess, parser, suggestionsOnly, suggestionsOnly);
+    protected void parseEntryList(ParseContext<?> parseContext) throws CommandSyntaxException {
+      weightedList = weightedListParser.parse(parseContext);
     }
 
     @Override
@@ -136,8 +137,8 @@ public interface Checkerboard<T> {
     }
 
     @Override
-    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      final StringReader reader = parser.reader;
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      final StringReader reader = parseContext.parser().reader;
 
       switch (paramName) {
         case "floor" -> floor = ParsingUtil.parseShortenableVec3d(reader);

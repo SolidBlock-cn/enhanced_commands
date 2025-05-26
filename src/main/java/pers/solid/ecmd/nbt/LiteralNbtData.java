@@ -2,7 +2,6 @@ package pers.solid.ecmd.nbt;
 
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -19,6 +18,7 @@ import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTarget.Single<MutableObject<NbtCompound>>, NbtSourceArgument<MutableObject<NbtCompound>>, NbtTargetArgument<MutableObject<NbtCompound>> {
@@ -65,7 +65,8 @@ public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTar
     return this;
   }
 
-  public static LiteralNbtData handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public static LiteralNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final SuggestedParser<?> parser = parseContext.parser();
     ParsingUtil.expectAndSkipWhitespace(parser.reader);
     final CompoundNbtFunction compoundNbtFunction = new NbtFunctionSuggestedParser<>(parser).parseCompound(false);
     return new LiteralNbtData(new MutableObject<>(compoundNbtFunction.apply(null)));

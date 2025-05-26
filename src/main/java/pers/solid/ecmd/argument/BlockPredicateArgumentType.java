@@ -10,6 +10,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -27,7 +28,7 @@ public record BlockPredicateArgumentType(CommandRegistryAccess registryAccess) i
 
   @Override
   public BlockPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
-    return BlockPredicateArgument.parse(registryAccess, new SuggestedParser<>(reader), false, false);
+    return BlockPredicateArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(reader), false, false));
   }
 
   @Override
@@ -36,7 +37,7 @@ public record BlockPredicateArgumentType(CommandRegistryAccess registryAccess) i
     stringReader.setCursor(builder.getStart());
     final SuggestedParser<S> parser = new SuggestedParser<>(stringReader);
     try {
-      BlockPredicateArgument.parse(registryAccess, parser, true, false);
+      BlockPredicateArgument.parse(new ParseContext<>(registryAccess, parser, true, false));
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

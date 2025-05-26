@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.function.nbt.*;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.parse.FunctionsParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.ArrayList;
@@ -360,6 +361,10 @@ public class NbtFunctionSuggestedParser<S> extends SuggestedParser<S> {
 
   public NbtFunction parseFunction(boolean mustExpectSign, boolean equalsForDefault)
       throws CommandSyntaxException {
+    // 尝试解析函数名称；如果不是函数语法，则恢复 cursor 重新解析；如果是函数语法，则按照函数语法解析，如果函数不存在，则报错。
+    final int cursorBeforeFunctionName = reader.getCursor();
+    final FunctionsParser<NbtFunctionArgument> parser = new FunctionsParser<>(NbtFunctionTypes.FUNCTIONS, NbtFunctionTypes.FUNCTION_NAMES);
+    // to be completed
 
     // 解析等号和不等号
     final int cursorBeforeSign = reader.getCursor();

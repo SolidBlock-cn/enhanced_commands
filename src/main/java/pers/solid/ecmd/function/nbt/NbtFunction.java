@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -45,9 +46,7 @@ public interface NbtFunction extends ExpressionConvertible, FailableFunction<@Nu
       if (applied != null) {
         return applied;
       }
-    }
-    switch (nbtElement) {
-      case NbtCompound nbtCompound -> {
+      if (Objects.requireNonNull(nbtElement) instanceof NbtCompound nbtCompound) {
         final Set<String> keys = nbtCompound.getKeys();
         for (String key : keys) {
           final NbtElement value = nbtCompound.get(key);
@@ -58,8 +57,7 @@ public interface NbtFunction extends ExpressionConvertible, FailableFunction<@Nu
           }
         }
         return nbtCompound;
-      }
-      case NbtList nbtList -> {
+      } else if (nbtElement instanceof NbtList nbtList) {
         for (int i = 0; i < nbtList.size(); i++) {
           final NbtElement value = nbtList.get(i);
           final NbtElement appliedElement = recursivelyApply(nbtFunction, value, predicate);
@@ -69,9 +67,30 @@ public interface NbtFunction extends ExpressionConvertible, FailableFunction<@Nu
         }
         return nbtList;
       }
-      default -> {
-        return nbtElement;
+      return nbtElement;
+    } else {
+      if (nbtElement instanceof NbtCompound nbtCompound) {
+        final Set<String> keys = nbtCompound.getKeys();
+        for (String key : keys) {
+          final NbtElement value = nbtCompound.get(key);
+          if (value == null) continue;
+          final NbtElement appliedValue = recursivelyApply(nbtFunction, value, predicate);
+          if (appliedValue != value) {
+            nbtCompound.put(key, appliedValue);
+          }
+        }
+        return nbtCompound;
+      } else if (nbtElement instanceof NbtList nbtList) {
+        for (int i = 0; i < nbtList.size(); i++) {
+          final NbtElement value = nbtList.get(i);
+          final NbtElement appliedElement = recursivelyApply(nbtFunction, value, predicate);
+          if (appliedElement != value) {
+            nbtList.setElement(i, appliedElement);
+          }
+        }
+        return nbtList;
       }
+      return nbtElement;
     }
   }
 

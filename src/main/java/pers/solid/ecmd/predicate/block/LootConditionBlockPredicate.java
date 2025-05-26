@@ -8,7 +8,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.nbt.NbtOps;
@@ -25,6 +24,7 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.bridge.LootBridge;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Optional;
@@ -87,13 +87,13 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
         return source -> {
-          final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = registryAccess.createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
+          final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = parseContext.registryAccess().createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
           if (lootCondition.isEmpty()) {
-            parser.reader.setCursor(cursorBeforeId);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parser.reader, id.toString()), cursorAfterId);
+            parseContext.parser().reader.setCursor(cursorBeforeId);
+            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.parser().reader, id.toString()), cursorAfterId);
           }
           return new LootConditionBlockPredicate(lootCondition.get());
         };
@@ -105,7 +105,8 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final StringReader reader = parser.reader;
       final int cursorBeforeId = parser.reader.getCursor();
       parser.setSuggestion((context1, suggestionsBuilder1) -> getLootConditionIdSuggestions(context1, suggestionsBuilder1, cursorBeforeId));
@@ -121,7 +122,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
       this.cursorBeforeId = reader.getCursor();
       this.id = Identifier.fromCommandInput(reader);
       this.cursorAfterId = reader.getCursor();
-      if (!reader.canRead() && suggestionsOnly) {
+      if (!reader.canRead() && parseContext.suggestionsOnly()) {
         // 在提供建议的过程中，如果后面没有内容，则提前中断建议，不提供“,”或“)”的建议。
         parser.setSuggestion((context, suggestionsBuilder) -> getLootConditionIdSuggestions(context, suggestionsBuilder, cursorBeforeId).thenCompose(suggestions -> {
           if (suggestions.isEmpty()) {

@@ -6,7 +6,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -15,12 +14,12 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.OptionalLong;
@@ -79,23 +78,23 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       return source -> new PickBlockFunction(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), seed);
     }
 
     @Override
-    public void parseWithinParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      final WeightedListParser<BlockFunctionArgument> weightedListParser = WeightedListParser.of(BlockFunctionArgument::parse);
-      final StringReader reader = parser.reader;
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final WeightedListParser<BlockFunctionArgument> weightedListParser = WeightedListParser.of((parseContext1) -> BlockFunctionArgument.parse(parseContext));
+      final StringReader reader = parseContext.parser().reader;
 
-      weightedList = weightedListParser.parse(registryAccess, parser, suggestionsOnly, true);
+      weightedList = weightedListParser.parse(parseContext);
 
       if (reader.canRead() && reader.peek() == ';') {
         reader.skip();
         reader.skipWhitespace();
-        parser.clearSuggestion();
+        parseContext.parser().clearSuggestion();
 
-        parseNamedParameters(registryAccess, parser, suggestionsOnly);
+        parseNamedParameters(parseContext);
       }
     }
 
@@ -110,8 +109,8 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
     }
 
     @Override
-    public void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      seed = OptionalLong.of(parser.reader.readLong());
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      seed = OptionalLong.of(parseContext.parser().reader.readLong());
     }
   }
 }

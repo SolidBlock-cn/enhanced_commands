@@ -4,10 +4,10 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
-import net.minecraft.command.CommandRegistryAccess;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.ArrayList;
@@ -22,9 +22,10 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
   protected int cursorBeforeEntries;
 
   @Override
-  public WeightedList<T> parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
-    parseEntryList(registryAccess, parser, suggestionsOnly);
+  public WeightedList<T> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    parseEntryList(parseContext);
     if (weightSum == 0) {
+      final SuggestedParser<?> parser = parseContext.parser();
       final int cursorEnd = parser.reader.getCursor();
       parser.reader.setCursor(cursorBeforeEntries);
       throw withCursorEnd(PickBlockFunction.SUM_ZERO.createWithContext(parser.reader), cursorEnd);
@@ -36,17 +37,18 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
     }
   }
 
-  protected abstract T parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException;
+  protected abstract T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
 
-  public void parseEntryList(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  public void parseEntryList(ParseContext<?> parseContext) throws CommandSyntaxException {
     this.pairs = new ArrayList<>();
+    final SuggestedParser<?> parser = parseContext.parser();
     final StringReader reader = parser.reader;
     cursorBeforeEntries = reader.getCursor();
 
     // 解析方块函数的部分
     while (true) {
       parser.clearSuggestion();
-      final T parse = parseElement(registryAccess, parser, suggestionsOnly);
+      final T parse = parseElement(parseContext);
       reader.skipWhitespace();
       if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
         final int cursorBeforeDouble = reader.getCursor();
@@ -88,8 +90,8 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
   public static <T> WeightedListParser<T> of(Parser<T> elementParser) {
     return new WeightedListParser<>() {
       @Override
-      protected T parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-        return elementParser.parse(registryAccess, parser, suggestionsOnly, suggestionsOnly);
+      protected T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+        return elementParser.parse(parseContext);
       }
     };
   }

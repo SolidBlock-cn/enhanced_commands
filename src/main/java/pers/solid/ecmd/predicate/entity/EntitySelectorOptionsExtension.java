@@ -61,6 +61,7 @@ import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.*;
@@ -252,7 +253,7 @@ public class EntitySelectorOptionsExtension {
       final SuggestedParser<Object> parser = new SuggestedParser<>(reader.getReader());
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
       final CommandRegistryAccess registryAccess = MixinShared.getCommandRegistryAccess();
-      final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, false);
+      final RegionArgument regionArgument = RegionArgument.parse(new ParseContext<>(registryAccess, parser, false, true));
 
       reader.extension$ec().addFunction(source -> {
         final Region region;
@@ -462,7 +463,7 @@ public class EntitySelectorOptionsExtension {
 
           parser.clearSuggestion();
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-          final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(MixinShared.getCommandRegistryAccess(), parser, false);
+          final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parser, false, true));
 
           map.put(posArgument, blockPredicateArgument);
           stringReader.skipWhitespace();
@@ -492,7 +493,7 @@ public class EntitySelectorOptionsExtension {
       } else {
         parser.clearSuggestion();
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parser.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-        final BlockPredicateArgument parse = BlockPredicateArgument.parse(MixinShared.getCommandRegistryAccess(), parser, false);
+        final BlockPredicateArgument parse = BlockPredicateArgument.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parser, false, true));
         EntitySelectorReaderExtras extras = reader.extension$ec();
         extras.addFunction(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
       }

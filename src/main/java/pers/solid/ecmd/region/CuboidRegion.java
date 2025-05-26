@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -17,6 +16,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -183,7 +183,7 @@ public record CuboidRegion(Box box) implements Region {
     private PosArgument to;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public RegionArgument getParseResult(ParseContext<?> parseContext) {
       if (to == null) {
         if (EnhancedPosArgument.isInt(from)) {
           return source -> new SingleBlockPosRegion(from.toAbsoluteBlockPos(source));
@@ -196,8 +196,9 @@ public record CuboidRegion(Box box) implements Region {
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
+      final SuggestedParser<?> parser = parseContext.parser();
       if (paramIndex == 0) {
         from = parser.parseAndSuggestArgument(type);
         if (parser.reader.canRead() && Character.isWhitespace(parser.reader.peek())) {

@@ -4,13 +4,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -18,6 +16,7 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.List;
 import java.util.OptionalLong;
@@ -75,13 +74,13 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   public static class Parser extends Noise.Parser<BlockPredicateArgument> {
 
     @Override
-    protected BlockPredicateArgument parseElement(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowSparse) throws CommandSyntaxException {
-      return BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
+    protected BlockPredicateArgument parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return BlockPredicateArgument.parse(parseContext);
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
-      super.getParseResult(registryAccess, parser);
+    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      super.getParseResult(parseContext);
       return source -> new NoiseBlockPredicate(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), seed, new DoublePerlinNoiseSampler.NoiseParameters(firstOctave, amplitudes), scale, offset);
     }
   }

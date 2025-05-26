@@ -5,15 +5,14 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 /**
  * 去除方块函数中的流体，并将 waterlogged 设为 false。这不一定总是能够成功。
@@ -56,13 +55,13 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
     BlockFunctionArgument blockFunction = null;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
       return source -> new DryBlockFunction(blockFunction == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      blockFunction = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      blockFunction = BlockFunctionArgument.parse(parseContext);
     }
 
     @Override

@@ -24,6 +24,7 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.function.Predicate;
 
@@ -36,7 +37,7 @@ public interface BlockPredicate extends Predicate<CachedBlockPosition>, Expressi
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
 
   static @NotNull BlockPredicate parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return BlockPredicateArgument.parse(registryAccess, new SuggestedParser<>(s), false).apply(source);
+    return BlockPredicateArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(s), false, true)).apply(source);
   }
 
   static TestResult successResult(BlockPos blockPos) {

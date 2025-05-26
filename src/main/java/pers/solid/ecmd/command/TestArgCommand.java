@@ -50,6 +50,7 @@ import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -269,7 +270,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(registryAccess, new SuggestedParser<>(s), false).toAbsoluteRegion(context.getSource()))))
+            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(new ParseContext<>(registryAccess, new SuggestedParser<>(s), false, true)).toAbsoluteRegion(context.getSource()))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")

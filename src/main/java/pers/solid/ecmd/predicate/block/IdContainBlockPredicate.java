@@ -4,16 +4,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.regex.Pattern;
@@ -47,10 +46,10 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   public boolean equals(Object o) {
     if (this == o)
       return true;
-    if (!(o instanceof IdContainBlockPredicate(Pattern pattern1)))
+    if (!(o instanceof IdContainBlockPredicate idContainBlockPredicate))
       return false;
 
-    return pattern.pattern().equals(pattern1.pattern());
+    return pattern.pattern().equals(idContainBlockPredicate.pattern.pattern());
   }
 
   @Override
@@ -81,14 +80,14 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     }
 
     @Override
-    public IdContainBlockPredicate getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) { // @formatter:on
+    public IdContainBlockPredicate getParseResult(ParseContext<?> parseContext) { // @formatter:on
       return new IdContainBlockPredicate(pattern);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
-      parser.clearSuggestion();
-      pattern = ParsingUtil.readRegex(parser.reader);
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      parseContext.parser().clearSuggestion();
+      pattern = ParsingUtil.readRegex(parseContext.parser().reader);
     }
   }
 }

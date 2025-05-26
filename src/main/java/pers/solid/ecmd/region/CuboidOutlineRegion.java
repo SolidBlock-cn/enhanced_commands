@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -23,6 +22,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -140,14 +140,15 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public RegionArgument parseAfterLeftParenthesis(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-      final RegionArgument parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(registryAccess, parser, suggestionsOnly);
-      cursorAfter = parser.reader.getCursor();
+    public RegionArgument parseAfterLeftParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final RegionArgument parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(parseContext);
+      cursorAfter = parseContext.parser().reader.getCursor();
       return parsed;
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
       if (paramIndex == 0) {
         fromPos = parser.parseAndSuggestArgument(type);
@@ -175,7 +176,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public RegionArgument getParseResult(ParseContext<?> parseContext) {
       return source -> {
         try {
           return createParsedResult(source);
@@ -184,7 +185,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
             if (commandSyntaxException.getInput() != null) {
               throw commandSyntaxException;
             } else {
-              throw CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), parser.reader.getString(), cursorBefore), cursorAfter);
+              throw CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), parseContext.parser().reader.getString(), cursorBefore), cursorAfter);
             }
           } else {
             throw e;

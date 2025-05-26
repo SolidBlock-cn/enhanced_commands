@@ -6,7 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -99,14 +99,15 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     private int dimensionNumber = 0;
 
     @Override
-    public RegionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) throws CommandSyntaxException {
+    public RegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final int paramY = dimensionNumber < 2 ? x : y;
       final int paramZ = dimensionNumber < 3 ? x : z;
       return source -> new OutwardsRegion(center.toAbsoluteBlockPos(source), x, paramY, paramZ);
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       if (paramIndex == 1) {
         ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
         center = parser.parseAndSuggestArgument(argumentType);

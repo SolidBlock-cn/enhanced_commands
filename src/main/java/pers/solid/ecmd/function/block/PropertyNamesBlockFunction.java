@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -16,6 +15,7 @@ import pers.solid.ecmd.argument.SimpleBlockFunctionSuggestedParser;
 import pers.solid.ecmd.argument.SimpleBlockSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -57,10 +57,11 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
     }
 
     @Override
-    public @Nullable BlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    public @Nullable BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockFunctionSuggestedParser<?> suggestedParser = new SimpleBlockFunctionSuggestedParser<>(registryAccess, parser);
+        final SimpleBlockFunctionSuggestedParser<?> suggestedParser = new SimpleBlockFunctionSuggestedParser<>(parseContext.registryAccess(), parser);
         suggestedParser.parsePropertyNames();
         return new PropertyNamesBlockFunction(suggestedParser.propertyNameFunctions);
       } else {

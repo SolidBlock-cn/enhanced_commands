@@ -2,7 +2,6 @@ package pers.solid.ecmd.function.block;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -11,6 +10,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -43,7 +43,8 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable UseOriginalBlockFunction parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) {
+    public @Nullable UseOriginalBlockFunction parse(ParseContext<?> parseContext) {
+      final SuggestedParser<?> parser = parseContext.parser();
       parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.use_original"), suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '~') {
         parser.reader.skip();

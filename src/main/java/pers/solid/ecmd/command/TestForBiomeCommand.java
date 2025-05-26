@@ -53,7 +53,8 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
   private static int executeTestForBiome(CommandContext<ServerCommandSource> context, BlockPos blockPos) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final ServerWorld world = source.getWorld();
-    if (!world.isChunkLoaded(blockPos)) {
+    @SuppressWarnings("deprecation") final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+    if (!chunkLoaded) {
       throw TEST_FOR_BIOME_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final RegistryEntry<Biome> biome = world.getBiome(blockPos);
@@ -65,7 +66,8 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
     final ServerCommandSource source = context.getSource();
     final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
-    if (!forceLoad && !world.isChunkLoaded(blockPos)) {
+    @SuppressWarnings("deprecation") final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+    if (!forceLoad && !chunkLoaded) {
       throw TEST_FOR_BIOME_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final var predicate = RegistryEntryPredicateArgumentType.getRegistryEntryPredicate(context, "biome", RegistryKeys.BIOME);

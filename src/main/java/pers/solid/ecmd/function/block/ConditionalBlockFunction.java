@@ -5,16 +5,15 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 /**
  * 当原先的方块符合方块谓词时，应用函数 1，否则应用函数 2。例如：
@@ -63,18 +62,18 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     private BlockFunctionArgument valueIfTrue, valueIfFalse;
 
     @Override
-    public BlockFunctionArgument getParseResult(CommandRegistryAccess registryAccess, SuggestedParser<?> parser) {
+    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
       return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? (BlockFunction) EmptyBlockFunction.INSTANCE : valueIfFalse.apply(source));
     }
 
     @Override
-    public void parseParameter(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, int paramIndex, boolean suggestionsOnly) throws CommandSyntaxException {
+    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        condition = BlockPredicateArgument.parse(registryAccess, parser, suggestionsOnly);
+        condition = BlockPredicateArgument.parse(parseContext.withAllowSparse(true));
       } else if (paramIndex == 1) {
-        valueIfTrue = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
+        valueIfTrue = BlockFunctionArgument.parse(parseContext.withAllowSparse(true));
       } else if (paramIndex == 2) {
-        valueIfFalse = BlockFunctionArgument.parse(registryAccess, parser, suggestionsOnly);
+        valueIfFalse = BlockFunctionArgument.parse(parseContext.withAllowSparse(true));
       }
     }
 

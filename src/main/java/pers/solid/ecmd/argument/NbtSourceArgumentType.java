@@ -13,6 +13,7 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.nbt.NbtSourceArgument;
+import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +36,7 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
   public NbtSourceArgument<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtSourceArgument<?> nbtSourceArgument = NbtDataRegistry.handleSource(s, registryAccess, new SuggestedParser<>(reader), false);
+    final NbtSourceArgument<?> nbtSourceArgument = NbtDataRegistry.handleSource(s, new ParseContext<>(registryAccess, new SuggestedParser<>(reader), false, true));
     if (nbtSourceArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -55,7 +56,7 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
     final SuggestedParser<S> suggestedParser = new SuggestedParser<>(reader);
     final NbtSourceArgument<?> nbtSourceArgument;
     try {
-      nbtSourceArgument = NbtDataRegistry.handleSource(s, registryAccess, suggestedParser, true);
+      nbtSourceArgument = NbtDataRegistry.handleSource(s, new ParseContext<>(registryAccess, suggestedParser, true, true));
       if (nbtSourceArgument == null) {
         reader.setCursor(cursorBeforeString);
         return CommandSource.suggestMatching(NbtDataRegistry.streamSourceTypes(), builder);

@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +16,7 @@ import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -82,10 +82,11 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     }
 
     @Override
-    public @Nullable PropertiesNamesBlockPredicate parse(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly, boolean allowsSparse) throws CommandSyntaxException {
+    public @Nullable PropertiesNamesBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final SuggestedParser<?> parser = parseContext.parser();
       parser.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockSuggestedParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       if (parser.reader.canRead() && parser.reader.peek() == '[') {
-        final SimpleBlockPredicateSuggestedParser<?> suggestedParser = new SimpleBlockPredicateSuggestedParser<>(registryAccess, parser);
+        final SimpleBlockPredicateSuggestedParser<?> suggestedParser = new SimpleBlockPredicateSuggestedParser<>(parseContext.registryAccess(), parser);
         suggestedParser.parsePropertyNames();
         return new PropertiesNamesBlockPredicate(suggestedParser.propertyNamePredicates);
       } else {

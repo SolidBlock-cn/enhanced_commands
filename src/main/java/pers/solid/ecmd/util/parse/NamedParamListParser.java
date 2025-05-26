@@ -2,7 +2,6 @@ package pers.solid.ecmd.util.parse;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
@@ -76,9 +75,10 @@ public interface NamedParamListParser {
    *
    * @param paramName 参数名称。
    */
-  void parseNamedParameter(String paramName, CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException;
+  void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException;
 
-  default void parseNamedParameters(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
+  default void parseNamedParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final SuggestedParser<?> parser = parseContext.parser();
     final StringReader reader = parser.reader;
 
     int paramCount = 0;
@@ -107,7 +107,7 @@ public interface NamedParamListParser {
       reader.skipWhitespace();
 
       parser.clearSuggestion();
-      parseNamedParameter(paramName, registryAccess, parser, suggestionsOnly);
+      parseNamedParameter(paramName, parseContext);
 
       parser.reader.skipWhitespace();
       if (supportedParams().stream().anyMatch(this::isValidParamName)) {

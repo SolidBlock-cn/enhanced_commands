@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockBox;
@@ -12,12 +11,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.predicate.block.BlockPredicateContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.HashSet;
@@ -68,10 +67,10 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, @Nullable Blo
     return getBlockNbtData(source);
   }
 
-  public static BlocksNbtDataArgument handle(CommandRegistryAccess registryAccess, SuggestedParser<?> parser, boolean suggestionsOnly) throws CommandSyntaxException {
-    ParsingUtil.expectAndSkipWhitespace(parser.reader);
-    final RegionArgument regionArgument = RegionArgument.parse(registryAccess, parser, suggestionsOnly);
-    parser.clearSuggestion();
+  public static BlocksNbtDataArgument handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+    ParsingUtil.expectAndSkipWhitespace(parseContext.parser().reader);
+    final RegionArgument regionArgument = RegionArgument.parse(parseContext);
+    parseContext.parser().clearSuggestion();
     return new BlocksNbtDataArgument(regionArgument);
   }
 }
