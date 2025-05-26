@@ -146,9 +146,9 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final NbtElement nbtElement = getNbtElement(context, "nbt");
               final String s = TextUtil.toSpacedStringNbt(nbtElement);
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(Styles.RESULT)), false);
-              final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser(new StringReader(s)).parsePredicate(false, false);
+              final NbtPredicate reparsedPredicate = new NbtPredicateSuggestedParser<>(new StringReader(s)).parsePredicate(false, false);
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(Styles.RESULT)), false);
-              final NbtFunction reparsedFunction = new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false);
+              final NbtFunction reparsedFunction = new NbtFunctionSuggestedParser<>(new StringReader(s)).parseFunction(false, false);
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
@@ -191,7 +191,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("string")
             .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> new NbtPredicateSuggestedParser(new StringReader(s)).parseCompound(false, false))))
+            .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> new NbtPredicateSuggestedParser<>(new StringReader(s)).parseCompound(false, false))))
     );
   }
 
@@ -216,7 +216,15 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("string")
             .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString, s -> new NbtFunctionSuggestedParser(new StringReader(s)).parseFunction(false, false))))
+            .executes(context -> executeStringTest(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString, s -> new NbtFunctionSuggestedParser<>(new StringReader(s)).parseFunction(false, false))))
+        .then(literal("nbt")
+            .executes(context -> executeCodecShow(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json")
+            .executes(context -> executeCodecShow(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, JsonOps.INSTANCE)))
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, JsonOps.INSTANCE)))
     );
   }
 
@@ -261,7 +269,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(registryAccess, new SuggestedParser(s), false).toAbsoluteRegion(context.getSource()))))
+            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(registryAccess, new SuggestedParser<>(s), false).toAbsoluteRegion(context.getSource()))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")

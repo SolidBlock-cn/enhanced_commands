@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
-import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -26,7 +25,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
   public static final MapCodec<PropertiesNbtCombinationBlockFunction> CODEC = RecordCodecBuilder.<Triple<BlockFunction, Optional<PropertyNamesBlockFunction>, Optional<NbtBlockFunction>>>mapCodec(i -> i.apply3(Triple::of,
       BlockFunction.CODEC.fieldOf("base").forGetter(Triple::getLeft),
       CodecUtil.optionalField("properties", PropertyNameFunction.CODEC.listOf()).xmap(o -> o.map(PropertyNamesBlockFunction::new), o -> o.map(PropertyNamesBlockFunction::functions)).forGetter(Triple::getMiddle),
-      CodecUtil.optionalField("nbt", CompoundNbtFunction.CODEC).xmap(o -> o.map(NbtBlockFunction::new), o -> o.map(NbtBlockFunction::nbtFunction)).forGetter(Triple::getRight))).flatXmap(triple -> {
+      CodecUtil.optionalField("nbt", CompoundNbtFunction.CODEC.codec()).xmap(o -> o.map(NbtBlockFunction::new), o -> o.map(NbtBlockFunction::nbtFunction)).forGetter(Triple::getRight))).flatXmap(triple -> {
     try {
       return DataResult.success(new PropertiesNbtCombinationBlockFunction(triple.getLeft(), triple.getMiddle().orElse(null), triple.getRight().orElse(null)));
     } catch (IllegalArgumentException e) {
@@ -39,7 +38,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
     if (properties == null && nbt == null) {
       throw new IllegalArgumentException("The property names and nbt predicate cannot be both null. In that case, directly use the first block predicate.");
     }
-    if (base instanceof NbtFunction) {
+    if (base instanceof NbtBlockFunction) {
       throw new IllegalArgumentException("The base cannot be NbtFunction or PropertyNamesFunction");
     }
     if (base instanceof PropertyNamesBlockFunction && properties != null) {

@@ -1,18 +1,24 @@
 package pers.solid.ecmd.function.nbt;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.command.ServerCommandSource;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface NbtFunction extends ExpressionConvertible, Function<@Nullable NbtElement, @NotNull NbtElement> {
+public interface NbtFunction extends ExpressionConvertible, FailableFunction<@Nullable NbtElement, @NotNull
+    NbtElement, CommandSyntaxException>, NbtFunctionArgument {
+  Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.getCodec().dispatch(NbtFunction::getType, NbtFunctionType::getCodec);
+
   @Override
   @NotNull
   default String asString() {
@@ -21,17 +27,19 @@ public interface NbtFunction extends ExpressionConvertible, Function<@Nullable N
 
   @NotNull String asString(boolean requirePrefix);
 
+  NbtFunctionType<?> getType();
+
   /**
    * 根据现有的 NBT 元素（可能为 null）返回所需要的 NBT 元素。原先的 NBT 元素可能会被完全忽略。当接收的 NBT 元素为可变对象时，可能会直接修改并返回它。
    */
   @Override
-  @NotNull NbtElement apply(@Nullable NbtElement nbtElement);
+  @NotNull NbtElement apply(@Nullable NbtElement nbtElement) throws CommandSyntaxException;
 
-  default @NotNull NbtElement recursivelyApply(NbtElement nbtElement, NbtPredicate predicate) {
+  default @NotNull NbtElement recursivelyApply(NbtElement nbtElement, NbtPredicate predicate) throws CommandSyntaxException {
     return recursivelyApply(this, nbtElement, predicate);
   }
 
-  static @NotNull NbtElement recursivelyApply(Function<@Nullable NbtElement, @Nullable NbtElement> nbtFunction, NbtElement nbtElement, @Nullable Predicate<@NotNull NbtElement> predicate) {
+  static @NotNull NbtElement recursivelyApply(FailableFunction<@Nullable NbtElement, @Nullable NbtElement, CommandSyntaxException> nbtFunction, NbtElement nbtElement, @Nullable Predicate<@NotNull NbtElement> predicate) throws CommandSyntaxException {
     if (predicate == null || predicate.test(nbtElement)) {
       final NbtElement applied = nbtFunction.apply(nbtElement);
       if (applied != null) {
@@ -65,5 +73,10 @@ public interface NbtFunction extends ExpressionConvertible, Function<@Nullable N
         return nbtElement;
       }
     }
+  }
+
+  @Override
+  default NbtFunction toAbsolute(ServerCommandSource source) {
+    return this;
   }
 }

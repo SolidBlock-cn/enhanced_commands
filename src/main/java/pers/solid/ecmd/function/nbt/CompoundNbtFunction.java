@@ -1,14 +1,14 @@
 package pers.solid.ecmd.function.nbt;
 
-import com.mojang.brigadier.StringReader;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -39,13 +39,10 @@ import java.util.stream.Collectors;
  * @param allowsMerge 是否允许对 NBT 复合标签进行合并
  */
 public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boolean allowsMerge) implements NbtFunction {
-  public static final Codec<CompoundNbtFunction> CODEC = Codec.STRING.flatXmap(s -> {
-    try {
-      return DataResult.success(new NbtFunctionSuggestedParser<>(new StringReader(s)).parseCompound(false));
-    } catch (CommandSyntaxException e) {
-      return DataResult.error(e::getMessage);
-    }
-  }, f -> DataResult.success(f.asString()));
+  public static final MapCodec<CompoundNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      Codec.unboundedMap(Codec.STRING, NbtFunction.CODEC).optionalFieldOf("source", ImmutableMap.of()).forGetter(CompoundNbtFunction::source),
+      Codec.BOOL.optionalFieldOf("allows_merge", true).forGetter(CompoundNbtFunction::allowsMerge)
+  ).apply(i, CompoundNbtFunction::new));
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
@@ -62,15 +59,31 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   }
 
   @Override
-  public @NotNull NbtCompound apply(@Nullable NbtElement nbtElement) {
+  public NbtFunctionType<?> getType() {
+    return Type.COMPOUND_TYPE;
+  }
+
+  @Override
+  public @NotNull NbtCompound apply(@Nullable NbtElement nbtElement) throws CommandSyntaxException {
     final NbtCompound targetCompound = (nbtElement instanceof final NbtCompound nbtCompound && allowsMerge) ? nbtCompound : new NbtCompound();
-    source.forEach((key, nbtFunction) -> {
+    for (Map.Entry<String, NbtFunction> entry : source.entrySet()) {
+      String key = entry.getKey();
+      NbtFunction nbtFunction = entry.getValue();
       if (nbtFunction == null) {
         targetCompound.remove(key);
       } else {
         targetCompound.put(key, nbtFunction.apply(targetCompound.get(key)));
       }
-    });
+    }
     return targetCompound;
+  }
+
+  public enum Type implements NbtFunctionType<CompoundNbtFunction> {
+    COMPOUND_TYPE;
+
+    @Override
+    public MapCodec<CompoundNbtFunction> getCodec() {
+      return CODEC;
+    }
   }
 }

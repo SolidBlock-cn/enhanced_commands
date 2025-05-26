@@ -1,5 +1,8 @@
 package pers.solid.ecmd.function.nbt;
 
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +22,17 @@ public record NumberValueNbtFunction(AbstractNbtNumber number) implements NbtFun
     return "= " + number.toString();
   }
 
+  public static final MapCodec<NumberValueNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(NbtCompound.CODEC.comapFlatMap(nbtCompound -> nbtCompound.get("value") instanceof AbstractNbtNumber n ? DataResult.success(n) : DataResult.error(() -> "not a number in the NBT"), n -> {
+    final NbtCompound nbtCompound = new NbtCompound();
+    nbtCompound.put("value", n);
+    return nbtCompound;
+  }).fieldOf("number").forGetter(NumberValueNbtFunction::number)).apply(i, NumberValueNbtFunction::new));
+
+  @Override
+  public NbtFunctionType<?> getType() {
+    return Type.NUMBER_VALUE_TYPE;
+  }
+
   @Override
   public @NotNull NbtElement apply(@Nullable NbtElement nbtElement) {
     if (nbtElement instanceof NbtDouble) {
@@ -33,6 +47,15 @@ public record NumberValueNbtFunction(AbstractNbtNumber number) implements NbtFun
       return NbtShort.of(number.shortValue());
     } else {
       return number;
+    }
+  }
+
+  public enum Type implements NbtFunctionType<NumberValueNbtFunction> {
+    NUMBER_VALUE_TYPE;
+
+    @Override
+    public MapCodec<NumberValueNbtFunction> getCodec() {
+      return CODEC;
     }
   }
 }

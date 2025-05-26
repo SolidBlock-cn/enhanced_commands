@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtFunctionSuggestedParser;
 import pers.solid.ecmd.argument.NbtPredicateSuggestedParser;
 import pers.solid.ecmd.argument.SuggestedParser;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -28,7 +29,11 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    blockEntityData.setValue(nbtFunction.apply(blockEntityData.getValue()));
+    try {
+      blockEntityData.setValue(nbtFunction.apply(blockEntityData.getValue()));
+    } catch (CommandSyntaxException e) {
+      throw new CommandRuntimeException(e);
+    }
     return blockState;
   }
 

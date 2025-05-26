@@ -13,6 +13,7 @@ import pers.solid.ecmd.curve.CurveTypes;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionTypes;
+import pers.solid.ecmd.function.nbt.NbtFunctionTypes;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
@@ -41,6 +42,7 @@ public class EnhancedCommands implements ModInitializer {
     CommandEnumType.init();
     CurveTypes.init();
     NbtDataRegistry.init();
+    NbtFunctionTypes.init();
     RegionTypes.init();
     RegionSelectionTypes.init();
     ModArgumentTypes.init();

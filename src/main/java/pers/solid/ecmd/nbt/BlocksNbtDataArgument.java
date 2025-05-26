@@ -31,7 +31,7 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, @Nullable Blo
     this(regionArgument, null);
   }
 
-  public BlocksNbtData getBlockNbtData(ServerCommandSource source) throws CommandSyntaxException {
+  public NbtTarget<BlockEntity> getBlockNbtData(ServerCommandSource source) throws CommandSyntaxException {
     final Region region = regionArgument.toAbsoluteRegion(source);
     final BlockPredicate blockPredicate = blockPredicateArgument == null ? null : blockPredicateArgument.apply(source);
     final ServerWorld world = source.getWorld();
@@ -52,16 +52,19 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, @Nullable Blo
       }
       blockEntities = stream.map(Map.Entry::getValue).collect(ImmutableList.toImmutableList());
     }
-    return new BlocksNbtData(blockEntities);
+    if (blockEntities.size() == 1) {
+      return new BlockNbtData(blockEntities.getFirst());
+    } else
+      return new BlocksNbtData(blockEntities);
   }
 
   @Override
-  public BlocksNbtData getNbtSource(ServerCommandSource source) throws CommandSyntaxException {
+  public NbtTarget<BlockEntity> getNbtSource(ServerCommandSource source) throws CommandSyntaxException {
     return getBlockNbtData(source);
   }
 
   @Override
-  public BlocksNbtData getNbtTarget(ServerCommandSource source) throws CommandSyntaxException {
+  public NbtTarget<BlockEntity> getNbtTarget(ServerCommandSource source) throws CommandSyntaxException {
     return getBlockNbtData(source);
   }
 

@@ -95,13 +95,13 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     Stream<BlockPos> stream = region.stream();
     if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       stream = stream.takeWhile(pos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(pos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.isChunkLoaded(pos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       stream = stream.filter(pos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(pos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.isChunkLoaded(pos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
@@ -115,7 +115,11 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     final Function<BlockPos, Void> mapper = blockPos -> {
       final Entity entity = conversion.getConvertedEntity(world, blockPos, flags, modFlags, affectFluid);
       if (nbtFunction != null) {
-        entity.readNbt(nbtFunction.apply(entity.writeNbt(new NbtCompound())));
+        try {
+          entity.readNbt(nbtFunction.apply(entity.writeNbt(new NbtCompound())));
+        } catch (CommandSyntaxException e) {
+          // todo how to handle this?
+        }
       }
       numbersAffected.increment();
       return null;

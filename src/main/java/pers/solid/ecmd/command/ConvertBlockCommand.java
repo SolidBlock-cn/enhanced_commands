@@ -2,6 +2,7 @@ package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -58,7 +59,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
                     .executes(context -> executeConvert(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))));
   }
 
-  public static int executeConvert(Conversion conversion, Function<BlockPos, Text> feedback, BlockPos blockPos, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) {
+  public static int executeConvert(Conversion conversion, Function<BlockPos, Text> feedback, BlockPos blockPos, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final ServerWorld world = source.getWorld();
     final CompoundNbtFunction nbtFunction = keywordArgs.getArg("nbt");

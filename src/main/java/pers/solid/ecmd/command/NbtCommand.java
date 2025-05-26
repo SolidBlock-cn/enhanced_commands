@@ -14,6 +14,7 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
@@ -24,7 +25,6 @@ import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -132,12 +132,12 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return 1; // 应该修改为执行成功数量
   }
 
-  private int executeTransform(NbtTarget<?> target, NbtPathArgumentType.NbtPath path, Function<@Nullable NbtElement, @Nullable NbtElement> operation, Supplier<Text> message, boolean recursively, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private int executeTransform(NbtTarget<?> target, NbtPathArgumentType.NbtPath path, FailableFunction<@Nullable NbtElement, @Nullable NbtElement, CommandSyntaxException> operation, Supplier<Text> message, boolean recursively, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     if (recursively) {
       target.transformNbtInPath(path, nbtElement -> NbtFunction.recursivelyApply(operation, nbtElement, null), source.getRegistryManager());
     } else {
-      target.transformNbtInPath(path, operation::apply, source.getRegistryManager());
+      target.transformNbtInPath(path, operation, source.getRegistryManager());
     }
     source.sendFeedback$ecBridge(message, true);
     return 1;

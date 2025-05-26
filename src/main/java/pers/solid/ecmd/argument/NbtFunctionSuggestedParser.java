@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import net.minecraft.nbt.AbstractNbtNumber;
@@ -150,7 +151,7 @@ public class NbtFunctionSuggestedParser<S> extends SuggestedParser<S> {
       // 空列表
       reader.skip();
       clearSuggestion();
-      return new ListOpsNbtFunction(List.of(), null, null);
+      return new ListOpsNbtFunction(List.of(), Map.of(), Map.of());
     } else {
       // 列表根据分号，分为左边和右边两部分。
       // 左边的部分表示替换整个列表或者设置单个列表值，右边的部分则表示插值。
@@ -318,8 +319,8 @@ public class NbtFunctionSuggestedParser<S> extends SuggestedParser<S> {
       clearSuggestion();
       // 解析完成，处理数据
       final List<NbtFunction> valueReplacements = leftPartList == null ? null : leftPartList.stream().filter(pair -> !(pair instanceof IntObjectPair<NbtFunction>) && pair.left() == null).map(Pair::right).toList();
-      final Int2ObjectMap<NbtFunction> positionalFunctions = leftPartList == null ? null : new Int2ObjectOpenHashMap<>();
-      final Int2ObjectMap<List<NbtFunction>> positionalInsertions = rightPartList == null ? null : new Int2ObjectOpenHashMap<>();
+      final Int2ObjectMap<NbtFunction> positionalFunctions = leftPartList == null ? Int2ObjectMaps.emptyMap() : new Int2ObjectOpenHashMap<>();
+      final Int2ObjectMap<List<NbtFunction>> positionalInsertions = rightPartList == null ? Int2ObjectMaps.emptyMap() : new Int2ObjectOpenHashMap<>();
 
       if (leftPartList != null) {
         for (Pair<Integer, NbtFunction> pair : leftPartList) {
@@ -350,7 +351,7 @@ public class NbtFunctionSuggestedParser<S> extends SuggestedParser<S> {
       }
 
       return new ListOpsNbtFunction(
-          (valueReplacements == null || valueReplacements.isEmpty()) ? null : valueReplacements,
+          (valueReplacements == null || valueReplacements.isEmpty()) ? List.of() : valueReplacements,
           positionalFunctions,
           positionalInsertions
       );

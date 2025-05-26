@@ -9,19 +9,25 @@ import pers.solid.ecmd.argument.SuggestedParser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collections;
+import java.util.List;
 
 public record EntitiesNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument<Entity>, NbtTargetArgument<Entity> {
-  public EntitiesNbtData getEntitiesNbtData(ServerCommandSource source) throws CommandSyntaxException {
-    return new EntitiesNbtData(Collections.unmodifiableCollection(entitySelector.getEntities(source)));
+  public NbtTarget<Entity> getEntitiesNbtData(ServerCommandSource source) throws CommandSyntaxException {
+    final List<? extends Entity> entities = entitySelector.getEntities(source);
+    if (entities.size() == 1) {
+      return new EntityNbtData(entities.getFirst());
+    } else {
+      return new EntitiesNbtData(Collections.unmodifiableList(entities));
+    }
   }
 
   @Override
-  public EntitiesNbtData getNbtSource(ServerCommandSource source) throws CommandSyntaxException {
+  public NbtTarget<Entity> getNbtSource(ServerCommandSource source) throws CommandSyntaxException {
     return getEntitiesNbtData(source);
   }
 
   @Override
-  public EntitiesNbtData getNbtTarget(ServerCommandSource source) throws CommandSyntaxException {
+  public NbtTarget<Entity> getNbtTarget(ServerCommandSource source) throws CommandSyntaxException {
     return getEntitiesNbtData(source);
   }
 
