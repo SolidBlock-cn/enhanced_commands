@@ -10,12 +10,14 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.predicate.nbt.NbtPredicateArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtPredicate> {
+public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtPredicateArgument> {
 
   public static NbtPredicateArgumentType compound(CommandRegistryAccess registryAccess) {
     return new NbtPredicateArgumentType(true, registryAccess);
@@ -25,12 +27,12 @@ public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAcc
     return new NbtPredicateArgumentType(false, registryAccess);
   }
 
-  public static NbtPredicate getNbtPredicate(CommandContext<?> context, String name) {
-    return context.getArgument(name, NbtPredicate.class);
+  public static NbtPredicate getNbtPredicate(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, NbtPredicateArgument.class).toAbsolute(context.getSource());
   }
 
   @Override
-  public NbtPredicate parse(StringReader reader) throws CommandSyntaxException {
+  public NbtPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
     final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader, false, false);
     final NbtPredicateParser<?> parser = new NbtPredicateParser<>(parseContext);
     return onlyCompounds ? parser.parseCompound(false, false) : parser.parsePredicate(false, false);

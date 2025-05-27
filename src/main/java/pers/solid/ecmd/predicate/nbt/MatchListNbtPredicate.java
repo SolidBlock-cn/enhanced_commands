@@ -1,5 +1,9 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -25,7 +29,13 @@ import java.util.stream.Stream;
  *   [=[2, 3], =[4, 5]] match [[2, 3, 4, 5]] -> false
  * </pre>
  */
-public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<IntObjectPair<@NotNull NbtPredicate>> positionalExpected, boolean negated) implements NbtPredicate {
+public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<IntObjectPair<@NotNull NbtPredicate>> positionalExpected, boolean inverted) implements NbtPredicate {
+  public static final MapCodec<MatchListNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(MatchListNbtPredicate::expected),
+      Codec.pair(Codec.INT, NbtPredicate.CODEC).xmap(pair -> IntObjectPair.of(pair.getFirst(), pair.getSecond()), intObjectPair -> Pair.of(intObjectPair.leftInt(), intObjectPair.right())).listOf().fieldOf("positional_expected").forGetter(MatchListNbtPredicate::positionalExpected),
+      Codec.BOOL.fieldOf("inverted").forGetter(MatchListNbtPredicate::inverted)
+  ).apply(i, MatchListNbtPredicate::new));
+
   @Override
   public @NotNull String asString() {
     return asString(false);
@@ -33,7 +43,7 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::asString), positionalExpected.stream().map(pair -> {
+    return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::asString), positionalExpected.stream().map(pair -> {
       final String valueAsString = pair.right().asString(true);
       return pair.leftInt() + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
     })).collect(Collectors.joining(", ")) + "]";
@@ -42,7 +52,7 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
   @Override
   public boolean test(@NotNull NbtElement nbtElement) {
     if (!(nbtElement instanceof NbtList nbtList)) {
-      return negated;
+      return inverted;
     }
     for (NbtPredicate nbtPredicate : expected) {
       boolean elementMatched = false;
@@ -53,7 +63,7 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
         }
       }
       if (!elementMatched)
-        return negated;
+        return inverted;
     }
     final int size = nbtList.size();
     for (IntObjectPair<NbtPredicate> pair : positionalExpected) {
@@ -63,17 +73,26 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
       }
       if (expectedIndex >= 0 && size > expectedIndex) {
         if (!pair.right().test(nbtList.get(expectedIndex))) {
-          return negated;
+          return inverted;
         }
       } else {
-        return negated;
+        return inverted;
       }
     }
-    return !negated;
+    return !inverted;
   }
 
   @Override
-  public @NotNull Type getType() {
-    return Type.MATCH_LIST;
+  public @NotNull NbtPredicateType<MatchListNbtPredicate> getType() {
+    return Type.MATCH_LIST_TYPE;
+  }
+
+  public enum Type implements NbtPredicateType<MatchListNbtPredicate> {
+    MATCH_LIST_TYPE;
+
+    @Override
+    public MapCodec<MatchListNbtPredicate> getCodec() {
+      return CODEC;
+    }
   }
 }

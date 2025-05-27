@@ -35,7 +35,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableFunction;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.extensions.HistoryHolder;
@@ -50,6 +49,7 @@ import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.HashSet;
@@ -162,9 +162,21 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                 .executes(context -> executeConvertShow(context, BlockFunction.CODEC)))
             .then(literal("block_predicate")
                 .executes(context -> executeConvertShow(context, BlockPredicate.CODEC)))
+            .then(literal("nbt_function")
+                .executes(context -> executeConvertShow(context, NbtFunction.CODEC)))
+            .then(literal("nbt_predicate")
+                .executes(context -> executeConvertShow(context, NbtPredicate.CODEC)))
             .then(literal("region")
                 .executes(context -> executeConvertShow(context, Region.CODEC)))
         )
+        .then(literal("nbt")
+            .executes(context -> executeCodecShow(context, getNbtElement(context, "nbt"), CodecUtil.NBT_ELEMENT, NbtOps.INSTANCE)))
+        .then(literal("json")
+            .executes(context -> executeCodecShow(context, getNbtElement(context, "nbt"), CodecUtil.NBT_ELEMENT, JsonOps.INSTANCE)))
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getNbtElement(context, "nbt"), CodecUtil.NBT_ELEMENT, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getNbtElement(context, "nbt"), CodecUtil.NBT_ELEMENT, JsonOps.INSTANCE)))
     );
   }
 
@@ -193,6 +205,14 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString)))
         .then(literal("string_test")
             .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> NbtPredicate.parse(registryAccess, s, context.getSource()))))
+        .then(literal("nbt")
+            .executes(context -> executeCodecShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json")
+            .executes(context -> executeCodecShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, JsonOps.INSTANCE)))
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, JsonOps.INSTANCE)))
     );
   }
 
@@ -370,7 +390,6 @@ public enum TestArgCommand implements CommandRegistrationCallback {
       context.getSource().sendFeedback$ecBridge(() -> TextUtil.wrapBoolean(b), false);
       return BooleanUtils.toInteger(b);
     } catch (Throwable e) {
-      EnhancedCommands.LOGGER.error("Parsing region from NBT:", e);
       throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
     }
   }

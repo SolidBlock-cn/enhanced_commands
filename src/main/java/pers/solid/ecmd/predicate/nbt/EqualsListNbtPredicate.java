@@ -1,5 +1,8 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.NotNull;
@@ -9,6 +12,11 @@ import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expected, boolean inverted) implements NbtPredicate {
+  public static final MapCodec<EqualsListNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(EqualsListNbtPredicate::expected),
+      Codec.BOOL.fieldOf("inverted").forGetter(EqualsListNbtPredicate::inverted)
+  ).apply(i, EqualsListNbtPredicate::new));
+
   @Override
   public @NotNull String asString() {
     return asString(true);
@@ -36,7 +44,16 @@ public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expect
   }
 
   @Override
-  public @NotNull Type getType() {
-    return Type.EQUALS_LIST;
+  public @NotNull NbtPredicateType<EqualsListNbtPredicate> getType() {
+    return Type.EQUALS_LIST_TYPE;
+  }
+
+  public enum Type implements NbtPredicateType<EqualsListNbtPredicate> {
+    EQUALS_LIST_TYPE;
+
+    @Override
+    public MapCodec<EqualsListNbtPredicate> getCodec() {
+      return CODEC;
+    }
   }
 }

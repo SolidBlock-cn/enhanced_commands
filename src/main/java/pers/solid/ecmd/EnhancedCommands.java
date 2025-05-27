@@ -18,6 +18,7 @@ import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
 import pers.solid.ecmd.predicate.entity.EntitySelectorOptionsExtension;
+import pers.solid.ecmd.predicate.nbt.NbtPredicateTypes;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
@@ -43,6 +44,7 @@ public class EnhancedCommands implements ModInitializer {
     CurveTypes.init();
     NbtDataRegistry.init();
     NbtFunctionTypes.init();
+    NbtPredicateTypes.init();
     RegionTypes.init();
     RegionSelectionTypes.init();
     ModArgumentTypes.init();

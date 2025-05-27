@@ -4,13 +4,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.predicate.NumberRange;
+import net.minecraft.util.StringIdentifiable;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -20,6 +23,8 @@ import java.util.function.Function;
  * 本模组中使用的范围对象。每个范围都可能有一个最大值和最小值。与原版的 {@link NumberRange} 不同的是，本对象的方法更加统一，且在不同版本之间的用法基本一致。
  */
 public interface BridgeRange<T extends Comparable<T>> extends ExpressionConvertible {
+  MapCodec<BridgeRange<?>> CODEC = Type.CODEC.dispatchMap("range_number_type", BridgeRange::getType, type -> type.getCodec().fieldOf("range"));
+
   static boolean isNextCharValid(StringReader reader) {
     char c = reader.peek();
     if ((c < '0' || c > '9') && c != '-') {
@@ -127,6 +132,34 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
     } else {
       final T max = getMax();
       return (min == null ? "" : min.toString()) + ".." + (max == null ? "" : max.toString());
+    }
+  }
+
+  Type getType();
+
+  enum Type implements StringIdentifiable {
+    // 这里没有将 codec 作为字段存储，而是在 getCodec 方法中通过 switch 语句获取，是因为如果存储为字段，则出现过读取为 null 的问题。
+    FLOAT("float"), INT("int"), DOUBLE("double");
+
+    public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(values());
+
+    private final String s;
+
+    Type(String s) {
+      this.s = s;
+    }
+
+    public Codec<? extends BridgeRange<?>> getCodec() {
+      return switch (this) {
+        case FLOAT -> BridgeFloatRange.CODEC;
+        case INT -> BridgeIntRange.CODEC;
+        case DOUBLE -> BridgeDoubleRange.CODEC;
+      };
+    }
+
+    @Override
+    public String asString() {
+      return s;
     }
   }
 }

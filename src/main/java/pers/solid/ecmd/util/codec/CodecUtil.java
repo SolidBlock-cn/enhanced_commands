@@ -1,12 +1,12 @@
 package pers.solid.ecmd.util.codec;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.nbt.*;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 /**
  * 一些常用 codec 及处理 codec 的类，用于进行原版无法达成的复杂处理。。
@@ -35,8 +36,59 @@ public final class CodecUtil {
     }
   }, pattern -> DataResult.success(pattern.pattern()));
 
-  private CodecUtil() {
-  }
+  /**
+   * NBT 元素的 codec，部分内容使用了和 {@link Codec#PASSTHROUGH} 相似的处理方式，但是对于非 NBT 的 ops，会先转换为字符串，以确保所有 NBT 数据的类型都不会失真。
+   *
+   * @see net.minecraft.nbt.NbtCompound#CODEC
+   */
+  public static final Codec<NbtElement> NBT_ELEMENT = new Codec<>() {
+    @Override
+    public <T> DataResult<Pair<NbtElement, T>> decode(DynamicOps<T> ops, T input) {
+      if (input instanceof NbtElement nbtElement) {
+        return DataResult.success(Pair.of(nbtElement.copy(), input));
+      }
+      final DataResult<String> stringResult = Codec.STRING.parse(ops, input);
+      if (stringResult.isSuccess()) {
+        try {
+          return DataResult.success(Pair.of(new StringNbtReader(new StringReader(stringResult.getOrThrow())).parseElement(), input));
+        } catch (CommandSyntaxException e) {
+          return DataResult.error(() -> "Got a string value but cannot parse as NBT: " + e.getMessage());
+        }
+      }
+      final DataResult<Double> doubleResult = Codec.DOUBLE.parse(ops, input);
+      if (doubleResult.isSuccess()) {
+        return DataResult.success(Pair.of(NbtDouble.of(doubleResult.getOrThrow()), input));
+      }
+      return DataResult.error(() -> "Cannot parse value: not a string or number");
+    }
+
+    @Override
+    public <T> DataResult<T> encode(NbtElement input, DynamicOps<T> ops, T prefix) {
+      if (input == ops.empty()) {
+        return DataResult.success(prefix, Lifecycle.experimental());
+      }
+
+      final T casted;
+      if (ops.empty() instanceof NbtElement) {
+        casted = (NbtOps.INSTANCE.convertTo(ops, input));
+      } else {
+        casted = (ops.createString(input.toString()));
+      }
+      if (prefix == ops.empty()) {
+        return DataResult.success(casted, Lifecycle.experimental());
+      }
+
+      final DataResult<T> toMap = ops.getMap(casted).flatMap(map -> ops.mergeToMap(prefix, map));
+      return toMap.result().map(DataResult::success).orElseGet(() -> {
+        final DataResult<T> toList = ops.getStream(casted).flatMap(stream -> ops.mergeToList(prefix, stream.collect(Collectors.toList())));
+        return toList.result().map(DataResult::success).orElseGet(() ->
+            DataResult.error(() -> "Don't know how to merge " + prefix + " and " + casted, prefix, Lifecycle.experimental())
+        );
+      });
+    }
+  };
+
+  public static final Codec<AbstractNbtNumber> NBT_NUMBER = NBT_ELEMENT.comapFlatMap(nbtElement -> nbtElement instanceof AbstractNbtNumber number ? DataResult.success(number) : DataResult.error(() -> "The NBT value is not a number"), Function.identity());
 
   /**
    * 为特定的方块，创建其属性名称的 codec，将只能读取到符合该方块的属性名称，否则会发生错误。
@@ -124,16 +176,6 @@ public final class CodecUtil {
   }
 
   /**
-   * 与 {@code Codec.INT.optionalFieldOf} 类似，但是其类型为 {@code OptionalInt} 而非 {@code Optional<Integer>}，从而减少不必要的装箱与拆箱。
-   *
-   * @see Codec#INT
-   * @see Codec#optionalFieldOf
-   */
-  public MapCodec<OptionalInt> optionalIntFieldOf(String name) {
-    return Codec.INT.optionalFieldOf(name).xmap(ol -> ol.map(OptionalInt::of).orElseGet(OptionalInt::empty), optionalInt -> optionalInt.isEmpty() ? Optional.empty() : Optional.of(optionalInt.getAsInt()));
-  }
-
-  /**
    * 与 {@code Codec.LONG.optionalFieldOf} 类似，但是其类型为 {@code OptionalLong} 而非 {@code Optional<Long>}，从而减少不必要的装箱与拆箱。
    *
    * @see Codec#LONG
@@ -141,5 +183,15 @@ public final class CodecUtil {
    */
   public static MapCodec<OptionalLong> optionalLongFieldOf(String name) {
     return Codec.LONG.optionalFieldOf(name).xmap(ol -> ol.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isEmpty() ? Optional.empty() : Optional.of(optionalLong.getAsLong()));
+  }
+
+  /**
+   * 与 {@code Codec.INT.optionalFieldOf} 类似，但是其类型为 {@code OptionalInt} 而非 {@code Optional<Integer>}，从而减少不必要的装箱与拆箱。
+   *
+   * @see Codec#INT
+   * @see Codec#optionalFieldOf
+   */
+  public MapCodec<OptionalInt> optionalIntFieldOf(String name) {
+    return Codec.INT.optionalFieldOf(name).xmap(ol -> ol.map(OptionalInt::of).orElseGet(OptionalInt::empty), optionalInt -> optionalInt.isEmpty() ? Optional.empty() : Optional.of(optionalInt.getAsInt()));
   }
 }

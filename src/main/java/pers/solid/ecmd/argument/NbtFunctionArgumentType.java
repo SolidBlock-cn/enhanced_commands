@@ -10,13 +10,15 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
+import pers.solid.ecmd.function.nbt.NbtFunctionArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtFunction> {
+public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtFunctionArgument> {
 
   public static NbtFunctionArgumentType compound(CommandRegistryAccess registryAccess) {
     return new NbtFunctionArgumentType(true, registryAccess);
@@ -26,8 +28,8 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
     return new NbtFunctionArgumentType(false, registryAccess);
   }
 
-  public static NbtFunction getNbtFunction(CommandContext<?> context, String name) {
-    return context.getArgument(name, NbtFunction.class);
+  public static NbtFunction getNbtFunction(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, NbtFunction.class).toAbsolute(context.getSource());
   }
 
   public static CompoundNbtFunction getCompoundNbtFunction(CommandContext<?> context, String name) {
@@ -35,7 +37,7 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
   }
 
   @Override
-  public NbtFunction parse(StringReader reader) throws CommandSyntaxException {
+  public NbtFunctionArgument parse(StringReader reader) throws CommandSyntaxException {
     final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader, false, false);
     final NbtFunctionParser<?> parser = new NbtFunctionParser<>(parseContext);
     return onlyCompounds ? parser.parseCompound(false) : parser.parseFunction(false, false);

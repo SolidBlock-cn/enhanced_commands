@@ -24,7 +24,7 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
   }
 
   @Override
-  public NbtFunctionType<?> getType() {
+  public NbtFunctionType<StringReplaceNbtFunction> getType() {
     return Type.STRING_REPLACE_TYPE;
   }
 

@@ -1,6 +1,12 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Maps;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +33,12 @@ import java.util.stream.Collectors;
  *
  * @see net.minecraft.nbt.NbtHelper#matches(NbtElement, NbtElement, boolean)
  */
-public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull NbtPredicate> entries, boolean negated) implements NbtPredicate {
+public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull NbtPredicate> entries, boolean inverted) implements NbtPredicate {
+  public static final MapCodec<MatchCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC.listOf()).<ListMultimap<String, NbtPredicate>>xmap(map -> map.entrySet().stream().collect(ImmutableListMultimap.flatteningToImmutableListMultimap(Map.Entry::getKey, entry -> entry.getValue().stream())), map -> Maps.transformValues(map.asMap(), ImmutableList::copyOf)).fieldOf("entries").forGetter(matchCompoundNbtPredicate -> matchCompoundNbtPredicate.entries),
+      Codec.BOOL.fieldOf("inverted").forGetter(MatchCompoundNbtPredicate::inverted)
+  ).apply(i, MatchCompoundNbtPredicate::new));
+
   @Override
   public @NotNull String asString() {
     return asString(false);
@@ -35,7 +46,7 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull 
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + "{" + entries.entries().stream().map(pair -> {
+    return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + "{" + entries.entries().stream().map(pair -> {
       final String key = pair.getKey();
       final String keyAsString;
       final NbtPredicate value = pair.getValue();
@@ -56,14 +67,14 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull 
   @Override
   public boolean test(@NotNull NbtElement nbtElement) {
     if (!(nbtElement instanceof final NbtCompound nbtCompound))
-      return negated;
+      return inverted;
     for (Map.Entry<String, NbtPredicate> entry : entries.entries()) {
       final String key = entry.getKey();
       final NbtPredicate valuePredicate = entry.getValue();
       if (key != null) {
         final NbtElement actualElement = nbtCompound.get(key);
         if (actualElement == null || !valuePredicate.test(actualElement)) {
-          return negated;
+          return inverted;
         }
       } else {
         boolean valueFound = false;
@@ -74,15 +85,24 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull 
           }
         }
         if (!valueFound) {
-          return negated;
+          return inverted;
         }
       }
     }
-    return !negated;
+    return !inverted;
   }
 
   @Override
-  public @NotNull Type getType() {
-    return Type.MATCH_COMPOUND;
+  public @NotNull NbtPredicateType<MatchCompoundNbtPredicate> getType() {
+    return Type.MATCH_COMPOUND_TYPE;
+  }
+
+  public enum Type implements NbtPredicateType<MatchCompoundNbtPredicate> {
+    MATCH_COMPOUND_TYPE;
+
+    @Override
+    public MapCodec<MatchCompoundNbtPredicate> getCodec() {
+      return CODEC;
+    }
   }
 }

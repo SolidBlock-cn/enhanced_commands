@@ -1,5 +1,8 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +11,9 @@ import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.bridge.BridgeRange;
 
-public record RangeNbtPredicate(BridgeRange<?> numberRange, boolean negated) implements NbtPredicate {
+public record RangeNbtPredicate(BridgeRange<?> numberRange, boolean inverted) implements NbtPredicate {
+  public static final MapCodec<RangeNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BridgeRange.CODEC.forGetter(RangeNbtPredicate::numberRange), Codec.BOOL.fieldOf("inverted").forGetter(RangeNbtPredicate::inverted)).apply(i, RangeNbtPredicate::new));
+
   @Override
   public @NotNull String asString() {
     return asString(false);
@@ -16,26 +21,35 @@ public record RangeNbtPredicate(BridgeRange<?> numberRange, boolean negated) imp
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? ": " : "") + numberRange.asString();
+    return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + numberRange.asString();
   }
 
   @Override
   public boolean test(@NotNull NbtElement nbtElement) {
     if (!(nbtElement instanceof final AbstractNbtNumber nbtNumber))
-      return negated;
+      return inverted;
     if (numberRange instanceof BridgeDoubleRange doubleRange) {
-      return doubleRange.test(nbtNumber.doubleValue()) != negated;
+      return doubleRange.test(nbtNumber.doubleValue()) != inverted;
     } else if (numberRange instanceof BridgeFloatRange floatRange) {
-      return floatRange.test(nbtNumber.floatValue()) != negated;
+      return floatRange.test(nbtNumber.floatValue()) != inverted;
     } else if (numberRange instanceof BridgeIntRange intRange) {
-      return intRange.test(nbtNumber.intValue()) != negated;
+      return intRange.test(nbtNumber.intValue()) != inverted;
     } else {
-      return negated;
+      return inverted;
     }
   }
 
   @Override
-  public @NotNull Type getType() {
-    return Type.RANGE;
+  public @NotNull NbtPredicateType<RangeNbtPredicate> getType() {
+    return Type.RANGE_TYPE;
+  }
+
+  public enum Type implements NbtPredicateType<RangeNbtPredicate> {
+    RANGE_TYPE;
+
+    @Override
+    public MapCodec<RangeNbtPredicate> getCodec() {
+      return CODEC;
+    }
   }
 }

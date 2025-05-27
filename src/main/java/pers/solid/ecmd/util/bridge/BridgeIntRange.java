@@ -53,4 +53,9 @@ public final class BridgeIntRange extends AbstractBridgeRange<Integer> {
     final Optional<Integer> max = Optional.ofNullable(this.max);
     return new NumberRange.IntRange(min, max, min.map(x -> x.longValue() * x.longValue()), max.map(x -> x.longValue() * x.longValue()));
   }
+
+  @Override
+  public Type getType() {
+    return Type.INT;
+  }
 }

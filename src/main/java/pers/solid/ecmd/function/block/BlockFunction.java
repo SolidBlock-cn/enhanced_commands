@@ -5,6 +5,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -37,8 +38,8 @@ import pers.solid.ecmd.util.parse.ParseContext;
  */
 public interface BlockFunction extends ExpressionConvertible, BlockFunctionArgument {
   RegistryKey<Registry<BlockFunction>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("block_function"));
-  Codec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.getCodec().dispatch(BlockFunction::getType, BlockFunctionType::getCodec);
-  Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC, blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? s : null);
+  MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.getCodec().dispatchMap(BlockFunction::getType, BlockFunctionType::getCodec);
+  Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC.codec(), blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? s : null);
   Codec<RegistryEntry<BlockFunction>> ENTRY_CODEC = RegistryElementCodec.of(REGISTRY_KEY, CODEC);
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));

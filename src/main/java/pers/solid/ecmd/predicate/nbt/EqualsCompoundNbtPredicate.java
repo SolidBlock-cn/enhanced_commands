@@ -53,7 +53,16 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
   }
 
   @Override
-  public @NotNull Type getType() {
-    return Type.EQUALS_COMPOUND;
+  public @NotNull NbtPredicateType<EqualsCompoundNbtPredicate> getType() {
+    return Type.EQUALS_COMPOUND_TYPE;
+  }
+
+  public enum Type implements NbtPredicateType<EqualsCompoundNbtPredicate> {
+    EQUALS_COMPOUND_TYPE;
+
+    @Override
+    public MapCodec<EqualsCompoundNbtPredicate> getCodec() {
+      return CODEC;
+    }
   }
 }

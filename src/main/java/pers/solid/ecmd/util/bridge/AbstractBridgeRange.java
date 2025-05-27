@@ -3,6 +3,7 @@ package pers.solid.ecmd.util.bridge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public abstract class AbstractBridgeRange<T extends Comparable<T>> implements BridgeRange<T> {
@@ -42,5 +43,19 @@ public abstract class AbstractBridgeRange<T extends Comparable<T>> implements Br
   @Override
   public Optional<T> getConstantValue() {
     return isExact() ? Optional.ofNullable(min) : Optional.empty();
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (!(o instanceof AbstractBridgeRange<?> that)) return false;
+
+    return Objects.equals(min, that.min) && Objects.equals(max, that.max);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hashCode(min);
+    result = 31 * result + Objects.hashCode(max);
+    return result;
   }
 }

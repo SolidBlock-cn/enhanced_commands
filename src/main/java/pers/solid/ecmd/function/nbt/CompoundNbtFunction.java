@@ -59,7 +59,7 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   }
 
   @Override
-  public NbtFunctionType<?> getType() {
+  public NbtFunctionType<CompoundNbtFunction> getType() {
     return Type.COMPOUND_TYPE;
   }
 

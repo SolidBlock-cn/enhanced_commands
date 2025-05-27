@@ -49,4 +49,9 @@ public class BridgeDoubleRange extends AbstractBridgeRange<Double> {
     final Optional<Double> max = Optional.ofNullable(this.max);
     return new NumberRange.DoubleRange(min, max, min.map(x -> x * x), max.map(x -> x * x));
   }
+
+  @Override
+  public Type getType() {
+    return Type.DOUBLE;
+  }
 }

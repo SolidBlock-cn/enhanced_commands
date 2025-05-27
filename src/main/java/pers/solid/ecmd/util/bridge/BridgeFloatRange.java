@@ -50,4 +50,9 @@ public class BridgeFloatRange extends AbstractBridgeRange<Float> {
   public FloatRangeArgument toVanilla() {
     return new FloatRangeArgument(min, max);
   }
+
+  @Override
+  public Type getType() {
+    return Type.FLOAT;
+  }
 }

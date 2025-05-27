@@ -1,11 +1,14 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.AbstractNbtNumber;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 /**
  * 匹配一个 NBT 数值是否在数值上与指定的值相等，而不考虑其类型。例如：
@@ -16,6 +19,10 @@ import pers.solid.ecmd.util.TextUtil;
  * </pre>
  */
 public record ComparisonNbtPredicate(Comparator comparator, NbtElement expected) implements NbtPredicate {
+  public static final MapCodec<ComparisonNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      Comparator.CODEC.fieldOf("comparator").forGetter(ComparisonNbtPredicate::comparator),
+      CodecUtil.NBT_ELEMENT.fieldOf("expected").forGetter(ComparisonNbtPredicate::expected)
+  ).apply(i, ComparisonNbtPredicate::new));
 
   @Override
   public @NotNull String asString() {
@@ -50,7 +57,16 @@ public record ComparisonNbtPredicate(Comparator comparator, NbtElement expected)
   }
 
   @Override
-  public @NotNull Type getType() {
-    return Type.COMPARISON;
+  public @NotNull NbtPredicateType<ComparisonNbtPredicate> getType() {
+    return Type.COMPARISON_TYPE;
+  }
+
+  public enum Type implements NbtPredicateType<ComparisonNbtPredicate> {
+    COMPARISON_TYPE;
+
+    @Override
+    public MapCodec<ComparisonNbtPredicate> getCodec() {
+      return CODEC;
+    }
   }
 }

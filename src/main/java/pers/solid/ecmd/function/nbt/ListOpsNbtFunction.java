@@ -87,7 +87,7 @@ public record ListOpsNbtFunction(@NotNull List<NbtFunction> valueReplacements, @
   }
 
   @Override
-  public NbtFunctionType<?> getType() {
+  public NbtFunctionType<ListOpsNbtFunction> getType() {
     return Type.LIST_OPS_TYPE;
   }
 
