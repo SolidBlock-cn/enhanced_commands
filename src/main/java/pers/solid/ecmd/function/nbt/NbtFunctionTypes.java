@@ -27,6 +27,7 @@ public final class NbtFunctionTypes {
   // 特殊的 NBT 函数
 
   public static final NbtFunctionType<StringReplaceNbtFunction> STRING_REPLACE = register("string_replace", StringReplaceNbtFunction.Type.STRING_REPLACE_TYPE);
+  public static final NbtFunctionType<GetDataNbtFunction> GET_DATA = register("get_data", GetDataNbtFunction.Type.GET_DATA_TYPE);
 
   private static <T extends NbtFunctionType<?>> T register(String name, T value) {
     return Registry.register(NbtFunctionType.REGISTRY, EnhancedCommands.id(name), value);
@@ -38,10 +39,12 @@ public final class NbtFunctionTypes {
 
 
   private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends NbtFunctionArgument>>> map) {
-
+    map.put("from", GetDataNbtFunction.Parser::new);
+    map.put("string_replace", StringReplaceNbtFunction.Parser::new);
   }
 
   private static void registerFunctionNames(Map<String, Text> map) {
-
+    map.put("from", Text.translatable("enhanced_commands.nbt_predicate.from"));
+    map.put("string_replace", Text.translatable("enhanced_commands.nbt_predicate.string_replace"));
   }
 }

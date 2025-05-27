@@ -70,7 +70,7 @@ public interface NamedParamListParser {
   }
 
   /**
-   * 解析一个参数，此时 {@code cursor} 已经在等号后面，并验证了参数名称。
+   * 解析一个参数，此时 {@code cursor} 已经在等号后面，并验证了参数名称，且跳过了空白字符。
    *
    * @param paramName 参数名称。
    */

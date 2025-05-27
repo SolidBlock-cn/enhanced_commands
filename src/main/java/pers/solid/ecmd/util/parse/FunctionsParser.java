@@ -35,7 +35,7 @@ public class FunctionsParser<T> implements Parser<T> {
   public T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
-    parseContext.addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(functions, suggestionsBuilder, s -> s + "(", tooltipProvider::apply));
+    parseContext.addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(functions, suggestionsBuilder.createOffset(cursorOnStart), s -> s + "(", tooltipProvider::apply));
     final String unquotedString = reader.readUnquotedString();
     if (!unquotedString.isEmpty() && reader.canRead() && reader.peek() == '(') {
       final FunctionLikeParser<? extends T> functionParamsParser = parserFactory.apply(unquotedString);

@@ -12,7 +12,7 @@ import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.argument.SimpleBlockParser;
-import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
+import pers.solid.ecmd.function.nbt.NbtFunctionArgument;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -72,16 +72,16 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
     } else {
       propertyNameFunctions = null;
     }
-    CompoundNbtFunction nbtFunction;
+    NbtFunctionArgument nbtFunctionArgument;
     parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("{", NbtPredicateParser.START_OF_COMPOUND).buildFuture());
     if (reader.canRead() && reader.peek() == '{') {
       // 尝试读取 NBT
-      nbtFunction = new NbtFunctionParser<>(parseContext).parseCompound(false);
+      nbtFunctionArgument = new NbtFunctionParser<>(parseContext).parseCompound(false);
     } else {
-      nbtFunction = null;
+      nbtFunctionArgument = null;
     }
-    if (propertyNameFunctions != null || nbtFunction != null) {
-      return source -> new PropertiesNbtCombinationBlockFunction(parseUnit.apply(source), propertyNameFunctions == null ? null : new PropertyNamesBlockFunction(propertyNameFunctions), nbtFunction == null ? null : new NbtBlockFunction(nbtFunction));
+    if (propertyNameFunctions != null || nbtFunctionArgument != null) {
+      return source -> new PropertiesNbtCombinationBlockFunction(parseUnit.apply(source), propertyNameFunctions == null ? null : new PropertyNamesBlockFunction(propertyNameFunctions), nbtFunctionArgument == null ? null : new NbtBlockFunction(nbtFunctionArgument.toAbsolute(source)));
     }
     return parseUnit;
   }

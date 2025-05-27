@@ -157,7 +157,7 @@ public enum NbtCommand implements CommandRegistrationCallback {
         }
       }
       return null;
-    }, () -> Text.translatable("enhanced_commands.nbt.string.replace.success", mutableInt.toString()), keywordArgs.getBoolean("recursively"), context);
+    }, () -> Text.translatable("enhanced_commands.commands.nbt.string.replace.success", mutableInt.toString()), keywordArgs.getBoolean("recursively"), context);
   }
 
   private int executeStringRegexReplace(CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
@@ -179,6 +179,6 @@ public enum NbtCommand implements CommandRegistrationCallback {
         }
       }
       return null;
-    }, () -> Text.translatable("enhanced_commands.nbt.string.replace.success", mutableInt.toString()), keywordArgs.getBoolean("recursively"), context);
+    }, () -> Text.translatable("enhanced_commands.commands.nbt.string.replace.success", mutableInt.toString()), keywordArgs.getBoolean("recursively"), context);
   }
 }

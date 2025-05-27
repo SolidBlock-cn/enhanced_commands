@@ -23,7 +23,7 @@ import java.util.*;
  * @param <T> 包含 NBT 数据的对象，如方块实体、实体等。
  */
 public interface NbtSource<T> {
-  DynamicCommandExceptionType QUERY_SCALE_NOT_NUMBER = new DynamicCommandExceptionType((path) -> Text.translatable("enhanced_commands.nbt.query_scale_not_number", path.toString()));
+  DynamicCommandExceptionType QUERY_SCALE_NOT_NUMBER = new DynamicCommandExceptionType((path) -> Text.translatable("enhanced_commands.commands.nbt.query_scale_not_number", path.toString()));
   int QUERY_LIMIT = 12;
   SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.data.get.multiple"));
 

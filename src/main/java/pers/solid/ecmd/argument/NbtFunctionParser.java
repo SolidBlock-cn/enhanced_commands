@@ -29,16 +29,16 @@ import java.util.Map;
 public class NbtFunctionParser<S> {
   private final ParseContext<S> parseContext;
 
-  public static final Text MERGE = Text.translatable("enhanced_commands.argument.nbt_function.merge");
-  public static final Text EQUAL = Text.translatable("enhanced_commands.argument.nbt_function.equal");
-  public static final Text SEMICOLON = Text.translatable("enhanced_commands.argument.nbt_function.semicolon");
-  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.sign_expected"));
-  public static final SimpleCommandExceptionType SIGN_UNEXPECTED_WHEN_REMOVING_KEY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.sign_unexpected_when_removing_key"));
-  public static final Text REMOVE_KEY = Text.translatable("enhanced_commands.argument.nbt_function.remove_key");
-  public static final Text ECLIPSE = Text.translatable("enhanced_commands.argument.nbt_function.eclipse");
-  public static final SimpleCommandExceptionType DUPLICATE_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.duplicate_eclipse"));
-  public static final SimpleCommandExceptionType DUPLICATE_SEMICOLON = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.duplicate_semicolon"));
-  public static final SimpleCommandExceptionType UNEXPECTED_SEMICOLON_AFTER_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.nbt_function.unexpected_semicolon_after_eclipse"));
+  public static final Text MERGE = Text.translatable("enhanced_commands.nbt_function.merge");
+  public static final Text EQUAL = Text.translatable("enhanced_commands.nbt_function.equal");
+  public static final Text SEMICOLON = Text.translatable("enhanced_commands.nbt_function.semicolon");
+  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.sign_expected"));
+  public static final SimpleCommandExceptionType SIGN_UNEXPECTED_WHEN_REMOVING_KEY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.sign_unexpected_when_removing_key"));
+  public static final Text REMOVE_KEY = Text.translatable("enhanced_commands.nbt_function.remove_key");
+  public static final Text ECLIPSE = Text.translatable("enhanced_commands.nbt_function.eclipse");
+  public static final SimpleCommandExceptionType DUPLICATE_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.duplicate_eclipse"));
+  public static final SimpleCommandExceptionType DUPLICATE_SEMICOLON = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.duplicate_semicolon"));
+  public static final SimpleCommandExceptionType UNEXPECTED_SEMICOLON_AFTER_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.unexpected_semicolon_after_eclipse"));
 
   public NbtFunctionParser(ParseContext<S> parseContext) {
     this.parseContext = parseContext;
@@ -48,7 +48,7 @@ public class NbtFunctionParser<S> {
     boolean isUsingEqual = equalsForDefault;
     final StringReader reader = parseContext.reader();
     final int cursorBeforeSign = reader.getCursor();
-    parseContext.setSuggestion((context, suggestionsBuilder) -> {
+    parseContext.addSuggestion((context, suggestionsBuilder) -> {
       ParsingUtil.suggestString(":", MERGE, suggestionsBuilder);
       ParsingUtil.suggestString("=", EQUAL, suggestionsBuilder);
       return suggestionsBuilder.buildFuture();
@@ -81,13 +81,13 @@ public class NbtFunctionParser<S> {
     return isUsingEqual;
   }
 
-  public CompoundNbtFunction parseCompound(boolean isUsingEqual) throws CommandSyntaxException {
+  public CompoundNbtFunctionArgument parseCompound(boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     parseContext.setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
     reader.expect('{');
     parseContext.clearSuggestion();
     reader.skipWhitespace();
-    Map<String, NbtFunction> entries = new LinkedHashMap<>();
+    Map<String, NbtFunctionArgument> entries = new LinkedHashMap<>();
 
     while (!reader.canRead() || reader.peek() != '}') {
       reader.skipWhitespace();
@@ -132,7 +132,7 @@ public class NbtFunctionParser<S> {
     parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("}", NbtPredicateParser.END_OF_COMPOUND, suggestionsBuilder).buildFuture());
     reader.expect('}');
     parseContext.clearSuggestion();
-    return new CompoundNbtFunction(entries, !isUsingEqual);
+    return new CompoundNbtFunctionArgument(entries, !isUsingEqual);
   }
 
 
@@ -141,7 +141,7 @@ public class NbtFunctionParser<S> {
    *
    * @see StringNbtReader#parseList()
    */
-  public NbtFunction parseList(boolean isUsingEqual) throws CommandSyntaxException {
+  public NbtFunctionArgument parseList(boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     reader.expect('[');
     reader.skipWhitespace();
@@ -159,9 +159,9 @@ public class NbtFunctionParser<S> {
       // 列表根据分号，分为左边和右边两部分。
       // 左边的部分表示替换整个列表或者设置单个列表值，右边的部分则表示插值。
       // 如果没有分号，则根据是否有省略号来进行区分。
-      List<Pair<@Nullable Integer, NbtFunction>> leftPartList = new ArrayList<>();
-      List<Pair<@Nullable Integer, NbtFunction>> rightPartList = null;
-      List<Pair<@Nullable Integer, NbtFunction>> currentlyAppendingList = leftPartList;
+      List<Pair<@Nullable Integer, NbtFunctionArgument>> leftPartList = new ArrayList<>();
+      List<Pair<@Nullable Integer, NbtFunctionArgument>> rightPartList = null;
+      List<Pair<@Nullable Integer, NbtFunctionArgument>> currentlyAppendingList = leftPartList;
 
       boolean hasFoundEclipse = false;
       boolean hasFoundSemicolon = false;
@@ -236,7 +236,7 @@ public class NbtFunctionParser<S> {
             final int index = reader.readInt();
             reader.skipWhitespace();
             parseContext.clearSuggestion();
-            final NbtFunction nbtFunction = parseFunction(true, false);
+            final NbtFunctionArgument nbtFunction = parseFunction(true, false);
             currentlyAppendingList.add(IntObjectPair.of(index, nbtFunction));
             isUsingPositionalPredicate = true;
           } catch (CommandSyntaxException e) {
@@ -248,7 +248,7 @@ public class NbtFunctionParser<S> {
         }
         if (!isUsingPositionalPredicate) {
           try {
-            final NbtFunction nbtFunction = parseFunction(false, isUsingEqual);
+            final NbtFunctionArgument nbtFunction = parseFunction(false, isUsingEqual);
             currentlyAppendingList.add(Pair.of(null, nbtFunction));
           } catch (CommandSyntaxException exception) {
             if (exceptionWhenParsingPositionalFunction != null) {
@@ -321,27 +321,27 @@ public class NbtFunctionParser<S> {
 
       parseContext.clearSuggestion();
       // 解析完成，处理数据
-      final List<NbtFunction> valueReplacements = leftPartList == null ? null : leftPartList.stream().filter(pair -> !(pair instanceof IntObjectPair<NbtFunction>) && pair.left() == null).map(Pair::right).toList();
-      final Int2ObjectMap<NbtFunction> positionalFunctions = leftPartList == null ? Int2ObjectMaps.emptyMap() : new Int2ObjectOpenHashMap<>();
-      final Int2ObjectMap<List<NbtFunction>> positionalInsertions = rightPartList == null ? Int2ObjectMaps.emptyMap() : new Int2ObjectOpenHashMap<>();
+      final List<NbtFunctionArgument> valueReplacements = leftPartList == null ? null : leftPartList.stream().filter(pair -> !(pair instanceof IntObjectPair<NbtFunctionArgument>) && pair.left() == null).map(Pair::right).toList();
+      final Int2ObjectMap<NbtFunctionArgument> positionalFunctions = leftPartList == null ? Int2ObjectMaps.emptyMap() : new Int2ObjectOpenHashMap<>();
+      final Int2ObjectMap<List<NbtFunctionArgument>> positionalInsertions = rightPartList == null ? Int2ObjectMaps.emptyMap() : new Int2ObjectOpenHashMap<>();
 
       if (leftPartList != null) {
-        for (Pair<Integer, NbtFunction> pair : leftPartList) {
-          if (pair instanceof IntObjectPair<NbtFunction> intObjectPair) {
+        for (Pair<Integer, NbtFunctionArgument> pair : leftPartList) {
+          if (pair instanceof IntObjectPair<NbtFunctionArgument> intObjectPair) {
             positionalFunctions.put(intObjectPair.leftInt(), pair.right());
           }
         }
       }
       if (rightPartList != null) {
         int key = 0;
-        List<NbtFunction> listToAppend = null;
-        for (Pair<Integer, NbtFunction> pair : rightPartList) {
+        List<NbtFunctionArgument> listToAppend = null;
+        for (Pair<Integer, NbtFunctionArgument> pair : rightPartList) {
           if (pair == null) {
             // pair 为 null 时，说明遇到了省略号
             key = -1;
             listToAppend = null;
             continue;
-          } else if (pair instanceof IntObjectPair<NbtFunction> intObjectPair) {
+          } else if (pair instanceof IntObjectPair<NbtFunctionArgument> intObjectPair) {
             key = intObjectPair.keyInt();
             listToAppend = new ArrayList<>();
             positionalInsertions.put(key, listToAppend);
@@ -353,7 +353,7 @@ public class NbtFunctionParser<S> {
         }
       }
 
-      return new ListOpsNbtFunction(
+      return new ListOpsNbtFunctionArgument(
           (valueReplacements == null || valueReplacements.isEmpty()) ? List.of() : valueReplacements,
           positionalFunctions,
           positionalInsertions
@@ -361,16 +361,22 @@ public class NbtFunctionParser<S> {
     }
   }
 
-  public NbtFunction parseFunction(boolean mustExpectSign, boolean equalsForDefault)
-      throws CommandSyntaxException {
+  public NbtFunctionArgument parseFunction(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     // 尝试解析函数名称；如果不是函数语法，则恢复 cursor 重新解析；如果是函数语法，则按照函数语法解析，如果函数不存在，则报错。
     final StringReader reader = parseContext.reader();
     final int cursorBeforeFunctionName = reader.getCursor();
     final FunctionsParser<NbtFunctionArgument> functionsParser = new FunctionsParser<>(NbtFunctionTypes.FUNCTIONS, NbtFunctionTypes.FUNCTION_NAMES);
+    final NbtFunctionArgument functionGrammar = functionsParser.parse(parseContext);
+    if (functionGrammar != null) {
+      return functionGrammar;
+    } else {
+      reader.setCursor(cursorBeforeFunctionName);
+    }
     // to be completed
 
     // 解析等号和不等号
     final int cursorBeforeSign = reader.getCursor();
+    parseContext.terminateSuggestionsIfNotEmpty();
     final boolean isUsingEqual = parseSign(mustExpectSign, equalsForDefault);
     final boolean hasExplicitSign = cursorBeforeSign != reader.getCursor();
     reader.skipWhitespace();
@@ -399,5 +405,37 @@ public class NbtFunctionParser<S> {
         return new SimpleNbtFunction(element);
       }
     }
+  }
+
+  /**
+   * 解析复合标签或者函数语法的函数，不会解析其他类型如数字、列表等。与 {@link #parseCompound} 不同的是，仍会解析函数语法，尽管这些情况下的 NBT 函数运行的结果不一定是复合标签。
+   */
+  public NbtFunctionArgument parsePreferringCompound(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
+    final StringReader reader = parseContext.reader();
+    final int cursorBeforeFunctionName = reader.getCursor();
+    final FunctionsParser<NbtFunctionArgument> functionsParser = new FunctionsParser<>(NbtFunctionTypes.FUNCTIONS, NbtFunctionTypes.FUNCTION_NAMES);
+    final NbtFunctionArgument functionGrammar = functionsParser.parse(parseContext);
+    if (functionGrammar != null) {
+      return functionGrammar;
+    } else {
+      reader.setCursor(cursorBeforeFunctionName);
+    }
+    // to be completed
+
+    // 解析等号和不等号
+    final int cursorBeforeSign = reader.getCursor();
+    parseContext.terminateSuggestionsIfNotEmpty();
+    final boolean isUsingEqual = parseSign(mustExpectSign, equalsForDefault);
+
+    final boolean hasExplicitSign = cursorBeforeSign != reader.getCursor();
+    reader.skipWhitespace();
+    if (hasExplicitSign) {
+      parseContext.clearSuggestion();
+    }
+    parseContext.addSuggestion((context, suggestionsBuilder) -> {
+      ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder);
+      return suggestionsBuilder.buildFuture();
+    });
+    return parseCompound(isUsingEqual);
   }
 }

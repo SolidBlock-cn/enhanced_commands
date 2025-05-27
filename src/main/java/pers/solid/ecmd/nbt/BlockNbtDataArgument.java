@@ -15,7 +15,7 @@ import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 public record BlockNbtDataArgument(PosArgument posArgument) implements NbtSourceArgument<BlockEntity>, NbtTargetArgument<BlockEntity> {
-  public static final Dynamic2CommandExceptionType BLOCK_IS_NOT_ENTITY = new Dynamic2CommandExceptionType((pos, name) -> Text.translatable("enhanced_commands.nbt.block_is_not_entity", pos, name));
+  public static final Dynamic2CommandExceptionType BLOCK_IS_NOT_ENTITY = new Dynamic2CommandExceptionType((pos, name) -> Text.translatable("enhanced_commands.commands.nbt.block_is_not_entity", pos, name));
 
   public @NotNull BlockEntity blockEntity(ServerCommandSource source, BlockPos pos) throws CommandSyntaxException {
     final ServerWorld world = source.getWorld();

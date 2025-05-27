@@ -14,13 +14,9 @@ import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.NbtFunctionParser;
-import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.ParsingUtil;
 
-public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTarget.Single<MutableObject<NbtCompound>>, NbtSourceArgument<MutableObject<NbtCompound>>, NbtTargetArgument<MutableObject<NbtCompound>> {
+public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTarget.Single<MutableObject<NbtCompound>> {
   @Override
   public void setNbtFor(MutableObject<NbtCompound> target, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     target.setValue(nbt);
@@ -28,7 +24,7 @@ public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTar
 
   @Override
   public Text feedbackModify() {
-    return Text.translatable("enhanced_commands.nbt.literal.modify");
+    return Text.translatable("enhanced_commands.commands.nbt.literal.modify");
   }
 
   @Override
@@ -40,33 +36,17 @@ public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTar
   public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     final NbtCompound nbt = value.getValue();
     if (path == null) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.literal.query", NbtHelper.toPrettyPrintedText(nbt)), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.literal.query", NbtHelper.toPrettyPrintedText(nbt)), false);
       return NbtSource.toInt(nbt);
     }
     final NbtElement nbtAtPath = Iterables.getOnlyElement(path.get(nbt));
     if (scale == 1) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.literal.query_path", path.toString(), NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.literal.query_path", path.toString(), NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
       return NbtSource.toInt(nbtAtPath);
     } else {
       final double scaledValue = NbtSource.scaleNbt(nbtAtPath, scale, path);
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.literal.query_scale", path.toString(), scale, NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.literal.query_scale", path.toString(), scale, NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
       return MathHelper.floor(scaledValue);
     }
-  }
-
-  @Override
-  public NbtSource<MutableObject<NbtCompound>> getNbtSource(ServerCommandSource source) throws CommandSyntaxException {
-    return this;
-  }
-
-  @Override
-  public NbtTarget<MutableObject<NbtCompound>> getNbtTarget(ServerCommandSource source) throws CommandSyntaxException {
-    return this;
-  }
-
-  public static LiteralNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
-    ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-    final CompoundNbtFunction compoundNbtFunction = new NbtFunctionParser<>(parseContext).parseCompound(false);
-    return new LiteralNbtData(new MutableObject<>(compoundNbtFunction.apply(null)));
   }
 }

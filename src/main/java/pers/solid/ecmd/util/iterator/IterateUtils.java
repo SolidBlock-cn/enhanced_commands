@@ -2,11 +2,14 @@ package pers.solid.ecmd.util.iterator;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -125,6 +128,20 @@ public final class IterateUtils {
     final ImmutableList.Builder<R> builder = new ImmutableList.Builder<>();
     for (T t : iterable) {
       builder.add(failableFunction.apply(t));
+    }
+    return builder.build();
+  }
+
+  /**
+   * 将 map 的值通过指定的函数进行转换并收集到新的 map 中，返回的 map 是不可修改的。中途如果遇到异常，则会直接将其抛出并中止抚今追昔。此过程类似于 {@link Maps#transformValues}，但允许中途抛出异常。
+   *
+   * @see Maps#transformValues
+   */
+  @Contract(pure = true)
+  public static <K, V1, V2, E extends Throwable> ImmutableMap<K, V2> transformFailableImmutableMapValues(Map<K, V1> fromMap, FailableFunction<? super V1, V2, E> failableFunction) throws E {
+    final ImmutableMap.Builder<K, V2> builder = new ImmutableMap.Builder<>();
+    for (Map.Entry<K, V1> entry : fromMap.entrySet()) {
+      builder.put(entry.getKey(), failableFunction.apply(entry.getValue()));
     }
     return builder.build();
   }

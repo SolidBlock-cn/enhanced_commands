@@ -53,19 +53,19 @@ public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<
     if (nbtConcentrationType == NbtConcentrationType.ALL) {
       source.sendFeedback$ecBridge(() -> {
         List<Text> texts = new ArrayList<>();
-        texts.add(Text.translatable("enhanced_commands.nbt.entities.query.header", Math.min(nbts.size(), QUERY_LIMIT)).enhanced$$().formatted(Formatting.AQUA));
+        texts.add(Text.translatable("enhanced_commands.commands.nbt.entities.query.header", Math.min(nbts.size(), QUERY_LIMIT)).enhanced$$().formatted(Formatting.AQUA));
         for (var entry : Iterables.limit(nbts.entrySet(), QUERY_LIMIT)) {
           final Entity entity = entry.getKey();
           if (path == null) {
-            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.nbt.entity.query", entity.getDisplayName(), NbtHelper.toPrettyPrintedText(entry.getValue()))));
+            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.commands.nbt.entity.query", entity.getDisplayName(), NbtHelper.toPrettyPrintedText(entry.getValue()))));
           } else if (scale == 1) {
-            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.nbt.entity.query_path", entity.getDisplayName(), path.toString(), NbtHelper.toPrettyPrintedText(entry.getValue()))));
+            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.commands.nbt.entity.query_path", entity.getDisplayName(), path.toString(), NbtHelper.toPrettyPrintedText(entry.getValue()))));
           } else {
-            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.nbt.entity.query_scale", entity.getDisplayName(), path.toString(), scale, scaledNbts.getOrDefault(entity, 0))));
+            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.commands.nbt.entity.query_scale", entity.getDisplayName(), path.toString(), scale, scaledNbts.getOrDefault(entity, 0))));
           }
         }
         if (nbts.size() > QUERY_LIMIT) {
-          texts.add(Text.translatable("enhanced_commands.nbt.query_limit_notice", QUERY_LIMIT).formatted(Formatting.YELLOW));
+          texts.add(Text.translatable("enhanced_commands.commands.nbt.query_limit_notice", QUERY_LIMIT).formatted(Formatting.YELLOW));
         }
         return ScreenTexts.joinLines(texts);
       }, false);
@@ -74,14 +74,14 @@ public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<
 
     final NbtElement concentratedNbts = nbtConcentrationType.concentrate(nbts.values(), random);
     if (path == null) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.entities.query", entities.size(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entities.query", entities.size(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
       return NbtSource.toInt(concentratedNbts);
     } else if (scale == 1) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.entities.query_path", entities.size(), path.toString(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entities.query_path", entities.size(), path.toString(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
       return NbtSource.toInt(concentratedNbts);
     } else {
       final double scaledConcentratedNbt = NbtSource.scaleNbt(concentratedNbts, scale, path);
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.entities.query_scale", entities.size(), path.toString(), scale, scaledConcentratedNbt).enhanced$$(), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entities.query_scale", entities.size(), path.toString(), scale, scaledConcentratedNbt).enhanced$$(), false);
       return MathHelper.floor(scaledConcentratedNbt);
     }
   }
@@ -98,7 +98,7 @@ public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<
     if (entities.size() == 1) {
       return Text.translatable("commands.data.entity.modified", entities.iterator().next().getDisplayName());
     } else {
-      return Text.translatable("enhanced_commands.nbt.entities.modify", entities.size()).enhanced$$();
+      return Text.translatable("enhanced_commands.commands.nbt.entities.modify", entities.size()).enhanced$$();
     }
   }
 }

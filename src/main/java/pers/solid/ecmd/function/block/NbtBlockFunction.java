@@ -2,10 +2,13 @@ package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -14,13 +17,15 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.exception.CommandRuntimeException;
-import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
+import pers.solid.ecmd.function.nbt.NbtFunction;
+import pers.solid.ecmd.function.nbt.NbtFunctionArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) implements BlockFunction {
-  public static final MapCodec<NbtBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockFunction::new, CompoundNbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
+public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements BlockFunction {
+  public static final MapCodec<NbtBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockFunction::new, NbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
+  public static final DynamicCommandExceptionType NOT_COMPOUND = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.block_function.nbt_not_compound", s));
 
   @Override
   public @NotNull String asString() {
@@ -30,7 +35,12 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     try {
-      blockEntityData.setValue(nbtFunction.apply(blockEntityData.getValue()));
+      final NbtElement applied = nbtFunction.apply(blockEntityData.getValue());
+      if (applied instanceof NbtCompound nbtCompound) {
+        blockEntityData.setValue(nbtCompound);
+      } else {
+        throw NOT_COMPOUND.create(applied.getNbtType().getCommandFeedbackName());
+      }
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
     }
@@ -51,11 +61,12 @@ public record NbtBlockFunction(@NotNull CompoundNbtFunction nbtFunction) impleme
     }
 
     @Override
-    public @Nullable NbtBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable BlockFunctionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '{') {
-        return new NbtBlockFunction(new NbtFunctionParser<>(parseContext).parseCompound(false));
+        final NbtFunctionArgument nbtFunctionArgument = new NbtFunctionParser<>(parseContext).parsePreferringCompound(false, false);
+        return source -> new NbtBlockFunction(nbtFunctionArgument.toAbsolute(source));
       } else {
         return null;
       }

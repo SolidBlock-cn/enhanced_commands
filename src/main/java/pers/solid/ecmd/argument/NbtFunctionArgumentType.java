@@ -28,8 +28,8 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
     return new NbtFunctionArgumentType(false, registryAccess);
   }
 
-  public static NbtFunction getNbtFunction(CommandContext<ServerCommandSource> context, String name) {
-    return context.getArgument(name, NbtFunction.class).toAbsolute(context.getSource());
+  public static NbtFunction getNbtFunction(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+    return context.getArgument(name, NbtFunctionArgument.class).toAbsolute(context.getSource());
   }
 
   public static CompoundNbtFunction getCompoundNbtFunction(CommandContext<?> context, String name) {
@@ -40,7 +40,7 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
   public NbtFunctionArgument parse(StringReader reader) throws CommandSyntaxException {
     final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader, false, false);
     final NbtFunctionParser<?> parser = new NbtFunctionParser<>(parseContext);
-    return onlyCompounds ? parser.parseCompound(false) : parser.parseFunction(false, false);
+    return onlyCompounds ? parser.parsePreferringCompound(false, false) : parser.parseFunction(false, false);
   }
 
   @Override

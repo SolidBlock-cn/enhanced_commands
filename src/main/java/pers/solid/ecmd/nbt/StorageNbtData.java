@@ -22,16 +22,16 @@ public record StorageNbtData(DataCommandStorage storage, Identifier value) imple
   public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     final NbtElement nbt = getNbt(path, source.getRegistryManager());
     if (path == null) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.storage.query", value, NbtHelper.toPrettyPrintedText(nbt)), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.storage.query", value, NbtHelper.toPrettyPrintedText(nbt)), false);
       return NbtSource.toInt(nbt);
     }
     final NbtElement nbtAtPath = Iterables.getOnlyElement(path.get(nbt));
     if (scale == 1) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.storage.query_path", value, path.toString(), NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.storage.query_path", value, path.toString(), NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
       return NbtSource.toInt(nbtAtPath);
     } else {
       final double scaledValue = NbtSource.scaleNbt(nbtAtPath, scale, path);
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.storage.query_scale", value, path.toString(), scale, NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.storage.query_scale", value, path.toString(), scale, NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
       return MathHelper.floor(scaledValue);
     }
   }

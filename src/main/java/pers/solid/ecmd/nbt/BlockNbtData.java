@@ -31,15 +31,15 @@ public record BlockNbtData(BlockEntity blockEntity) implements NbtTarget.Single<
 
     final NbtElement nbt = getNbt(path, source.getRegistryManager());
     if (path == null) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.block.query", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), NbtHelper.toPrettyPrintedText(nbt)), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.block.query", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), NbtHelper.toPrettyPrintedText(nbt)), false);
       return NbtSource.toInt(nbt);
     }
     if (scale == 1) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.block.query_path", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), path.toString(), NbtHelper.toPrettyPrintedText(nbt)), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.block.query_path", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), path.toString(), NbtHelper.toPrettyPrintedText(nbt)), false);
       return NbtSource.toInt(nbt);
     } else {
       final double scaledValue = NbtSource.scaleNbt(nbt, scale, path);
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.nbt.block.query_scale", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), path.toString(), scale, scaledValue), false);
+      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.block.query_scale", blockEntity.getCachedState().getBlock().getName(), TextUtil.wrapVector(pos), path.toString(), scale, scaledValue), false);
       return MathHelper.floor(scaledValue);
     }
   }
