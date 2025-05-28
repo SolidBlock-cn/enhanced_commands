@@ -30,12 +30,12 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     return predicates.stream().anyMatch(blockPredicate -> blockPredicate.test(cachedBlockPosition, context));
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final ImmutableList.Builder<TestResult> results = new ImmutableList.Builder<>();
     int successes = 0;
     for (BlockPredicate blockPredicate : predicates) {

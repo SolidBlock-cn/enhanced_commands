@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -22,12 +23,12 @@ public record SimpleNbtFunction(@NotNull NbtElement element) implements NbtFunct
   }
 
   @Override
-  public NbtFunctionType<SimpleNbtFunction> getType() {
+  public @NotNull NbtFunctionType<?> getType() {
     return Type.SIMPLE_TYPE;
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement) {
+  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) {
     return element;
   }
 

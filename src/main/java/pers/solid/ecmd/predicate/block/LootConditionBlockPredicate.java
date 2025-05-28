@@ -33,7 +33,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
   public static final MapCodec<LootConditionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(LootCondition.ENTRY_CODEC.fieldOf("condition").forGetter(LootConditionBlockPredicate::entry)).apply(i, LootConditionBlockPredicate::new));
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final LootCondition lootCondition = entry.value();
     final WorldView world = cachedBlockPosition.getWorld();
     if (!(world instanceof final ServerWorld serverWorld)) return false;

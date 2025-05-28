@@ -61,12 +61,12 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     return base.test(cachedBlockPosition, context) && (properties == null || properties.test(cachedBlockPosition, context)) && (nbt == null || nbt.test(cachedBlockPosition, context));
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final List<TestResult> attachments = new ArrayList<>(3);
     attachments.add(base.testAndDescribe(cachedBlockPosition, context));
     if (properties != null) {

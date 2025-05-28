@@ -43,6 +43,7 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
@@ -146,15 +147,16 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             .executes(context -> {
               final NbtElement nbtElement = getNbtElement(context, "nbt");
               final String s = TextUtil.toSpacedStringNbt(nbtElement);
-              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(Styles.RESULT)), false);
-              final NbtPredicate reparsedPredicate = NbtPredicate.parse(registryAccess, s, context.getSource());
-              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(Styles.RESULT)), false);
-              final NbtFunction reparsedFunction = NbtFunction.parse(registryAccess, s, context.getSource());
-              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(Styles.RESULT)), false);
+              final ServerCommandSource source = context.getSource();
+              source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Text.literal(s).styled(Styles.RESULT)), false);
+              final NbtPredicate reparsedPredicate = NbtPredicate.parse(registryAccess, s, source);
+              source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(Styles.RESULT)), false);
+              final NbtFunction reparsedFunction = NbtFunction.parse(registryAccess, s, source);
+              source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
-              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
-              final boolean reparsedFunctionEqual = reparsedFunction.apply(null).equals(nbtElement);
-              context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
+              source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
+              final boolean reparsedFunctionEqual = reparsedFunction.apply(null, new ExecutionContext(source)).equals(nbtElement);
+              source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function_equal", TextUtil.wrapBoolean(reparsedFunctionEqual)), false);
               return (reparsedPredicateMatches ? 2 : 0) + (reparsedFunctionEqual ? 1 : 0);
             }))
         .then(literal("convert")
@@ -222,16 +224,18 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("apply")
             .executes(context -> {
               final NbtFunction nbtFunction = getNbtFunction(context, "nbt_function");
-              final NbtElement apply = nbtFunction.apply(null);
-              context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(apply), false);
+              final ServerCommandSource source = context.getSource();
+              final NbtElement apply = nbtFunction.apply(null, new ExecutionContext(source));
+              source.sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(apply), false);
               return 1;
             })
             .then(argument("nbt_element", NbtElementArgumentType.nbtElement())
                 .executes(context -> {
                   final NbtElement nbtElement = getNbtElement(context, "nbt_element");
                   final NbtFunction nbtFunction = getNbtFunction(context, "nbt_function");
-                  final NbtElement apply = nbtFunction.apply(nbtElement);
-                  context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(apply), false);
+                  final ServerCommandSource source = context.getSource();
+                  final NbtElement apply = nbtFunction.apply(nbtElement, new ExecutionContext(source));
+                  source.sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(apply), false);
                   return 1;
                 })))
         .then(literal("string")

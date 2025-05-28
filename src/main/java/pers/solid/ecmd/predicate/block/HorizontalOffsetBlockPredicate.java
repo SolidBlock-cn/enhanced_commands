@@ -37,12 +37,12 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     return blockPredicate.test(new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().up(offset), false), context);
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final MutableText description;
     final CachedBlockPosition offsetPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().up(offset), false);
     final TestResult attachment = blockPredicate.testAndDescribe(offsetPosition, context);

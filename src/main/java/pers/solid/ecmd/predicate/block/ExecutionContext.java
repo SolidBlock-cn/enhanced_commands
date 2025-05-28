@@ -1,5 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
+import net.minecraft.command.CommandSource;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.math.random.RandomSplitter;
 import org.jetbrains.annotations.NotNull;
@@ -8,14 +10,24 @@ import pers.solid.ecmd.util.SeedStorage;
 
 import java.util.OptionalLong;
 
-public class BlockPredicateContext {
+public class ExecutionContext {
   public final Random random;
+  public final CommandSource source;
   private @Nullable Long seed;
   private @Nullable SeedStorage<Object> splitterStorage;
 
-  public BlockPredicateContext(Random random, @Nullable Long seed) {
+  public ExecutionContext(Random random, CommandSource source, @Nullable Long seed) {
     this.random = random;
+    this.source = source;
     this.seed = seed;
+  }
+
+  public ExecutionContext(ServerCommandSource source, @Nullable Long seed) {
+    this(source.getWorld().getRandom(), source, seed);
+  }
+
+  public ExecutionContext(ServerCommandSource source) {
+    this(source.getWorld().getRandom(), source, null);
   }
 
   public long getSeed() {

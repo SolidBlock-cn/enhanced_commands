@@ -28,12 +28,12 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     return !predicate.test(cachedBlockPosition, context);
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final TestResult testResult = predicate.testAndDescribe(cachedBlockPosition, context);
     if (testResult.successes()) {
       return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.negation.fail"), List.of(testResult));

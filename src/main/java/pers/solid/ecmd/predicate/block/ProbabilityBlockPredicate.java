@@ -47,7 +47,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final Random random = context.getSplitterForOptionalSeed(this, seed).split(cachedBlockPosition.getBlockPos());
     if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
       return random.nextFloat() < probability;
@@ -57,7 +57,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final float nextFloat = context.getSplitterForOptionalSeed(this, seed).split(cachedBlockPosition.getBlockPos()).nextFloat();
     final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(Styles.ACTUAL);
     final MutableText o2 = Text.literal(String.valueOf(probability)).styled(Styles.EXPECTED);

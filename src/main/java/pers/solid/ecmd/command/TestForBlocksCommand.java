@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateContext;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.StringUtil;
@@ -110,7 +110,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         }
       }
       blocksCounted.increment();
-      final boolean test = blockPredicate.test(cachedBlockPosition, new BlockPredicateContext(world.getRandom(), seed));
+      final boolean test = blockPredicate.test(cachedBlockPosition, new ExecutionContext(world.getRandom(), source, seed));
       if (test) blocksMatched.increment();
 
       if (testType == TestType.ANY && test) {

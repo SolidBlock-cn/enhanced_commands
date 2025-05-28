@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -59,12 +60,12 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   }
 
   @Override
-  public NbtFunctionType<CompoundNbtFunction> getType() {
+  public @NotNull NbtFunctionType<?> getType() {
     return Type.COMPOUND_TYPE;
   }
 
   @Override
-  public @NotNull NbtCompound apply(@Nullable NbtElement nbtElement) throws CommandSyntaxException {
+  public @NotNull NbtCompound apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
     final NbtCompound targetCompound = (nbtElement instanceof final NbtCompound nbtCompound && allowsMerge) ? nbtCompound : new NbtCompound();
     for (Map.Entry<String, NbtFunction> entry : source.entrySet()) {
       String key = entry.getKey();
@@ -72,7 +73,7 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
       if (nbtFunction == null) {
         targetCompound.remove(key);
       } else {
-        targetCompound.put(key, nbtFunction.apply(targetCompound.get(key)));
+        targetCompound.put(key, nbtFunction.apply(targetCompound.get(key), context));
       }
     }
     return targetCompound;

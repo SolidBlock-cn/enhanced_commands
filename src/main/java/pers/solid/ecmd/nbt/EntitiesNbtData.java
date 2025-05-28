@@ -10,36 +10,50 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.predicate.NbtPredicate;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 
 import java.util.*;
 
 public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<Entity> {
+  // todo: consider using an entity selector as a record component, instead of the actual collection of entities
+
   @Override
-  public Collection<Entity> values() {
+  public Collection<Entity> values(ServerCommandSource source) {
     return entities;
   }
 
   @Override
-  public NbtCompound getNbtFor(Entity source, @NotNull RegistryWrapper.WrapperLookup registryLookup) {
+  public NbtCompound getNbtFor(ServerCommandSource commandSource, Entity source) {
     return NbtPredicate.entityToNbt(source);
   }
 
   @Override
   public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
-    if (entities.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
-      return new EntityNbtData(entities.iterator().next()).executeQuery(source, path, scale, nbtConcentrationType, random);
+    final Map<Entity, NbtElement> nbts = getNbtsInPath(source, path);
+    if (nbts.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
+      final var soleEntry = nbts.entrySet().iterator().next();
+      final Entity entity = soleEntry.getKey();
+      final NbtElement nbt = soleEntry.getValue();
+      if (path == null) {
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entity.query", entity.getDisplayName(), NbtHelper.toPrettyPrintedText(nbt)), false);
+        return NbtSource.toInt(nbt);
+      }
+      if (scale == 1) {
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entity.query_path", entity.getDisplayName(), path.toString(), NbtHelper.toPrettyPrintedText(nbt)), false);
+        return NbtSource.toInt(nbt);
+      } else {
+        final double scaledValue = NbtSource.scaleNbt(nbt, scale, path);
+        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entity.query_scale", entity.getDisplayName(), path.toString(), scale, NbtHelper.toPrettyPrintedText(nbt)), false);
+        return MathHelper.floor(scaledValue);
+      }
     }
-    final Map<Entity, NbtElement> nbts = getNbtsInPath(path, source.getRegistryManager());
     final Object2DoubleMap<Entity> scaledNbts;
     if (scale != 1 && path != null) {
       scaledNbts = new Object2DoubleOpenHashMap<>();
@@ -87,14 +101,14 @@ public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<
   }
 
   @Override
-  public void setNbtFor(Entity target, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+  public void setNbtFor(ServerCommandSource commandSource, Entity target, NbtCompound nbt) throws CommandSyntaxException {
     UUID uuid = target.getUuid();
     target.readNbt(nbt);
     target.setUuid(uuid);
   }
 
   @Override
-  public Text feedbackModify() {
+  public Text feedbackModify(Collection<Entity> values) {
     if (entities.size() == 1) {
       return Text.translatable("commands.data.entity.modified", entities.iterator().next().getDisplayName());
     } else {

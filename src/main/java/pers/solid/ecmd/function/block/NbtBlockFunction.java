@@ -35,7 +35,7 @@ public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements Bloc
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     try {
-      final NbtElement applied = nbtFunction.apply(blockEntityData.getValue());
+      final NbtElement applied = nbtFunction.apply(blockEntityData.getValue(), context);
       if (applied instanceof NbtCompound nbtCompound) {
         blockEntityData.setValue(nbtCompound);
       } else {

@@ -109,7 +109,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
   }
 
   private int executeSetHealthFromSource(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path, NbtConcentrationType nbtConcentrationType) throws CommandSyntaxException {
-    return executeSetHealth(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path, context.getSource().getRegistryManager(), nbtConcentrationType, context.getSource().getWorld().getRandom()), path).floatValue());
+    return executeSetHealth(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(context.getSource(), path, nbtConcentrationType, context.getSource().getWorld().getRandom()), path).floatValue());
   }
 
   public static final DynamicCommandExceptionType NOT_LIVING = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.health.get.single.not_living", o));
@@ -128,7 +128,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
       final float health = livingEntity.getHealth();
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(health).styled(Styles.RESULT)), false);
       if (nbtTarget != null && nbtPath != null) {
-        nbtTarget.setNbtInPath(nbtPath, NbtFloat.of(health), context.getSource().getRegistryManager());
+        nbtTarget.setNbtInPath(context.getSource(), nbtPath, NbtFloat.of(health));
       }
       return (int) (health * scale);
     } else {
@@ -144,7 +144,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
       final double result = concentrationType.concentrateFloat(floats);
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.get.multiple", floats.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.floatToString(result)).styled(Styles.RESULT)).enhanced$$(), false);
       if (nbtTarget != null && nbtPath != null) {
-        nbtTarget.setNbtInPath(nbtPath, concentrationType.floatToNbt(result), context.getSource().getRegistryManager());
+        nbtTarget.setNbtInPath(context.getSource(), nbtPath, concentrationType.floatToNbt(result));
       }
       return (int) (result * scale);
     }

@@ -59,7 +59,8 @@ public enum AirCommand implements CommandRegistrationCallback {
                                 .executes(context -> {
                                   final NbtTarget<?> target = getNbtTarget(context, "target");
                                   final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
-                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.setNbtInPath(path, nbt, context.getSource().getRegistryManager()));
+                                  final ServerCommandSource source = context.getSource();
+                                  return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.setNbtInPath(source, path, nbt));
                                 })))))))
         .then(literal("set")
             .then(argument("entities", entities())
@@ -106,7 +107,7 @@ public enum AirCommand implements CommandRegistrationCallback {
   }
 
   private int executeSetAirFromSource(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path, NbtConcentrationType nbtConcentrationType) throws CommandSyntaxException {
-    return executeSetAir(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(path, context.getSource().getRegistryManager(), nbtConcentrationType, context.getSource().getWorld().getRandom()), path).intValue());
+    return executeSetAir(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(context.getSource(), path, nbtConcentrationType, context.getSource().getWorld().getRandom()), path).intValue());
   }
 
   private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) throws CommandSyntaxException {

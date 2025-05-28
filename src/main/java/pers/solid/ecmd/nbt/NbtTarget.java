@@ -4,7 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.commons.lang3.function.FailableFunction;
@@ -14,54 +14,54 @@ import java.util.Collection;
 import java.util.Collections;
 
 public interface NbtTarget<T> extends NbtSource<T> {
-  Collection<T> values();
+  Collection<T> values(ServerCommandSource source);
 
-  void setNbtFor(T target, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException;
+  void setNbtFor(ServerCommandSource commandSource, T target, NbtCompound nbt) throws CommandSyntaxException;
 
-  default void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    for (T value : values()) {
-      setNbtFor(value, nbt, registryLookup);
+  default void setNbt(ServerCommandSource source, NbtCompound nbt) throws CommandSyntaxException {
+    for (T value : values(source)) {
+      setNbtFor(source, value, nbt);
     }
   }
 
-  default void transformNbtFor(T target, FailableFunction<NbtCompound, @Nullable NbtCompound, CommandSyntaxException> operation, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    setNbtFor(target, operation.apply(getNbtFor(target, registryLookup)), registryLookup);
+  default void transformNbtFor(ServerCommandSource commandSource, T target, FailableFunction<NbtCompound, @Nullable NbtCompound, CommandSyntaxException> operation) throws CommandSyntaxException {
+    setNbtFor(commandSource, target, operation.apply(getNbtFor(commandSource, target)));
   }
 
-  default void transformNbt(FailableFunction<NbtCompound, @Nullable NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    for (T value : values()) {
-      transformNbtFor(value, operator, registryLookup);
+  default void transformNbt(ServerCommandSource commandSource, FailableFunction<NbtCompound, @Nullable NbtCompound, CommandSyntaxException> operator) throws CommandSyntaxException {
+    for (T value : values(commandSource)) {
+      transformNbtFor(commandSource, value, operator);
     }
   }
 
-  default void transformNbtInPathFor(T target, NbtPathArgumentType.NbtPath nbtPath, FailableFunction<NbtElement, @Nullable NbtElement, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    final NbtElement original = getNbtInPathFor(target, nbtPath, registryLookup);
+  default void transformNbtInPathFor(ServerCommandSource commandSource, T target, NbtPathArgumentType.NbtPath nbtPath, FailableFunction<NbtElement, @Nullable NbtElement, CommandSyntaxException> operator) throws CommandSyntaxException {
+    final NbtElement original = getNbtInPathFor(commandSource, target, nbtPath);
     final NbtElement applied = operator.apply(original);
-    setNbtInPathFor(target, nbtPath, applied == null ? original : applied, registryLookup);
+    setNbtInPathFor(commandSource, target, nbtPath, applied == null ? original : applied);
   }
 
-  default void transformNbtInPath(NbtPathArgumentType.NbtPath nbtPath, FailableFunction<NbtElement, @Nullable NbtElement, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    for (T value : values()) {
-      transformNbtInPathFor(value, nbtPath, operator, registryLookup);
+  default void transformNbtInPath(ServerCommandSource commandSource, NbtPathArgumentType.NbtPath nbtPath, FailableFunction<NbtElement, @Nullable NbtElement, CommandSyntaxException> operator) throws CommandSyntaxException {
+    for (T value : values(commandSource)) {
+      transformNbtInPathFor(commandSource, value, nbtPath, operator);
     }
   }
 
-  default void modifyNbtFor(T target, FailableConsumer<NbtCompound, CommandSyntaxException> consumer, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    transformNbtFor(target, nbtCompound -> {
+  default void modifyNbtFor(ServerCommandSource commandSource, T target, FailableConsumer<NbtCompound, CommandSyntaxException> consumer) throws CommandSyntaxException {
+    transformNbtFor(commandSource, target, nbtCompound -> {
       consumer.accept(nbtCompound);
       return nbtCompound;
-    }, registryLookup);
+    });
   }
 
 
-  default void modifyNbt(FailableConsumer<NbtCompound, CommandSyntaxException> consumer, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    for (T value : values()) {
-      modifyNbtFor(value, consumer, registryLookup);
+  default void modifyNbt(ServerCommandSource commandSource, FailableConsumer<NbtCompound, CommandSyntaxException> consumer) throws CommandSyntaxException {
+    for (T value : values(commandSource)) {
+      modifyNbtFor(commandSource, value, consumer);
     }
   }
 
-  default void setNbtInPathFor(T target, NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    modifyNbtFor(target, nbt -> {
+  default void setNbtInPathFor(ServerCommandSource commandSource, T target, NbtPathArgumentType.NbtPath nbtPath, NbtElement element) throws CommandSyntaxException {
+    modifyNbtFor(commandSource, target, nbt -> {
       nbtPath.put(nbt, element);
 
       // 这样做是为了确保对根目录的 NBT 的修改也能正常生效。
@@ -73,43 +73,43 @@ public interface NbtTarget<T> extends NbtSource<T> {
           }
         }
       }
-    }, registryLookup);
+    });
   }
 
-  default void setNbtInPath(NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-    for (T value : values()) {
-      setNbtInPathFor(value, nbtPath, element, registryLookup);
+  default void setNbtInPath(ServerCommandSource commandSource, NbtPathArgumentType.NbtPath nbtPath, NbtElement element) throws CommandSyntaxException {
+    for (T value : values(commandSource)) {
+      setNbtInPathFor(commandSource, value, nbtPath, element);
     }
   }
 
-  Text feedbackModify();
+  Text feedbackModify(Collection<T> values);
 
   interface Single<T> extends NbtTarget<T>, NbtSource.Single<T> {
-    T value();
+    T value(ServerCommandSource commandSource);
 
     @Override
-    default Collection<T> values() {
-      return Collections.singleton(value());
+    default Collection<T> values(ServerCommandSource source) {
+      return Collections.singleton(value(source));
     }
 
     @Override
-    default void setNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-      setNbtFor(value(), nbt, registryLookup);
+    default void setNbt(ServerCommandSource source, NbtCompound nbt) throws CommandSyntaxException {
+      setNbtFor(source, value(source), nbt);
     }
 
     @Override
-    default void transformNbt(FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-      transformNbtFor(value(), operator, registryLookup);
+    default void transformNbt(ServerCommandSource commandSource, FailableFunction<NbtCompound, NbtCompound, CommandSyntaxException> operator) throws CommandSyntaxException {
+      transformNbtFor(commandSource, value(commandSource), operator);
     }
 
     @Override
-    default void modifyNbt(FailableConsumer<NbtCompound, CommandSyntaxException> consumer, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-      modifyNbtFor(value(), consumer, registryLookup);
+    default void modifyNbt(ServerCommandSource commandSource, FailableConsumer<NbtCompound, CommandSyntaxException> consumer) throws CommandSyntaxException {
+      modifyNbtFor(commandSource, value(commandSource), consumer);
     }
 
     @Override
-    default void setNbtInPath(NbtPathArgumentType.NbtPath nbtPath, NbtElement element, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
-      setNbtInPathFor(value(), nbtPath, element, registryLookup);
+    default void setNbtInPath(ServerCommandSource commandSource, NbtPathArgumentType.NbtPath nbtPath, NbtElement element) throws CommandSyntaxException {
+      setNbtInPathFor(commandSource, value(commandSource), nbtPath, element);
     }
   }
 }

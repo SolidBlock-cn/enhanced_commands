@@ -54,6 +54,6 @@ public final class NbtDataRegistry {
     register("block", BlocksNbtDataArgument::handle);
     register("entity", EntitiesNbtDataArgument::handle);
     register("literal", LiteralNbtDataArgument::handle);
-    register("storage", StorageNbtDataArgument::handle);
+    register("storage", StorageNbtData::handle);
   }
 }

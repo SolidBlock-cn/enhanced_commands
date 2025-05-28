@@ -8,6 +8,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.function.nbt.NbtFunctionArgument;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -21,7 +22,7 @@ public record LiteralNbtDataArgument(NbtFunctionArgument nbtFunctionArgument) im
   }
 
   private @NotNull LiteralNbtData getLiteralNbtData(ServerCommandSource source) throws CommandSyntaxException {
-    final NbtElement nbtElement = nbtFunctionArgument.toAbsolute(source).apply(null);
+    final NbtElement nbtElement = nbtFunctionArgument.toAbsolute(source).apply(null, new ExecutionContext(source));
     if (nbtElement instanceof NbtCompound nbtCompound) {
       return new LiteralNbtData(new MutableObject<>(nbtCompound));
     } else {

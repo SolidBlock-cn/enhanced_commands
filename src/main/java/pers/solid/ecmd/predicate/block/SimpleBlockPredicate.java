@@ -42,7 +42,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     if (!cachedBlockPosition.getBlockState().isOf(block))
       return false;
     for (PropertyPredicate<?> propertyPredicate : properties) {
@@ -53,7 +53,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     boolean matches = true;
     final BlockState blockState = cachedBlockPosition.getBlockState();
     final List<Text> messages = new ArrayList<>();

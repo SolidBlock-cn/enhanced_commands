@@ -105,11 +105,11 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
 
   public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, predicate, false, false, new BlockFunctionContext(Block.NOTIFY_LISTENERS, 0, source.getWorld().getRandom(), null), UnloadedPosBehavior.REJECT, true);
+    return setBlocksInRegion(region, blockFunction, source, predicate, false, false, new BlockFunctionContext(Block.NOTIFY_LISTENERS, 0, source.getWorld().getRandom(), source, null), UnloadedPosBehavior.REJECT, true);
   }
 
   public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, predicate, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getWorld().getRandom(), kwArgs.getArg("seed")), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
+    return setBlocksInRegion(region, blockFunction, source, predicate, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getWorld().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
   public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {

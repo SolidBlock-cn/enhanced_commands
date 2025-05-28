@@ -11,6 +11,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -19,8 +20,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public interface NbtFunction extends ExpressionConvertible, FailableFunction<@Nullable NbtElement, @NotNull
-    NbtElement, CommandSyntaxException>, NbtFunctionArgument {
+public interface NbtFunction extends ExpressionConvertible, NbtFunctionArgument {
   Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.getCodec().dispatch(NbtFunction::getType, NbtFunctionType::getCodec);
 
   static @NotNull NbtFunction parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
@@ -35,16 +35,19 @@ public interface NbtFunction extends ExpressionConvertible, FailableFunction<@Nu
 
   @NotNull String asString(boolean requirePrefix);
 
-  NbtFunctionType<?> getType();
+  @NotNull NbtFunctionType<?> getType();
 
   /**
    * 根据现有的 NBT 元素（可能为 null）返回所需要的 NBT 元素。原先的 NBT 元素可能会被完全忽略。当接收的 NBT 元素为可变对象时，可能会直接修改并返回它。
    */
-  @Override
-  @NotNull NbtElement apply(@Nullable NbtElement nbtElement) throws CommandSyntaxException;
+  @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException;
 
-  default @NotNull NbtElement recursivelyApply(NbtElement nbtElement, NbtPredicate predicate) throws CommandSyntaxException {
-    return recursivelyApply(this, nbtElement, predicate);
+  default @NotNull FailableFunction<NbtElement, NbtElement, CommandSyntaxException> asJavaFunction(ExecutionContext context) {
+    return input -> apply(input, context);
+  }
+
+  default @NotNull NbtElement recursivelyApply(NbtElement nbtElement, NbtPredicate predicate, ExecutionContext context) throws CommandSyntaxException {
+    return recursivelyApply(input -> this.apply(input, context), nbtElement, predicate);
   }
 
   static @NotNull NbtElement recursivelyApply(FailableFunction<@Nullable NbtElement, @Nullable NbtElement, CommandSyntaxException> nbtFunction, NbtElement nbtElement, @Nullable Predicate<@NotNull NbtElement> predicate) throws CommandSyntaxException {

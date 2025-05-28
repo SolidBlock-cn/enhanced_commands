@@ -13,6 +13,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -40,14 +41,14 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
   }
 
   @Override
-  public NbtFunctionType<StringReplaceNbtFunction> getType() {
+  public @NotNull NbtFunctionType<?> getType() {
     return Type.STRING_REPLACE_TYPE;
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement) throws CommandSyntaxException {
+  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (original.isPresent()) {
-      nbtElement = original.get().apply(nbtElement);
+      nbtElement = original.get().apply(nbtElement, context);
     }
     if (recursive) {
       return NbtFunction.recursivelyApply(e -> e instanceof NbtString nbtString ? NbtString.of(nbtString.asString().replace(target, replacement)) : null, nbtElement, null);

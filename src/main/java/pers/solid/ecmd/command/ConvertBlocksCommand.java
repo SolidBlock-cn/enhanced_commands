@@ -25,12 +25,13 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
-import pers.solid.ecmd.predicate.block.BlockPredicateContext;
 import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.Styles;
@@ -112,13 +113,14 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     final int flags = FillReplaceCommand.getFlags(keywordArgs);
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final boolean affectFluid = keywordArgs.getBoolean("affect_fluid");
+    final ExecutionContext executionContext = new ExecutionContext(world.getRandom(), source, seed);
     final Function<BlockPos, Void> mapper = blockPos -> {
       final Entity entity = conversion.getConvertedEntity(world, blockPos, flags, modFlags, affectFluid);
       if (nbtFunction != null) {
         try {
-          entity.readNbt(nbtFunction.apply(entity.writeNbt(new NbtCompound())));
+          entity.readNbt(nbtFunction.apply(entity.writeNbt(new NbtCompound()), executionContext));
         } catch (CommandSyntaxException e) {
-          // todo how to handle this?
+          throw new CommandRuntimeException(e);
         }
       }
       numbersAffected.increment();
@@ -143,7 +145,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
       final BlockPos.Mutable mutable = new BlockPos.Mutable();
       Iterator<Void> testPosIterator = stream.<Void>map(blockPos -> {
             final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, true);
-            if (predicate.test(cachedBlockPosition, new BlockPredicateContext(world.getRandom(), seed))) {
+            if (predicate.test(cachedBlockPosition, executionContext)) {
               posThatMatch.add(blockPos.asLong());
             }
             return null;

@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 /**
@@ -25,12 +26,12 @@ public record NumberValueNbtFunction(AbstractNbtNumber number) implements NbtFun
   public static final MapCodec<NumberValueNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_NUMBER.fieldOf("number").forGetter(NumberValueNbtFunction::number)).apply(i, NumberValueNbtFunction::new));
 
   @Override
-  public NbtFunctionType<NumberValueNbtFunction> getType() {
+  public @NotNull NbtFunctionType<?> getType() {
     return Type.NUMBER_VALUE_TYPE;
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement) {
+  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) {
     if (nbtElement instanceof NbtDouble) {
       return NbtDouble.of(number.doubleValue());
     } else if (nbtElement instanceof NbtFloat) {

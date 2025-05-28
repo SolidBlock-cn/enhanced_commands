@@ -37,12 +37,12 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3d.of(cachedBlockPosition.getBlockPos())).test(cachedBlockPosition, context);
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockPos blockPos = cachedBlockPosition.getBlockPos();
     final long actualSeed = seed().orElseGet(() -> context.getSeed(this));
     final double sampleValue = getSampleValue(actualSeed, blockPos.getX(), blockPos.getY(), blockPos.getZ());

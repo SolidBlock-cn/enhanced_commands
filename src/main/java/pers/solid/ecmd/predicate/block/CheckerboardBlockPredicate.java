@@ -30,14 +30,14 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockPredicate entry = getEntry(predicates, cachedBlockPosition.getBlockPos());
     if (entry == null) return false;
     return entry.test(cachedBlockPosition, context);
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockPredicate entry = getEntry(predicates, cachedBlockPosition.getBlockPos());
     if (entry == null) return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.checkerboard.fail_no_checkerboard"));
     final TestResult testResult = entry.testAndDescribe(cachedBlockPosition, context);

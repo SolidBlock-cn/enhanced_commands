@@ -15,11 +15,7 @@ import java.util.List;
 public record EntitiesNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument<Entity>, NbtTargetArgument<Entity> {
   public NbtTarget<Entity> getEntitiesNbtData(ServerCommandSource source) throws CommandSyntaxException {
     final List<? extends Entity> entities = entitySelector.getEntities(source);
-    if (entities.size() == 1) {
-      return new EntityNbtData(entities.getFirst());
-    } else {
-      return new EntitiesNbtData(Collections.unmodifiableList(entities));
-    }
+    return new EntitiesNbtData(Collections.unmodifiableList(entities));
   }
 
   @Override

@@ -22,12 +22,12 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     return (blockPredicate1.test(cachedBlockPosition, context) == blockPredicate2.test(cachedBlockPosition, context)) == same;
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final TestResult testResult1 = blockPredicate1.testAndDescribe(cachedBlockPosition, context);
     final TestResult testResult2 = blockPredicate2.testAndDescribe(cachedBlockPosition, context);
     final boolean actual = testResult1.successes() == testResult2.successes();

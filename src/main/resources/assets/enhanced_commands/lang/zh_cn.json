@@ -701,6 +701,7 @@
   "enhanced_commands.nbt_predicate.duplicate_key": "重复的键：%s",
   "enhanced_commands.nbt_predicate.from": "从指定的来源获取 NBT",
   "enhanced_commands.nbt_predicate.must_be_number_or_string": "比较符号后面的值必须是数字或字符串，而不是%s",
+  "enhanced_commands.nbt_predicate.pos": "将坐标转换为列表",
   "enhanced_commands.nbt_predicate.sign_expected": "需要符号（“:”或“=”）",
   "enhanced_commands.nbt_predicate.string_replace": "替换字符串",
   "enhanced_commands.nbt_predicate.string_replace.not_a_string": "无法执行替换，因为NBT元素是%s，不是字符串",

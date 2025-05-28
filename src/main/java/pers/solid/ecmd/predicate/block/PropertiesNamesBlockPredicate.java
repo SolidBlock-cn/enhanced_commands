@@ -37,7 +37,7 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
     for (PropertyNamePredicate propertyNamePredicate : predicates) {
       if (!propertyNamePredicate.test(blockState))
@@ -47,7 +47,7 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
     boolean successes = true;
     List<TestResult> attachments = new ArrayList<>();

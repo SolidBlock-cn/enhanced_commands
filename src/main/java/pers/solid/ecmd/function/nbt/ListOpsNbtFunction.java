@@ -12,6 +12,7 @@ import net.minecraft.nbt.NbtList;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 
 import java.util.List;
 import java.util.Map;
@@ -87,18 +88,18 @@ public record ListOpsNbtFunction(@NotNull List<NbtFunction> valueReplacements, @
   }
 
   @Override
-  public NbtFunctionType<ListOpsNbtFunction> getType() {
+  public @NotNull NbtFunctionType<?> getType() {
     return Type.LIST_OPS_TYPE;
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement) throws CommandSyntaxException {
+  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
     final NbtList targetList = nbtElement instanceof final NbtList nbtList ? nbtList : new NbtList();
     if (!valueReplacements.isEmpty()) {
       targetList.clear();
       try {
         for (NbtFunction nbtFunction : valueReplacements) {
-          targetList.add(nbtFunction.apply(null));
+          targetList.add(nbtFunction.apply(null, context));
         }
       } catch (UnsupportedOperationException ignored) {
       }
@@ -111,7 +112,7 @@ public record ListOpsNbtFunction(@NotNull List<NbtFunction> valueReplacements, @
           index += targetList.size();
         }
         try {
-          targetList.setElement(index, function.apply(targetList.get(index)));
+          targetList.setElement(index, function.apply(targetList.get(index), context));
         } catch (UnsupportedOperationException | IndexOutOfBoundsException ignored) {
         }
       }
@@ -129,7 +130,7 @@ public record ListOpsNbtFunction(@NotNull List<NbtFunction> valueReplacements, @
         }
         try {
           for (NbtFunction nbtFunction : function) {
-            targetList.add(index + i, nbtFunction.apply(null));
+            targetList.add(index + i, nbtFunction.apply(null, context));
           }
         } catch (IndexOutOfBoundsException | UnsupportedOperationException ignored) {
         }

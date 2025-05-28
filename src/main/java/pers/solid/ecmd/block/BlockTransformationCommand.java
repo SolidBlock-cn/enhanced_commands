@@ -30,7 +30,7 @@ import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
-import pers.solid.ecmd.predicate.block.BlockPredicateContext;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.Styles;
@@ -85,8 +85,8 @@ public interface BlockTransformationCommand {
     final @Nullable Long seed = keywordArgs.getArg("seed");
     final BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(getIteratorTaskName(region), world, flags, modFlags) : null;
     final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(world, region)
-        .setBlockPredicateContext(new BlockPredicateContext(world.getRandom(), seed))
-        .setBlockFunctionContext(new BlockFunctionContext(flags, modFlags, world.getRandom(), seed))
+        .setBlockPredicateContext(new ExecutionContext(world.getRandom(), source, seed))
+        .setBlockFunctionContext(new BlockFunctionContext(flags, modFlags, world.getRandom(), source, seed))
         .transformsBlockPos(this::transformBlockPos)
         .transformsPos(this::transformPos)
         .transformsPosBack(this::transformPosBack)

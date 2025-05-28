@@ -30,7 +30,7 @@ import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.function.block.SimpleBlockFunction;
 import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateContext;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
@@ -77,7 +77,7 @@ public class BlockTransformationTask {
    * 受操作影响的区域。
    */
   private final @NotNull Region region;
-  private final BlockPredicateContext blockPredicateContext;
+  private final ExecutionContext executionContext;
   private final BlockFunctionContext blockFunctionContext;
   /**
    * 如果不为 {@code null}，那么只有符合此谓词的方块才会受到影响，包括替换新位置的方块以及按照规则替换原位置的方块。
@@ -119,7 +119,7 @@ public class BlockTransformationTask {
   /**
    * @see Builder#build()
    */
-  private BlockTransformationTask(@NotNull Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3d, Vec3d> posTransformer, @Nullable Function<Vec3d, Vec3d> invertedPosTransformer, @NotNull Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @Nullable Consumer<Entity> reverseEntityTransformer, @NotNull World world, @NotNull Region region, BlockPredicateContext blockPredicateContext, BlockFunctionContext blockFunctionContext, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, @NotNull UnloadedPosBehavior unloadedPosBehavior, boolean bypassLimit, @Nullable CommandOutput historyTarget, @Nullable BlockTransformationHistory history) {
+  private BlockTransformationTask(@NotNull Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3d, Vec3d> posTransformer, @Nullable Function<Vec3d, Vec3d> invertedPosTransformer, @NotNull Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @Nullable Consumer<Entity> reverseEntityTransformer, @NotNull World world, @NotNull Region region, ExecutionContext executionContext, BlockFunctionContext blockFunctionContext, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, @NotNull UnloadedPosBehavior unloadedPosBehavior, boolean bypassLimit, @Nullable CommandOutput historyTarget, @Nullable BlockTransformationHistory history) {
     this.blockPosTransformer = blockPosTransformer;
     this.posTransformer = posTransformer;
     this.invertedPosTransformer = invertedPosTransformer;
@@ -128,7 +128,7 @@ public class BlockTransformationTask {
     this.reverseEntityTransformer = reverseEntityTransformer;
     this.world = world;
     this.region = region;
-    this.blockPredicateContext = blockPredicateContext;
+    this.executionContext = executionContext;
     this.blockFunctionContext = blockFunctionContext;
     this.affectsOnly = affectsOnly;
     this.transformsOnly = transformsOnly;
@@ -215,7 +215,7 @@ public class BlockTransformationTask {
       _posIterable = Iterables.transform(_posIterable, blockPos -> {
         if (blockPos == null) return null;
         final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-        if ((transformsOnly == null || transformsOnly.test(cachedBlockPosition, blockPredicateContext)) && cachedBlockPosition.getBlockState() != null) {
+        if ((transformsOnly == null || transformsOnly.test(cachedBlockPosition, executionContext)) && cachedBlockPosition.getBlockState() != null) {
           final BlockState blockState = cachedBlockPosition.getBlockState();
           posTransformedOut.put(blockPos.asLong(), blockState);
           final BlockPos transformedBlockPos = mutable.set(blockPosTransformer.apply(blockPos));
@@ -241,7 +241,7 @@ public class BlockTransformationTask {
       matchingBlockPos = new LongOpenHashSet();
       collectMatchingTransformed = () -> transformedStates.keySet().longStream().mapToObj(longValue -> {
         mutable.set(longValue);
-        if (affectsOnly.test(new CachedBlockPosition(world, mutable, unloadedPosBehavior == UnloadedPosBehavior.FORCE), blockPredicateContext)) {
+        if (affectsOnly.test(new CachedBlockPosition(world, mutable, unloadedPosBehavior == UnloadedPosBehavior.FORCE), executionContext)) {
           matchingBlockPos.add(longValue);
         }
         return (Void) null;
@@ -285,7 +285,7 @@ public class BlockTransformationTask {
         collectMatchingRemaining = Iterables.transform(
             new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong())),
             blockPos -> {
-              if (blockPos != null && affectsOnly.test(new CachedBlockPosition(world, blockPos, false), blockPredicateContext)) {
+              if (blockPos != null && affectsOnly.test(new CachedBlockPosition(world, blockPos, false), executionContext)) {
                 affectedRemaining.add(blockPos.asLong());
               }
               return null;
@@ -323,7 +323,7 @@ public class BlockTransformationTask {
           transformedPos -> {
             final BlockPos invertedPos = BlockPos.ofFloored(invertedPosTransformer.apply(transformedPos.toCenterPos()));
             if (region.contains(invertedPos) && !transformedStates.containsKey(transformedPos.asLong())) {
-              if (affectsOnly == null || affectsOnly.test(new CachedBlockPosition(world, transformedPos, false), blockPredicateContext)) {
+              if (affectsOnly == null || affectsOnly.test(new CachedBlockPosition(world, transformedPos, false), executionContext)) {
                 final Optional<BlockPos> nearestOriginal = BlockPos.streamOutwards(invertedPos, 1, 1, 1).mapToLong(BlockPos::asLong).filter(posTransformedOut::containsKey).mapToObj(BlockPos::fromLong).min(Comparator.comparingInt(o -> o.getManhattanDistance(invertedPos)));
                 if (nearestOriginal.isPresent()) {
                   final long nearestOriginalLong = nearestOriginal.get().asLong();
@@ -430,7 +430,7 @@ public class BlockTransformationTask {
     private Function<BlockState, BlockState> blockStateTransformer;
     private @Nullable Consumer<Entity> entityTransformer;
     private @Nullable Consumer<Entity> reverseEntityTransformer;
-    private BlockPredicateContext blockPredicateContext;
+    private ExecutionContext executionContext;
     private BlockFunctionContext blockFunctionContext;
     private @Nullable BlockPredicate affectsOnly = null;
     private @Nullable BlockPredicate transformsOnly = null;
@@ -474,8 +474,8 @@ public class BlockTransformationTask {
       return this;
     }
 
-    public Builder setBlockPredicateContext(BlockPredicateContext blockPredicateContext) {
-      this.blockPredicateContext = blockPredicateContext;
+    public Builder setBlockPredicateContext(ExecutionContext executionContext) {
+      this.executionContext = executionContext;
       return this;
     }
 
@@ -531,7 +531,7 @@ public class BlockTransformationTask {
     }
 
     public BlockTransformationTask build() {
-      return new BlockTransformationTask(blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, blockPredicateContext, blockFunctionContext, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyTarget, history);
+      return new BlockTransformationTask(blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, executionContext, blockFunctionContext, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyTarget, history);
     }
   }
 }

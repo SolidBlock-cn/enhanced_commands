@@ -18,7 +18,7 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
   public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(BlockPredicate.REGISTRY_KEY, ReferenceBlockPredicate::new);
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     try {
       final WorldView world = cachedBlockPosition.getWorld();
       if (!(world instanceof ServerWorld serverWorld)) {

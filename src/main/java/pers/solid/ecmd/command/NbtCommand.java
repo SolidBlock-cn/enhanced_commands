@@ -23,8 +23,10 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.nbt.NbtTarget;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
+import java.util.Collection;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -111,33 +113,42 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return nbtSource.executeQuery(source, nbtPath, scale, nbtConcentrationType, source.getWorld().getRandom());
   }
 
-  private static int executeSet(NbtTarget<?> target, NbtPathArgumentType.NbtPath nbtPath, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private static <T> int executeSet(NbtTarget<T> target, NbtPathArgumentType.NbtPath nbtPath, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    target.transformNbtInPath(nbtPath, nbtFunction, source.getRegistryManager());
-    source.sendFeedback$ecBridge(target::feedbackModify, true);
+    final Collection<T> values = target.values(source);
+    for (T value : values) {
+      target.transformNbtInPathFor(source, value, nbtPath, nbtFunction.asJavaFunction(new ExecutionContext(source)));
+    }
+    source.sendFeedback$ecBridge(() -> target.feedbackModify(values), true);
     return 1; // 应该修改为执行成功数量
   }
 
-  private static int executeMerge(NbtTarget<?> target, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private static <T> int executeMerge(NbtTarget<T> target, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    target.transformNbt(nbtCompound -> nbtFunction.apply(nbtCompound) instanceof final NbtCompound newCompound ? newCompound : nbtCompound, source.getRegistryManager());
-    source.sendFeedback$ecBridge(target::feedbackModify, true);
+    final Collection<T> values = target.values(source);
+    for (T value : values) {
+      target.transformNbtFor(context.getSource(), value, nbtCompound -> nbtFunction.apply(nbtCompound, new ExecutionContext(source)) instanceof final NbtCompound newCompound ? newCompound : nbtCompound);
+    }
+    source.sendFeedback$ecBridge(() -> target.feedbackModify(values), true);
     return 1; // 应该修改为执行成功数量
   }
 
-  private static int executeReplace(NbtTarget<?> target, NbtPredicate nbtPredicate, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private static <T> int executeReplace(NbtTarget<T> target, NbtPredicate nbtPredicate, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    target.transformNbt(nbtCompound -> nbtFunction.recursivelyApply(nbtCompound, nbtPredicate) instanceof final NbtCompound newCompound ? newCompound : nbtCompound, source.getRegistryManager());
-    source.sendFeedback$ecBridge(target::feedbackModify, true);
+    final Collection<T> values = target.values(source);
+    for (T value : values) {
+      target.transformNbtFor(source, value, nbtCompound -> nbtFunction.recursivelyApply(nbtCompound, nbtPredicate, new ExecutionContext(source)) instanceof final NbtCompound newCompound ? newCompound : nbtCompound);
+    }
+    source.sendFeedback$ecBridge(() -> target.feedbackModify(values), true);
     return 1; // 应该修改为执行成功数量
   }
 
   private int executeTransform(NbtTarget<?> target, NbtPathArgumentType.NbtPath path, FailableFunction<@Nullable NbtElement, @Nullable NbtElement, CommandSyntaxException> operation, Supplier<Text> message, boolean recursively, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     if (recursively) {
-      target.transformNbtInPath(path, nbtElement -> NbtFunction.recursivelyApply(operation, nbtElement, null), source.getRegistryManager());
+      target.transformNbtInPath(source, path, nbtElement -> NbtFunction.recursivelyApply(operation, nbtElement, null));
     } else {
-      target.transformNbtInPath(path, operation, source.getRegistryManager());
+      target.transformNbtInPath(source, path, operation);
     }
     source.sendFeedback$ecBridge(message, true);
     return 1;

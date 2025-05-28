@@ -21,7 +21,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
-import pers.solid.ecmd.predicate.block.BlockPredicateContext;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -83,7 +83,7 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     if (cachedBlockPosition.getBlockState() == null) {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
-    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition, new BlockPredicateContext(source.getWorld().getRandom(), null));
+    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition, new ExecutionContext(source.getWorld().getRandom(), source, null));
     testResult.sendMessage(source);
     return BooleanUtils.toInteger(testResult.successes());
   }

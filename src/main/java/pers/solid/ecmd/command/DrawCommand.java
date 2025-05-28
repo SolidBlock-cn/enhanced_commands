@@ -77,7 +77,7 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
     mainIterator = stream
         .peek(blockPos -> {
-          if (block.setBlock(world, blockPos, new BlockFunctionContext(flags, modFlags, world.random, null)))
+          if (block.setBlock(world, blockPos, new BlockFunctionContext(flags, modFlags, world.random, source, null)))
             numbersAffected.increment();
         })
         .map(blockPos -> null)

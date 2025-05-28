@@ -47,7 +47,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
     final boolean inTag = blockState.isIn(tag);
     if (!inTag) {
@@ -61,7 +61,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, BlockPredicateContext context) {
+  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockState blockState = cachedBlockPosition.getBlockState();
     final boolean inTag = blockState.isIn(tag);
     boolean successes = true;

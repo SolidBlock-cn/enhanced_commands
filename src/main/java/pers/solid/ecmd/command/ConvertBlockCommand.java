@@ -28,6 +28,7 @@ import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.mixins.accessor.BlockDisplayEntityAccessor;
 import pers.solid.ecmd.mixins.accessor.FallingBlockEntityAccessor;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
@@ -69,7 +70,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
       return 0;
     }
     if (nbtFunction != null) {
-      final NbtCompound apply = nbtFunction.apply(NbtPredicate.entityToNbt(entity));
+      final NbtCompound apply = nbtFunction.apply(NbtPredicate.entityToNbt(entity), new ExecutionContext(world.getRandom(), source, null));
       entity.readNbt(apply);
     }
     source.sendFeedback$ecBridge(() -> feedback.apply(blockPos), false);

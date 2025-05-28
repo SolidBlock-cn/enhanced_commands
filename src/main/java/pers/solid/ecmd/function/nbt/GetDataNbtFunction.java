@@ -5,6 +5,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +14,7 @@ import pers.solid.ecmd.argument.SimpleEnumArgumentType;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.nbt.NbtSourceArgument;
-import pers.solid.ecmd.util.mixin.MixinShared;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -28,14 +29,13 @@ public record GetDataNbtFunction(NbtSource<?> nbtSource, Optional<NbtPathArgumen
   }
 
   @Override
-  public NbtFunctionType<GetDataNbtFunction> getType() {
+  public @NotNull NbtFunctionType<?> getType() {
     return null;
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement) throws CommandSyntaxException {
-    // todo consider using context
-    return nbtSource.getConcentratedNbts(path.orElse(null), MixinShared.getCommandRegistryAccess(), concentrationType, Random.create());
+  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
+    return nbtSource.getConcentratedNbts((ServerCommandSource) context.source, path.orElse(null), concentrationType, Random.create());
   }
 
   public enum Type implements NbtFunctionType<GetDataNbtFunction> {
