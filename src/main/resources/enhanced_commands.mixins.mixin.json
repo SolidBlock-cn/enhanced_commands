@@ -21,6 +21,7 @@
     "IdentifierMixin",
     "LocateCommandMixin",
     "MinecraftServerMixin",
+    "NbtPathArgumentTypeMixin",
     "RegistryEntryPredicateArgumentTypeMixin",
     "RegistryEntryReferenceArgumentTypeMixin",
     "ServerPlayerEntityMixin",

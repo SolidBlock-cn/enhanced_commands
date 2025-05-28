@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
@@ -49,9 +50,10 @@ public class NbtFunctionParser<S> {
     final StringReader reader = parseContext.reader();
     final int cursorBeforeSign = reader.getCursor();
     parseContext.addSuggestion((context, suggestionsBuilder) -> {
-      ParsingUtil.suggestString(":", MERGE, suggestionsBuilder);
-      ParsingUtil.suggestString("=", EQUAL, suggestionsBuilder);
-      return suggestionsBuilder.buildFuture();
+      final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursorBeforeSign);
+      ParsingUtil.suggestString(":", MERGE, offset);
+      ParsingUtil.suggestString("=", EQUAL, offset);
+      return offset.buildFuture();
     });
     if (!reader.canRead()) {
       if (mustExpectSign) {
@@ -118,7 +120,8 @@ public class NbtFunctionParser<S> {
         }
         entries.put(key, null);
       }
-      parseContext.setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString(",", NbtPredicateParser.SEPARATE, suggestionsBuilder).buildFuture());
+      parseContext.terminateSuggestionsIfNotEmpty();
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString(",", NbtPredicateParser.SEPARATE, suggestionsBuilder).buildFuture());
       if (reader.canRead() && reader.peek() == ',') {
         reader.skip();
         parseContext.clearSuggestion();
@@ -364,6 +367,16 @@ public class NbtFunctionParser<S> {
   public NbtFunctionArgument parseFunction(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     // 尝试解析函数名称；如果不是函数语法，则恢复 cursor 重新解析；如果是函数语法，则按照函数语法解析，如果函数不存在，则报错。
     final StringReader reader = parseContext.reader();
+
+    // 解析等号和不等号
+    final int cursorBeforeSign = reader.getCursor();
+    final boolean isUsingEqual = parseSign(mustExpectSign, equalsForDefault);
+    final boolean hasExplicitSign = cursorBeforeSign != reader.getCursor();
+    reader.skipWhitespace();
+    if (hasExplicitSign) {
+      parseContext.clearSuggestion();
+    }
+
     final int cursorBeforeFunctionName = reader.getCursor();
     final FunctionsParser<NbtFunctionArgument> functionsParser = new FunctionsParser<>(NbtFunctionTypes.FUNCTIONS, NbtFunctionTypes.FUNCTION_NAMES);
     final NbtFunctionArgument functionGrammar = functionsParser.parse(parseContext);
@@ -372,17 +385,8 @@ public class NbtFunctionParser<S> {
     } else {
       reader.setCursor(cursorBeforeFunctionName);
     }
-    // to be completed
 
-    // 解析等号和不等号
-    final int cursorBeforeSign = reader.getCursor();
     parseContext.terminateSuggestionsIfNotEmpty();
-    final boolean isUsingEqual = parseSign(mustExpectSign, equalsForDefault);
-    final boolean hasExplicitSign = cursorBeforeSign != reader.getCursor();
-    reader.skipWhitespace();
-    if (hasExplicitSign) {
-      parseContext.clearSuggestion();
-    }
     parseContext.addSuggestion((context, suggestionsBuilder) -> {
       ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder);
       ParsingUtil.suggestString("[", NbtPredicateParser.START_OF_LIST, suggestionsBuilder);
@@ -397,7 +401,7 @@ public class NbtFunctionParser<S> {
       return parseList(isUsingEqual);
     } else {
       final NbtElement element = new StringNbtReader(reader).parseElement();
-      parseContext.clearSuggestion();
+//      parseContext.clearSuggestion();
 
       if (isUsingEqual && element instanceof AbstractNbtNumber abstractNbtNumber) {
         return new NumberValueNbtFunction(abstractNbtNumber);
@@ -412,6 +416,17 @@ public class NbtFunctionParser<S> {
    */
   public NbtFunctionArgument parsePreferringCompound(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
+
+    // 解析等号和不等号
+    final int cursorBeforeSign = reader.getCursor();
+    final boolean isUsingEqual = parseSign(mustExpectSign, equalsForDefault);
+
+    final boolean hasExplicitSign = cursorBeforeSign != reader.getCursor();
+    reader.skipWhitespace();
+    if (hasExplicitSign) {
+      parseContext.clearSuggestion();
+    }
+
     final int cursorBeforeFunctionName = reader.getCursor();
     final FunctionsParser<NbtFunctionArgument> functionsParser = new FunctionsParser<>(NbtFunctionTypes.FUNCTIONS, NbtFunctionTypes.FUNCTION_NAMES);
     final NbtFunctionArgument functionGrammar = functionsParser.parse(parseContext);
@@ -420,18 +435,8 @@ public class NbtFunctionParser<S> {
     } else {
       reader.setCursor(cursorBeforeFunctionName);
     }
-    // to be completed
 
-    // 解析等号和不等号
-    final int cursorBeforeSign = reader.getCursor();
     parseContext.terminateSuggestionsIfNotEmpty();
-    final boolean isUsingEqual = parseSign(mustExpectSign, equalsForDefault);
-
-    final boolean hasExplicitSign = cursorBeforeSign != reader.getCursor();
-    reader.skipWhitespace();
-    if (hasExplicitSign) {
-      parseContext.clearSuggestion();
-    }
     parseContext.addSuggestion((context, suggestionsBuilder) -> {
       ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder);
       return suggestionsBuilder.buildFuture();

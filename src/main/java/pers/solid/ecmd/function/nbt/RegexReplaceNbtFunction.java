@@ -2,18 +2,17 @@ package pers.solid.ecmd.function.nbt;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -22,27 +21,25 @@ import pers.solid.ecmd.util.parse.ParsingUtil;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
-public record StringReplaceNbtFunction(String target, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
-  public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.nbt_predicate.string_replace.not_a_string", s));
-  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_predicate.string_replace.not_value"));
-
-  public static final MapCodec<StringReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Codec.STRING.fieldOf("target").forGetter(StringReplaceNbtFunction::target),
-      Codec.STRING.fieldOf("replacement").forGetter(StringReplaceNbtFunction::replacement),
-      Codec.BOOL.optionalFieldOf("recursive", false).forGetter(StringReplaceNbtFunction::recursive),
-      Codec.BOOL.optionalFieldOf("lenient", false).forGetter(StringReplaceNbtFunction::lenient),
-      NbtFunction.CODEC.optionalFieldOf("original").forGetter(StringReplaceNbtFunction::original)
-  ).apply(i, StringReplaceNbtFunction::new));
+public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
+  public static final MapCodec<RegexReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      CodecUtil.PATTERN.fieldOf("target").forGetter(RegexReplaceNbtFunction::pattern),
+      Codec.STRING.fieldOf("replacement").forGetter(RegexReplaceNbtFunction::replacement),
+      Codec.BOOL.optionalFieldOf("recursive", false).forGetter(RegexReplaceNbtFunction::recursive),
+      Codec.BOOL.optionalFieldOf("lenient", false).forGetter(RegexReplaceNbtFunction::lenient),
+      NbtFunction.CODEC.optionalFieldOf("original").forGetter(RegexReplaceNbtFunction::original)
+  ).apply(i, RegexReplaceNbtFunction::new));
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return "string.replace(" + NbtString.escape(target) + ", " + NbtString.escape(replacement) + "; recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> "; original = " + nbtFunction.asString(false)).orElse("") + ")";
+    return "regex.replace(" + pattern.pattern() + ", " + NbtString.escape(replacement) + "; recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> "; original = " + nbtFunction.asString(false)).orElse("") + ")";
   }
 
   @Override
-  public @NotNull NbtFunctionType<?> getType() {
-    return Type.STRING_REPLACE_TYPE;
+  public @NotNull NbtFunctionType<RegexReplaceNbtFunction> getType() {
+    return Type.REGEX_TYPE;
   }
 
   @Override
@@ -51,47 +48,70 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
       nbtElement = original.get().apply(nbtElement, context);
     }
     if (recursive) {
-      return NbtFunction.recursivelyApply(e -> e instanceof NbtString nbtString ? NbtString.of(nbtString.asString().replace(target, replacement)) : null, nbtElement, null);
+      return NbtFunction.recursivelyApply(e -> {
+        if (e instanceof NbtString nbtString) {
+          final String string = nbtString.asString();
+          try {
+            return NbtString.of(pattern.matcher(string).replaceAll(replacement));
+          } catch (RuntimeException ex) {
+            if (lenient) {
+              return e;
+            } else {
+              throw ModCommandExceptionTypes.INVALID_REGEX.create(ex.getMessage());
+            }
+          }
+        }
+        return null;
+      }, nbtElement, null);
     }
     if (nbtElement instanceof NbtString nbtString) {
       final String string = nbtString.asString();
-      return NbtString.of(string.replace(target, replacement));
+      try {
+        return NbtString.of(pattern.matcher(string).replaceAll(replacement));
+      } catch (RuntimeException ex) {
+        if (lenient) {
+          return nbtElement;
+        } else {
+          throw ModCommandExceptionTypes.INVALID_REGEX.create(ex.getMessage());
+        }
+      }
     } else if (lenient && nbtElement != null) {
       // 在当 lenient 为 true 时，不会报错。但仅限 nbtElement 为非 null 的情况下。
       return nbtElement;
     } else {
       // handle absent value
       if (nbtElement == null) {
-        throw NO_VALUE.create();
+        throw StringReplaceNbtFunction.NO_VALUE.create();
       }
-      throw NOT_A_STRING.create(nbtElement.getNbtType().getCommandFeedbackName());
+      throw StringReplaceNbtFunction.NOT_A_STRING.create(nbtElement.getNbtType().getCommandFeedbackName());
     }
   }
 
-  public enum Type implements NbtFunctionType<StringReplaceNbtFunction> {
-    STRING_REPLACE_TYPE;
+  public enum Type implements NbtFunctionType<RegexReplaceNbtFunction> {
+    REGEX_TYPE;
 
     @Override
-    public MapCodec<StringReplaceNbtFunction> getCodec() {
+    public MapCodec<RegexReplaceNbtFunction> getCodec() {
       return CODEC;
     }
   }
 
   public static class Parser implements FunctionLikeParser<NbtFunctionArgument>, NamedParamListParser {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
-    private String target, replacement;
+    private Pattern regex;
+    private String replacement;
     private Boolean recursive, lenient;
     private NbtFunctionArgument original;
 
     @Override
     public NbtFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return source -> new StringReplaceNbtFunction(target, replacement, Boolean.TRUE.equals(recursive), Boolean.TRUE.equals(lenient), original == null ? Optional.empty() : Optional.of(original.toAbsolute(source)));
+      return source -> new RegexReplaceNbtFunction(regex, replacement, Boolean.TRUE.equals(recursive), Boolean.TRUE.equals(lenient), original == null ? Optional.empty() : Optional.of(original.toAbsolute(source)));
     }
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
-      target = reader.readString();
+      regex = ParsingUtil.readRegex(reader);
       reader.skipWhitespace();
       reader.expect(',');
       reader.skipWhitespace();

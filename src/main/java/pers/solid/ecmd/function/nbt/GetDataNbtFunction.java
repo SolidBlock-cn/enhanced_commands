@@ -29,8 +29,8 @@ public record GetDataNbtFunction(NbtSource<?> nbtSource, Optional<NbtPathArgumen
   }
 
   @Override
-  public @NotNull NbtFunctionType<?> getType() {
-    return null;
+  public @NotNull NbtFunctionType<GetDataNbtFunction> getType() {
+    return Type.GET_DATA_TYPE;
   }
 
   @Override
