@@ -33,11 +33,11 @@ public record SubstringNbtFunction(int startIndex, int endIndex, boolean lenient
       NbtFunction.CODEC.optionalFieldOf("original").forGetter(SubstringNbtFunction::original)
   ).apply(i, SubstringNbtFunction::new));
 
-  public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.nbt_predicate.substring.not_a_string", s));
-  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_predicate.substring.not_value"));
-  public static final Dynamic2CommandExceptionType START_END_WRONG = new Dynamic2CommandExceptionType((start, end) -> Text.translatable("enhanced_commands.nbt_predicate.substring.start_end_wrong", start, end));
-  public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH = new Dynamic2CommandExceptionType((index, length) -> Text.translatable("enhanced_commands.nbt_predicate.substring.exceeds_string_length", index, length));
-  public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH_INVERSE = new Dynamic2CommandExceptionType((index, length) -> Text.translatable("enhanced_commands.nbt_predicate.substring.exceeds_string_length_inverse", index, length));
+  public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.nbt_function.substring.not_a_string", s));
+  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.substring.not_value"));
+  public static final Dynamic2CommandExceptionType START_END_WRONG = new Dynamic2CommandExceptionType((start, end) -> Text.translatable("enhanced_commands.nbt_function.substring.start_end_wrong", start, end));
+  public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH = new Dynamic2CommandExceptionType((index, length) -> Text.translatable("enhanced_commands.nbt_function.substring.exceeds_string_length", index, length));
+  public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH_INVERSE = new Dynamic2CommandExceptionType((index, length) -> Text.translatable("enhanced_commands.nbt_function.substring.exceeds_string_length_inverse", index, length));
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {

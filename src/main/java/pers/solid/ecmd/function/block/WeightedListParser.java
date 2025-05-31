@@ -43,7 +43,7 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
     final StringReader reader = parseContext.reader();
     cursorBeforeEntries = reader.getCursor();
 
-    // 解析方块函数的部分
+    // 解析元素的部分
     while (true) {
       parseContext.clearSuggestion();
       final T parse = parseElement(parseContext);
@@ -72,7 +72,7 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
       }
       reader.skipWhitespace();
       final char peek = reader.peek();
-      if (peek == ',') {
+      if (peek == separator()) {
         reader.skip();
         reader.skipWhitespace();
       } else {
@@ -83,6 +83,10 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
 
   private String separatorString() {
     return ",";
+  }
+
+  private char separator() {
+    return ',';
   }
 
   public static <T> WeightedListParser<T> of(Parser<T> elementParser) {
