@@ -101,7 +101,7 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
 
     @Override
     public boolean flatten() {
-      return false;
+      return true;
     }
 
     @Override

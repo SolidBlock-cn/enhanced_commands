@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 /**
- * 集的 codec。类似于 {@link ListCodec}，编码时会按照列表编码，但是解码时直接读取为列表，含有重复的内容会忽略。。
+ * 集的 codec。类似于 {@link ListCodec}，编码时会按照列表编码，但是解码时直接读取为列表，含有重复的内容会忽略。
  *
  * @param elementCodec 集合元素的 codec。
  * @param <A>          集的元素的类型。

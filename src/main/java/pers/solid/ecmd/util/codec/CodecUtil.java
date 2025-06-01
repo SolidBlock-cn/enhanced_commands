@@ -88,6 +88,9 @@ public final class CodecUtil {
     }
   };
 
+  /**
+   * NBT 数字的 codec，类似于 {@link #NBT_ELEMENT}，但是遇到非数字的值会报错。
+   */
   public static final Codec<AbstractNbtNumber> NBT_NUMBER = NBT_ELEMENT.comapFlatMap(nbtElement -> nbtElement instanceof AbstractNbtNumber number ? DataResult.success(number) : DataResult.error(() -> "The NBT value is not a number"), Function.identity());
 
   /**
@@ -104,7 +107,7 @@ public final class CodecUtil {
   }
 
   /**
-   * 为集创建 codec。类似于 {@link Codec#list(Codec)} 然后调用 {@code xmap}，但是会省略与列表的转化过程。
+   * 为集创建 codec。虽然可以使用 {@link Codec#list(Codec)} 然后调用 {@code xmap}，但是本方法与之相比能够省略与列表的转化过程。
    *
    * @param elementCodec 集的元素的 codec。
    */
@@ -176,7 +179,7 @@ public final class CodecUtil {
   }
 
   /**
-   * 与 {@code Codec.LONG.optionalFieldOf} 类似，但是其类型为 {@code OptionalLong} 而非 {@code Optional<Long>}，从而减少不必要的装箱与拆箱。
+   * 与 {@code Codec.LONG.optionalFieldOf} 类似，但是其类型为 {@code OptionalLong} 而非 {@code Optional<Long>}，从而在运行中避免装箱与拆箱。
    *
    * @see Codec#LONG
    * @see Codec#optionalFieldOf
@@ -186,7 +189,7 @@ public final class CodecUtil {
   }
 
   /**
-   * 与 {@code Codec.INT.optionalFieldOf} 类似，但是其类型为 {@code OptionalInt} 而非 {@code Optional<Integer>}，从而减少不必要的装箱与拆箱。
+   * 与 {@code Codec.INT.optionalFieldOf} 类似，但是其类型为 {@code OptionalInt} 而非 {@code Optional<Integer>}，从而在运行中避免装箱与拆箱。
    *
    * @see Codec#INT
    * @see Codec#optionalFieldOf
