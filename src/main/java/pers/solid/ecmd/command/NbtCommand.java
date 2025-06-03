@@ -24,6 +24,7 @@ import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.IntFunction;
 import java.util.regex.Pattern;
 
@@ -119,9 +120,8 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return executeApply(nbtFunction, success -> Text.translatable("enhanced_commands.commands.nbt.regex_replace.success", success), context);
   }
 
-  private static int executeSubstring(CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
+  private static int executeSubstring(OptionalInt endIndex, CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final int startIndex = getInteger(context, "startIndex");
-    final int endIndex = getInteger(context, "endIndex");
     final SubstringNbtFunction nbtFunction = new SubstringNbtFunction(startIndex, endIndex, keywordArgs.getBoolean("lenient"), Optional.empty());
     return executeApply(nbtFunction, success -> Text.translatable("enhanced_commands.commands.nbt.substring.success", success), context);
   }
@@ -184,9 +184,10 @@ public enum NbtCommand implements CommandRegistrationCallback {
                                 .executes(context -> executeRegexReplace(context, getKeywordArgs(context, "keyword_args")))))))))
         .then(literal("substring")
             .then(argument("startIndex", integer())
+                .executes(context -> executeSubstring(OptionalInt.empty(), context, substringKeywordArgs.defaultArgs()))
                 .then(argument("endIndex", integer())
-                    .executes(context -> executeSubstring(context, substringKeywordArgs.defaultArgs()))
+                    .executes(context -> executeSubstring(OptionalInt.of(getInteger(context, "end_index")), context, substringKeywordArgs.defaultArgs()))
                     .then(argument("keyword_args", substringKeywordArgs)
-                        .executes(context -> executeSubstring(context, getKeywordArgs(context, "keyword_args"))))))));
+                        .executes(context -> executeSubstring(OptionalInt.of(getInteger(context, "end_index")), context, getKeywordArgs(context, "keyword_args"))))))));
   }
 }

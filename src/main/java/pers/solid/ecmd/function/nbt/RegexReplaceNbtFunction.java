@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  */
 public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
   public static final MapCodec<RegexReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      CodecUtil.PATTERN.fieldOf("target").forGetter(RegexReplaceNbtFunction::pattern),
+      CodecUtil.PATTERN.fieldOf("pattern").forGetter(RegexReplaceNbtFunction::pattern),
       Codec.STRING.fieldOf("replacement").forGetter(RegexReplaceNbtFunction::replacement),
       Codec.BOOL.optionalFieldOf("recursive", false).forGetter(RegexReplaceNbtFunction::recursive),
       Codec.BOOL.optionalFieldOf("lenient", false).forGetter(RegexReplaceNbtFunction::lenient),
@@ -131,6 +131,9 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
         reader.skip();
         reader.skipWhitespace();
 
+        if (reader.canRead() && reader.peek() == ')') {
+          return;
+        }
         parseNamedParameters(parseContext);
       }
     }

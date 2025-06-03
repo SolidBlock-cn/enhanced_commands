@@ -111,6 +111,9 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
         reader.skip();
         reader.skipWhitespace();
 
+        if (reader.canRead() && reader.peek() == ')') {
+          return;
+        }
         parseNamedParameters(parseContext);
       }
     }

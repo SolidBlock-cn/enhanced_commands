@@ -94,10 +94,10 @@ NBT 函数可以返回任意的指定的 NBT 值，和 NBT 元素自身的写法
 
 NBT 函数支持以下函数语法：
 
-- [`concat()`](/concat/zh.md)：连接多个 NBT 字符串。
-- [`from()`](/from/zh.md)：从另一个 NBT 来源导入数据。
-- [`pos()`](/pos/zh.md)：将坐标以双精度浮点数数字的形式返回。
-- [`regex_replace()`](/regex_replace/zh.md)：进行正则表达式文本替换。
-- [`replace()`](/replace/zh.md)：替换 NBT 中所有符合指定的 NBT 谓词的值，并应用 NBT 函数。
-- [`string_replace()`](/string_replace/zh.md)：进行字符串替换。
-- [`substring()`](/substring/zh.md)：截取子字符串。
+- [`concat()`](concat/zh.md)：连接多个 NBT 字符串。
+- [`from()`](from/zh.md)：从另一个 NBT 来源导入数据。
+- [`pos()`](pos/zh.md)：将坐标以双精度浮点数数字的形式返回。
+- [`regex_replace()`](regex_replace/zh.md)：进行正则表达式文本替换。
+- [`replace()`](replace/zh.md)：替换 NBT 中所有符合指定的 NBT 谓词的值，并应用 NBT 函数。
+- [`string_replace()`](string_replace/zh.md)：进行字符串替换。
+- [`substring()`](substring/zh.md)：截取子字符串。

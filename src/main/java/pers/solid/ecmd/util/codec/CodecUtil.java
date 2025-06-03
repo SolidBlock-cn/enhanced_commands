@@ -194,7 +194,7 @@ public final class CodecUtil {
    * @see Codec#INT
    * @see Codec#optionalFieldOf
    */
-  public MapCodec<OptionalInt> optionalIntFieldOf(String name) {
+  public static MapCodec<OptionalInt> optionalIntFieldOf(String name) {
     return Codec.INT.optionalFieldOf(name).xmap(ol -> ol.map(OptionalInt::of).orElseGet(OptionalInt::empty), optionalInt -> optionalInt.isEmpty() ? Optional.empty() : Optional.of(optionalInt.getAsInt()));
   }
 }
