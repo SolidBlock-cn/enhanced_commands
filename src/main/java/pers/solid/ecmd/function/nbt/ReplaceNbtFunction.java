@@ -12,6 +12,9 @@ import pers.solid.ecmd.predicate.nbt.NbtPredicateArgument;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
+/**
+ * 在 NBT 中进行替换，将符合谓词的值都应用指定的函数。
+ */
 public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFunction function) implements NbtFunction {
   public static final MapCodec<ReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtPredicate.CODEC.fieldOf("predicate").forGetter(ReplaceNbtFunction::predicate),

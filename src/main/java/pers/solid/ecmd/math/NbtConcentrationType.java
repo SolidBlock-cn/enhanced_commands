@@ -19,7 +19,14 @@ import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * <p>NBT 聚合类型，指定多个 NBT 数据如何转化为单个 NBT。
+ * <p>很多情况下，例如 {@code /nbt} 命令，一次获取了多个 NBT，如果需要将结果转化为单个 NBT，则需要指定聚合类型。
+ */
 public enum NbtConcentrationType implements StringIdentifiable {
+  /**
+   * 取所得数据的第一个值。如果没有数据，则抛出异常。
+   */
   FIRST("first") {
     @Override
     public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) throws CommandSyntaxException {
@@ -30,6 +37,9 @@ public enum NbtConcentrationType implements StringIdentifiable {
       return iterator.next();
     }
   },
+  /**
+   * 取所得数据的最后一个值。如果没有数据，则抛出异常。
+   */
   LAST("last") {
     @Override
     public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) throws CommandSyntaxException {
@@ -40,6 +50,9 @@ public enum NbtConcentrationType implements StringIdentifiable {
       }
     }
   },
+  /**
+   * 取所得数据的最小值。只有当所有数据都是数字或都是字符串时，才能生效，否则会抛出错误。
+   */
   MIN("min") {
     @Override
     public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) throws CommandSyntaxException {
@@ -81,6 +94,9 @@ public enum NbtConcentrationType implements StringIdentifiable {
       }
     }
   },
+  /**
+   * 取所得数据的最大值。只有当所有数据都是数字或都是字符串时，才能生效，否则会抛出错误。
+   */
   MAX("max") {
     @Override
     public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) throws CommandSyntaxException {
@@ -122,6 +138,9 @@ public enum NbtConcentrationType implements StringIdentifiable {
       }
     }
   },
+  /**
+   * 将所有数据组合成列表。如果这些数据混合有多个类型的数据，则会抛出错误。如果没有数据，则正常返回空列表。
+   */
   LIST("list") {
     @Override
     public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) {
@@ -130,6 +149,9 @@ public enum NbtConcentrationType implements StringIdentifiable {
       return list;
     }
   },
+  /**
+   * 取所有数据中的随机值。如果没有数据，则抛出异常。
+   */
   RANDOM("random") {
     @Override
     public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) throws CommandSyntaxException {
@@ -145,6 +167,9 @@ public enum NbtConcentrationType implements StringIdentifiable {
       return list.get(random.nextInt(list.size()));
     }
   },
+  /**
+   * 如果所有数据只有一个，则正常返回该数据，否则抛出异常。在一些命令（如 {@code /nbt}）会有特殊处理，以直接在命令反馈中显示多个数据。
+   */
   ALL("all") {
     @Override
     public NbtElement concentrate(Iterable<? extends NbtElement> elements, Random random) throws CommandSyntaxException {

@@ -23,6 +23,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+/**
+ * 使用正则表达式替换 NBT 字符串内容的 NBT 函数。
+ *
+ * @param pattern     正则表达式。
+ * @param replacement 被替换后的内容。
+ * @param recursive   是否递归替换，如果为 true，那么当参数为复合标签或列表时，其包含的各字符串都被替换。
+ * @param lenient     如果为 true，那么当被替换的内容不是字符串且 recursive 不为 true，或者当 replacement 中包含无效的组号时，不会抛出异常。
+ * @param original    指定被替换前的 NBT 数据。如果未指定，则默认使用 NBT 函数运行时的参数。
+ */
 public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
   public static final MapCodec<RegexReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       CodecUtil.PATTERN.fieldOf("target").forGetter(RegexReplaceNbtFunction::pattern),

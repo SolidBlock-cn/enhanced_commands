@@ -94,6 +94,9 @@ public interface NbtSource<T> {
     return nbtConcentrationType.concentrate(nbts.values(), random);
   }
 
+  /**
+   * 表示单个的 NBT 来源，其一些方法可以有所优化。
+   */
   interface Single<T> extends NbtSource<T> {
     T value(ServerCommandSource commandSource);
 

@@ -41,9 +41,9 @@
 
 ## 数据结构
 
-* **type:** 字符串。当前为 `enhanced_commands:concat`。
-* **flatten:** 布尔值。该 NBT 函数是否为展平模式。
-* **elements:** 列表。仅限 `flatten: false` 时，各 NBT 函数。
+* **type**：字符串。当前为 `enhanced_commands:concat`。
+* **flatten**：布尔值。该 NBT 函数是否为展平模式。
+* **elements**：列表。仅限 `flatten: false` 时，各 NBT 函数。
     * 复合标签。一个 NBT 函数。
-* **element:** 复合标签。仅限 `flatten: true` 时，一个 NBT 函数。
-* **delimiter:** 复合标签。一个 NBT 函数。
+* **element**：复合标签。仅限 `flatten: true` 时，一个 NBT 函数。
+* **delimiter**：复合标签。一个 NBT 函数。

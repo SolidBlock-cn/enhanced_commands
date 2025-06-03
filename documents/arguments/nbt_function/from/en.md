@@ -18,7 +18,7 @@ NBT path, the format is the same as vanilla. It specifies the path in which to i
 
 ### `[NBT concentration type]`
 
-NBT concentration type. When applying the function, if the NBT source is found to have multiple NBTs, such as a [region](../../region/en.md) containing multiple block entities, or an [entity selector](../../entity_selector/en.md) that finds multiple entities, while the concentration is not specified, exceptions will be thrown.
+[NBT concentration type](../../nbt_concentration_type/en.md). When applying the function, if the NBT source is found to have multiple NBTs, such as a [region](../../region/en.md) containing multiple block entities, or an [entity selector](../../entity_selector/en.md) that finds multiple entities, while the concentration is not specified, exceptions will be thrown.
 
 ## Examples
 

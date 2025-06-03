@@ -41,9 +41,9 @@ The [NBT function](../en.md) to be concatenated as a list. If the return value o
 
 ## Data structure
 
-* **type:** String, currently `enhanced_commands:concat`.
-* **flatten:** Boolean. Whether the NBT function is flattening.
-* **elements:** List. Only when `flatten: false`. The NBT functions.
+* **type**: String, currently `enhanced_commands:concat`.
+* **flatten**: Boolean. Whether the NBT function is flattening.
+* **elements**: List. Only when `flatten: false`. The NBT functions.
     * Compound. An NBT function.
-* **element:** Compound. Only when `flatten: true`. The NBT function.
-* **delimiter:** Compound. The NBT function.
+* **element**: Compound. Only when `flatten: true`. The NBT function.
+* **delimiter**: Compound. The NBT function.

@@ -23,6 +23,15 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * 对字符串进行替换的 NBT 函数。
+ *
+ * @param target      查找内容。
+ * @param replacement 被替换后的内容。
+ * @param recursive   是否递归替换，如果为 true，那么当参数为复合标签或列表时，其包含的各字符串都被替换。
+ * @param lenient     如果为 true，那么当被替换的内容不是字符串且 recursive 不为 true 时。
+ * @param original    指定被替换前的 NBT 数据。如果未指定，则默认使用 NBT 函数运行时的参数。
+ */
 public record StringReplaceNbtFunction(String target, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
   public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.nbt_function.string_replace.not_a_string", s));
   public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.string_replace.not_value"));

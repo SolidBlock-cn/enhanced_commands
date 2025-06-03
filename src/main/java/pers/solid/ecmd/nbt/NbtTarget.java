@@ -13,9 +13,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * <p>NBT 目标指定了将 NBT 数据存储在什么位置。自身是不带路径和聚合类型的，实际运行命令时通常需要搭配表示路径以及聚合类型的参数使用。
+ * <p>这里为了方便，{@link NbtTarget} 直接继承了 {@link NbtSource}，这是考虑到所有的 NBT 目标首先都会是 NBT 来源。
+ *
+ * @param <T> NBT 目标所含具体对象的类型，可以是方块、实体等。
+ */
 public interface NbtTarget<T> extends NbtSource<T> {
+  /**
+   * @return 所有可修改 NBT 数据的对象的集合。
+   */
+  @Override
   Collection<T> values(ServerCommandSource source);
 
+  /**
+   * 设置指定的对象的 NBT 数据。
+   */
   void setNbtFor(ServerCommandSource commandSource, T target, NbtCompound nbt) throws CommandSyntaxException;
 
   default void setNbt(ServerCommandSource source, NbtCompound nbt) throws CommandSyntaxException {
@@ -84,6 +97,9 @@ public interface NbtTarget<T> extends NbtSource<T> {
 
   Text feedbackModify(Collection<T> values);
 
+  /**
+   * 单个的 NBT 目标。其方法在实现上会有些优化，以减少一些集合创建和迭代。
+   */
   interface Single<T> extends NbtTarget<T>, NbtSource.Single<T> {
     T value(ServerCommandSource commandSource);
 
