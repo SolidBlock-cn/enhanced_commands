@@ -42,8 +42,8 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
   ).apply(i, RegexReplaceNbtFunction::new));
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
-    return "regex.replace(" + pattern.pattern() + ", " + NbtString.escape(replacement) + "; recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> "; original = " + nbtFunction.asString(false)).orElse("") + ")";
+  public @NotNull String asString() {
+    return "regex.replace(" + pattern.pattern() + ", " + NbtString.escape(replacement) + "; recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> "; original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   @Override

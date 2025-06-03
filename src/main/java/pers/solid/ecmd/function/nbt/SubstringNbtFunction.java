@@ -50,8 +50,8 @@ public record SubstringNbtFunction(int startIndex, OptionalInt endIndex, boolean
   public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH_INVERSE = new Dynamic2CommandExceptionType((index, length) -> Text.translatable("enhanced_commands.nbt_function.substring.exceeds_string_length_inverse", index, length));
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
-    return "substring(" + startIndex + (endIndex.isPresent() ? ", " + endIndex.getAsInt() : "") + "; lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString(false)).orElse("") + ")";
+  public @NotNull String asString() {
+    return "substring(" + startIndex + (endIndex.isPresent() ? ", " + endIndex.getAsInt() : "") + "; lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   private static int actualIndex(int index, int length) throws CommandSyntaxException {

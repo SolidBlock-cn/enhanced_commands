@@ -24,7 +24,7 @@ public record GetDataNbtFunction(NbtSource<?> nbtSource, Optional<NbtPathArgumen
   public static final MapCodec<GetDataNbtFunction> CODEC = MapCodec.unit(null).flatXmap(o -> DataResult.error(() -> "not implemented yet"), function -> null);
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public @NotNull String asString() {
     return "from(" + nbtSource + ")";
   }
 

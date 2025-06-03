@@ -19,6 +19,11 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  */
 public record NumberValueNbtFunction(AbstractNbtNumber number) implements NbtFunction {
   @Override
+  public @NotNull String asString() {
+    return asString(true);
+  }
+
+  @Override
   public @NotNull String asString(boolean requirePrefix) {
     return "= " + number.toString();
   }

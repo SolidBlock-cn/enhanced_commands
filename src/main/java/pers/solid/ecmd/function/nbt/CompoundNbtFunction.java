@@ -46,6 +46,11 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   ).apply(i, CompoundNbtFunction::new));
 
   @Override
+  public @NotNull String asString() {
+    return asString(false);
+  }
+
+  @Override
   public @NotNull String asString(boolean requirePrefix) {
     return (allowsMerge ? (requirePrefix ? ": " : "") : "= ") + "{" + source.entrySet().stream().map(entry -> {
       final String key = entry.getKey();

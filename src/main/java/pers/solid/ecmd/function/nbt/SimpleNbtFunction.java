@@ -18,8 +18,8 @@ public record SimpleNbtFunction(@NotNull NbtElement element) implements NbtFunct
   public static final MapCodec<SimpleNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_ELEMENT.fieldOf("element").forGetter(SimpleNbtFunction::element)).apply(i, SimpleNbtFunction::new));
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
-    return (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(element);
+  public @NotNull String asString() {
+    return TextUtil.toSpacedStringNbt(element);
   }
 
   @Override

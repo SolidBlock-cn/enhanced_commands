@@ -79,7 +79,7 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
 
     @Override
-    public @NotNull String asString(boolean requirePrefix) {
+    public @NotNull String asString() {
       return "concat(" + elements.stream().map(NbtFunction::asString).collect(Collectors.joining(", ")) + ")";
     }
 
@@ -105,8 +105,8 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
 
     @Override
-    public @NotNull String asString(boolean requirePrefix) {
-      return "concat(* " + element.asString(false) + ")";
+    public @NotNull String asString() {
+      return "concat(* " + element.asString() + ")";
     }
 
     @Override

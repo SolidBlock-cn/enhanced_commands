@@ -60,10 +60,15 @@ public record ListOpsNbtFunction(@NotNull List<NbtFunction> valueReplacements, @
   ).apply(i, ListOpsNbtFunction::new));
 
   @Override
+  public @NotNull String asString() {
+    return asString(false);
+  }
+
+  @Override
   public @NotNull String asString(boolean requirePrefix) {
     final Function<Map.Entry<Integer, NbtFunction>, String> indexValueToStringMapper = entry -> {
       final int index = entry.getKey();
-      final String valueAsString = entry.getValue().asString(true);
+      final String valueAsString = entry.getValue().asString();
       return index + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
     };
     final Function<Map.Entry<Integer, List<NbtFunction>>, String> indexValuesToStringMapper = entry -> {

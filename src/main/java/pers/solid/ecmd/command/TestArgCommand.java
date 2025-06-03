@@ -152,7 +152,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final NbtPredicate reparsedPredicate = NbtPredicate.parse(registryAccess, s, source);
               source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Text.literal(reparsedPredicate.asString(false)).styled(Styles.RESULT)), false);
               final NbtFunction reparsedFunction = NbtFunction.parse(registryAccess, s, source);
-              source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString(false)).styled(Styles.RESULT)), false);
+              source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Text.literal(reparsedFunction.asString()).styled(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
               source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
               final boolean reparsedFunctionEqual = reparsedFunction.apply(null, new ExecutionContext(source)).equals(nbtElement);

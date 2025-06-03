@@ -29,7 +29,7 @@ public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements Bloc
 
   @Override
   public @NotNull String asString() {
-    return nbtFunction.asString(false);
+    return nbtFunction.asString();
   }
 
   @Override

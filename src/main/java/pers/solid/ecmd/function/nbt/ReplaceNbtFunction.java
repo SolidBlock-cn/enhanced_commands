@@ -22,8 +22,8 @@ public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFu
   ).apply(i, ReplaceNbtFunction::new));
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
-    return "replace(" + predicate.asString(false) + ", " + function.asString(false) + ")";
+  public @NotNull String asString() {
+    return "replace(" + predicate.asString(false) + ", " + function.asString() + ")";
   }
 
   @Override

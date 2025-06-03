@@ -23,7 +23,7 @@ public record PosNbtFunction(Vec3d pos) implements NbtFunction {
   public static final MapCodec<PosNbtFunction> CODEC = Vec3d.CODEC.fieldOf("pos").xmap(PosNbtFunction::new, PosNbtFunction::pos);
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public @NotNull String asString() {
     return "pos(" + StringUtil.wrapVector(pos) + ")";
   }
 
