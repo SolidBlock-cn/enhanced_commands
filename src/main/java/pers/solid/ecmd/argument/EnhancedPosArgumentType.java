@@ -23,6 +23,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -33,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -417,11 +419,12 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   /**
    * 指定了整数坐标（没有小数部分）如何对齐到精确坐标（浮点数坐标）。浮点数（包括数值上等于整数但指定了小数部分的数）不会受到影响。
    */
-  public enum IntAlignType {
+  public enum IntAlignType implements StringIdentifiable {
+
     /**
      * 不改变值，即整数坐标会被解析成数值相等的浮点坐标。例如：(1, 2, 3) -> (1.0, 2.0, 3.0)。
      */
-    UNCHANGED {
+    UNCHANGED("unchanged") {
       @Override
       public boolean shouldAdjustToCenter(int index) {
         return false;
@@ -430,7 +433,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     /**
      * 仅在水平方向上向坐标对齐，类似于 {@code /teleport} 命令中的参数，例如：(1, 2, 3) -> (1.5, 2.0, 3.5)。
      */
-    HORIZONTALLY_CENTERED {
+    HORIZONTALLY_CENTERED("horizontally_centered") {
       @Override
       public boolean shouldAdjustToCenter(int index) {
         return index != 1;
@@ -439,15 +442,22 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     /**
      * 对齐的方块的中心位置，即各整数值均增加 0.5。例如：(1, 2, 3) -> (1.5, 2.5, 3.5)。
      */
-    CENTERED {
+    CENTERED("centered") {
       @Override
       public boolean shouldAdjustToCenter(int index) {
         return true;
       }
     };
 
+    IntAlignType(String name) {
+      this.name = name;
+    }
+
     @Contract(pure = true)
     public abstract boolean shouldAdjustToCenter(int index);
+
+    public static final StringIdentifiableCodec<IntAlignType> CODEC = StringIdentifiableCodec.create(values());
+    private final String name;
 
     public double mayAdjustToCenter(int value, int index) {
       if (shouldAdjustToCenter(index)) {
@@ -455,6 +465,11 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
       } else {
         return value;
       }
+    }
+
+    @Override
+    public String asString() {
+      return name;
     }
 
     public Vec3d mayAdjustToCenter(Vec3i vec3i) {

@@ -72,20 +72,6 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 public enum TestArgCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    dispatcher.register(literalR2("testarg")
-        .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
-        .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
-        .then(addNbtProperties(literal("nbt"), registryAccess))
-        .then(addNbtCompoundProperties(literal("nbt_compound")))
-        .then(addNbtPredicateProperties(literal("nbt_predicate"), registryAccess))
-        .then(addNbtFunctionProperties(literal("nbt_function"), registryAccess))
-        .then(addPosProperties(literal("pos")))
-        .then(addRegionProperties(literal("region"), registryAccess))
-    );
-  }
-
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addBlockFunctionProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
     return argumentBuilder.then(argument("block_function", BlockFunctionArgumentType.blockFunction(registryAccess))
         .executes(context -> executeStringShow(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString))
@@ -257,6 +243,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     final Command<ServerCommandSource> execution = context -> {
       final PosArgument pos = getPosArgument(context, "pos");
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
+      context.getSource().sendFeedback$ecBridge(() -> Text.literal(EnhancedPosArgument.asString(pos)), false);
+      context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(EnhancedPosArgument.CODEC.encodeStart(NbtOps.INSTANCE, pos).getOrThrow()), false);
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.pos.result").append(ScreenTexts.LINE_BREAK).append(Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY)), false);
       return 1;
     };
@@ -396,5 +384,19 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     } catch (Throwable e) {
       throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException().create(e.toString());
     }
+  }
+
+  @Override
+  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+    dispatcher.register(literalR2("testarg")
+        .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
+        .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
+        .then(addNbtProperties(literal("nbt"), registryAccess))
+        .then(addNbtCompoundProperties(literal("nbt_compound")))
+        .then(addNbtPredicateProperties(literal("nbt_predicate"), registryAccess))
+        .then(addNbtFunctionProperties(literal("nbt_function"), registryAccess))
+        .then(addPosProperties(literal("pos")))
+        .then(addRegionProperties(literal("region"), registryAccess))
+    );
   }
 }
