@@ -84,7 +84,7 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final WeightedListParser<BlockFunction> weightedListParser = WeightedListParser.of((parseContext1) -> BlockFunctionArgument.parse(parseContext));
+      final WeightedListParser<BlockFunction> weightedListParser = WeightedListParser.of((parseContext1) -> BlockFunction.parse(parseContext));
       final StringReader reader = parseContext.reader();
 
       weightedList = weightedListParser.parse(parseContext);

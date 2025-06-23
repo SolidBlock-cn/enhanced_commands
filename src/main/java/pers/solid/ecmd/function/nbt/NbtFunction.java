@@ -1,16 +1,14 @@
 package pers.solid.ecmd.function.nbt;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.server.command.ServerCommandSource;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -23,14 +21,9 @@ import java.util.function.Predicate;
 /**
  * <p>NBT 函数指定了对 NBT 数据的处理，可以直接替换一个 NBT 值，也可以进行具体修改，例如连接字符串、截取子字符串、修改列表等。每个 NBT 函数对 NBT 的具体处理由 {@link #apply} 决定，该方法接收一个 NBT 元素作为参数。
  * <p>每个 NBT 函数都有对应的类型，即 {@link NbtFunctionType}，决定了该 NBT 函数将进行序列化和反序列化。
- * <p>在命令参数中，NBT 函数在解析时实际上是 {@link NbtFunctionArgument}，并根据 {@link ServerCommandSource} 转换成具体的 NBT 函数。
  */
-public interface NbtFunction extends ExpressionConvertible, NbtFunctionArgument {
+public interface NbtFunction extends ExpressionConvertible {
   Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.getCodec().dispatch(NbtFunction::getType, NbtFunctionType::getCodec);
-
-  static @NotNull NbtFunction parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
-    return NbtFunctionArgument.parse(new ParseContext<>(registryAccess, new StringReader(s), false, true), false, false).toAbsolute(source);
-  }
 
   /**
    * 对 NBT 函数在 NBT 元素上进行递归应用。如果该 NBT 元素是列表、复合标签等，则它的元素也会被应用，除非该列表或者复合标签自身即被应用。
@@ -94,6 +87,11 @@ public interface NbtFunction extends ExpressionConvertible, NbtFunctionArgument 
     }
   }
 
+  static <S> NbtFunction parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
+    final NbtFunctionParser<S> n = new NbtFunctionParser<>(parseContext);
+    return n.parseFunction(mustExpectSign, equalsForDefault);
+  }
+
   /**
    * 将 NBT 函数用字符串表示后的结果。
    */
@@ -131,8 +129,4 @@ public interface NbtFunction extends ExpressionConvertible, NbtFunctionArgument 
     return recursivelyApply(input -> this.apply(input, context), nbtElement, predicate);
   }
 
-  @Override
-  default NbtFunction toAbsolute(ServerCommandSource source) {
-    return this;
-  }
 }

@@ -62,7 +62,7 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
 
     @Override
     protected BlockFunction parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return BlockFunctionArgument.parse(parseContext.withAllowSparse(true));
+      return BlockFunction.parse(parseContext.withAllowSparse(true));
     }
 
     @Override

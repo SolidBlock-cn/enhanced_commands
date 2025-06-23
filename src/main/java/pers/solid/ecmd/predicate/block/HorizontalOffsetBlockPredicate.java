@@ -10,7 +10,6 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -61,7 +60,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     return BlockPredicateTypes.HORIZONTAL_OFFSET;
   }
 
-  public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate>, Parser<BlockPredicateArgument> {
+  public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate>, Parser<BlockPredicate> {
     HORIZONTAL_OFFSET_TYPE;
 
     @Override
@@ -70,7 +69,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> {
         ParsingUtil.suggestString("<", BENEATH_BLOCK, suggestionsBuilder);
         ParsingUtil.suggestString(">", ABOVE_BLOCK, suggestionsBuilder);
@@ -96,10 +95,9 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
       }
       if (!prefixed) return null;
       if (parseContext.allowSparse()) reader.skipWhitespace();
-      final BlockPredicateArgument parse = BlockPredicateArgument.parse(parseContext);
+      final BlockPredicate parse = BlockPredicate.parse(parseContext);
       if (offset != 0) {
-        int finalOffset = offset;
-        return source -> new HorizontalOffsetBlockPredicate(finalOffset, parse.apply(source));
+        return new HorizontalOffsetBlockPredicate(offset, parse);
       } else {
         return parse;
       }

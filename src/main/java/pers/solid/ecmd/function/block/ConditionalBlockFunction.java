@@ -11,7 +11,6 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -69,11 +68,11 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        condition = BlockPredicateArgument.parse(parseContext);
+        condition = BlockPredicate.parse(parseContext);
       } else if (paramIndex == 1) {
-        valueIfTrue = BlockFunctionArgument.parse(parseContext);
+        valueIfTrue = BlockFunction.parse(parseContext);
       } else if (paramIndex == 2) {
-        valueIfFalse = BlockFunctionArgument.parse(parseContext);
+        valueIfFalse = BlockFunction.parse(parseContext);
       }
     }
 

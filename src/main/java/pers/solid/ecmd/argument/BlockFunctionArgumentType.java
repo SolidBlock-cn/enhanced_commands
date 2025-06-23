@@ -9,7 +9,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.function.block.BlockFunction;
-import pers.solid.ecmd.function.block.BlockFunctionArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
@@ -19,13 +18,13 @@ public record BlockFunctionArgumentType(CommandRegistryAccess registryAccess) im
     return new BlockFunctionArgumentType(registryAccess);
   }
 
-  public static BlockFunction getBlockFunction(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return context.getArgument(name, BlockFunctionArgument.class).apply(context.getSource());
+  public static BlockFunction getBlockFunction(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, BlockFunction.class);
   }
 
   @Override
   public BlockFunction parse(StringReader reader) throws CommandSyntaxException {
-    return BlockFunctionArgument.parse(new ParseContext<>(registryAccess, reader, false, false));
+    return BlockFunction.parse(new ParseContext<>(registryAccess, reader, false, false));
   }
 
   @Override
@@ -34,7 +33,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess registryAccess) im
     stringReader.setCursor(builder.getStart());
     final ParseContext<S> parseContext = new ParseContext<>(registryAccess, stringReader, true, false);
     try {
-      BlockFunctionArgument.parse(parseContext);
+      BlockFunction.parse(parseContext);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

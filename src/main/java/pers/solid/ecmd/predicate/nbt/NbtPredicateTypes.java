@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class NbtPredicateTypes {
 
-  public static final Map<String, Supplier<FunctionLikeParser<? extends NbtPredicateArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtPredicateTypes::registerPredicates);
+  public static final Map<String, Supplier<FunctionLikeParser<? extends NbtPredicate>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtPredicateTypes::registerPredicates);
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtPredicateTypes::registerFunctionNames);
 
   // 基本的 NBT 谓词
@@ -37,7 +37,7 @@ public class NbtPredicateTypes {
   }
 
 
-  private static void registerPredicates(Map<String, Supplier<FunctionLikeParser<? extends NbtPredicateArgument>>> map) {
+  private static void registerPredicates(Map<String, Supplier<FunctionLikeParser<? extends NbtPredicate>>> map) {
 
   }
 

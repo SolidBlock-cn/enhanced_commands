@@ -7,7 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
@@ -56,7 +55,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     return BlockPredicateTypes.CONSTANT;
   }
 
-  public enum Type implements BlockPredicateType<ConstantBlockPredicate>, Parser<BlockPredicateArgument> {
+  public enum Type implements BlockPredicateType<ConstantBlockPredicate>, Parser<ConstantBlockPredicate> {
     CONSTANT_TYPE;
 
     @Override
@@ -65,7 +64,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     }
 
     @Override
-    public @Nullable BlockPredicate parse(ParseContext<?> parseContext) {
+    public ConstantBlockPredicate parse(ParseContext<?> parseContext) {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_predicate.constant"), suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '*') {

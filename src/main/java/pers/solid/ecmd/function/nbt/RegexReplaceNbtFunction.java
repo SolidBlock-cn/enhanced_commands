@@ -164,7 +164,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
           parseContext.addSuggestion((context, builder) -> ParsingUtil.suggestBoolean(builder));
           lenient = parseContext.reader().readBoolean();
         }
-        case "original" -> original = NbtFunctionArgument.parse(parseContext, false, false);
+        case "original" -> original = NbtFunction.parse(parseContext, false, false);
       }
     }
   }

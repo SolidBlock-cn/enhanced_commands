@@ -23,7 +23,7 @@ import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collection;
 
-public record StorageNbtData(Identifier identifier) implements NbtTarget.Single<DataCommandStorage>, NbtTargetArgument<DataCommandStorage>, NbtSourceArgument<DataCommandStorage> {
+public record StorageNbtData(Identifier identifier) implements NbtTarget.Single<DataCommandStorage> {
   public static final MapCodec<StorageNbtData> CODEC = Identifier.CODEC.fieldOf("storage").xmap(StorageNbtData::new, StorageNbtData::identifier);
 
   public static StorageNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
@@ -80,15 +80,5 @@ public record StorageNbtData(Identifier identifier) implements NbtTarget.Single<
   @Override
   public Text feedbackModify(Collection<DataCommandStorage> values) {
     return Text.translatable("commands.data.storage.modified", this.identifier);
-  }
-
-  @Override
-  public NbtTarget<DataCommandStorage> getNbtTarget(ServerCommandSource source) throws CommandSyntaxException {
-    return this;
-  }
-
-  @Override
-  public NbtSource<DataCommandStorage> getNbtSource(ServerCommandSource source) throws CommandSyntaxException {
-    return this;
   }
 }

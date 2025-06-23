@@ -7,7 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
@@ -47,7 +46,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
     return BlockPredicateTypes.NEGATING;
   }
 
-  public enum Type implements BlockPredicateType<NegatingBlockPredicate>, Parser<BlockPredicateArgument> {
+  public enum Type implements BlockPredicateType<NegatingBlockPredicate>, Parser<BlockPredicate> {
     NEGATING_TYPE;
 
     @Override
@@ -56,7 +55,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
     }
 
     @Override
-    public @Nullable BlockPredicateArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
       boolean negates = false;
       boolean suffixed = false;
@@ -73,9 +72,9 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
         reader.skip();
         return ConstantBlockPredicate.ALWAYS_FALSE;
       }
-      final BlockPredicateArgument parse = BlockPredicateArgument.parse(parseContext);
+      final BlockPredicate parse = BlockPredicate.parse(parseContext);
       if (negates) {
-        return source -> new NegatingBlockPredicate(parse.apply(source));
+        return new NegatingBlockPredicate(parse);
       } else {
         return parse;
       }

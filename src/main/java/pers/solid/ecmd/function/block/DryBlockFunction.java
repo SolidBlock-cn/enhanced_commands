@@ -61,7 +61,7 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      blockFunction = BlockFunctionArgument.parse(parseContext);
+      blockFunction = BlockFunction.parse(parseContext);
     }
 
     @Override

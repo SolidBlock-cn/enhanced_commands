@@ -90,7 +90,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      blockFunction = BlockFunctionArgument.parse(parseContext);
+      blockFunction = BlockFunction.parse(parseContext);
     }
 
     @Override

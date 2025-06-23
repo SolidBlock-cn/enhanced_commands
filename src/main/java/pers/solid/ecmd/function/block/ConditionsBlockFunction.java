@@ -13,7 +13,6 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -87,7 +86,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
       }
       while (true) {
         parseContext.clearSuggestion();
-        BlockPredicate predicate = BlockPredicateArgument.parse(parseContext);
+        BlockPredicate predicate = BlockPredicate.parse(parseContext);
         reader.skipWhitespace();
         parseContext.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
@@ -100,7 +99,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
         parseContext.clearSuggestion();
         reader.skipWhitespace();
 
-        BlockFunction functionIfTrue = BlockFunctionArgument.parse(parseContext);
+        BlockFunction functionIfTrue = BlockFunction.parse(parseContext);
         reader.skipWhitespace();
         parseContext.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
@@ -112,7 +111,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
           reader.skip();
           reader.skipWhitespace();
           parseContext.clearSuggestion();
-          BlockFunction functionIfFalse = BlockFunctionArgument.parse(parseContext);
+          BlockFunction functionIfFalse = BlockFunction.parse(parseContext);
 
           functions.add(new ConditionalBlockFunction(predicate, functionIfTrue, functionIfFalse));
         } else {

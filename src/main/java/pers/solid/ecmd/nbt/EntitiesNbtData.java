@@ -1,10 +1,12 @@
 package pers.solid.ecmd.nbt;
 
 import com.google.common.collect.Iterables;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.command.EntitySelector;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
@@ -19,10 +21,21 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
+import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.*;
 
 public record EntitiesNbtData(EntitySelector entitySelector) implements NbtTarget<Entity> {
+  public static EntitiesNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+    final StringReader reader = parseContext.reader();
+    ParsingUtil.expectAndSkipWhitespace(reader);
+    final EntitySelector selector = parseContext.parseAndSuggestArgument(EntityArgumentType.entities());
+    if (reader.canRead()) {
+      parseContext.clearSuggestion();
+    }
+    return new EntitiesNbtData(selector);
+  }
   // todo: consider using an entity selector as a record component, instead of the actual collection of entities
 
   @Override

@@ -13,15 +13,24 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collection;
 
 public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Single<MutableObject<NbtCompound>> {
   public static final MapCodec<LiteralNbtData> CODEC = NbtFunction.CODEC.fieldOf("value").xmap(LiteralNbtData::new, LiteralNbtData::nbtFunction);
+
+  public static LiteralNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+    ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
+    final NbtFunction nbtFunction = new NbtFunctionParser<>(parseContext).parseFunction(false, false);
+    return new LiteralNbtData(nbtFunction);
+  }
 
   public MutableObject<NbtCompound> value(ServerCommandSource source) throws CommandSyntaxException {
     final NbtElement nbtElement = nbtFunction.apply(null, new ExecutionContext(source));

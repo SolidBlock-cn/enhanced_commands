@@ -80,7 +80,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
       if (paramIndex == 0) {
         relPos = parseContext.parseAndSuggestVec3i();
       } else if (paramIndex == 1) {
-        blockPredicate = BlockPredicateArgument.parse(parseContext);
+        blockPredicate = BlockPredicate.parse(parseContext);
       }
     }
   }

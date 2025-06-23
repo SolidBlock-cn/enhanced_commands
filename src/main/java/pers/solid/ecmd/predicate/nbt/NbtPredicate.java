@@ -15,11 +15,16 @@ import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.function.Predicate;
 
-public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull NbtElement>, NbtPredicateArgument {
+public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull NbtElement> {
   Codec<NbtPredicate> CODEC = NbtPredicateType.REGISTRY.getCodec().dispatch(NbtPredicate::getType, NbtPredicateType::getCodec);
 
   static @NotNull NbtPredicate parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
     return new NbtPredicateParser<>(new ParseContext<>(registryAccess, new StringReader(s), false, true)).parsePredicate(false, false);
+  }
+
+  static <S> NbtPredicate parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
+    final NbtPredicateParser<S> n = new NbtPredicateParser<>(parseContext);
+    return n.parsePredicate(mustExpectSign, equalsForDefault);
   }
 
   @Override
@@ -33,11 +38,6 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
   boolean test(@NotNull NbtElement nbtElement);
 
   @NotNull NbtPredicateType<?> getType();
-
-  @Override
-  default NbtPredicate toAbsolute(ServerCommandSource source) {
-    return this;
-  }
 
   enum Type implements StringIdentifiable {
     COMPARISON("comparison"),

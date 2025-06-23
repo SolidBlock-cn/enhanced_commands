@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
-import pers.solid.ecmd.predicate.nbt.NbtPredicateArgument;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -52,8 +51,8 @@ public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFu
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
-        case 0 -> nbtPredicate = NbtPredicateArgument.parse(parseContext, false, false);
-        case 1 -> nbtFunction = NbtFunctionArgument.parse(parseContext, false, false);
+        case 0 -> nbtPredicate = NbtPredicate.parse(parseContext, false, false);
+        case 1 -> nbtFunction = NbtFunction.parse(parseContext, false, false);
       }
     }
 

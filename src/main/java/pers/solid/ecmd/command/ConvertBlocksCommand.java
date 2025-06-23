@@ -29,7 +29,6 @@ import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.region.Region;
@@ -108,8 +107,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
       });
     }
 
-    final BlockPredicateArgument blockPredicateArgument = keywordArgs.getArg("affect_only");
-    final BlockPredicate predicate = blockPredicateArgument == null ? null : blockPredicateArgument.apply(source);
+    final BlockPredicate predicate = keywordArgs.getArg("affect_only");
     final int flags = FillReplaceCommand.getFlags(keywordArgs);
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final boolean affectFluid = keywordArgs.getBoolean("affect_fluid");

@@ -71,7 +71,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final BlockPredicate parse = BlockPredicateArgument.parse(parseContext);
+      final BlockPredicate parse = BlockPredicate.parse(parseContext);
       if (value1 == null) {
         value1 = parse;
       } else if (value2 == null) {

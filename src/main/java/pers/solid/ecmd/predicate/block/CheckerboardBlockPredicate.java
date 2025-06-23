@@ -76,7 +76,7 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
 
     @Override
     protected BlockPredicate parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return BlockPredicateArgument.parse(parseContext);
+      return BlockPredicate.parse(parseContext);
     }
   }
 }

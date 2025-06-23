@@ -64,7 +64,7 @@ public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> fun
 
     @Override
     protected BlockFunction parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return BlockFunctionArgument.parse(parseContext);
+      return BlockFunction.parse(parseContext);
     }
   }
 }

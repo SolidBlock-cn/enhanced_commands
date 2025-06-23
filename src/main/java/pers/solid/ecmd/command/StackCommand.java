@@ -36,7 +36,6 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
@@ -171,10 +170,8 @@ public enum StackCommand implements CommandRegistrationCallback {
 
     final BlockPredicate affectOnly, transformOnly;
     {
-      final BlockPredicateArgument affectOnlyArgument = keywordArgs.getArg("affect_only");
-      affectOnly = affectOnlyArgument == null ? null : affectOnlyArgument.apply(source);
-      final BlockPredicateArgument transformOnlyArgument = keywordArgs.getArg("transform_only");
-      transformOnly = transformOnlyArgument == null ? null : transformOnlyArgument.apply(source);
+      affectOnly = keywordArgs.getArg("affect_only");
+      transformOnly = keywordArgs.getArg("transform_only");
     }
 
     // 收集需要影响的方块和方块实体

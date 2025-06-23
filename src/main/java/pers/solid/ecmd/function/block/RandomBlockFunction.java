@@ -99,7 +99,7 @@ public final class RandomBlockFunction implements BlockFunction {
     return "RandomBlockFunction{}";
   }
 
-  public enum Type implements BlockFunctionType<RandomBlockFunction>, Parser<BlockFunctionArgument> {
+  public enum Type implements BlockFunctionType<RandomBlockFunction>, Parser<RandomBlockFunction> {
     RANDOM_TYPE;
 
     @Override

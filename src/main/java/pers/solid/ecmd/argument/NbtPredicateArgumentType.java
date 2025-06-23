@@ -12,7 +12,6 @@ import net.minecraft.command.argument.serialize.ArgumentSerializer;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
-import pers.solid.ecmd.predicate.nbt.NbtPredicateArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
@@ -28,7 +27,7 @@ public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAcc
   }
 
   public static NbtPredicate getNbtPredicate(CommandContext<ServerCommandSource> context, String name) {
-    return context.getArgument(name, NbtPredicateArgument.class).toAbsolute(context.getSource());
+    return context.getArgument(name, NbtPredicate.class);
   }
 
   @Override

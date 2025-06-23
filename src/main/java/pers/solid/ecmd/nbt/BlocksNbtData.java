@@ -28,10 +28,13 @@ import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -41,6 +44,13 @@ public record BlocksNbtData(RegionArgument<?> region, BlockPredicate blockPredic
       RegionArgument.CODEC.fieldOf("region").forGetter(BlocksNbtData::region),
       BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(BlocksNbtData::blockPredicate)
   ).apply(i, BlocksNbtData::new));
+
+  public static BlocksNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+    ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
+    final RegionArgument<?> regionArgument = RegionArgument.parse(parseContext);
+    parseContext.clearSuggestion();
+    return new BlocksNbtData(regionArgument, ConstantBlockPredicate.ALWAYS_TRUE);
+  }
 
   @Override
   public Collection<BlockEntity> values(ServerCommandSource source) throws CommandSyntaxException {

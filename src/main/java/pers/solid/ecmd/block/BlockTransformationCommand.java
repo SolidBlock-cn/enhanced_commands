@@ -25,11 +25,11 @@ import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
-import pers.solid.ecmd.function.block.BlockFunctionArgument;
+import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
 import pers.solid.ecmd.region.Region;
@@ -74,9 +74,9 @@ public interface BlockTransformationCommand {
 
   default int execute(Region region, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
-    final @Nullable BlockPredicateArgument affectOnly = keywordArgs.getArg("affect_only");
-    final @Nullable BlockPredicateArgument transformOnly = keywordArgs.getArg("transform_only");
-    final @Nullable BlockFunctionArgument remaining = keywordArgs.getArg("remaining");
+    final @Nullable BlockPredicate affectOnly = keywordArgs.getArg("affect_only");
+    final @Nullable BlockPredicate transformOnly = keywordArgs.getArg("transform_only");
+    final @Nullable BlockFunction remaining = keywordArgs.getArg("remaining");
     final ServerWorld world = source.getWorld();
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     final boolean bypassLimit = keywordArgs.getArg("bypass_limit");
@@ -92,9 +92,9 @@ public interface BlockTransformationCommand {
         .transformsPosBack(this::transformPosBack)
         .transformsEntity(this::transformEntity, this::transformEntityBack)
         .transformsBlockState(keywordArgs.getBoolean("keep_state") ? Function.identity() : this::transformBlockState)
-        .affectsOnly(affectOnly == null ? null : affectOnly.apply(source))
-        .transformsOnly(transformOnly == null ? null : transformOnly.apply(source))
-        .fillRemainingWith(remaining == null ? null : remaining.apply(source))
+        .affectsOnly(affectOnly)
+        .transformsOnly(transformOnly)
+        .fillRemainingWith(remaining)
         .setUnloadedPosBehavior(unloadedPosBehavior)
         .interpolates(keywordArgs.supportsArg("interpolate") && keywordArgs.getBoolean("interpolate"))
         .bypassLimit(bypassLimit)

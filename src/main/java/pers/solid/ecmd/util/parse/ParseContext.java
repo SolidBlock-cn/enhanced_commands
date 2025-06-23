@@ -51,6 +51,10 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
     this(null, reader, false, false);
   }
 
+  public ParseContext(CommandRegistryAccess registryAccess, String string, boolean suggestionsOnly, boolean allowSparse) {
+    this(registryAccess, new StringReader(string), suggestionsOnly, allowSparse);
+  }
+
   public ParseContext(CommandRegistryAccess registryAccess, StringReader reader, boolean suggestionsOnly, boolean allowSparse) {
     this(registryAccess, reader, new ArrayList<>(), suggestionsOnly, allowSparse);
   }

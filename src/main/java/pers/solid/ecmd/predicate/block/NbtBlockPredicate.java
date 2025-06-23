@@ -53,7 +53,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     return BlockPredicateTypes.NBT;
   }
 
-  public enum Type implements BlockPredicateType<NbtBlockPredicate>, Parser<BlockPredicateArgument> {
+  public enum Type implements BlockPredicateType<NbtBlockPredicate>, Parser<NbtBlockPredicate> {
     NBT_TYPE;
 
     @Override

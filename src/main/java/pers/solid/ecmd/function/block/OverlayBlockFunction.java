@@ -68,7 +68,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      blockFunctions.add(BlockFunctionArgument.parse(parseContext));
+      blockFunctions.add(BlockFunction.parse(parseContext));
     }
   }
 }

@@ -72,7 +72,7 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final BlockPredicate parse = BlockPredicateArgument.parse(parseContext);
+      final BlockPredicate parse = BlockPredicate.parse(parseContext);
       blockPredicates.add(parse);
     }
 

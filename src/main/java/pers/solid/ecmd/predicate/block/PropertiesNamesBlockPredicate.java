@@ -73,7 +73,7 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     return BlockPredicateTypes.PROPERTY_NAMES;
   }
 
-  public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate>, Parser<BlockPredicateArgument> {
+  public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate>, Parser<PropertiesNamesBlockPredicate> {
     PROPERTY_NAMES_TYPE;
 
     @Override

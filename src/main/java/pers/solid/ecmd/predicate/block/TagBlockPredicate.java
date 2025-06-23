@@ -88,7 +88,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
     return BlockPredicateTypes.TAG;
   }
 
-  public enum Type implements BlockPredicateType<TagBlockPredicate>, Parser<BlockPredicateArgument> {
+  public enum Type implements BlockPredicateType<TagBlockPredicate>, Parser<TagBlockPredicate> {
     TAG_TYPE;
 
     @Override

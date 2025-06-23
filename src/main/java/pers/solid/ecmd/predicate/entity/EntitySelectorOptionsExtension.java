@@ -2,7 +2,6 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
@@ -51,7 +50,6 @@ import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
@@ -442,7 +440,7 @@ public class EntitySelectorOptionsExtension {
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
-        final Map<PosArgument, BlockPredicateArgument> map = new LinkedHashMap<>();
+        final Map<PosArgument, BlockPredicate> map = new LinkedHashMap<>();
         while (true) {
           if (stringReader.canRead() && stringReader.peek() == '}') {
             stringReader.skip();
@@ -465,9 +463,9 @@ public class EntitySelectorOptionsExtension {
           parseContext.clearSuggestion();
           //noinspection unchecked
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-          final BlockPredicateArgument blockPredicateArgument = BlockPredicateArgument.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
+          final BlockPredicate blockPredicate = BlockPredicate.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
 
-          map.put(posArgument, blockPredicateArgument);
+          map.put(posArgument, blockPredicate);
           stringReader.skipWhitespace();
 
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest(",").suggest("}").buildFuture());
@@ -482,23 +480,14 @@ public class EntitySelectorOptionsExtension {
           }
         }
 
-        EntitySelectorReaderExtras extras = reader.extension$ec();
-        extras.addFunction(source -> {
-          final ImmutableMap.Builder<PosArgument, BlockPredicate> newMapBuilder = new ImmutableMap.Builder<>();
-          for (final var entry : map.entrySet()) {
-            final var posArgument = entry.getKey();
-            final var blockPredicateArgument = entry.getValue();
-            newMapBuilder.put(posArgument, blockPredicateArgument.apply(source));
-          }
-          return new BlockPredicatesEntityPredicateEntry(newMapBuilder.build());
-        });
+        reader.addPredicate(new BlockPredicatesEntityPredicateEntry(map));
       } else {
         parseContext.clearSuggestion();
         //noinspection unchecked
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-        final BlockPredicateArgument parse = BlockPredicateArgument.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
+        final BlockPredicate parse = BlockPredicate.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
         EntitySelectorReaderExtras extras = reader.extension$ec();
-        extras.addFunction(source -> new BlockPredicateEntityPredicateEntry(parse.apply(source)));
+        reader.addPredicate(new BlockPredicateEntityPredicateEntry(parse));
       }
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.block"));
 

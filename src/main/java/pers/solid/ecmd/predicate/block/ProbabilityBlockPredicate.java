@@ -121,7 +121,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooLow().createWithContext(reader, value, 0);
         }
       } else if (paramIndex == 1) {
-        predicate = BlockPredicateArgument.parse(parseContext);
+        predicate = BlockPredicate.parse(parseContext);
       }
 
       if (reader.canRead() && reader.peek() == ';') {

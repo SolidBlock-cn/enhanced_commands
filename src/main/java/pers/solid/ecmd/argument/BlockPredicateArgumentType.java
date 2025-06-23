@@ -9,7 +9,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
@@ -22,13 +21,13 @@ public record BlockPredicateArgumentType(CommandRegistryAccess registryAccess) i
     return new BlockPredicateArgumentType(registryAccess);
   }
 
-  public static BlockPredicate getBlockPredicate(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return context.getArgument(name, BlockPredicateArgument.class).apply(context.getSource());
+  public static BlockPredicate getBlockPredicate(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, BlockPredicate.class);
   }
 
   @Override
   public BlockPredicate parse(StringReader reader) throws CommandSyntaxException {
-    return BlockPredicateArgument.parse(new ParseContext<>(registryAccess, reader, false, false));
+    return BlockPredicate.parse(new ParseContext<>(registryAccess, reader, false, false));
   }
 
   @Override
@@ -37,7 +36,7 @@ public record BlockPredicateArgumentType(CommandRegistryAccess registryAccess) i
     stringReader.setCursor(builder.getStart());
     final ParseContext<S> parseContext = new ParseContext<>(registryAccess, stringReader, true, false);
     try {
-      BlockPredicateArgument.parse(parseContext);
+      BlockPredicate.parse(parseContext);
     } catch (CommandSyntaxException ignore) {
     }
     SuggestionsBuilder builderOffset = builder.createOffset(stringReader.getCursor());

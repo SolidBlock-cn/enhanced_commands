@@ -46,7 +46,7 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
     return Type.INSTANCE.createExceptionForUnknownId(reader, identifier);
   }
 
-  public static class Type extends PrefixedIdParser<BlockPredicateArgument, BlockPredicate> implements BlockPredicateType<ReferenceBlockPredicate> {
+  public static class Type extends PrefixedIdParser<ReferenceBlockPredicate, BlockPredicate> implements BlockPredicateType<ReferenceBlockPredicate> {
     public static final Type INSTANCE = new Type();
 
     protected Type() {
@@ -59,8 +59,8 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
     }
 
     @Override
-    protected BlockPredicateArgument getResultByEntrySupplier(FailableSupplier<RegistryKey<BlockPredicate>, CommandSyntaxException> supplier) {
-      return source -> new ReferenceBlockPredicate(supplier.get());
+    protected ReferenceBlockPredicate getResultByEntrySupplier(FailableSupplier<RegistryKey<BlockPredicate>, CommandSyntaxException> supplier) throws CommandSyntaxException {
+      return new ReferenceBlockPredicate(supplier.get());
     }
 
     @Override

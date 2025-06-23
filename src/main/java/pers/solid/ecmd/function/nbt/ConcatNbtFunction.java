@@ -155,12 +155,12 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
         flatten = true;
 
         // 在展平模式下，只能读取一个参数
-        nbtFunctions.add(NbtFunctionArgument.parse(parseContext, false, false));
+        nbtFunctions.add(NbtFunction.parse(parseContext, false, false));
       } else if (reader.canRead() && reader.peek() == ')') {
         parseContext.clearSuggestion();
       } else {
         while (true) {
-          nbtFunctions.add(NbtFunctionArgument.parse(parseContext, false, false));
+          nbtFunctions.add(NbtFunction.parse(parseContext, false, false));
           reader.skipWhitespace();
 
           parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder
@@ -197,7 +197,7 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
       if ("delimiter".equals(paramName)) {
-        delimiter = NbtFunctionArgument.parse(parseContext, false, false);
+        delimiter = NbtFunction.parse(parseContext, false, false);
       }
     }
   }

@@ -75,7 +75,7 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
 
     @Override
     protected BlockPredicate parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return BlockPredicateArgument.parse(parseContext);
+      return BlockPredicate.parse(parseContext);
     }
 
     @Override

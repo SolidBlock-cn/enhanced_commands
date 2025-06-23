@@ -13,7 +13,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
-import pers.solid.ecmd.function.nbt.NbtFunctionArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
@@ -28,8 +27,8 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
     return new NbtFunctionArgumentType(false, registryAccess);
   }
 
-  public static NbtFunction getNbtFunction(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return context.getArgument(name, NbtFunctionArgument.class).toAbsolute(context.getSource());
+  public static NbtFunction getNbtFunction(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, NbtFunction.class);
   }
 
   public static CompoundNbtFunction getCompoundNbtFunction(CommandContext<?> context, String name) {
