@@ -318,6 +318,7 @@
   "enhanced_commands.commands.nbt.query_limit_notice": "Query for multiple targets is limited to %s",
   "enhanced_commands.commands.nbt.query_scale_not_number": "Can't get NBT data for path %s because it is not a numeric NBT; only numeric NBT values are allowed when scale is specified",
   "enhanced_commands.commands.nbt.regex_replace.success": "Replace NBT with regular expression for %s $plural(times, time)",
+  "enhanced_commands.commands.nbt.remove.success": "Successfully removed %s $plural(NBTs, NBT)",
   "enhanced_commands.commands.nbt.replace.success": "Replace NBT for %s $plural(times, time)",
   "enhanced_commands.commands.nbt.storage.query": "The storage %s has the following NBT data: %s",
   "enhanced_commands.commands.nbt.storage.query_path": "The storage %s has the following NBT data at path %s: %s",

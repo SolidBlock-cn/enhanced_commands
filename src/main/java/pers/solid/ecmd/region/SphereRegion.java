@@ -7,13 +7,13 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -32,7 +32,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
 
   @Override
   public @NotNull Iterator<BlockPos> iterator() {
-    return Streams.stream(new CuboidRegion(center.add(-radius, -radius, -radius), center.add(radius, radius, radius))).filter(blockPos -> blockPos.isWithinDistance(center, radius)).iterator();
+    return Streams.stream(new PreciseCuboidRegion(center.add(-radius, -radius, -radius), center.add(radius, radius, radius))).filter(blockPos -> blockPos.isWithinDistance(center, radius)).iterator();
   }
 
   @Override
@@ -94,7 +94,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<SphereRegionArgument> functionParamsParser() {
       return new Parser();
     }
 
@@ -102,15 +102,20 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     public @NotNull MapCodec<SphereRegion> getCodec() {
       return CODEC;
     }
+
+    @Override
+    public @NotNull MapCodec<SphereRegionArgument> getArgumentCodec() {
+      return SphereRegionArgument.CODEC;
+    }
   }
 
-  public static final class Parser implements FunctionParamsParser<RegionArgument> {
-    private PosArgument centerPos = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
+  public static final class Parser implements FunctionParamsParser<SphereRegionArgument> {
+    private EnhancedPosArgument centerPos = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
     private double radius;
 
     @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new SphereRegion(radius, centerPos.toAbsolutePos(source));
+    public SphereRegionArgument getParseResult(ParseContext<?> parseContext) {
+      return new SphereRegionArgument(radius, centerPos);
     }
 
     @Override

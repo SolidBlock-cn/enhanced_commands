@@ -2,7 +2,6 @@ package pers.solid.ecmd.curve;
 
 import com.google.common.collect.AbstractIterator;
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
@@ -283,7 +282,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
         }
         parseContext.clearSuggestion();
         ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-        ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+        EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(argumentType);
       } else if ("around".equals(unquotedString) || "rotated".equals(unquotedString) || "facing".equals(unquotedString)) {
         if (around != null) {
@@ -305,7 +304,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
             };
           }
           case "facing" -> {
-            ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+            EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
             final PosArgument posArgument = parseContext.parseAndSuggestArgument(argumentType);
             around = (source, center) -> {
               final Vec3d facingTarget = posArgument.toAbsolutePos(source);

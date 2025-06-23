@@ -6,11 +6,11 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2d;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.util.enums.OutlineType;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
@@ -147,7 +147,7 @@ public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion regio
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<HollowCylinderRegionArgument> functionParamsParser() {
       return new Parser();
     }
 
@@ -155,17 +155,22 @@ public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion regio
     public @NotNull MapCodec<HollowCylinderRegion> getCodec() {
       return CODEC;
     }
+
+    @Override
+    public @NotNull MapCodec<? extends RegionArgument<HollowCylinderRegion>> getArgumentCodec() {
+      return HollowCylinderRegionArgument.CODEC;
+    }
   }
 
-  public static final class Parser implements FunctionParamsParser<RegionArgument> {
+  public static final class Parser implements FunctionParamsParser<HollowCylinderRegionArgument> {
     private double radius;
     private double height = 1;
-    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
+    private EnhancedPosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
     private OutlineType type = OutlineType.WALL;
 
     @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new HollowCylinderRegion(type, new CylinderRegion(radius, height, center.toAbsolutePos(source)));
+    public HollowCylinderRegionArgument getParseResult(ParseContext<?> parseContext) {
+      return new HollowCylinderRegionArgument(type, new CylinderRegionArgument(radius, height, center));
     }
 
     @Override
@@ -186,7 +191,7 @@ public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion regio
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, height);
         }
       } else if (paramIndex == 2) {
-        ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+        ArgumentType<EnhancedPosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 3) {
         type = parseContext.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);

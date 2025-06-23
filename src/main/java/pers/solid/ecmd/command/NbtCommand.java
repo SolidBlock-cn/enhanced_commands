@@ -22,6 +22,7 @@ import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -73,11 +74,19 @@ public enum NbtCommand implements CommandRegistrationCallback {
     final ServerCommandSource source = context.getSource();
     final Collection<T> values = target.values(source);
     final ExecutionContext executionContext = new ExecutionContext(source);
+    final Collection<T> successValues = new ArrayList<>();
     for (T value : values) {
-      target.transformNbtFor(context.getSource(), value, nbtCompound -> nbtFunction.apply(nbtCompound, executionContext) instanceof final NbtCompound newCompound ? newCompound : nbtCompound);
+      target.transformNbtFor(context.getSource(), value, nbtCompound -> {
+        final NbtCompound old = nbtCompound.copy();
+        final NbtCompound applied = nbtFunction.apply(nbtCompound, executionContext) instanceof final NbtCompound newCompound ? newCompound : nbtCompound;
+        if (!applied.equals(old)) {
+          successValues.add(value);
+        }
+        return applied;
+      });
     }
-    source.sendFeedback$ecBridge(() -> target.feedbackModify(values), true);
-    return 1; // 应该修改为执行成功数量
+    source.sendFeedback$ecBridge(() -> target.feedbackModify(successValues), true);
+    return successValues.size(); // 应该修改为执行成功数量
   }
 
   private static int executeApply(NbtFunction nbtFunction, IntFunction<Text> message, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -91,8 +100,9 @@ public enum NbtCommand implements CommandRegistrationCallback {
     final MutableInt success = new MutableInt();
     for (T value : values) {
       target.transformNbtInPathFor(source, value, nbtPath, nbtElement -> {
+        final NbtElement old = nbtElement.copy();
         final NbtElement applied = nbtFunction.apply(nbtElement, executionContext);
-        if (!applied.equals(nbtElement)) {
+        if (!applied.equals(old)) {
           success.increment();
         }
         return nbtElement;
@@ -124,6 +134,17 @@ public enum NbtCommand implements CommandRegistrationCallback {
     final int startIndex = getInteger(context, "startIndex");
     final SubstringNbtFunction nbtFunction = new SubstringNbtFunction(startIndex, endIndex, keywordArgs.getBoolean("lenient"), Optional.empty());
     return executeApply(nbtFunction, success -> Text.translatable("enhanced_commands.commands.nbt.substring.success", success), context);
+  }
+
+  private static <T> int executeRemove(NbtTarget<T> target, NbtPathArgumentType.NbtPath nbtPath, ServerCommandSource source) throws CommandSyntaxException {
+    final MutableInt success = new MutableInt();
+    target.transformNbt(source, input -> {
+      final int remove = nbtPath.remove(input);
+      success.add(remove);
+      return input;
+    });
+    source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.remove.success", success.intValue()).enhanced$$(), true);
+    return success.intValue();
   }
 
   @Override
@@ -188,6 +209,10 @@ public enum NbtCommand implements CommandRegistrationCallback {
                 .then(argument("endIndex", integer())
                     .executes(context -> executeSubstring(OptionalInt.of(getInteger(context, "end_index")), context, substringKeywordArgs.defaultArgs()))
                     .then(argument("keyword_args", substringKeywordArgs)
-                        .executes(context -> executeSubstring(OptionalInt.of(getInteger(context, "end_index")), context, getKeywordArgs(context, "keyword_args"))))))));
+                        .executes(context -> executeSubstring(OptionalInt.of(getInteger(context, "end_index")), context, getKeywordArgs(context, "keyword_args")))))))
+        .then(literal("remove")
+            .then(argument("target", nbtTarget(commandRegistryAccess))
+                .then(argument("path", nbtPath())
+                    .executes(context -> executeRemove(getNbtTarget(context, "target"), getNbtPath(context, "path"), context.getSource()))))));
   }
 }

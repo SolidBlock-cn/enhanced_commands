@@ -113,7 +113,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<? extends OutlineRegionArgument> functionParamsParser() {
       return new Parser();
     }
 
@@ -121,15 +121,20 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     public @NotNull MapCodec<OutlineRegion> getCodec() {
       return CODEC;
     }
-  }
-
-  public static final class Parser implements FunctionParamsParser<RegionArgument> {
-    private OutlineType outlineType = OutlineType.OUTLINE;
-    private RegionArgument regionArgument;
 
     @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new OutlineRegion(outlineType, regionArgument.toAbsoluteRegion(source));
+    public @NotNull MapCodec<? extends OutlineRegionArgument> getArgumentCodec() {
+      return OutlineRegionArgument.CODEC;
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<OutlineRegionArgument> {
+    private OutlineType outlineType = OutlineType.OUTLINE;
+    private RegionArgument<?> regionArgument;
+
+    @Override
+    public OutlineRegionArgument getParseResult(ParseContext<?> parseContext) {
+      return new OutlineRegionArgument(outlineType, regionArgument);
     }
 
     @Override

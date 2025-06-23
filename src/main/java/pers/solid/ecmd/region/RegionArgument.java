@@ -2,22 +2,26 @@ package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
 import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 
 /**
  * @see net.minecraft.command.argument.PosArgument
  */
-public interface RegionArgument {
+public interface RegionArgument<R extends Region> extends ExpressionConvertible {
+  Codec<RegionArgument<?>> CODEC = RegionType.REGISTRY.getCodec().dispatch(RegionArgument::getType, RegionType::getArgumentCodec);
+
   @NotNull
-  static RegionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static RegionArgument<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
-    for (Parser<RegionArgument> argumentParser : RegionTypes.PARSERS) {
+    for (Parser<? extends RegionArgument<?>> argumentParser : RegionTypes.PARSERS) {
       reader.setCursor(cursorOnStart);
-      final RegionArgument parse = argumentParser.parse(parseContext.withAllowSparse(true));
+      final RegionArgument<?> parse = argumentParser.parse(parseContext.withAllowSparse(true));
       if (parse != null) {
         // keep the current position of the cursor
         return parse;
@@ -27,5 +31,8 @@ public interface RegionArgument {
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
   }
 
-  Region toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException;
+  R toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException;
+
+  @NotNull
+  RegionType<? super R> getType();
 }

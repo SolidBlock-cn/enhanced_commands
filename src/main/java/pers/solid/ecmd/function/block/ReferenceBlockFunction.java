@@ -23,7 +23,6 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
     try {
-      // todo 考虑一项更好的措施，使得 world.getRegistryManager() 返回的注册表管理器也能访问这里面的注册表（原版的配方、战利品表等是不能访问的）
       if (!(world instanceof ServerWorld serverWorld)) {
         return blockState;
       }

@@ -1,11 +1,14 @@
 package pers.solid.ecmd.curve;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.region.RegionType;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -16,5 +19,11 @@ public interface CurveType<T extends Curve> extends RegionType<T> {
   @Nullable
   default CurveArgument<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     return null;
+  }
+
+  @Override
+  @NotNull
+  default MapCodec<? extends RegionArgument<? extends T>> getArgumentCodec() {
+    throw new UnsupportedOperationException();
   }
 }

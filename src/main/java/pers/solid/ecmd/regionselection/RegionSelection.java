@@ -2,6 +2,7 @@ package pers.solid.ecmd.regionselection;
 
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,10 +16,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.region.RegionBasedRegion;
-import pers.solid.ecmd.region.RegionType;
-import pers.solid.ecmd.region.RegionTypes;
+import pers.solid.ecmd.region.*;
 import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.List;
@@ -144,6 +142,11 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
     @Override
     public @NotNull MapCodec<RegionSelection> getCodec() {
       return CODEC;
+    }
+
+    @Override
+    public @NotNull MapCodec<? extends RegionArgument<? extends RegionSelection>> getArgumentCodec() {
+      return CODEC.flatXmap(blockPos -> DataResult.error(() -> "unsupported"), regionArgument -> DataResult.error(() -> "unsupported"));
     }
   }
 }

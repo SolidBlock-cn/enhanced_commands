@@ -11,23 +11,38 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * 附加在 {@link EntitySelector} 的额外内容。
+ *
+ * @see pers.solid.ecmd.mixins.mixin.EntitySelectorMixin
+ * @see pers.solid.ecmd.mixins.ext.EntitySelectorExtension
+ */
 public class EntitySelectorExtras {
   public static final Logger LOGGER = LoggerFactory.getLogger(EntitySelectorExtras.class);
+  /**
+   * 该实体选择器所使用的 {@link ServerCommandSource}。可能会在实际调用时发生改变。
+   */
   public ServerCommandSource source;
+  /**
+   * 需要指定 {@link ServerCommandSource} 后才能生效的谓词会存储于此列表。为了节省内容，默认为 null。
+   */
   public @Nullable List<FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException>> predicateFunctions = null;
+
+  /**
+   * 在通过 {@link #updateSource} 方法修改源时，会根据指定的源，生成（或重新生成）这些谓词。
+   */
   public Predicate<Entity> actualExtraPredicate = entity -> {
-    EnhancedCommands.LOGGER.warn("Warning! There is no ServerCommandSource yet for {}!", EntitySelectorExtras.this);
+    LOGGER.warn("Warning! There is no ServerCommandSource yet for {}!", EntitySelectorExtras.this);
     return false;
   };
   /**
-   * 此字体决定了在运行 {@link EntitySelector#getEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
+   * 此字段决定了在运行 {@link EntitySelector#getEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
    *
    * @see EntitySelectorReaderMixin#buildExtraPredicate(CallbackInfoReturnable)
    */
@@ -40,7 +55,6 @@ public class EntitySelectorExtras {
 
   public void updateSource(@NotNull ServerCommandSource source) throws CommandSyntaxException {
     if (!source.equals(this.source)) {
-      // todo is it safe to change to another source?
       this.source = source;
       actualExtraPredicate = createUpdatedPredicate(source);
     }

@@ -11,7 +11,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -97,7 +96,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<UnionRegionArgument> functionParamsParser() {
       return new Parser();
     }
 
@@ -105,14 +104,19 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     public @NotNull MapCodec<UnionRegion> getCodec() {
       return CODEC;
     }
-  }
-
-  public static final class Parser implements FunctionParamsParser<RegionArgument> {
-    private final List<RegionArgument> regions = new ArrayList<>();
 
     @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new UnionRegion(IterateUtils.transformFailableImmutableList(regions, regionArgument -> regionArgument.toAbsoluteRegion(source)));
+    public @NotNull MapCodec<? extends RegionArgument<UnionRegion>> getArgumentCodec() {
+      return UnionRegionArgument.CODEC;
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<UnionRegionArgument> {
+    private final List<RegionArgument<?>> regions = new ArrayList<>();
+
+    @Override
+    public UnionRegionArgument getParseResult(ParseContext<?> parseContext) {
+      return new UnionRegionArgument(regions);
     }
 
     @Override

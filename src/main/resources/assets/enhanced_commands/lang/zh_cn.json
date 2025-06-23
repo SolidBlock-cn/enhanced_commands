@@ -318,6 +318,7 @@
   "enhanced_commands.commands.nbt.query_limit_notice": "查询多个目标限制为%s个",
   "enhanced_commands.commands.nbt.query_scale_not_number": "无法获取路径%s的NBT数据，因为不是数值NBT，在指定了倍率时只支持数值NBT",
   "enhanced_commands.commands.nbt.regex_replace.success": "已完成%s次正则表达式NBT替换",
+  "enhanced_commands.commands.nbt.remove.success": "成功移除了%s个NBT",
   "enhanced_commands.commands.nbt.replace.success": "已完成%s次NBT替换",
   "enhanced_commands.commands.nbt.storage.query": "存储%s拥有以下NBT数据：%s",
   "enhanced_commands.commands.nbt.storage.query_path": "存储%s在路径%s拥有以下NBT数据：%s",

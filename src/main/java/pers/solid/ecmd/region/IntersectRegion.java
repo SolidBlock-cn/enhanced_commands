@@ -11,7 +11,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -53,7 +52,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   }
 
   /**
-   * The volume of the intersect region is inaccurate. The actual probability equals to of lower than it.
+   * The volume of the intersection region is inaccurate. The actual probability equals to of lower than it.
    */
   @Override
   public double volume() {
@@ -108,7 +107,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<IntersectRegionArgument> functionParamsParser() {
       return new Parser();
     }
 
@@ -116,14 +115,19 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     public @NotNull MapCodec<IntersectRegion> getCodec() {
       return CODEC;
     }
-  }
-
-  public static final class Parser implements FunctionParamsParser<RegionArgument> {
-    private final List<RegionArgument> regions = new ArrayList<>();
 
     @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new IntersectRegion(IterateUtils.transformFailableImmutableList(regions, regionArgument -> regionArgument.toAbsoluteRegion(source)));
+    public @NotNull MapCodec<? extends RegionArgument<IntersectRegion>> getArgumentCodec() {
+      return IntersectRegionArgument.CODEC;
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<IntersectRegionArgument> {
+    private final List<RegionArgument<?>> regions = new ArrayList<>();
+
+    @Override
+    public IntersectRegionArgument getParseResult(ParseContext<?> parseContext) {
+      return new IntersectRegionArgument(regions);
     }
 
     @Override

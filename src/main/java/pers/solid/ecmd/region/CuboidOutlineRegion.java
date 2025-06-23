@@ -9,8 +9,6 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
@@ -19,6 +17,7 @@ import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
@@ -119,7 +118,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<CuboidOutlineRegionArgument> functionParamsParser() {
       return new Parser();
     }
 
@@ -127,10 +126,15 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     public @NotNull MapCodec<CuboidOutlineRegion> getCodec() {
       return CODEC;
     }
+
+    @Override
+    public @NotNull MapCodec<? extends CuboidOutlineRegionArgument> getArgumentCodec() {
+      return CuboidOutlineRegionArgument.CODEC;
+    }
   }
 
-  public static abstract sealed class AbstractParser implements FunctionParamsParser<RegionArgument> permits Parser, CuboidWallRegion.Parser {
-    protected PosArgument fromPos, toPos;
+  public static abstract sealed class AbstractParser<R extends RegionArgument<?>> implements FunctionParamsParser<R> permits Parser, CuboidWallRegion.Parser {
+    protected EnhancedPosArgument fromPos, toPos;
     protected int thickness = 1;
     protected int cursorBefore = 0, cursorAfter = 0;
 
@@ -140,8 +144,8 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public RegionArgument parseAfterLeftParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final RegionArgument parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(parseContext);
+    public R parseAfterLeftParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final R parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(parseContext);
       cursorAfter = parseContext.reader().getCursor();
       return parsed;
     }
@@ -174,34 +178,12 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
         }
       }
     }
-
-    @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) {
-      final StringReader reader = parseContext.reader();
-      return source -> {
-        try {
-          return createParsedResult(source);
-        } catch (Exception e) {
-          if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
-            if (commandSyntaxException.getInput() != null) {
-              throw commandSyntaxException;
-            } else {
-              throw CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), reader.getString(), cursorBefore), cursorAfter);
-            }
-          } else {
-            throw e;
-          }
-        }
-      };
-    }
-
-    protected abstract Region createParsedResult(ServerCommandSource source);
   }
 
-  public static final class Parser extends AbstractParser {
+  public static final class Parser extends AbstractParser<CuboidOutlineRegionArgument> {
     @Override
-    protected Region createParsedResult(ServerCommandSource source) {
-      return new CuboidOutlineRegion(new BlockCuboidRegion(fromPos.toAbsoluteBlockPos(source), toPos.toAbsoluteBlockPos(source)), thickness);
+    public CuboidOutlineRegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new CuboidOutlineRegionArgument(new BlockCuboidRegionArgument(fromPos, toPos), thickness);
     }
   }
 }

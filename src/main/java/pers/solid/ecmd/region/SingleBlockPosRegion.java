@@ -7,22 +7,21 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.Parser;
 
 import java.util.Iterator;
 import java.util.function.Function;
 
-public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
+public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, CuboidRegion {
   public static final MapCodec<SingleBlockPosRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3i.CODEC.fieldOf("pos").forGetter(SingleBlockPosRegion::pos)).apply(i, SingleBlockPosRegion::new));
 
   @Override
@@ -79,7 +78,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<RegionArgument<SingleBlockPosRegion>> functionParamsParser() {
       return FunctionParser.INSTANCE;
     }
 
@@ -87,16 +86,21 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     public @NotNull MapCodec<SingleBlockPosRegion> getCodec() {
       return CODEC;
     }
+
+    @Override
+    public @NotNull MapCodec<? extends RegionArgument<SingleBlockPosRegion>> getArgumentCodec() {
+      return SingleBlockPosRegionArgument.CODEC;
+    }
   }
 
   /**
    * 直接将坐标形式的内容解析为区域，例如 {@code 1 2 3} 等价于 {@code single(1 2 3)}，{@code ~~~} 等价于 {@code single(~~~)}。
    */
-  public enum BareParser implements Parser<RegionArgument> {
+  public enum BareParser implements pers.solid.ecmd.util.parse.Parser<SingleBlockPosRegionArgument> {
     INSTANCE;
 
     @Override
-    public RegionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public SingleBlockPosRegionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       final int cursorBeforeParse = reader.getCursor();
       final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.blockPos();
@@ -107,17 +111,17 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
       if (reader.canRead()) {
         final char peek = reader.peek();
         if (StringReader.isAllowedNumber(peek) || peek == '~' || peek == '^') {
-          final PosArgument posArgument = argumentType.parse(reader);
-          return source -> new SingleBlockPosRegion(posArgument.toAbsoluteBlockPos(source));
+          final EnhancedPosArgument posArgument = argumentType.parse(reader);
+          return new SingleBlockPosRegionArgument(posArgument);
         }
       }
       return null;
     }
   }
 
-  public enum FunctionParser implements FunctionParamsParser<RegionArgument> {
+  public enum FunctionParser implements FunctionParamsParser<RegionArgument<SingleBlockPosRegion>> {
     INSTANCE;
-    private PosArgument posArgument;
+    private EnhancedPosArgument posArgument;
 
     @Override
     public int minParamsCount() {
@@ -130,15 +134,15 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion {
     }
 
     @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final PosArgument posArgument1 = posArgument;
+    public RegionArgument<SingleBlockPosRegion> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final EnhancedPosArgument posArgument1 = posArgument;
       posArgument = null;
-      return source -> new SingleBlockPosRegion(posArgument1.toAbsoluteBlockPos(source));
+      return new SingleBlockPosRegionArgument(posArgument1);
     }
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
+      ArgumentType<EnhancedPosArgument> argumentType = EnhancedPosArgumentType.blockPos();
       posArgument = parseContext.parseAndSuggestArgument(argumentType);
     }
   }

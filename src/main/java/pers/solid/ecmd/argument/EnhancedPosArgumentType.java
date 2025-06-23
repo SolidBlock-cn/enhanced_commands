@@ -15,7 +15,6 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.LookingPosArgument;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
@@ -52,9 +51,9 @@ import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCur
  * @see net.minecraft.command.argument.BlockPosArgumentType
  * @see Vec3ArgumentType
  */
-public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<PosArgument>, ArgumentSerializer.ArgumentTypeProperties<EnhancedPosArgumentType> {
+public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<EnhancedPosArgument>, ArgumentSerializer.ArgumentTypeProperties<EnhancedPosArgumentType> {
   public static final EnhancedPosArgument CURRENT_POS = new EnhancedPosArgument.DoublePos(0, 0, 0, true, true, true);
-  public static final EnhancedPosArgument CURRENT_BLOCK_POS_CENTER = new EnhancedPosArgument.IntPos(0, 0, 0, true, true, true);
+  public static final EnhancedPosArgument CURRENT_BLOCK_POS_CENTER = new EnhancedPosArgument.IntPos(0, 0, 0, true, true, true, IntAlignType.CENTERED);
 
   public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.pos.local_coordinates_not_allowed"));
 
@@ -66,8 +65,8 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     return new EnhancedPosArgumentType(NumberType.PREFER_INT, IntAlignType.CENTERED);
   }
 
-  public static PosArgument getPosArgument(CommandContext<?> context, String name) {
-    return context.getArgument(name, PosArgument.class);
+  public static EnhancedPosArgument getPosArgument(CommandContext<?> context, String name) {
+    return context.getArgument(name, EnhancedPosArgument.class);
   }
 
   /**
@@ -144,7 +143,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   }
 
   @Override
-  public PosArgument parse(StringReader reader) throws CommandSyntaxException {
+  public EnhancedPosArgument parse(StringReader reader) throws CommandSyntaxException {
     if (!reader.canRead()) {
       throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
     }
@@ -172,7 +171,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
           reader.skipWhitespace();
         }
       }
-      return new LookingPosArgument(values[0], values[1], values[2]);
+      return new EnhancedPosArgument.LookingPos(values[0], values[1], values[2]);
     } else {
       double[] values = new double[3];
       boolean[] isRelatives = new boolean[3];

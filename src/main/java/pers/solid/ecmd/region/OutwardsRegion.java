@@ -6,13 +6,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
@@ -82,7 +82,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<OutwardsRegionArgument> functionParamsParser() {
       return new Parser();
     }
 
@@ -90,24 +90,29 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     public @NotNull MapCodec<OutwardsRegion> getCodec() {
       return CODEC;
     }
+
+    @Override
+    public @NotNull MapCodec<? extends RegionArgument<OutwardsRegion>> getArgumentCodec() {
+      return OutwardsRegionArgument.CODEC;
+    }
   }
 
-  public static final class Parser implements FunctionParamsParser<RegionArgument> {
-    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
+  public static final class Parser implements FunctionParamsParser<OutwardsRegionArgument> {
+    private EnhancedPosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
     private int x, y, z;
     private int dimensionNumber = 0;
 
     @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public OutwardsRegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final int paramY = dimensionNumber < 2 ? x : y;
       final int paramZ = dimensionNumber < 3 ? x : z;
-      return source -> new OutwardsRegion(center.toAbsoluteBlockPos(source), x, paramY, paramZ);
+      return new OutwardsRegionArgument(center, x, paramY, paramZ);
     }
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 1) {
-        ArgumentType<PosArgument> argumentType = EnhancedPosArgumentType.blockPos();
+        ArgumentType<EnhancedPosArgument> argumentType = EnhancedPosArgumentType.blockPos();
         center = parseContext.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 0) {
         final StringReader reader = parseContext.reader();

@@ -1,0 +1,148 @@
+package pers.solid.ecmd.region;
+
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.function.Function;
+
+/**
+ * <p>A <b>cuboid region</b> is a region representing a cuboid, which is defined by two positions. The positions are accurate positions, instead of block positions. The coordinates can be decimal, even if blocks only support non-decimal coordinates.
+ * <p><b>Syntax:</b> {@code cuboid(<begin pos>, <end pos>)}
+ * <p>As the positions are accurate positions, the two points must have some distance in several coordinates. For example, {@code cuboid(0.0 0.0 0.0, 0.0 0.0 0.0)} does not contain any area. Instead, {@code cuboid(0.0 0.0 0.0, 1.0 1.0 1.0)} is a region contain a <em>block pos</em> {@code 0 0 0}. It is identical to <em>block cuboid region</em> {@code cuboid(0 0 0, 0 0 0)}.
+ * <p>Whether a block position is in the cuboid regions is determined by whether the accurate center position of the block pos is in the cuboid region. For example, {@code cuboid(0.4 0.4 0.4, 1.2 1.2 1.2)} contains block pos {@code (0 0 0)} (whose center pos is {@code (0.5 0.5 0.5)}), but does not contain {@code (1 1 1)} (whose center pos is {@code (1.5 1.5 1.5)}).
+ *
+ * @param box
+ */
+public record PreciseCuboidRegion(Box box) implements CuboidRegion {
+  public static final MapCodec<PreciseCuboidRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(r -> new Vec3d(r.box.minX, r.box.minY, r.box.minZ)), Vec3d.CODEC.fieldOf("to").forGetter(r -> new Vec3d(r.box.maxX, r.box.maxY, r.box.maxZ))).apply(i, PreciseCuboidRegion::new));
+
+  /**
+   * Create a cuboid region from several coordinates. The comparison is not required because it will be compared in implementation.
+   */
+  public PreciseCuboidRegion(double x1, double y1, double z1, double x2, double y2, double z2) {
+    this(new Box(x1, y1, z1, x2, y2, z2));
+  }
+
+  /**
+   * Create a cuboid region from two positions. The relative relation is not required because the coordinates will be compared in implementation.
+   */
+  public PreciseCuboidRegion(Vec3d fromPos, Vec3d toPos) {
+    this(new Box(fromPos, toPos));
+  }
+
+  @Override
+  public boolean contains(@NotNull Vec3d vec3d) {
+    return box.contains(vec3d);
+  }
+
+  @Override
+  public @NotNull Iterator<BlockPos> iterator() {
+    final BlockCuboidRegion round = round();
+    return round == null ? Collections.emptyIterator() : round.iterator();
+  }
+
+  /**
+   * Round the cuboid region into a block cuboid region, in which each block position's center position is in this cuboid region. It may be {@code null} if the region does not contain any block.
+   */
+  public @Nullable BlockCuboidRegion round() {
+    final int minX = (int) Math.round(box.minX);
+    final int minY = (int) Math.round(box.minY);
+    final int minZ = (int) Math.round(box.minZ);
+    final int maxX = (int) Math.round(box.maxX);
+    final int maxY = (int) Math.round(box.maxY);
+    final int maxZ = (int) Math.round(box.maxZ);
+    if (minX == maxX || minY == maxX || minZ == maxX) {
+      return null;
+    }
+    return new BlockCuboidRegion(minX, minY, minZ, maxX - 1, maxY - 1, maxZ - 1);
+  }
+
+  @Override
+  public @NotNull PreciseCuboidRegion transformed(Function<Vec3d, Vec3d> transformation) {
+    return new PreciseCuboidRegion(transformation.apply(new Vec3d(box.minX, box.minY, box.minZ)), transformation.apply(new Vec3d(box.maxX, box.maxY, box.maxZ)));
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset) {
+    return new PreciseCuboidRegion(box.expand(offset));
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset, Direction.Axis axis) {
+    var x = axis.choose(offset, 0, 0);
+    var y = axis.choose(0, offset, 0);
+    var z = axis.choose(0, 0, offset);
+    return new PreciseCuboidRegion(box.expand(x, y, z));
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset, Direction direction) {
+    if (offset > 0) {
+      return new PreciseCuboidRegion(box.stretch(Vec3d.of(direction.getVector()).multiply(offset)));
+    } else if (offset < 0) {
+      var vec = Vec3d.of(direction.getVector()).multiply(offset);
+      return new PreciseCuboidRegion(box.shrink(vec.x, vec.y, vec.z));
+    } else {
+      return this;
+    }
+  }
+
+  @Override
+  public @NotNull Region expanded(double offset, Direction.Type type) {
+    if (offset == 0) {
+      return this;
+    }
+    switch (type) {
+      case HORIZONTAL -> {
+        if (offset > 0) {
+          return new PreciseCuboidRegion(box.stretch(offset, 0, offset));
+        } else {
+          return new PreciseCuboidRegion(box.shrink(-offset, 0, -offset));
+        }
+      }
+      case VERTICAL -> {
+        if (offset > 0) {
+          return new PreciseCuboidRegion(box.stretch(0, offset, 0));
+        } else {
+          return new PreciseCuboidRegion(box.shrink(0, -offset, 0));
+        }
+      }
+      default -> throw new IllegalStateException("Unexpected probability: " + type);
+    }
+  }
+
+  @Override
+  public @NotNull Type getType() {
+    return RegionTypes.CUBOID;
+  }
+
+  @Override
+  public double volume() {
+    return (box.maxX - box.minX) * (box.maxY - box.minY) * (box.maxZ - box.minZ);
+  }
+
+  @Override
+  public long numberOfBlocksAffected() {
+    final BlockCuboidRegion round = round();
+    return round == null ? 0 : round.numberOfBlocksAffected();
+  }
+
+  @Override
+  public @NotNull String asString() {
+    return "cuboid(%s %s %s, %s %s %s)".formatted(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+  }
+
+  @Override
+  public @Nullable Box minContainingBox() {
+    return box;
+  }
+
+}

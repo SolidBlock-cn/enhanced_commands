@@ -35,7 +35,7 @@ The [NBT function](../en.md) to be concatenated as a list. If the return value o
 ### Syntax 2 examples
 
 - `concat(* 1)`: Cannot execute, as 1 is not a list.
-- `concat(* {})`: Cannot execute ,as `{}` is not a list.
+- `concat(* {})`: Cannot execute, as `{}` is not a list.
 - `concat(* [1, 2, 3])`: Return `123`.
 - `concat(* [a, 1, 5])`: Return `a`, as when the NBT list function `[a, 1, 5]` is being applied, the latter two elements 1 and 5 cannot be added to the list as datatype mismatch, so the function only concatenates within list `[a]`.
 

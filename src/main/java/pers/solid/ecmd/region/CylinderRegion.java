@@ -6,12 +6,12 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.PosArgument;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import org.joml.Vector2d;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -145,7 +145,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument> functionParamsParser() {
+    public FunctionParamsParser<CylinderRegionArgument> functionParamsParser() {
       return new Parser();
     }
 
@@ -153,16 +153,21 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     public @NotNull MapCodec<CylinderRegion> getCodec() {
       return CODEC;
     }
-  }
-
-  public static final class Parser implements FunctionParamsParser<RegionArgument> {
-    private double radius;
-    private double height = 1;
-    private PosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
 
     @Override
-    public RegionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new CylinderRegion(radius, height, center.toAbsolutePos(source));
+    public @NotNull MapCodec<? extends RegionArgument<CylinderRegion>> getArgumentCodec() {
+      return CylinderRegionArgument.CODEC;
+    }
+  }
+
+  public static final class Parser implements FunctionParamsParser<CylinderRegionArgument> {
+    private double radius;
+    private double height = 1;
+    private EnhancedPosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
+
+    @Override
+    public CylinderRegionArgument getParseResult(ParseContext<?> parseContext) {
+      return new CylinderRegionArgument(radius, height, center);
     }
 
     @Override

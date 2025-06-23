@@ -17,7 +17,10 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.*;
+import net.minecraft.command.argument.BlockPosArgumentType;
+import net.minecraft.command.argument.NbtCompoundArgumentType;
+import net.minecraft.command.argument.NbtElementArgumentType;
+import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
@@ -36,7 +39,6 @@ import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.argument.*;
-import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
@@ -241,7 +243,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addPosProperties(T argumentBuilder) {
     final Command<ServerCommandSource> execution = context -> {
-      final PosArgument pos = getPosArgument(context, "pos");
+      final EnhancedPosArgument pos = getPosArgument(context, "pos");
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
       context.getSource().sendFeedback$ecBridge(() -> Text.literal(EnhancedPosArgument.asString(pos)), false);
       context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(EnhancedPosArgument.CODEC.encodeStart(NbtOps.INSTANCE, pos).getOrThrow()), false);

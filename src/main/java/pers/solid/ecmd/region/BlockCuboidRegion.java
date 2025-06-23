@@ -13,11 +13,11 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 /**
- * <p>The <b>block cuboid region</b> representing a cuboid defined by two block positions. It is similar to {@link CuboidRegion}, but positions are block positions, and are inclusive. A block position indicates a whole cube, instead of an accurate position.
+ * <p>The <b>block cuboid region</b> representing a cuboid defined by two block positions. It is similar to {@link PreciseCuboidRegion}, but positions are block positions, and are inclusive. A block position indicates a whole cube, instead of an accurate position.
  * <p>For example, the <em>block cuboid region</em> {@code cuboid(0 0 0, 5 5 5)} is a cuboid from the southwest bottom corner of block position {@code (0 0 0)} to the northeast top corner of block position {@code (5 5 5)}, which is also the southwest bottom corner of block position {@code (6 6 6)}. Therefore, it is identical to the <em>cuboid region</em> {@code cuboid(0.0 0.0 0.0, 6.0 6.0 6.0)}.
  * <p>In any case, a block cuboid region has a min volume of 1, which means the two corners are the same block position.
  */
-public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements IntBackedRegion {
+public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) implements IntBackedRegion, CuboidRegion {
   public static final MapCodec<BlockCuboidRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.INT.fieldOf("minX").forGetter(BlockCuboidRegion::minX),
       Codec.INT.fieldOf("minY").forGetter(BlockCuboidRegion::minY),
@@ -101,8 +101,8 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     return new BlockBox(minX, minY, minZ, maxX, maxY, maxZ);
   }
 
-  public CuboidRegion asCuboidRegion() {
-    return new CuboidRegion(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
+  public PreciseCuboidRegion asCuboidRegion() {
+    return new PreciseCuboidRegion(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
   }
 
   @Override
@@ -180,7 +180,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull CuboidRegion.Type getType() {
+  public @NotNull PreciseCuboidRegion.Type getType() {
     return RegionTypes.CUBOID;
   }
 
