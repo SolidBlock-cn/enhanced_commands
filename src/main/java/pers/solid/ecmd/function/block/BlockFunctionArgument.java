@@ -12,7 +12,7 @@ import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.argument.SimpleBlockParser;
-import pers.solid.ecmd.function.nbt.NbtFunctionArgument;
+import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -26,32 +26,32 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
   Text OVERLAY_TOOLTIP = Text.translatable("enhanced_commands.block_function.overlay.symbol_tooltip");
   Text PICK_TOOLTIP = Text.translatable("enhanced_commands.block_function.pick.symbol_tooltip");
 
-  static @NotNull BlockFunctionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static @NotNull BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     return parsePick(parseContext);
   }
 
-  static @NotNull BlockFunctionArgument parsePick(ParseContext<?> parseContext) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseOverlay(parseContext), functions -> source -> {
+  static @NotNull BlockFunction parsePick(ParseContext<?> parseContext) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseOverlay(parseContext), functions -> {
       ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
-      for (BlockFunctionArgument function : functions) {
-        builder.add(function.apply(source));
+      for (BlockFunction function : functions) {
+        builder.add(function);
       }
       return new PickBlockFunction(new WeightedList.Uniform<>(builder.build()));
     }, "|", PICK_TOOLTIP, parseContext);
   }
 
-  static @NotNull BlockFunctionArgument parseOverlay(ParseContext<?> parseContext) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseCombination(parseContext), functions -> source -> {
+  static @NotNull BlockFunction parseOverlay(ParseContext<?> parseContext) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseCombination(parseContext), functions -> {
       ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
-      for (BlockFunctionArgument blockFunctionArgument : functions) {
-        builder.add(blockFunctionArgument.apply(source));
+      for (BlockFunction blockFunction : functions) {
+        builder.add(blockFunction);
       }
       return new OverlayBlockFunction(builder.build());
     }, "*", OVERLAY_TOOLTIP, parseContext);
   }
 
-  static @NotNull <S> BlockFunctionArgument parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
-    final BlockFunctionArgument parseUnit = parseUnit(parseContext);
+  static @NotNull <S> BlockFunction parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
+    final BlockFunction parseUnit = parseUnit(parseContext);
     if (parseUnit instanceof NbtBlockFunction) {
       return parseUnit;
     }
@@ -72,29 +72,29 @@ public interface BlockFunctionArgument extends FailableFunction<ServerCommandSou
     } else {
       propertyNameFunctions = null;
     }
-    NbtFunctionArgument nbtFunctionArgument;
+    NbtFunction nbtFunction;
     parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("{", NbtPredicateParser.START_OF_COMPOUND).buildFuture());
     if (reader.canRead() && reader.peek() == '{') {
       // 尝试读取 NBT
-      nbtFunctionArgument = new NbtFunctionParser<>(parseContext).parseCompound(false);
+      nbtFunction = new NbtFunctionParser<>(parseContext).parseCompound(false);
     } else {
-      nbtFunctionArgument = null;
+      nbtFunction = null;
     }
-    if (propertyNameFunctions != null || nbtFunctionArgument != null) {
-      return source -> new PropertiesNbtCombinationBlockFunction(parseUnit.apply(source), propertyNameFunctions == null ? null : new PropertyNamesBlockFunction(propertyNameFunctions), nbtFunctionArgument == null ? null : new NbtBlockFunction(nbtFunctionArgument.toAbsolute(source)));
+    if (propertyNameFunctions != null || nbtFunction != null) {
+      return new PropertiesNbtCombinationBlockFunction(parseUnit, propertyNameFunctions == null ? null : new PropertyNamesBlockFunction(propertyNameFunctions), nbtFunction == null ? null : new NbtBlockFunction(nbtFunction));
     }
     return parseUnit;
   }
 
   @NotNull
-  static BlockFunctionArgument parseUnit(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static BlockFunction parseUnit(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
 
     // 强制将 simple 调整到最后再去使用
-    for (Parser<BlockFunctionArgument> argumentParser : Iterables.concat(BlockFunctionTypes.PARSERS, Collections.singleton(SimpleBlockFunction.Type.SIMPLE_TYPE))) {
+    for (Parser<BlockFunction> argumentParser : Iterables.concat(BlockFunctionTypes.PARSERS, Collections.singleton(SimpleBlockFunction.Type.SIMPLE_TYPE))) {
       reader.setCursor(cursorOnStart);
-      final BlockFunctionArgument parse = argumentParser.parse(parseContext);
+      final BlockFunction parse = argumentParser.parse(parseContext);
       if (parse != null) {
         return parse;
       }

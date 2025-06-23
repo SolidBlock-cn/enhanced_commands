@@ -122,13 +122,13 @@ public final class RandomBlockFunction implements BlockFunction {
     }
   }
 
-  public static class RandFuncParser implements FunctionLikeParser<BlockFunctionArgument>, NamedParamListParser {
+  public static class RandFuncParser implements FunctionLikeParser<RandomBlockFunction>, NamedParamListParser {
     protected OptionalLong seed = OptionalLong.empty();
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return source -> new RandomBlockFunction(seed);
+    public RandomBlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new RandomBlockFunction(seed);
     }
 
     @Override

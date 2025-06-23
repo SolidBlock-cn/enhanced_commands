@@ -71,17 +71,17 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
     }
   }
 
-  public static class Parser extends Noise.Parser<BlockPredicateArgument> {
+  public static class Parser extends Noise.Parser<BlockPredicate> {
 
     @Override
-    protected BlockPredicateArgument parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+    protected BlockPredicate parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
       return BlockPredicateArgument.parse(parseContext);
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public NoiseBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       super.getParseResult(parseContext);
-      return source -> new NoiseBlockPredicate(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), seed, new DoublePerlinNoiseSampler.NoiseParameters(firstOctave, amplitudes), scale, offset);
+      return new NoiseBlockPredicate(weightedList, seed, new DoublePerlinNoiseSampler.NoiseParameters(firstOctave, amplitudes), scale, offset);
     }
   }
 }

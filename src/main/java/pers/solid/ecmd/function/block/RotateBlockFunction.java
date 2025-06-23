@@ -41,7 +41,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
     }
   }
 
-  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
+  public static class Parser implements FunctionParamsParser<RotateBlockFunction> {
     private EnumOrRandom<BlockRotation> rotation;
 
     @Override

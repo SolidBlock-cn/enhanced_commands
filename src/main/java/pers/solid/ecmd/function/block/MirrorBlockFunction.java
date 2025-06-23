@@ -1,28 +1,21 @@
 package pers.solid.ecmd.function.block;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.BlockMirror;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.math.EnumOrRandom;
+import pers.solid.ecmd.argument.MirrorArgument;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
-import java.util.List;
-import java.util.function.Function;
-
-public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) implements BlockFunction {
-  public static final MapCodec<MirrorBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(MirrorBlockFunction::new, EnumOrRandom.getCodec(BlockMirror.CODEC, BlockMirror::values).fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
+public record MirrorBlockFunction(@NotNull MirrorArgument mirror) implements BlockFunction {
+  public static final MapCodec<MirrorBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(MirrorBlockFunction::new, MirrorArgument.CODEC.fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
 
   @Override
   public @NotNull String asString() {
@@ -31,7 +24,7 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    return blockState.mirror(mirror.apply(world.getRandom()));
+    return blockState.mirror(mirror.apply((ServerCommandSource) context.source));
   }
 
   @Override
@@ -48,8 +41,8 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
     }
   }
 
-  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
-    private Function<ServerCommandSource, EnumOrRandom<BlockMirror>> mirror;
+  public static class Parser implements FunctionParamsParser<MirrorBlockFunction> {
+    private MirrorArgument mirror;
 
     @Override
     public int minParamsCount() {
@@ -62,27 +55,13 @@ public record MirrorBlockFunction(@NotNull EnumOrRandom<BlockMirror> mirror) imp
     }
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new MirrorBlockFunction(mirror.apply(source));
+    public MirrorBlockFunction getParseResult(ParseContext<?> parseContext) {
+      return new MirrorBlockFunction(mirror);
     }
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final StringReader reader = parseContext.reader();
-      final int cursor1 = reader.getCursor();
-      parseContext.setSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("forward", "side"), suggestionsBuilder));
-      final String s = reader.readString();
-      if ("forward".equals(s)) {
-        // 沿玩家视觉前方的轴镜像
-        mirror = source -> EnumOrRandom.of(Direction.fromRotation(source.getRotation().y).getAxis() == Direction.Axis.X ? BlockMirror.FRONT_BACK : BlockMirror.LEFT_RIGHT);
-      } else if ("side".equals(s)) {
-        // 沿玩家视觉侧方的轴镜像
-        mirror = source -> EnumOrRandom.of(Direction.fromRotation(source.getRotation().y).getAxis() == Direction.Axis.Z ? BlockMirror.FRONT_BACK : BlockMirror.LEFT_RIGHT);
-      } else {
-        reader.setCursor(cursor1);
-        final EnumOrRandom<BlockMirror> constValue = EnumOrRandom.parseAndSuggest(BlockMirror.values(), BlockMirror.CODEC, parseContext);
-        mirror = source -> constValue;
-      }
+      mirror = parseContext.parseAndSuggestEnums(MirrorArgument.values(), mirrorArgument -> null, MirrorArgument.CODEC);
     }
   }
 }

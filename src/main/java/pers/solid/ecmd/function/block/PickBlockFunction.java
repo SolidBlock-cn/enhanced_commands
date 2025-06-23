@@ -72,19 +72,19 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
   }
 
 
-  public static class Parser implements FunctionLikeParser<BlockFunctionArgument>, NamedParamListParser {
-    private WeightedList<BlockFunctionArgument> weightedList;
+  public static class Parser implements FunctionLikeParser<BlockFunction>, NamedParamListParser {
+    private WeightedList<BlockFunction> weightedList;
     private OptionalLong seed = OptionalLong.empty();
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return source -> new PickBlockFunction(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), seed);
+    public BlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new PickBlockFunction(weightedList, seed);
     }
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final WeightedListParser<BlockFunctionArgument> weightedListParser = WeightedListParser.of((parseContext1) -> BlockFunctionArgument.parse(parseContext));
+      final WeightedListParser<BlockFunction> weightedListParser = WeightedListParser.of((parseContext1) -> BlockFunctionArgument.parse(parseContext));
       final StringReader reader = parseContext.reader();
 
       weightedList = weightedListParser.parse(parseContext);

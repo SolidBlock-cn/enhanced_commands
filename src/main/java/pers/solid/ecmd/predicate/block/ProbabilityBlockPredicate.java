@@ -82,17 +82,17 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<BlockPredicateArgument>, NamedParamListParser {
+  public static final class Parser implements FunctionParamsParser<ProbabilityBlockPredicate>, NamedParamListParser {
     private float value;
-    private BlockPredicateArgument predicate;
+    private BlockPredicate predicate;
     private OptionalLong seed = OptionalLong.empty();
 
     @Override
-    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) {
+    public ProbabilityBlockPredicate getParseResult(ParseContext<?> parseContext) {
       if (predicate == null) {
         predicate = ConstantBlockPredicate.ALWAYS_TRUE;
       }
-      return source -> new ProbabilityBlockPredicate(value, predicate.apply(source), seed);
+      return new ProbabilityBlockPredicate(value, predicate, seed);
     }
 
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");

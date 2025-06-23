@@ -82,7 +82,7 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
     return BlockPredicateTypes.SIMPLE;
   }
 
-  public enum Type implements BlockPredicateType<SimpleBlockPredicate>, Parser<BlockPredicateArgument> {
+  public enum Type implements BlockPredicateType<SimpleBlockPredicate>, Parser<BlockPredicate> {
     SIMPLE_TYPE;
 
     @Override

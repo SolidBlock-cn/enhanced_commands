@@ -51,12 +51,12 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
+  public static final class Parser implements FunctionParamsParser<BiPredicateBlockPredicate> {
     private final String functionName;
     private final Text tooltip;
     private final boolean same;
-    private BlockPredicateArgument value1;
-    private BlockPredicateArgument value2;
+    private BlockPredicate value1;
+    private BlockPredicate value2;
 
     public Parser(String functionName, Text tooltip, boolean same) {
       this.functionName = functionName;
@@ -65,13 +65,13 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new BiPredicateBlockPredicate(value1.apply(source), value2.apply(source), same);
+    public BiPredicateBlockPredicate getParseResult(ParseContext<?> parseContext) {
+      return new BiPredicateBlockPredicate(value1, value2, same);
     }
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final BlockPredicateArgument parse = BlockPredicateArgument.parse(parseContext);
+      final BlockPredicate parse = BlockPredicateArgument.parse(parseContext);
       if (value1 == null) {
         value1 = parse;
       } else if (value2 == null) {

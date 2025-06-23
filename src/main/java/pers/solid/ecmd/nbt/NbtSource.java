@@ -56,7 +56,7 @@ public interface NbtSource<T> {
     return 1;
   }
 
-  Collection<T> values(ServerCommandSource source);
+  Collection<T> values(ServerCommandSource source) throws CommandSyntaxException;
 
   NbtCompound getNbtFor(ServerCommandSource commandSource, T source);
 
@@ -98,10 +98,10 @@ public interface NbtSource<T> {
    * 表示单个的 NBT 来源，其一些方法可以有所优化。
    */
   interface Single<T> extends NbtSource<T> {
-    T value(ServerCommandSource commandSource);
+    T value(ServerCommandSource commandSource) throws CommandSyntaxException;
 
     @Override
-    default Collection<T> values(ServerCommandSource source) {
+    default Collection<T> values(ServerCommandSource source) throws CommandSyntaxException {
       return Collections.singletonList(value(source));
     }
 

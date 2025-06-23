@@ -14,7 +14,7 @@ import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record BlockFunctionArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<BlockFunctionArgument> {
+public record BlockFunctionArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<BlockFunction> {
   public static BlockFunctionArgumentType blockFunction(CommandRegistryAccess registryAccess) {
     return new BlockFunctionArgumentType(registryAccess);
   }
@@ -24,7 +24,7 @@ public record BlockFunctionArgumentType(CommandRegistryAccess registryAccess) im
   }
 
   @Override
-  public BlockFunctionArgument parse(StringReader reader) throws CommandSyntaxException {
+  public BlockFunction parse(StringReader reader) throws CommandSyntaxException {
     return BlockFunctionArgument.parse(new ParseContext<>(registryAccess, reader, false, false));
   }
 

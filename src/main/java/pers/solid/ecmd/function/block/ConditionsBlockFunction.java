@@ -7,16 +7,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -65,12 +63,12 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
     }
   }
 
-  public static class Parser implements FunctionLikeParser<BlockFunctionArgument> {
-    private final List<FailableFunction<ServerCommandSource, BlockFunction, CommandSyntaxException>> functions = new ArrayList<>();
+  public static class Parser implements FunctionLikeParser<ConditionsBlockFunction> {
+    private final List<ConditionalBlockFunction> functions = new ArrayList<>();
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return source -> new ConditionsBlockFunction(IterateUtils.transformFailableImmutableList(functions, function -> (ConditionalBlockFunction) function.apply(source)));
+    public ConditionsBlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new ConditionsBlockFunction(functions);
     }
 
     @Override
@@ -89,7 +87,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
       }
       while (true) {
         parseContext.clearSuggestion();
-        BlockPredicateArgument predicate = BlockPredicateArgument.parse(parseContext);
+        BlockPredicate predicate = BlockPredicateArgument.parse(parseContext);
         reader.skipWhitespace();
         parseContext.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
@@ -102,7 +100,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
         parseContext.clearSuggestion();
         reader.skipWhitespace();
 
-        BlockFunctionArgument functionIfTrue = BlockFunctionArgument.parse(parseContext);
+        BlockFunction functionIfTrue = BlockFunctionArgument.parse(parseContext);
         reader.skipWhitespace();
         parseContext.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
@@ -114,11 +112,11 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
           reader.skip();
           reader.skipWhitespace();
           parseContext.clearSuggestion();
-          BlockFunctionArgument functionIfFalse = BlockFunctionArgument.parse(parseContext);
+          BlockFunction functionIfFalse = BlockFunctionArgument.parse(parseContext);
 
-          functions.add(source -> new ConditionalBlockFunction(predicate.apply(source), functionIfTrue.apply(source), functionIfFalse.apply(source)));
+          functions.add(new ConditionalBlockFunction(predicate, functionIfTrue, functionIfFalse));
         } else {
-          functions.add(source -> new ConditionalBlockFunction(predicate.apply(source), functionIfTrue.apply(source)));
+          functions.add(new ConditionalBlockFunction(predicate, functionIfTrue));
         }
         parseContext.addSuggestion((context, builder) -> {
           if (builder.getRemaining().isEmpty()) {
@@ -133,7 +131,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
             reader.skip();
             reader.skipWhitespace();
             parseContext.clearSuggestion();
-            functions.add(source -> new ConditionalBlockFunction(predicate.apply(source), functionIfTrue.apply(source)));
+            functions.add(new ConditionalBlockFunction(predicate, functionIfTrue));
           } else {
             break;
           }

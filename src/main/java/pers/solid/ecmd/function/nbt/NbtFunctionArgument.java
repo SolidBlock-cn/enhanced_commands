@@ -8,7 +8,7 @@ import pers.solid.ecmd.util.parse.ParseContext;
 public interface NbtFunctionArgument {
   NbtFunction toAbsolute(ServerCommandSource source) throws CommandSyntaxException;
 
-  static <S> NbtFunctionArgument parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
+  static <S> NbtFunction parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     final NbtFunctionParser<S> n = new NbtFunctionParser<>(parseContext);
     return n.parseFunction(mustExpectSign, equalsForDefault);
   }

@@ -6,13 +6,14 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
+import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-public record BlocksNbtDataArgument(RegionArgument regionArgument, @Nullable BlockPredicateArgument blockPredicateArgument) implements NbtSourceArgument<BlockEntity>, NbtTargetArgument<BlockEntity> {
-  public BlocksNbtDataArgument(RegionArgument regionArgument) {
+public record BlocksNbtDataArgument(RegionArgument<?> regionArgument, @Nullable BlockPredicateArgument blockPredicateArgument) implements NbtSourceArgument<BlockEntity>, NbtTargetArgument<BlockEntity> {
+  public BlocksNbtDataArgument(RegionArgument<?> regionArgument) {
     this(regionArgument, null);
   }
 
@@ -32,10 +33,10 @@ public record BlocksNbtDataArgument(RegionArgument regionArgument, @Nullable Blo
     return getBlockNbtData(source);
   }
 
-  public static BlocksNbtDataArgument handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+  public static BlocksNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-    final RegionArgument regionArgument = RegionArgument.parse(parseContext);
+    final RegionArgument<?> regionArgument = RegionArgument.parse(parseContext);
     parseContext.clearSuggestion();
-    return new BlocksNbtDataArgument(regionArgument);
+    return new BlocksNbtData(regionArgument, ConstantBlockPredicate.ALWAYS_TRUE);
   }
 }

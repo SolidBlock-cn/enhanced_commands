@@ -18,7 +18,7 @@ import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtFunctionArgument> {
+public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtFunction> {
 
   public static NbtFunctionArgumentType compound(CommandRegistryAccess registryAccess) {
     return new NbtFunctionArgumentType(true, registryAccess);
@@ -37,7 +37,7 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
   }
 
   @Override
-  public NbtFunctionArgument parse(StringReader reader) throws CommandSyntaxException {
+  public NbtFunction parse(StringReader reader) throws CommandSyntaxException {
     final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader, false, false);
     final NbtFunctionParser<?> parser = new NbtFunctionParser<>(parseContext);
     return onlyCompounds ? parser.parsePreferringCompound(false, false) : parser.parseFunction(false, false);

@@ -11,7 +11,6 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
@@ -48,7 +47,7 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
     return BlockFunctionTypes.PROPERTY_NAMES;
   }
 
-  public enum Type implements BlockFunctionType<PropertyNamesBlockFunction>, Parser<BlockFunctionArgument> {
+  public enum Type implements BlockFunctionType<PropertyNamesBlockFunction>, Parser<PropertyNamesBlockFunction> {
     PROPERTY_NAMES_TYPE;
 
     @Override
@@ -57,7 +56,7 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
     }
 
     @Override
-    public @Nullable BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public PropertyNamesBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '[') {

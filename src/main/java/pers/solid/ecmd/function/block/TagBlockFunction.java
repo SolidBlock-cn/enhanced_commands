@@ -61,7 +61,7 @@ public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull L
     return BlockFunctionTypes.TAG;
   }
 
-  public enum Type implements BlockFunctionType<TagBlockFunction>, Parser<BlockFunctionArgument> {
+  public enum Type implements BlockFunctionType<TagBlockFunction>, Parser<TagBlockFunction> {
     TAG_TYPE;
 
     @Override

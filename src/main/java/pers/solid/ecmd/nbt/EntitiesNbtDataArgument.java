@@ -9,13 +9,12 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
-import java.util.Collections;
 import java.util.List;
 
 public record EntitiesNbtDataArgument(EntitySelector entitySelector) implements NbtSourceArgument<Entity>, NbtTargetArgument<Entity> {
   public NbtTarget<Entity> getEntitiesNbtData(ServerCommandSource source) throws CommandSyntaxException {
     final List<? extends Entity> entities = entitySelector.getEntities(source);
-    return new EntitiesNbtData(Collections.unmodifiableList(entities));
+    return new EntitiesNbtData(entitySelector);
   }
 
   @Override
@@ -28,13 +27,13 @@ public record EntitiesNbtDataArgument(EntitySelector entitySelector) implements 
     return getEntitiesNbtData(source);
   }
 
-  public static EntitiesNbtDataArgument handle(ParseContext<?> parseContext) throws CommandSyntaxException {
+  public static EntitiesNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     ParsingUtil.expectAndSkipWhitespace(reader);
     final EntitySelector selector = parseContext.parseAndSuggestArgument(EntityArgumentType.entities());
     if (reader.canRead()) {
       parseContext.clearSuggestion();
     }
-    return new EntitiesNbtDataArgument(selector);
+    return new EntitiesNbtData(selector);
   }
 }

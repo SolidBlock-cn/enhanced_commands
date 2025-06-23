@@ -78,7 +78,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     }
   }
 
-  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
+  public static class Parser implements FunctionParamsParser<IdReplaceBlockFunction> {
     private Pattern pattern;
     private String replacement;
 

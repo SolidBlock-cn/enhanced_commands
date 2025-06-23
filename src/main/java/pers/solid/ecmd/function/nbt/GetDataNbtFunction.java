@@ -13,7 +13,6 @@ import pers.solid.ecmd.argument.NbtSourceArgumentType;
 import pers.solid.ecmd.argument.SimpleEnumArgumentType;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
-import pers.solid.ecmd.nbt.NbtSourceArgument;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -47,8 +46,8 @@ public record GetDataNbtFunction(NbtSource<?> nbtSource, Optional<NbtPathArgumen
     }
   }
 
-  public static class Parser implements FunctionParamsParser<NbtFunctionArgument> {
-    private NbtSourceArgument<?> nbtSourceArgument;
+  public static class Parser implements FunctionParamsParser<GetDataNbtFunction> {
+    private NbtSource<?> nbtSource;
     private @Nullable NbtPathArgumentType.NbtPath nbtPath;
     private NbtConcentrationType nbtConcentrationType = NbtConcentrationType.ALL;
 
@@ -65,15 +64,15 @@ public record GetDataNbtFunction(NbtSource<?> nbtSource, Optional<NbtPathArgumen
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
-        case 0 -> nbtSourceArgument = parseContext.parseAndSuggestArgument(NbtSourceArgumentType.nbtSource(parseContext.registryAccess()));
+        case 0 -> nbtSource = parseContext.parseAndSuggestArgument(NbtSourceArgumentType.nbtSource(parseContext.registryAccess()));
         case 1 -> nbtPath = parseContext.parseAndSuggestArgument(NbtPathArgumentType.nbtPath());
         case 2 -> nbtConcentrationType = parseContext.parseAndSuggestArgument(SimpleEnumArgumentType.nbtConcentrationType());
       }
     }
 
     @Override
-    public NbtFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return source -> new GetDataNbtFunction(nbtSourceArgument.getNbtSource(source), Optional.ofNullable(nbtPath), nbtConcentrationType);
+    public GetDataNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new GetDataNbtFunction(nbtSource, Optional.ofNullable(nbtPath), nbtConcentrationType);
     }
   }
 }

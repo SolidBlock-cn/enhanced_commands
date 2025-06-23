@@ -45,21 +45,21 @@ public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFu
     }
   }
 
-  public static class Parser implements FunctionParamsParser<NbtFunctionArgument> {
-    private NbtPredicateArgument nbtPredicateArgument;
-    private NbtFunctionArgument nbtFunctionArgument;
+  public static class Parser implements FunctionParamsParser<ReplaceNbtFunction> {
+    private NbtPredicate nbtPredicate;
+    private NbtFunction nbtFunction;
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
-        case 0 -> nbtPredicateArgument = NbtPredicateArgument.parse(parseContext, false, false);
-        case 1 -> nbtFunctionArgument = NbtFunctionArgument.parse(parseContext, false, false);
+        case 0 -> nbtPredicate = NbtPredicateArgument.parse(parseContext, false, false);
+        case 1 -> nbtFunction = NbtFunctionArgument.parse(parseContext, false, false);
       }
     }
 
     @Override
-    public NbtFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return source -> new ReplaceNbtFunction(nbtPredicateArgument.toAbsolute(source), nbtFunctionArgument.toAbsolute(source));
+    public ReplaceNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new ReplaceNbtFunction(nbtPredicate, nbtFunction);
     }
 
     @Override

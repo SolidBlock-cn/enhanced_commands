@@ -59,14 +59,14 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<BlockFunctionArgument> {
-    private BlockPredicateArgument blockPredicate;
-    private BlockFunctionArgument blockFunction;
-    private @Nullable BlockFunctionArgument elseFunction;
+  public static final class Parser implements FunctionParamsParser<FilterBlockFunction> {
+    private BlockPredicate blockPredicate;
+    private BlockFunction blockFunction;
+    private @Nullable BlockFunction elseFunction;
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new FilterBlockFunction(blockFunction.apply(source), blockPredicate.apply(source), elseFunction == null ? EmptyBlockFunction.INSTANCE : elseFunction.apply(source));
+    public FilterBlockFunction getParseResult(ParseContext<?> parseContext) {
+      return new FilterBlockFunction(blockFunction, blockPredicate, elseFunction == null ? EmptyBlockFunction.INSTANCE : elseFunction);
     }
 
     @Override

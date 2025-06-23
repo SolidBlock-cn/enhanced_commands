@@ -12,43 +12,38 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.nbt.BlocksNbtDataArgument;
+import pers.solid.ecmd.nbt.BlocksNbtData;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtTarget;
-import pers.solid.ecmd.nbt.NbtTargetArgument;
-import pers.solid.ecmd.predicate.block.BlockPredicateArgument;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtTargetArgument<?>> {
+public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtTarget<?>> {
   public static NbtTargetArgumentType nbtTarget(CommandRegistryAccess registryAccess) {
     return new NbtTargetArgumentType(registryAccess);
   }
 
-  public static NbtTargetArgument<?> getNbtTargetArgument(CommandContext<?> context, String name, @Nullable BlockPredicateArgument blockPredicateArgument) {
-    final NbtTargetArgument<?> argument = context.getArgument(name, NbtTargetArgument.class);
-    if (argument instanceof BlocksNbtDataArgument blocksNbtDataArgument && blockPredicateArgument != null) {
-      return new BlocksNbtDataArgument(blocksNbtDataArgument.regionArgument(), blockPredicateArgument);
+  public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name, @Nullable BlockPredicate blockPredicate) throws CommandSyntaxException {
+    final NbtTarget<?> argument = context.getArgument(name, NbtTarget.class);
+    if (argument instanceof BlocksNbtData blocksNbtData && blockPredicate != null) {
+      return new BlocksNbtData(blocksNbtData.region(), blockPredicate);
     }
     return argument;
   }
 
-  public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name, @Nullable BlockPredicateArgument blockPredicateArgument) throws CommandSyntaxException {
-    return getNbtTargetArgument(context, name, blockPredicateArgument).getNbtTarget(context.getSource());
-  }
-
   public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return getNbtTargetArgument(context, name, ((CommandContextAccessor<?>) context).getArguments().containsKey("keyword_args") ? KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getArg("affect_only") : null).getNbtTarget(context.getSource());
+    return getNbtTarget(context, name, ((CommandContextAccessor<?>) context).getArguments().containsKey("keyword_args") ? KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getArg("affect_only") : null);
   }
 
   @Override
-  public NbtTargetArgument<?> parse(StringReader reader) throws CommandSyntaxException {
+  public NbtTarget<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtTargetArgument<?> nbtTargetArgument = NbtDataRegistry.handleTarget(s, new ParseContext<>(registryAccess, reader, false, true));
+    final NbtTarget<?> nbtTargetArgument = NbtDataRegistry.handleTarget(s, new ParseContext<>(registryAccess, reader, false, true));
     if (nbtTargetArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -64,7 +59,7 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
     reader.setCursor(builder.getStart());
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtTargetArgument<?> nbtTargetArgument;
+    final NbtTarget<?> nbtTargetArgument;
     final ParseContext<S> parseContext = new ParseContext<>(registryAccess, reader, true, true);
     try {
       nbtTargetArgument = NbtDataRegistry.handleTarget(s, parseContext);

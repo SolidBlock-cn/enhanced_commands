@@ -15,7 +15,7 @@ import java.util.Map;
 
 public final class NbtFunctionTypes {
 
-  public static final Map<String, Supplier<FunctionLikeParser<? extends NbtFunctionArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtFunctionTypes::registerFunctions);
+  public static final Map<String, Supplier<FunctionLikeParser<? extends NbtFunction>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtFunctionTypes::registerFunctions);
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtFunctionTypes::registerFunctionNames);
 
   // 基本的 NBT 函数
@@ -44,7 +44,7 @@ public final class NbtFunctionTypes {
   }
 
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends NbtFunctionArgument>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends NbtFunction>>> map) {
     map.put("concat", ConcatNbtFunction.Parser::new);
     map.put("from", GetDataNbtFunction.Parser::new);
     map.put("pos", PosNbtFunction.Parser::new);

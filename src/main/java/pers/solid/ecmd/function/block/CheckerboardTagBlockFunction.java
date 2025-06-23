@@ -117,11 +117,11 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     }
   }
 
-  public static class Parser extends CheckerboardParser<BlockFunctionArgument> {
+  public static class Parser extends CheckerboardParser<BlockFunction> {
     protected RegistryEntryList.Named<Block> tagKey;
 
     @Override
-    protected BlockFunctionArgument getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
+    protected CheckerboardTagBlockFunction getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
       return new CheckerboardTagBlockFunction(tagKey, floor, scale, offset);
     }
 
@@ -143,7 +143,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     }
 
     @Override
-    protected BlockFunctionArgument parseElement(ParseContext<?> parseContext) {
+    protected BlockFunction parseElement(ParseContext<?> parseContext) {
       throw new UnsupportedOperationException();
     }
   }

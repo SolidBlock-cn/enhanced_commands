@@ -17,7 +17,7 @@ import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtPredicateArgument> {
+public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtPredicate> {
 
   public static NbtPredicateArgumentType compound(CommandRegistryAccess registryAccess) {
     return new NbtPredicateArgumentType(true, registryAccess);
@@ -32,7 +32,7 @@ public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAcc
   }
 
   @Override
-  public NbtPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
+  public NbtPredicate parse(StringReader reader) throws CommandSyntaxException {
     final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader, false, false);
     final NbtPredicateParser<?> parser = new NbtPredicateParser<>(parseContext);
     return onlyCompounds ? parser.parseCompound(false, false) : parser.parsePredicate(false, false);

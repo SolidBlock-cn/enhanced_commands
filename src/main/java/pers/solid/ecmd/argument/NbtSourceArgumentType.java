@@ -12,37 +12,32 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtSource;
-import pers.solid.ecmd.nbt.NbtSourceArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtSourceArgument<?>> {
+public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtSource<?>> {
   public static NbtSourceArgumentType nbtSource(CommandRegistryAccess registryAccess) {
     return new NbtSourceArgumentType(registryAccess);
   }
 
-  public static NbtSourceArgument<?> getNbtSourceArgument(CommandContext<?> context, String name) {
-    return context.getArgument(name, NbtSourceArgument.class);
-  }
-
   public static NbtSource<?> getNbtSource(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return getNbtSourceArgument(context, name).getNbtSource(context.getSource());
+    return ((NbtSource<?>) context.getArgument(name, NbtSource.class));
   }
 
   @Override
-  public NbtSourceArgument<?> parse(StringReader reader) throws CommandSyntaxException {
+  public NbtSource<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtSourceArgument<?> nbtSourceArgument = NbtDataRegistry.handleSource(s, new ParseContext<>(registryAccess, reader, false, true));
-    if (nbtSourceArgument == null) {
+    final NbtSource<?> nbtSource = NbtDataRegistry.handleSource(s, new ParseContext<>(registryAccess, reader, false, true));
+    if (nbtSource == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
       throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader), cursorAfterString);
     } else {
-      return nbtSourceArgument;
+      return nbtSource;
     }
   }
 
@@ -53,11 +48,11 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
     final int cursorAfterString = reader.getCursor();
-    final NbtSourceArgument<?> nbtSourceArgument;
+    final NbtSource<?> nbtSource;
     final ParseContext<S> parseContext = new ParseContext<>(registryAccess, reader, true, true);
     try {
-      nbtSourceArgument = NbtDataRegistry.handleSource(s, parseContext);
-      if (nbtSourceArgument == null) {
+      nbtSource = NbtDataRegistry.handleSource(s, parseContext);
+      if (nbtSource == null) {
         reader.setCursor(cursorBeforeString);
         return CommandSource.suggestMatching(NbtDataRegistry.streamSourceTypes(), builder);
       }

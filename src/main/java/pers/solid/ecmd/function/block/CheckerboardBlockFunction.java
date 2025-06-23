@@ -56,14 +56,14 @@ public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> fun
     }
   }
 
-  public static class Parser extends CheckerboardParser<BlockFunctionArgument> {
+  public static class Parser extends CheckerboardParser<BlockFunction> {
     @Override
-    protected BlockFunctionArgument getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
-      return source -> new CheckerboardBlockFunction(weightedList.transform(blockFunctionArgument -> blockFunctionArgument.apply(source)), floor, scale, offset);
+    protected CheckerboardBlockFunction getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
+      return new CheckerboardBlockFunction(weightedList.transform(blockFunctionArgument -> blockFunctionArgument), floor, scale, offset);
     }
 
     @Override
-    protected BlockFunctionArgument parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+    protected BlockFunction parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
       return BlockFunctionArgument.parse(parseContext);
     }
   }

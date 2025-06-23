@@ -16,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -130,18 +129,18 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
   }
 
-  class Parser implements FunctionLikeParser<NbtFunctionArgument>, NamedParamListParser {
+  class Parser implements FunctionLikeParser<ConcatNbtFunction>, NamedParamListParser {
     private static final Set<String> SUPPORTED_PARAMS = Set.of("delimiter");
-    private final List<NbtFunctionArgument> functionArguments = new ArrayList<>();
+    private final List<NbtFunction> nbtFunctions = new ArrayList<>();
     private boolean flatten;
-    private @Nullable NbtFunctionArgument delimiter = null;
+    private @Nullable NbtFunction delimiter = null;
 
     @Override
-    public NbtFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public ConcatNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (flatten) {
-        return source -> new Flattened(functionArguments.getFirst().toAbsolute(source), delimiter == null ? Optional.empty() : Optional.ofNullable(delimiter.toAbsolute(source)));
+        return new Flattened(nbtFunctions.getFirst(), Optional.ofNullable(delimiter));
       } else {
-        return source -> new Direct(IterateUtils.transformFailableImmutableList(functionArguments, input -> input.toAbsolute(source)), delimiter == null ? Optional.empty() : Optional.ofNullable(delimiter.toAbsolute(source)));
+        return new Direct(nbtFunctions, Optional.ofNullable(delimiter));
       }
     }
 
@@ -156,12 +155,12 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
         flatten = true;
 
         // 在展平模式下，只能读取一个参数
-        functionArguments.add(NbtFunctionArgument.parse(parseContext, false, false));
+        nbtFunctions.add(NbtFunctionArgument.parse(parseContext, false, false));
       } else if (reader.canRead() && reader.peek() == ')') {
         parseContext.clearSuggestion();
       } else {
         while (true) {
-          functionArguments.add(NbtFunctionArgument.parse(parseContext, false, false));
+          nbtFunctions.add(NbtFunctionArgument.parse(parseContext, false, false));
           reader.skipWhitespace();
 
           parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder

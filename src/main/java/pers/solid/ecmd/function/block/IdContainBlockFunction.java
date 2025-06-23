@@ -106,7 +106,7 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   }
 
-  public static class Parser implements FunctionLikeParser<BlockFunctionArgument>, NamedParamListParser {
+  public static class Parser implements FunctionLikeParser<IdContainBlockFunction>, NamedParamListParser {
     private static final Set<String> SUPPORTED_PARAM_NAMES = ImmutableSet.of("seed");
     private Pattern pattern;
     private OptionalLong seed = OptionalLong.empty();

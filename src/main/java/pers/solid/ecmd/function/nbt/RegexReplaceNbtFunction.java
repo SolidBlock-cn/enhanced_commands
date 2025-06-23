@@ -105,16 +105,16 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
     }
   }
 
-  public static class Parser implements FunctionLikeParser<NbtFunctionArgument>, NamedParamListParser {
+  public static class Parser implements FunctionLikeParser<RegexReplaceNbtFunction>, NamedParamListParser {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
     private Pattern regex;
     private String replacement;
     private Boolean recursive, lenient;
-    private NbtFunctionArgument original;
+    private NbtFunction original;
 
     @Override
-    public NbtFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return source -> new RegexReplaceNbtFunction(regex, replacement, Boolean.TRUE.equals(recursive), Boolean.TRUE.equals(lenient), original == null ? Optional.empty() : Optional.of(original.toAbsolute(source)));
+    public RegexReplaceNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new RegexReplaceNbtFunction(regex, replacement, Boolean.TRUE.equals(recursive), Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
     }
 
     @Override

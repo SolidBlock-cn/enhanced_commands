@@ -10,7 +10,6 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -66,20 +65,20 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
     }
   }
 
-  public record Parser(List<BlockPredicateArgument> blockPredicates) implements FunctionParamsParser<BlockPredicateArgument> {
+  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionParamsParser<AnyBlockPredicate> {
     public Parser() {
       this(new ArrayList<>());
     }
 
     @Override
     public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final BlockPredicateArgument parse = BlockPredicateArgument.parse(parseContext);
+      final BlockPredicate parse = BlockPredicateArgument.parse(parseContext);
       blockPredicates.add(parse);
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(blockPredicates, input -> input.apply(source)));
+    public AnyBlockPredicate getParseResult(ParseContext<?> parseContext) {
+      return new AnyBlockPredicate(blockPredicates);
     }
   }
 }

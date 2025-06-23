@@ -57,13 +57,13 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     }
   }
 
-  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
-    private BlockPredicateArgument condition;
-    private BlockFunctionArgument valueIfTrue, valueIfFalse;
+  public static class Parser implements FunctionParamsParser<ConditionalBlockFunction> {
+    private BlockPredicate condition;
+    private BlockFunction valueIfTrue, valueIfFalse;
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new ConditionalBlockFunction(condition.apply(source), valueIfTrue.apply(source), valueIfFalse == null ? EmptyBlockFunction.INSTANCE : valueIfFalse.apply(source));
+    public ConditionalBlockFunction getParseResult(ParseContext<?> parseContext) {
+      return new ConditionalBlockFunction(condition, valueIfTrue, valueIfFalse == null ? EmptyBlockFunction.INSTANCE : valueIfFalse);
     }
 
     @Override

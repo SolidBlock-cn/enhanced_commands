@@ -18,11 +18,11 @@ import java.util.List;
 import java.util.Map;
 
 public final class BlockPredicateTypes {
-  public static final Map<String, Supplier<FunctionLikeParser<? extends BlockPredicateArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
+  public static final Map<String, Supplier<FunctionLikeParser<? extends BlockPredicate>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
   public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockPredicateTypes::registerFunctionNames);
-  public static final Parser<BlockPredicateArgument> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(parseContext.withAllowSparse(true)), parseContext);
-  public static final Parser<BlockPredicateArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
-  public static final List<Parser<BlockPredicateArgument>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
+  public static final Parser<BlockPredicate> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockPredicateArgument.parse(parseContext.withAllowSparse(true)), parseContext);
+  public static final Parser<BlockPredicate> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
+  public static final List<Parser<BlockPredicate>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
 
   public static final SimpleBlockPredicate.Type SIMPLE = register("simple", SimpleBlockPredicate.Type.SIMPLE_TYPE);
   public static final NegatingBlockPredicate.Type NEGATING = register("negating", NegatingBlockPredicate.Type.NEGATING_TYPE);
@@ -51,12 +51,12 @@ public final class BlockPredicateTypes {
   @SuppressWarnings("unchecked")
   private static <T extends BlockPredicateType<?>> T register(String name, T value) {
     if (value != SimpleBlockPredicate.Type.SIMPLE_TYPE && value instanceof Parser<?> parser) {
-      PARSERS.add((Parser<BlockPredicateArgument>) parser);
+      PARSERS.add((Parser<BlockPredicate>) parser);
     }
     return Registry.register(BlockPredicateType.REGISTRY, EnhancedCommands.id(name), value);
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockPredicateArgument>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockPredicate>>> map) {
     map.put("all", AllBlockPredicate.Parser::new);
     map.put("any", AnyBlockPredicate.Parser::new);
     map.put("checkerboard", CheckerboardBlockPredicate.Parser::new);

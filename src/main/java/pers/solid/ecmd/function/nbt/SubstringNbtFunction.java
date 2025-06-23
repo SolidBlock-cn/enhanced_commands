@@ -117,16 +117,16 @@ public record SubstringNbtFunction(int startIndex, OptionalInt endIndex, boolean
     }
   }
 
-  public static class Parser implements FunctionLikeParser<NbtFunctionArgument>, NamedParamListParser {
+  public static class Parser implements FunctionLikeParser<SubstringNbtFunction>, NamedParamListParser {
     private Integer startIndex, endIndex;
     private Boolean lenient;
-    private @Nullable NbtFunctionArgument original;
+    private @Nullable NbtFunction original;
     private static final Collection<String> SUPPORTED = Set.of("lenient", "original");
 
     @Override
-    public NbtFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public SubstringNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final OptionalInt optionalInt = endIndex == null ? OptionalInt.empty() : OptionalInt.of(endIndex);
-      return source -> new SubstringNbtFunction(startIndex, optionalInt, Boolean.TRUE.equals(lenient), original == null ? Optional.empty() : Optional.of(original.toAbsolute(source)));
+      return new SubstringNbtFunction(startIndex, optionalInt, Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
     }
 
     @Override

@@ -54,18 +54,16 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<BlockFunctionArgument> {
-    private final List<BlockFunctionArgument> blockFunctions = new ArrayList<>();
+  public static final class Parser implements FunctionParamsParser<OverlayBlockFunction> {
+    private final List<BlockFunction> blockFunctions = new ArrayList<>();
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> {
-        final ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
-        for (BlockFunctionArgument blockFunction : blockFunctions) {
-          builder.add(blockFunction.apply(source));
-        }
-        return new OverlayBlockFunction(builder.build());
-      };
+    public OverlayBlockFunction getParseResult(ParseContext<?> parseContext) {
+      final ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
+      for (BlockFunction blockFunction : blockFunctions) {
+        builder.add(blockFunction);
+      }
+      return new OverlayBlockFunction(builder.build());
     }
 
     @Override

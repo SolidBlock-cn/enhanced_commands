@@ -80,12 +80,12 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     }
   }
 
-  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
-    private BlockFunctionArgument blockFunction = null;
+  public static class Parser implements FunctionParamsParser<StonecutBlockFunction> {
+    private BlockFunction blockFunction = null;
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new StonecutBlockFunction(blockFunction == null ? EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
+    public StonecutBlockFunction getParseResult(ParseContext<?> parseContext) {
+      return new StonecutBlockFunction(blockFunction == null ? EmptyBlockFunction.INSTANCE : blockFunction);
     }
 
     @Override

@@ -4,10 +4,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -15,8 +16,8 @@ import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
 import pers.solid.ecmd.util.parse.ParseContext;
 
-public record RegionBlockPredicate(Region region) implements BlockPredicate {
-  public static final MapCodec<RegionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RegionBlockPredicate::new, Region.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
+public record RegionBlockPredicate(RegionArgument<?> region) implements BlockPredicate {
+  public static final MapCodec<RegionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RegionBlockPredicate::new, RegionArgument.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
 
   @Override
   public @NotNull String asString() {
@@ -25,13 +26,24 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    return region.contains(cachedBlockPosition.getBlockPos());
+    try {
+      // todo consider optimizing
+      return region.toAbsoluteRegion((ServerCommandSource) context.source).contains(cachedBlockPosition.getBlockPos());
+    } catch (CommandSyntaxException e) {
+      throw new CommandRuntimeException(e);
+    }
   }
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockPos blockPos = cachedBlockPosition.getBlockPos();
-    final boolean contains = region.contains(blockPos);
+    final boolean contains;
+    try {
+      contains = region.toAbsoluteRegion((ServerCommandSource) context.source).contains(blockPos);
+    } catch (CommandSyntaxException e) {
+      // todo consider optimizing
+      throw new CommandRuntimeException(e);
+    }
     return TestResult.of(contains, Text.translatable("enhanced_commands.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).styled(Styles.ACTUAL)));
   }
 
@@ -49,12 +61,12 @@ public record RegionBlockPredicate(Region region) implements BlockPredicate {
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
-    private RegionArgument regionArgument;
+  public static final class Parser implements FunctionParamsParser<RegionBlockPredicate> {
+    private RegionArgument<?> regionArgument;
 
     @Override
-    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) {
-      return serverCommandSource -> new RegionBlockPredicate(regionArgument.toAbsoluteRegion(serverCommandSource));
+    public RegionBlockPredicate getParseResult(ParseContext<?> parseContext) {
+      return new RegionBlockPredicate(regionArgument);
     }
 
     @Override

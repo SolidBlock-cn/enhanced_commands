@@ -55,7 +55,7 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
     return BlockFunctionTypes.SIMPLE;
   }
 
-  public enum Type implements BlockFunctionType<SimpleBlockFunction>, Parser<BlockFunctionArgument> {
+  public enum Type implements BlockFunctionType<SimpleBlockFunction>, Parser<BlockFunction> {
     SIMPLE_TYPE;
 
     @Override

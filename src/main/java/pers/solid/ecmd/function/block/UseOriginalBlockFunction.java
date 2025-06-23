@@ -34,7 +34,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     return BlockFunctionTypes.USE_ORIGINAL;
   }
 
-  public enum Type implements BlockFunctionType<UseOriginalBlockFunction>, Parser<BlockFunctionArgument> {
+  public enum Type implements BlockFunctionType<UseOriginalBlockFunction>, Parser<UseOriginalBlockFunction> {
     USE_ORIGINAL_TYPE;
 
     @Override

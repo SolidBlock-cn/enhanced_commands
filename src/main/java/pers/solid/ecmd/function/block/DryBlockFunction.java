@@ -51,12 +51,12 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
     }
   }
 
-  public static class Parser implements FunctionParamsParser<BlockFunctionArgument> {
-    BlockFunctionArgument blockFunction = null;
+  public static class Parser implements FunctionParamsParser<DryBlockFunction> {
+    BlockFunction blockFunction = null;
 
     @Override
-    public BlockFunctionArgument getParseResult(ParseContext<?> parseContext) {
-      return source -> new DryBlockFunction(blockFunction == null ? EmptyBlockFunction.INSTANCE : blockFunction.apply(source));
+    public DryBlockFunction getParseResult(ParseContext<?> parseContext) {
+      return new DryBlockFunction(blockFunction == null ? EmptyBlockFunction.INSTANCE : blockFunction);
     }
 
     @Override

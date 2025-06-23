@@ -1,6 +1,5 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -54,15 +53,16 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<BlockPredicateArgument> {
+  public static final class Parser implements FunctionParamsParser<RegionBlockPredicate> {
     private Function<ServerCommandSource, Vec3i> relPos;
-    private BlockPredicateArgument blockPredicate;
+    private BlockPredicate blockPredicate;
 
     @Override
-    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) {
-      Preconditions.checkNotNull(relPos, "relPos (argument 1)");
-      Preconditions.checkNotNull(blockPredicate, "predicate (argument 2)");
-      return source -> new RelBlockPredicate(relPos.apply(source), blockPredicate.apply(source));
+    public RegionBlockPredicate getParseResult(ParseContext<?> parseContext) {
+      return null; // implement
+//      Preconditions.checkNotNull(relPos, "relPos (argument 1)");
+//      Preconditions.checkNotNull(blockPredicate, "predicate (argument 2)");
+//      return new RelBlockPredicate(relPos, blockPredicate);
     }
 
     @Override

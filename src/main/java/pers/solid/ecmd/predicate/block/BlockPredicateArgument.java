@@ -12,7 +12,6 @@ import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -24,20 +23,20 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
   Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.all.symbol_tooltip");
   Text UNION_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.any.symbol_tooltip");
 
-  static @NotNull BlockPredicateArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static @NotNull BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     return parseUnion(parseContext);
   }
 
-  static @NotNull BlockPredicateArgument parseUnion(ParseContext<?> parseContext) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseIntersect(parseContext), predicates -> source -> new AnyBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "|", UNION_TOOLTIP, parseContext);
+  static @NotNull BlockPredicate parseUnion(ParseContext<?> parseContext) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseIntersect(parseContext), AnyBlockPredicate::new, "|", UNION_TOOLTIP, parseContext);
   }
 
-  static @NotNull BlockPredicateArgument parseIntersect(ParseContext<?> parseContext) throws CommandSyntaxException {
-    return ParsingUtil.parseUnifiable(() -> parseCombination(parseContext), predicates -> source -> new AllBlockPredicate(IterateUtils.transformFailableImmutableList(predicates, input -> input.apply(source))), "&", INTERSECT_TOOLTIP, parseContext);
+  static @NotNull BlockPredicate parseIntersect(ParseContext<?> parseContext) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseCombination(parseContext), AllBlockPredicate::new, "&", INTERSECT_TOOLTIP, parseContext);
   }
 
-  static @NotNull <S> BlockPredicateArgument parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
-    final BlockPredicateArgument parseUnit = parseUnit(parseContext);
+  static @NotNull <S> BlockPredicate parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
+    final BlockPredicate parseUnit = parseUnit(parseContext);
     if (parseUnit instanceof NbtPredicate) {
       return parseUnit;
     }
@@ -70,19 +69,19 @@ public interface BlockPredicateArgument extends FailableFunction<ServerCommandSo
       nbtPredicate = new NbtPredicateParser<>(parseContext).parseCompound(false, false);
     } else nbtPredicate = null;
     if (propertyNamePredicates != null || nbtPredicate != null) {
-      return source -> new PropertiesNbtCombinationBlockPredicate(parseUnit.apply(source), propertyNamePredicates == null ? null : new PropertiesNamesBlockPredicate(propertyNamePredicates), nbtPredicate == null ? null : new NbtBlockPredicate(nbtPredicate));
+      return new PropertiesNbtCombinationBlockPredicate(parseUnit, propertyNamePredicates == null ? null : new PropertiesNamesBlockPredicate(propertyNamePredicates), nbtPredicate == null ? null : new NbtBlockPredicate(nbtPredicate));
     }
     return parseUnit;
   }
 
   @NotNull
-  static BlockPredicateArgument parseUnit(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static BlockPredicate parseUnit(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
     // 刻意将 simple 调整到最后面
-    for (Parser<BlockPredicateArgument> argumentParser : Iterables.concat(BlockPredicateTypes.PARSERS, Collections.singleton(SimpleBlockPredicate.Type.SIMPLE_TYPE))) {
+    for (Parser<BlockPredicate> argumentParser : Iterables.concat(BlockPredicateTypes.PARSERS, Collections.singleton(SimpleBlockPredicate.Type.SIMPLE_TYPE))) {
       reader.setCursor(cursorOnStart);
-      final BlockPredicateArgument parse = argumentParser.parse(parseContext);
+      final BlockPredicate parse = argumentParser.parse(parseContext);
       if (parse != null) {
         return parse;
       }

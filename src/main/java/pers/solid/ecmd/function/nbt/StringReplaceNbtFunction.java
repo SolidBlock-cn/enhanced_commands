@@ -86,15 +86,15 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
     }
   }
 
-  public static class Parser implements FunctionLikeParser<NbtFunctionArgument>, NamedParamListParser {
+  public static class Parser implements FunctionLikeParser<StringReplaceNbtFunction>, NamedParamListParser {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
     private String target, replacement;
     private Boolean recursive, lenient;
-    private NbtFunctionArgument original;
+    private NbtFunction original;
 
     @Override
-    public NbtFunctionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return source -> new StringReplaceNbtFunction(target, replacement, Boolean.TRUE.equals(recursive), Boolean.TRUE.equals(lenient), original == null ? Optional.empty() : Optional.of(original.toAbsolute(source)));
+    public StringReplaceNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new StringReplaceNbtFunction(target, replacement, Boolean.TRUE.equals(recursive), Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
     }
 
     @Override

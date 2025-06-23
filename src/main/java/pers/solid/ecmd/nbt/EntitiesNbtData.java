@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
@@ -21,12 +22,13 @@ import pers.solid.ecmd.math.NbtConcentrationType;
 
 import java.util.*;
 
-public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<Entity> {
+public record EntitiesNbtData(EntitySelector entitySelector) implements NbtTarget<Entity> {
   // todo: consider using an entity selector as a record component, instead of the actual collection of entities
 
   @Override
-  public Collection<Entity> values(ServerCommandSource source) {
-    return entities;
+  public Collection<Entity> values(ServerCommandSource source) throws CommandSyntaxException {
+    final List<? extends Entity> entities = entitySelector.getEntities(source);
+    return Collections.unmodifiableList(entities);
   }
 
   @Override
@@ -36,6 +38,7 @@ public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<
 
   @Override
   public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
+    final Collection<Entity> entities = values(source);
     final Map<Entity, NbtElement> nbts = getNbtsInPath(source, path);
     if (nbts.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
       final var soleEntry = nbts.entrySet().iterator().next();
@@ -109,10 +112,10 @@ public record EntitiesNbtData(Collection<Entity> entities) implements NbtTarget<
 
   @Override
   public Text feedbackModify(Collection<Entity> values) {
-    if (entities.size() == 1) {
-      return Text.translatable("commands.data.entity.modified", entities.iterator().next().getDisplayName());
+    if (values.size() == 1) {
+      return Text.translatable("commands.data.entity.modified", values.iterator().next().getDisplayName());
     } else {
-      return Text.translatable("enhanced_commands.commands.nbt.entities.modify", entities.size()).enhanced$$();
+      return Text.translatable("enhanced_commands.commands.nbt.entities.modify", values.size()).enhanced$$();
     }
   }
 }

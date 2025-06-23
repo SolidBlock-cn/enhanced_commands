@@ -9,30 +9,30 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public final class NbtDataRegistry {
-  private static final Map<String, Parser<? extends NbtSourceArgument<?>>> SOURCES = new HashMap<>();
-  private static final Map<String, Parser<? extends NbtTargetArgument<?>>> TARGETS = new HashMap<>();
+  private static final Map<String, Parser<? extends NbtSource<?>>> SOURCES = new HashMap<>();
+  private static final Map<String, Parser<? extends NbtTarget<?>>> TARGETS = new HashMap<>();
 
-  public static void registerSource(String type, Parser<? extends NbtSourceArgument<?>> handler) {
+  public static void registerSource(String type, Parser<? extends NbtSource<?>> handler) {
     SOURCES.put(type, handler);
   }
 
-  public static void registerTarget(String type, Parser<? extends NbtTargetArgument<?>> handler) {
+  public static void registerTarget(String type, Parser<? extends NbtTarget<?>> handler) {
     TARGETS.put(type, handler);
   }
 
-  public static <T extends NbtSourceArgument<?> & NbtTargetArgument<?>> void register(String type, Parser<T> handler) {
+  public static <T extends NbtSource<?> & NbtTarget<?>> void register(String type, Parser<T> handler) {
     registerSource(type, handler);
     registerTarget(type, handler);
   }
 
-  public static NbtSourceArgument<?> handleSource(String type, ParseContext<?> parseContext) throws CommandSyntaxException {
+  public static NbtSource<?> handleSource(String type, ParseContext<?> parseContext) throws CommandSyntaxException {
     if (!SOURCES.containsKey(type)) {
       return null;
     }
     return SOURCES.get(type).parse(parseContext);
   }
 
-  public static NbtTargetArgument<?> handleTarget(String type, ParseContext<?> parseContext) throws CommandSyntaxException {
+  public static NbtTarget<?> handleTarget(String type, ParseContext<?> parseContext) throws CommandSyntaxException {
     if (!TARGETS.containsKey(type)) {
       return null;
     }

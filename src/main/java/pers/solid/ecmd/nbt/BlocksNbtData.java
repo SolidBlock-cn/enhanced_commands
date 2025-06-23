@@ -30,19 +30,21 @@ import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.*;
 import java.util.stream.Stream;
 
-public record BlocksNbtData(Region region, BlockPredicate blockPredicate) implements NbtTarget<BlockEntity> {
+public record BlocksNbtData(RegionArgument<?> region, BlockPredicate blockPredicate) implements NbtTarget<BlockEntity> {
   public static final MapCodec<BlocksNbtData> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Region.CODEC.fieldOf("region").forGetter(BlocksNbtData::region),
+      RegionArgument.CODEC.fieldOf("region").forGetter(BlocksNbtData::region),
       BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(BlocksNbtData::blockPredicate)
   ).apply(i, BlocksNbtData::new));
 
   @Override
-  public Collection<BlockEntity> values(ServerCommandSource source) {
+  public Collection<BlockEntity> values(ServerCommandSource source) throws CommandSyntaxException {
+    final Region region = this.region.toAbsoluteRegion(source);
     final ServerWorld world = source.getWorld();
     final ImmutableList<BlockEntity> blockEntities;
     final BlockBox blockBox = region.minContainingBlockBox();

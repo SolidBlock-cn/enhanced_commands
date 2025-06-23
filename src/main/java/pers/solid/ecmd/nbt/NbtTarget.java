@@ -24,7 +24,7 @@ public interface NbtTarget<T> extends NbtSource<T> {
    * @return 所有可修改 NBT 数据的对象的集合。
    */
   @Override
-  Collection<T> values(ServerCommandSource source);
+  Collection<T> values(ServerCommandSource source) throws CommandSyntaxException;
 
   /**
    * 设置指定的对象的 NBT 数据。
@@ -101,10 +101,10 @@ public interface NbtTarget<T> extends NbtSource<T> {
    * 单个的 NBT 目标。其方法在实现上会有些优化，以减少一些集合创建和迭代。
    */
   interface Single<T> extends NbtTarget<T>, NbtSource.Single<T> {
-    T value(ServerCommandSource commandSource);
+    T value(ServerCommandSource commandSource) throws CommandSyntaxException;
 
     @Override
-    default Collection<T> values(ServerCommandSource source) {
+    default Collection<T> values(ServerCommandSource source) throws CommandSyntaxException {
       return Collections.singleton(value(source));
     }
 

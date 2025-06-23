@@ -13,12 +13,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.function.nbt.NbtFunction;
-import pers.solid.ecmd.function.nbt.NbtFunctionArgument;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -52,7 +50,7 @@ public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements Bloc
     return BlockFunctionTypes.NBT;
   }
 
-  public enum Type implements BlockFunctionType<NbtBlockFunction>, Parser<BlockFunctionArgument> {
+  public enum Type implements BlockFunctionType<NbtBlockFunction>, Parser<NbtBlockFunction> {
     NBT_TYPE;
 
     @Override
@@ -61,12 +59,12 @@ public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements Bloc
     }
 
     @Override
-    public @Nullable BlockFunctionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public NbtBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtPredicateParser.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '{') {
-        final NbtFunctionArgument nbtFunctionArgument = new NbtFunctionParser<>(parseContext).parsePreferringCompound(false, false);
-        return source -> new NbtBlockFunction(nbtFunctionArgument.toAbsolute(source));
+        final NbtFunction nbtFunctionArgument = new NbtFunctionParser<>(parseContext).parsePreferringCompound(false, false);
+        return new NbtBlockFunction(nbtFunctionArgument);
       } else {
         return null;
       }

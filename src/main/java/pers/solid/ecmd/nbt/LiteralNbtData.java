@@ -13,12 +13,24 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
+import pers.solid.ecmd.predicate.block.ExecutionContext;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 import java.util.Collection;
 
-public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTarget.Single<MutableObject<NbtCompound>> {
-  public static final MapCodec<LiteralNbtData> CODEC = NbtCompound.CODEC.xmap(MutableObject::new, MutableObject::getValue).fieldOf("value").xmap(LiteralNbtData::new, LiteralNbtData::value);
+public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Single<MutableObject<NbtCompound>> {
+  public static final MapCodec<LiteralNbtData> CODEC = NbtFunction.CODEC.fieldOf("value").xmap(LiteralNbtData::new, LiteralNbtData::nbtFunction);
+
+  public MutableObject<NbtCompound> value(ServerCommandSource source) throws CommandSyntaxException {
+    final NbtElement nbtElement = nbtFunction.apply(null, new ExecutionContext(source));
+    if (nbtElement instanceof NbtCompound nbtCompound) {
+      return new MutableObject<>(nbtCompound);
+    } else {
+      throw ModCommandExceptionTypes.CANNOT_PARSE.create("not compound");
+    }
+  }
 
   @Override
   public void setNbtFor(ServerCommandSource commandSource, MutableObject<NbtCompound> target, NbtCompound nbt) throws CommandSyntaxException {
@@ -37,7 +49,7 @@ public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTar
 
   @Override
   public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
-    final NbtCompound nbt = value.getValue();
+    final NbtCompound nbt = value(source).getValue();
     if (path == null) {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.literal.query", NbtHelper.toPrettyPrintedText(nbt)), false);
       return NbtSource.toInt(nbt);
@@ -51,10 +63,5 @@ public record LiteralNbtData(MutableObject<NbtCompound> value) implements NbtTar
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.literal.query_scale", path.toString(), scale, NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
       return MathHelper.floor(scaledValue);
     }
-  }
-
-  @Override
-  public MutableObject<NbtCompound> value(ServerCommandSource commandSource) {
-    return value;
   }
 }

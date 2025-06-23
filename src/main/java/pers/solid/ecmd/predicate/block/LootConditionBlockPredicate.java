@@ -60,7 +60,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
   }
 
-  public static class Parser implements FunctionParamsParser<BlockPredicateArgument> {
+  public static class Parser implements FunctionParamsParser<LootConditionBlockPredicate> {
     protected Identifier id;
     protected LootCondition anonymous;
     protected int cursorBeforeId, cursorAfterId;
@@ -86,16 +86,14 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public BlockPredicateArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
-        return source -> {
-          final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = parseContext.registryAccess().createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
-          if (lootCondition.isEmpty()) {
-            parseContext.reader().setCursor(cursorBeforeId);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);
-          }
-          return new LootConditionBlockPredicate(lootCondition.get());
-        };
+        final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = parseContext.registryAccess().createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
+        if (lootCondition.isEmpty()) {
+          parseContext.reader().setCursor(cursorBeforeId);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);
+        }
+        return new LootConditionBlockPredicate(lootCondition.get());
       } else if (anonymous != null) {
         return new LootConditionBlockPredicate(RegistryEntry.of(anonymous));
       } else {

@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * @see net.minecraft.command.argument.BlockPredicateArgumentType
  */
-public record BlockPredicateArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<BlockPredicateArgument> {
+public record BlockPredicateArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<BlockPredicate> {
   public static BlockPredicateArgumentType blockPredicate(CommandRegistryAccess registryAccess) {
     return new BlockPredicateArgumentType(registryAccess);
   }
@@ -27,7 +27,7 @@ public record BlockPredicateArgumentType(CommandRegistryAccess registryAccess) i
   }
 
   @Override
-  public BlockPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
+  public BlockPredicate parse(StringReader reader) throws CommandSyntaxException {
     return BlockPredicateArgument.parse(new ParseContext<>(registryAccess, reader, false, false));
   }
 

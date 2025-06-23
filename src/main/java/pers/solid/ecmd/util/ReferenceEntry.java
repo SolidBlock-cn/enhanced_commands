@@ -94,7 +94,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       });
     }
 
-    protected abstract T getResultByEntrySupplier(FailableSupplier<RegistryKey<E>, CommandSyntaxException> supplier);
+    protected abstract T getResultByEntrySupplier(FailableSupplier<RegistryKey<E>, CommandSyntaxException> supplier) throws CommandSyntaxException;
 
     protected abstract CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier);
   }

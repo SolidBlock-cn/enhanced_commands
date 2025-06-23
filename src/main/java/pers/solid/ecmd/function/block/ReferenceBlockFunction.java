@@ -49,7 +49,7 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
   }
 
 
-  public static class Type extends PrefixedIdParser<BlockFunctionArgument, BlockFunction> implements BlockFunctionType<ReferenceBlockFunction> {
+  public static class Type extends PrefixedIdParser<ReferenceBlockFunction, BlockFunction> implements BlockFunctionType<ReferenceBlockFunction> {
     public static final Type INSTANCE = new Type();
 
     protected Type() {
@@ -62,8 +62,8 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
     }
 
     @Override
-    protected BlockFunctionArgument getResultByEntrySupplier(FailableSupplier<RegistryKey<BlockFunction>, CommandSyntaxException> supplier) {
-      return source -> new ReferenceBlockFunction(supplier.get());
+    protected ReferenceBlockFunction getResultByEntrySupplier(FailableSupplier<RegistryKey<BlockFunction>, CommandSyntaxException> supplier) throws CommandSyntaxException {
+      return new ReferenceBlockFunction(supplier.get());
     }
 
     @Override

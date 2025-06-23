@@ -24,7 +24,7 @@ public final class BlockFunctionTypes {
   /**
    * 所有方块函数的函数式解析器。键为方块函数的名称，值为对应名称的方块函数解析器的 supplier。
    */
-  public static final Map<String, Supplier<FunctionLikeParser<? extends BlockFunctionArgument>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockFunctionTypes::registerFunctions);
+  public static final Map<String, Supplier<FunctionLikeParser<? extends BlockFunction>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockFunctionTypes::registerFunctions);
   /**
    * 所有方块函数的函数语法的名称，将用于命令建议中的提示信息。
    */
@@ -33,15 +33,15 @@ public final class BlockFunctionTypes {
   /**
    * 解析方块函数中的括号语法。
    */
-  public static final Parser<BlockFunctionArgument> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(parseContext.withAllowSparse(true)), parseContext);
+  public static final Parser<BlockFunction> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockFunctionArgument.parse(parseContext.withAllowSparse(true)), parseContext);
   /**
    * 解析方块函数中的函数语法、
    */
-  public static final Parser<BlockFunctionArgument> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
+  public static final Parser<BlockFunction> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
   /**
    * 方块函数的所有解析器。注意这个列表是可变的。
    */
-  public static final List<Parser<BlockFunctionArgument>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
+  public static final List<Parser<BlockFunction>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
 
   public static final SimpleBlockFunction.Type SIMPLE = register("simple", SimpleBlockFunction.Type.SIMPLE_TYPE);
   public static final PropertyNamesBlockFunction.Type PROPERTY_NAMES = register("property_names", PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE);
@@ -73,7 +73,7 @@ public final class BlockFunctionTypes {
   @SuppressWarnings("unchecked")
   private static <T extends BlockFunctionType<?>> T register(String name, T value) {
     if (value != SimpleBlockFunction.Type.SIMPLE_TYPE && value instanceof Parser<?> parser) {
-      PARSERS.add((Parser<BlockFunctionArgument>) parser);
+      PARSERS.add((Parser<BlockFunction>) parser);
     }
     return Registry.register(BlockFunctionType.REGISTRY, EnhancedCommands.id(name), value);
   }
@@ -82,7 +82,7 @@ public final class BlockFunctionTypes {
     Preconditions.checkState(BlockFunctionType.REGISTRY.size() != 0);
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockFunctionArgument>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockFunction>>> map) {
     map.put("pick", PickBlockFunction.Parser::new);
     map.put("dry", DryBlockFunction.Parser::new);
     map.put("overlay", OverlayBlockFunction.Parser::new);

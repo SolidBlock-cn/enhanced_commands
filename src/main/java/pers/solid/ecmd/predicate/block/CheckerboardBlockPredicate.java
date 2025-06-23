@@ -68,14 +68,14 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
   }
 
 
-  public static class Parser extends CheckerboardParser<BlockPredicateArgument> {
+  public static class Parser extends CheckerboardParser<BlockPredicate> {
     @Override
-    protected BlockPredicateArgument getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
-      return source -> new CheckerboardBlockPredicate(weightedList.transform(blockPredicateArgument -> blockPredicateArgument.apply(source)), floor, scale, offset);
+    protected CheckerboardBlockPredicate getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
+      return new CheckerboardBlockPredicate(weightedList, floor, scale, offset);
     }
 
     @Override
-    protected BlockPredicateArgument parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+    protected BlockPredicate parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
       return BlockPredicateArgument.parse(parseContext);
     }
   }
