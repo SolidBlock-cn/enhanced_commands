@@ -3,9 +3,9 @@ package pers.solid.ecmd.region;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 
@@ -31,7 +31,7 @@ public interface RegionArgument<R extends Region> extends ExpressionConvertible 
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader);
   }
 
-  R toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException;
+  R toAbsoluteRegion(PositionProvider positionProvider);
 
   @NotNull
   RegionType<? super R> getType();

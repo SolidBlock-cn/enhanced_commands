@@ -4,12 +4,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.exception.CommandRuntimeException;
+import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -26,24 +26,14 @@ public record RegionBlockPredicate(RegionArgument<?> region) implements BlockPre
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    try {
-      // todo consider optimizing
-      return region.toAbsoluteRegion((ServerCommandSource) context.source).contains(cachedBlockPosition.getBlockPos());
-    } catch (CommandSyntaxException e) {
-      throw new CommandRuntimeException(e);
-    }
+    return Region.getCached(region, context.positionProvider).contains(cachedBlockPosition.getBlockPos());
   }
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
     final BlockPos blockPos = cachedBlockPosition.getBlockPos();
     final boolean contains;
-    try {
-      contains = region.toAbsoluteRegion((ServerCommandSource) context.source).contains(blockPos);
-    } catch (CommandSyntaxException e) {
-      // todo consider optimizing
-      throw new CommandRuntimeException(e);
-    }
+    contains = region.toAbsoluteRegion(context.positionProvider).contains(blockPos);
     return TestResult.of(contains, Text.translatable("enhanced_commands.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).styled(Styles.ACTUAL)));
   }
 

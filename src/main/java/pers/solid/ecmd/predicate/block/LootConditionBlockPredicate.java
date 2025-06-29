@@ -20,6 +20,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.bridge.LootBridge;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;

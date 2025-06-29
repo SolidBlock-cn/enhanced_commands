@@ -1,10 +1,9 @@
 package pers.solid.ecmd.region;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.enums.OutlineType;
 
 public record HollowCylinderRegionArgument(OutlineType outlineType, CylinderRegionArgument region) implements RegionArgument<HollowCylinderRegion> {
@@ -14,8 +13,8 @@ public record HollowCylinderRegionArgument(OutlineType outlineType, CylinderRegi
       .apply(i, HollowCylinderRegionArgument::new));
 
   @Override
-  public HollowCylinderRegion toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException {
-    return new HollowCylinderRegion(outlineType, region.toAbsoluteRegion(source));
+  public HollowCylinderRegion toAbsoluteRegion(PositionProvider positionProvider) {
+    return new HollowCylinderRegion(outlineType, region.toAbsoluteRegion(positionProvider));
   }
 
   @Override

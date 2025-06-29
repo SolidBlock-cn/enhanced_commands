@@ -44,13 +44,10 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.ParseContext;
 
@@ -155,8 +152,12 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                 .executes(context -> executeConvertShow(context, NbtFunction.CODEC)))
             .then(literal("nbt_predicate")
                 .executes(context -> executeConvertShow(context, NbtPredicate.CODEC)))
+            .then(literal("pos_argument")
+                .executes(context -> executeConvertShow(context, EnhancedPosArgument.CODEC)))
             .then(literal("region")
                 .executes(context -> executeConvertShow(context, Region.CODEC)))
+            .then(literal("region_argument")
+                .executes(context -> executeConvertShow(context, RegionArgument.CODEC)))
         )
         .then(literal("nbt")
             .executes(context -> executeCodecShow(context, getNbtElement(context, "nbt"), CodecUtil.NBT_ELEMENT, NbtOps.INSTANCE)))
@@ -283,7 +284,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(new ParseContext<>(registryAccess, s, false, true)).toAbsoluteRegion(context.getSource()))))
+            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(new ParseContext<>(registryAccess, s, false, true)).toAbsoluteRegion((PositionProvider) context.getSource()))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")

@@ -1,11 +1,10 @@
 package pers.solid.ecmd.region;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.util.PositionProvider;
 
 public record BlockCuboidRegionArgument(EnhancedPosArgument from, EnhancedPosArgument to) implements CuboidRegionArgument<BlockCuboidRegion> {
   public static final MapCodec<BlockCuboidRegionArgument> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -14,8 +13,8 @@ public record BlockCuboidRegionArgument(EnhancedPosArgument from, EnhancedPosArg
   ).apply(i, BlockCuboidRegionArgument::new));
 
   @Override
-  public BlockCuboidRegion toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException {
-    return new BlockCuboidRegion(from.toAbsoluteBlockPos(source), to.toAbsoluteBlockPos(source));
+  public BlockCuboidRegion toAbsoluteRegion(PositionProvider positionProvider) {
+    return new BlockCuboidRegion(from.toAbsoluteBlockPos(positionProvider), to.toAbsoluteBlockPos(positionProvider));
   }
 
   @Override

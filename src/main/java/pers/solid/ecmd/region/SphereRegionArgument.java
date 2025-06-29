@@ -1,12 +1,11 @@
 package pers.solid.ecmd.region;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.util.PositionProvider;
 
 public record SphereRegionArgument(double radius, EnhancedPosArgument center) implements RegionArgument<SphereRegion> {
   public static final MapCodec<SphereRegionArgument> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -15,8 +14,8 @@ public record SphereRegionArgument(double radius, EnhancedPosArgument center) im
   ).apply(i, SphereRegionArgument::new));
 
   @Override
-  public SphereRegion toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException {
-    return new SphereRegion(radius, center.toAbsolutePos(source));
+  public SphereRegion toAbsoluteRegion(PositionProvider positionProvider) {
+    return new SphereRegion(radius, center.toAbsolutePos(positionProvider));
   }
 
   @Override

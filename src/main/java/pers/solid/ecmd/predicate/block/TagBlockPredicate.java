@@ -16,10 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.Parser;
 

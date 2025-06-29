@@ -15,7 +15,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
 import pers.solid.ecmd.util.parse.ParseContext;

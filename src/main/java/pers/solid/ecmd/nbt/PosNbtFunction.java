@@ -5,7 +5,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +12,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunctionType;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -33,7 +32,7 @@ public record PosNbtFunction(EnhancedPosArgument pos) implements NbtFunction {
 
   @Override
   public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
-    final Vec3d pos = this.pos.toAbsolutePos(((ServerCommandSource) context.source));
+    final Vec3d pos = this.pos.toAbsolutePos(context.positionProvider);
     final DataResult<NbtElement> result = Vec3d.CODEC.encodeStart(NbtOps.INSTANCE, pos);
     return result.getOrThrow(ModCommandExceptionTypes.CANNOT_PARSE::create);
   }

@@ -23,7 +23,7 @@ import pers.solid.ecmd.configs.CommandsConfig;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
-import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.Collections;
@@ -84,7 +84,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   public static final RedirectModifier<ServerCommandSource> REGION_ARGUMENTS_MODIFIER = context -> {
     final ServerCommandSource source = context.getSource();
-    final RegionArgument regionArgument = ((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow();
+    final Region regionArgument = ((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow();
     source.addExtraArgument$ec("region", regionArgument);
     return Collections.singleton(source);
   };

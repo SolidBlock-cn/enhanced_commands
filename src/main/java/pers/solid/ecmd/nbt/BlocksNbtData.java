@@ -29,9 +29,10 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -54,7 +55,7 @@ public record BlocksNbtData(RegionArgument<?> region, BlockPredicate blockPredic
 
   @Override
   public Collection<BlockEntity> values(ServerCommandSource source) throws CommandSyntaxException {
-    final Region region = this.region.toAbsoluteRegion(source);
+    final Region region = this.region.toAbsoluteRegion((PositionProvider) source);
     final ServerWorld world = source.getWorld();
     final ImmutableList<BlockEntity> blockEntities;
     final BlockBox blockBox = region.minContainingBlockBox();

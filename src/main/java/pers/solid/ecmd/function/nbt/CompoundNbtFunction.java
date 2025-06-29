@@ -9,7 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Map;
 import java.util.stream.Collectors;

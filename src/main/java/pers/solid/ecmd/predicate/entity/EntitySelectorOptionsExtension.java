@@ -53,6 +53,7 @@ import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
@@ -255,7 +256,7 @@ public class EntitySelectorOptionsExtension {
 
       reader.extension$ec().addFunction(source -> {
         final Region region;
-        region = regionArgument.toAbsoluteRegion(source);
+        region = regionArgument.toAbsoluteRegion((PositionProvider) source);
         return new RegionEntityPredicateEntry(region);
       });
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.region"));

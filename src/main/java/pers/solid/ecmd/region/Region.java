@@ -1,11 +1,12 @@
 package pers.solid.ecmd.region;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Streams;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.Contract;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.GeoUtil;
+import pers.solid.ecmd.util.PositionProvider;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -24,9 +26,13 @@ import java.util.stream.Stream;
  * 区域是指一系列坐标的抽象集合，每个区域需要能够遍历区域中的方块坐标，并且能够判断精确坐标或方块坐标是否在区域内。区域使用的坐标是精确的，不一定是方块坐标，如果所有的操作都是基于方块的，则可以使用 {@link IntBackedRegion}。
  */
 @Unmodifiable
-public interface Region extends Iterable<BlockPos>, ExpressionConvertible, RegionArgument {
+public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   RegistryKey<Registry<Region>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region"));
   Codec<Region> CODEC = RegionType.REGISTRY.getCodec().dispatch(Region::getType, RegionType::getCodec);
+
+  static Region getCached(RegionArgument<?> regionArgument, PositionProvider positionProvider) {
+    return CacheStorage.cache.getUnchecked(regionArgument).getUnchecked(positionProvider);
+  }
 
   /**
    * 判断方块坐标是否在该区域内。其默认的实现方式是判断方块坐标的中心位置。
@@ -162,9 +168,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible, Regio
     return minContainingBox == null ? null : new BlockBox(MathHelper.floor(minContainingBox.minX), MathHelper.floor(minContainingBox.minY), MathHelper.floor(minContainingBox.minZ), MathHelper.floor(minContainingBox.maxX), MathHelper.floor(minContainingBox.maxY), MathHelper.floor(minContainingBox.maxZ));
   }
 
-  @Deprecated
-  @Override
-  default Region toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException {
-    return this;
+  class CacheStorage {
+    private static final LoadingCache<RegionArgument<?>, LoadingCache<PositionProvider, Region>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument::toAbsoluteRegion))));
   }
 }

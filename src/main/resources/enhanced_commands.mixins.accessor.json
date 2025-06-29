@@ -8,6 +8,7 @@
     "CachedBlockPositionAccessor",
     "CommandContextAccessor",
     "DefaultPosArgumentAccessor",
+    "EntityAnchorAccessor",
     "EntitySelectorAccessor",
     "EntitySelectorReaderAccessor",
     "ExecuteCommandAccessor",

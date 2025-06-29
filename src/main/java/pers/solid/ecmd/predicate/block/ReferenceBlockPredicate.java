@@ -11,6 +11,7 @@ import net.minecraft.world.WorldView;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 

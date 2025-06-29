@@ -14,7 +14,9 @@ import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.ConditionalBlockFunction;
 import pers.solid.ecmd.predicate.block.RegionBlockPredicate;
 import pers.solid.ecmd.region.OutlineRegion;
-import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.region.OutlineRegionArgument;
+import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.enums.OutlineType;
 
@@ -62,13 +64,13 @@ public enum OutlineCommand implements CommandRegistrationCallback {
 
   public static int executeFromKeywordArgs(CommandContext<ServerCommandSource> context, OutlineType outlineType, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final @Nullable BlockFunction inner = keywordArgs.getArg("inner");
-    final Region region = RegionArgumentType.getRegion(context, "region");
-    final Region outlineRegion = OutlineRegion.of(region, outlineType);
+    final RegionArgument<?> region = RegionArgumentType.getRegionArgument(context, "region");
+    final RegionArgument<?> outlineRegion = new OutlineRegionArgument(outlineType, region);
     final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block");
     if (inner == null) {
-      return FillReplaceCommand.setBlocksFromKeywordArgs(outlineRegion, blockFunction, context.getSource(), null, keywordArgs);
+      return FillReplaceCommand.setBlocksFromKeywordArgs(outlineRegion.toAbsoluteRegion((PositionProvider) context.getSource()), blockFunction, context.getSource(), null, keywordArgs);
     } else {
-      return FillReplaceCommand.setBlocksFromKeywordArgs(region, new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
+      return FillReplaceCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion((PositionProvider) context.getSource()), new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
     }
   }
 }

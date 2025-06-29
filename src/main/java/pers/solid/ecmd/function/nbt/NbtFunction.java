@@ -9,8 +9,8 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtFunctionParser;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.parse.ParseContext;
 

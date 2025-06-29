@@ -1,33 +1,35 @@
-package pers.solid.ecmd.predicate.block;
+package pers.solid.ecmd.util;
 
-import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.math.random.RandomSplitter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.SeedStorage;
 
 import java.util.OptionalLong;
 
 public class ExecutionContext {
   public final Random random;
-  public final CommandSource source;
+  public final PositionProvider positionProvider;
   private @Nullable Long seed;
   private @Nullable SeedStorage<Object> splitterStorage;
 
-  public ExecutionContext(Random random, CommandSource source, @Nullable Long seed) {
+  public ExecutionContext(Random random, PositionProvider positionProvider, @Nullable Long seed) {
     this.random = random;
-    this.source = source;
+    this.positionProvider = positionProvider;
     this.seed = seed;
   }
 
+  public ExecutionContext(Random random, ServerCommandSource source, @Nullable Long seed) {
+    this(random, (PositionProvider) source, seed);
+  }
+
   public ExecutionContext(ServerCommandSource source, @Nullable Long seed) {
-    this(source.getWorld().getRandom(), source, seed);
+    this(source.getWorld().getRandom(), (PositionProvider) source, seed);
   }
 
   public ExecutionContext(ServerCommandSource source) {
-    this(source.getWorld().getRandom(), source, null);
+    this(source.getWorld().getRandom(), (PositionProvider) source, null);
   }
 
   public long getSeed() {

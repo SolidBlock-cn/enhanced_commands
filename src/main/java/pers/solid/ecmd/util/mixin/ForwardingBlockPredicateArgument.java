@@ -6,9 +6,9 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.block.NbtBlockPredicate;
 import pers.solid.ecmd.predicate.block.PropertiesNbtCombinationBlockPredicate;
+import pers.solid.ecmd.util.ExecutionContext;
 
 public class ForwardingBlockPredicateArgument implements BlockPredicateArgumentType.BlockPredicate {
   private final BlockPredicate modBlockPredicate;

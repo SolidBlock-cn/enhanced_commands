@@ -11,17 +11,22 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record RegionArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<RegionArgument> {
+public record RegionArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<RegionArgument<?>> {
   private static final List<String> EXAMPLES = List.of("cuboid(1 1 1, 2 2 2)", "sphere(3)", "cyl(3, 2)", "outline(cuboid(~~~, ~~~5))");
 
   public static RegionArgumentType region(CommandRegistryAccess registryAccess) {
     return new RegionArgumentType(registryAccess);
+  }
+
+  public static RegionArgument<?> getRegionArgument(CommandContext<ServerCommandSource> context, String name) {
+    return context.getArgument(name, RegionArgument.class);
   }
 
   /**
@@ -30,12 +35,12 @@ public record RegionArgumentType(CommandRegistryAccess registryAccess) implement
   public static Region getRegion(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     try {
       if (!((CommandContextAccessor<?>) context).getArguments().containsKey(name)) {
-        final RegionArgument sourceArg = context.getSource().getExtraArgument$ec("region", RegionArgument.class);
+        final RegionArgument<?> sourceArg = context.getSource().getExtraArgument$ec("region", RegionArgument.class);
         if (sourceArg != null) {
-          return sourceArg.toAbsoluteRegion(context.getSource());
+          return sourceArg.toAbsoluteRegion((PositionProvider) context.getSource());
         }
       }
-      return context.getArgument(name, RegionArgument.class).toAbsoluteRegion(context.getSource());
+      return context.getArgument(name, RegionArgument.class).toAbsoluteRegion((PositionProvider) context.getSource());
     } catch (RuntimeException e) {
       if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
         throw commandSyntaxException;
@@ -46,7 +51,7 @@ public record RegionArgumentType(CommandRegistryAccess registryAccess) implement
   }
 
   @Override
-  public RegionArgument parse(StringReader reader) throws CommandSyntaxException {
+  public RegionArgument<?> parse(StringReader reader) throws CommandSyntaxException {
     return RegionArgument.parse(new ParseContext<>(registryAccess, reader, false, false));
   }
 

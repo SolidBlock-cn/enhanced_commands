@@ -1,10 +1,9 @@
 package pers.solid.ecmd.region;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.List;
@@ -14,8 +13,8 @@ public record UnionRegionArgument(@NotNull List<RegionArgument<?>> regions) impl
   public static final MapCodec<UnionRegionArgument> CODEC = RegionArgument.CODEC.listOf().optionalFieldOf("regions", List.of()).xmap(UnionRegionArgument::new, UnionRegionArgument::regions);
 
   @Override
-  public UnionRegion toAbsoluteRegion(ServerCommandSource source) throws CommandSyntaxException {
-    return new UnionRegion(IterateUtils.transformFailableImmutableList(regions, regionArgument -> regionArgument.toAbsoluteRegion(source)));
+  public UnionRegion toAbsoluteRegion(PositionProvider positionProvider) {
+    return new UnionRegion(IterateUtils.transformFailableImmutableList(regions, regionArgument -> regionArgument.toAbsoluteRegion(positionProvider)));
   }
 
   @Override

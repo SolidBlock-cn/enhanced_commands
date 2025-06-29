@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.accessor.DefaultPosArgumentAccessor;
 import pers.solid.ecmd.mixins.accessor.LookingPosArgumentAccessor;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.List;
@@ -86,6 +87,24 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
    */
   boolean isInt();
 
+  Vec3d toAbsolutePos(PositionProvider positionProvider);
+
+  @Override
+  default Vec3d toAbsolutePos(ServerCommandSource source) {
+    return toAbsolutePos(((PositionProvider) source));
+  }
+
+  default BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
+    return BlockPos.ofFloored(toAbsolutePos(positionProvider));
+  }
+
+  Vec2f toAbsoluteRotation(PositionProvider positionProvider);
+
+  @Override
+  default Vec2f toAbsoluteRotation(ServerCommandSource source) {
+    return toAbsoluteRotation((PositionProvider) source);
+  }
+
   enum Type implements StringIdentifiable {
     DEFAULT_INT("default_int"),
     DEFAULT_DOUBLE("default_double"),
@@ -145,20 +164,20 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     ).apply(i, DoublePos::new));
 
     @Override
-    public Vec3d toAbsolutePos(ServerCommandSource source) {
+    public Vec3d toAbsolutePos(PositionProvider positionProvider) {
       if (!xRelative && !yRelative && !zRelative) {
         return new Vec3d(x, y, z);
       }
-      final Vec3d position = source.getPosition();
+      final Vec3d position = positionProvider.position$ec();
       return new Vec3d(xRelative ? position.x + x : x, yRelative ? position.y + y : y, zRelative ? position.z + z : z);
     }
 
     @Override
-    public Vec2f toAbsoluteRotation(ServerCommandSource source) {
+    public Vec2f toAbsoluteRotation(PositionProvider positionProvider) {
       if (!xRelative && !yRelative) {
         return new Vec2f((float) x, (float) y);
       }
-      final Vec2f rotation = source.getRotation();
+      final Vec2f rotation = positionProvider.rotation$ec();
       return new Vec2f((float) (xRelative ? rotation.x + x : x), (float) (yRelative ? rotation.y + y : y));
     }
 
@@ -212,26 +231,26 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
 
     @Override
-    public Vec3d toAbsolutePos(ServerCommandSource source) {
-      final BlockPos blockPos = toAbsoluteBlockPos(source);
+    public Vec3d toAbsolutePos(PositionProvider positionProvider) {
+      final BlockPos blockPos = toAbsoluteBlockPos(positionProvider);
       return alignType.mayAdjustToCenter(blockPos);
     }
 
     @Override
-    public Vec2f toAbsoluteRotation(ServerCommandSource source) {
+    public Vec2f toAbsoluteRotation(PositionProvider positionProvider) {
       if (!xRelative && !yRelative) {
         return new Vec2f((float) x, (float) y);
       }
-      final Vec2f rotation = source.getRotation();
+      final Vec2f rotation = positionProvider.rotation$ec();
       return new Vec2f(xRelative ? rotation.x + x : x, yRelative ? rotation.y + y : y);
     }
 
     @Override
-    public BlockPos toAbsoluteBlockPos(ServerCommandSource source) {
+    public BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
       if (!xRelative && !yRelative && !zRelative) {
         return new BlockPos(x, y, z);
       }
-      final Vec3d position = source.getPosition();
+      final Vec3d position = positionProvider.position$ec();
       return new BlockPos(xRelative ? MathHelper.floor(position.getX() + x) : x, yRelative ? MathHelper.floor(position.getY() + y) : y, zRelative ? MathHelper.floor(position.getZ() + z) : z);
     }
 
@@ -263,28 +282,15 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
   }
 
-  record LookingPos(LookingPosArgument lookingPosArgument) implements EnhancedPosArgument {
+  /**
+   * @see LookingPosArgument
+   */
+  record LookingPos(double x, double y, double z) implements EnhancedPosArgument {
     public static final MapCodec<LookingPos> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
         Codec.DOUBLE.fieldOf("x").forGetter(LookingPos::x),
         Codec.DOUBLE.fieldOf("y").forGetter(LookingPos::y),
         Codec.DOUBLE.fieldOf("z").forGetter(LookingPos::z)
     ).apply(i, LookingPos::new));
-
-    public LookingPos(double x, double y, double z) {
-      this(new LookingPosArgument(x, y, z));
-    }
-
-    public double x() {
-      return ((LookingPosArgumentAccessor) lookingPosArgument).getX();
-    }
-
-    public double y() {
-      return ((LookingPosArgumentAccessor) lookingPosArgument).getY();
-    }
-
-    public double z() {
-      return ((LookingPosArgumentAccessor) lookingPosArgument).getZ();
-    }
 
     @Override
     public boolean isInt() {
@@ -292,28 +298,42 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
 
     @Override
-    public Vec3d toAbsolutePos(ServerCommandSource source) {
-      return lookingPosArgument.toAbsolutePos(source);
+    public Vec3d toAbsolutePos(PositionProvider positionProvider) {
+      Vec2f vec2f = positionProvider.rotation$ec();
+      Vec3d vec3d = positionProvider.positionAt$ec(positionProvider);
+      float f = MathHelper.cos((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
+      float g = MathHelper.sin((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
+      float h = MathHelper.cos(-vec2f.x * ((float) Math.PI / 180F));
+      float i = MathHelper.sin(-vec2f.x * ((float) Math.PI / 180F));
+      float j = MathHelper.cos((-vec2f.x + 90.0F) * ((float) Math.PI / 180F));
+      float k = MathHelper.sin((-vec2f.x + 90.0F) * ((float) Math.PI / 180F));
+      Vec3d vec3d2 = new Vec3d(f * h, i, g * h);
+      Vec3d vec3d3 = new Vec3d(f * j, k, g * j);
+      Vec3d vec3d4 = vec3d2.crossProduct(vec3d3).multiply(-1.0F);
+      double d = vec3d2.x * this.z + vec3d3.x * this.y + vec3d4.x * this.x;
+      double e = vec3d2.y * this.z + vec3d3.y * this.y + vec3d4.y * this.x;
+      double l = vec3d2.z * this.z + vec3d3.z * this.y + vec3d4.z * this.x;
+      return new Vec3d(vec3d.x + d, vec3d.y + e, vec3d.z + l);
     }
 
     @Override
-    public Vec2f toAbsoluteRotation(ServerCommandSource source) {
-      return lookingPosArgument.toAbsoluteRotation(source);
+    public Vec2f toAbsoluteRotation(PositionProvider positionProvider) {
+      return null;
     }
 
     @Override
     public boolean isXRelative() {
-      return lookingPosArgument.isXRelative();
+      return true;
     }
 
     @Override
     public boolean isYRelative() {
-      return lookingPosArgument.isYRelative();
+      return true;
     }
 
     @Override
     public boolean isZRelative() {
-      return lookingPosArgument.isZRelative();
+      return true;
     }
 
     @Override

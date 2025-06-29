@@ -24,7 +24,7 @@ public record MirrorBlockFunction(@NotNull MirrorArgument mirror) implements Blo
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    return blockState.mirror(mirror.apply((ServerCommandSource) context.source));
+    return blockState.mirror(mirror.apply((ServerCommandSource) context.positionProvider));
   }
 
   @Override

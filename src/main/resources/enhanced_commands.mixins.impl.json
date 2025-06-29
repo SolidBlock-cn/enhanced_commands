@@ -12,6 +12,7 @@
     "ServerCommandSourceExtensionImpl"
   ],
   "client": [
+    "FabricClientCommandSourceMixin"
   ],
   "injectors": {
     "defaultRequire": 1

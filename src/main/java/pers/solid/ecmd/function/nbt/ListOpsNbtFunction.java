@@ -12,7 +12,7 @@ import net.minecraft.nbt.NbtList;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
 import java.util.Map;

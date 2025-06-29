@@ -19,8 +19,8 @@ import pers.solid.ecmd.function.nbt.*;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.nbt.NbtTarget;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.ArrayList;
 import java.util.Collection;

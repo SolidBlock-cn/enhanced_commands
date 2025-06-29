@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -17,14 +18,12 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec2f;
 import org.apache.commons.lang3.BooleanUtils;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
-import pers.solid.ecmd.predicate.block.ExecutionContext;
-import pers.solid.ecmd.util.Styles;
-import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.*;
 
 import java.util.Collection;
 
@@ -83,7 +82,7 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     if (cachedBlockPosition.getBlockState() == null) {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
-    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition, new ExecutionContext(source.getWorld().getRandom(), source, null));
+    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition, new ExecutionContext(source.getWorld().getRandom(), PositionProvider.of(blockPos.toCenterPos(), Vec2f.ZERO, null, EntityAnchorArgumentType.EntityAnchor.FEET), null));
     testResult.sendMessage(source);
     return BooleanUtils.toInteger(testResult.successes());
   }
