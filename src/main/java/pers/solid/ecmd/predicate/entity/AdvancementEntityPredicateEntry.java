@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -171,8 +172,8 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
   @Override
   public @NotNull String toOptionEntry() {
     return "advancements={" + map.entrySet().stream().map(entry -> entry.getKey()
-        + "=" + entry.getValue().mapBoth(
-        criterionMap -> "{" + criterionMap.entrySet().stream().map(criterionEntry -> criterionEntry.getKey() + "=" + criterionEntry.getValue()).collect(Collectors.joining(", ")) + "}",
+        + "=" + entry.getValue().map(
+        criterionMap -> "{" + criterionMap.entrySet().stream().map(criterionEntry -> StringArgumentType.escapeIfRequired(criterionEntry.getKey()) + "=" + criterionEntry.getValue()).collect(Collectors.joining(", ")) + "}",
         String::valueOf
     )).collect(Collectors.joining(", ")) + "}";
   }

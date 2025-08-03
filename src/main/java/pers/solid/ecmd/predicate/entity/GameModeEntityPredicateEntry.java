@@ -77,7 +77,7 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry, Stat
 
     @Override
     public String toOptionEntry() {
-      return "gamemode=" + StringUtils.join(Collections2.transform(gameModes, GameMode::asString), ',');
+      return "gamemode=" + StringUtils.join(Collections2.transform(gameModes, GameMode::asString), '|');
     }
 
     @Override

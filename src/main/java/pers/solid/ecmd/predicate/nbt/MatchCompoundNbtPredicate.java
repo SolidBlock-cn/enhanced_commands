@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull NbtPredicate> entries, boolean inverted) implements NbtPredicate {
   public static final MapCodec<MatchCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC.listOf()).<ListMultimap<String, NbtPredicate>>xmap(map -> map.entrySet().stream().collect(ImmutableListMultimap.flatteningToImmutableListMultimap(Map.Entry::getKey, entry -> entry.getValue().stream())), map -> Maps.transformValues(map.asMap(), ImmutableList::copyOf)).fieldOf("entries").forGetter(matchCompoundNbtPredicate -> matchCompoundNbtPredicate.entries),
-      Codec.BOOL.fieldOf("inverted").forGetter(MatchCompoundNbtPredicate::inverted)
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MatchCompoundNbtPredicate::inverted)
   ).apply(i, MatchCompoundNbtPredicate::new));
 
   @Override

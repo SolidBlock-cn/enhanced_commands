@@ -20,6 +20,7 @@ public final class EntityPredicateTypes {
   public static final EntityPredicateType<BlockPredicateEntityPredicateEntry> BLOCK_PREDICATE = registerSimple("block_predicate", BlockPredicateEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<BlockPredicatesEntityPredicateEntry> BLOCK_PREDICATES = registerSimple("block_predicates", BlockPredicatesEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<BoxEntityPredicate> BOX = registerSimple("box", BoxEntityPredicate.CODEC);
+  public static final EntityPredicateType<CollectorEntityPredicate> COLLECTOR = registerSimple("collector", CollectorEntityPredicate.CODEC);
   public static final EntityPredicateType<DistanceBlockPredicate> DISTANCE = registerSimple("distance", DistanceBlockPredicate.CODEC);
   public static final EntityPredicateType<EffectEntityPredicateEntry> EFFECT = registerSimple("effect", EffectEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<EffectsEntityPredicateEntry> EFFECTS = registerSimple("effects", EffectsEntityPredicateEntry.CODEC);

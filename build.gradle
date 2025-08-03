@@ -28,6 +28,9 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+
+    // Mod Menu
+    maven { url "https://maven.terraformersmc.com/releases/" }
 }
 
 dependencies {
@@ -39,9 +42,15 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
+    // Mod Menu
+    modImplementation "com.terraformersmc:modmenu:$project.modmenu_version"
+
+    // imblocker
     if (!project.findProperty('imblocker_version').isEmpty()) {
         modRuntimeOnly "maven.modrinth:imblocker-original:$project.imblocker_version"
     }
+
+    // Better Selection
     if (!project.findProperty("better_selection_version").isEmpty()) {
         modRuntimeOnly "maven.modrinth:better-selection:$project.better_selection_version"
     }

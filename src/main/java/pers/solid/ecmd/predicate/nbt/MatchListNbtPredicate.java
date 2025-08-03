@@ -33,7 +33,7 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
   public static final MapCodec<MatchListNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(MatchListNbtPredicate::expected),
       Codec.pair(Codec.INT, NbtPredicate.CODEC).xmap(pair -> IntObjectPair.of(pair.getFirst(), pair.getSecond()), intObjectPair -> Pair.of(intObjectPair.leftInt(), intObjectPair.right())).listOf().fieldOf("positional_expected").forGetter(MatchListNbtPredicate::positionalExpected),
-      Codec.BOOL.fieldOf("inverted").forGetter(MatchListNbtPredicate::inverted)
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MatchListNbtPredicate::inverted)
   ).apply(i, MatchListNbtPredicate::new));
 
   @Override

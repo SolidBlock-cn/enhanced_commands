@@ -12,7 +12,7 @@ import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.bridge.BridgeRange;
 
 public record RangeNbtPredicate(BridgeRange<?> numberRange, boolean inverted) implements NbtPredicate {
-  public static final MapCodec<RangeNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BridgeRange.CODEC.forGetter(RangeNbtPredicate::numberRange), Codec.BOOL.fieldOf("inverted").forGetter(RangeNbtPredicate::inverted)).apply(i, RangeNbtPredicate::new));
+  public static final MapCodec<RangeNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BridgeRange.CODEC.forGetter(RangeNbtPredicate::numberRange), Codec.BOOL.optionalFieldOf("inverted", false).forGetter(RangeNbtPredicate::inverted)).apply(i, RangeNbtPredicate::new));
 
   @Override
   public @NotNull String asString() {

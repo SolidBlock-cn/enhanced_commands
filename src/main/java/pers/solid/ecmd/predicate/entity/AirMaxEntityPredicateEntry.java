@@ -14,7 +14,7 @@ import pers.solid.ecmd.util.TextUtil;
 
 public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<AirMaxEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Codec.BOOL.fieldOf("inverted").forGetter(AirMaxEntityPredicateEntry::inverted)
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(AirMaxEntityPredicateEntry::inverted)
   ).apply(i, AirMaxEntityPredicateEntry::new));
 
   @Override

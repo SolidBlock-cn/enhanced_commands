@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expected, boolean inverted) implements NbtPredicate {
   public static final MapCodec<EqualsListNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(EqualsListNbtPredicate::expected),
-      Codec.BOOL.fieldOf("inverted").forGetter(EqualsListNbtPredicate::inverted)
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(EqualsListNbtPredicate::inverted)
   ).apply(i, EqualsListNbtPredicate::new));
 
   @Override

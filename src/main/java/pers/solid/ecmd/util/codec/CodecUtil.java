@@ -1,20 +1,29 @@
 package pers.solid.ecmd.util.codec;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.command.EntitySelector;
+import net.minecraft.command.EntitySelectorReader;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.*;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -92,6 +101,17 @@ public final class CodecUtil {
    * NBT 数字的 codec，类似于 {@link #NBT_ELEMENT}，但是遇到非数字的值会报错。
    */
   public static final Codec<AbstractNbtNumber> NBT_NUMBER = NBT_ELEMENT.comapFlatMap(nbtElement -> nbtElement instanceof AbstractNbtNumber number ? DataResult.success(number) : DataResult.error(() -> "The NBT value is not a number"), Function.identity());
+  public static final BiMap<String, BiConsumer<Vec3d, List<? extends Entity>>> SORTER_MAP = Util.make(HashBiMap.create(), biMap -> {
+    biMap.put("arbitrary", EntitySelector.ARBITRARY);
+    biMap.put("random", EntitySelectorReader.RANDOM);
+    biMap.put("furthest", EntitySelectorReader.FURTHEST);
+    biMap.put("nearest", EntitySelectorReader.NEAREST);
+  });
+  /**
+   * 用于序列化实体选择器中的 {@link EntitySelector#sorter}，即实体选择器中的 {@code sort} 参数。
+   */
+  public static final Codec<BiConsumer<Vec3d, List<? extends Entity>>> SORTER = Codec.STRING.flatXmap(string -> SORTER_MAP.containsKey(string) ? DataResult.success(SORTER_MAP.get(string)) : DataResult.error(() -> "unknown sorter: " + string + ", which may be provided by other mods and cannot be recognized by Enhanced Commands mod")
+      , biConsumer -> SORTER_MAP.inverse().containsKey(biConsumer) ? DataResult.success(SORTER_MAP.inverse().get(biConsumer)) : DataResult.error(() -> "Unknown sorter which may be provided or modified by other mods and cannot be recognized by Enhanced Commands mod"));
 
   /**
    * 为特定的方块，创建其属性名称的 codec，将只能读取到符合该方块的属性名称，否则会发生错误。

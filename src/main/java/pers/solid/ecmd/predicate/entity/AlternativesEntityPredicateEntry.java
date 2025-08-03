@@ -9,14 +9,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public record AlternativesEntityPredicateEntry(List<EntityPredicate> predicates, boolean inverted) implements EntityPredicateEntry {
   public static final MapCodec<AlternativesEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       EntityPredicate.CODEC.listOf().fieldOf("predicates").forGetter(AlternativesEntityPredicateEntry::predicates),
-      Codec.BOOL.fieldOf("inverted").forGetter(AlternativesEntityPredicateEntry::inverted)
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(AlternativesEntityPredicateEntry::inverted)
   ).apply(i, AlternativesEntityPredicateEntry::new));
 
   @Override
@@ -55,6 +57,6 @@ public record AlternativesEntityPredicateEntry(List<EntityPredicate> predicates,
 
   @Override
   public @NotNull String toOptionEntry() {
-    return "alternatives=" + (inverted ? "!" : "") + "[...]";
+    return "alternatives=" + (inverted ? "!" : "") + predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "[", "]"));
   }
 }

@@ -11,8 +11,8 @@ import pers.solid.ecmd.util.parse.ParsingUtil;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull NbtPredicate> map, boolean negated) implements NbtPredicate {
-  public static final MapCodec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("predicates").forGetter(EqualsCompoundNbtPredicate::map), Codec.BOOL.fieldOf("inverted").forGetter(EqualsCompoundNbtPredicate::negated)));
+public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull NbtPredicate> map, boolean inverted) implements NbtPredicate {
+  public static final MapCodec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("predicates").forGetter(EqualsCompoundNbtPredicate::map), Codec.BOOL.optionalFieldOf("inverted", false).forGetter(EqualsCompoundNbtPredicate::inverted)));
 
   @Override
   public @NotNull String asString() {
@@ -21,7 +21,7 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
 
   @Override
   public @NotNull String asString(boolean requirePrefix) {
-    return (negated ? "!" : "") + (requirePrefix ? "= " : "") + "{" + map.entrySet().stream().map(entry -> {
+    return (inverted ? "!" : "") + (requirePrefix ? "= " : "") + "{" + map.entrySet().stream().map(entry -> {
       final String key = entry.getKey();
       final String keyAsString;
       final NbtPredicate value = entry.getValue();
@@ -38,18 +38,18 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
   @Override
   public boolean test(@NotNull NbtElement nbtElement) {
     if (!(nbtElement instanceof final NbtCompound nbtCompound))
-      return negated;
+      return inverted;
     if (nbtCompound.getSize() != map.size())
-      return negated;
+      return inverted;
     for (Map.Entry<String, NbtPredicate> entry : map.entrySet()) {
       final String key = entry.getKey();
       final NbtPredicate valuePredicate = entry.getValue();
       final NbtElement actualElement = nbtCompound.get(key);
       if (actualElement == null || !valuePredicate.test(actualElement)) {
-        return negated;
+        return inverted;
       }
     }
-    return !negated;
+    return !inverted;
   }
 
   @Override

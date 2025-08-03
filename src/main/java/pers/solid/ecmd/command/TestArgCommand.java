@@ -170,6 +170,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                 .executes(context -> executeConvertShow(context, BlockFunction.CODEC)))
             .then(literal("block_predicate")
                 .executes(context -> executeConvertShow(context, BlockPredicate.CODEC)))
+            .then(literal("entity_predicate")
+                .executes(context -> executeConvertShow(context, EntityPredicate.CODEC)))
             .then(literal("nbt_function")
                 .executes(context -> executeConvertShow(context, NbtFunction.CODEC)))
             .then(literal("nbt_predicate")

@@ -2,6 +2,7 @@ package pers.solid.ecmd.mixins.impl;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -52,6 +53,9 @@ public abstract class ServerCommandSourceExtensionImpl implements ServerCommandS
   @Shadow
   public abstract ServerWorld getWorld();
 
+  @Shadow
+  public abstract Entity getEntityOrThrow() throws CommandSyntaxException;
+
   @Override
   public final void sendFeedback$ecBridge(Supplier<Text> feedbackSupplier, boolean broadcastToOps) {
     sendFeedback(feedbackSupplier, broadcastToOps);
@@ -83,6 +87,11 @@ public abstract class ServerCommandSourceExtensionImpl implements ServerCommandS
   @Override
   public @Nullable PlayerEntity entity$ec() {
     return getPlayer();
+  }
+
+  @Override
+  public @NotNull Entity entityOrThrow$ec() throws CommandSyntaxException {
+    return getEntityOrThrow();
   }
 
   @Override

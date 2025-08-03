@@ -16,7 +16,7 @@ import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Objects;
 
-public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverted) implements EntityPredicateEntry, SpecialEntityPredicate, StaticEntityPredicate {
+public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<TypeEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Registries.ENTITY_TYPE.getCodec().fieldOf("entity_type").forGetter(TypeEntityPredicateEntry::entityType),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(TypeEntityPredicateEntry::inverted)

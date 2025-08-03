@@ -1,5 +1,8 @@
 package pers.solid.ecmd.predicate.entity;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
@@ -8,14 +11,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 /**
  * <p>通过实体选择器实现的实体谓词。在测试时，如果对应的实体选择器没有指定数量，则会根据实体选择器内的一些属性来对实体进行判断，包括判断实体是否为命令的指靠者、实体是否为玩家等。如果实体选择器限制了实体的数量，那么会先选择出这些数量的实体，然后再判断指定的实体是否属于被选择出来的这些实体。
@@ -23,13 +25,18 @@ import java.util.Objects;
  * <p>在创建了此对象之后，就不要再对 {@link EntitySelector} 进行后续的更改。
  */
 public class SelectorEntityPredicate implements EntityPredicate {
-  public static final MapCodec<SelectorEntityPredicate> CODEC = EntitySelectorCodec.INSTANCE.fieldOf("selector").xmap(SelectorEntityPredicate::new, selectorEntityPredicate -> selectorEntityPredicate.entitySelector);
+  public static final MapCodec<SelectorEntityPredicate> CODEC = EntitySelectorCodec.INSTANCE.xmap(SelectorEntityPredicate::new, selectorEntityPredicate -> selectorEntityPredicate.entitySelector);
   /**
    * 该实体谓词所基于的实体选择器。
    */
   public final EntitySelector entitySelector;
-
-  protected @Nullable Collection<? extends Entity> limitedEntities;
+  private static final LoadingCache<EntitySelector, LoadingCache<ExecutionContext, Set<Entity>>> CACHE = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(selector -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(context -> {
+    try {
+      return Set.copyOf(selector.getEntities(((ServerCommandSource) context.positionProvider)));
+    } catch (CommandSyntaxException e) {
+      throw new CommandRuntimeException(e);
+    }
+  }))));
 
   public SelectorEntityPredicate(EntitySelector entitySelector) {
     this.entitySelector = entitySelector;
@@ -37,8 +44,8 @@ public class SelectorEntityPredicate implements EntityPredicate {
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    if (limitedEntities != null) {
-      return limitedEntities.contains(entity);
+    if (entitySelector.getLimit() < Integer.MAX_VALUE) {
+      return CACHE.getUnchecked(entitySelector).getUnchecked(context).contains(entity);
     } else {
       for (EntityPredicate predicate : Iterables.concat(entitySelector.extension$ec().getSpecialEntries(), entitySelector.extension$ec().getStandardPredicates())) {
         if (!predicate.test(entity, context)) {
@@ -54,6 +61,9 @@ public class SelectorEntityPredicate implements EntityPredicate {
     List<TestResult> descriptions = new ArrayList<>();
 
     boolean result = true;
+    if (entitySelector.getLimit() < Integer.MAX_VALUE) {
+      result = CACHE.getUnchecked(entitySelector).getUnchecked(context).contains(entity);
+    }
     for (EntityPredicate predicate : Iterables.concat(entitySelector.extension$ec().getSpecialEntries(), entitySelector.extension$ec().getStandardPredicates())) {
       final TestResult e = predicate.testAndDescribe(entity, context, displayName);
       descriptions.add(e);
@@ -81,13 +91,11 @@ public class SelectorEntityPredicate implements EntityPredicate {
   public final boolean equals(Object o) {
     if (!(o instanceof SelectorEntityPredicate that)) return false;
 
-    return EntitySelectorHelper.equals(entitySelector, that.entitySelector) && Objects.equals(limitedEntities, that.limitedEntities);
+    return EntitySelectorHelper.equals(entitySelector, that.entitySelector);
   }
 
   @Override
   public int hashCode() {
-    int result = EntitySelectorHelper.hashCode(entitySelector);
-    result = 31 * result + Objects.hashCode(limitedEntities);
-    return result;
+    return EntitySelectorHelper.hashCode(entitySelector);
   }
 }

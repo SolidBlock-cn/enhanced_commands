@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
 import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +33,9 @@ public final class EntitySelectorHelper {
     final ImmutableList.Builder<SpecialEntityPredicate> entries = new ImmutableList.Builder<>();
     final var accessor = (EntitySelectorAccessor) entitySelector;
 
+    if (entitySelector.extension$ec().collector != null) {
+      entries.add(new CollectorEntityPredicate(entitySelector.extension$ec().collector));
+    }
     if (!accessor.getDistance().isDummy()) {
       entries.add(new DistanceBlockPredicate(accessor.getDistance(), entitySelector.extension$ec().positionOffsetInfo));
     }
@@ -54,9 +57,6 @@ public final class EntitySelectorHelper {
     }
     if (accessor.getUuid() != null) {
       entries.add(new UuidEntityPredicateEntry(accessor.getUuid()));
-    }
-    if (accessor.getEntityFilter() instanceof EntityType<?> entityType) {
-      entries.add(new TypeEntityPredicateEntry(entityType, false));
     }
 
     return entries.build();
@@ -107,17 +107,26 @@ public final class EntitySelectorHelper {
     boolean requireAlive = false;
     final EntitySelectorCollector collector = entitySelector.extension$ec().collector;
     final int limit = entitySelector.getLimit();
+    boolean hasExplicitLimit = false;
+    boolean hasExplicitSorter = false;
 
-    if (limit < Integer.MAX_VALUE && !(collector != null && EntitySelectorTypeExtras.FORCE_ONE_LIMIT.contains(collector.asString())) && !entitySelector.isSenderOnly()) {
-      joiner.add("limit=" + limit);
-    }
+    String atVariable = null;
     final BiConsumer<Vec3d, List<? extends Entity>> sorter = accessor.getSorter();
-    if (sorter == EntitySelectorReader.RANDOM) {
-      joiner.add("sort=random");
-    } else if (sorter == EntitySelectorReader.NEAREST) {
-      joiner.add("sort=nearest");
-    } else if (sorter == EntitySelectorReader.FURTHEST) {
-      joiner.add("sort=furthest");
+    if (limit < Integer.MAX_VALUE && !(collector != null && EntitySelectorTypeExtras.FORCE_ONE_LIMIT.contains(collector.asString())) && !entitySelector.isSenderOnly()) {
+      if (!EntitySelectorReader.NEAREST.equals(sorter) && !(!includesNonPlayers && EntitySelectorReader.RANDOM.equals(sorter))) {
+        joiner.add("limit=" + limit);
+        hasExplicitLimit = true;
+      }
+    }
+    if (!EntitySelector.ARBITRARY.equals(sorter)) {
+      if (EntitySelectorReader.NEAREST.equals(sorter)) {
+        atVariable = includesNonPlayers ? "n" : "p";
+      } else if (EntitySelectorReader.RANDOM.equals(sorter) && !includesNonPlayers) {
+        atVariable = "r";
+      } else {
+        joiner.add("sort=" + CodecUtil.SORTER_MAP.inverse().get(sorter));
+        hasExplicitSorter = true;
+      }
     }
 
     final PositionOffsetInfo positionOffsetInfo = entitySelector.extension$ec().positionOffsetInfo;
@@ -163,15 +172,30 @@ public final class EntitySelectorHelper {
       }
     }
 
-    final String atVariable;
     if (collector != null) {
       atVariable = collector.asString();
-    } else if (entitySelector.isSenderOnly()) {
-      atVariable = "s";
-    } else if (includesNonPlayers || hasExplicitType) {
-      atVariable = requireAlive ? "e" : "E";
-    } else {
-      atVariable = "a";
+    } else if (atVariable == null) {
+      if (entitySelector.isSenderOnly()) {
+        atVariable = "s";
+      } else if (includesNonPlayers || hasExplicitType) {
+        atVariable = requireAlive ? "e" : "E";
+      } else {
+        atVariable = "a";
+      }
+    } else if ("n".equals(atVariable) && !requireAlive) {
+      if (hasExplicitType) {
+        atVariable = "p";
+      } else {
+        atVariable = "E";
+        if (!hasExplicitSorter) {
+          joiner.add("sort=nearest");
+        }
+        if (!hasExplicitLimit) {
+          joiner.add("limit=" + limit);
+        }
+      }
+    } else if ("p".equals(atVariable) && requireAlive) {
+      atVariable = "n";
     }
 
     return "@" + atVariable + joiner;
@@ -186,6 +210,7 @@ public final class EntitySelectorHelper {
     if (o1.getLimit() != o2.getLimit()
         || o1.includesNonPlayers() != o2.includesNonPlayers()
         || o1.isLocalWorldOnly() != o2.isLocalWorldOnly()
+        || !Objects.equals(e1.getStandardPredicates(), e2.getStandardPredicates())
         || !Objects.equals(a1.getDistance(), a2.getDistance())
         || !Objects.equals(e1.positionOffsetInfo, e2.positionOffsetInfo)
         || !Objects.equals(e1.dxDyDz, e2.dxDyDz)
@@ -193,12 +218,12 @@ public final class EntitySelectorHelper {
         || o1.isSenderOnly() != o2.isSenderOnly()
         || !Objects.equals(a1.getPlayerName(), a2.getPlayerName())
         || !Objects.equals(a1.getUuid(), a2.getUuid())
-        || !Objects.equals(a1.getEntityFilter(), a2.getEntityFilter())) {
+        || !Objects.equals(a1.getEntityFilter(), a2.getEntityFilter())
+        || o1.usesAt() != o2.usesAt()) {
       return false;
     }
 
-    if (!Objects.equals(e1.collector, e2.collector)
-        || !Objects.equals(e1.getStandardPredicates(), e2.getStandardPredicates())) {
+    if (!Objects.equals(e1.collector, e2.collector)) {
       return false;
     }
 
@@ -218,6 +243,7 @@ public final class EntitySelectorHelper {
         .append(o.getLimit())
         .append(o.includesNonPlayers())
         .append(o.isLocalWorldOnly())
+        .append(e.getStandardPredicates())
         .append(a.getDistance())
         .append(e.positionOffsetInfo)
         .append(e.dxDyDz)
@@ -227,7 +253,7 @@ public final class EntitySelectorHelper {
         .append(a.getUuid())
         .append(a.getEntityFilter());
 
-    hashCodeBuilder.append(e.collector).append(e.getStandardPredicates());
+    hashCodeBuilder.append(e.collector);
 
     return hashCodeBuilder.toHashCode();
   }

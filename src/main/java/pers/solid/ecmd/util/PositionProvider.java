@@ -28,6 +28,15 @@ public interface PositionProvider {
     throw new NotImplementedException();
   }
 
+  default @NotNull Entity entityOrThrow$ec() throws CommandSyntaxException {
+    final Entity entity = entity$ec();
+    if (entity == null) {
+      throw ServerCommandSource.REQUIRES_ENTITY_EXCEPTION.create();
+    } else {
+      return entity;
+    }
+  }
+
   default @Nullable PlayerEntity player$ec() {
     final Entity entity = entity$ec();
     return entity instanceof PlayerEntity player ? player : null;

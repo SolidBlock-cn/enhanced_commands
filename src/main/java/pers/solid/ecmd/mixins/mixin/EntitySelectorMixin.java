@@ -36,7 +36,7 @@ public abstract class EntitySelectorMixin implements EntitySelectorExtension {
   @Inject(method = "getEntities(Lnet/minecraft/server/command/ServerCommandSource;)Ljava/util/List;", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z"), cancellable = true)
   private void modifiedEntityCollector(ServerCommandSource source, CallbackInfoReturnable<List<? extends Entity>> cir, @Local Vec3d vec3d, @Local Box box) throws CommandSyntaxException {
     if (extension$ec().collector != null) {
-      cir.setReturnValue(extension$ec().collector.collectEntities(source).filter(getPositionPredicate(vec3d, box, null)).toList());
+      cir.setReturnValue(extension$ec().collector.collectEntities(source.getEntityOrThrow()).filter(getPositionPredicate(vec3d, box, null)).toList());
     }
   }
 
@@ -46,7 +46,7 @@ public abstract class EntitySelectorMixin implements EntitySelectorExtension {
   @Inject(method = "getPlayers", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z"), cancellable = true)
   private void modifiedPlayerCollector(ServerCommandSource source, CallbackInfoReturnable<List<ServerPlayerEntity>> cir, @Local Predicate<Entity> actualPredicate) throws CommandSyntaxException {
     if (extension$ec().collector != null) {
-      cir.setReturnValue(extension$ec().collector.collectPlayers(source).filter(actualPredicate).toList());
+      cir.setReturnValue(extension$ec().collector.collectPlayers(source.getEntityOrThrow()).filter(actualPredicate).toList());
     }
   }
 }

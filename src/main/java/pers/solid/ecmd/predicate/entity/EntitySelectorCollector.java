@@ -1,16 +1,15 @@
 package pers.solid.ecmd.predicate.entity;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.*;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
-import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -20,64 +19,66 @@ public enum EntitySelectorCollector implements StringIdentifiable {
   /**
    * 驯养了该实体的实体，即实体的主人，类似于 {@code /execute on owner}。
    */
-  OWNER("owner", source -> source.getEntityOrThrow() instanceof Tameable tameable ? stream(tameable.getOwner()) : Stream.of()),
+  OWNER("owner", entity -> entity instanceof Tameable tameable ? stream(tameable.getOwner()) : Stream.of()),
   /**
    * 该实体骑乘的实体，类似于 {@code /execute on vehicle}。
    */
-  VEHICLE("vehicle", source -> stream(source.getEntityOrThrow().getVehicle())),
+  VEHICLE("vehicle", entity -> stream(entity.getVehicle())),
   /**
    * 骑乘该实体的所有实体，类似于 {@code /execute on passengers}。
    */
-  PASSENGERS("passengers", source -> source.getEntityOrThrow().getPassengerList().stream()),
+  PASSENGERS("passengers", entity -> entity.getPassengerList().stream()),
   /**
    * 使用拴绳拴住了此实体的实体，类似于 {@code /execute on leasher}。
    */
-  LEASHER("leasher", source -> source.getEntityOrThrow() instanceof MobEntity mobEntity ? stream(mobEntity.getLeashHolder()) : Stream.of()),
+  LEASHER("leasher", entity -> entity instanceof MobEntity mobEntity ? stream(mobEntity.getLeashHolder()) : Stream.of()),
   /**
    * 实体的来源，例如抛出了该珍珠的玩家，类似于 {@code /execute on origin}。
    */
-  ORIGIN("origin", source -> source.getEntityOrThrow() instanceof Ownable ownable ? stream(ownable.getOwner()) : Stream.of()),
+  ORIGIN("origin", entity -> entity instanceof Ownable ownable ? stream(ownable.getOwner()) : Stream.of()),
   /**
    * 实体的攻击者，类似于 {@code /execute on attacker}。
    */
-  ATTACKER("attacker", source -> source.getEntityOrThrow() instanceof Attackable attackable ? stream(attackable.getLastAttacker()) : Stream.of()),
+  ATTACKER("attacker", entity -> entity instanceof Attackable attackable ? stream(attackable.getLastAttacker()) : Stream.of()),
   /**
    * 实体的攻击目标，类似于 {@code /execute on target}。
    */
-  TARGET("target", source -> source.getEntityOrThrow() instanceof Targeter targeter ? stream(targeter.getTarget()) : Stream.of()),
+  TARGET("target", entity -> entity instanceof Targeter targeter ? stream(targeter.getTarget()) : Stream.of()),
   /**
    * 该实体骑乘并控制着的实体。
    */
-  CONTROLLING_VEHICLE("controlling_vehicle", source -> stream(source.getEntityOrThrow().getControllingVehicle())),
+  CONTROLLING_VEHICLE("controlling_vehicle", entity -> stream(entity.getControllingVehicle())),
   /**
    * 实体并控制着该实体的乘客，类似于 {@code /execute on controller}。
    */
-  CONTROLLER("controller", source -> stream(source.getEntityOrThrow().getControllingPassenger()));
+  CONTROLLER("controller", entity -> stream(entity.getControllingPassenger()));
 
   /**
    * 该名称应当于对应的实体选择器的名称一致。
    */
   private final String name;
-  private final FailableFunction<ServerCommandSource, Stream<? extends Entity>, CommandSyntaxException> entityCollector;
-  private final FailableFunction<ServerCommandSource, Stream<ServerPlayerEntity>, CommandSyntaxException> playerCollector;
+  private final Function<Entity, Stream<? extends Entity>> entityCollector;
+  private final Function<Entity, Stream<ServerPlayerEntity>> playerCollector;
+  private final Text displayName;
   public static final StringIdentifiableCodec<EntitySelectorCollector> CODEC = StringIdentifiableCodec.create(values());
 
-  EntitySelectorCollector(String name, FailableFunction<ServerCommandSource, Stream<? extends Entity>, CommandSyntaxException> entityCollector, FailableFunction<ServerCommandSource, Stream<ServerPlayerEntity>, CommandSyntaxException> playerCollector) {
+  EntitySelectorCollector(String name, Function<Entity, Stream<? extends Entity>> entityCollector, Function<Entity, Stream<ServerPlayerEntity>> playerCollector) {
     this.name = name;
     this.entityCollector = entityCollector;
     this.playerCollector = playerCollector;
+    this.displayName = Text.translatable("enhanced_commands.entity_selector_collector." + name);
   }
 
-  EntitySelectorCollector(String name, FailableFunction<ServerCommandSource, Stream<? extends Entity>, CommandSyntaxException> entityCollector) {
+  EntitySelectorCollector(String name, Function<Entity, Stream<? extends Entity>> entityCollector) {
     this(name, entityCollector, source -> entityCollector.apply(source).filter(entity -> entity instanceof ServerPlayerEntity).map(entity -> (ServerPlayerEntity) entity));
   }
 
-  public Stream<? extends Entity> collectEntities(ServerCommandSource source) throws CommandSyntaxException {
-    return entityCollector.apply(source);
+  public Stream<? extends Entity> collectEntities(Entity entity) {
+    return entityCollector.apply(entity);
   }
 
-  public Stream<ServerPlayerEntity> collectPlayers(ServerCommandSource source) throws CommandSyntaxException {
-    return playerCollector.apply(source);
+  public Stream<ServerPlayerEntity> collectPlayers(Entity entity) {
+    return playerCollector.apply(entity);
   }
 
   @Override
@@ -90,5 +91,9 @@ public enum EntitySelectorCollector implements StringIdentifiable {
    */
   private static <T> Stream<@NotNull T> stream(@Nullable T element) {
     return element == null ? Stream.empty() : Stream.of(element);
+  }
+
+  public Text getDisplayName() {
+    return displayName;
   }
 }

@@ -20,7 +20,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 public record MatchPrimitiveNbtPredicate(NbtElement expected, boolean inverted) implements NbtPredicate {
   public static final MapCodec<MatchPrimitiveNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       CodecUtil.NBT_ELEMENT.fieldOf("expected").forGetter(MatchPrimitiveNbtPredicate::expected),
-      Codec.BOOL.fieldOf("inverted").forGetter(MatchPrimitiveNbtPredicate::inverted)
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MatchPrimitiveNbtPredicate::inverted)
   ).apply(i, MatchPrimitiveNbtPredicate::new));
 
   @Override

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public record RegexNbtPredicate(Pattern pattern, boolean inverted) implements NbtPredicate {
   public static final MapCodec<RegexNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       CodecUtil.PATTERN.fieldOf("pattern").forGetter(RegexNbtPredicate::pattern),
-      Codec.BOOL.fieldOf("inverted").forGetter(RegexNbtPredicate::inverted)
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(RegexNbtPredicate::inverted)
   ).apply(i, RegexNbtPredicate::new));
 
   @Override

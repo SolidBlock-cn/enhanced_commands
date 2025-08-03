@@ -15,7 +15,7 @@ import pers.solid.ecmd.util.TextUtil;
 
 public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<HealthMaxEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Codec.BOOL.optionalFieldOf("HealthMaxEntityPredicateEntry", false).forGetter(HealthMaxEntityPredicateEntry::inverted)
+      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(HealthMaxEntityPredicateEntry::inverted)
   ).apply(i, HealthMaxEntityPredicateEntry::new));
 
   @Override
