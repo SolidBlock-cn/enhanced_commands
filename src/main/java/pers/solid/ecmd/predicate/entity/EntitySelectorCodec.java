@@ -125,6 +125,7 @@ public class EntitySelectorCodec extends MapCodec<EntitySelector> {
     if (dz instanceof DataResult.Error<Optional<Double>> error) return DataResult.error(error.messageSupplier(), error.lifecycle());
 
     Box box;
+    @Nullable Vec3d dxDyDz = null;
     if (dx.getOrThrow().isEmpty() && dz.getOrThrow().isEmpty() && dz.getOrThrow().isEmpty()) {
       if (distance.getOrThrow() != null && distance.getOrThrow().max().isPresent()) {
         double maxDistance = distance.getOrThrow().max().get();
@@ -146,6 +147,7 @@ public class EntitySelectorCodec extends MapCodec<EntitySelector> {
       double y2 = (negativeY ? 0d : y) + 1d;
       double z2 = (negativeZ ? 0d : z) + 1d;
       box = new Box(x1, y1, z1, x2, y2, z2);
+      dxDyDz = new Vec3d(dx.getOrThrow().orElse(0d), dy.getOrThrow().orElse(0d), dz.getOrThrow().orElse(0d));
     }
 
     final DataResult<BiConsumer<Vec3d, List<? extends Entity>>> sort = SORT.decode(ops, input);
@@ -156,6 +158,7 @@ public class EntitySelectorCodec extends MapCodec<EntitySelector> {
 
     final EntitySelector entitySelector = new EntitySelector(limit.getOrThrow(), !playerOnly, localWorldOnly, vanillaEntries.build(), distance.getOrThrow(), positionOffset.getOrThrow(), box, sort.getOrThrow(), senderOnly, playerName, uuid, type, usesAt.getOrThrow());
     entitySelector.extension$ec().positionOffsetInfo = positionOffset.getOrThrow();
+    entitySelector.extension$ec().dxDyDz = dxDyDz;
     entitySelector.extension$ec().contextWrapper = contextWrapper;
     entitySelector.extension$ec().collector = collector.getOrThrow().orElse(null);
     return DataResult.success(entitySelector);
@@ -176,9 +179,9 @@ public class EntitySelectorCodec extends MapCodec<EntitySelector> {
       DZ.encode(Optional.of(dxDyDz.z), ops, prefix);
     }
 
-    final List<SpecialEntityPredicate> specialEntries = EntitySelectorHelper.getSpecialEntries(input);
-    final List<EntityPredicate> serializablePredicates = EntitySelectorHelper.getStandardPredicates(input);
-    PREDICATES.encode(ImmutableList.copyOf(Iterables.concat(specialEntries, serializablePredicates)), ops, prefix);
+    final List<SpecialEntityPredicate> specialEntries = input.extension$ec().getSpecialEntries();
+    final List<EntityPredicate> serializablePredicates = input.extension$ec().getStandardPredicates();
+    PREDICATES.encode(ImmutableList.copyOf(Iterables.concat(Iterables.filter(specialEntries, predicate -> !(predicate instanceof DistanceBlockPredicate) && !(predicate instanceof BoxEntityPredicate)), serializablePredicates)), ops, prefix);
     DISTANCE.encode(distance, ops, prefix);
 
     SORT.encode(((EntitySelectorAccessor) input).getSorter(), ops, prefix);

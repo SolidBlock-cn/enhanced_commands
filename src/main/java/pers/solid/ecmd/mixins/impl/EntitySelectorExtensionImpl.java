@@ -9,7 +9,7 @@ import pers.solid.ecmd.predicate.entity.EntitySelectorExtras;
 @Mixin(EntitySelector.class)
 public abstract class EntitySelectorExtensionImpl implements EntitySelectorExtension {
   @Unique
-  private final EntitySelectorExtras extension$ec = new EntitySelectorExtras();
+  private final EntitySelectorExtras extension$ec = new EntitySelectorExtras((EntitySelector) (Object) this);
 
   @Override
   public EntitySelectorExtras extension$ec() {

@@ -180,7 +180,7 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   /**
    * 根据读取到的增强的参数类型，应用相应的特殊的限制。例如，读取到 {@code @f} 时，设置 {@code limit=1,sort=furthest}。
    */
-  @Inject(method = "readAtVariable", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;predicates:Ljava/util/List;", shift = At.Shift.AFTER))
+  @Inject(method = "readAtVariable", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", shift = At.Shift.AFTER))
   private void appendAdditionalLimitations(CallbackInfo ci) {
     final String atVariable = extension$ec().atVariable;
     if (EntitySelectorTypeExtras.EXTRA_LIMITS.containsKey(atVariable)) {

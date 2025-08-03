@@ -7,12 +7,14 @@ import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
 import pers.solid.ecmd.util.ExecutionContext;
 
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -23,6 +25,7 @@ import java.util.function.Function;
  */
 public class EntitySelectorExtras {
   public static final Logger LOGGER = LoggerFactory.getLogger(EntitySelectorExtras.class);
+  private final EntitySelector self;
   /**
    * 该实体选择器所使用的 {@link ServerCommandSource}。可能会在实际调用时发生改变。
    */
@@ -48,6 +51,19 @@ public class EntitySelectorExtras {
   public @Nullable EntitySelectorCollector collector;
   public MutableObject<ExecutionContext> contextWrapper = new MutableObject<>();
 
+  /**
+   * 该实体选择实际用于判断实体的谓词对象。
+   */
+  private @Unmodifiable List<SpecialEntityPredicate> specialEntries = null;
+  /**
+   * 实体选择器的常规谓词。
+   */
+  private @Unmodifiable List<EntityPredicate> standardPredicates = null;
+
+  public EntitySelectorExtras(EntitySelector self) {
+    this.self = self;
+  }
+
   public void updateSource(@NotNull ServerCommandSource source) {
     if (!source.equals(this.source)) {
       this.source = source;
@@ -60,5 +76,19 @@ public class EntitySelectorExtras {
    */
   public static EntitySelectorExtras getOf(EntitySelector entitySelector) {
     return entitySelector.extension$ec();
+  }
+
+  public @NotNull @Unmodifiable List<SpecialEntityPredicate> getSpecialEntries() {
+    if (specialEntries == null) {
+      specialEntries = EntitySelectorHelper.calculateSpecialEntries(self);
+    }
+    return specialEntries;
+  }
+
+  public @NotNull @Unmodifiable List<EntityPredicate> getStandardPredicates() {
+    if (standardPredicates == null) {
+      standardPredicates = EntitySelectorHelper.calculateStandardPredicates(self);
+    }
+    return standardPredicates;
   }
 }

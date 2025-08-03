@@ -25,12 +25,20 @@ public final class EntitySelectorHelper {
   }
 
   /**
-   * <p>从实体选择器对象中的一些属性中，获取未存储于 {@link EntitySelector#predicates} 中的实际谓词。这些谓词不会存储于 {@link EntitySelector#predicates} 中，但应当在作为谓词使用时被考虑到。
-   * <p>{@link EntitySelector#positionOffset} 是个例外，因为无法序列化，因此可能需要在读取解析时才能存储其数据。
+   * <p>将实体选择器对象中未存储于 {@link EntitySelector#predicates} 中的一些属性转换为相应的 {@link SpecialEntityPredicate}，从而实现序列化。
+   *
+   * @see EntitySelectorExtras#getSpecialEntries()
    */
-  public static @Unmodifiable List<SpecialEntityPredicate> getSpecialEntries(EntitySelector entitySelector) {
+  public static @Unmodifiable List<SpecialEntityPredicate> calculateSpecialEntries(EntitySelector entitySelector) {
     final ImmutableList.Builder<SpecialEntityPredicate> entries = new ImmutableList.Builder<>();
     final var accessor = (EntitySelectorAccessor) entitySelector;
+
+    if (!accessor.getDistance().isDummy()) {
+      entries.add(new DistanceBlockPredicate(accessor.getDistance(), entitySelector.extension$ec().positionOffsetInfo));
+    }
+    if (accessor.getBox() != null) {
+      entries.add(new BoxEntityPredicate(accessor.getBox(), entitySelector.extension$ec().positionOffsetInfo));
+    }
 
     if (!entitySelector.includesNonPlayers()) {
       entries.add(PlayerOnlyEntityPredicate.INSTANCE);
@@ -55,7 +63,7 @@ public final class EntitySelectorHelper {
   }
 
   /**
-   * <p>从 {@link EntitySelector#predicates} 列表中获取可被本模组直接序列化的 {@link EntityPredicate} 对象。当列表中的 {@code Predicate<Entity>} 符合以下条件之一时，会被本模组读取：
+   * <p>将 {@link EntitySelector#predicates} 列表转换为可被本模组直接序列化的 {@link EntityPredicate} 对象。当列表中的 {@code Predicate<Entity>} 符合以下条件之一时，会被本模组读取：
    * <ul>
    *   <li>直接继承了 {@link EntityPredicate}。</li>
    *   <li>继承了 {@link StaticEntityPredicateWrapper}。</li>
@@ -63,8 +71,10 @@ public final class EntitySelectorHelper {
    * </ul>
    *
    * <p>如果上述条件均不符合，会被本模组转换成 {@link UnknownEntityPredicateEntry}。
+   *
+   * @see EntitySelectorExtras#getStandardPredicates()
    */
-  public static @Unmodifiable List<EntityPredicate> getStandardPredicates(EntitySelector entitySelector) {
+  public static @Unmodifiable List<EntityPredicate> calculateStandardPredicates(EntitySelector entitySelector) {
     return ((EntitySelectorAccessor) entitySelector).getPredicates()
         .stream()
         .map(predicate -> {
@@ -85,7 +95,7 @@ public final class EntitySelectorHelper {
     final EntitySelectorAccessor accessor = (EntitySelectorAccessor) entitySelector;
     final boolean includesNonPlayers = entitySelector.includesNonPlayers();
 
-    final List<EntityPredicate> standardPredicates = getStandardPredicates(entitySelector);
+    final List<EntityPredicate> standardPredicates = entitySelector.extension$ec().getStandardPredicates();
 
     if (accessor.getPlayerName() != null && standardPredicates.isEmpty()) {
       return accessor.getPlayerName();
@@ -159,7 +169,7 @@ public final class EntitySelectorHelper {
     } else if (entitySelector.isSenderOnly()) {
       atVariable = "s";
     } else if (includesNonPlayers || hasExplicitType) {
-      atVariable = requireAlive ? "e" : ":";
+      atVariable = requireAlive ? "e" : "E";
     } else {
       atVariable = "a";
     }
@@ -188,7 +198,7 @@ public final class EntitySelectorHelper {
     }
 
     if (!Objects.equals(e1.collector, e2.collector)
-        || !Objects.equals(getStandardPredicates(o1), getStandardPredicates(o2))) {
+        || !Objects.equals(e1.getStandardPredicates(), e2.getStandardPredicates())) {
       return false;
     }
 
@@ -217,7 +227,7 @@ public final class EntitySelectorHelper {
         .append(a.getUuid())
         .append(a.getEntityFilter());
 
-    hashCodeBuilder.append(e.collector).append(getStandardPredicates(o));
+    hashCodeBuilder.append(e.collector).append(e.getStandardPredicates());
 
     return hashCodeBuilder.toHashCode();
   }
