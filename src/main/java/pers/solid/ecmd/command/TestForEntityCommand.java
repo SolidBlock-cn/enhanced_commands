@@ -18,6 +18,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EntityPredicateArgumentType;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -43,11 +44,12 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
       return 0;
     } else if (size == 1) {
       final Entity entity = entities.iterator().next();
-      final TestResult testResult = predicate.testAndDescribe(entity);
+      final ExecutionContext executionContext = new ExecutionContext(context.getSource());
+      final TestResult testResult = predicate.testAndDescribe(entity, executionContext);
       testResult.sendMessage(context.getSource());
       return BooleanUtils.toInteger(testResult.successes());
     } else {
-      final int passes = Iterables.size(Iterables.filter(entities, predicate::test));
+      final int passes = Iterables.size(Iterables.filter(entities, entity -> predicate.test(entity, new ExecutionContext(context.getSource()))));
       final MutableText exampleEntity = TextUtil.styled(entities.iterator().next().getDisplayName(), Styles.TARGET);
       if (passes == size) {
         context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.entity.all_pass", size, exampleEntity).enhanced$$().styled(Styles.TRUE), false);

@@ -3,6 +3,7 @@ package pers.solid.ecmd.command;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -44,6 +45,7 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
@@ -62,6 +64,8 @@ import static net.minecraft.server.command.CommandManager.literal;
 import static pers.solid.ecmd.argument.BlockFunctionArgumentType.getBlockFunction;
 import static pers.solid.ecmd.argument.BlockPredicateArgumentType.getBlockPredicate;
 import static pers.solid.ecmd.argument.EnhancedPosArgumentType.getPosArgument;
+import static pers.solid.ecmd.argument.EntityPredicateArgumentType.entityPredicate;
+import static pers.solid.ecmd.argument.EntityPredicateArgumentType.getEntityPredicate;
 import static pers.solid.ecmd.argument.NbtFunctionArgumentType.getNbtFunction;
 import static pers.solid.ecmd.argument.NbtPredicateArgumentType.getNbtPredicate;
 import static pers.solid.ecmd.argument.RegionArgumentType.getRegion;
@@ -103,6 +107,24 @@ public enum TestArgCommand implements CommandRegistrationCallback {
             .executes(context -> executeCodecTest(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")
             .executes(context -> executeCodecTest(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, JsonOps.INSTANCE)))
+    );
+  }
+
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addEntityPredicateProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
+    return argumentBuilder.then(argument("entity_predicate", entityPredicate(registryAccess))
+        .executes(context -> executeStringShow(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString))
+        .then(literal("string")
+            .executes(context -> executeStringShow(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString)))
+        .then(literal("nbt")
+            .executes(context -> executeCodecShow(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json")
+            .executes(context -> executeCodecShow(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, JsonOps.INSTANCE)))
+        .then(literal("string_test")
+            .executes(context -> executeStringTest(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString, s -> EntityPredicateArgumentType.entityPredicate(registryAccess).parse(new StringReader(s)))))
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, JsonOps.INSTANCE)))
     );
   }
 
@@ -393,6 +415,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     dispatcher.register(literalR2("testarg")
         .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
         .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
+        .then(addEntityPredicateProperties(literal("entity_predicate"), registryAccess))
         .then(addNbtProperties(literal("nbt"), registryAccess))
         .then(addNbtCompoundProperties(literal("nbt_compound")))
         .then(addNbtPredicateProperties(literal("nbt_predicate"), registryAccess))

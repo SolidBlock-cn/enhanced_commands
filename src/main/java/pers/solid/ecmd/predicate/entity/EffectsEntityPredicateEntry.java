@@ -1,6 +1,9 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -11,22 +14,28 @@ import net.minecraft.predicate.entity.EntityEffectPredicate;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.*;
 
-public record EffectsEntityPredicateEntry(Map<RegistryEntry<StatusEffect>, EntityEffectPredicate.EffectData> effects, Set<RegistryEntry<StatusEffect>> inverted) implements EntityPredicateEntry {
+public record EffectsEntityPredicateEntry(List<Entry> effects) implements EntityPredicateEntry, StaticEntityPredicate {
+  public static final MapCodec<EffectsEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      Entry.CODEC.listOf().fieldOf("effects").forGetter(EffectsEntityPredicateEntry::effects)
+  ).apply(i, EffectsEntityPredicateEntry::new));
+
   @Override
   public boolean test(@NotNull Entity entity) {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return false;
     }
     final var actualEffects = livingEntity.getActiveStatusEffects();
-    for (final var entry : effects.entrySet()) {
-      final RegistryEntry<StatusEffect> statusEffect = entry.getKey();
+    for (final var entry : effects) {
+      final RegistryEntry<StatusEffect> statusEffect = entry.effect;
       StatusEffectInstance statusEffectInstance = actualEffects.get(statusEffect);
-      if (entry.getValue().test(statusEffectInstance) == inverted.contains(statusEffect)) {
+      if (entry.data.test(statusEffectInstance) == entry.inverted) {
         return false;
       }
     }
@@ -34,19 +43,19 @@ public record EffectsEntityPredicateEntry(Map<RegistryEntry<StatusEffect>, Entit
   }
 
   @Override
-  public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
     final Map<RegistryEntry<StatusEffect>, StatusEffectInstance> actualEffects = livingEntity.getActiveStatusEffects();
     boolean result = true;
     final List<TestResult> attachments = new ArrayList<>();
-    for (final var mapEntry : effects.entrySet()) {
-      final RegistryEntry<StatusEffect> effectEntry = mapEntry.getKey();
+    for (final var entry : effects) {
+      final RegistryEntry<StatusEffect> effectEntry = entry.effect;
       StatusEffectInstance statusEffectInstance = actualEffects.get(effectEntry);
-      final EntityEffectPredicate.EffectData effectData = mapEntry.getValue();
+      final EntityEffectPredicate.EffectData effectData = entry.data;
       final var testResult = effectData.test(statusEffectInstance);
-      final var isInverted = inverted.contains(effectEntry);
+      final var isInverted = entry.inverted;
       final var passes = testResult != isInverted;
       result &= passes;
 
@@ -75,42 +84,60 @@ public record EffectsEntityPredicateEntry(Map<RegistryEntry<StatusEffect>, Entit
   }
 
   @Override
+  public @NotNull EntityPredicateType<EffectsEntityPredicateEntry> getType() {
+    return EntityPredicateTypes.EFFECTS;
+  }
+
+  @Override
   public String toOptionEntry() {
     final StringJoiner joiner = new StringJoiner(", ", "{", "}");
-    for (var mapEntry : effects.entrySet()) {
-      final RegistryEntry<StatusEffect> effectEntry = mapEntry.getKey();
-      final EntityEffectPredicate.EffectData effectData = mapEntry.getValue();
-      final StringJoiner joiner2 = new StringJoiner(", ", "{", "}");
+    for (var entry : effects) {
+      joiner.add(entry.asString());
+    }
+
+    return joiner.toString();
+  }
+
+  public record Entry(RegistryEntry<StatusEffect> effect, EntityEffectPredicate.EffectData data, boolean inverted) implements ExpressionConvertible {
+    public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
+        StatusEffect.ENTRY_CODEC.fieldOf("effect").forGetter(Entry::effect),
+        EntityEffectPredicate.EffectData.CODEC.fieldOf("data").forGetter(Entry::data),
+        Codec.BOOL.optionalFieldOf("inverted", false).forGetter(Entry::inverted)
+    ).apply(i, Entry::new));
+
+    @Override
+    public @NotNull String asString() {
+      final RegistryEntry<StatusEffect> effectEntry = effect;
+      final EntityEffectPredicate.EffectData effectData = data;
+      final StringJoiner joiner = new StringJoiner(", ", "{", "}");
       final NumberRange.IntRange amplifier = effectData.amplifier();
       boolean dummy = true;
       if (!amplifier.isDummy()) {
-        joiner2.add("amplifier = " + StringUtil.wrapRange(amplifier));
+        joiner.add("amplifier = " + StringUtil.wrapRange(amplifier));
         dummy = false;
       }
       final NumberRange.IntRange duration = effectData.duration();
       if (!duration.isDummy()) {
-        joiner2.add("duration = " + StringUtil.wrapRange(duration));
+        joiner.add("duration = " + StringUtil.wrapRange(duration));
         dummy = false;
       }
       final Optional<Boolean> ambient = effectData.ambient();
       if (ambient.isPresent()) {
-        joiner2.add("ambient = " + ambient);
+        joiner.add("ambient = " + ambient);
         dummy = false;
       }
       final Optional<Boolean> visible = effectData.visible();
       if (visible.isPresent()) {
-        joiner2.add("visible = " + visible);
+        joiner.add("visible = " + visible);
         dummy = false;
       }
 
       final String effectId = effectEntry.getKeyOrValue().map(key -> key.getValue().toString(), statusEffect -> StatusEffect.ENTRY_CODEC.encodeStart(NbtOps.INSTANCE, effectEntry).getOrThrow().toString());
       if (dummy) {
-        joiner.add(effectId + " = " + inverted.contains(effectEntry));
+        return effectId + " = " + inverted;
       } else {
-        joiner.add(effectId + " = " + (inverted.contains(effectEntry) ? "!" : "") + joiner2);
+        return effectId + " = " + (inverted ? "!" : "") + joiner;
       }
     }
-
-    return joiner.toString();
   }
 }

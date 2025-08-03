@@ -1,17 +1,11 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.server.command.ServerCommandSource;
-import org.apache.commons.lang3.function.FailableFunction;
-import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.commons.lang3.mutable.MutableObject;
+import pers.solid.ecmd.util.ExecutionContext;
 
 /**
  * 这是在 {@link EntitySelectorReader} 中加入的一些额外的信息，用于本模组。
@@ -48,12 +42,6 @@ public class EntitySelectorReaderExtras {
    */
   public boolean implicitNegativeLimit = false;
   /**
-   * 此参数会在 {@link EntitySelectorReader#build()} 中。
-   *
-   * @see EntitySelectorReaderMixin
-   */
-  public @Nullable List<FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException>> predicateFunctions = null;
-  /**
    * 此 context 对象用于提供建议。在非提供建议的情景下，此字段有可能是 null。
    */
   public CommandContext<?> context = null;
@@ -62,12 +50,13 @@ public class EntitySelectorReaderExtras {
    */
   public Object2BooleanMap<String> usedParams = new Object2BooleanOpenHashMap<>();
 
+  public MutableObject<ExecutionContext> contextWrapper = new MutableObject<>();
+
   public EntitySelectorReaderExtras(EntitySelectorReader self) {
     this.self = self;
   }
 
-  public void addFunction(FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException> predicateFunction) {
-    var predicateFunctions = this.predicateFunctions == null ? (this.predicateFunctions = new ArrayList<>()) : this.predicateFunctions;
-    predicateFunctions.add(predicateFunction);
+  public void addPredicate(EntityPredicateEntry predicateEntry) {
+    self.addPredicate(new DynamicEntityPredicateWrapper(predicateEntry, contextWrapper));
   }
 }

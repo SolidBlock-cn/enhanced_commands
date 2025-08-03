@@ -5,6 +5,7 @@ import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -47,6 +48,9 @@ public abstract class ServerCommandSourceExtensionImpl implements ServerCommandS
 
   @Shadow
   public abstract ServerPlayerEntity getPlayerOrThrow() throws CommandSyntaxException;
+
+  @Shadow
+  public abstract ServerWorld getWorld();
 
   @Override
   public final void sendFeedback$ecBridge(Supplier<Text> feedbackSupplier, boolean broadcastToOps) {
@@ -94,5 +98,10 @@ public abstract class ServerCommandSourceExtensionImpl implements ServerCommandS
   @Override
   public @NotNull PlayerEntity playerOrThrow$ec() throws CommandSyntaxException {
     return getPlayerOrThrow();
+  }
+
+  @Override
+  public ServerWorld world$ec() {
+    return getWorld();
   }
 }

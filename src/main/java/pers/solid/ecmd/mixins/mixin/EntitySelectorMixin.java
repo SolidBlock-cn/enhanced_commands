@@ -1,6 +1,5 @@
 package pers.solid.ecmd.mixins.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
@@ -26,13 +25,8 @@ public abstract class EntitySelectorMixin implements EntitySelectorExtension {
   @Shadow
   protected abstract Predicate<Entity> getPositionPredicate(Vec3d pos, @Nullable Box box, @Nullable FeatureSet enabledFeatures);
 
-  @ModifyReturnValue(method = "getPositionPredicate", at = @At("RETURN"))
-  private Predicate<Entity> modifyPositionPredicate(Predicate<Entity> original) {
-    return original.and(this.extension$ec()::testForExtraPredicates);
-  }
-
   @Inject(method = {"getEntity", "getEntities(Lnet/minecraft/server/command/ServerCommandSource;)Ljava/util/List;", "getPlayer", "getPlayers"}, at = @At("HEAD"))
-  private void setSource(ServerCommandSource source, CallbackInfoReturnable<Entity> cir) throws CommandSyntaxException {
+  private void setSource(ServerCommandSource source, CallbackInfoReturnable<Entity> cir) {
     extension$ec().updateSource(source);
   }
 

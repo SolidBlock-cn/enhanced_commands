@@ -73,7 +73,7 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
       json.addProperty("type", Registries.COMMAND_ARGUMENT_TYPE.getId(forwardSerializer).toString());
       final JsonObject forward = new JsonObject();
       forwardSerializer.writeJson(properties.forwardProperties, forward);
-      json.add("forward", forward);
+      json.add("entityPredicate", forward);
     }
 
     @SuppressWarnings({"unchecked", "UnstableApiUsage"})

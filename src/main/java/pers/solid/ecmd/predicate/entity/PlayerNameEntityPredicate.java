@@ -1,10 +1,14 @@
 package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
@@ -13,7 +17,11 @@ import pers.solid.ecmd.util.TestResult;
  *
  * @param name
  */
-public record PlayerNameEntityPredicate(@NotNull String name) implements SpecialEntityPredicate {
+public record PlayerNameEntityPredicate(@NotNull String name) implements SpecialEntityPredicate, StaticEntityPredicate {
+  public static final MapCodec<PlayerNameEntityPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      Codec.STRING.fieldOf("name").forGetter(PlayerNameEntityPredicate::name)
+  ).apply(i, PlayerNameEntityPredicate::new));
+
   /**
    * @see net.minecraft.server.PlayerManager#getPlayer(String)
    */
@@ -23,7 +31,7 @@ public record PlayerNameEntityPredicate(@NotNull String name) implements Special
   }
 
   @Override
-  public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
     if (entity instanceof PlayerEntity player) {
       final boolean matches = player.getGameProfile().getName().equalsIgnoreCase(name);
       if (matches) {
@@ -34,5 +42,15 @@ public record PlayerNameEntityPredicate(@NotNull String name) implements Special
     } else {
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.player_name.not_player", entity.getDisplayName()));
     }
+  }
+
+  @Override
+  public @NotNull EntityPredicateType<PlayerNameEntityPredicate> getType() {
+    return EntityPredicateTypes.PLAYER_NAME;
+  }
+
+  @Override
+  public @NotNull String asString() {
+    return name;
   }
 }

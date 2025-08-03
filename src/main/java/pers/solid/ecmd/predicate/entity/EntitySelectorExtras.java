@@ -1,21 +1,19 @@
 package pers.solid.ecmd.predicate.entity;
 
-import com.google.common.base.Predicates;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.EntitySelector;
-import net.minecraft.entity.Entity;
+import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.server.command.ServerCommandSource;
-import org.apache.commons.lang3.function.FailableFunction;
+import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
-import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.ExecutionContext;
 
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.function.Function;
 
 /**
  * 附加在 {@link EntitySelector} 的额外内容。
@@ -29,34 +27,31 @@ public class EntitySelectorExtras {
    * 该实体选择器所使用的 {@link ServerCommandSource}。可能会在实际调用时发生改变。
    */
   public ServerCommandSource source;
-  /**
-   * 需要指定 {@link ServerCommandSource} 后才能生效的谓词会存储于此列表。为了节省内容，默认为 null。
-   */
-  public @Nullable List<FailableFunction<ServerCommandSource, EntityPredicateEntry, CommandSyntaxException>> predicateFunctions = null;
 
   /**
-   * 在通过 {@link #updateSource} 方法修改源时，会根据指定的源，生成（或重新生成）这些谓词。
+   * 以可序列化的形式记录 {@link EntitySelector#positionOffset}，因为该字段类型为 {@link Function}，无法序列化其数据，因此需要在 {@link EntitySelectorReader#build()} 中手动存储其序列化数据。
+   *
+   * @see EntitySelectorReaderMixin#recordMoreIntoAtBuild(EntitySelector)
    */
-  public Predicate<Entity> actualExtraPredicate = entity -> {
-    LOGGER.warn("Warning! There is no ServerCommandSource yet for {}!", EntitySelectorExtras.this);
-    return false;
-  };
+  public @NotNull PositionOffsetInfo positionOffsetInfo = PositionOffsetInfo.NO_OP;
+
+  /**
+   * 以可序列化的形式记录 {@link EntitySelectorReader#dx}、{@link EntitySelectorReader#dy}、{@link EntitySelectorReader#dz}，因为这些数据并不会存储在 {@link EntitySelector} 中。
+   */
+  public @Nullable Vec3d dxDyDz = null;
+
   /**
    * 此字段决定了在运行 {@link EntitySelector#getEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
    *
    * @see EntitySelectorReaderMixin#buildExtraPredicate(CallbackInfoReturnable)
    */
   public @Nullable EntitySelectorCollector collector;
+  public MutableObject<ExecutionContext> contextWrapper = new MutableObject<>();
 
-  public Predicate<Entity> createUpdatedPredicate(ServerCommandSource source) throws CommandSyntaxException {
-    // 这个 transform 过的 iterable 会被复制一遍。
-    return predicateFunctions == null ? Predicates.alwaysTrue() : Predicates.and(IterateUtils.transformFailableImmutableList(predicateFunctions, predicateFunction -> predicateFunction.apply(source)::test));
-  }
-
-  public void updateSource(@NotNull ServerCommandSource source) throws CommandSyntaxException {
+  public void updateSource(@NotNull ServerCommandSource source) {
     if (!source.equals(this.source)) {
       this.source = source;
-      actualExtraPredicate = createUpdatedPredicate(source);
+      this.contextWrapper.setValue(new ExecutionContext(source));
     }
   }
 
@@ -65,9 +60,5 @@ public class EntitySelectorExtras {
    */
   public static EntitySelectorExtras getOf(EntitySelector entitySelector) {
     return entitySelector.extension$ec();
-  }
-
-  public boolean testForExtraPredicates(Entity entity) {
-    return actualExtraPredicate.test(entity);
   }
 }

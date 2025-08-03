@@ -2,6 +2,7 @@ package pers.solid.ecmd.mixins.impl;
 
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec2f;
@@ -21,6 +22,9 @@ public interface FabricClientCommandSourceMixin extends PositionProvider {
 
   @Shadow
   ClientPlayerEntity getPlayer();
+
+  @Shadow
+  ClientWorld getWorld();
 
   @Override
   default Vec3d position$ec() {
@@ -46,5 +50,10 @@ public interface FabricClientCommandSourceMixin extends PositionProvider {
   @Override
   default EntityAnchorArgumentType.EntityAnchor entityAnchor$ec() {
     return EntityAnchorArgumentType.EntityAnchor.FEET;
+  }
+
+  @Override
+  default ClientWorld world$ec() {
+    return getWorld();
   }
 }

@@ -35,15 +35,19 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public final class LootBridge {
-  public static Optional<LootCondition> getLootCondition(ServerWorld serverWorld, Identifier identifier) {
-    return getLootCondition(serverWorld.getServer(), identifier);
-  }
-
   public static Optional<LootCondition> getLootCondition(MinecraftServer server, Identifier identifier) {
     return server
         .getReloadableRegistries()
         .createRegistryLookup()
         .getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, identifier))
+        .map(RegistryEntry::value);
+  }
+
+  public static Optional<LootCondition> getLootCondition(MinecraftServer server, RegistryKey<LootCondition> registryKey) {
+    return server
+        .getReloadableRegistries()
+        .createRegistryLookup()
+        .getOptionalEntry(RegistryKeys.PREDICATE, registryKey)
         .map(RegistryEntry::value);
   }
 

@@ -6,6 +6,7 @@ import net.minecraft.util.math.Position;
 import net.minecraft.util.math.Vec3i;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 与字符串有关的实用类。
@@ -23,17 +24,17 @@ public final class StringUtil {
   }
 
   public static <T extends Number> String wrapRange(NumberRange<T> numberRange) {
-    final var min = numberRange.min();
-    final var max = numberRange.max();
+    final Optional<T> min = numberRange.min();
+    final Optional<T> max = numberRange.max();
     if (min.isPresent() && min.equals(max)) {
-      return min.toString();
+      return min.get().toString();
     }
     return min.map(Objects::toString).orElse("") + ".." + max.map(Objects::toString).orElse("");
   }
 
   public static String wrapRange(FloatRangeArgument numberRange) {
-    final var min = numberRange.min();
-    final var max = numberRange.max();
+    final Float min = numberRange.min();
+    final Float max = numberRange.max();
     if (min != null && min.equals(max)) {
       return min.toString();
     }

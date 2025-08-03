@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.parse.FunctionLikeParser;
 import pers.solid.ecmd.util.parse.NamedParamListParser;
 import pers.solid.ecmd.util.parse.ParseContext;
@@ -24,7 +23,6 @@ import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 
 /**
@@ -35,10 +33,10 @@ import java.util.Set;
  * @param lenient    如果为 true，则当索引超出字符串范围时，也不抛出异常。
  * @param original   指定要截取子字符串的字符串，如果未指定，则默认使用 NBT 函数运行时的参数。
  */
-public record SubstringNbtFunction(int startIndex, OptionalInt endIndex, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
+public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
   public static final MapCodec<SubstringNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.INT.fieldOf("start_index").forGetter(SubstringNbtFunction::startIndex),
-      CodecUtil.optionalIntFieldOf("end_index").forGetter(SubstringNbtFunction::endIndex),
+      Codec.INT.optionalFieldOf("end_index").forGetter(SubstringNbtFunction::endIndex),
       Codec.BOOL.optionalFieldOf("lenient", false).forGetter(SubstringNbtFunction::lenient),
       NbtFunction.CODEC.optionalFieldOf("original").forGetter(SubstringNbtFunction::original)
   ).apply(i, SubstringNbtFunction::new));
@@ -51,7 +49,7 @@ public record SubstringNbtFunction(int startIndex, OptionalInt endIndex, boolean
 
   @Override
   public @NotNull String asString() {
-    return "substring(" + startIndex + (endIndex.isPresent() ? ", " + endIndex.getAsInt() : "") + "; lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
+    return "substring(" + startIndex + (endIndex.isPresent() ? ", " + endIndex.get() : "") + "; lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   private static int actualIndex(int index, int length) throws CommandSyntaxException {
@@ -90,7 +88,7 @@ public record SubstringNbtFunction(int startIndex, OptionalInt endIndex, boolean
       if (endIndex.isEmpty()) {
         return NbtString.of(string.substring(actualStartIndex));
       }
-      final int actualEndIndex = actualIndex(endIndex.getAsInt(), length);
+      final int actualEndIndex = actualIndex(endIndex.get(), length);
       if (actualStartIndex > actualEndIndex) {
         if (lenient) {
           return nbtElement;
@@ -125,8 +123,8 @@ public record SubstringNbtFunction(int startIndex, OptionalInt endIndex, boolean
 
     @Override
     public SubstringNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final OptionalInt optionalInt = endIndex == null ? OptionalInt.empty() : OptionalInt.of(endIndex);
-      return new SubstringNbtFunction(startIndex, optionalInt, Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
+      final Optional<Integer> endIndex = Optional.ofNullable(this.endIndex);
+      return new SubstringNbtFunction(startIndex, endIndex, Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
     }
 
     @Override

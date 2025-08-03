@@ -56,7 +56,7 @@ public final class CatchingIterator<T> implements Iterator<T> {
   @Override
   public String toString() {
     return "CatchingIterator{" +
-        "forward=" + forward +
+        "entityPredicate=" + forward +
         ", errorConsumer=" + errorConsumer +
         ", hasError=" + hasError +
         '}';

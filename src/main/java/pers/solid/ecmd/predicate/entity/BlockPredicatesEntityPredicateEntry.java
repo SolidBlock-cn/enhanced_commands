@@ -2,25 +2,30 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.argument.PosArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public record BlockPredicatesEntityPredicateEntry(Map<PosArgument, BlockPredicate> map) implements EntityPredicateEntry {
+public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedPosArgument, BlockPredicate>> predicates) implements EntityPredicateEntry {
+  public static final MapCodec<BlockPredicatesEntityPredicateEntry> CODEC = Codec.pair(EnhancedPosArgument.CODEC, BlockPredicate.CODEC).listOf().fieldOf("predicates").xmap(BlockPredicatesEntityPredicateEntry::new, BlockPredicatesEntityPredicateEntry::predicates);
+
   @Override
-  public boolean test(@NotNull Entity entity) {
-    for (Map.Entry<PosArgument, BlockPredicate> entry : map.entrySet()) {
-      final var key = entry.getKey();
-      final var value = entry.getValue();
-      if (!value.test(new CachedBlockPosition(entity.getWorld(), key.toAbsoluteBlockPos(entity.getCommandSource()), false), new ExecutionContext(entity.getCommandSource()))) {
+  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+    for (Pair<EnhancedPosArgument, BlockPredicate> pair : predicates) {
+      final var pos = pair.getFirst();
+      final var predicate = pair.getSecond();
+      if (!predicate.test(new CachedBlockPosition(entity.getWorld(), pos.toAbsoluteBlockPos(entity.getCommandSource()), false), new ExecutionContext(entity.getCommandSource()))) {
         return false;
       }
     }
@@ -28,13 +33,13 @@ public record BlockPredicatesEntityPredicateEntry(Map<PosArgument, BlockPredicat
   }
 
   @Override
-  public TestResult testAndDescribe(Entity entity, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
     boolean result = true;
-    for (Map.Entry<PosArgument, BlockPredicate> entry : map.entrySet()) {
-      final var key = entry.getKey();
-      final var value = entry.getValue();
-      final TestResult testResult = value.testAndDescribe(new CachedBlockPosition(entity.getWorld(), key.toAbsoluteBlockPos(entity.getCommandSource()), false), new ExecutionContext(entity.getCommandSource()));
+    for (Pair<EnhancedPosArgument, BlockPredicate> pair : predicates) {
+      final var pos = pair.getFirst();
+      final var predicate = pair.getSecond();
+      final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), pos.toAbsoluteBlockPos(entity.getCommandSource()), false), new ExecutionContext(entity.getCommandSource()));
       attachments.add(testResult);
       result &= testResult.successes();
     }
@@ -46,7 +51,12 @@ public record BlockPredicatesEntityPredicateEntry(Map<PosArgument, BlockPredicat
   }
 
   @Override
+  public @NotNull EntityPredicateType<BlockPredicatesEntityPredicateEntry> getType() {
+    return EntityPredicateTypes.BLOCK_PREDICATES;
+  }
+
+  @Override
   public @NotNull String toOptionEntry() {
-    return "block=" + map.entrySet().stream().map(entry -> "<" + entry.getKey().toString() + "> = " + entry.getValue().asString()).collect(Collectors.joining(", ", "{", "}"));
+    return "block=" + predicates.stream().map(entry -> entry.getFirst().toString() + " = " + entry.getSecond().asString()).collect(Collectors.joining(", ", "{", "}"));
   }
 }

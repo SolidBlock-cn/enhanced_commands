@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.util.TypeFilter;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
@@ -15,16 +16,17 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 @Mixin(EntitySelector.class)
 public interface EntitySelectorAccessor {
   @Accessor
-  String getPlayerName();
+  @Nullable String getPlayerName();
 
   @Accessor
-  UUID getUuid();
+  @Nullable UUID getUuid();
 
   @Invoker
   Predicate<Entity> callGetPositionPredicate(Vec3d pos, @Nullable Box box, @Nullable FeatureSet enabledFeatures);
@@ -36,7 +38,7 @@ public interface EntitySelectorAccessor {
   void callCheckSourcePermission(ServerCommandSource source) throws CommandSyntaxException;
 
   @Accessor
-  Box getBox();
+  @Nullable Box getBox();
 
   @Accessor
   NumberRange.DoubleRange getDistance();
@@ -46,4 +48,10 @@ public interface EntitySelectorAccessor {
 
   @Accessor
   List<Predicate<Entity>> getPredicates();
+
+  @Accessor
+  TypeFilter<Entity, ?> getEntityFilter();
+
+  @Accessor
+  BiConsumer<Vec3d, List<? extends Entity>> getSorter();
 }

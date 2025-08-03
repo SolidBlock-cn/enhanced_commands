@@ -1,6 +1,5 @@
 package pers.solid.ecmd.predicate.entity;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.*;
 import net.minecraft.entity.mob.MobEntity;
@@ -10,9 +9,8 @@ import net.minecraft.util.StringIdentifiable;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
-import java.util.Arrays;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -62,7 +60,7 @@ public enum EntitySelectorCollector implements StringIdentifiable {
   private final String name;
   private final FailableFunction<ServerCommandSource, Stream<? extends Entity>, CommandSyntaxException> entityCollector;
   private final FailableFunction<ServerCommandSource, Stream<ServerPlayerEntity>, CommandSyntaxException> playerCollector;
-  public static final ImmutableMap<String, EntitySelectorCollector> NAMES = Arrays.stream(values()).collect(ImmutableMap.toImmutableMap(EntitySelectorCollector::asString, Function.identity()));
+  public static final StringIdentifiableCodec<EntitySelectorCollector> CODEC = StringIdentifiableCodec.create(values());
 
   EntitySelectorCollector(String name, FailableFunction<ServerCommandSource, Stream<? extends Entity>, CommandSyntaxException> entityCollector, FailableFunction<ServerCommandSource, Stream<ServerPlayerEntity>, CommandSyntaxException> playerCollector) {
     this.name = name;

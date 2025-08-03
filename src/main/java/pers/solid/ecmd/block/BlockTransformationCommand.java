@@ -30,7 +30,7 @@ import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
+import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -102,9 +102,10 @@ public interface BlockTransformationCommand {
     if (keywordArgs.getBoolean("keep_remaining")) {
       builder.keepRemaining();
     }
-    final EntityPredicateArgument entitiesToAffect = keywordArgs.getArg("affect_entities");
+    final EntityPredicate entitiesToAffect = keywordArgs.getArg("affect_entities");
     if (entitiesToAffect != null) {
-      builder.entitiesToAffect(world.getEntitiesByClass(Entity.class, region.minContainingBox(), entitiesToAffect.apply(source)).iterator());
+      final ExecutionContext executionContext = new ExecutionContext(context.getSource());
+      builder.entitiesToAffect(world.getEntitiesByClass(Entity.class, region.minContainingBox(), entity -> entitiesToAffect.test(entity, executionContext)).iterator());
     }
 
     final boolean transformsRegion = keywordArgs.getBoolean("select");

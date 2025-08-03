@@ -64,7 +64,7 @@ public final class IterateUtils {
   }
 
   /**
-   * Exhaust the stream, causing all {@code peek}, {@code filter} and {@code map} (if any) to be evaluated.
+   * Exhaust the stream, causing all {@code peek}, {@code filter} and {@code predicates} (if any) to be evaluated.
    */
   public static void exhaust(Stream<?> stream) {
     stream.forEach(o -> {});
@@ -83,11 +83,11 @@ public final class IterateUtils {
   }
 
   /**
-   * 调用 {@link Iterator} 的运行过程。此过程会基于一个 {@code forward}，返回的 {@code iterator} 中，每调用一次 {@link Iterator#next()}，会调用多次 {@code forward.next()}，之后的几次 {@code next()} 都将被忽略并返回 {@code null}。
+   * 调用 {@link Iterator} 的运行过程。此过程会基于一个 {@code entityPredicate}，返回的 {@code iterator} 中，每调用一次 {@link Iterator#next()}，会调用多次 {@code entityPredicate.next()}，之后的几次 {@code next()} 都将被忽略并返回 {@code null}。
    *
    * @param forward   返回的对象所基于的迭代器。
-   * @param batchSize 迭代器运行一次 {@code next()} 时，{@code forward} 所运行 {@code next()} 的次数。
-   * @param skipTimes 迭代器运行一次 {@code next()} 后，之后多少次的 {@code next()} 将不执行任何操作（不调用 {@code forward.next()}）并返回 {@code null}。
+   * @param batchSize 迭代器运行一次 {@code next()} 时，{@code entityPredicate} 所运行 {@code next()} 的次数。
+   * @param skipTimes 迭代器运行一次 {@code next()} 后，之后多少次的 {@code next()} 将不执行任何操作（不调用 {@code entityPredicate.next()}）并返回 {@code null}。
    */
   @Contract(pure = true)
   public static <E> Iterator<E> batchAndSkip(Iterator<E> forward, int batchSize, int skipTimes) {
@@ -133,7 +133,7 @@ public final class IterateUtils {
   }
 
   /**
-   * 将 map 的值通过指定的函数进行转换并收集到新的 map 中，返回的 map 是不可修改的。中途如果遇到异常，则会直接将其抛出并中止抚今追昔。此过程类似于 {@link Maps#transformValues}，但允许中途抛出异常。
+   * 将 predicates 的值通过指定的函数进行转换并收集到新的 predicates 中，返回的 predicates 是不可修改的。中途如果遇到异常，则会直接将其抛出并中止抚今追昔。此过程类似于 {@link Maps#transformValues}，但允许中途抛出异常。
    *
    * @see Maps#transformValues
    */

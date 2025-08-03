@@ -11,17 +11,14 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.command.*;
-import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.predicate.NumberRange;
@@ -35,29 +32,27 @@ import net.minecraft.scoreboard.ReadableScoreboardScore;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.GameMode;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
 import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
@@ -252,13 +247,9 @@ public class EntitySelectorOptionsExtension {
       final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader.getReader(), false, true);
       //noinspection unchecked
       reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-      final RegionArgument regionArgument = RegionArgument.parse(parseContext);
+      final RegionArgument<?> regionArgument = RegionArgument.parse(parseContext);
 
-      reader.extension$ec().addFunction(source -> {
-        final Region region;
-        region = regionArgument.toAbsoluteRegion((PositionProvider) source);
-        return new RegionEntityPredicateEntry(region);
-      });
+      reader.addPredicate(new RegionEntityPredicateEntry(regionArgument));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.region"));
 
     putOption("alternatives", reader -> {
@@ -273,7 +264,7 @@ public class EntitySelectorOptionsExtension {
       }
 
       // 在左方括号的后面，开始解析实体谓词。
-      ImmutableList.Builder<FailableFunction<ServerCommandSource, EntityPredicate, CommandSyntaxException>> entityPredicates = new ImmutableList.Builder<>();
+      ImmutableList.Builder<EntityPredicate> entityPredicates = new ImmutableList.Builder<>();
       while (true) {
         stringReader.skipWhitespace();
         if (stringReader.canRead() && stringReader.peek() == ']') {
@@ -285,7 +276,7 @@ public class EntitySelectorOptionsExtension {
         final int cursorBeforeRead = stringReader.getCursor();
         try {
           final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
-          entityPredicates.add(source -> new SelectorEntityPredicate(entitySelector, source));
+          entityPredicates.add(new SelectorEntityPredicate(entitySelector));
         } catch (CommandSyntaxException e) {
           reader.setSuggestionProvider((builder, consumer) -> newReader.listSuggestions(builder, suggestionsBuilder -> {
             consumer.accept(suggestionsBuilder);
@@ -323,9 +314,9 @@ public class EntitySelectorOptionsExtension {
         throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "]");
       }
 
-      final ImmutableList<FailableFunction<ServerCommandSource, EntityPredicate, CommandSyntaxException>> build = entityPredicates.build();
+      final ImmutableList<EntityPredicate> build = entityPredicates.build();
       EntitySelectorReaderExtras extras = reader.extension$ec();
-      extras.addFunction(source -> new AlternativesEntityPredicateEntry(IterateUtils.transformFailableImmutableList(build, input -> input.apply(source)), source, inverted));
+      extras.addPredicate(new AlternativesEntityPredicateEntry(build, inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
 
     putOption("health", reader -> {
@@ -426,12 +417,12 @@ public class EntitySelectorOptionsExtension {
 
     // 以下对应 EntityFlags 部分
 
-    putSimpleBooleanOption("on_fire", Entity::isOnFire);
+    putSimpleBooleanOption("on_fire", EntityPredicateTypes.ON_FIRE);
     // 注意：这里的 isSneaking 于 EntityFlagsPredicate 所使用的 isInSneakingPose 不同
-    putSimpleBooleanOption("sneaking", Entity::isSneaking);
-    putSimpleBooleanOption("sprinting", Entity::isSprinting);
-    putSimpleBooleanOption("swimming", Entity::isSwimming);
-    putSimpleBooleanOption("baby", entity -> entity instanceof LivingEntity livingEntity && livingEntity.isBaby());
+    putSimpleBooleanOption("sneaking", EntityPredicateTypes.SNEAKING);
+    putSimpleBooleanOption("sprinting", EntityPredicateTypes.SPRINTING);
+    putSimpleBooleanOption("swimming", EntityPredicateTypes.SWIMMING);
+    putSimpleBooleanOption("baby", EntityPredicateTypes.BABY);
 
     // 检测实体所在的方块
     putOption("block", reader -> {
@@ -441,7 +432,7 @@ public class EntitySelectorOptionsExtension {
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
-        final Map<PosArgument, BlockPredicate> map = new LinkedHashMap<>();
+        final List<com.mojang.datafixers.util.Pair<EnhancedPosArgument, BlockPredicate>> list = new ArrayList<>();
         while (true) {
           if (stringReader.canRead() && stringReader.peek() == '}') {
             stringReader.skip();
@@ -450,7 +441,7 @@ public class EntitySelectorOptionsExtension {
           parseContext.clearSuggestion();
           //noinspection unchecked
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-          final PosArgument posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgumentType.blockPos());
+          final EnhancedPosArgument posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgumentType.blockPos());
 
           stringReader.skipWhitespace();
           if (stringReader.canRead() && stringReader.peek() == '=') {
@@ -466,7 +457,7 @@ public class EntitySelectorOptionsExtension {
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
           final BlockPredicate blockPredicate = BlockPredicate.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
 
-          map.put(posArgument, blockPredicate);
+          list.add(new com.mojang.datafixers.util.Pair<>(posArgument, blockPredicate));
           stringReader.skipWhitespace();
 
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest(",").suggest("}").buildFuture());
@@ -481,13 +472,12 @@ public class EntitySelectorOptionsExtension {
           }
         }
 
-        reader.addPredicate(new BlockPredicatesEntityPredicateEntry(map));
+        reader.addPredicate(new BlockPredicatesEntityPredicateEntry(list));
       } else {
         parseContext.clearSuggestion();
         //noinspection unchecked
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
         final BlockPredicate parse = BlockPredicate.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
-        EntitySelectorReaderExtras extras = reader.extension$ec();
         reader.addPredicate(new BlockPredicateEntityPredicateEntry(parse));
       }
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.block"));
@@ -501,9 +491,8 @@ public class EntitySelectorOptionsExtension {
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
-        final LinkedHashMap<RegistryEntry<StatusEffect>, EntityEffectPredicate.EffectData> effects = new LinkedHashMap<>();
-        final HashSet<RegistryEntry<StatusEffect>> inverted = new HashSet<>();
-        final EffectsEntityPredicateEntry entry = new EffectsEntityPredicateEntry(effects, inverted);
+        final ImmutableList.Builder<EffectsEntityPredicateEntry.Entry> effects = new ImmutableList.Builder<>();
+        final Set<RegistryEntry<StatusEffect>> usedEffects = new HashSet<>();
         while (true) {
           if (stringReader.canRead() && stringReader.peek() == '}') {
             stringReader.skip();
@@ -511,9 +500,9 @@ public class EntitySelectorOptionsExtension {
           }
 
           final int cursorBeforeEffectEntry = stringReader.getCursor();
-          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries().filter(effectEntry -> !effects.containsKey(effectEntry)), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref1 -> ref1.value().getName()));
+          reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries().filter(effectEntry -> !usedEffects.contains(effectEntry)), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref1 -> ref1.value().getName()));
           final var effectEntry = type.parse(stringReader);
-          if (effects.containsKey(effectEntry)) {
+          if (usedEffects.contains(effectEntry)) {
             final int cursorAfterEffectId = stringReader.getCursor();
             stringReader.setCursor(cursorBeforeEffectEntry);
             throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, effectEntry.value().getName()), cursorAfterEffectId);
@@ -526,10 +515,8 @@ public class EntitySelectorOptionsExtension {
 
           // 这里暂时只允许读布尔值。
           final boolean expected = stringReader.readBoolean();
-          effects.put(effectEntry, new EntityEffectPredicate.EffectData());
-          if (isInverted == expected) {
-            inverted.add(effectEntry);
-          }
+          usedEffects.add(effectEntry);
+          effects.add(new EffectsEntityPredicateEntry.Entry(effectEntry, new EntityEffectPredicate.EffectData(), isInverted == expected));
 
           stringReader.skipWhitespace();
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest(",").suggest("}").buildFuture());
@@ -543,12 +530,13 @@ public class EntitySelectorOptionsExtension {
             throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "}");
           }
         }
+        final EffectsEntityPredicateEntry entry = new EffectsEntityPredicateEntry(effects.build());
 
         reader.addPredicate(entry);
       } else {
         final boolean inverted = reader.readNegationCharacter();
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> CommandSource.suggestFromIdentifier(wrapper.streamEntries(), suggestionsBuilder, ref -> ref.registryKey().getValue(), ref -> ref.value().getName()));
-        final StatusEffect value = type.parse(stringReader).value();
+        final RegistryEntry.Reference<StatusEffect> value = type.parse(stringReader);
 
         reader.addPredicate(new EffectEntityPredicateEntry(value, inverted));
       }
@@ -569,7 +557,7 @@ public class EntitySelectorOptionsExtension {
       }
       final EntitySelector value = EntitySelectors.readOmittibleEntitySelector(reader);
       EntitySelectorReaderExtras extras = reader.extension$ec();
-      extras.addFunction(source -> new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value, source), inverted));
+      extras.addPredicate(new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value), inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.owner"));
   }
 
@@ -577,20 +565,17 @@ public class EntitySelectorOptionsExtension {
     EntitySelectorOptionsAccessor.callPutOption(id, handler, condition, description);
   }
 
-  private static void putSimpleBooleanOption(String id, Predicate<Entity> predicate) {
-    putSimpleBooleanOption(id, predicate, "enhanced_commands.entity_predicate." + id);
-    markRequiringUnique(id);
-  }
 
-  private static void putSimpleBooleanOption(String id, Predicate<Entity> predicate, String baseTranslationKey) {
+  private static void putSimpleBooleanOption(String id, SimpleBooleanEntityPredicateType type) {
     putOption(id, reader -> {
       final boolean inverted = reader.readNegationCharacter();
       reader.setSuggestionProvider(BOOLEAN_SUGGEST);
       final boolean expected = inverted != reader.getReader().readBoolean();
-      reader.addPredicate(new SimpleBooleanEntityPredicateEntry(predicate, expected, baseTranslationKey + "." + true, baseTranslationKey + "." + false, id));
+      reader.addPredicate(new SimpleBooleanEntityPredicateEntry(type, expected));
       // 对于布尔值，使用否定的直接替换其效果，仍视为未被取反的谓词
       markParamAsUsed(reader, id, false);
-    }, reader -> isNeverPositivelyUsed(reader, id), Text.translatable(baseTranslationKey));
+    }, reader -> isNeverPositivelyUsed(reader, id), Text.translatable(type.baseTranslationKey));
+    markRequiringUnique(id);
   }
 
   private static boolean markParamAsUsed(EntitySelectorReader reader, String option, boolean inverted) {
@@ -713,6 +698,10 @@ public class EntitySelectorOptionsExtension {
     if (stringReader.canRead() && stringReader.peek() == '|') {
       // 解析更多的游戏模式，例如：
       // m = c <当前cursor> | a | sp
+
+      // 这里在解析时，parsedGameModes 是以 EnumSet 的形式储存的，
+      // 但是在序列化之后，可能会被解析为普通的 Set，
+      // 两种集的实现方式不同，但效果相同，故不作区分。
       EnumSet<GameMode> parsedGameModes = EnumSet.of(gameMode);
       while (stringReader.canRead() && stringReader.peek() == '|') {
         stringReader.skip();
@@ -798,11 +787,15 @@ public class EntitySelectorOptionsExtension {
    * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin，返回的谓词仅测试被反向的分数条件。
    */
   @NotNull
-  public static Predicate<Entity> mixinInvertedScoredPredicate(List<Pair<String, NumberRange.IntRange>> invertedScores) {
+  public static Predicate<Entity> mixinInvertedScoredPredicate(List<ScoreEntityPredicateEntry.Entry> invertedScores) {
     return entity -> {
-      final Scoreboard scoreboard = entity.getServer().getScoreboard();
-      for (Pair<String, NumberRange.IntRange> pair : invertedScores) {
-        ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(pair.left());
+      final MinecraftServer server = entity.getServer();
+      if (server == null) {
+        return false;
+      }
+      final Scoreboard scoreboard = server.getScoreboard();
+      for (ScoreEntityPredicateEntry.Entry pair : invertedScores) {
+        ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(pair.name());
         if (scoreboardObjective == null) {
           return false;
         }
@@ -811,7 +804,7 @@ public class EntitySelectorOptionsExtension {
           return false;
         }
         int i = score.getScore();
-        if (pair.right().test(i)) {
+        if (pair.score().test(i)) {
           return false;
         }
       }
@@ -833,7 +826,7 @@ public class EntitySelectorOptionsExtension {
     if (stringReader.canRead() && stringReader.peek() == '{') {
       reader.setSuggestionProvider(EntitySelectorReader.DEFAULT_SUGGESTION_PROVIDER);
       final LootCondition lootCondition = ParsingUtil.parseNbt(stringReader, LootCondition.CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
-      reader.addPredicate(new LootTablePredicateAnonymousEntityPredicateEntry(lootCondition, inverted));
+      reader.addPredicate(new LootTablePredicateEntityPredicateEntry(new RegistryEntry.Direct<>(lootCondition), inverted));
       return true;
     }
     return false;

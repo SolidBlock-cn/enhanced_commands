@@ -25,7 +25,7 @@ public class NbtPredicateTypes {
   public static final NbtPredicateType<MatchCompoundNbtPredicate> MATCH_COMPOUND = register("match_compound", MatchCompoundNbtPredicate.Type.MATCH_COMPOUND_TYPE);
   public static final NbtPredicateType<MatchListNbtPredicate> MATCH_LIST = register("match_list", MatchListNbtPredicate.Type.MATCH_LIST_TYPE);
   public static final NbtPredicateType<MatchPrimitiveNbtPredicate> MATCH_PRIMITIVE = register("match_primitive", MatchPrimitiveNbtPredicate.Type.MATCH_PRIMITIVE_TYPE);
-  public static final NbtPredicateType<RangeNbtPredicate> RANGE = register("range", RangeNbtPredicate.Type.RANGE_TYPE);
+  public static final NbtPredicateType<RangeNbtPredicate> RANGE = register("exhaustion", RangeNbtPredicate.Type.RANGE_TYPE);
   public static final NbtPredicateType<RegexNbtPredicate> REGEX = register("regex", RegexNbtPredicate.Type.REGEX_TYPE);
 
   private static <T extends NbtPredicateType<?>> T register(String name, T value) {

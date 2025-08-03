@@ -13,13 +13,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 一些常用 codec 及处理 codec 的类，用于进行原版无法达成的复杂处理。。
@@ -188,13 +188,22 @@ public final class CodecUtil {
     return Codec.LONG.optionalFieldOf(name).xmap(ol -> ol.map(OptionalLong::of).orElseGet(OptionalLong::empty), optionalLong -> optionalLong.isEmpty() ? Optional.empty() : Optional.of(optionalLong.getAsLong()));
   }
 
-  /**
-   * 与 {@code Codec.INT.optionalFieldOf} 类似，但是其类型为 {@code OptionalInt} 而非 {@code Optional<Integer>}，从而在运行中避免装箱与拆箱。
-   *
-   * @see Codec#INT
-   * @see Codec#optionalFieldOf
-   */
-  public static MapCodec<OptionalInt> optionalIntFieldOf(String name) {
-    return Codec.INT.optionalFieldOf(name).xmap(ol -> ol.map(OptionalInt::of).orElseGet(OptionalInt::empty), optionalInt -> optionalInt.isEmpty() ? Optional.empty() : Optional.of(optionalInt.getAsInt()));
+  public static <T> MapCodec<T> unimplementedMapCodec(String message) {
+    return new MapCodec<T>() {
+      @Override
+      public <T1> Stream<T1> keys(DynamicOps<T1> ops) {
+        return Stream.empty();
+      }
+
+      @Override
+      public <T1> DataResult<T> decode(DynamicOps<T1> ops, MapLike<T1> input) {
+        return DataResult.error(() -> message);
+      }
+
+      @Override
+      public <T1> RecordBuilder<T1> encode(T input, DynamicOps<T1> ops, RecordBuilder<T1> prefix) {
+        return prefix.withErrorsFrom(DataResult.error(() -> message));
+      }
+    };
   }
 }

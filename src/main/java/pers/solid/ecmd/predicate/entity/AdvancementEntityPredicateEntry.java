@@ -2,7 +2,9 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.advancement.PlayerAdvancementTracker;
@@ -14,6 +16,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -21,7 +24,11 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, @NotNull Either<@NotNull Object2BooleanMap<@NotNull String>, @NotNull Boolean>> map) implements EntityPredicateEntry {
+public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, @NotNull Either<@NotNull Map<@NotNull String, Boolean>, @NotNull Boolean>> map) implements EntityPredicateEntry, StaticEntityPredicate {
+  public static final MapCodec<AdvancementEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      Codec.unboundedMap(Identifier.CODEC, Codec.either(Codec.unboundedMap(Codec.STRING, Codec.BOOL), Codec.BOOL)).fieldOf("predicates").forGetter(AdvancementEntityPredicateEntry::map)
+  ).apply(i, AdvancementEntityPredicateEntry::new));
+
   @Override
   public boolean test(@NotNull Entity entity) {
     if (!(entity instanceof ServerPlayerEntity serverPlayerEntity)) {
@@ -40,16 +47,16 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
         final AdvancementProgress progress = advancementTracker.getProgress(advancementEntry);
 
         if (value.left().isPresent()) {
-          final Object2BooleanMap<String> expectedProgress = value.left().get();
+          final Map<String, Boolean> expectedProgress = value.left().get();
 
-          for (var progressEntry : expectedProgress.object2BooleanEntrySet()) {
+          for (var progressEntry : expectedProgress.entrySet()) {
             final String criterionName = progressEntry.getKey();
             final CriterionProgress criterionProgress = progress.getCriterionProgress(criterionName);
             if (criterionProgress == null) {
               // the criterion does not exist -> false
               return false;
             }
-            final boolean expectedValue = progressEntry.getBooleanValue();
+            final boolean expectedValue = progressEntry.getValue();
             final boolean actualValue = criterionProgress.isObtained();
             if (expectedValue != actualValue) {
               return false;
@@ -70,7 +77,7 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
   }
 
   @Override
-  public TestResult testAndDescribe(Entity entity, Text displayName) {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
     if (!(entity instanceof final ServerPlayerEntity player)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.not_player", displayName));
     }
@@ -97,9 +104,9 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
       if (value.left().isPresent()) {
         boolean progressResult = true;
         final ImmutableList.Builder<TestResult> progressAttachments = new ImmutableList.Builder<>();
-        final Object2BooleanMap<String> expectedProgress = value.left().get();
+        final Map<String, Boolean> expectedProgress = value.left().get();
 
-        for (var progressEntry : expectedProgress.object2BooleanEntrySet()) {
+        for (var progressEntry : expectedProgress.entrySet()) {
           final String criterionName = progressEntry.getKey();
           final CriterionProgress criterionProgress = progress.getCriterionProgress(criterionName);
           final MutableText criterionText = Text.literal(criterionName).styled(Styles.TARGET);
@@ -109,7 +116,7 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
             progressAttachments.add(TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.advancements.criterion.no_criterion", TextUtil.styled(advancementText, Styles.EXPECTED), criterionText)));
             continue;
           }
-          final boolean expectedValue = progressEntry.getBooleanValue();
+          final boolean expectedValue = progressEntry.getValue();
           final boolean actualValue = criterionProgress.isObtained();
           if (expectedValue == actualValue) {
             if (actualValue) {
@@ -165,8 +172,13 @@ public record AdvancementEntityPredicateEntry(@NotNull Map<@NotNull Identifier, 
   public @NotNull String toOptionEntry() {
     return "advancements={" + map.entrySet().stream().map(entry -> entry.getKey()
         + "=" + entry.getValue().mapBoth(
-        criterionMap -> "{" + criterionMap.object2BooleanEntrySet().stream().map(criterionEntry -> criterionEntry.getKey() + "=" + criterionEntry.getBooleanValue()).collect(Collectors.joining(", ")) + "}",
+        criterionMap -> "{" + criterionMap.entrySet().stream().map(criterionEntry -> criterionEntry.getKey() + "=" + criterionEntry.getValue()).collect(Collectors.joining(", ")) + "}",
         String::valueOf
     )).collect(Collectors.joining(", ")) + "}";
+  }
+
+  @Override
+  public @NotNull EntityPredicateType<AdvancementEntityPredicateEntry> getType() {
+    return EntityPredicateTypes.ADVANCEMENT;
   }
 }

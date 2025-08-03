@@ -7,6 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -48,6 +49,10 @@ public interface PositionProvider {
   default Vec3d positionAt$ec(PositionProvider positionProvider) {
     Entity entity = positionProvider.entity$ec();
     return entity == null ? positionProvider.position$ec() : ((EntityAnchorAccessor) (Enum<EntityAnchorArgumentType.EntityAnchor>) entityAnchor$ec()).getOffset().apply(positionProvider.position$ec(), entity);
+  }
+
+  default @Nullable World world$ec() {
+    throw new NotImplementedException();
   }
 
   static PositionProvider of(Vec3d position, Vec2f rotation, @Nullable PlayerEntity player, EntityAnchorArgumentType.EntityAnchor entityAnchor) {

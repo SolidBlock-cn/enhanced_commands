@@ -59,7 +59,7 @@ public final class BatchedFilterIterator<T> extends AbstractIterator<@Nullable T
   @Override
   public String toString() {
     return new ToStringBuilder(this)
-        .append("forward", forward)
+        .append("entityPredicate", forward)
         .append("batchSize", batchSize)
         .append("predicate", predicate)
         .toString();

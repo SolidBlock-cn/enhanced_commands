@@ -1,6 +1,7 @@
 package pers.solid.ecmd.mixins.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
@@ -17,11 +18,13 @@ import net.minecraft.command.FloatRangeArgument;
 import net.minecraft.entity.Entity;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -29,7 +32,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.ext.EntitySelectorReaderExtension;
 import pers.solid.ecmd.predicate.entity.*;
-import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
@@ -51,9 +53,6 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   private NumberRange.IntRange levelRange;
 
   @Shadow
-  protected abstract Predicate<Entity> rotationPredicate(FloatRangeArgument angleRange, ToDoubleFunction<Entity> entityToAngle);
-
-  @Shadow
   private int limit;
   @Shadow
   private BiConsumer<Vec3d, List<? extends Entity>> sorter;
@@ -70,7 +69,28 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   private boolean hasLimit;
 
   @Shadow
-  public abstract void addPredicate(Predicate<Entity> predicate);
+  @Nullable
+  private Double x;
+
+  @Shadow
+  @Nullable
+  private Double y;
+
+  @Shadow
+  @Nullable
+  private Double z;
+
+  @Shadow
+  @Nullable
+  private Double dy;
+
+  @Shadow
+  @Nullable
+  private Double dx;
+
+  @Shadow
+  @Nullable
+  private Double dz;
 
   @Inject(method = "readArguments", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readString()Ljava/lang/String;", remap = false), slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorOptions;getHandler(Lnet/minecraft/command/EntitySelectorReader;Ljava/lang/String;I)Lnet/minecraft/command/EntitySelectorOptions$SelectorHandler;")), locals = LocalCapture.CAPTURE_FAILSOFT)
   private void setCursorBeforeOptionName(CallbackInfo ci, int i) {
@@ -101,11 +121,15 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @Inject(method = "buildPredicate", at = @At("HEAD"))
   private void buildPredicateDescriptions(CallbackInfo ci) {
     if (pitchRange != FloatRangeArgument.ANY) {
-      addPredicate(new RotationPredicateEntry(BridgeFloatRange.fromVanilla(pitchRange), "pitch", Entity::getPitch, rotationPredicate(pitchRange, Entity::getPitch)));
+      final Float min = pitchRange.min();
+      final Float max = pitchRange.max();
+      addPredicate(new RotationPredicateEntry.Pitch(min == null ? 0f : min, max == null ? 359f : max));
     }
 
     if (yawRange != FloatRangeArgument.ANY) {
-      addPredicate(new RotationPredicateEntry(BridgeFloatRange.fromVanilla(yawRange), "yaw", Entity::getYaw, rotationPredicate(yawRange, Entity::getYaw)));
+      final Float min = yawRange.min();
+      final Float max = yawRange.max();
+      addPredicate(new RotationPredicateEntry.Yaw(min == null ? 0f : min, max == null ? 359f : max));
     }
 
     if (!levelRange.isDummy()) {
@@ -121,8 +145,8 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
     final EntitySelector returnValue = cir.getReturnValue();
     final EntitySelectorExtras extras = EntitySelectorExtras.getOf(returnValue);
     final EntitySelectorReaderExtras selfExtras = extension$ec();
-    extras.predicateFunctions = selfExtras.predicateFunctions;
-    extras.collector = selfExtras.atVariable != null ? EntitySelectorCollector.NAMES.get(selfExtras.atVariable) : null;
+    extras.contextWrapper = selfExtras.contextWrapper;
+    extras.collector = selfExtras.atVariable != null ? EntitySelectorCollector.CODEC.byId(selfExtras.atVariable) : null;
   }
 
   /**
@@ -175,6 +199,15 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   }
 
   /**
+   * 在一些特定情况下，会将初始的实体谓词设置为 {@code Entity::isAlive} 以避免选择死亡的实体。此 mixin 使该谓词可序列化。
+   */
+  @SuppressWarnings("unchecked")
+  @ModifyArg(method = "readAtVariable", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+  private Object wrapAlivePredicate(Object e) {
+    return new StaticEntityPredicateWrapper((Predicate<Entity>) e, AliveEntityPredicate.INSTANCE);
+  }
+
+  /**
    * 在提供变量类型的建议时，排除不匹配的建议。原版中由于只有一个字符，故没有考虑到这个问题。
    */
   @WrapOperation(method = "suggestSelector(Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;suggest(Ljava/lang/String;Lcom/mojang/brigadier/Message;)Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;", remap = false))
@@ -209,5 +242,22 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @ModifyExpressionValue(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;UNKNOWN_SELECTOR_EXCEPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
   private CommandSyntaxException modifyUnknownSelectorException(CommandSyntaxException original) {
     return CommandSyntaxExceptionExtension.addCursorEnd(original, extension$ec().atVariable);
+  }
+
+  /**
+   * 在运行 {@link EntitySelectorReader#build()} 时，将 {@link EntitySelectorReader#x}、{@link EntitySelectorReader#y}、{@link EntitySelectorReader#z} 等数据存储在 {@link EntitySelector} 的相关字段中，而非仅以 {@link Function} 的形式呈现，从而实现序列化与反序列化。
+   *
+   * @see PositionOffsetInfo
+   * @see EntitySelectorExtras#positionOffsetInfo
+   */
+  @ModifyReturnValue(method = "build", at = @At("RETURN"))
+  private EntitySelector recordMoreIntoAtBuild(EntitySelector original) {
+    original.extension$ec().positionOffsetInfo = PositionOffsetInfo.of(x, y, z);
+    if (this.dx == null && this.dy == null && this.dz == null) {
+      original.extension$ec().dxDyDz = null;
+    } else {
+      original.extension$ec().dxDyDz = new Vec3d(dx == null ? 0 : dx, dy == null ? 0 : dy, dz == null ? 0 : dz);
+    }
+    return original;
   }
 }

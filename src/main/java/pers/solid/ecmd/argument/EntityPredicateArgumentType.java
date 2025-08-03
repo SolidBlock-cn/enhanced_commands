@@ -13,13 +13,13 @@ import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
-import pers.solid.ecmd.predicate.entity.EntityPredicateArgument;
+import pers.solid.ecmd.predicate.entity.SelectorEntityPredicate;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<EntityPredicateArgument> {
+public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<EntityPredicate> {
   private static final List<String> EXAMPLES = List.of("@a", "SolidBlock", "0123", "@r", "@e[distance=..5]", "[m=c]", "[gamemode=creative]");
 
   public static EntityPredicateArgumentType entityPredicate(CommandRegistryAccess registryAccess) {
@@ -27,11 +27,11 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
   }
 
   public static EntityPredicate getEntityPredicate(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return context.getArgument(name, EntityPredicateArgument.class).apply(context.getSource());
+    return context.getArgument(name, EntityPredicate.class);
   }
 
   @Override
-  public EntityPredicateArgument parse(StringReader reader) throws CommandSyntaxException {
+  public EntityPredicate parse(StringReader reader) throws CommandSyntaxException {
     // 考虑命令主要是由管理员执行的，所以使用允许使用实体选择器。
     final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader, true);
     if (reader.canRead() && reader.peek() == '[') {
@@ -40,19 +40,19 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
       entitySelectorReader.setLimit(Integer.MAX_VALUE);
       ((EntitySelectorReaderAccessor) entitySelectorReader).callReadArguments();
       ((EntitySelectorReaderAccessor) entitySelectorReader).callBuildPredicate();
-      return EntityPredicateArgument.of(entitySelectorReader.build());
+      return new SelectorEntityPredicate(entitySelectorReader.build());
     } else {
-      return EntityPredicateArgument.of(entitySelectorReader.read());
+      return new SelectorEntityPredicate(entitySelectorReader.read());
     }
   }
 
   @Override
-  public <S> EntityPredicateArgument parse(StringReader reader, S source) throws CommandSyntaxException {
+  public <S> EntityPredicate parse(StringReader reader, S source) throws CommandSyntaxException {
     if (EntitySelectorReader.shouldAllowAtSelectors(source)) {
       return parse(reader);
     } else {
       final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader, false);
-      return EntityPredicateArgument.of(entitySelectorReader.read());
+      return new SelectorEntityPredicate(entitySelectorReader.read());
     }
   }
 
