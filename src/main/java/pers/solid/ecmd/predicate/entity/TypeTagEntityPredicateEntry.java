@@ -29,10 +29,18 @@ public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tag, boolean inv
   public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
     final EntityType<?> type = entity.getType();
     final boolean isInTag = type.isIn(tag);
-    if (isInTag) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.type.in_tag", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+    if (inverted) {
+      if (isInTag) {
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.in_tag.false", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+      } else {
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.not_in_tag.true", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+      }
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.type.not_in_tag", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+      if (isInTag) {
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.in_tag.true", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+      } else {
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.not_in_tag.false", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+      }
     }
   }
 

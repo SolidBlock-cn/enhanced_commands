@@ -39,10 +39,18 @@ public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<Entity
     final boolean anyMatch = types.stream().anyMatch(either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().isIn(tag)));
     final MutableText actualText = TextUtil.styled(entity.getType().getName(), Styles.ACTUAL);
     final MutableText expectedText = Texts.join(types, Texts.DEFAULT_SEPARATOR_TEXT, either -> either.map(type -> TextUtil.styled(type.getName(), Styles.EXPECTED), tag -> Text.literal("#" + tag.id()).styled(Styles.EXPECTED)));
-    if (anyMatch) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.type.true_multiple", displayName, actualText, expectedText));
+    if (inverted) {
+      if (anyMatch) {
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal_multiple.false", displayName, actualText, expectedText));
+      } else {
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.not_equal_multiple.true", displayName, actualText, expectedText));
+      }
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.type.false_multiple", displayName, actualText, expectedText));
+      if (anyMatch) {
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal_multiple.true", displayName, actualText, expectedText));
+      } else {
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.not_equal_multiple.false", displayName, actualText, expectedText));
+      }
     }
   }
 

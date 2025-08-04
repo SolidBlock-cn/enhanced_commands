@@ -36,6 +36,7 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
     final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader, true);
     if (reader.canRead() && reader.peek() == '[') {
       reader.skip();
+      ((EntitySelectorReaderAccessor) entitySelectorReader).setUsesAt(true);
       entitySelectorReader.setIncludesNonPlayers(true);
       entitySelectorReader.setLimit(Integer.MAX_VALUE);
       ((EntitySelectorReaderAccessor) entitySelectorReader).callReadArguments();

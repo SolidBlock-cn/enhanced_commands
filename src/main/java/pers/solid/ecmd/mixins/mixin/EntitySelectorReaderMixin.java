@@ -118,23 +118,26 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
     }
   }
 
-  @Inject(method = "buildPredicate", at = @At("HEAD"))
-  private void buildPredicateDescriptions(CallbackInfo ci) {
-    if (pitchRange != FloatRangeArgument.ANY) {
-      final Float min = pitchRange.min();
-      final Float max = pitchRange.max();
-      addPredicate(new RotationPredicateEntry.Pitch(min == null ? 0f : min, max == null ? 359f : max));
-    }
+  @SuppressWarnings("unchecked")
+  @ModifyArg(method = "buildPredicate", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 0), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;pitchRange:Lnet/minecraft/command/FloatRangeArgument;", ordinal = 1), to = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;yawRange:Lnet/minecraft/command/FloatRangeArgument;")))
+  private Object buildPredicateDescriptionsForPitch(Object e) {
+    final Float min = pitchRange.min();
+    final Float max = pitchRange.max();
+    return new StaticEntityPredicateWrapper((Predicate<Entity>) e, new RotationPredicateEntry.Pitch(min == null ? 0f : min, max == null ? 359f : max));
+  }
 
-    if (yawRange != FloatRangeArgument.ANY) {
-      final Float min = yawRange.min();
-      final Float max = yawRange.max();
-      addPredicate(new RotationPredicateEntry.Yaw(min == null ? 0f : min, max == null ? 359f : max));
-    }
+  @SuppressWarnings("unchecked")
+  @ModifyArg(method = "buildPredicate", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 0), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;yawRange:Lnet/minecraft/command/FloatRangeArgument;"), to = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;levelRange:Lnet/minecraft/predicate/NumberRange$IntRange;")))
+  private Object buildPredicateDescriptionsForYaw(Object e) {
+    final Float min = yawRange.min();
+    final Float max = yawRange.max();
+    return new StaticEntityPredicateWrapper((Predicate<Entity>) e, new RotationPredicateEntry.Yaw(min == null ? 0f : min, max == null ? 359f : max));
+  }
 
-    if (!levelRange.isDummy()) {
-      addPredicate(new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), false));
-    }
+  @SuppressWarnings("unchecked")
+  @ModifyArg(method = "buildPredicate", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 0), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;levelRange:Lnet/minecraft/predicate/NumberRange$IntRange;")))
+  private Object buildPredicateDescriptionsForLevel(Object e) {
+    return new StaticEntityPredicateWrapper((Predicate<Entity>) e, new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), false));
   }
 
   /**

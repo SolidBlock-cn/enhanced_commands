@@ -31,4 +31,7 @@ public interface EntitySelectorReaderAccessor {
 
   @Invoker
   CompletableFuture<Suggestions> callSuggestEndNext(SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer);
+
+  @Accessor
+  void setUsesAt(boolean usesAt);
 }

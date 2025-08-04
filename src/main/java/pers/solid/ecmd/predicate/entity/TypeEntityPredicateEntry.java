@@ -32,10 +32,18 @@ public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverte
     final EntityType<?> actualType = entity.getType();
     final boolean equals = Objects.equals(actualType, entityType);
     final MutableText actualText = TextUtil.styled(actualType.getName(), Styles.ACTUAL);
-    if (equals) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.type.equal", displayName, actualText));
+    if (inverted) {
+      if (equals) {
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal.false", displayName, actualText));
+      } else {
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.not_equal.true", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
+      }
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.type.not_equal", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
+      if (equals) {
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal.true", displayName, actualText));
+      } else {
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.not_equal.false", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
+      }
     }
   }
 
