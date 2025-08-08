@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -177,10 +178,10 @@ public final class EntitySelectorHelper {
     } else if (atVariable == null) {
       if (entitySelector.isSenderOnly()) {
         atVariable = "s";
-      } else if (includesNonPlayers || hasExplicitType) {
-        atVariable = requireAlive ? "e" : "E";
-      } else {
+      } else if (!includesNonPlayers && accessor.getEntityFilter() == EntityType.PLAYER && !requireAlive && !hasExplicitType) {
         atVariable = "a";
+      } else {
+        atVariable = requireAlive ? "e" : "E";
       }
     } else if ("n".equals(atVariable) && !requireAlive) {
       if (hasExplicitType) {

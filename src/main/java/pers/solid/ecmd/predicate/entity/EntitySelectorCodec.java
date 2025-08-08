@@ -32,7 +32,7 @@ public class EntitySelectorCodec extends MapCodec<EntitySelector> {
   private static final MapCodec<Integer> LIMIT = Codec.INT.optionalFieldOf("limit", Integer.MAX_VALUE);
   private static final MapCodec<Boolean> PLAYER_ONLY = Codec.BOOL.optionalFieldOf("player_only", false);
   private static final MapCodec<Boolean> LOCAL_WORLD_ONLY = Codec.BOOL.optionalFieldOf("local_world_only", false);
-  private static final MapCodec<List<EntityPredicate>> PREDICATES = EntityPredicate.CODEC.listOf().fieldOf("predicates");
+  private static final MapCodec<List<EntityPredicate>> PREDICATES = EntityPredicate.CODEC.listOf().optionalFieldOf("predicates", List.of());
   private static final MapCodec<NumberRange.DoubleRange> DISTANCE = NumberRange.DoubleRange.CODEC.optionalFieldOf("distance", NumberRange.DoubleRange.ANY);
   private static final MapCodec<PositionOffsetInfo> POSITION_OFFSET = PositionOffsetInfo.CODEC;
   private static final MapCodec<Optional<Double>> DX = Codec.DOUBLE.optionalFieldOf("dx");
