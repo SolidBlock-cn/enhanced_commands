@@ -34,15 +34,15 @@ public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverte
     final MutableText actualText = TextUtil.styled(actualType.getName(), Styles.ACTUAL);
     if (inverted) {
       if (equals) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal.false", displayName, actualText));
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal.fail_inverted", displayName, actualText));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.not_equal.true", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal.pass_inverted", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
       }
     } else {
       if (equals) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal.true", displayName, actualText));
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal.pass", displayName, actualText));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.not_equal.false", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal.fail", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
       }
     }
   }

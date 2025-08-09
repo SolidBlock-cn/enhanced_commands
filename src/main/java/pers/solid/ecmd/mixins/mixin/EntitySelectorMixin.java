@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.mixins.ext.EntitySelectorExtension;
+import pers.solid.ecmd.predicate.entity.EntitySelectorCollector;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -35,8 +36,14 @@ public abstract class EntitySelectorMixin implements EntitySelectorExtension {
    */
   @Inject(method = "getEntities(Lnet/minecraft/server/command/ServerCommandSource;)Ljava/util/List;", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z"), cancellable = true)
   private void modifiedEntityCollector(ServerCommandSource source, CallbackInfoReturnable<List<? extends Entity>> cir, @Local Vec3d vec3d, @Local Box box) throws CommandSyntaxException {
-    if (extension$ec().collector != null) {
-      cir.setReturnValue(extension$ec().collector.collectEntities(source.getEntityOrThrow()).filter(getPositionPredicate(vec3d, box, null)).toList());
+    final EntitySelectorCollector collector = extension$ec().collector;
+    if (collector != null) {
+      final EntitySelector collectorOf = extension$ec().collectorOf;
+      if (collectorOf == null) {
+        cir.setReturnValue(collector.collectEntities(source.getEntityOrThrow()).filter(getPositionPredicate(vec3d, box, null)).toList());
+      } else {
+        cir.setReturnValue(collectorOf.getEntities(source).stream().flatMap(collector::collectEntities).toList());
+      }
     }
   }
 
@@ -45,8 +52,14 @@ public abstract class EntitySelectorMixin implements EntitySelectorExtension {
    */
   @Inject(method = "getPlayers", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelector;senderOnly:Z"), cancellable = true)
   private void modifiedPlayerCollector(ServerCommandSource source, CallbackInfoReturnable<List<ServerPlayerEntity>> cir, @Local Predicate<Entity> actualPredicate) throws CommandSyntaxException {
-    if (extension$ec().collector != null) {
-      cir.setReturnValue(extension$ec().collector.collectPlayers(source.getEntityOrThrow()).filter(actualPredicate).toList());
+    final EntitySelectorCollector collector = extension$ec().collector;
+    if (collector != null) {
+      final EntitySelector collectorOf = extension$ec().collectorOf;
+      if (collectorOf == null) {
+        cir.setReturnValue(collector.collectPlayers(source.getEntityOrThrow()).filter(actualPredicate).toList());
+      } else {
+        cir.setReturnValue(collectorOf.getEntities(source).stream().flatMap(collector::collectPlayers).toList());
+      }
     }
   }
 }

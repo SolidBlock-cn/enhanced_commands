@@ -73,6 +73,10 @@ public class EntitySelectorOptionsExtension {
    * 此映射用于选项名称的别称，当解析到不存在的选项名称时，会尝试解析到别称。
    */
   public static final Map<String, String> OPTION_NAME_ALIASES = new HashMap<>();
+  /**
+   * 此集包括需要在解析完成后推迟进入到下一步建议的选项名称的集合。例如，如果没有这个集合，在输入 {@code @a[not=Pla]} 之后，玩家名称“Pla”被视为解析完成，不再提供 {@code PlayerName} 的建议而直接进入到提示输入逗号或方括号。为了避免这一部分，此集合收集需要特定处理的选项名称。
+   */
+  public static final Set<String> INCOMPLETE_SUGGESTIONS = new HashSet<>();
 
 
   public static final DynamicCommandExceptionType DUPLICATE_OPTION = new DynamicCommandExceptionType(optionName -> Text.translatable("enhanced_commands.argument.entity.options.duplicate_option", optionName));
@@ -85,6 +89,7 @@ public class EntitySelectorOptionsExtension {
   public static final SimpleCommandExceptionType DISTANCE_ALREADY_IMPLICIT = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.distance_already_implicit"));
   public static final SimpleCommandExceptionType INVALID_NEGATIVE_LIMIT_WITH_SORTER = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.invalid_negative_limit_with_sorter"));
   public static final SimpleCommandExceptionType INVALID_SORTER_WITH_NEGATIVE_LIMIT = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.invalid_sorter_with_negative_limit"));
+  public static final SimpleCommandExceptionType OWNER_OPTION_IN_PET_VARIABLE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.entity.options.owner_option_in_pets_variable"));
   /**
    * 在解析内容时提供布尔值的建议。
    */
@@ -219,7 +224,7 @@ public class EntitySelectorOptionsExtension {
         }
         reader.setDistance(NumberRange.DoubleRange.between(original.min().get(), value));
       }
-    }, reader -> reader.getDistance().isDummy() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.r.description"));
+    }, reader -> reader.getDistance().isDummy() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.r"));
     putOption("rm", reader -> {
       final NumberRange.DoubleRange original = reader.getDistance();
       final StringReader stringReader = reader.getReader();
@@ -240,7 +245,7 @@ public class EntitySelectorOptionsExtension {
         }
         reader.setDistance(NumberRange.DoubleRange.between(value, original.max().get()));
       }
-    }, reader -> reader.getDistance().isDummy() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.rm.description"));
+    }, reader -> reader.getDistance().isDummy() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Text.translatable("enhanced_commands.argument.entity.options.rm"));
 
     putOption("region", reader -> {
       final CommandRegistryAccess registryAccess = MixinShared.getCommandRegistryAccess();
@@ -250,7 +255,7 @@ public class EntitySelectorOptionsExtension {
       final RegionArgument<?> regionArgument = RegionArgument.parse(parseContext);
 
       reader.addPredicate(new RegionEntityPredicateEntry(regionArgument));
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.region"));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.region.option_name"));
 
     putOption("alternatives", reader -> {
       final boolean inverted = reader.readNegationCharacter();
@@ -315,8 +320,7 @@ public class EntitySelectorOptionsExtension {
       }
 
       final ImmutableList<EntityPredicate> build = entityPredicates.build();
-      EntitySelectorReaderExtras extras = reader.extension$ec();
-      extras.addPredicate(new AlternativesEntityPredicateEntry(build, inverted));
+      reader.addPredicate(new AlternativesEntityPredicateEntry(build, inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.argument.entity.options.alternatives"));
 
     putOption("health", reader -> {
@@ -336,7 +340,7 @@ public class EntitySelectorOptionsExtension {
         reader.addPredicate(new HealthEntityPredicateEntry(floatRange, inverted));
       }
       markParamAsUsed(reader, "health", inverted);
-    }, reader -> isNeverPositivelyUsed(reader, "health"), Text.translatable("enhanced_commands.argument.entity.options.health"));
+    }, reader -> isNeverPositivelyUsed(reader, "health"), Text.translatable("enhanced_commands.entity_predicate.health.option_name"));
     markRequiringUniqueNoMixture("health");
     putOption("air", reader -> {
       final StringReader stringReader = reader.getReader();
@@ -355,7 +359,7 @@ public class EntitySelectorOptionsExtension {
         reader.addPredicate(new AirEntityPredicateEntry(intRange, inverted));
       }
       markParamAsUsed(reader, "air", inverted);
-    }, reader -> isNeverPositivelyUsed(reader, "air"), Text.translatable("enhanced_commands.argument.entity.options.air"));
+    }, reader -> isNeverPositivelyUsed(reader, "air"), Text.translatable("enhanced_commands.entity_predicate.air.option_name"));
     markRequiringUniqueNoMixture("air");
     putOption("food", reader -> {
       final StringReader stringReader = reader.getReader();
@@ -365,7 +369,7 @@ public class EntitySelectorOptionsExtension {
       reader.setIncludesNonPlayers(false);
       reader.addPredicate(new FoodEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "food", inverted);
-    }, reader -> isNeverPositivelyUsed(reader, "food"), Text.translatable("enhanced_commands.argument.entity.options.food"));
+    }, reader -> isNeverPositivelyUsed(reader, "food"), Text.translatable("enhanced_commands.entity_predicate.food.option_name"));
     markRequiringUniqueNoMixture("food");
     putOption("saturation", reader -> {
       final StringReader stringReader = reader.getReader();
@@ -375,7 +379,7 @@ public class EntitySelectorOptionsExtension {
       reader.setIncludesNonPlayers(false);
       reader.addPredicate(new SaturationEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "saturation", inverted);
-    }, reader -> isNeverPositivelyUsed(reader, "saturation"), Text.translatable("enhanced_commands.argument.entity.options.saturation"));
+    }, reader -> isNeverPositivelyUsed(reader, "saturation"), Text.translatable("enhanced_commands.entity_predicate.saturation.option_name"));
     markRequiringUniqueNoMixture("saturation");
     putOption("exhaustion", reader -> {
       final StringReader stringReader = reader.getReader();
@@ -385,7 +389,7 @@ public class EntitySelectorOptionsExtension {
       reader.setIncludesNonPlayers(false);
       reader.addPredicate(new ExhaustionEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "exhaustion", inverted);
-    }, reader -> isNeverPositivelyUsed(reader, "exhaustion"), Text.translatable("enhanced_commands.argument.entity.options.exhaustion"));
+    }, reader -> isNeverPositivelyUsed(reader, "exhaustion"), Text.translatable("enhanced_commands.entity_predicate.exhaustion.option_name"));
     markRequiringUniqueNoMixture("exhaustion");
     putOption("fire", reader -> {
       final StringReader stringReader = reader.getReader();
@@ -394,7 +398,7 @@ public class EntitySelectorOptionsExtension {
       final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
       reader.addPredicate(new FireEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "fire", inverted);
-    }, reader -> isNeverPositivelyUsed(reader, "fire"), Text.translatable("enhanced_commands.argument.entity.options.fire"));
+    }, reader -> isNeverPositivelyUsed(reader, "fire"), Text.translatable("enhanced_commands.entity_predicate.fire.option_name"));
     markRequiringUniqueNoMixture("fire");
 
     putOption("pose", reader -> {
@@ -552,13 +556,55 @@ public class EntitySelectorOptionsExtension {
         if (peek == ']' || peek == ',' || peek == ';') {
           // 在 'owner=' 或 'owner=!' 后没有接任何值时，使用 null 值
           reader.addPredicate(new OwnerEntityPredicateEntry(null, inverted));
-          return;
+        } else {
+          final EntitySelectorReader newReader = new EntitySelectorReader(reader.getReader(), true);
+          reader.setSuggestionProvider(newReader::listSuggestions);
+          final EntitySelector value = EntitySelectors.readOmittibleEntitySelector(newReader);
+          reader.addPredicate(new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value), inverted));
         }
       }
-      final EntitySelector value = EntitySelectors.readOmittibleEntitySelector(reader);
-      EntitySelectorReaderExtras extras = reader.extension$ec();
-      extras.addPredicate(new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value), inverted));
-    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.owner"));
+    }, reader -> !EntitySelectorTypeExtras.PETS.equals(reader.extension$ec().atVariable), Text.translatable("enhanced_commands.entity_predicate.owner"));
+    INCOMPLETE_SUGGESTIONS.add("owner");
+    INAPPLICABLE_REASONS.put("owner", (reader, option, restoreCursor) -> {
+      reader.getReader().setCursor(restoreCursor);
+      return OWNER_OPTION_IN_PET_VARIABLE.createWithContext(reader.getReader());
+    });
+
+    // 用于在带有特定的收集器的情况下，指定收集基于哪个实体的实体
+    putOption("of", reader -> {
+      final EntitySelectorReader subReader = new EntitySelectorReader(reader.getReader(), true);
+      reader.setSuggestionProvider(subReader::listSuggestions);
+      reader.extension$ec().collectorOf = subReader.read();
+    }, reader -> isNeverPositivelyUsed(reader, "of"), Text.translatable("enhanced_commands.entity_predicate.of"));
+    markRequiringUnique("of");
+    INCOMPLETE_SUGGESTIONS.add("of");
+
+    // 用于 is 和 not
+    putOption("is", reader -> {
+      final boolean inverted = reader.readNegationCharacter();
+
+      final EntitySelectorReader newReader = new EntitySelectorReader(reader.getReader(), true);
+      reader.setSuggestionProvider(newReader::listSuggestions);
+      final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
+
+      reader.addPredicate(new SubPredicateEntityPredicateEntry(new SelectorEntityPredicate(entitySelector), inverted));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.sub_predicate"));
+    INCOMPLETE_SUGGESTIONS.add("is");
+    putOption("not", reader -> {
+      final boolean inverted = reader.readNegationCharacter();
+
+      final EntitySelectorReader newReader = new EntitySelectorReader(reader.getReader(), true);
+      reader.setSuggestionProvider(newReader::listSuggestions);
+      final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
+
+      reader.addPredicate(new SubPredicateEntityPredicateEntry(new SelectorEntityPredicate(entitySelector), !inverted));
+    }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.sub_predicate.inverted"));
+    INCOMPLETE_SUGGESTIONS.add("not");
+  }
+
+  @ApiStatus.Internal
+  public static BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> getPutOffSuggestions(BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> original, BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> next) {
+    return (suggestionsBuilder, suggestionsBuilderConsumer) -> original.apply(suggestionsBuilder, suggestionsBuilderConsumer).thenCombine(next.apply(suggestionsBuilder, suggestionsBuilderConsumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
   }
 
   private static void putOption(String id, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> condition, Text description) {
@@ -578,8 +624,8 @@ public class EntitySelectorOptionsExtension {
     markRequiringUnique(id);
   }
 
-  private static boolean markParamAsUsed(EntitySelectorReader reader, String option, boolean inverted) {
-    return reader.extension$ec().usedParams.put(option, inverted);
+  private static void markParamAsUsed(EntitySelectorReader reader, String option, boolean inverted) {
+    reader.extension$ec().usedParams.put(option, inverted);
   }
 
   /**

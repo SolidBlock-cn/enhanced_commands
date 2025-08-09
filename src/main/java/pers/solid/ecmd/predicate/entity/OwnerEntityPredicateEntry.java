@@ -90,6 +90,6 @@ public record OwnerEntityPredicateEntry(@Nullable EntityPredicate owner, boolean
 
   @Override
   public String toOptionEntry() {
-    return "tamer=" + (inverted ? "!" : "") + (owner == null ? "" : "[...]");
+    return "owner=" + (inverted ? "!" : "") + (owner == null ? "" : owner.asString());
   }
 }

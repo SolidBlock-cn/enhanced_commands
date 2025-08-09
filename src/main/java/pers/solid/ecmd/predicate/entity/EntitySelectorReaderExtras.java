@@ -3,8 +3,10 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import net.minecraft.command.EntitySelector;
 import net.minecraft.command.EntitySelectorReader;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 
 /**
@@ -41,6 +43,10 @@ public class EntitySelectorReaderExtras {
    * 如果使用了 {@code @p} 搭配负 {@code limit} 值，则为 {@code true}。
    */
   public boolean implicitNegativeLimit = false;
+  /**
+   * @see EntitySelectorExtras#collectorOf
+   */
+  public @Nullable EntitySelector collectorOf;
   /**
    * 此 context 对象用于提供建议。在非提供建议的情景下，此字段有可能是 null。
    */

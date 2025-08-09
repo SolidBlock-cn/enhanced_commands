@@ -83,7 +83,7 @@ public final class EntitySelectorTypeExtras {
     map.put(RANDOM_NON_PLAYER, 1);
     map.put(RANDOM_NON_PLAYER2, 1);
   });
-  public static final Set<String> FORCE_ONE_LIMIT = Sets.newHashSet(OWNER, VEHICLE, LEASHER, ORIGIN, ATTACKER, TARGET, CONTROLLER, CONTROLLING_VEHICLE);
+  public static final Set<String> FORCE_ONE_LIMIT = Sets.newHashSet(); // 考虑到有可能使用 of 属性，暂时使用空的集合
   public static final Map<String, BiConsumer<Vec3d, List<? extends Entity>>> EXTRA_SORTERS = Util.make(new HashMap<>(), map -> {
 //    predicates.put(NEAREST_ENTITY, EntitySelectorReader.NEAREST);
     map.put(RANDOM_ENTITY, EntitySelectorReader.RANDOM);
@@ -110,9 +110,7 @@ public final class EntitySelectorTypeExtras {
     map.put(RANDOM_NON_PLAYER, excludesPlayersConsumer);
     map.put(RANDOM_NON_PLAYER2, excludesPlayersConsumer);
     map.put(ALL_INCLUDING_DEAD, reader -> ((EntitySelectorReaderAccessor) reader).getPredicates().clear());
-    map.put(PETS, reader -> {
-      EntitySelectorReaderExtras extras = reader.extension$ec();
-      extras.addPredicate(new OwnerEntityPredicateEntry(SenderOnlyEntityPredicate.INSTANCE, false));
-    });
+
+    // 关于 @pets 选择器，考虑到需要与 of 属性搭配，在 mixin 中特殊处理。
   });
 }

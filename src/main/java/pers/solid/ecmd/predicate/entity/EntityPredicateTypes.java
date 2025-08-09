@@ -49,6 +49,7 @@ public final class EntityPredicateTypes {
   public static final EntityPredicateType<SelectorEntityPredicate> SELECTOR = registerSimple("selector", SelectorEntityPredicate.CODEC);
   public static final SimpleBooleanEntityPredicateType SNEAKING = registerSimpleBoolean("sneaking", Entity::isSneaking);
   public static final SimpleBooleanEntityPredicateType SPRINTING = registerSimpleBoolean("sprinting", Entity::isSprinting);
+  public static final EntityPredicateType<SubPredicateEntityPredicateEntry> SUB_PREDICATE = registerSimple("sub_predicate", SubPredicateEntityPredicateEntry.CODEC);
   public static final SimpleBooleanEntityPredicateType SWIMMING = registerSimpleBoolean("swimming", Entity::isSwimming);
   public static final EntityPredicateType<TagEntityPredicateEntry> TAG = registerSimple("tag", TagEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<TeamEntityPredicateEntry> TEAM = registerSimple("team", TeamEntityPredicateEntry.CODEC);

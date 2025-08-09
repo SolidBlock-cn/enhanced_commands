@@ -84,18 +84,18 @@ public class SelectorEntityPredicate implements EntityPredicate {
 
   @Override
   public @NotNull String asString() {
-    return EntitySelectorHelper.express(entitySelector);
+    return EntitySelectors.express(entitySelector);
   }
 
   @Override
   public final boolean equals(Object o) {
     if (!(o instanceof SelectorEntityPredicate that)) return false;
 
-    return EntitySelectorHelper.equals(entitySelector, that.entitySelector);
+    return EntitySelectors.equals(entitySelector, that.entitySelector);
   }
 
   @Override
   public int hashCode() {
-    return EntitySelectorHelper.hashCode(entitySelector);
+    return EntitySelectors.hashCode(entitySelector);
   }
 }

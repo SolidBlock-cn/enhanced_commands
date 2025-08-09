@@ -2,8 +2,10 @@ package pers.solid.ecmd.mixins.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.brigadier.Message;
@@ -92,6 +94,14 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @Nullable
   private Double dz;
 
+  @Shadow
+  @Final
+  public static BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> DEFAULT_SUGGESTION_PROVIDER;
+
+  @Shadow
+  @Final
+  private List<Predicate<Entity>> predicates;
+
   @Inject(method = "readArguments", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;readString()Ljava/lang/String;", remap = false), slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorOptions;getHandler(Lnet/minecraft/command/EntitySelectorReader;Ljava/lang/String;I)Lnet/minecraft/command/EntitySelectorOptions$SelectorHandler;")), locals = LocalCapture.CAPTURE_FAILSOFT)
   private void setCursorBeforeOptionName(CallbackInfo ci, int i) {
     extension$ec().cursorBeforeOptionName = i; // cursor
@@ -100,6 +110,16 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   @Inject(method = "readArguments", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorOptions;getHandler(Lnet/minecraft/command/EntitySelectorReader;Ljava/lang/String;I)Lnet/minecraft/command/EntitySelectorOptions$SelectorHandler;"))
   private void setCursorAfterOptionName(CallbackInfo ci) {
     extension$ec().cursorAfterOptionName = reader.getCursor(); // cursor
+  }
+
+  @WrapWithCondition(method = "readArguments", at = @At(value = "FIELD", target = "Lnet/minecraft/command/EntitySelectorReader;suggestionProvider:Ljava/util/function/BiFunction;", ordinal = 0), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorOptions$SelectorHandler;handle(Lnet/minecraft/command/EntitySelectorReader;)V")))
+  private boolean putOffNextSuggestion(EntitySelectorReader instance, BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> value, @Local String optionName) {
+    if (EntitySelectorOptionsExtension.INCOMPLETE_SUGGESTIONS.contains(optionName) && suggestionProvider != DEFAULT_SUGGESTION_PROVIDER) {
+      suggestionProvider = EntitySelectorOptionsExtension.getPutOffSuggestions(suggestionProvider, value);
+      return false;
+    } else {
+      return true;
+    }
   }
 
   @ModifyExpressionValue(method = "readAtVariable", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;read()C", remap = false))
@@ -141,16 +161,38 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   }
 
   /**
-   * 在结束时对对象进行修改，使之接受本模组中的受实体命令源影响的谓词。
+   * 当实体选择器类型为 @pets 时，添加一个类型为 owner 的谓词，该谓词会使用到 {@link EntitySelectorReaderExtras#collectorOf} 字段。
    */
-  @Inject(method = "build", at = @At("RETURN"))
-  private void buildExtraPredicate(CallbackInfoReturnable<EntitySelector> cir) {
-    final EntitySelector returnValue = cir.getReturnValue();
-    final EntitySelectorExtras extras = EntitySelectorExtras.getOf(returnValue);
+  @Inject(method = "build", at = @At(value = "INVOKE", target = "Ljava/util/List;copyOf(Ljava/util/Collection;)Ljava/util/List;"))
+  private void modifyPredicatesAtBuild(CallbackInfoReturnable<EntitySelector> cir) {
+    final EntitySelectorReaderExtras extras = extension$ec();
+    if (EntitySelectorTypeExtras.PETS.equals(extras.atVariable)) {
+      predicates.add(0, new DynamicEntityPredicateWrapper(new OwnerEntityPredicateEntry(extras.collectorOf == null ? SenderOnlyEntityPredicate.INSTANCE : new SelectorEntityPredicate(extras.collectorOf), false), extras.contextWrapper));
+    }
+  }
+
+  /**
+   * 在运行 {@link EntitySelectorReader#build()} 时，将 {@link EntitySelectorReader#x}、{@link EntitySelectorReader#y}、{@link EntitySelectorReader#z} 等数据存储在 {@link EntitySelector} 的相关字段中，而非仅以 {@link Function} 的形式呈现，从而实现序列化与反序列化。
+   *
+   * @see PositionOffsetInfo
+   * @see EntitySelectorExtras#positionOffsetInfo
+   */
+  @ModifyReturnValue(method = "build", at = @At("RETURN"))
+  private EntitySelector recordMoreInfoAtBuild(EntitySelector original) {
+    final EntitySelectorExtras extras = EntitySelectorExtras.getOf(original);
     final EntitySelectorReaderExtras selfExtras = extension$ec();
     extras.contextWrapper = selfExtras.contextWrapper;
     extras.collector = selfExtras.atVariable != null ? EntitySelectorCollector.CODEC.byId(selfExtras.atVariable) : null;
+    extras.collectorOf = selfExtras.collectorOf;
+    original.extension$ec().positionOffsetInfo = PositionOffsetInfo.of(x, y, z);
+    if (this.dx == null && this.dy == null && this.dz == null) {
+      original.extension$ec().dxDyDz = null;
+    } else {
+      original.extension$ec().dxDyDz = new Vec3d(dx == null ? 0 : dx, dy == null ? 0 : dy, dz == null ? 0 : dz);
+    }
+    return original;
   }
+
 
   /**
    * 如果通过 {@code gamemode}、{@code level} 等选项将 {@link EntitySelectorReader#setIncludesNonPlayers(boolean)} 为 {@code false}，那么 {@code implicitNonPlayers} 就应该是 {@code false}。需要注意的是，在 {@link EntitySelectorReader#readArguments()} 中读取 {@code @p} 等参数时，是直接修改的字段，没有调用此方法。
@@ -247,20 +289,4 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
     return CommandSyntaxExceptionExtension.addCursorEnd(original, extension$ec().atVariable);
   }
 
-  /**
-   * 在运行 {@link EntitySelectorReader#build()} 时，将 {@link EntitySelectorReader#x}、{@link EntitySelectorReader#y}、{@link EntitySelectorReader#z} 等数据存储在 {@link EntitySelector} 的相关字段中，而非仅以 {@link Function} 的形式呈现，从而实现序列化与反序列化。
-   *
-   * @see PositionOffsetInfo
-   * @see EntitySelectorExtras#positionOffsetInfo
-   */
-  @ModifyReturnValue(method = "build", at = @At("RETURN"))
-  private EntitySelector recordMoreIntoAtBuild(EntitySelector original) {
-    original.extension$ec().positionOffsetInfo = PositionOffsetInfo.of(x, y, z);
-    if (this.dx == null && this.dy == null && this.dz == null) {
-      original.extension$ec().dxDyDz = null;
-    } else {
-      original.extension$ec().dxDyDz = new Vec3d(dx == null ? 0 : dx, dy == null ? 0 : dy, dz == null ? 0 : dz);
-    }
-    return original;
-  }
 }

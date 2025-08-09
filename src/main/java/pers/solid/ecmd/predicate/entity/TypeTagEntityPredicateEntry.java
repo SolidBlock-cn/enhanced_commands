@@ -31,15 +31,15 @@ public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tag, boolean inv
     final boolean isInTag = type.isIn(tag);
     if (inverted) {
       if (isInTag) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.in_tag.false", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.in_tag.fail_inverted", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.not_in_tag.true", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.in_tag.pass_inverted", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
       }
     } else {
       if (isInTag) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.in_tag.true", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.in_tag.pass", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.not_in_tag.false", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
+        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.in_tag.fail", displayName, TextUtil.styled(type.getName(), Styles.ACTUAL), TextUtil.literal(tag.id()).styled(Styles.EXPECTED)));
       }
     }
   }

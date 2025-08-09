@@ -47,6 +47,7 @@ public class EntitySelectorCodec extends MapCodec<EntitySelector> {
   // endregion standard fields
 
   public static final MapCodec<Optional<EntitySelectorCollector>> COLLECTOR = EntitySelectorCollector.CODEC.optionalFieldOf("collector");
+  public static final MapCodec<Optional<EntitySelector>> COLLECTOR_OF = EntitySelectorCodec.INSTANCE.codec().optionalFieldOf("collector_of");
 
   @Override
   public <T> Stream<T> keys(DynamicOps<T> ops) {
@@ -154,11 +155,16 @@ public class EntitySelectorCodec extends MapCodec<EntitySelector> {
     final DataResult<Optional<EntitySelectorCollector>> collector = COLLECTOR.decode(ops, input);
     if (collector instanceof DataResult.Error<Optional<EntitySelectorCollector>> error) return DataResult.error(error.messageSupplier(), error.lifecycle());
 
+    // collector of
+    final DataResult<Optional<EntitySelector>> collectorOf = COLLECTOR_OF.decode(ops, input);
+    if (collectorOf instanceof DataResult.Error<Optional<EntitySelector>> error) return DataResult.error(error.messageSupplier(), error.lifecycle());
+
     final EntitySelector entitySelector = new EntitySelector(limit.getOrThrow(), !playerOnly.getOrThrow(), localWorldOnly.getOrThrow(), vanillaEntries.build(), distance.getOrThrow(), positionOffset.getOrThrow(), box, sort.getOrThrow(), senderOnly.getOrThrow(), playerName.getOrThrow().orElse(null), uuid.getOrThrow().orElse(null), entityType.getOrThrow().orElse(null), usesAt.getOrThrow());
     entitySelector.extension$ec().positionOffsetInfo = positionOffset.getOrThrow();
     entitySelector.extension$ec().dxDyDz = dxDyDz;
     entitySelector.extension$ec().contextWrapper = contextWrapper;
     entitySelector.extension$ec().collector = collector.getOrThrow().orElse(null);
+    entitySelector.extension$ec().collectorOf = collectorOf.getOrThrow().orElse(null);
     return DataResult.success(entitySelector);
   }
 
@@ -185,6 +191,7 @@ public class EntitySelectorCodec extends MapCodec<EntitySelector> {
     USES_AT.encode(input.usesAt(), ops, prefix);
 
     COLLECTOR.encode(Optional.ofNullable(input.extension$ec().collector), ops, prefix);
+    COLLECTOR_OF.encode(Optional.ofNullable(input.extension$ec().collectorOf), ops, prefix);
 
     return prefix;
   }

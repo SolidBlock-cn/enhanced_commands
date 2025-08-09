@@ -49,6 +49,16 @@ public class EntitySelectorExtras {
    * @see EntitySelectorReaderMixin#buildExtraPredicate(CallbackInfoReturnable)
    */
   public @Nullable EntitySelectorCollector collector;
+
+  /**
+   * 此字段决定了在使用 {@link #collector} 时基于哪个实体特殊收集。例如：
+   * <ul>
+   *   <li>{@code @passengers}：当前实体的乘客</li>
+   *   <li>{@code @passengers[of=@n[type=pig]]}：最近一只猪的乘客</li>
+   * </ul>
+   */
+  public @Nullable EntitySelector collectorOf;
+
   public MutableObject<ExecutionContext> contextWrapper = new MutableObject<>();
 
   /**
@@ -80,14 +90,14 @@ public class EntitySelectorExtras {
 
   public @NotNull @Unmodifiable List<SpecialEntityPredicate> getSpecialEntries() {
     if (specialEntries == null) {
-      specialEntries = EntitySelectorHelper.calculateSpecialEntries(self);
+      specialEntries = EntitySelectors.calculateSpecialEntries(self);
     }
     return specialEntries;
   }
 
   public @NotNull @Unmodifiable List<EntityPredicate> getStandardPredicates() {
     if (standardPredicates == null) {
-      standardPredicates = EntitySelectorHelper.calculateStandardPredicates(self);
+      standardPredicates = EntitySelectors.calculateStandardPredicates(self);
     }
     return standardPredicates;
   }

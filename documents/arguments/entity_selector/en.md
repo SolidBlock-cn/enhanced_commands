@@ -39,6 +39,8 @@ Besides the several entity selectors provided in vanilla, the mod provides some 
 - `@controlling_vehicle`: Selects the entity that the current entity is riding and controlling. For example, if a player and a villager sit on the same boat, as only players control boats, when the executor of the command is a player, the selector will select the boat, while when the executor is the village, the selector can’t select the boat.
 - `@controller`: Selects the entity riding and controlling the current entity. For example, if a player and a villager sit on the same boat, when the executor of the command is the boat, the selector will select the player instead of the villager.
 
+In the selectors above, entity selector type `@pets` and those after it allow to specify the relevant entities of the specified entity with the option "`of`", instead of relevant entities of the current entity. For example, `@pets[of=Steve]` can select all entities that the player Steve tames (equals to `@e[owner=Steve]` in effect). `@passengers[of=@n[type=minecart]]` can select passengers on the nearest minecart. See [the "`of`" option](#of).
+
 ### Specifying `type` for `@p` and `@r`
 
 Vanilla `@p` and `@r` only select players. To select the nearest entity of other types, you must use `@e[type=..., sort=nearest/furthest]`, which is too inconvenient! (Selector `@n` is added since 1.21.) But it's good that the mod modified it: if you use `@p` and `@r`, you can also select entities of other types. For example:
@@ -151,11 +153,12 @@ See [the `/air` command](/documents/commands/air/en.md).
 
 ### alternatives
 
-Specifying multiple entity predicates. The entity only needs to pass one of the predicate tests. Values of the parameters are wrapped in a square bracket, with multiple entity predicates inside; multiple entity predicates are separated with comma. The parameter can’t be inverted yet.
+Specifying multiple entity predicates. The entity only needs to pass one of the predicate tests. Values of the parameters are wrapped in a square bracket, with multiple entity predicates inside; multiple entity predicates are separated with comma. The parameter be inverted.
 
 - `@e[alternatives=[[type=cow], [type=sheep]]]`: Selects all cows and sheep.
 - `@a[alternatives=[Player1, Player2]]`: Selects Player1 and Player2.
 - `@e[type=sheep, alternatives=[[tag=a], [tag=b]]]`: Within all sheep, select those with tag "a" or tag "b".
+- `@e[type=sheep, alternatives=![[tag=a], [tag=b]]]`: Within all sheep, select those with neither tag "a" nor "b".
 
 ### baby
 
@@ -203,6 +206,38 @@ Tests the health value of entities. Accepts a range, or the keyword `max`. The p
 - `@e[health=10..]`: Selects living entities whose health value is not less than 10.
 
 See [the `/health` command](/documents/commands/health/en.md).
+
+### is
+
+Specifies an [entity predicate](../entity_predicate) and only passes when the entity also matches the predicate. This means filtering entities selected. The option can be inverted, which is identical to [`not`](#not) in effect.
+
+- `@p[is=@s]`: The nearest entity, and meanwhile the entity should be the executor of the command.
+- `@a[is=@e[type=cow]]`: All players that are cows. This entity selector is valid but obviously cannot select any entity.
+- `@e[is=!@s]`: All entities except the command executor. Identical to `@e[not=@s]` in effect.
+
+### not
+
+Specifies an [entity predicate](../entity_predicate) and only passes when the entity does not match the predicate. This means excluding some entities selected. The option can be inverted, which is identical to [`is`](#is).
+
+- `@e[not=@s]`: All entities except the command executor.
+- `@e[not=[type=cow]]`: All entities except cows. Identical to `@e[type=!cow]` in effect.
+- `@e[not=@s, not=@pets]`: All entities except the command executor and pets of the command executor. Identical to `@e[alternatives=![@s, @pets]]` in effect.
+- `@e[type=cow, not=!@s]`: All cows that are the command executor. Identical to `@e[type=cow, is=@s]`, `@s[type=cow]`.
+
+### of
+
+Specifies an entity selector, used for some specific entity selector types such as `@pets`, `@vehicle`, meaning selecting relevant entities of the specified entities, instead of the relevant entities of the command executor. This option cannot be used once. See [#more entity selector types](#more-entity-selector-types).
+
+In other entity selectors, the option "`of`" can be used but has no effect.
+
+- `@pets`: All entities that the command executor tames. Identical to `@e[owner=@s]`.
+- `@pets[of=Alex]`: All entities that the player Alex tames. Identical to `@e[owner=Alex]`.
+- `@vehicle`: Entities that the command executor is riding.
+- `@vehicle[of=@a]`: Entities that any player is riding.
+- `@passengers`: All passengers of the command executor.
+- `@passengers[passengers=@e[type=horse]]`: All passengers of all horses.
+
+> Note: `@pets` cannot be used along with [the `owner` option](#owner), or parsing error will be caused. For example, to select all pets of Steve, you may use `@pets[of=Steve]` or `@e[owner=Steve]`, but cannot use `@pets[owner=Steve]`.
 
 ### on_fire
 
