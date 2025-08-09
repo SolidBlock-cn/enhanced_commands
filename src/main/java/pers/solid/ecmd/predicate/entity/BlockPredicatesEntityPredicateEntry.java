@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
@@ -18,7 +19,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedPosArgument, BlockPredicate>> predicates) implements EntityPredicateEntry {
-  public static final MapCodec<BlockPredicatesEntityPredicateEntry> CODEC = Codec.pair(EnhancedPosArgument.CODEC, BlockPredicate.CODEC).listOf().fieldOf("predicates").xmap(BlockPredicatesEntityPredicateEntry::new, BlockPredicatesEntityPredicateEntry::predicates);
+  private static final Codec<Pair<EnhancedPosArgument, BlockPredicate>> pairCodec = RecordCodecBuilder.create(instance -> instance.group(EnhancedPosArgument.CODEC.fieldOf("pos").forGetter(Pair::getFirst), BlockPredicate.CODEC.fieldOf("block").forGetter(Pair::getSecond)).apply(instance, Pair::of));
+  public static final MapCodec<BlockPredicatesEntityPredicateEntry> CODEC = pairCodec.listOf().fieldOf("predicates").xmap(BlockPredicatesEntityPredicateEntry::new, BlockPredicatesEntityPredicateEntry::predicates);
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
@@ -57,6 +59,6 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedPosArgument,
 
   @Override
   public @NotNull String toOptionEntry() {
-    return "block=" + predicates.stream().map(entry -> entry.getFirst().toString() + " = " + entry.getSecond().asString()).collect(Collectors.joining(", ", "{", "}"));
+    return "block=" + predicates.stream().map(entry -> entry.getFirst().asString() + " = " + entry.getSecond().asString()).collect(Collectors.joining(", ", "{", "}"));
   }
 }

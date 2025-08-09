@@ -13,17 +13,17 @@ import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
 
-public record BlockPredicateEntityPredicateEntry(BlockPredicate blockPredicate) implements EntityPredicateEntry {
-  public static final MapCodec<BlockPredicateEntityPredicateEntry> CODEC = BlockPredicate.CODEC.fieldOf("block_predicate").xmap(BlockPredicateEntityPredicateEntry::new, BlockPredicateEntityPredicateEntry::blockPredicate);
+public record BlockPredicateEntityPredicateEntry(BlockPredicate predicate) implements EntityPredicateEntry {
+  public static final MapCodec<BlockPredicateEntityPredicateEntry> CODEC = BlockPredicate.CODEC.fieldOf("predicate").xmap(BlockPredicateEntityPredicateEntry::new, BlockPredicateEntityPredicateEntry::predicate);
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    return blockPredicate.test(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), entity.getCommandSource(), null));
+    return predicate.test(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), entity.getCommandSource(), null));
   }
 
   @Override
   public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final TestResult testResult = blockPredicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), entity.getCommandSource(), null));
+    final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), entity.getCommandSource(), null));
     if (testResult.successes()) {
       return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.block.pass", displayName, TextUtil.wrapVector(entity.getBlockPos())), List.of(testResult));
     } else {
@@ -33,7 +33,7 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate blockPredicate) 
 
   @Override
   public @NotNull String toOptionEntry() {
-    return "block=" + blockPredicate.asString();
+    return "block=" + predicate.asString();
   }
 
   @Override
