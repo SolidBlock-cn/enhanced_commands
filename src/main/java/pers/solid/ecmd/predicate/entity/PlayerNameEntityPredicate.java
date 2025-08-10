@@ -14,8 +14,6 @@ import pers.solid.ecmd.util.TestResult;
 
 /**
  * 此用于实体未使用实体选择器而是直接指定玩家名称的情形，这种情况下只选择玩家并且忽略大小写。
- *
- * @param name
  */
 public record PlayerNameEntityPredicate(@NotNull String name) implements SpecialEntityPredicate, StaticEntityPredicate {
   public static final MapCodec<PlayerNameEntityPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(

@@ -169,6 +169,6 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   }
 
   class CacheStorage {
-    private static final LoadingCache<RegionArgument<?>, LoadingCache<PositionProvider, Region>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument::toAbsoluteRegion))));
+    private static final LoadingCache<@NotNull RegionArgument<?>, LoadingCache<@NotNull PositionProvider, Region>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument::toAbsoluteRegion))));
   }
 }

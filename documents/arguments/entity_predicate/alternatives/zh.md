@@ -14,4 +14,4 @@
 - `type`：此时为 `"enhanced_commands:alternatives"`。
 - `predicates`：列表。
     - 一个[实体谓词](../zh.md)。
-- `inverted`：布尔值。
+- `inverted`：布尔值，可选，默认为 false。

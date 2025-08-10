@@ -13,9 +13,9 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
-public record EffectEntityPredicateEntry(RegistryEntry<StatusEffect> expected, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record EffectEntityPredicateEntry(RegistryEntry<StatusEffect> effect, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<EffectEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      StatusEffect.ENTRY_CODEC.fieldOf("expected").forGetter(EffectEntityPredicateEntry::expected),
+      StatusEffect.ENTRY_CODEC.fieldOf("effect").forGetter(EffectEntityPredicateEntry::effect),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(EffectEntityPredicateEntry::inverted)
   ).apply(i, EffectEntityPredicateEntry::new));
 
@@ -25,7 +25,7 @@ public record EffectEntityPredicateEntry(RegistryEntry<StatusEffect> expected, b
       return false;
     }
     final var actualEffects = livingEntity.getActiveStatusEffects();
-    return actualEffects.containsKey(expected) != inverted;
+    return actualEffects.containsKey(effect) != inverted;
   }
 
   @Override
@@ -34,11 +34,11 @@ public record EffectEntityPredicateEntry(RegistryEntry<StatusEffect> expected, b
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
     final var actualEffects = livingEntity.getActiveStatusEffects();
-    final var actual = actualEffects.containsKey(expected);
+    final var actual = actualEffects.containsKey(effect);
     if (actual) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.effect.true_dummy", displayName, expected.value().getName()));
+      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.effect.true_dummy", displayName, effect.value().getName()));
     } else {
-      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.effect.false_dummy", displayName, expected.value().getName()));
+      return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.effect.false_dummy", displayName, effect.value().getName()));
     }
   }
 
@@ -49,6 +49,6 @@ public record EffectEntityPredicateEntry(RegistryEntry<StatusEffect> expected, b
 
   @Override
   public String toOptionEntry() {
-    return "effect=" + (inverted ? "!" : "") + expected.getIdAsString();
+    return "effect=" + (inverted ? "!" : "") + effect.getIdAsString();
   }
 }

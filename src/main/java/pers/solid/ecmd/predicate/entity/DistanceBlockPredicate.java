@@ -21,7 +21,7 @@ public record DistanceBlockPredicate(NumberRange.DoubleRange distance, PositionO
       NumberRange.DoubleRange.CODEC.fieldOf("distance").forGetter(DistanceBlockPredicate::distance),
       PositionOffsetInfo.CODEC.codec().optionalFieldOf("info", PositionOffsetInfo.NO_OP).forGetter(DistanceBlockPredicate::info)
   ).apply(i, DistanceBlockPredicate::new));
-  private static final LoadingCache<PositionOffsetInfo, LoadingCache<ExecutionContext, Vec3d>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(po -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(context -> po.apply(context.positionProvider.position$ec())))));
+  private static final LoadingCache<@NotNull PositionOffsetInfo, LoadingCache<@NotNull ExecutionContext, Vec3d>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(po -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(context -> po.apply(context.positionProvider.position$ec())))));
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {

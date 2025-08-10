@@ -13,9 +13,7 @@ import pers.solid.ecmd.util.TestResult;
 import java.util.UUID;
 
 /**
- * 主要用于没有使用实体选择器参数而是直接指定 id 的情形。
- *
- * @param uuid
+ * 主要用于没有使用实体选择器参数而是直接指定 uuid 的情形。
  */
 public record UuidEntityPredicateEntry(@NotNull UUID uuid) implements SpecialEntityPredicate, StaticEntityPredicate {
   public static final MapCodec<UuidEntityPredicateEntry> CODEC = Uuids.CODEC.fieldOf("uuid").xmap(UuidEntityPredicateEntry::new, UuidEntityPredicateEntry::uuid);

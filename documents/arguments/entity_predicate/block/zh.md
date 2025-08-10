@@ -7,6 +7,8 @@
 - `[block=<方块谓词>]`：指定单个方块谓词，检测实体所在位置的方块。
 - `[block={<坐标 1> = <方块谓词 1>, <坐标 2> = <方块谓词 2>, ...}]`：指定多个坐标和方块谓词，检测指定位置的方块。
 
+> 注意：如果方块谓词是 [NBT 谓词](/documents/arguments/block_predicate/nbt/zh.md)，请注意给 NBT 谓词加上括号或者星号，以免被解析为第二种语法。例如，`[block={Inventory: []}]` 是错误的，应当写成 `[block=({Inventory: []})]` 或 `[block=*{Inventory: []}]`。
+
 ## 示例
 
 - `@e[block=air]`：选择所在位置为空气的实体。

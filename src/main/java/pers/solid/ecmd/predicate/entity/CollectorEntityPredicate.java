@@ -15,7 +15,7 @@ import java.util.List;
 
 public record CollectorEntityPredicate(EntitySelectorCollector collector) implements SpecialEntityPredicate {
   public static final MapCodec<CollectorEntityPredicate> CODEC = EntitySelectorCollector.CODEC.fieldOf("collector").xmap(CollectorEntityPredicate::new, CollectorEntityPredicate::collector);
-  private static final LoadingCache<EntitySelectorCollector, LoadingCache<Entity, List<? extends Entity>>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(collector -> CacheBuilder.newBuilder().weakKeys().build(CacheLoader.from(entity -> collector.collectEntities(entity).toList()))));
+  private static final LoadingCache<@NotNull EntitySelectorCollector, LoadingCache<@NotNull Entity, List<? extends Entity>>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(collector -> CacheBuilder.newBuilder().weakKeys().build(CacheLoader.from(entity -> collector.collectEntities(entity).toList()))));
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {

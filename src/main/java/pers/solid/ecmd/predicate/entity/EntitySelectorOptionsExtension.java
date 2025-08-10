@@ -520,7 +520,7 @@ public class EntitySelectorOptionsExtension {
           // 这里暂时只允许读布尔值。
           final boolean expected = stringReader.readBoolean();
           usedEffects.add(effectEntry);
-          effects.add(new EffectsEntityPredicateEntry.Entry(effectEntry, new EntityEffectPredicate.EffectData(), isInverted == expected));
+          effects.add(new EffectsEntityPredicateEntry.Entry(effectEntry, new EntityEffectPredicate.EffectData(), isInverted != expected));
 
           stringReader.skipWhitespace();
           reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest(",").suggest("}").buildFuture());
@@ -833,14 +833,14 @@ public class EntitySelectorOptionsExtension {
    * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin，返回的谓词仅测试被反向的分数条件。
    */
   @NotNull
-  public static Predicate<Entity> mixinInvertedScoredPredicate(List<ScoreEntityPredicateEntry.Entry> invertedScores) {
+  public static Predicate<Entity> mixinInvertedScoredPredicate(List<ScoresEntityPredicateEntry.Entry> invertedScores) {
     return entity -> {
       final MinecraftServer server = entity.getServer();
       if (server == null) {
         return false;
       }
       final Scoreboard scoreboard = server.getScoreboard();
-      for (ScoreEntityPredicateEntry.Entry pair : invertedScores) {
+      for (ScoresEntityPredicateEntry.Entry pair : invertedScores) {
         ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(pair.name());
         if (scoreboardObjective == null) {
           return false;

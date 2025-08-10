@@ -442,7 +442,7 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @Inject(method = "method_9975", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Maps;newHashMap()Ljava/util/HashMap;", remap = false))
-  private static void initInvertedScoreSet(EntitySelectorReader reader, CallbackInfo ci, @Share("invertedScores") LocalRef<List<ScoreEntityPredicateEntry.Entry>> invertedScores) {
+  private static void initInvertedScoreSet(EntitySelectorReader reader, CallbackInfo ci, @Share("invertedScores") LocalRef<List<ScoresEntityPredicateEntry.Entry>> invertedScores) {
     invertedScores.set(new ArrayList<>());
   }
 
@@ -457,9 +457,9 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @WrapWithCondition(method = "method_9975", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/predicate/NumberRange$IntRange;parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/predicate/NumberRange$IntRange;")))
-  private static boolean prepareScoreNegations(Map<String, NumberRange.IntRange> map, Object key, Object value, @Share("inverted") LocalBooleanRef localBooleanRef, @Share("invertedScores") LocalRef<List<ScoreEntityPredicateEntry.Entry>> invertedScores) {
+  private static boolean prepareScoreNegations(Map<String, NumberRange.IntRange> map, Object key, Object value, @Share("inverted") LocalBooleanRef localBooleanRef, @Share("invertedScores") LocalRef<List<ScoresEntityPredicateEntry.Entry>> invertedScores) {
     if (localBooleanRef.get()) {
-      invertedScores.get().add(new ScoreEntityPredicateEntry.Entry((String) key, (NumberRange.IntRange) value, true));
+      invertedScores.get().add(new ScoresEntityPredicateEntry.Entry((String) key, (NumberRange.IntRange) value, true));
       return false;
     } else {
       return true;
@@ -467,14 +467,14 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @ModifyExpressionValue(method = "method_9975", at = @At(value = "INVOKE", target = "Ljava/util/Map;isEmpty()Z"))
-  private static boolean applyScoreNegationsToPredicate1(boolean original, @Share("invertedScores") LocalRef<List<ScoreEntityPredicateEntry.Entry>> invertedScores) {
+  private static boolean applyScoreNegationsToPredicate1(boolean original, @Share("invertedScores") LocalRef<List<ScoresEntityPredicateEntry.Entry>> invertedScores) {
     // 由于在判断添加谓词时会检测 predicates.isEmpty()，如果仅使用了反向的分数谓词，那么 predicates 也会是 empty
     return original && invertedScores.get().isEmpty();
   }
 
   @ModifyArg(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> applyScoreNegationsToPredicate2(Predicate<Entity> predicate, @Share("invertedScores") LocalRef<List<ScoreEntityPredicateEntry.Entry>> ref) {
-    final List<ScoreEntityPredicateEntry.Entry> invertedScores = ref.get();
+  private static Predicate<Entity> applyScoreNegationsToPredicate2(Predicate<Entity> predicate, @Share("invertedScores") LocalRef<List<ScoresEntityPredicateEntry.Entry>> ref) {
+    final List<ScoresEntityPredicateEntry.Entry> invertedScores = ref.get();
     if (!invertedScores.isEmpty()) {
       return predicate.and(EntitySelectorOptionsExtension.mixinInvertedScoredPredicate(invertedScores));
     } else {
@@ -483,8 +483,8 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @ModifyArg(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> addScoreInformation(Predicate<Entity> predicate, @Local Map<String, NumberRange.IntRange> expectedScore, @Share("invertedScores") LocalRef<List<ScoreEntityPredicateEntry.Entry>> invertedScores) {
-    return new StaticEntityPredicateWrapper(predicate, new ScoreEntityPredicateEntry(Stream.concat(expectedScore.entrySet().stream().map(entry -> new ScoreEntityPredicateEntry.Entry(entry.getKey(), entry.getValue(), false)), invertedScores.get().stream()).toList()));
+  private static Predicate<Entity> addScoreInformation(Predicate<Entity> predicate, @Local Map<String, NumberRange.IntRange> expectedScore, @Share("invertedScores") LocalRef<List<ScoresEntityPredicateEntry.Entry>> invertedScores) {
+    return new StaticEntityPredicateWrapper(predicate, new ScoresEntityPredicateEntry(Stream.concat(expectedScore.entrySet().stream().map(entry -> new ScoresEntityPredicateEntry.Entry(entry.getKey(), entry.getValue(), false)), invertedScores.get().stream()).toList()));
   }
 
   @Inject(method = "method_9974", at = {@At(value = "INVOKE", target = "Lcom/google/common/collect/Maps;newHashMap()Ljava/util/HashMap;", remap = false)}, slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;fromCommandInput(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/util/Identifier;")))
@@ -598,7 +598,7 @@ public abstract class EntitySelectorOptionsMixin {
   @ModifyArg(method = "method_9974", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/EntitySelectorReader;addPredicate(Ljava/util/function/Predicate;)V"))
   private static Predicate<Entity> addAdvancementInformation(Predicate<Entity> predicate, @Share("advancements") LocalRef<Map<Identifier, Either<Map<String, Boolean>, Boolean>>> advancements) {
     final Map<Identifier, Either<Map<String, Boolean>, Boolean>> build = advancements.get();
-    return new StaticEntityPredicateWrapper(predicate, new AdvancementEntityPredicateEntry(build));
+    return new StaticEntityPredicateWrapper(predicate, new AdvancementsEntityPredicateEntry(build));
   }
 
   @WrapOperation(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;fromCommandInput(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/util/Identifier;"))

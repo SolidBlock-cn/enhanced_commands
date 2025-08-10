@@ -7,6 +7,8 @@ The [entity predicate](../en.md) can be used to test any coordinate based on the
 - `[block=<block predicate>]`: Specify a single block predicate to test the block where the entity is.
 - `[block={<coordinate 1> = <block predicate 1>, <coordinate 2> = <block predicate 2>, ...}]`: Specify multiple coordinates and block predicates to test the blocks at the specified positions.
 
+> Note: If the block predicate is an [NBT predicate](/documents/arguments/block_predicate/nbt/en.md), please add parenthesis or star to the NBT predicate or be parsed as the second syntax. For example, `[block={Inventory: []}]` is incorrect, and should be written as `[block=({Inventory: []})]` or `[block=*{Inventory: []}]`.
+
 ## Examples
 
 - `@e[block=air]`: Selects entities where the block is air.

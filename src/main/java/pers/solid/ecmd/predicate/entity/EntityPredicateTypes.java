@@ -11,7 +11,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import java.util.function.Predicate;
 
 public final class EntityPredicateTypes {
-  public static final EntityPredicateType<AdvancementEntityPredicateEntry> ADVANCEMENT = registerSimple("advancement", AdvancementEntityPredicateEntry.CODEC);
+  public static final EntityPredicateType<AdvancementsEntityPredicateEntry> ADVANCEMENT = registerSimple("advancements", AdvancementsEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<AirEntityPredicateEntry> AIR = registerSimple("air", AirEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<AirMaxEntityPredicateEntry> AIR_MAX = registerSimple("air_max", AirMaxEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<AliveEntityPredicate> ALIVE = registerSimple("alive", AliveEntityPredicate.CODEC);
@@ -32,7 +32,7 @@ public final class EntityPredicateTypes {
   public static final EntityPredicateType<HealthEntityPredicateEntry> HEALTH = registerSimple("health", HealthEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<HealthMaxEntityPredicateEntry> HEALTH_MAX = registerSimple("health_max", HealthMaxEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<LevelEntityPredicateEntry> LEVEL = registerSimple("level", LevelEntityPredicateEntry.CODEC);
-  public static final EntityPredicateType<LocalWorldOnlyEntityPredicate> LOCAL_WORLD = registerSimple("local_world", LocalWorldOnlyEntityPredicate.CODEC);
+  public static final EntityPredicateType<LocalWorldEntityPredicate> LOCAL_WORLD = registerSimple("local_world", LocalWorldEntityPredicate.CODEC);
   public static final EntityPredicateType<LootTablePredicateEntityPredicateEntry> LOOT_TABLE_PREDICATE = registerSimple("loot_table_predicate", LootTablePredicateEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<NameEntityPredicateEntry> NAME = registerSimple("name", NameEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<NbtMatchingEntityPredicateEntry> NBT = registerSimple("nbt", NbtMatchingEntityPredicateEntry.CODEC);
@@ -44,9 +44,9 @@ public final class EntityPredicateTypes {
   public static final SimpleBooleanEntityPredicateType ON_FIRE = registerSimpleBoolean("on_fire", Entity::isOnFire);
   public static final EntityPredicateType<RegionEntityPredicateEntry> REGION = registerSimple("region", RegionEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<SaturationEntityPredicateEntry> SATURATION = registerSimple("saturation", SaturationEntityPredicateEntry.CODEC);
-  public static final EntityPredicateType<ScoreEntityPredicateEntry> SCORE = registerSimple("score", ScoreEntityPredicateEntry.CODEC);
-  public static final EntityPredicateType<SenderOnlyEntityPredicate> SENDER_ONLY = registerSimple("sender_only", SenderOnlyEntityPredicate.CODEC);
+  public static final EntityPredicateType<ScoresEntityPredicateEntry> SCORE = registerSimple("scores", ScoresEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<SelectorEntityPredicate> SELECTOR = registerSimple("selector", SelectorEntityPredicate.CODEC);
+  public static final EntityPredicateType<SenderOnlyEntityPredicate> SENDER_ONLY = registerSimple("sender_only", SenderOnlyEntityPredicate.CODEC);
   public static final SimpleBooleanEntityPredicateType SNEAKING = registerSimpleBoolean("sneaking", Entity::isSneaking);
   public static final SimpleBooleanEntityPredicateType SPRINTING = registerSimpleBoolean("sprinting", Entity::isSprinting);
   public static final EntityPredicateType<SubPredicateEntityPredicateEntry> SUB_PREDICATE = registerSimple("sub_predicate", SubPredicateEntityPredicateEntry.CODEC);

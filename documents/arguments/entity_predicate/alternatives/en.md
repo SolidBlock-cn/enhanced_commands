@@ -14,4 +14,4 @@ This [entity predicate](../en.md) multiple entity predicates. The entity only ne
 - `type`: Currently `"enhanced_commands:alternatives"`.
 - `predicates`: List.
     - An [entity predicate](../en.md)。
-- `inverted`: Boolean/
+- `inverted`: Boolean, optional, false by default.

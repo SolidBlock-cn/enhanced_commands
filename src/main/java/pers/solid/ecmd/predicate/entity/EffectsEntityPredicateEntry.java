@@ -35,7 +35,7 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
     for (final var entry : effects) {
       final RegistryEntry<StatusEffect> statusEffect = entry.effect;
       StatusEffectInstance statusEffectInstance = actualEffects.get(statusEffect);
-      if (entry.data.test(statusEffectInstance) == entry.inverted) {
+      if (entry.data.test(statusEffectInstance) == entry.expected) {
         return false;
       }
     }
@@ -55,8 +55,8 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
       StatusEffectInstance statusEffectInstance = actualEffects.get(effectEntry);
       final EntityEffectPredicate.EffectData effectData = entry.data;
       final var testResult = effectData.test(statusEffectInstance);
-      final var isInverted = entry.inverted;
-      final var passes = testResult != isInverted;
+      final var expected = entry.expected;
+      final var passes = testResult == expected;
       result &= passes;
 
       final Text effectName = effectEntry.value().getName();
@@ -95,14 +95,14 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
       joiner.add(entry.asString());
     }
 
-    return joiner.toString();
+    return "effect=" + joiner;
   }
 
-  public record Entry(RegistryEntry<StatusEffect> effect, EntityEffectPredicate.EffectData data, boolean inverted) implements ExpressionConvertible {
+  public record Entry(RegistryEntry<StatusEffect> effect, EntityEffectPredicate.EffectData data, boolean expected) implements ExpressionConvertible {
     public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
         StatusEffect.ENTRY_CODEC.fieldOf("effect").forGetter(Entry::effect),
         EntityEffectPredicate.EffectData.CODEC.fieldOf("data").forGetter(Entry::data),
-        Codec.BOOL.optionalFieldOf("inverted", false).forGetter(Entry::inverted)
+        Codec.BOOL.optionalFieldOf("expected", true).forGetter(Entry::expected)
     ).apply(i, Entry::new));
 
     @Override
@@ -113,30 +113,30 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
       final NumberRange.IntRange amplifier = effectData.amplifier();
       boolean dummy = true;
       if (!amplifier.isDummy()) {
-        joiner.add("amplifier = " + StringUtil.wrapRange(amplifier));
+        joiner.add("amplifier=" + StringUtil.wrapRange(amplifier));
         dummy = false;
       }
       final NumberRange.IntRange duration = effectData.duration();
       if (!duration.isDummy()) {
-        joiner.add("duration = " + StringUtil.wrapRange(duration));
+        joiner.add("duration=" + StringUtil.wrapRange(duration));
         dummy = false;
       }
       final Optional<Boolean> ambient = effectData.ambient();
       if (ambient.isPresent()) {
-        joiner.add("ambient = " + ambient);
+        joiner.add("ambient=" + ambient);
         dummy = false;
       }
       final Optional<Boolean> visible = effectData.visible();
       if (visible.isPresent()) {
-        joiner.add("visible = " + visible);
+        joiner.add("visible=" + visible);
         dummy = false;
       }
 
       final String effectId = effectEntry.getKeyOrValue().map(key -> key.getValue().toString(), statusEffect -> StatusEffect.ENTRY_CODEC.encodeStart(NbtOps.INSTANCE, effectEntry).getOrThrow().toString());
       if (dummy) {
-        return effectId + " = " + inverted;
+        return effectId + "=" + expected;
       } else {
-        return effectId + " = " + (inverted ? "!" : "") + joiner;
+        return effectId + "=" + (expected ? "!" : "") + joiner;
       }
     }
   }

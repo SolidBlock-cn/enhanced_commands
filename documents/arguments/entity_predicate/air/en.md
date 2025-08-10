@@ -17,8 +17,8 @@ When the type is `air`:
 
 * `type`: Currently `"enhanced_commands:air"`
 * `air`: Int range.
-* `inverted`: Boolean.
+* `inverted`: Boolean, optional, `false` by default.
 
 When the type is `air_max`:
 
-* `inverted`: Boolean.
+* `inverted`: Boolean, optional, `false` by default.

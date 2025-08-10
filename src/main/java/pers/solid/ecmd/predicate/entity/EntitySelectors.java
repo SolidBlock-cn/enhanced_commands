@@ -77,7 +77,7 @@ public final class EntitySelectors {
       entries.add(PlayerOnlyEntityPredicate.INSTANCE);
     }
     if (entitySelector.isLocalWorldOnly()) {
-      entries.add(LocalWorldOnlyEntityPredicate.INSTANCE);
+      entries.add(LocalWorldEntityPredicate.INSTANCE);
     }
     if (entitySelector.isSenderOnly()) {
       entries.add(SenderOnlyEntityPredicate.INSTANCE);

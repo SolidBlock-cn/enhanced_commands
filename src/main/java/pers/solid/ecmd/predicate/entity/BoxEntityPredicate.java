@@ -15,7 +15,7 @@ import pers.solid.ecmd.util.TestResult;
 
 public record BoxEntityPredicate(Box box, PositionOffsetInfo offset) implements SpecialEntityPredicate {
   public static final MapCodec<BoxEntityPredicate> CODEC = MapCodec.unit(() -> new BoxEntityPredicate(Box.from(Vec3d.ZERO), PositionOffsetInfo.NO_OP));
-  private static final LoadingCache<BoxEntityPredicate, LoadingCache<Vec3d, Box>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(input -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(vec3d -> input.box.offset(input.offset.apply(vec3d))))));
+  private static final LoadingCache<@NotNull BoxEntityPredicate, LoadingCache<@NotNull Vec3d, Box>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(input -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(vec3d -> input.box.offset(input.offset.apply(vec3d))))));
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
