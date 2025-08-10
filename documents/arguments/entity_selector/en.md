@@ -312,3 +312,26 @@ Tests whether the entity is swimming. The parameter can be inverted.
 
 - `@e[swimming=true]`: Selects swimming entities.
 - `@a[swimming=false]`: Selects entities not swimming.
+
+## Data structure
+
+Entity selectors support serialization and deserialization through this mod. Some mods may add other properties or entity predicates into entity selectors. Contents added by other mods may not be serialized by this mod. Entity selectors specified through command arguments can usually be serialized normally, but entity selectors directly created by codes may not be serialized fully for all data,
+
+* `limit`: Integer, optional, by default 2<sup>31</sup> - 1.
+* `player_only`: Boolean, optional, by default `false`.
+* `local_world_only`: Boolean, optional, by default `false`.
+* `predicates`: List, optional. Usually not including entity predicates of special types.
+    * [Entity predicate](../entity_predicate/en.md)
+* `distance`: Double floating-point, or a range defined by a map, optional.
+* `position_offset`: Map, optional.
+* `dx`: Double floating-point, optional.
+* `dy`: Double floating-point, optional.
+* `dz`: Double floating-point, optional.
+* `sort`: String, optional, by default `arbitrary`. The sorting that the entity selector uses.
+* `sender_only`: Boolean, optional, by default `false`.
+* `player_name`: String. Optional.
+* `uuid`：UUID (usually a list or array), optional.
+* `entity_type`: String, specify an entity type, optional.
+* `uses_at`: Boolean, optional, by default `false`, which means whether "@" is used.
+* `collector`: String, optional. The special collector of entity selector.
+* `collector_of`: Entity selector, optional. Corresponds to the `of` argument in the entity selector arguments.
