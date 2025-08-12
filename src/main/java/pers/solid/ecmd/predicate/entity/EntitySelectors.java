@@ -73,12 +73,6 @@ public final class EntitySelectors {
       entries.add(new BoxEntityPredicate(accessor.getBox(), entitySelector.extension$ec().positionOffsetInfo));
     }
 
-    if (!entitySelector.includesNonPlayers()) {
-      entries.add(PlayerOnlyEntityPredicate.INSTANCE);
-    }
-    if (entitySelector.isLocalWorldOnly()) {
-      entries.add(LocalWorldEntityPredicate.INSTANCE);
-    }
     if (entitySelector.isSenderOnly()) {
       entries.add(SenderOnlyEntityPredicate.INSTANCE);
     }

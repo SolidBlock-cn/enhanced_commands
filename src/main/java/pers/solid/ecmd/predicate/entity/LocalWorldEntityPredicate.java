@@ -17,13 +17,13 @@ public enum LocalWorldEntityPredicate implements SpecialEntityPredicate {
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    return entity.getWorld().equals(context.positionProvider.world$ec());
+    return entity.getWorld().equals(context.positionProvider.getWorld$ec());
   }
 
   @Override
   public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
     final World world = entity.getWorld();
-    final World sourceWorld = context.positionProvider.world$ec();
+    final World sourceWorld = context.positionProvider.getWorld$ec();
     if (world.equals(sourceWorld)) {
       return (TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.local_world.true", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(Styles.ACTUAL))));
     } else {

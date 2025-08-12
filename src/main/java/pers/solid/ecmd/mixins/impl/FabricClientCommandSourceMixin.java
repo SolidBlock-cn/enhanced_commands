@@ -27,33 +27,33 @@ public interface FabricClientCommandSourceMixin extends PositionProvider {
   ClientWorld getWorld();
 
   @Override
-  default Vec3d position$ec() {
+  default Vec3d getPosition$ec() {
     return getPosition();
   }
 
   @Override
-  default Vec2f rotation$ec() {
+  default Vec2f getRotation$ec() {
     return getRotation();
   }
 
   @Override
-  default @Nullable PlayerEntity entity$ec() {
+  default @Nullable PlayerEntity getEntity$ec() {
     return getPlayer();
   }
 
   @Override
   @Nullable
-  default ClientPlayerEntity player$ec() {
+  default ClientPlayerEntity getPlayer$ec() {
     return getPlayer();
   }
 
   @Override
-  default EntityAnchorArgumentType.EntityAnchor entityAnchor$ec() {
+  default EntityAnchorArgumentType.EntityAnchor getEntityAnchor$ec() {
     return EntityAnchorArgumentType.EntityAnchor.FEET;
   }
 
   @Override
-  default ClientWorld world$ec() {
+  default ClientWorld getWorld$ec() {
     return getWorld();
   }
 }

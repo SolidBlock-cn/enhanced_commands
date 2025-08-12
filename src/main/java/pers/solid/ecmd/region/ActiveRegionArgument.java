@@ -16,7 +16,7 @@ public enum ActiveRegionArgument implements RegionArgument<Region> {
   @Override
   public Region toAbsoluteRegion(PositionProvider positionProvider) {
     try {
-      final PlayerEntity playerEntity = positionProvider.playerOrThrow$ec();
+      final PlayerEntity playerEntity = positionProvider.getPlayerOrThrow$ec();
       if (playerEntity instanceof ServerPlayerEntityExtension serverPlayerEntityExtension) {
         return serverPlayerEntityExtension.ec$getActiveRegion();
       } else {

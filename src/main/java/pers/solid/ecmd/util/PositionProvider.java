@@ -16,20 +16,20 @@ import pers.solid.ecmd.mixins.accessor.EntityAnchorAccessor;
 public interface PositionProvider {
   PositionProvider EMPTY = of(Vec3d.ZERO, Vec2f.ZERO, null, EntityAnchorArgumentType.EntityAnchor.FEET);
 
-  default Vec3d position$ec() {
+  default Vec3d getPosition$ec() {
     throw new NotImplementedException();
   }
 
-  default Vec2f rotation$ec() {
+  default Vec2f getRotation$ec() {
     throw new NotImplementedException();
   }
 
-  default @Nullable Entity entity$ec() {
+  default @Nullable Entity getEntity$ec() {
     throw new NotImplementedException();
   }
 
-  default @NotNull Entity entityOrThrow$ec() throws CommandSyntaxException {
-    final Entity entity = entity$ec();
+  default @NotNull Entity getEntityOrThrow$ec() throws CommandSyntaxException {
+    final Entity entity = getEntity$ec();
     if (entity == null) {
       throw ServerCommandSource.REQUIRES_ENTITY_EXCEPTION.create();
     } else {
@@ -37,13 +37,13 @@ public interface PositionProvider {
     }
   }
 
-  default @Nullable PlayerEntity player$ec() {
-    final Entity entity = entity$ec();
+  default @Nullable PlayerEntity getPlayer$ec() {
+    final Entity entity = getEntity$ec();
     return entity instanceof PlayerEntity player ? player : null;
   }
 
-  default @NotNull PlayerEntity playerOrThrow$ec() throws CommandSyntaxException {
-    final PlayerEntity playerEntity = player$ec();
+  default @NotNull PlayerEntity getPlayerOrThrow$ec() throws CommandSyntaxException {
+    final PlayerEntity playerEntity = getPlayer$ec();
     if (playerEntity == null) {
       throw ServerCommandSource.REQUIRES_PLAYER_EXCEPTION.create();
     } else {
@@ -51,16 +51,16 @@ public interface PositionProvider {
     }
   }
 
-  default EntityAnchorArgumentType.EntityAnchor entityAnchor$ec() {
+  default EntityAnchorArgumentType.EntityAnchor getEntityAnchor$ec() {
     throw new NotImplementedException();
   }
 
-  default Vec3d positionAt$ec(PositionProvider positionProvider) {
-    Entity entity = positionProvider.entity$ec();
-    return entity == null ? positionProvider.position$ec() : ((EntityAnchorAccessor) (Enum<EntityAnchorArgumentType.EntityAnchor>) entityAnchor$ec()).getOffset().apply(positionProvider.position$ec(), entity);
+  default Vec3d getPositionAt$ec(PositionProvider positionProvider) {
+    Entity entity = positionProvider.getEntity$ec();
+    return entity == null ? positionProvider.getPosition$ec() : ((EntityAnchorAccessor) (Enum<EntityAnchorArgumentType.EntityAnchor>) getEntityAnchor$ec()).getOffset().apply(positionProvider.getPosition$ec(), entity);
   }
 
-  default @Nullable World world$ec() {
+  default World getWorld$ec() {
     throw new NotImplementedException();
   }
 
@@ -68,6 +68,6 @@ public interface PositionProvider {
     return new Simple(position, rotation, player, entityAnchor);
   }
 
-  record Simple(Vec3d position$ec, Vec2f rotation$ec, @Nullable PlayerEntity entity$ec, EntityAnchorArgumentType.EntityAnchor entityAnchor$ec) implements PositionProvider {
+  record Simple(Vec3d getPosition$ec, Vec2f getRotation$ec, @Nullable PlayerEntity getEntity$ec, EntityAnchorArgumentType.EntityAnchor getEntityAnchor$ec) implements PositionProvider {
   }
 }

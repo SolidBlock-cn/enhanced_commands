@@ -16,12 +16,12 @@ public enum SenderOnlyEntityPredicate implements SpecialEntityPredicate {
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    return entity.equals(context.positionProvider.entity$ec());
+    return entity.equals(context.positionProvider.getEntity$ec());
   }
 
   @Override
   public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final Entity sender = context.positionProvider.entity$ec();
+    final Entity sender = context.positionProvider.getEntity$ec();
     if (entity.equals(sender)) {
       return (TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.sender.true", displayName)));
     } else if (sender != null) {

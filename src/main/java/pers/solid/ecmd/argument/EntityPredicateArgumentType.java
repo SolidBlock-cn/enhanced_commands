@@ -11,9 +11,8 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.server.command.ServerCommandSource;
-import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
-import pers.solid.ecmd.predicate.entity.SelectorEntityPredicate;
+import pers.solid.ecmd.predicate.entity.EntitySelectors;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,7 +25,7 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
     return new EntityPredicateArgumentType(registryAccess);
   }
 
-  public static EntityPredicate getEntityPredicate(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static EntityPredicate getEntityPredicate(CommandContext<ServerCommandSource> context, String name) {
     return context.getArgument(name, EntityPredicate.class);
   }
 
@@ -34,17 +33,7 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
   public EntityPredicate parse(StringReader reader) throws CommandSyntaxException {
     // 考虑命令主要是由管理员执行的，所以使用允许使用实体选择器。
     final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader, true);
-    if (reader.canRead() && reader.peek() == '[') {
-      reader.skip();
-      ((EntitySelectorReaderAccessor) entitySelectorReader).setUsesAt(true);
-      entitySelectorReader.setIncludesNonPlayers(true);
-      entitySelectorReader.setLimit(Integer.MAX_VALUE);
-      ((EntitySelectorReaderAccessor) entitySelectorReader).callReadArguments();
-      ((EntitySelectorReaderAccessor) entitySelectorReader).callBuildPredicate();
-      return new SelectorEntityPredicate(entitySelectorReader.build());
-    } else {
-      return new SelectorEntityPredicate(entitySelectorReader.read());
-    }
+    return EntityPredicate.parse(entitySelectorReader);
   }
 
   @Override
@@ -53,7 +42,7 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
       return parse(reader);
     } else {
       final EntitySelectorReader entitySelectorReader = new EntitySelectorReader(reader, false);
-      return new SelectorEntityPredicate(entitySelectorReader.read());
+      return EntityPredicate.simplifiedBySelector(entitySelectorReader.read());
     }
   }
 
@@ -64,17 +53,9 @@ public record EntityPredicateArgumentType(CommandRegistryAccess registryAccess) 
       stringReader.setCursor(builder.getStart());
       EntitySelectorReader entitySelectorReader = new EntitySelectorReader(stringReader, commandSource.hasPermissionLevel(2));
       entitySelectorReader.extension$ec().context = context;
-      final var accessor = (EntitySelectorReaderAccessor) entitySelectorReader;
 
       try {
-        if (stringReader.canRead() && stringReader.peek() == '[') {
-          stringReader.skip();
-          entitySelectorReader.setIncludesNonPlayers(true);
-          entitySelectorReader.setLimit(Integer.MAX_VALUE);
-          accessor.callReadArguments();
-        } else {
-          entitySelectorReader.read();
-        }
+        EntitySelectors.readOmittibleEntitySelector(entitySelectorReader);
       } catch (CommandSyntaxException ignored) {
       }
 

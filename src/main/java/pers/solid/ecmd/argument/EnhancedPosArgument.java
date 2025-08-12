@@ -168,7 +168,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
       if (!xRelative && !yRelative && !zRelative) {
         return new Vec3d(x, y, z);
       }
-      final Vec3d position = positionProvider.position$ec();
+      final Vec3d position = positionProvider.getPosition$ec();
       return new Vec3d(xRelative ? position.x + x : x, yRelative ? position.y + y : y, zRelative ? position.z + z : z);
     }
 
@@ -177,7 +177,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
       if (!xRelative && !yRelative) {
         return new Vec2f((float) x, (float) y);
       }
-      final Vec2f rotation = positionProvider.rotation$ec();
+      final Vec2f rotation = positionProvider.getRotation$ec();
       return new Vec2f((float) (xRelative ? rotation.x + x : x), (float) (yRelative ? rotation.y + y : y));
     }
 
@@ -241,7 +241,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
       if (!xRelative && !yRelative) {
         return new Vec2f((float) x, (float) y);
       }
-      final Vec2f rotation = positionProvider.rotation$ec();
+      final Vec2f rotation = positionProvider.getRotation$ec();
       return new Vec2f(xRelative ? rotation.x + x : x, yRelative ? rotation.y + y : y);
     }
 
@@ -250,7 +250,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
       if (!xRelative && !yRelative && !zRelative) {
         return new BlockPos(x, y, z);
       }
-      final Vec3d position = positionProvider.position$ec();
+      final Vec3d position = positionProvider.getPosition$ec();
       return new BlockPos(xRelative ? MathHelper.floor(position.getX() + x) : x, yRelative ? MathHelper.floor(position.getY() + y) : y, zRelative ? MathHelper.floor(position.getZ() + z) : z);
     }
 
@@ -299,8 +299,8 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
 
     @Override
     public Vec3d toAbsolutePos(PositionProvider positionProvider) {
-      Vec2f vec2f = positionProvider.rotation$ec();
-      Vec3d vec3d = positionProvider.positionAt$ec(positionProvider);
+      Vec2f vec2f = positionProvider.getRotation$ec();
+      Vec3d vec3d = positionProvider.getPositionAt$ec(positionProvider);
       float f = MathHelper.cos((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
       float g = MathHelper.sin((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
       float h = MathHelper.cos(-vec2f.x * ((float) Math.PI / 180F));

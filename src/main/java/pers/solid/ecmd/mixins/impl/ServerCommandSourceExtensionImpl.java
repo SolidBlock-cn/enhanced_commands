@@ -75,42 +75,42 @@ public abstract class ServerCommandSourceExtensionImpl implements ServerCommandS
   }
 
   @Override
-  public Vec3d position$ec() {
+  public Vec3d getPosition$ec() {
     return getPosition();
   }
 
   @Override
-  public Vec2f rotation$ec() {
+  public Vec2f getRotation$ec() {
     return getRotation();
   }
 
   @Override
-  public @Nullable PlayerEntity entity$ec() {
+  public @Nullable PlayerEntity getEntity$ec() {
     return getPlayer();
   }
 
   @Override
-  public @NotNull Entity entityOrThrow$ec() throws CommandSyntaxException {
+  public @NotNull Entity getEntityOrThrow$ec() throws CommandSyntaxException {
     return getEntityOrThrow();
   }
 
   @Override
-  public EntityAnchorArgumentType.EntityAnchor entityAnchor$ec() {
+  public EntityAnchorArgumentType.EntityAnchor getEntityAnchor$ec() {
     return getEntityAnchor();
   }
 
   @Override
-  public @Nullable PlayerEntity player$ec() {
+  public @Nullable PlayerEntity getPlayer$ec() {
     return getPlayer();
   }
 
   @Override
-  public @NotNull PlayerEntity playerOrThrow$ec() throws CommandSyntaxException {
+  public @NotNull PlayerEntity getPlayerOrThrow$ec() throws CommandSyntaxException {
     return getPlayerOrThrow();
   }
 
   @Override
-  public ServerWorld world$ec() {
+  public ServerWorld getWorld$ec() {
     return getWorld();
   }
 }

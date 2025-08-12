@@ -9,9 +9,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.TextUtil;
 
 public record BoxEntityPredicate(Box box, PositionOffsetInfo offset) implements SpecialEntityPredicate {
   public static final MapCodec<BoxEntityPredicate> CODEC = MapCodec.unit(() -> new BoxEntityPredicate(Box.from(Vec3d.ZERO), PositionOffsetInfo.NO_OP));
@@ -19,12 +21,17 @@ public record BoxEntityPredicate(Box box, PositionOffsetInfo offset) implements 
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    return cache.getUnchecked(this).getUnchecked(context.positionProvider.position$ec()).intersects(entity.getBoundingBox());
+    return cache.getUnchecked(this).getUnchecked(context.positionProvider.getPosition$ec()).intersects(entity.getBoundingBox());
   }
 
   @Override
   public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final Box box = cache.getUnchecked(this).getUnchecked(context.positionProvider.position$ec());
+    final World expected = context.positionProvider.getWorld$ec();
+    final World actual = entity.getWorld();
+    if (!expected.equals(actual)) {
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.local_world.false", displayName, TextUtil.literal(actual.getRegistryKey().getValue()), TextUtil.literal(expected.getRegistryKey().getValue())));
+    }
+    final Box box = cache.getUnchecked(this).getUnchecked(context.positionProvider.getPosition$ec());
     if (box.intersects(entity.getBoundingBox())) {
       return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.box.true", displayName, box.toString()));
     } else {

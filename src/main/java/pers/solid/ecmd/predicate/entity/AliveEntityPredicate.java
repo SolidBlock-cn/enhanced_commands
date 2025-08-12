@@ -40,6 +40,6 @@ public enum AliveEntityPredicate implements StaticEntityPredicate, EntityPredica
 
   @Override
   public @NotNull String asString() {
-    return "<alive>";
+    return "@e";
   }
 }

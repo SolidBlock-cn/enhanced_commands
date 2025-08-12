@@ -14,7 +14,10 @@ import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.command.*;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.EntitySelectorOptions;
+import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
@@ -280,8 +283,7 @@ public class EntitySelectorOptionsExtension {
         final EntitySelectorReader newReader = new EntitySelectorReader(stringReader, true);
         final int cursorBeforeRead = stringReader.getCursor();
         try {
-          final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
-          entityPredicates.add(new SelectorEntityPredicate(entitySelector));
+          entityPredicates.add(EntityPredicate.parse(newReader));
         } catch (CommandSyntaxException e) {
           reader.setSuggestionProvider((builder, consumer) -> newReader.listSuggestions(builder, suggestionsBuilder -> {
             consumer.accept(suggestionsBuilder);
@@ -559,8 +561,7 @@ public class EntitySelectorOptionsExtension {
         } else {
           final EntitySelectorReader newReader = new EntitySelectorReader(reader.getReader(), true);
           reader.setSuggestionProvider(newReader::listSuggestions);
-          final EntitySelector value = EntitySelectors.readOmittibleEntitySelector(newReader);
-          reader.addPredicate(new OwnerEntityPredicateEntry(new SelectorEntityPredicate(value), inverted));
+          reader.addPredicate(new OwnerEntityPredicateEntry(EntityPredicate.parse(newReader), inverted));
         }
       }
     }, reader -> !EntitySelectorTypeExtras.PETS.equals(reader.extension$ec().atVariable), Text.translatable("enhanced_commands.entity_predicate.owner"));
@@ -585,9 +586,7 @@ public class EntitySelectorOptionsExtension {
 
       final EntitySelectorReader newReader = new EntitySelectorReader(reader.getReader(), true);
       reader.setSuggestionProvider(newReader::listSuggestions);
-      final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
-
-      reader.addPredicate(new SubPredicateEntityPredicateEntry(new SelectorEntityPredicate(entitySelector), inverted));
+      reader.addPredicate(new SubPredicateEntityPredicateEntry(EntityPredicate.parse(newReader), inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.sub_predicate"));
     INCOMPLETE_SUGGESTIONS.add("is");
     putOption("not", reader -> {
@@ -595,9 +594,7 @@ public class EntitySelectorOptionsExtension {
 
       final EntitySelectorReader newReader = new EntitySelectorReader(reader.getReader(), true);
       reader.setSuggestionProvider(newReader::listSuggestions);
-      final EntitySelector entitySelector = EntitySelectors.readOmittibleEntitySelector(newReader);
-
-      reader.addPredicate(new SubPredicateEntityPredicateEntry(new SelectorEntityPredicate(entitySelector), !inverted));
+      reader.addPredicate(new SubPredicateEntityPredicateEntry(EntityPredicate.parse(newReader), !inverted));
     }, Predicates.alwaysTrue(), Text.translatable("enhanced_commands.entity_predicate.sub_predicate.inverted"));
     INCOMPLETE_SUGGESTIONS.add("not");
   }

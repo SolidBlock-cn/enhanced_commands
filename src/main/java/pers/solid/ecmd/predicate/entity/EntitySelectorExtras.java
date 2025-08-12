@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
 import pers.solid.ecmd.util.ExecutionContext;
 
@@ -34,7 +33,7 @@ public class EntitySelectorExtras {
   /**
    * 以可序列化的形式记录 {@link EntitySelector#positionOffset}，因为该字段类型为 {@link Function}，无法序列化其数据，因此需要在 {@link EntitySelectorReader#build()} 中手动存储其序列化数据。
    *
-   * @see EntitySelectorReaderMixin#recordMoreIntoAtBuild(EntitySelector)
+   * @see EntitySelectorReaderMixin#recordMoreInfoAtBuild(EntitySelector)
    */
   public @NotNull PositionOffsetInfo positionOffsetInfo = PositionOffsetInfo.NO_OP;
 
@@ -46,7 +45,7 @@ public class EntitySelectorExtras {
   /**
    * 此字段决定了在运行 {@link EntitySelector#getEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
    *
-   * @see EntitySelectorReaderMixin#buildExtraPredicate(CallbackInfoReturnable)
+   * @see EntitySelectorReaderMixin#recordMoreInfoAtBuild(EntitySelector)
    */
   public @Nullable EntitySelectorCollector collector;
 

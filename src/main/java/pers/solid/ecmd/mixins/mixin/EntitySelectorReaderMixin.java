@@ -167,7 +167,8 @@ public abstract class EntitySelectorReaderMixin implements EntitySelectorReaderE
   private void modifyPredicatesAtBuild(CallbackInfoReturnable<EntitySelector> cir) {
     final EntitySelectorReaderExtras extras = extension$ec();
     if (EntitySelectorTypeExtras.PETS.equals(extras.atVariable)) {
-      predicates.add(0, new DynamicEntityPredicateWrapper(new OwnerEntityPredicateEntry(extras.collectorOf == null ? SenderOnlyEntityPredicate.INSTANCE : new SelectorEntityPredicate(extras.collectorOf), false), extras.contextWrapper));
+      // 插入在 alive 谓词的后面（使用 @pets 时，默认都是 alive 的），从而与转化回的结果要一致。
+      predicates.add(predicates.isEmpty() ? 0 : 1, new DynamicEntityPredicateWrapper(new OwnerEntityPredicateEntry(extras.collectorOf == null ? SenderOnlyEntityPredicate.INSTANCE : EntityPredicate.simplifiedBySelector(extras.collectorOf), false), extras.contextWrapper));
     }
   }
 

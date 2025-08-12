@@ -19,7 +19,7 @@ public record CollectorEntityPredicate(EntitySelectorCollector collector) implem
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    final Entity sender = context.positionProvider.entity$ec();
+    final Entity sender = context.positionProvider.getEntity$ec();
     if (sender == null) {
       return false;
     }
@@ -29,7 +29,7 @@ public record CollectorEntityPredicate(EntitySelectorCollector collector) implem
 
   @Override
   public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final Entity sender = context.positionProvider.entity$ec();
+    final Entity sender = context.positionProvider.getEntity$ec();
     if (sender == null) {
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.collector.no_sender", displayName, collector.getDisplayName()));
     }

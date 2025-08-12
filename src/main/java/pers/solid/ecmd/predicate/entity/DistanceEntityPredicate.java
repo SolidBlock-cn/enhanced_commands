@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.StringUtil;
@@ -21,7 +22,7 @@ public record DistanceEntityPredicate(NumberRange.DoubleRange distance, Position
       NumberRange.DoubleRange.CODEC.fieldOf("distance").forGetter(DistanceEntityPredicate::distance),
       PositionOffsetInfo.CODEC.codec().optionalFieldOf("info", PositionOffsetInfo.NO_OP).forGetter(DistanceEntityPredicate::info)
   ).apply(i, DistanceEntityPredicate::new));
-  private static final LoadingCache<@NotNull PositionOffsetInfo, LoadingCache<@NotNull ExecutionContext, Vec3d>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(po -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(context -> po.apply(context.positionProvider.position$ec())))));
+  private static final LoadingCache<@NotNull PositionOffsetInfo, LoadingCache<@NotNull ExecutionContext, Vec3d>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(po -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(context -> po.apply(context.positionProvider.getPosition$ec())))));
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
@@ -31,6 +32,11 @@ public record DistanceEntityPredicate(NumberRange.DoubleRange distance, Position
 
   @Override
   public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
+    final World expected = context.positionProvider.getWorld$ec();
+    final World actual = entity.getWorld();
+    if (!expected.equals(actual)) {
+      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.distance.not_local", displayName, TextUtil.literal(actual.getRegistryKey().getValue()), TextUtil.literal(expected.getRegistryKey().getValue())));
+    }
     final Vec3d center = cache.getUnchecked(info).getUnchecked(context);
     final double actualDistance = Math.sqrt(entity.squaredDistanceTo(center));
     if (this.distance.test(actualDistance)) {
@@ -47,6 +53,6 @@ public record DistanceEntityPredicate(NumberRange.DoubleRange distance, Position
 
   @Override
   public @NotNull String asString() {
-    return "distance=" + StringUtil.wrapRange(distance);
+    return "[distance=" + StringUtil.wrapRange(distance) + "]";
   }
 }
