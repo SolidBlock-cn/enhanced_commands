@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import pers.solid.ecmd.mixins.ext.ServerCommandSourceExtension;
 
-@Mixin(CommandContext.class)
+@Mixin(value = CommandContext.class, remap = false)
 public abstract class CommandContextMixin<S> {
   @Shadow
   @Final
