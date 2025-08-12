@@ -49,7 +49,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public Stream<BlockPos> stream() {
+  public Stream<@NotNull BlockPos> stream() {
     final Stream<BlockPos> oneHeightRound = BlockPos.stream(MathHelper.ceil(center.x - radius - 0.5), 0, MathHelper.ceil(center.z - radius - 0.5), MathHelper.floor(center.x + radius - 0.5), 0, MathHelper.floor(center.z + radius - 0.5)) // a one-height cuboid that contains a round
         .filter(blockPos -> {
           final Vec3d centerPos = blockPos.toCenterPos();

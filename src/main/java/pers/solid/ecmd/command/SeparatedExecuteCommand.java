@@ -275,7 +275,7 @@ public final class SeparatedExecuteCommand {
 
   public static <T extends ArgumentBuilder<ServerCommandSource, T>> T addExtraConditionArguments(CommandNode<ServerCommandSource> root, T argumentBuilder, boolean positive, CommandRegistryAccess registryAccess) {
     return argumentBuilder
-        .then(literal("block_info")
+        .then(literal("blockinfo")
             .then(addBlockInfoArguments(root, argument("pos", EnhancedPosArgumentType.blockPos()), positive)))
         .then(literal("rand")
             .then(addConditionLogic(root, argument("probability", FloatArgumentType.floatArg(0, 1)), positive, context -> context.getSource().getWorld().random.nextFloat() < FloatArgumentType.getFloat(context, "probability"))));

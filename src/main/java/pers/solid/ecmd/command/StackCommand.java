@@ -37,6 +37,7 @@ import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.Styles;
@@ -143,7 +144,8 @@ public enum StackCommand implements CommandRegistrationCallback {
   public static int executeStack(Region region, Vec3i relativeVec, int stackAmount, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final ServerWorld world = source.getWorld();
-    final Region targetRegion = region.moved(relativeVec.multiply(stackAmount));
+    final Vec3i multiplied = relativeVec.multiply(stackAmount);
+    final Region targetRegion = region.moved(multiplied);
     final boolean transformsRegion = keywordArgs.getBoolean("select");
     final ServerPlayerEntity player = source.getPlayer();
 
@@ -292,7 +294,10 @@ public enum StackCommand implements CommandRegistrationCallback {
         source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
       }
       if (transformsRegion && player != null) {
-        ((ServerPlayerEntityExtension) player).ec$setActiveRegion(targetRegion);
+        final RegionSelection activeRegion = ((ServerPlayerEntityExtension) player).getActiveRegion$ec();
+        if (activeRegion != null && region.equals(activeRegion.region())) {
+          ((ServerPlayerEntityExtension) player).setActiveRegion$ec(activeRegion.moved(multiplied));
+        }
       }
     }));
 

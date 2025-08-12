@@ -32,6 +32,7 @@ import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
@@ -113,26 +114,24 @@ public interface BlockTransformationCommand {
 
     final boolean immediately = keywordArgs.getBoolean("immediately");
 
-    Region transformedActiveRegion = transformsRegion && player != null ? transformRegion(region) : null;
-
     final BlockTransformationTask task = builder.build();
 
-    final @Nullable Region oldActiveRegion; // 仅用于撤销操作
+    final @Nullable RegionSelection oldActiveRegion; // 仅用于撤销操作
     if (transformsRegion && player != null && history != null) {
-      oldActiveRegion = ((ServerPlayerEntityExtension) player).ec$getOrEvaluateActiveRegion();
+      oldActiveRegion = ((ServerPlayerEntityExtension) player).getActiveRegionOrThrow$ec();
     } else {
       oldActiveRegion = null;
     }
+    final RegionSelection transformedRegionSelection = oldActiveRegion != null && region.equals(oldActiveRegion.region()) ? oldActiveRegion.transformed(this::transformPos) : null;
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       final IteratorTask<?> iteratorTask = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
-        if (transformedActiveRegion != null) {
-          if (history != null) {
-            history.reverseEntities.add(Triple.of(player, Pair.of(
-                player0 -> ((ServerPlayerEntityExtension) player0).ec$setActiveRegion(oldActiveRegion),
-                player0 -> ((ServerPlayerEntityExtension) player0).ec$setActiveRegion(transformedActiveRegion)
-            ), null));
-          }
-          ((ServerPlayerEntityExtension) player).ec$setActiveRegion(transformedActiveRegion);
+
+        if (transformedRegionSelection != null) {
+          history.reverseEntities.add(Triple.of(player, Pair.of(
+              player0 -> ((ServerPlayerEntityExtension) player0).setActiveRegion$ec(oldActiveRegion),
+              player0 -> ((ServerPlayerEntityExtension) player0).setActiveRegion$ec(transformedRegionSelection)
+          ), null));
+          ((ServerPlayerEntityExtension) player).setActiveRegion$ec(transformedRegionSelection);
         }
         notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
@@ -146,14 +145,12 @@ public interface BlockTransformationCommand {
       final int affectedBlocks = task.getAffectedBlocks();
       final int affectedEntities = task.getAffectedEntities();
       notifyCompletion(source, affectedBlocks, entitiesToAffect == null ? -1 : affectedEntities);
-      if (transformedActiveRegion != null) {
-        if (history != null) {
-          history.reverseEntities.add(Triple.of(player, Pair.of(
-              player0 -> ((ServerPlayerEntityExtension) player0).ec$setActiveRegion(oldActiveRegion),
-              player0 -> ((ServerPlayerEntityExtension) player0).ec$setActiveRegion(transformedActiveRegion)
-          ), null));
-        }
-        ((ServerPlayerEntityExtension) player).ec$setActiveRegion(transformedActiveRegion);
+      if (transformedRegionSelection != null) {
+        history.reverseEntities.add(Triple.of(player, Pair.of(
+            player0 -> ((ServerPlayerEntityExtension) player0).setActiveRegion$ec(oldActiveRegion),
+            player0 -> ((ServerPlayerEntityExtension) player0).setActiveRegion$ec(transformedRegionSelection)
+        ), null));
+        ((ServerPlayerEntityExtension) player).setActiveRegion$ec(transformedRegionSelection);
       }
       return affectedBlocks + affectedEntities;
     }

@@ -43,7 +43,7 @@ public interface MappingRegion extends RegionBasedRegion<MappingRegion, Region> 
   }
 
   @Override
-  default Stream<BlockPos> stream() {
+  default Stream<@NotNull BlockPos> stream() {
     final BlockPos.Mutable mutable = new BlockPos.Mutable();
     return region().stream().map(blockPos -> mutable.set(getMappedPosOf(blockPos)));
   }

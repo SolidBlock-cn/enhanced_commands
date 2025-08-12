@@ -65,7 +65,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   @Override
-  public Stream<BlockPos> stream() {
+  public Stream<@NotNull BlockPos> stream() {
     return region.stream().filter(this::contains);
   }
 

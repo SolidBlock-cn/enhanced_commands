@@ -84,7 +84,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public Stream<BlockPos> stream() {
+  public Stream<@NotNull BlockPos> stream() {
     return decompose().flatMap(Region::stream);
   }
 

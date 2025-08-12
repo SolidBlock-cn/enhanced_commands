@@ -18,7 +18,7 @@ public enum ActiveRegionArgument implements RegionArgument<Region> {
     try {
       final PlayerEntity playerEntity = positionProvider.getPlayerOrThrow$ec();
       if (playerEntity instanceof ServerPlayerEntityExtension serverPlayerEntityExtension) {
-        return serverPlayerEntityExtension.ec$getActiveRegion();
+        return serverPlayerEntityExtension.getActiveRegionOrThrow$ec().region();
       } else {
         throw new CommandRuntimeException();
       }

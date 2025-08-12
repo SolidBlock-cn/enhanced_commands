@@ -14,7 +14,6 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.BlockCuboidRegion;
-import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
@@ -125,7 +124,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public Region expanded(int offset, Direction.Type type) {
+  public @NotNull RegionSelection expanded(int offset, Direction.Type type) {
     final Vec3i pos1Offset = switch (type) {
       case VERTICAL -> new Vec3i(0, first.getY() > second.getY() ? offset : -offset, 0);
       case HORIZONTAL -> new Vec3i(first.getX() > second.getX() ? offset : -offset, 0, first.getZ() > second.getZ() ? offset : -offset);

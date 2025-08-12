@@ -2,6 +2,7 @@ package pers.solid.ecmd.command;
 
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -45,6 +46,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
       .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)
       .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgumentType(), UnloadedPosBehavior.REJECT)
+      .addOptionalArg("seed", LongArgumentType.longArg(), null)
       .build();
 
   @Override

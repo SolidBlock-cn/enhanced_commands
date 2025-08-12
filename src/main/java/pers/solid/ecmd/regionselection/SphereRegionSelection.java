@@ -86,7 +86,9 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
 
   @Override
   public @NotNull SphereRegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
-    center = transformation.apply(center);
+    final Vec3d oldCenter = center;
+    center = transformation.apply(oldCenter);
+    radiusTarget = radiusTarget.add(center.subtract(oldCenter));
     updateRadius();
     resetCalculation();
     return this;

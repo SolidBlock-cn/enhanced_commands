@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.history.History;
-import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
@@ -24,34 +24,34 @@ public abstract class ServerPlayerEntityMixin implements ServerPlayerEntityExten
   @Unique
   private final Deque<History> redoableHistories = new ArrayDeque<>();
   @Unique
-  private @Nullable Region ec$activeRegion;
+  private @Nullable RegionSelection activeRegion$ec;
   @Unique
   private RegionSelectionType ec$regionSelectionType = RegionSelectionTypes.CUBOID;
 
   @Override
-  public @Nullable Region ec$getActiveRegion() {
-    return ec$activeRegion;
+  public @Nullable RegionSelection getActiveRegion$ec() {
+    return activeRegion$ec;
   }
 
   @Override
-  public void ec$setActiveRegion(Region region) {
-    ec$activeRegion = region;
+  public void setActiveRegion$ec(@Nullable RegionSelection region) {
+    activeRegion$ec = region;
   }
 
   @Inject(method = "copyFrom", at = @At("TAIL"))
   public void injectedCopyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
     // 玩家重生时，需保留这些信息。
-    ec$setActiveRegion(((ServerPlayerEntityExtension) oldPlayer).ec$getActiveRegion());
-    ec$setRegionSelectionType(((ServerPlayerEntityExtension) oldPlayer).ec$getRegionSelectionType());
+    setActiveRegion$ec(((ServerPlayerEntityExtension) oldPlayer).getActiveRegion$ec());
+    setRegionSelectionType$ec(((ServerPlayerEntityExtension) oldPlayer).getRegionSelectionType$ec());
   }
 
   @Override
-  public RegionSelectionType ec$getRegionSelectionType() {
+  public RegionSelectionType getRegionSelectionType$ec() {
     return this.ec$regionSelectionType;
   }
 
   @Override
-  public void ec$setRegionSelectionType(RegionSelectionType regionSelectionType) {
+  public void setRegionSelectionType$ec(RegionSelectionType regionSelectionType) {
     this.ec$regionSelectionType = regionSelectionType;
   }
 

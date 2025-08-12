@@ -58,7 +58,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   /**
    * 返回该区域内的所有方块坐标的{@linkplain Stream 流}。<strong>注意：</strong>返回的 {@link BlockPos} 可能是 {@linkplain BlockPos.Mutable 可变的}，参见 {@link #iterator()}。
    */
-  default Stream<BlockPos> stream() {
+  default Stream<@NotNull BlockPos> stream() {
     return Streams.stream(this);
   }
 

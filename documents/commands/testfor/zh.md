@@ -8,3 +8,5 @@
 
 - [`/testfor block`](block/zh.md)
 - [`/testfor blockinfo`](blockinfo/zh.md)
+- [`/testfor blocks`](blocks/zh.md)
+- [`/testfor entity`](entity/zh.md)

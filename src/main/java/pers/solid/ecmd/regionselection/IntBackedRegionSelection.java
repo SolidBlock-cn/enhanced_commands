@@ -1,19 +1,17 @@
 package pers.solid.ecmd.regionselection;
 
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.IntBackedRegion;
 import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.function.Function;
 
-public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegion {
-  @Override
-  default boolean contains(@NotNull Vec3i vec3i) {
-    return region().contains(vec3i);
-  }
+public interface IntBackedRegionSelection extends RegionSelection {
 
   default @NotNull RegionSelection moved(@NotNull Vec3i relativePos) {
     return transformedInt(vec3i -> vec3i.add(relativePos));
@@ -24,43 +22,33 @@ public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegi
   }
 
   default @NotNull RegionSelection expanded(double offset) {
-    IntBackedRegion.super.expanded(offset);
+    expanded((int) offset);
     return this;
   }
 
-  @Override
-  default @NotNull RegionSelection expanded(int offset) {
-    throw new UnsupportedOperationException();
-  }
+  @NotNull RegionSelection expanded(int offset);
 
   default @NotNull RegionSelection expanded(double offset, Direction.Axis axis) {
-    IntBackedRegion.super.expanded(offset, axis);
+    expanded((int) offset, axis);
     return this;
   }
 
-  default RegionSelection expanded(int offset, Direction.Axis axis) {
-    throw new UnsupportedOperationException();
-  }
+  RegionSelection expanded(int offset, Direction.Axis axis);
 
   default @NotNull RegionSelection expanded(double offset, Direction direction) {
-    IntBackedRegion.super.expanded(offset, direction);
+    expanded((int) offset, direction);
     return this;
   }
 
-  default @NotNull RegionSelection expanded(int offset, Direction direction) {
-    throw new UnsupportedOperationException();
-  }
+  @NotNull RegionSelection expanded(int offset, Direction direction);
 
   @Override
   default @NotNull RegionSelection expanded(double offset, Direction.Type type) {
-    IntBackedRegion.super.expanded(offset, type);
+    expanded((int) offset, type);
     return this;
   }
 
-  @Override
-  default boolean contains(@NotNull Vec3d vec3d) {
-    return RegionSelection.super.contains(vec3d);
-  }
+  @NotNull RegionSelection expanded(int offset, Direction.Type type);
 
   default @NotNull RegionSelection rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
     return rotated(blockRotation, IntBackedRegion.toCenteredIntOrThrow(pivot, IntBackedRegion.ROTATION_PIVOT_MUST_CENTER));
@@ -80,11 +68,10 @@ public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegi
 
   @Override
   default @NotNull IntBackedRegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
-    IntBackedRegion.super.transformed(transformation);
+    transformedInt(vec3i -> BlockPos.ofFloored(transformation.apply(Vec3d.ofCenter(vec3i))));
     return this;
   }
 
-  @Override
   @NotNull IntBackedRegionSelection transformedInt(Function<Vec3i, Vec3i> transformation);
 
   @Override
@@ -92,24 +79,4 @@ public interface IntBackedRegionSelection extends RegionSelection, IntBackedRegi
 
   @Override
   IntBackedRegion region();
-
-  @Override
-  default long numberOfBlocksAffected() {
-    return region().numberOfBlocksAffected();
-  }
-
-  @Override
-  default @Nullable BlockBox minContainingBlockBox() {
-    return region().minContainingBlockBox();
-  }
-
-  @Override
-  default @Nullable Box minContainingBox() {
-    return region().minContainingBox();
-  }
-
-  @Override
-  default double volume() {
-    return region().volume();
-  }
 }

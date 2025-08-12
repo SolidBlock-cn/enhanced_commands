@@ -1,10 +1,6 @@
 package pers.solid.ecmd.regionselection;
 
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Decoder;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -16,7 +12,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.region.*;
+import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.List;
@@ -26,7 +22,7 @@ import java.util.function.Supplier;
 /**
  * 区域选择可用于玩家在游戏内通过交互式的操作来建立一个区域。这个区域会在服务器和客户端之间进行同步，因此需要实现与 NBRegionBuilder 之间的转换。
  */
-public interface RegionSelection extends RegionBasedRegion<RegionSelection, Region> {
+public interface RegionSelection {
   SimpleCommandExceptionType NOT_COMPLETED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region_selection.not_completed"));
 
   /**
@@ -102,28 +98,15 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
   @NotNull RegionSelection transformed(Function<Vec3d, Vec3d> transformation);
 
   /**
-   * 转换为具体的 Region 对象，该对象通常不应该是 RegionBuilder 对象。一般来说，它应该是缓存在对象的字段中的，如果自身有修改，则该字段清除，下次调用时再重新计算。
+   * 转换为具体的 Region 对象。一般来说，它应该是缓存在对象的字段中的，如果自身有修改，则该字段清除，下次调用时再重新计算。
    */
-  @Override
   Region region();
 
   RegionSelection clone();
 
-  @Override
-  default RegionSelection newRegion(Region region) {
-    return this;
-  }
-
-  @Override
   @NotNull
   default String asString() {
     return region().asString();
-  }
-
-  @Override
-  @NotNull
-  default Type getType() {
-    return RegionTypes.BUILDER;
   }
 
   @NotNull
@@ -133,20 +116,4 @@ public interface RegionSelection extends RegionBasedRegion<RegionSelection, Regi
   void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world);
 
   void writeNbt(@NotNull NbtCompound nbtCompound);
-
-  MapCodec<RegionSelection> CODEC = MapCodec.assumeMapUnsafe(Codec.of(Region.CODEC.comap(RegionSelection::region), Decoder.error("Decoding region selection is not supported")));
-
-  enum Type implements RegionType<RegionSelection> {
-    INSTANCE;
-
-    @Override
-    public @NotNull MapCodec<RegionSelection> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public @NotNull MapCodec<? extends RegionArgument<? extends RegionSelection>> getArgumentCodec() {
-      return CODEC.flatXmap(blockPos -> DataResult.error(() -> "unsupported"), regionArgument -> DataResult.error(() -> "unsupported"));
-    }
-  }
 }

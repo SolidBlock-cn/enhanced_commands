@@ -17,7 +17,7 @@ public final class WandEvent {
       if (!player.isSpectator() && isWand(player.getStackInHand(hand))) {
         if (player instanceof ServerPlayerEntity) {
           final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
-          final Text text = extension.ec$getOrResetRegionSelection().clickSecondPoint(hitResult.getBlockPos(), player).get();
+          final Text text = extension.getOrResetRegionSelection$ec().clickSecondPoint(hitResult.getBlockPos(), player).get();
           if (text != null) player.sendMessage(text);
         }
         return ActionResult.SUCCESS;
@@ -31,7 +31,7 @@ public final class WandEvent {
       if (!player.isSpectator() && isWand(player.getMainHandStack())) {
         if (player instanceof ServerPlayerEntity) {
           final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
-          final Text text = extension.ec$getOrResetRegionSelection().clickFirstPoint(pos, player).get();
+          final Text text = extension.getOrResetRegionSelection$ec().clickFirstPoint(pos, player).get();
           if (text != null) player.sendMessage(text);
         }
         return ActionResult.SUCCESS;

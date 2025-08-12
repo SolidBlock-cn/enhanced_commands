@@ -44,14 +44,14 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     if (allMatches.isEmpty()) {
       return blockState;
     }
-    final ItemStack output = allMatches.get(world.getRandom().nextInt(allMatches.size())).value().getResult(world.getRegistryManager());
+    final ItemStack output = allMatches.get(context.random.nextInt(allMatches.size())).value().getResult(world.getRegistryManager());
     if (output.getItem() instanceof BlockItem blockItem) {
-      BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), world.getRandom());
+      BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), context.random);
       for (Property<?> property : result.getProperties()) {
         if (blockState.contains(property)) {
           result = StateUtil.withPropertyOfValueFromAnother(result, blockState, property);
         } else {
-          result = StateUtil.withPropertyOfRandomValue(result, property, world.getRandom());
+          result = StateUtil.withPropertyOfRandomValue(result, property, context.random);
         }
       }
       if (!blockState.contains(Properties.WATERLOGGED)) {

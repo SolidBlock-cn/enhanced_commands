@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import net.minecraft.registry.Registry;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.parse.FunctionsParser;
 import pers.solid.ecmd.util.parse.Parser;
 
@@ -34,8 +33,6 @@ public final class RegionTypes {
   public static final CuboidWallRegion.Type CUBOID_WALL = register("cuboid_wall", CuboidWallRegion.Type.CUBOID_WALL_TYPE);
   public static final OutwardsRegion.Type OUTWARDS = register("outwards", OutwardsRegion.Type.INSTANCE);
   public static final ActiveRegionType ACTIVE_REGION = register("active_region", ActiveRegionType.TYPE);
-
-  public static final RegionSelection.Type BUILDER = register("builder", RegionSelection.Type.INSTANCE);
 
   private RegionTypes() {
   }

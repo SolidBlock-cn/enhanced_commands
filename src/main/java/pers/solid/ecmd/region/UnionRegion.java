@@ -39,7 +39,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
   }
 
   @Override
-  public Stream<BlockPos> stream() {
+  public Stream<@NotNull BlockPos> stream() {
     return regions.stream().flatMap(Region::stream).map(BlockPos::toImmutable).distinct();
   }
 

@@ -38,7 +38,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   }
 
   @Override
-  public Stream<BlockPos> stream() {
+  public Stream<@NotNull BlockPos> stream() {
     if (regions.isEmpty()) {
       return Stream.empty();
     }

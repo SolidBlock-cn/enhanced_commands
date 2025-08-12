@@ -93,7 +93,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     final Command<ServerCommandSource> directCommand = regionArgument.getCommand();
     if (directCommand != null && indirectBuilder.getCommand() == null) {
       indirectBuilder.executes(context -> {
-        ((CommandContextAccessor<?>) context).getArguments().put("region", new ParsedArgument<>(0, 0, ((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow()));
+        ((CommandContextAccessor<?>) context).getArguments().put("region", new ParsedArgument<>(0, 0, ((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).getActiveRegionOrThrow$ec()));
         return directCommand.run(context);
       });
     }

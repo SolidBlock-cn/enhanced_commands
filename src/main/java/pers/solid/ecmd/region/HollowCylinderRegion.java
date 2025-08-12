@@ -74,7 +74,7 @@ public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion regio
   }
 
   @Override
-  public Stream<BlockPos> stream() {
+  public Stream<@NotNull BlockPos> stream() {
     final Vec3d center = region.center();
     final double radius = region.radius();
     final int topHeight = region.getTopHeight();
