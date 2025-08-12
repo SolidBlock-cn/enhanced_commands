@@ -92,6 +92,7 @@
   "enhanced_commands.block_function.pick": "随机选择一个方块函数",
   "enhanced_commands.block_function.pick.symbol_tooltip": "增加可选项",
   "enhanced_commands.block_function.pick.zero_sum": "权重值的和不能为零",
+  "enhanced_commands.block_function.post_process": "后处理方块",
   "enhanced_commands.block_function.property.all_original": "所有的原始的属性",
   "enhanced_commands.block_function.property.all_random": "所有的随机属性",
   "enhanced_commands.block_function.property.duplicate_general": "重复的通用属性函数（不带属性名称的“*”或“~”）",

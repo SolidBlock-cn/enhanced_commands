@@ -51,21 +51,23 @@ public final class BlockFunctionTypes {
   public static final RandomBlockFunction.Type RANDOM = register("random", RandomBlockFunction.Type.RANDOM_TYPE);
   public static final TagBlockFunction.Type TAG = register("tag", TagBlockFunction.Type.TAG_TYPE);
   public static final UseOriginalBlockFunction.Type USE_ORIGINAL = register("use_original", UseOriginalBlockFunction.Type.USE_ORIGINAL_TYPE);
-  public static final PickBlockFunction.Type PICK = register("pick", PickBlockFunction.Type.PICK_TYPE);
-  public static final DryBlockFunction.Type DRY = register("dry", DryBlockFunction.Type.DRY_TYPE);
-  public static final OverlayBlockFunction.Type OVERLAY = register("overlay", OverlayBlockFunction.Type.OVERLAY_TYPE);
-  public static final FilterBlockFunction.Type FILTER = register("filter", FilterBlockFunction.Type.FILTER_TYPE);
-  public static final IdContainBlockFunction.Type ID_CONTAIN = register("id_contain", IdContainBlockFunction.Type.ID_CONTAIN_TYPE);
-  public static final StonecutBlockFunction.Type STONE_CUT = register("stonecut", StonecutBlockFunction.Type.STONE_CUT_TYPE);
-  public static final ConditionalBlockFunction.Type CONDITIONAL = register("conditional", ConditionalBlockFunction.Type.CONDITIONAL_TYPE);
-  public static final ConditionsBlockFunction.Type CONDITIONS = register("conditions", ConditionsBlockFunction.Type.CONDITIONS_TYPE);
-  public static final IdReplaceBlockFunction.Type ID_REPLACE = register("id_replace", IdReplaceBlockFunction.Type.ID_REPLACE_TYPE);
-  public static final RotateBlockFunction.Type ROTATE = register("rotate", RotateBlockFunction.Type.ROTATE_TYPE);
-  public static final MirrorBlockFunction.Type MIRROR = register("mirror", MirrorBlockFunction.Type.MIRROR_TYPE);
-  public static final NoiseBlockFunction.Type NOISE = register("noise", NoiseBlockFunction.Type.INSTANCE);
+
   public static final CheckerboardBlockFunction.Type CHECKERBOARD = register("checkerboard", CheckerboardBlockFunction.Type.CHECKERBOARD_TYPE);
   public static final CheckerboardTagBlockFunction.Type CHECKERBOARD_TAG = register("checkerboard-tag", CheckerboardTagBlockFunction.Type.CHECKERBOARD_TAG_TYPE);
+  public static final ConditionalBlockFunction.Type CONDITIONAL = register("conditional", ConditionalBlockFunction.Type.CONDITIONAL_TYPE);
+  public static final ConditionsBlockFunction.Type CONDITIONS = register("conditions", ConditionsBlockFunction.Type.CONDITIONS_TYPE);
+  public static final DryBlockFunction.Type DRY = register("dry", DryBlockFunction.Type.DRY_TYPE);
+  public static final FilterBlockFunction.Type FILTER = register("filter", FilterBlockFunction.Type.FILTER_TYPE);
+  public static final IdContainBlockFunction.Type ID_CONTAIN = register("id_contain", IdContainBlockFunction.Type.ID_CONTAIN_TYPE);
+  public static final IdReplaceBlockFunction.Type ID_REPLACE = register("id_replace", IdReplaceBlockFunction.Type.ID_REPLACE_TYPE);
+  public static final MirrorBlockFunction.Type MIRROR = register("mirror", MirrorBlockFunction.Type.MIRROR_TYPE);
+  public static final NoiseBlockFunction.Type NOISE = register("noise", NoiseBlockFunction.Type.INSTANCE);
+  public static final OverlayBlockFunction.Type OVERLAY = register("overlay", OverlayBlockFunction.Type.OVERLAY_TYPE);
+  public static final PickBlockFunction.Type PICK = register("pick", PickBlockFunction.Type.PICK_TYPE);
+  public static final PostProcessBlockFunction.Type POST_PROCESS = register("post_process", PostProcessBlockFunction.Type.POST_PROCESS_TYPE);
   public static final ReferenceBlockFunction.Type REFERENCE = register("reference", ReferenceBlockFunction.Type.INSTANCE);
+  public static final RotateBlockFunction.Type ROTATE = register("rotate", RotateBlockFunction.Type.ROTATE_TYPE);
+  public static final StonecutBlockFunction.Type STONE_CUT = register("stonecut", StonecutBlockFunction.Type.STONE_CUT_TYPE);
 
   private BlockFunctionTypes() {
   }
@@ -92,6 +94,7 @@ public final class BlockFunctionTypes {
     map.put("if", ConditionalBlockFunction.Parser::new);
     map.put("ifs", ConditionsBlockFunction.Parser::new);
     map.put("idreplace", IdReplaceBlockFunction.Parser::new);
+    map.put("postprocess", PostProcessBlockFunction.Parser::new);
     map.put("random", RandomBlockFunction.RandFuncParser::new);
     map.put("rotate", RotateBlockFunction.Parser::new);
     map.put("mirror", MirrorBlockFunction.Parser::new);
@@ -110,6 +113,7 @@ public final class BlockFunctionTypes {
     map.put("if", Text.translatable("enhanced_commands.block_function.conditional"));
     map.put("ifs", Text.translatable("enhanced_commands.block_function.conditions"));
     map.put("idreplace", Text.translatable("enhanced_commands.block_function.id_replace"));
+    map.put("postprocess", Text.translatable("enhanced_commands.block_function.post_process"));
     map.put("random", Text.translatable("enhanced_commands.block_function.random"));
     map.put("rotate", Text.translatable("enhanced_commands.block_function.rotate"));
     map.put("mirror", Text.translatable("enhanced_commands.block_function.mirror"));

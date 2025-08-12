@@ -91,14 +91,14 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   /**
    * Execute the command with the default parameters.
    */
-  private static int execute(CommandContext<ServerCommandSource> context, BlockPredicate predicate) throws CommandSyntaxException {
+  private static int execute(CommandContext<ServerCommandSource> context, @Nullable BlockPredicate predicate) throws CommandSyntaxException {
     return setBlocksWithDefaultKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate);
   }
 
   /**
    * Execute the command with the parameters read from args.
    */
-  private static int execute(CommandContext<ServerCommandSource> context, BlockPredicate predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
+  private static int execute(CommandContext<ServerCommandSource> context, @Nullable BlockPredicate predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
     return setBlocksFromKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate, kwArgs);
   }
 

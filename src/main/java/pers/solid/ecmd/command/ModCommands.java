@@ -23,7 +23,7 @@ import pers.solid.ecmd.configs.CommandsConfig;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
-import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.region.ActiveRegionArgument;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.Collections;
@@ -62,6 +62,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     NbtCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     OutlineCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     PileCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    PostProcessCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RandCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RegionSelectionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RotateCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -84,8 +85,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   public static final RedirectModifier<ServerCommandSource> REGION_ARGUMENTS_MODIFIER = context -> {
     final ServerCommandSource source = context.getSource();
-    final Region regionArgument = ((ServerPlayerEntityExtension) source.getPlayerOrThrow()).ec$getOrEvaluateActiveRegionOrThrow();
-    source.addExtraArgument$ec("region", regionArgument);
+    source.addExtraArgument$ec("region", ActiveRegionArgument.INSTANCE);
     return Collections.singleton(source);
   };
 

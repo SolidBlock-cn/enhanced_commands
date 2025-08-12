@@ -92,6 +92,7 @@
   "enhanced_commands.block_function.pick": "Pick one block function randomly",
   "enhanced_commands.block_function.pick.symbol_tooltip": "Add alternative",
   "enhanced_commands.block_function.pick.zero_sum": "The sum of weight values cannot be zero",
+  "enhanced_commands.block_function.post_process": "Post process block",
   "enhanced_commands.block_function.property.all_original": "All original properties",
   "enhanced_commands.block_function.property.all_random": "All random properties",
   "enhanced_commands.block_function.property.duplicate_general": "Duplicate general property function ('*' or '~' without property name)",

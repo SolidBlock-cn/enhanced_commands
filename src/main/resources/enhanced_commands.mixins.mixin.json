@@ -7,7 +7,7 @@
     "BlockPosArgumentTypeMixin",
     "BlockPredicateArgumentTypeMixin",
     "BlockStateArgumentTypeMixin",
-    "CommandDispatcherMixin",
+    "CommandContextMixin",
     "CommandManagerMixin",
     "CommandSourceMixin",
     "CommandSyntaxExceptionMixin",
