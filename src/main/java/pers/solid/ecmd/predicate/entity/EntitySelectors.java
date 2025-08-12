@@ -67,7 +67,7 @@ public final class EntitySelectors {
       entries.add(new CollectorEntityPredicate(entitySelector.extension$ec().collector));
     }
     if (!accessor.getDistance().isDummy()) {
-      entries.add(new DistanceBlockPredicate(accessor.getDistance(), entitySelector.extension$ec().positionOffsetInfo));
+      entries.add(new DistanceEntityPredicate(accessor.getDistance(), entitySelector.extension$ec().positionOffsetInfo));
     }
     if (accessor.getBox() != null) {
       entries.add(new BoxEntityPredicate(accessor.getBox(), entitySelector.extension$ec().positionOffsetInfo));

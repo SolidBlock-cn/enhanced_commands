@@ -138,180 +138,120 @@ Where you type loot predicates, directly type the JSON, and the command will be 
 
 When you type something wrong in the entity selector, including wrong parameters, or some parameters that don’t exist or are duplicate, the mod provides more detailed error tips, such as noticing some parameter is duplicate, or not supported in the specific entity selector.
 
-## Extra parameters
-
-On the basis of vanilla entity selector, the mod adds some extra parameters to support more functionalities. The parameters are also available in [entity predicates](../entity_predicate/en.md).
-
-### air
-
-Tests the air value of the entity. Accepts int ranges or the keyword `max` which means the max air value. Can be inverted.
-
-- `@e[air=5..]`: Selects entities whose air values aren’t less than 5.
-- `@a[air=!..0]`: Selects entities whose air values are greater than 0.
-
-See [the `/air` command](/documents/commands/air/en.md).
-
-### alternatives
-
-Specifying multiple entity predicates. The entity only needs to pass one of the predicate tests. Values of the parameters are wrapped in a square bracket, with multiple entity predicates inside; multiple entity predicates are separated with comma. The parameter be inverted.
-
-- `@e[alternatives=[[type=cow], [type=sheep]]]`: Selects all cows and sheep.
-- `@a[alternatives=[Player1, Player2]]`: Selects Player1 and Player2.
-- `@e[type=sheep, alternatives=[[tag=a], [tag=b]]]`: Within all sheep, select those with tag "a" or tag "b".
-- `@e[type=sheep, alternatives=![[tag=a], [tag=b]]]`: Within all sheep, select those with neither tag "a" nor "b".
-
-### baby
-
-Tests whether the entity is a baby. If the entity type doesn’t support baby entities, entities will be seen as non-babies.
-
-- `@e[baby=true]`: Selects all baby entities.
-- `@e[baby=false]`: Selects all entities who aren’t babies (including entities who can’t be babies).
-
-The parameter can be inverted. For example, `@e[baby=!true]` is equivalent to `@e[baby=false]`.
-
-### exhaustion
-
-Tests the exhaustion value of the entity. Accepts float-point number ranges. Can be inverted. Similar to [`food`](#food), only players can be selected when this parameter is added.
-
-- `@a[exhaustion=0.5..]`: Selects players whose exhaustion value is at least 0.5.
-
-See [the `/food` command](/documents/commands/food/en.md)》
-
-### fire
-
-Tests the remaining on-fire time (ticks to the file extinguish naturally). Can be inverted.
-
-- `@e[fire=1..]`: Selects entities whose remaining on-fire time is at least 1 (which mean currently on fire).
-- `@e[fire=20..]`: Selects entities whose remaining on-fire time is at least 20.
-
-### food
-
-Tests the food value of entities. Accepts integer ranges. Can be inverted.
-
-Only players have food values, so adding this parameter will only select players.
-
-- `@e[food=20]`: Select players whose food value is 20 (although `@e` is used, only players can be selected).
-- `@a[food=10..15]`: Select players whose food value is between 10 and 15.
-- `@a[food=!10]`: Select players whose food value is not 10.
-
-See [the `/food` command](/documents/commands/food/en.md).
-
-### health
-
-Tests the health value of entities. Accepts a range, or the keyword `max`. The parameter can be inverted. This parameter only selects health values of living entities. Entities such as minecarts and dropped items also have their special health values but can’t be used to select by the entity selector.
-
-- `@e[health=20]`: Selects living entities whose health value is 20.
-- `@e[health=!20]`: Selects living entities whose health value is not 20.
-- `@e[health=max]`: Selects living entities whose health value is the max value.
-- `@e[health=10..]`: Selects living entities whose health value is not less than 10.
-
-See [the `/health` command](/documents/commands/health/en.md).
-
-### is
-
-Specifies an [entity predicate](../entity_predicate) and only passes when the entity also matches the predicate. This means filtering entities selected. The option can be inverted, which is identical to [`not`](#not) in effect.
-
-- `@p[is=@s]`: The nearest entity, and meanwhile the entity should be the executor of the command.
-- `@a[is=@e[type=cow]]`: All players that are cows. This entity selector is valid but obviously cannot select any entity.
-- `@e[is=!@s]`: All entities except the command executor. Identical to `@e[not=@s]` in effect.
-
-### not
-
-Specifies an [entity predicate](../entity_predicate) and only passes when the entity does not match the predicate. This means excluding some entities selected. The option can be inverted, which is identical to [`is`](#is).
-
-- `@e[not=@s]`: All entities except the command executor.
-- `@e[not=[type=cow]]`: All entities except cows. Identical to `@e[type=!cow]` in effect.
-- `@e[not=@s, not=@pets]`: All entities except the command executor and pets of the command executor. Identical to `@e[alternatives=![@s, @pets]]` in effect.
-- `@e[type=cow, not=!@s]`: All cows that are the command executor. Identical to `@e[type=cow, is=@s]`, `@s[type=cow]`.
-
-### of
-
-Specifies an entity selector, used for some specific entity selector types such as `@pets`, `@vehicle`, meaning selecting relevant entities of the specified entities, instead of the relevant entities of the command executor. This option cannot be used once. See [#more entity selector types](#more-entity-selector-types).
-
-In other entity selectors, the option "`of`" can be used but has no effect.
-
-- `@pets`: All entities that the command executor tames. Identical to `@e[owner=@s]`.
-- `@pets[of=Alex]`: All entities that the player Alex tames. Identical to `@e[owner=Alex]`.
-- `@vehicle`: Entities that the command executor is riding.
-- `@vehicle[of=@a]`: Entities that any player is riding.
-- `@passengers`: All passengers of the command executor.
-- `@passengers[passengers=@e[type=horse]]`: All passengers of all horses.
-
-> Note: `@pets` cannot be used along with [the `owner` option](#owner), or parsing error will be caused. For example, to select all pets of Steve, you may use `@pets[of=Steve]` or `@e[owner=Steve]`, but cannot use `@pets[owner=Steve]`.
-
-### on_fire
-
-Tests whether the entity is on fire. Accepts a boolean value. If the entity is immune to fire, they’re seen as not on fire.
-
-- `@e[on_fire=true]`: Selects entities on fire (and not immune to fire).
-- `@e[on_fire=false]`: Selects entities not on fire (or immune to fire).
-
-This parameter can be inverted. For example, `@e[on_fire=true]` and `@e[on_fire=!false]` are equivalent.
-
-### owner
-
-Filter by entities' owners. The value can be an [entity predicate](../entity_predicate/en.md) or no value.
-
-This option can be inverted. When no value is specified, it selects untamed entities, including untamable entities.
-
-- `@e[owner=]`: Selects all entities not tamed, including untamable entities.
-- `@e[owner=!]`: Selects all tamed entities, regardless of the owner (can be players no in the current world).
-
-If a selector is provided as a value, then no matter inverted or not, entities can’t be selected when they’re untamable, the owner doesn’t exist, or not in this world.
-
-- `@e[owner=<实体谓词>]`: Selects all tamed entities whose owners match the specified entity predicate.
-- `@e[owner=!<实体谓词>]`: Selects all tamed entities whose owners don’t match the specified entity predicate.
-
-For example:
-
-- `@e[owner=Alice]`: Selects all entities tamed by player Alice. It fails when Alice is not in the world.
-- `@e[owner=!@p]`: Selects all entities tamed by any player who is not the nearest player to the execution position.
-- `@e[owner=@s]`: Selects all entities tamed by the executor of the command, similar to `@pets`.
-
-### pose
-
-Selects entities in the specified pose.
-
-- `@e[pose=crouching]`: Selects all crouching entities.
-- `@a[pose=!swimming]`: Selects all entities not swimming.
-
-### region
-
-Selects entities within a specified [region](/documents/arguments/region/en.md). Relative coordinates are local coordinates are supported, which are calculated according to the position and rotation of the command source (instead of the selected entities' position and rotation).
-
-- `@e[region=sphere(5)]`: Selects entities within a sphere range, whose center is the command source's position, and radius is 5.
-
-### saturation
-
-Tests the saturation of entity. Accepts float-point number ranges. Can be inverted. Similar to [`food`](#food), only players can be selected when this parameter is added.
-
-- `@e[saturation=5..]`: Selects players whose saturation is at least 5.
-- `@e[saturation=!0]`: Selects players whose saturation is not 0.
-
-See [the `/food` command](/documents/commands/food/en.md).
-
-### sneaking
-
-Tests whether the entity is sneaking. Players flying and descending will also be selected. This option is different from the loot predicate.
-
-- `@e[sneaking=true]`: Selects sneaking entities.
-- `@e[sneaking=false]`: Selects entities not sneaking.
-
-The parameter can be inverted but usually unnecessary. For example, `@e[sneaking=!true]` is equivalent to `@e[sneaking=false]`.
-
-### sprinting
-
-Tests whether the entity is sprinting. The parameter can be inverted.
-
-- `@e[sprinting=true]`: Selects sprinting entities.
-- `@a[sprinting=false]`: Selects entities not sprinting.
-
-### swimming
-
-Tests whether the entity is swimming. The parameter can be inverted.
-
-- `@e[swimming=true]`: Selects swimming entities.
-- `@a[swimming=false]`: Selects entities not swimming.
+## Entity selector parameters
+
+This mod supports all vanilla parameters, and also adds some extra parameters to support more functionalities. The parameters are also available in [entity predicates](../entity_predicate/en.md).
+
+### Vanilla parameters
+
+The mod supports all vanilla parameters. Some enhancements to vanilla parameters are already described in this article. Some vanilla parameters are listed here.
+
+Parameters not directly used as the predicate:
+
+- `limit`: Limits the count of entities selected. For [entity predicates based on selectors](../entity_predicate/selector/en.md), if this argument is provided, the predicate selects entities prior to testing the entity.
+- `x`, `y`, `z`: Sets the starting point of the entity distance and volume.
+- `dx`, `dy`, `dz`: Specifies the size of the cuboid range. It influences the chunk range of entity selection of the entity selector.
+- `distance`: Distance from the entity to the base point. The maximum value influences the chunk range of entity selection of the entity selector.
+    - When used as an entity predicate, the two parameters above form a special entity predicate "[`box`](../entity_predicate/box/en.md)" that makes judgment on entity positions.
+- `sort`: Sorting.
+
+Parameters directly used as the predicate:
+
+- [`advancements`](../entity_predicate/advancements/en.md): Tests the entity's advancement.
+- [`gamemode`](../entity_predicate/game_mode/en.md): Tests the player's game mode.
+- [`name`](../entity_predicate/name/en.md): Tests the entity's name.
+- [`nbt`](../entity_predicate/nbt/en.md): Tests the entity's NBT.
+- [`predicate`](../entity_predicate/loot_table_predicate/en.md): Tests the entity according to the loot table predicate.
+- [`scores`](../entity_predicate/scores/en.md): Tests the entity's scoreboard score.
+- [`tag`](../entity_predicate/tag/en.md): Tests the entity's scoreboard tag.
+- [`team`](../entity_predicate/team/en.md): Tests the entity's team.
+- [`type`](../entity_predicate/type/en.md): Tests the entity's type.
+- [`x_rotation`](../entity_predicate/pitch/en.md): Pitch angle.
+- [`y_rotation`](../entity_predicate/yaw/en.md): Yaw angle.
+
+### non-vanilla parameters
+
+- [`air`](../entity_predicate/air/en.md): Tests the air value of the entity. Accepts int ranges or the keyword `max` which means the max air value.
+    - `@e[air=5..]`: Selects entities whose air values aren’t less than 5.
+    - `@a[air=!..0]`: Selects entities whose air values are greater than 0.
+- [`alternatives`](../entity_predicate/alternatives/en.md): Specifying multiple entity predicates. The entity only needs to pass one of the predicate tests. Values of the parameters are wrapped in a square bracket, with multiple entity predicates inside; multiple entity predicates are separated with comma.
+    - `@e[alternatives=[[type=cow], [type=sheep]]]`: Selects all cows and sheep.
+    - `@a[alternatives=[Player1, Player2]]`: Selects Player1 and Player2.
+    - `@e[type=sheep, alternatives=[[tag=a], [tag=b]]]`: Within all sheep, select those with tag "a" or tag "b".
+    - `@e[type=sheep, alternatives=![[tag=a], [tag=b]]]`: Within all sheep, select those with neither tag "a" nor "b".
+- [`baby`](../entity_predicate/baby/en.md): Tests whether the entity is a baby. If the entity type doesn’t support baby entities, entities will be seen as non-babies.
+    - `@e[baby=true]`: Selects all baby entities.
+    - `@e[baby=false]`: Selects all entities who aren’t babies (including entities who can’t be babies).
+- [`block`](../entity_predicate/block/en.md): Tests the blocks where the entity is.
+    - `@e[block=air]`: Selects entities where the block is air.
+    - `@e[block=water|*[waterlogged=true]]`: Selects entities where the block is water or any waterlogged block.
+    - `@a[block={~~-1~=redstone_block}]`: Selects entities where the block at one block below is a redstone block.
+    - `@e[block={~~-1~=grass_block, ~~-2~=dirt}]`: Selects entities where the block at one block below is grass block and two blocks below is dirt.
+- [`effect`](../entity_predicate/effect/en.md): Tests the entity's status effect.
+    - `@a[effect=night_vision]`: All players with night vision effect.
+    - `@a[effect=strength, effect=speed]`: All player s with strength and speed effect.
+    - `@a[effect={strength=true, effect=true}]`: Equivalent to the previous example.
+    - `@a[effect=!fire_resistance]`: All players without fire resistance effect.
+    - `@a[effect={fire_resistance=false}]`: Equivalent to the previous example.
+    - `@a[effect={fire_resistance=!true}]`: Equivalent to the previous example.
+    - `@a[effect=!blindness, effect=night_vision]`: All players without blindness and with night vision.
+    - `@a[effect={blindness=false, night_vision=true}]`: Equivalent to the previous example.
+- [`exhaustion`](../entity_predicate/exhaustion/en.md): Tests the exhaustion value of the entity. Accepts float-point number ranges.
+    - `@a[exhaustion=0.5..]`: Selects players whose exhaustion value is at least 0.5.
+- [`fire`](../entity_predicate/fire/en.md): Tests the remaining on-fire time (ticks to the file extinguish naturally).
+    - `@e[fire=1..]`: Selects entities whose remaining on-fire time is at least 1 (which mean currently on fire).
+    - `@e[fire=20..]`: Selects entities whose remaining on-fire time is at least 20.
+- [`food`](../entity_predicate/food/en.md): Tests the food value of entities. Accepts integer ranges.
+    - `@e[food=20]`: Select players whose food value is 20 (although `@e` is used, only players can be selected).
+    - `@a[food=10..15]`: Select players whose food value is between 10 and 15.
+    - `@a[food=!10]`: Select players whose food value is not 10.
+- [`health`](../entity_predicate/health/en.md): Tests the health value of entities. Accepts a range, or the keyword `max`. The parameter can be inverted. This parameter only selects health values of living entities. Entities such as minecarts and dropped items also have their special health values but can’t be used to select by the entity selector.
+    - `@e[health=20]`: Selects living entities whose health value is 20.
+    - `@e[health=!20]`: Selects living entities whose health value is not 20.
+    - `@e[health=max]`: Selects living entities whose health value is the max value.
+    - `@e[health=10..]`: Selects living entities whose health value is not less than 10.
+- [`is`](../entity_predicate/sub_predicate/en.md): Specifies an [entity predicate](../entity_predicate) and only passes when the entity also matches the predicate. This means filtering entities selected. The option can be inverted, which is identical to [`not`](../entity_predicate/sub_predicate/en.md) in effect.
+    - `@p[is=@s]`: The nearest entity, and meanwhile the entity should be the executor of the command.
+    - `@a[is=@e[type=cow]]`: All players that are cows. This entity selector is valid but obviously cannot select any entity.
+    - `@e[is=!@s]`: All entities except the command executor. Identical to `@e[not=@s]` in effect.
+- [`not`](../entity_predicate/sub_predicate/en.md): Specifies an [entity predicate](../entity_predicate) and only passes when the entity does not match the predicate. This means excluding some entities selected. The option can be inverted, which is identical to [`is`](../entity_predicate/sub_predicate/en.md).
+    - `@e[not=@s]`: All entities except the command executor.
+    - `@e[not=[type=cow]]`: All entities except cows. Identical to `@e[type=!cow]` in effect.
+    - `@e[not=@s, not=@pets]`: All entities except the command executor and pets of the command executor. Identical to `@e[alternatives=![@s, @pets]]` in effect.
+    - `@e[type=cow, not=!@s]`: All cows that are the command executor. Identical to `@e[type=cow, is=@s]`, `@s[type=cow]`.
+- `of`: Specifies an entity selector, used for some specific entity selector types such as `@pets`, `@vehicle`, meaning selecting relevant entities of the specified entities, instead of the relevant entities of the command executor. This option cannot be used once. See [#more entity selector types](#more-entity-selector-types). In other entity selectors, the option "`of`" can be used but has no effect.
+    - `@pets`: All entities that the command executor tames. Identical to `@e[owner=@s]`.
+    - `@pets[of=Alex]`: All entities that the player Alex tames. Identical to `@e[owner=Alex]`.
+    - `@vehicle`: Entities that the command executor is riding.
+    - `@vehicle[of=@a]`: Entities that any player is riding.
+    - `@passengers`: All passengers of the command executor.
+    - `@passengers[passengers=@e[type=horse]]`: All passengers of all horses.
+- [`on_fire`](../entity_predicate/on_fire/en.md): Tests whether the entity is on fire. Accepts a boolean value. If the entity is immune to fire, they’re seen as not on fire.
+    - `@e[on_fire=true]`: Selects entities on fire (and not immune to fire).
+    - `@e[on_fire=false]`: Selects entities not on fire (or immune to fire).
+- [`owner`](../entity_predicate/owner/en.md): Filter by entities' owners. The value can be an [entity predicate](../entity_predicate/en.md) or no value.
+    - `@e[owner=]`: Selects all entities not tamed, including untamable entities.
+    - `@e[owner=!]`: Selects all tamed entities, regardless of the owner (can be players no in the current world).
+    - `@e[owner=Alice]`: Selects all entities tamed by player Alice. It fails when Alice is not in the world.
+    - `@e[owner=!@p]`: Selects all entities tamed by any player who is not the nearest player to the execution position.
+    - `@e[owner=@s]`: Selects all entities tamed by the executor of the command, similar to `@pets`.
+- [`pose`](../entity_predicate/pose/en.md): Selects entities in the specified pose.
+    - `@e[pose=crouching]`: Selects all crouching entities.
+    - `@a[pose=!swimming]`: Selects all entities not swimming.
+- [`region`](../entity_predicate/region/en.md): Selects entities within a specified [region](/documents/arguments/region/en.md). Relative coordinates are local coordinates are supported, which are calculated according to the position and rotation of the command source (instead of the selected entities' position and rotation).
+    - `@e[region=sphere(5)]`: Selects entities within a sphere range, whose center is the command source's position, and radius is 5.
+- [`saturation`](../entity_predicate/saturation/en.md): Tests the saturation of entity. Accepts float-point number ranges. Can be inverted.
+    - `@e[saturation=5..]`: Selects players whose saturation is at least 5.
+    - `@e[saturation=!0]`: Selects players whose saturation is not 0.
+- [`sneaking`](../entity_predicate/sneaking/en.md): Tests whether the entity is sneaking. Players flying and descending will also be selected. This option is different from the loot predicate.
+    - `@e[sneaking=true]`: Selects sneaking entities.
+    - `@e[sneaking=false]`: Selects entities not sneaking.
+- [`sprinting`](../entity_predicate/sprinting/en.md): Tests whether the entity is sprinting. The parameter can be inverted.
+    - `@e[sprinting=true]`: Selects sprinting entities.
+    - `@a[sprinting=false]`: Selects entities not sprinting.
+- [`swimming`](../entity_predicate/swimming/en.md): Tests whether the entity is swimming. The parameter can be inverted.
+    - `@e[swimming=true]`: Selects swimming entities.
+    - `@a[swimming=false]`: Selects entities not swimming.
 
 ## Data structure
 

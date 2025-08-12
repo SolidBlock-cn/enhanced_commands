@@ -138,180 +138,120 @@
 
 当你在输入实体选择器时出现错误时，无论是输入错了某个参数，还是输入了某个不存在或者重复的参数，模组可以提供更加详细的错误提示，例如提示某个参数是重复的，或者在特定的选择器类型中是不支持的。
 
-## 额外的参数
-
-在原版的实体选择器的基础上，本模组还加入了一些额外的参数以支持更多的功能。这些参数在[实体谓词](../entity_predicate/zh.md)中同样可用。
-
-### air
-
-测试实体的空气值。可以接受整数范围或关键字 `max` 表示最大空气值。可以取反。
-
-- `@e[air=5..]`：选择空气值不少于 5 的实体。
-- `@a[air=!..0]`：选择空气值大于 0 的实体。
-
-参见 [`/air` 命令](/documents/commands/air/zh.md)。
-
-### alternatives
-
-指定多个实体谓词，当实体符合这组谓词中的任意一个时通过。该参数的值需要用中括号括起来，里面是多个实体谓词，多个实体谓词用逗号隔开。此参数支持取反。
-
-- `@e[alternatives=[[type=cow], [type=sheep]]]`：选择所有的牛和羊。
-- `@a[alternatives=[Player1, Player2]]`：选择 Player1 和 Player2。
-- `@e[type=sheep, alternatives=[[tag=a], [tag=b]]]`：在所有的羊中，选择有 a 或 b 标签的。
-- `@e[type=sheep, alternatives=![[tag=a], [tag=b]]]`：在所有的羊中，选择既没有 a 也没有 b 标签的。
-
-### baby
-
-测试实体是否为幼年实体。如果实体类型不存在幼年实体，则视为未幼年实体。
-
-- `@e[baby=true]`：选择所有幼年实体。
-- `@e[baby=false]`：选择所有非幼年（包括不存在幼年状态）的实体。
-
-此参数可以取反。例如，`@e[baby=!true]` 等价于 `@e[baby=false]`。
-
-### exhaustion
-
-测试实体的消耗度。可以接受浮点数范围。可以取反。和 [`food`](#food) 类似，加入此参数将只能选择玩家。
-
-- `@a[exhaustion=0.5..]`：选择消耗度至少为 0.5 的玩家。
-
-参见 [`/food` 命令](/documents/commands/food/zh.md)。
-
-### fire
-
-测试实体的剩余着火时间（离火自然熄灭所需要的刻数）。可以取反。
-
-- `@e[fire=1..]`：选择剩余着火时间至少为 1（即正在着火）的实体。
-- `@e[fire=20..]`：选择剩余着火时间至少为 20 的实体。
-
-### food
-
-测试实体的饱食度。可以接受整数范围。可以取反。
-
-只有玩家有饱食度，因此加入此参数将只能选择玩家。
-
-- `@e[food=20]`：选择饱食度为 20 的玩家（尽管是 `@e`，但只能玩家能被选择）。
-- `@a[food=10..15]`：选择饱食度在 10 至 15 之间的玩家。
-- `@a[food=!10]`：选择饱食度不为 10 的玩家。
-
-参见 [`/food` 命令](/documents/commands/food/zh.md)。
-
-### health
-
-测试实体的生命值，可以接受一个范围或者关键字 `max`。参数可以取反。无论参数是否取反，此参数都将只能够选择生物的生命值，矿车、掉落的物品等实体虽有特殊的生命值但是不会实体选择器用于选择。
-
-- `@e[health=20]`：选择所有生命值为 20 的生物。
-- `@e[health=!20]`：选择所有生命值不为 20 的生物。
-- `@e[health=max]`：选择生命值为最大值的生物。
-- `@e[health=10..]`：选择生命值不小于 10 的生物。
-
-参见 [`/health` 命令](/documents/commands/health/zh.md)。
-
-### is
-
-指定一个[实体谓词](../entity_predicate/zh.md)，只有当实体同时也符合此谓词时也通过。这意味着筛选选择到的实体。此选项支持取反，效果上将相当于 [`not`](#not)。
-
-- `@p[is=@s]`：距离最近的实体，同时该实体也得是命令的执行者。
-- `@a[is=@e[type=cow]]`：所有是牛的玩家，该实体选择器有效但显然选择不到实体。
-- `@e[is=!@s]`：除了命令执行者之外的所有实体，效果上相当于 `@e[not=@s]`。
-
-### not
-
-指定一个[实体谓词](../entity_predicate/zh.md)，只有当实体不符合此谓词时通过。这意味着排除部分选择到的实体。此选项支持取反，效果上相当于 [`is`](#is)。
-
-- `@e[not=@s]`：除了命令执行者之外的所有实体。
-- `@e[not=[type=cow]]`：除了牛之外的所有实体，效果上相当于 `@e[type=!cow]`。
-- `@e[not=@s, not=@pets]`：除了命令执行者和命令执行者的宠物之外的所有实体，效果上相当于 `@e[alternatives=![@s, @pets]]`。
-- `@e[type=cow, not=!@s]`：所有是命令执行者的牛，效果上相当于 `@e[type=cow, is=@s]`、`@s[type=cow]`。
-
-### of
-
-指定一个实体选择器，用于 `@pets`、`@vehicle` 等特定的实体选择器类型，表示选择指定实体的相关实体，而非命令执行者的相关实体。此选项只允许使用一次。参见[更多的实体选择器类型](#更多的实体选择器类型)。
-
-在其他选择器中，`of` 选项可以使用，但没有效果。
-
-- `@pets`：命令执行者驯养的所有实体。相当于 `@e[owner=@s]`。
-- `@pets[of=Alex]`：玩家 Alex 驯养的所有实体。相当于 `@e[owner=Alex]`。
-- `@vehicle`：命令执行者正在骑乘的实体。
-- `@vehicle[of=@a]`：任意玩家正在骑乘的实体。
-- `@passengers`：命令执行者的所有乘客。
-- `@passengers[passengers=@e[type=horse]]`：所有马的所有乘客。
-
-> 注意：`@pets` 不能与 [`owner` 选项](#owner)混用，否则会解析错误。例如，要选择 Steve 的所有宠物，可以使用 `@pets[of=Steve]` 或 `@e[owner=Steve]`，但是不能使用 `@pets[owner=Steve]`。
-
-### on_fire
-
-测试实体是否存在着火。接一个布尔值。如果实体本身是对火免疫的，则一律视为未着火的。
-
-- `@e[on_fire=true]`：选择所有正在着火（且不能免疫火）的实体。
-- `@e[on_fire=false]`：选择所有未着火（或对火免疫）的实体。
-
-此选项支持取反，例如，`@e[on_fire=true]` 与 `@e[on_fire=!false]` 等价。
-
-### owner
-
-对实体的拥有者筛选。后面接一个[实体谓词](../entity_predicate/zh.md)，或者不接。
-
-此选项支持取反。后面没有接内容时，选择没有被驯养的实体，包括无法被驯养的实体。
-
-- `@e[owner=]`：选择所有未被驯养的实体，包括无法被驯养的实体。
-- `@e[owner=!]`：选择所有被驯养的实体，不管该实体的驯养者是谁（可以是不在当前世界上的玩家）。
-
-如果后面接了选择器，则无论是否取反，当实体无法驯养、没有驯养者或驯养者不在世界上时，无法选择到。
-
-- `@e[owner=<实体谓词>]`：选择所有被驯养，且驯养者符合指定的实体谓词的实体。
-- `@e[owner=!<实体谓词>]`：选择所有被驯养，且驯养者不符合指定的实体谓词的实体。
-
-例如：
-
-- `@e[owner=Alice]`：选择被玩家 Alice 驯养的所有实体。当 Alice 不在世界上时失效。
-- `@e[owner=!@p]`：选择被世界上除了距离命令执行位置最近的玩家之外的玩家驯养的所有实体。
-- `@e[owner=@s]`：选择被命令执行者驯养的所有实体，类似于 `@pets`。
-
-### pose
-
-选择指定姿势的实体。
-
-- `@e[pose=crouching]`：选择所有正在爬行的实体。
-- `@a[pose=!swimming]`：选择所有未在游泳的实体。
-
-### region
-
-选择指定的[区域](/documents/arguments/region/zh.md)内的实体。支持使用相对坐标和局部坐标，会根据命令源的位置和朝向（而不是被选择的实体的位置和朝向）来计算。
-
-- `@e[region=sphere(5)]`：选择距离命令源为中心。半径为 5 的球体范围内的实体。
-
-### saturation
-
-测试实体的饱和度。可以接受浮点数范围。可以取反。和 [`food`](#food) 类似，加入此参数将只能选择玩家。
-
-- `@e[saturation=5..]`：选择饱和度至少为 5 的玩家。
-- `@e[saturation=!0]`：选择饱和度不为 0 的玩家。
-
-参见 [`/food` 命令](/documents/commands/food/zh.md)。
-
-### sneaking
-
-测试实体是否正在潜行。飞行模式下玩家下降时也会被选中。此选项与战利品表中的谓词不同。
-
-- `@e[sneaking=true]`：选择所有正在潜行的实体。
-- `@e[sneaking=false]`：选择所有未在潜行的实体。
-
-此参数可以取反，但是通常没有必要。例如，`@e[sneaking=!true]` 等价于 `@e[sneaking=false]`。
-
-### sprinting
-
-测试实体是否存在疾跑。此参数可以取反。
-
-- `@e[sprinting=true]`：选择正在疾跑的实体。
-- `@a[sprinting=false]`：选择未在疾跑的实体。
-
-### swimming
-
-测试实体是否存在游泳。此参数可以取反。
-
-- `@e[swimming=true]`：选择正在游泳的实体。
-- `@a[swimming=false]`：选择未在游泳的实体。
+## 实体选择器参数
+
+本模组支持原版的实体选择器参数，并还加入了一些额外的参数以支持更多的功能。这些参数在[实体谓词](../entity_predicate/zh.md)中同样可用。
+
+### 原版的参数
+
+本模组支持所有原版参数。部分对原版参数的增强已在前面列举出。这里列举出原版的部分参数。
+
+非直接作为谓词的参数：
+
+- `limit`：限制选择到的实体的个数。对于[基于选择器的实体谓词](../entity_predicate/selector/zh.md)，如果指定了此参数，则谓词在作用时会先选择实体再判断。
+- `x`、`y`、`z`：设置实体距离以及体积的基准点。
+- `dx`、`dy`、`dz`：指定长方体范围的大小。将影响实体选择器选择实体时选择的区块的范围。
+- `distance`：实体到基准点的距离。距离的最大值将影响实体选择器选择实体时选择的区块的范围。
+    - 作为实体谓词时，上述两个参数均会形成特殊的实体谓词 [`box`](../entity_predicate/box/zh.md)，从而判断实体的位置。
+- `sort`：排序方式。
+
+直接作为谓词的参数：
+
+- [`advancements`](../entity_predicate/advancements/zh.md)：测试实体的进度。
+- [`gamemode`](../entity_predicate/game_mode/zh.md)：测试玩家的游戏模式。
+- [`name`](../entity_predicate/name/zh.md)：测试实体的名字。
+- [`nbt`](../entity_predicate/nbt/zh.md)：测试实体的 NBT。
+- [`predicate`](../entity_predicate/loot_table_predicate/zh.md)：使用战利品表谓词进行测试。
+- [`scores`](../entity_predicate/scores/zh.md)：测试实体的记分板分数。
+- [`tag`](../entity_predicate/tag/zh.md)：测试实体的记分板标签。
+- [`team`](../entity_predicate/team/zh.md)：测试实体的队伍。
+- [`type`](../entity_predicate/type/zh.md)：测试实体的类型。
+- [`x_rotation`](../entity_predicate/pitch/zh.md)：俯仰角。
+- [`y_rotation`](../entity_predicate/yaw/zh.md)：偏航角。
+
+### 非原版的参数
+
+- [`air`](../entity_predicate/air/zh.md)：测试实体的空气值。可以接受整数范围或关键字 `max` 表示最大空气值。可以取反。
+    - `@e[air=5..]`：选择空气值不少于 5 的实体。
+    - `@a[air=!..0]`：选择空气值大于 0 的实体。
+- [`alternatives`](../entity_predicate/alternatives/zh.md)：指定多个实体谓词，当实体符合这组谓词中的任意一个时通过。该参数的值需要用中括号括起来，里面是多个实体谓词，多个实体谓词用逗号隔开。
+    - `@e[alternatives=[[type=cow], [type=sheep]]]`：选择所有的牛和羊。
+    - `@a[alternatives=[Player1, Player2]]`：选择 Player1 和 Player2。
+    - `@e[type=sheep, alternatives=[[tag=a], [tag=b]]]`：在所有的羊中，选择有 a 或 b 标签的。
+    - `@e[type=sheep, alternatives=![[tag=a], [tag=b]]]`：在所有的羊中，选择既没有 a 也没有 b 标签的。
+- [`baby`](../entity_predicate/baby/zh.md)：测试实体是否为幼年实体。如果实体类型不存在幼年实体，则视为未幼年实体。
+    - `@e[baby=true]`：选择所有幼年实体。
+    - `@e[baby=false]`：选择所有非幼年（包括不存在幼年状态）的实体。
+- [`block`](../entity_predicate/block/zh.md)：测试实体所在位置的方块。
+    - `@e[block=air]`：选择所在位置为空气的实体。
+    - `@e[block=water|*[waterlogged=true]]`：选择所在位置为水或任意含水方块的实体。
+    - `@a[block={~~-1~=redstone_block}]`：选择下方一格位置为红石块的玩家。
+    - `@e[block={~~-1~=grass_block, ~~-2~=dirt}]`：选择下方一格位置为草方块，且下方两格位置为泥土的玩家。
+- [`effect`](../entity_predicate/effect/zh.md)：测试实体的状态效果。
+    - `@a[effect=night_vision]`：所有拥有夜视效果的玩家。
+    - `@a[effect=strength, effect=speed]`：所有拥有力量和速度效果的玩家。
+    - `@a[effect={strength=true, effect=true}]`：等价于上一个例子。
+    - `@a[effect=!fire_resistance]`：所有没有抗火效果的玩家。
+    - `@a[effect={fire_resistance=false}]`：等价于上一个例子。
+    - `@a[effect={fire_resistance=!true}]`：等价于上一个例子。
+    - `@a[effect=!blindness, effect=night_vision]`：所有没有失明效果但有夜视效果的玩家。
+    - `@a[effect={blindness=false, night_vision=true}]`：等价于上一个例子。
+- [`exhaustion`](../entity_predicate/exhaustion/zh.md)：测试实体的消耗度。可以接受浮点数范围。
+    - `@a[exhaustion=0.5..]`：选择消耗度至少为 0.5 的玩家。
+- [`fire`](../entity_predicate/fire/zh.md)：测试实体的剩余着火时间（离火自然熄灭所需要的刻数）。
+    - `@e[fire=1..]`：选择剩余着火时间至少为 1（即正在着火）的实体。
+    - `@e[fire=20..]`：选择剩余着火时间至少为 20 的实体。
+- [`food`](../entity_predicate/food/zh.md)：测试实体的饱食度。可以接受整数范围。
+    - `@e[food=20]`：选择饱食度为 20 的玩家（尽管是 `@e`，但只能玩家能被选择）。
+    - `@a[food=10..15]`：选择饱食度在 10 至 15 之间的玩家。
+    - `@a[food=!10]`：选择饱食度不为 10 的玩家。
+- [`health`](../entity_predicate/health/zh.md)：测试实体的生命值，可以接受一个范围或者关键字 `max`。参数可以取反。无论参数是否取反，此参数都将只能够选择生物的生命值，矿车、掉落的物品等实体虽有特殊的生命值但是不会实体选择器用于选择。
+    - `@e[health=20]`：选择所有生命值为 20 的生物。
+    - `@e[health=!20]`：选择所有生命值不为 20 的生物。
+    - `@e[health=max]`：选择生命值为最大值的生物。
+    - `@e[health=10..]`：选择生命值不小于 10 的生物。
+- [`is`](../entity_predicate/sub_predicate/zh.md)：指定一个[实体谓词](../entity_predicate/zh.md)，只有当实体同时也符合此谓词时也通过。这意味着筛选选择到的实体。此选项支持取反，效果上将相当于 [`not`](../entity_predicate/sub_predicate/zh.md)。
+    - `@p[is=@s]`：距离最近的实体，同时该实体也得是命令的执行者。
+    - `@a[is=@e[type=cow]]`：所有是牛的玩家，该实体选择器有效但显然选择不到实体。
+    - `@e[is=!@s]`：除了命令执行者之外的所有实体，效果上相当于 `@e[not=@s]`。
+- [`not`](../entity_predicate/sub_predicate/zh.md)：指定一个[实体谓词](../entity_predicate/zh.md)，只有当实体不符合此谓词时通过。这意味着排除部分选择到的实体。此选项支持取反，效果上相当于 [`is`](../entity_predicate/sub_predicate/zh.md)。
+    - `@e[not=@s]`：除了命令执行者之外的所有实体。
+    - `@e[not=[type=cow]]`：除了牛之外的所有实体，效果上相当于 `@e[type=!cow]`。
+    - `@e[not=@s, not=@pets]`：除了命令执行者和命令执行者的宠物之外的所有实体，效果上相当于 `@e[alternatives=![@s, @pets]]`。
+    - `@e[type=cow, not=!@s]`：所有是命令执行者的牛，效果上相当于 `@e[type=cow, is=@s]`、`@s[type=cow]`。
+- `of`：指定一个实体选择器，用于 `@pets`、`@vehicle` 等特定的实体选择器类型，表示选择指定实体的相关实体，而非命令执行者的相关实体。此选项只允许使用一次。参见[更多的实体选择器类型](#更多的实体选择器类型)。在其他选择器中，`of` 选项可以使用，但没有效果。
+    - `@pets`：命令执行者驯养的所有实体。相当于 `@e[owner=@s]`。
+    - `@pets[of=Alex]`：玩家 Alex 驯养的所有实体。相当于 `@e[owner=Alex]`。
+    - `@vehicle`：命令执行者正在骑乘的实体。
+    - `@vehicle[of=@a]`：任意玩家正在骑乘的实体。
+    - `@passengers`：命令执行者的所有乘客。
+    - `@passengers[passengers=@e[type=horse]]`：所有马的所有乘客。
+- [`on_fire`](../entity_predicate/on_fire/zh.md)：测试实体是否存在着火。接一个布尔值。如果实体本身是对火免疫的，则一律视为未着火的。
+    - `@e[on_fire=true]`：选择所有正在着火（且不能免疫火）的实体。
+    - `@e[on_fire=false]`：选择所有未着火（或对火免疫）的实体。
+- [`owner`](../entity_predicate/owner/zh.md)：测试实体的拥有者。后面接一个[实体谓词](../entity_predicate/zh.md)，或者不接。
+    - `@e[owner=]`：选择所有未被驯养的实体，包括无法被驯养的实体。
+    - `@e[owner=!]`：选择所有被驯养的实体，不管该实体的驯养者是谁（可以是不在当前世界上的玩家）。
+    - `@e[owner=Alice]`：选择被玩家 Alice 驯养的所有实体。当 Alice 不在世界上时失效。
+    - `@e[owner=!@p]`：选择被世界上除了距离命令执行位置最近的玩家之外的玩家驯养的所有实体。
+    - `@e[owner=@s]`：选择被命令执行者驯养的所有实体，类似于 `@pets`。
+- [`pose`](../entity_predicate/pose/zh.md)：选择指定姿势的实体。
+    - `@e[pose=crouching]`：选择所有正在爬行的实体。
+    - `@a[pose=!swimming]`：选择所有未在游泳的实体。
+- [`region`](../entity_predicate/region/zh.md)：选择指定的[区域](/documents/arguments/region/zh.md)内的实体。支持使用相对坐标和局部坐标，会根据命令源的位置和朝向（而不是被选择的实体的位置和朝向）来计算。
+    - `@e[region=sphere(5)]`：选择距离命令源为中心。半径为 5 的球体范围内的实体。
+- [`saturation`](../entity_predicate/saturation/zh.md)：测试实体的饱和度。可以接受浮点数范围。
+    - `@e[saturation=5..]`：选择饱和度至少为 5 的玩家。
+    - `@e[saturation=!0]`：选择饱和度不为 0 的玩家。
+- [`sneaking`](../entity_predicate/sneaking/zh.md)：测试实体是否正在潜行。飞行模式下玩家下降时也会被选中。此选项与战利品表中的谓词不同。
+    - `@e[sneaking=true]`：选择所有正在潜行的实体。
+    - `@e[sneaking=false]`：选择所有未在潜行的实体。
+- [`sprinting`](../entity_predicate/sprinting/zh.md)：测试实体是否存在疾跑。
+    - `@e[sprinting=true]`：选择正在疾跑的实体。
+    - `@a[sprinting=false]`：选择未在疾跑的实体。
+- [`swimming`](../entity_predicate/swimming/zh.md)：测试实体是否存在游泳。此参数可以取反。
+    - `@e[swimming=true]`：选择正在游泳的实体。
+    - `@a[swimming=false]`：选择未在游泳的实体。
 
 ## 数据结构
 

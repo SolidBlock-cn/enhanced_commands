@@ -16,11 +16,11 @@ import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
-public record DistanceBlockPredicate(NumberRange.DoubleRange distance, PositionOffsetInfo info) implements SpecialEntityPredicate {
-  public static final MapCodec<DistanceBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      NumberRange.DoubleRange.CODEC.fieldOf("distance").forGetter(DistanceBlockPredicate::distance),
-      PositionOffsetInfo.CODEC.codec().optionalFieldOf("info", PositionOffsetInfo.NO_OP).forGetter(DistanceBlockPredicate::info)
-  ).apply(i, DistanceBlockPredicate::new));
+public record DistanceEntityPredicate(NumberRange.DoubleRange distance, PositionOffsetInfo info) implements SpecialEntityPredicate {
+  public static final MapCodec<DistanceEntityPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      NumberRange.DoubleRange.CODEC.fieldOf("distance").forGetter(DistanceEntityPredicate::distance),
+      PositionOffsetInfo.CODEC.codec().optionalFieldOf("info", PositionOffsetInfo.NO_OP).forGetter(DistanceEntityPredicate::info)
+  ).apply(i, DistanceEntityPredicate::new));
   private static final LoadingCache<@NotNull PositionOffsetInfo, LoadingCache<@NotNull ExecutionContext, Vec3d>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(po -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(context -> po.apply(context.positionProvider.position$ec())))));
 
   @Override
@@ -41,7 +41,7 @@ public record DistanceBlockPredicate(NumberRange.DoubleRange distance, PositionO
   }
 
   @Override
-  public @NotNull EntityPredicateType<DistanceBlockPredicate> getType() {
+  public @NotNull EntityPredicateType<DistanceEntityPredicate> getType() {
     return EntityPredicateTypes.DISTANCE;
   }
 
