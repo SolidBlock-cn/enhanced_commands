@@ -68,7 +68,7 @@ public enum MoonCommand implements CommandRegistrationCallback {
     final ServerCommandSource source = context.getSource();
     final ServerWorld world = source.getWorld();
     final long timeOfDay = world.getTimeOfDay();
-    world.setTimeOfDay(timeOfDay + steps * 24000L);
+    world.setTimeOfDay(timeOfDay + Math.floorMod(steps, 8) * 24000L);
     final MoonPhase moonPhase = MoonPhase.byNumericId(world.getMoonPhase());
     source.sendFeedback$ecBridge(() -> steps >= 0 ? Text.translatable("enhanced_commands.commands.moon.phase.rotate.next", TextUtil.literal(steps).styled(Styles.TARGET), TextUtil.styled(moonPhase.displayName, Styles.RESULT)) : Text.translatable("enhanced_commands.commands.moon.phase.rotate.previous", TextUtil.literal(-steps).styled(Styles.TARGET), TextUtil.styled(moonPhase.displayName, Styles.RESULT)), true);
     return 1;

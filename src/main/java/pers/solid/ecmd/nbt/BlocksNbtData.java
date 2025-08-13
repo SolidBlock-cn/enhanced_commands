@@ -25,6 +25,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
@@ -38,6 +39,7 @@ import pers.solid.ecmd.util.parse.ParseContext;
 import pers.solid.ecmd.util.parse.ParsingUtil;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public record BlocksNbtData(RegionArgument<?> region, BlockPredicate blockPredicate) implements NbtTarget<BlockEntity> {
@@ -60,15 +62,39 @@ public record BlocksNbtData(RegionArgument<?> region, BlockPredicate blockPredic
     final ImmutableList<BlockEntity> blockEntities;
     final BlockBox blockBox = region.minContainingBlockBox();
     if (region.numberOfBlocksAffected() < 32L || blockBox == null) {
-      blockEntities = region.stream().map(world::getBlockEntity).filter(Objects::nonNull).collect(ImmutableList.toImmutableList());
+      // 区域较小的情况下，可以直接迭代区域中的所有方块坐标，并筛选实体。
+      final Stream<@NotNull BlockEntity> stream;
+      if (blockPredicate != null) {
+        final ExecutionContext context = new ExecutionContext(world.getRandom(), source, null);
+        stream = region
+            .stream()
+            .mapMulti((@NotNull BlockPos blockPos, Consumer<BlockEntity> consumer) -> {
+              // 在有方块谓词的情况下，在已有实体的情况下对谓词进行测试。
+              final BlockEntity blockEntity = world.getBlockEntity(blockPos);
+              if (blockEntity != null) {
+                final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, false);
+                if (blockPredicate.test(cachedBlockPosition, context)) {
+                  consumer.accept(blockEntity);
+                }
+              }
+            });
+      } else {
+        stream = region.stream().map(world::getBlockEntity).filter(Objects::nonNull);
+      }
+      blockEntities = stream.collect(ImmutableList.toImmutableList());
     } else {
+      // 区域较大的情况下，迭代所涉区块内的所有实体，并对实体测试区域范围。
       Set<WorldChunk> affectedChunks = new HashSet<>();
       for (BlockPos shrunkPos : BlockPos.iterate(MathHelper.floorDiv(blockBox.getMinX(), 16), 0, MathHelper.floorDiv(blockBox.getMinZ(), 16), MathHelper.floorDiv(blockBox.getMaxX(), 16), 0, MathHelper.floorDiv(blockBox.getMaxZ(), 16))) {
         final WorldChunk worldChunk = world.getChunkManager().getWorldChunk(shrunkPos.getX(), shrunkPos.getZ());
         if (worldChunk != null) affectedChunks.add(worldChunk);
       }
-      Stream<Map.Entry<BlockPos, BlockEntity>> stream = affectedChunks.stream().flatMap(worldChunk -> worldChunk.getBlockEntities().entrySet().stream()).filter(entry -> region.contains(entry.getKey()));
+      Stream<Map.Entry<BlockPos, BlockEntity>> stream = affectedChunks
+          .stream()
+          .flatMap(worldChunk -> worldChunk.getBlockEntities().entrySet().stream())
+          .filter(entry -> region.contains(entry.getKey()));
       if (blockPredicate != null) {
+        // 在有方块谓词的情况下，对已有的方块实体坐标测试方块谓词。
         final ExecutionContext context = new ExecutionContext(world.getRandom(), source, null);
         stream = stream.filter(entry -> blockPredicate.test(new CachedBlockPosition(world, entry.getKey(), false), context));
       }

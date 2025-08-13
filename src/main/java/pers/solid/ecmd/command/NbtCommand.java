@@ -103,6 +103,7 @@ public enum NbtCommand implements CommandRegistrationCallback {
         final NbtElement applied = nbtFunction.apply(nbtElement, executionContext);
         if (!applied.equals(old)) {
           success.increment();
+          return applied;
         }
         return nbtElement;
       });
@@ -130,7 +131,7 @@ public enum NbtCommand implements CommandRegistrationCallback {
   }
 
   private static int executeSubstring(Optional<Integer> endIndex, CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
-    final int startIndex = getInteger(context, "startIndex");
+    final int startIndex = getInteger(context, "start_index");
     final SubstringNbtFunction nbtFunction = new SubstringNbtFunction(startIndex, endIndex, keywordArgs.getBoolean("lenient"), Optional.empty());
     return executeApply(nbtFunction, success -> Text.translatable("enhanced_commands.commands.nbt.substring.success", success), context);
   }
@@ -154,6 +155,7 @@ public enum NbtCommand implements CommandRegistrationCallback {
         .addOptionalArg("lenient", BoolArgumentType.bool(), false)
         .build();
     final KeywordArgsArgumentType substringKeywordArgs = KeywordArgsArgumentType.builder()
+        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess), null)
         .addOptionalArg("lenient", BoolArgumentType.bool(), false)
         .build();
 
@@ -203,12 +205,16 @@ public enum NbtCommand implements CommandRegistrationCallback {
                             .then(argument("keyword_args", transformKeywordArgs)
                                 .executes(context -> executeRegexReplace(context, getKeywordArgs(context, "keyword_args")))))))))
         .then(literal("substring")
-            .then(argument("startIndex", integer())
-                .executes(context -> executeSubstring(Optional.empty(), context, substringKeywordArgs.defaultArgs()))
-                .then(argument("endIndex", integer())
-                    .executes(context -> executeSubstring(Optional.of(getInteger(context, "end_index")), context, substringKeywordArgs.defaultArgs()))
-                    .then(argument("keyword_args", substringKeywordArgs)
-                        .executes(context -> executeSubstring(Optional.of(getInteger(context, "end_index")), context, getKeywordArgs(context, "keyword_args")))))))
+            .then(argument("target", nbtTarget(commandRegistryAccess))
+                .then(argument("path", nbtPath())
+                    .then(argument("start_index", integer())
+                        .executes(context -> executeSubstring(Optional.empty(), context, substringKeywordArgs.defaultArgs()))
+                        .then(argument("keyword_args", substringKeywordArgs)
+                            .executes(context -> executeSubstring(Optional.empty(), context, getKeywordArgs(context, "keyword_args"))))
+                        .then(argument("end_index", integer())
+                            .executes(context -> executeSubstring(Optional.of(getInteger(context, "end_index")), context, substringKeywordArgs.defaultArgs()))
+                            .then(argument("keyword_args", substringKeywordArgs)
+                                .executes(context -> executeSubstring(Optional.of(getInteger(context, "end_index")), context, getKeywordArgs(context, "keyword_args")))))))))
         .then(literal("remove")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("path", nbtPath())

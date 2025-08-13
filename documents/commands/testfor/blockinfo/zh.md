@@ -36,3 +36,4 @@
 ## 参见
 
 - [`/testfor`](../zh.md)
+- [`/if|unless blockinfo`](../../if_and_unless/blockinfo/zh.md)

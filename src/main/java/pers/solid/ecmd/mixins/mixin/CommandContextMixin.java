@@ -22,7 +22,10 @@ public abstract class CommandContextMixin<S> {
   @ModifyExpressionValue(method = "getArgument", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"))
   public Object getAddedArgument(Object original, @Local(argsOnly = true) String name) {
     if (original == null && source instanceof ServerCommandSourceExtension extension) {
-      return new ParsedArgument<>(0, 0, extension.getExtraArguments$ec().get(name));
+      final Object get = extension.getExtraArguments$ec().get(name);
+      if (get != null) {
+        return new ParsedArgument<>(0, 0, get);
+      }
     }
 
     return original;

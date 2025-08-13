@@ -44,7 +44,8 @@
 
 - 条件子命令：`/if` 和 `/unless`
     - 原版：`block`、`biome`、`loaded`、`dimension`、`score`、`blocks`、`entity`、`predicate`、`function`、`items`、`data` 等
-    - [`blockinfo`](if_and_unless/blockinfo.md)：测试方块信息。
+    - [`blockinfo`](if_and_unless/blockinfo/zh.md)：当方块信息符合或不符合指定条件时执行命令。
+    - [`rand`](if_and_unless/rand/zh.md)：在特定的概率下执行或不执行命令。
 - 修饰子命令：
     - `/as`、`/at`、`/positioned`、`/rotated`、`/facing`、`/align`、`/anchored`、`/in`、`/summon` 等
     - [`/inregion`](inregion/zh.md)（本模组添加）：在一个区域内的所有方块坐标中分别执行命令。
@@ -71,8 +72,8 @@
 ## 其他命令
 
 - [`/history`](history/zh.md)：管理操作历史记录。
-- [`/moon`](moon/zh.md)：查询和设置月相。`/jadeplate` 与之等价。
+- [`/moon`](moon/zh.md)：查询和设置月相。`/jadeplate` 是此命令的别称。
 - [`/nbt`](nbt/zh.md)：查看和设置 NBT 数据。
 - [`/rand`](rand/zh.md)：生成随机数。
 - [`/tasks`](tasks/zh.md)：管理当前服务器中的任务。
-- [`/undo` 和 `/redo`](undo_and_redo/zh.md)：撤销
+- [`/undo` 和 `/redo`](undo_and_redo/zh.md)：撤销和重做。
