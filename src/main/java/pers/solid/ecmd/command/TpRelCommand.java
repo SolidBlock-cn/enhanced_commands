@@ -22,6 +22,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.util.TextUtil;
 
 import java.util.*;
 
@@ -189,7 +190,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
   ) throws CommandSyntaxException {
     BlockPos blockPos = BlockPos.ofFloored(x, y, z);
     if (!World.isValid(blockPos)) {
-      throw EnhancedPosArgumentType.OUT_OF_BOUNDS_EXCEPTION.create(blockPos);
+      throw EnhancedPosArgumentType.OUT_OF_BOUNDS_EXCEPTION.create(TextUtil.wrapVector(blockPos));
     } else {
       float f = MathHelper.wrapDegrees(yaw);
       float g = MathHelper.wrapDegrees(pitch);

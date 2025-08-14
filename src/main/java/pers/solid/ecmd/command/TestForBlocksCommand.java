@@ -28,6 +28,7 @@ import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
+import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
@@ -55,18 +56,18 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         .then(argument("region", region(registryAccess))
             .then(argument("block_predicate", blockPredicate(registryAccess))
                 .executes(context -> executeTestForBlocks(context, TestType.ANY, KEYWORD_ARGS.defaultArgs()))
-                .then(argument("test_type", new TestTypeArgumentType())
+                .then(argument("test_type", new SimpleEnumArgumentType<>(CommandEnumType.TEST_TYPE))
                     .executes(context -> executeTestForBlocks(context, KEYWORD_ARGS.defaultArgs()))
                     .then(argument("keyword_args", KEYWORD_ARGS)
                         .executes(TestForBlocksCommand::executeTestForBlocks))))));
   }
 
   private static int executeTestForBlocks(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeTestForBlocks(context, context.getArgument("test_type", TestType.class), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"));
+    return executeTestForBlocks(context, SimpleEnumArgumentType.getEnumValue(context, "test_type"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"));
   }
 
   private static int executeTestForBlocks(CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
-    return executeTestForBlocks(context, context.getArgument("test_type", TestType.class), keywordArgs);
+    return executeTestForBlocks(context, SimpleEnumArgumentType.getEnumValue(context, "test_type"), keywordArgs);
   }
 
   private static int executeTestForBlocks(CommandContext<ServerCommandSource> context, TestType testType, KeywordArgs keywordArgs) throws CommandSyntaxException {

@@ -12,6 +12,7 @@ import net.minecraft.util.math.Direction;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.AxisArgument;
 import pers.solid.ecmd.argument.SimpleEnumArgumentType;
+import pers.solid.ecmd.command.TestForBlocksCommand;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.codec.EnumCodec;
@@ -49,6 +50,7 @@ public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, 
   public static final CommandEnumType<MoonPhase> MOON_PHASE = register("moon_phase", new CommandEnumType<>(MoonPhase.VALUES, MoonPhase.CODEC, moonPhase -> moonPhase.displayName));
   public static final CommandEnumType<NbtConcentrationType> NBT_CONCENTRATION_TYPE = register("nbt_concentration_type", new CommandEnumType<>(ImmutableList.copyOf(NbtConcentrationType.values()), NbtConcentrationType.CODEC, NbtConcentrationType::getDisplayName));
   public static final CommandEnumType<OutlineType> OUTLINE_TYPE = register("outline_type", new CommandEnumType<>(ImmutableList.copyOf(OutlineType.values()), OutlineType.CODEC, OutlineType::getDisplayName));
+  public static final CommandEnumType<TestForBlocksCommand.TestType> TEST_TYPE = register("test_type", new CommandEnumType<>(ImmutableList.copyOf(TestForBlocksCommand.TestType.values()), TestForBlocksCommand.TestType.CODEC, testType -> Text.literal(testType.asString())));
 
   private static <X extends CommandEnumType<E>, E extends Enum<E>> X register(String name, X commandEnumType) {
     return Registry.register(REGISTRY, EnhancedCommands.id(name), commandEnumType);

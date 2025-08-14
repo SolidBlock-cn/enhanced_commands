@@ -28,7 +28,6 @@ public class ModArgumentTypes {
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));
     register("simple_enum", SimpleEnumArgumentType.class, SimpleEnumArgumentType.Serializer.INSTANCE);
     register("string_enum", StringEnumArgumentType.class, StringEnumArgumentType.Serializer.INSTANCE);
-    register("test_type", TestTypeArgumentType.class, ConstantArgumentSerializer.of(TestTypeArgumentType::new));
     register("unloaded_pos_behavior", UnloadedPosBehaviorArgumentType.class, ConstantArgumentSerializer.of(UnloadedPosBehaviorArgumentType::new));
     registerTrustingType("vanilla_wrapped", VanillaWrappedArgumentType.class, VanillaWrappedArgumentType.Serializer.INSTANCE);
   }

@@ -20,7 +20,7 @@
     - `... prettyprinted`：显示 NBT 格式化渲染后的结果。
     - `... indented`：显示 NBT 格式化并带有缩进渲染后的结果。
     - `... test`：将 NBT 的字符串形式解析为 [NBT 谓词](/documents/arguments/nbt_predicate/zh.md)和 [NBT 函数](/documents/arguments/nbt_function/zh.md)，并检测 NBT 是否符合此 NBT 谓词，以及 NBT 函数应用的结果是否与此 NBT 相等。
-    - `... convert (block_function|block_predicate|nbt_function|nbt_predicate|region)`：将 NBT 转化为对应类型的对象，并显示结果。
+    - `... convert (block_function|block_predicate|entity_predicate|nbt_function|nbt_predicate|pos_argument|region)`：将 NBT 转化为对应类型的对象，并显示结果。
 - `/testart nbt_compound [nbt_test|json_test]`：将 NBT 复合标签转化为 NBT 或 JSON 对象，再转换为 NBT，并检测转换前后的结果是否一致。
 - `/testarg nbt_function <NBT 函数>`：显示 [NBT 函数](/documents/arguments/nbt_function/zh.md)转换为字符串后的结果。
     - `... apply [NBT]`：显示 NBT 函数应用在空内容或指定的 NBT 后的结果。

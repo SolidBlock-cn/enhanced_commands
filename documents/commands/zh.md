@@ -34,7 +34,12 @@
 ## 测试命令
 
 - [`/testarg`](testarg/zh.md)：对特定类型的参数进行测试。
-- [`/testfor`](testfor/zh.md)：测试和获取当前世界中的数据。
+- `/testfor`：可获取并测试世界内的一些内容。目前支持以下子命令：
+    - [`/testfor block`](testfor/block/zh.md)：获取单个方块，或测试[方块谓词](/documents/arguments/block_predicate/zh.md)。
+    - [`/testfor blockinfo`](testfor/blockinfo/zh.md)：获取或测试单个方块的信息，例如硬度、光照等信息。
+    - [`/testfor blocks`](testfor/blocks/zh.md)：获取多个方块的信息，并测试[方块谓词](/documents/arguments/block_predicate/zh.md)。
+    - [`/testfor entity`](testfor/entity/zh.md)：获取使用[实体选择器](/documents/arguments/entity_selector/zh.md)选择到的实体的信息，或使用[实体谓词](/documents/arguments/entity_predicate/zh.md)测试这些实体。
+    - [`/testfor biome`](testfor/biome/zh.md)：获取指定位置的生物群系，并进行测试。
 
 ## 独立的 `/execute` 子命令
 
