@@ -3,23 +3,22 @@ package pers.solid.ecmd.curve;
 import com.google.common.collect.AbstractIterator;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.command.argument.RotationArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.*;
-import org.apache.commons.lang3.function.FailableBiFunction;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4d;
 import org.joml.Vector3d;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.Vect3dArgument;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
@@ -155,7 +154,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
 
   @Override
   public @NotNull Type getType() {
-    return Type.INSTANCE;
+    return CurveTypes.CIRCLE;
   }
 
   public static String wrapRadRange(double minAngle, double maxAngle) {
@@ -175,7 +174,12 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
   }
 
 
-  public static final MapCodec<CircleCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("radius").forGetter(CircleCurve::radius), Vec3d.CODEC.fieldOf("center").forGetter(CircleCurve::center), Vec3d.CODEC.fieldOf("axis").forGetter(CircleCurve::axis), Codec.DOUBLE.fieldOf("minAngle").forGetter(CircleCurve::minAngle), Codec.DOUBLE.fieldOf("maxAngle").forGetter(CircleCurve::maxAngle)).apply(i, CircleCurve::new));
+  public static final MapCodec<CircleCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("radius").forGetter(CircleCurve::radius),
+      Vec3d.CODEC.fieldOf("center").forGetter(CircleCurve::center),
+      Vec3d.CODEC.fieldOf("axis").forGetter(CircleCurve::axis),
+      Codec.DOUBLE.optionalFieldOf("min_angle", FULL_MIN).forGetter(CircleCurve::minAngle),
+      Codec.DOUBLE.optionalFieldOf("max_angle", FULL_MAX).forGetter(CircleCurve::maxAngle)
+  ).apply(i, CircleCurve::new));
 
   public enum Type implements CurveType<CircleCurve> {
     INSTANCE;
@@ -183,6 +187,11 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     @Override
     public @NotNull MapCodec<CircleCurve> getCodec() {
       return CODEC;
+    }
+
+    @Override
+    public @NotNull MapCodec<? extends CurveArgument<? extends CircleCurve>> getArgumentCodec() {
+      return CircleCurveArgument.CODEC;
     }
   }
 
@@ -200,10 +209,10 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
    * <p>
    * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <axis>} 的默认值为 {@code 0 1 0}。当 {@code <radius>} 指定为标量时，其方向相当于 {@code <axis>} 与 y 轴正方向的向量积的方向。当 {@code <axis>} 正好指定为 y 轴正方向时，{@code <radius>} 方向为 x 正方向，若为 y 轴负方向，则 {@code <radius>} 方向为 x 负方向。
    */
-  private static class Parser implements FunctionParamsParser<CurveArgument<CircleCurve>> {
-    private @Nullable Either<Double, Function<ServerCommandSource, Vec3d>> radius;
-    private @Nullable PosArgument center;
-    private @Nullable FailableBiFunction<ServerCommandSource, Vec3d, Vec3d, CommandSyntaxException> around;
+  protected static class Parser implements FunctionParamsParser<CurveArgument<CircleCurve>> {
+    private @Nullable Double radius;
+    private @Nullable EnhancedPosArgument center;
+    private @Nullable Vect3dArgument axis;
     private @Nullable DoubleDoublePair range;
 
     @Override
@@ -211,21 +220,8 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
       if (this.radius == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parseContext.reader(), "radius");
       }
-      final PosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
-      return source -> {
-        final Vec3d absoluteCenter = center.toAbsolutePos(source);
-        final Vec3d around = this.around == null ? new Vec3d(0, 1, 0) : this.around.apply(source, absoluteCenter).normalize();
-        final Vec3d radius = this.radius.map(d -> {
-          Vec3d crossProduct = around.crossProduct(new Vec3d(0, 1, 0));
-          if (crossProduct.lengthSquared() == 0) {
-            crossProduct = around.y >= 0 ? new Vec3d(1, 0, 0) : new Vec3d(-1, 0, 0);
-          } else {
-            crossProduct = crossProduct.multiply(1 / crossProduct.length());
-          }
-          return crossProduct.multiply(d);
-        }, f -> f.apply(source));
-        return new CircleCurve(radius, absoluteCenter, around, range == null ? FULL_MIN : range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
-      };
+      final EnhancedPosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
+      return new CircleCurveArgument(radius, center, axis == null ? new Vect3dArgument.Fixed(new Vec3d(0, 1, 0)) : axis, range == null ? FULL_MIN : range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
     }
 
     @Override
@@ -249,25 +245,13 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
      */
     private void parseRadius(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
-      final int cursorBeforeKeyword = reader.getCursor();
-      final String unquotedString = reader.readUnquotedString();
-      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
-      if ("from".equals(unquotedString)) {
-        parseContext.clearSuggestion();
-        ParsingUtil.expectAndSkipWhitespace(reader);
-        radius = Either.right(parseContext.parseAndSuggestVec3d());
-      } else {
-        reader.setCursor(cursorBeforeKeyword);
-        if (!CommandSource.shouldSuggest(reader.getRemaining(), "from")) parseContext.clearSuggestion();
-
-        radius = Either.left(reader.readDouble());
-      }
+      radius = reader.readDouble();
     }
 
     private boolean parseAdditionalParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.setSuggestion((context, suggestionsBuilder) -> {
         if (center == null) ParsingUtil.suggestString("at", suggestionsBuilder);
-        if (around == null) CommandSource.suggestMatching(List.of("around", "facing", "rotated"), suggestionsBuilder);
+        if (axis == null) CommandSource.suggestMatching(List.of("around", "facing", "rotated"), suggestionsBuilder);
         if (range == null) ParsingUtil.suggestString("ranging", suggestionsBuilder);
         return suggestionsBuilder.buildFuture();
       });
@@ -285,7 +269,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
         EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(argumentType);
       } else if ("around".equals(unquotedString) || "rotated".equals(unquotedString) || "facing".equals(unquotedString)) {
-        if (around != null) {
+        if (axis != null) {
           parseContext.reader().setCursor(cursorBeforeKeyword);
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
         }
@@ -293,27 +277,23 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
         ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
         switch (unquotedString) {
           case "around" -> {
-            final Function<ServerCommandSource, Vec3d> vec3d = parseContext.parseAndSuggestVec3d();
-            around = (source, ignored) -> vec3d.apply(source);
-          }
+            axis = parseContext.parseAndSuggestVec3d();
+          }/* todo implement
           case "rotated" -> {
             final PosArgument posArgument = parseContext.parseAndSuggestArgument(new RotationArgumentType());
-            around = (source, ignored) -> {
+            axis = (source, ignored) -> {
               final Vec2f rotation = posArgument.toAbsoluteRotation(source);
               return new Vec3d(0, 0, 1).rotateX(-MathHelper.RADIANS_PER_DEGREE * rotation.x).rotateY(-MathHelper.RADIANS_PER_DEGREE * rotation.y);
             };
-          }
+          }*/
           case "facing" -> {
             EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
-            final PosArgument posArgument = parseContext.parseAndSuggestArgument(argumentType);
-            around = (source, center) -> {
-              final Vec3d facingTarget = posArgument.toAbsolutePos(source);
-              return facingTarget.subtract(center).normalize();
-            };
+            final EnhancedPosArgument posArgument = parseContext.parseAndSuggestArgument(argumentType);
+            axis = new Vect3dArgument.Facing(posArgument);
           }
         }
       } else if ("ranging".equals(unquotedString)) {
-        if (range == null) {
+        if (range != null) {
           parseContext.reader().setCursor(cursorBeforeKeyword);
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
         }

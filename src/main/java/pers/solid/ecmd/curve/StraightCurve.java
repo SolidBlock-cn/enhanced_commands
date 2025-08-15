@@ -6,13 +6,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.PosArgument;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.parse.FunctionParamsParser;
@@ -134,10 +134,15 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     public @NotNull MapCodec<StraightCurve> getCodec() {
       return CODEC;
     }
+
+    @Override
+    public @NotNull MapCodec<? extends CurveArgument<? extends StraightCurve>> getArgumentCodec() {
+      return StraightCurveArgument.CODEC;
+    }
   }
 
-  private static final class Parser implements FunctionParamsParser<CurveArgument<StraightCurve>> {
-    private PosArgument from, to;
+  protected static final class Parser implements FunctionParamsParser<CurveArgument<StraightCurve>> {
+    private EnhancedPosArgument from, to;
     private boolean usingKeyword = false;
 
     @Override
@@ -145,7 +150,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
       if (from == null || to == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
       }
-      return source -> new StraightCurve(from.toAbsolutePos(source), to.toAbsolutePos(source));
+      return new StraightCurveArgument(from, to);
     }
 
     @Override

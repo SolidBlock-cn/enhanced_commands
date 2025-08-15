@@ -21,8 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.argument.DirectionArgument;
+import pers.solid.ecmd.argument.Vect3dArgument;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.ArrayList;
@@ -149,6 +151,7 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
    * 解析整数的向量。这不是代表一个坐标，因此也不支持绝对坐标和局部坐标。
    */
   public Function<ServerCommandSource, Vec3i> parseAndSuggestVec3i() throws CommandSyntaxException {
+    // todo improve
     final StringReader reader = this.reader;
     {
       setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
@@ -157,7 +160,7 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
       final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
       if (byName != null) {
         clearSuggestion();
-        return source -> byName.apply(source).getVector();
+        return source -> byName.apply((PositionProvider) source).getVector();
       } else {
         this.reader.setCursor(cursorBeforeDirection);
       }
@@ -172,7 +175,7 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
       final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
       if (byName != null) {
         clearSuggestion();
-        return source -> byName.apply(source).getVector().multiply(x);
+        return source -> byName.apply((PositionProvider) source).getVector().multiply(x);
       } else {
         this.reader.setCursor(cursorBeforeDirection);
       }
@@ -188,7 +191,7 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
   /**
    * 解析双精度浮点数的向量。这不是代表一个坐标，因此也不支持绝对坐标和局部坐标。形式为 {@code (<x> <y> <z> | [length] <direction>)}。
    */
-  public Function<ServerCommandSource, Vec3d> parseAndSuggestVec3d() throws CommandSyntaxException {
+  public Vect3dArgument parseAndSuggestVec3d() throws CommandSyntaxException {
     final StringReader reader = this.reader;
     {
       setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
@@ -197,7 +200,7 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
       final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
       if (byName != null) {
         clearSuggestion();
-        return source -> Vec3d.of(byName.apply(source).getVector());
+        return new Vect3dArgument.Directional(byName, 1);
       } else {
         reader.setCursor(cursorBeforeDirection);
       }
@@ -212,7 +215,7 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
       final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
       if (byName != null) {
         clearSuggestion();
-        return source -> Vec3d.of(byName.apply(source).getVector()).multiply(x);
+        return new Vect3dArgument.Directional(byName, x);
       } else {
         reader.setCursor(cursorBeforeDirection);
       }
@@ -222,7 +225,7 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
     ParsingUtil.expectAndSkipWhitespace(reader);
     final double z = reader.readDouble();
     final Vec3d vec3d = new Vec3d(x, y, z);
-    return source -> vec3d;
+    return new Vect3dArgument.Fixed(vec3d);
   }
 
   /**

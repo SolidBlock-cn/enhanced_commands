@@ -3,12 +3,15 @@ package pers.solid.ecmd.curve;
 import com.google.common.collect.Streams;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.Iterator;
@@ -18,14 +21,7 @@ import java.util.stream.Stream;
 /**
  * Curve 是指可以绘制的曲线。与 {@link Region} 不同，曲线没有面积，也无法判断某个坐标是否在这个线内。但是，曲线仍然可以对点进行迭代。不同的是，对于曲线而言，产生迭代的点需要指定一个间距（这个间距可能会在迭代的过程中发生改变），否则会不知道如何进行迭代。
  */
-public interface Curve extends Region {
-  /**
-   * 曲线由于是没有粗细，所以一般不能判断点是否在该曲线内。。
-   */
-  @Override
-  default boolean contains(@NotNull Vec3d vec3d) {
-    return false;
-  }
+public interface Curve extends ExpressionConvertible {
 
   /**
    * 沿着这条曲线产生一条像素化的连续的线。这个 BlockPos 有可能是 {@link BlockPos.Mutable}。
@@ -77,7 +73,6 @@ public interface Curve extends Region {
 
   double length();
 
-  @Override
   @NotNull
   Curve transformed(Function<Vec3d, Vec3d> transformation);
 
@@ -104,13 +99,7 @@ public interface Curve extends Region {
   @Override
   @NotNull String asString();
 
-  @NotNull CurveType<?> getType();
+  @Nullable Box minContainingBox();
 
-  /**
-   * 由于曲线没有粗细，故只能与长度估算。
-   */
-  @Override
-  default double volume() {
-    return length();
-  }
+  @NotNull CurveType<?> getType();
 }

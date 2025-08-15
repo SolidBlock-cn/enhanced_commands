@@ -8,47 +8,52 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec2f;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.function.Function;
 
-public enum AxisArgument implements StringIdentifiable, Function<@NotNull ServerCommandSource, Direction.@NotNull Axis> {
+public enum AxisArgument implements StringIdentifiable, Function<@NotNull PositionProvider, Direction.@NotNull Axis> {
   X(Direction.Axis.X),
   Y(Direction.Axis.Y),
   Z(Direction.Axis.Z),
-  FRONT_BACK("front_back", source -> {
-    final Vec2f rotation = source.getRotation();
+  FRONT_BACK("front_back", positionProvider -> {
+    final Vec2f rotation = positionProvider.getRotation$ec();
     if (rotation.x > 60 || rotation.x < -60) {
       return Direction.Axis.Y;
     } else {
       return Direction.fromRotation(rotation.y).getAxis();
     }
   }),
-  FRONT_BACK_HORIZONTAL("front_back_horizontal", source -> Direction.fromRotation(source.getRotation().y).getAxis()),
-  LEFT_RIGHT("left_right", source -> Direction.fromRotation(source.getRotation().y).rotateYClockwise().getAxis()),
-  RANDOM("random", source -> Direction.Axis.pickRandomAxis(source.getWorld().getRandom())),
-  RANDOM_HORIZONTAL("random_horizontal", source -> source.getWorld().getRandom().nextBoolean() ? Direction.Axis.X : Direction.Axis.Z);
+  FRONT_BACK_HORIZONTAL("front_back_horizontal", positionProvider -> Direction.fromRotation(positionProvider.getRotation$ec().y).getAxis()),
+  LEFT_RIGHT("left_right", positionProvider -> Direction.fromRotation(positionProvider.getRotation$ec().y).rotateYClockwise().getAxis()),
+  RANDOM("random", positionProvider -> Direction.Axis.pickRandomAxis(positionProvider.getWorld$ec().getRandom())),
+  RANDOM_HORIZONTAL("random_horizontal", positionProvider -> positionProvider.getWorld$ec().getRandom().nextBoolean() ? Direction.Axis.X : Direction.Axis.Z);
 
   public static final ImmutableList<AxisArgument> VALUES = ImmutableList.copyOf(values());
   public static final ImmutableList<AxisArgument> VALUES_EXCEPT_RANDOM = VALUES.subList(0, VALUES.size() - 2);
   public static final StringIdentifiableCodec<AxisArgument> CODEC = StringIdentifiableCodec.create(AxisArgument.values());
   public static final StringIdentifiableCodec<AxisArgument> CODEC_EXCLUDING_RANDOM = StringIdentifiableCodec.create(VALUES_EXCEPT_RANDOM.toArray(AxisArgument[]::new));
   private final String name;
-  private final Function<ServerCommandSource, Direction.Axis> function;
+  private final Function<PositionProvider, Direction.Axis> function;
 
   AxisArgument(Direction.Axis axis) {
     this.name = axis.asString();
-    this.function = source -> axis;
+    this.function = positionProvider -> axis;
   }
 
-  AxisArgument(String name, Function<ServerCommandSource, Direction.Axis> function) {
+  AxisArgument(String name, Function<PositionProvider, Direction.Axis> function) {
     this.name = name;
     this.function = function;
   }
 
   @Override
+  public @NotNull Direction.Axis apply(@NotNull PositionProvider positionProvider) {
+    return function.apply(positionProvider);
+  }
+
   public @NotNull Direction.Axis apply(@NotNull ServerCommandSource source) {
-    return function.apply(source);
+    return function.apply((PositionProvider) source);
   }
 
   @Override

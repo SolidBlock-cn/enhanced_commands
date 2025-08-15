@@ -11,9 +11,9 @@ This [command](../en.md) is used to test the argument types of commands, and tes
     - `string_test`: Convert to string, and parse according to the string, and checker whether the converted result is identical to the original string. Usually it should return `true`, but if it returns `false`, it means there is consistency within this conversion: strings converted (or NBT, JSON encoded) from Java objects are not correctly converted (or decoded) to the same Java object as original ones, which means bugs in this mod, or maybe there are some unsupported contents. This command is usually test the consistency during the object conversion. Same to the following `nbt_test` and `json_test`.
     - `nbt_test`: Encode to NBT, and decode to Java objects, and test whether the converted result is identical to the original one.
     - `json_test`: Encode to JSON, and decode to Java objects, and test whether the converted result is identical to the original one.
-- `/testarg block_predicate <block predicate> [string|nbt|json|string_test|nbt_test|json_test]`: [Block predicate](/documents/arguments/block_predicate/en.md)。
+- `/testarg block_predicate <block predicate> [string|nbt|json|string_test|nbt_test|json_test]`: [Block predicate](/documents/arguments/block_predicate/en.md).
     - Same as above.
-- `/testarg block_predicate <entity predicate> [string|nbt|json|string_test|nbt_test|json_test]`: [Entity predicate](/documents/arguments/entity_predicate/en.md)。
+- `/testarg block_predicate <entity predicate> [string|nbt|json|string_test|nbt_test|json_test]`: [Entity predicate](/documents/arguments/entity_predicate/en.md).
     - Same as above.
 - `/testarg nbt <NBT>`: Display the result of NBT pretty-printing (similar to what's output by `/data get`).
     - `... plainstring`: Display the result of NBT directly converted to string NBT (SNBT).
