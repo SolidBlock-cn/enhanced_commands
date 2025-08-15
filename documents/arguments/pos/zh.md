@@ -29,9 +29,9 @@
 
 ## 数据结构
 
-- `type`：字符串。坐标的类型，支持以下值：`default_int`、`default_double`、`looking_pos`、`unknown`。
+- `type`：字符串。坐标的类型，支持以下值：`default`、`looking_pos`、`unknown`。
 
-若 `type` 为 `default_int`，则有以下字段：
+若 `type` 为 `default`，则有以下字段：
 
 - `x`：整数。
 - `y`：整数。
@@ -39,18 +39,12 @@
 - `x_relative`：布尔值，可选，默认为 `false`。
 - `y_relative`：布尔值，可选，默认为 `false`。
 - `z_relative`：布尔值，可选，默认为 `false`。
-
-若 `type` 为 `default_double`，则有以下字段：
-
-- `x`：双精度浮点数。
-- `y`：双精度浮点数。
-- `z`：双精度浮点数。
-- `x_relative`：布尔值，可选，默认为 `false`。
-- `y_relative`：布尔值，可选，默认为 `false`。
-- `z_relative`：布尔值，可选，默认为 `false`。
+- `int_align_type`：枚举，可选。如果指定了，则该坐标将被视为整数坐标。
 
 若 `type` 为 `looking_pos`，则有以下字段：
 
 - `x`：双精度浮点数。
 - `y`：双精度浮点数。
 - `z`：双精度浮点数。
+
+若 `type` 表示 `unknown`，则表示未被本模组识别的坐标，无法正常解析。

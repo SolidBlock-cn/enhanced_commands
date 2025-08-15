@@ -26,7 +26,6 @@ import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.StringUtils;
@@ -45,15 +44,15 @@ import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCur
 /**
  * Similar to {@link net.minecraft.command.argument.BlockPosArgumentType} and {@link Vec3ArgumentType}, with some slight modifications.
  *
- * @param numberType   The behavior of the argument type when accepting different valueNames.
+ * @param numberType   The behavior of the argument type when accepting different coordinates.
  * @param intAlignType
  * @see PosArgument
  * @see net.minecraft.command.argument.BlockPosArgumentType
  * @see Vec3ArgumentType
  */
 public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<EnhancedPosArgument>, ArgumentSerializer.ArgumentTypeProperties<EnhancedPosArgumentType> {
-  public static final EnhancedPosArgument CURRENT_POS = new EnhancedPosArgument.DoublePos(0, 0, 0, true, true, true);
-  public static final EnhancedPosArgument CURRENT_BLOCK_POS_CENTER = new EnhancedPosArgument.IntPos(0, 0, 0, true, true, true, IntAlignType.CENTERED);
+  public static final EnhancedPosArgument CURRENT_POS = EnhancedPosArgument.DefaultPos.doubleBased(0, 0, 0, true, true, true);
+  public static final EnhancedPosArgument CURRENT_BLOCK_POS_CENTER = EnhancedPosArgument.DefaultPos.intBased(0, 0, 0, true, true, true, IntAlignType.CENTERED);
 
   public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.pos.local_coordinates_not_allowed"));
 
@@ -178,7 +177,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
       Arrays.fill(isRelatives, false);
       boolean[] omitsNumber = new boolean[3];
 
-      // the initial probability, which may be modified later
+      // the initial value, which may be modified later
       boolean isDoublePos = numberType.doubleOnly();
       for (int i = 0; i < 3; i++) {
         if (!reader.canRead()) {
@@ -235,9 +234,9 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
         isDoublePos = numberType.doubleOnly() || !numberType.preferInt();
       }
       if (isDoublePos) {
-        return new EnhancedPosArgument.DoublePos(values[0], values[1], values[2], isRelatives[0], isRelatives[1], isRelatives[2]);
+        return EnhancedPosArgument.DefaultPos.doubleBased(values[0], values[1], values[2], isRelatives[0], isRelatives[1], isRelatives[2]);
       } else {
-        return new EnhancedPosArgument.IntPos(MathHelper.floor(values[0]), MathHelper.floor(values[1]), MathHelper.floor(values[2]), isRelatives[0], isRelatives[1], isRelatives[2], intAlignType);
+        return EnhancedPosArgument.DefaultPos.intBased(values[0], values[1], values[2], isRelatives[0], isRelatives[1], isRelatives[2], intAlignType);
       }
     }
   }
@@ -386,19 +385,19 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
    */
   public enum NumberType {
     /**
-     * Only accepts integer valueNames. Tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed with decimal relative valueNames.
+     * Only accepts integer values. Tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
      */
     INT_ONLY,
     /**
-     * Accepts both integer and double probability. Pure tilde "~ ~ ~" and tilde with integer valueNames (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed with decimal relative valueNames.
+     * Accepts both integer and double value. Pure tilde "~ ~ ~" and tilde with integer values (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
      */
     PREFER_INT,
     /**
-     * Accepts both integer and double probability. Tilde "~ ~ ~" and local coordinates "^ ^ ^" will be interpreted as double pos.
+     * Accepts both integer and double value. Tilde "~ ~ ~" and local coordinates "^ ^ ^" will be interpreted as double pos.
      */
     PREFER_DOUBLE,
     /**
-     * Accepts double valueNames only. Integer valueNames will be interpreted as doubles.
+     * Accepts double values only. Integer values will be interpreted as doubles.
      */
     DOUBLE_ONLY;
 

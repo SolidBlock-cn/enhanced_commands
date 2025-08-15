@@ -20,7 +20,7 @@
 - 将方块转换为下落的方块：`/convertblock ~~~ falling_block`
 - 旋转一个区域内的方块，甚至还可以插值：`/rotate sphere(50) 20deg force=true interpolate=true`
 - 想获取某个位置的方块的信息？可以：`/testfor block ~~~`
-- 检测某个地方的光照：`/if block_info ~~~ light 10.. tellraw @a "光照充足"`
+- 检测某个地方的光照：`/if blockinfo ~~~ light 10.. tellraw @a "光照充足"`
 - 随机生成数字！！`/as @e store result score my_score rand int 0 100`
 
 需要注意的是，上面这些只是一些简单的例子，远远不及模组的全部内容。

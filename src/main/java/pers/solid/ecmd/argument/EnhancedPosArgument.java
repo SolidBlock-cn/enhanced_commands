@@ -16,6 +16,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.DefaultPosArgumentAccessor;
 import pers.solid.ecmd.mixins.accessor.LookingPosArgumentAccessor;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -23,6 +24,7 @@ import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -30,10 +32,8 @@ import java.util.function.Function;
  */
 public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible {
   MapCodec<EnhancedPosArgument> MAP_BASED_CODEC = Type.CODEC.dispatchMap(posArgument -> {
-    if (posArgument instanceof DefaultPosArgument | posArgument instanceof DoublePos) {
-      return Type.DEFAULT_DOUBLE;
-    } else if (posArgument instanceof IntPos) {
-      return Type.DEFAULT_INT;
+    if (posArgument instanceof DefaultPosArgument | posArgument instanceof DefaultPos) {
+      return Type.DEFAULT;
     } else if (posArgument instanceof LookingPos) {
       return Type.LOOKING_POS;
     } else {
@@ -41,20 +41,15 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
   }, type ->
       switch (type) {
-        case DEFAULT_INT -> IntPos.CODEC;
-        case DEFAULT_DOUBLE -> DoublePos.CODEC;
+        case DEFAULT -> DefaultPos.CODEC;
         case LOOKING_POS -> LookingPos.CODEC;
-        case UNKNOWN -> DefaultPos.ALWAYS_FAIL;
+        default -> UnknownPos.ALWAYS_FAIL;
       });
-  Codec<DoublePos> LIST_BASED_CODEC = Codec.DOUBLE.listOf(3, 3).xmap(doubles -> new DoublePos(doubles.get(0), doubles.get(1), doubles.get(2), false, false, false), doublePos -> List.of(doublePos.x, doublePos.y, doublePos.z));
+  Codec<DefaultPos> LIST_BASED_CODEC = Codec.DOUBLE.listOf(3, 3).xmap(doubles -> DefaultPos.doubleBased(doubles.get(0), doubles.get(1), doubles.get(2), false, false, false), defaultPos -> List.of(defaultPos.x, defaultPos.y, defaultPos.z));
   Codec<EnhancedPosArgument> CODEC = Codec.either(MAP_BASED_CODEC.codec(), LIST_BASED_CODEC).xmap(fsEither -> fsEither.map(Function.identity(), Function.identity()), Either::left);
 
   static boolean isInt(PosArgument posArgument) {
     return posArgument instanceof EnhancedPosArgument enhancedPosArgument && enhancedPosArgument.isInt();
-  }
-
-  static DoublePos of(Vec3d vec3d) {
-    return new DoublePos(vec3d.x, vec3d.y, vec3d.z, false, false, false);
   }
 
   static String asString(PosArgument posArgument) {
@@ -106,8 +101,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
   }
 
   enum Type implements StringIdentifiable {
-    DEFAULT_INT("default_int"),
-    DEFAULT_DOUBLE("default_double"),
+    DEFAULT("default"),
     LOOKING_POS("looking_pos"),
     UNKNOWN("unknown");
 
@@ -125,13 +119,13 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
   }
 
-  abstract class DefaultPos implements EnhancedPosArgument {
+  abstract class UnknownPos implements EnhancedPosArgument {
 
     private static final MapCodec<EnhancedPosArgument> ALWAYS_FAIL = Codec.EMPTY.flatXmap(unit -> DataResult.error(() -> "This type of pos argument is not supported"), posArgument -> DataResult.error(() -> "This type of pos argument is not supported"));
 
     protected final boolean xRelative, yRelative, zRelative;
 
-    protected DefaultPos(boolean xRelative, boolean yRelative, boolean zRelative) {
+    protected UnknownPos(boolean xRelative, boolean yRelative, boolean zRelative) {
       this.xRelative = xRelative;
       this.yRelative = yRelative;
       this.zRelative = zRelative;
@@ -153,15 +147,28 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
   }
 
-  record DoublePos(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative) implements EnhancedPosArgument {
-    public static final MapCodec<DoublePos> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-        Codec.DOUBLE.fieldOf("x").forGetter(DoublePos::x),
-        Codec.DOUBLE.fieldOf("y").forGetter(DoublePos::y),
-        Codec.DOUBLE.fieldOf("z").forGetter(DoublePos::z),
-        Codec.BOOL.optionalFieldOf("x_relative", false).forGetter(DoublePos::xRelative),
-        Codec.BOOL.optionalFieldOf("y_relative", false).forGetter(DoublePos::yRelative),
-        Codec.BOOL.optionalFieldOf("z_relative", false).forGetter(DoublePos::zRelative)
-    ).apply(i, DoublePos::new));
+  record DefaultPos(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative, @Nullable EnhancedPosArgumentType.IntAlignType intAlignType) implements EnhancedPosArgument {
+    public static final MapCodec<DefaultPos> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+        Codec.DOUBLE.fieldOf("x").forGetter(DefaultPos::x),
+        Codec.DOUBLE.fieldOf("y").forGetter(DefaultPos::y),
+        Codec.DOUBLE.fieldOf("z").forGetter(DefaultPos::z),
+        Codec.BOOL.optionalFieldOf("x_relative", false).forGetter(DefaultPos::xRelative),
+        Codec.BOOL.optionalFieldOf("y_relative", false).forGetter(DefaultPos::yRelative),
+        Codec.BOOL.optionalFieldOf("z_relative", false).forGetter(DefaultPos::zRelative),
+        EnhancedPosArgumentType.IntAlignType.CODEC.optionalFieldOf("int_align_type").forGetter(defaultPos -> Optional.ofNullable(defaultPos.intAlignType()))
+    ).apply(i, DefaultPos::new));
+
+    private DefaultPos(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative, Optional<EnhancedPosArgumentType.IntAlignType> intAlignType) {
+      this(x, y, z, xRelative, yRelative, zRelative, intAlignType.orElse(null));
+    }
+
+    public static DefaultPos doubleBased(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative) {
+      return new DefaultPos(x, y, z, xRelative, yRelative, zRelative, (EnhancedPosArgumentType.IntAlignType) null);
+    }
+
+    public static DefaultPos intBased(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative, EnhancedPosArgumentType.IntAlignType intAlignType) {
+      return new DefaultPos(x, y, z, xRelative, yRelative, zRelative, intAlignType);
+    }
 
     @Override
     public Vec3d toAbsolutePos(PositionProvider positionProvider) {
@@ -169,7 +176,12 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
         return new Vec3d(x, y, z);
       }
       final Vec3d position = positionProvider.getPosition$ec();
-      return new Vec3d(xRelative ? position.x + x : x, yRelative ? position.y + y : y, zRelative ? position.z + z : z);
+      final Vec3d vec3d = new Vec3d(xRelative ? position.x + x : x, yRelative ? position.y + y : y, zRelative ? position.z + z : z);
+      if (intAlignType != null) {
+        final BlockPos blockPos = BlockPos.ofFloored(vec3d);
+        return intAlignType.mayAdjustToCenter(blockPos);
+      }
+      return vec3d;
     }
 
     @Override
@@ -179,6 +191,15 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
       }
       final Vec2f rotation = positionProvider.getRotation$ec();
       return new Vec2f((float) (xRelative ? rotation.x + x : x), (float) (yRelative ? rotation.y + y : y));
+    }
+
+    @Override
+    public BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
+      if (!xRelative && !yRelative && !zRelative) {
+        return BlockPos.ofFloored(x, y, z);
+      }
+      final Vec3d position = positionProvider.getPosition$ec();
+      return BlockPos.ofFloored(xRelative ? MathHelper.floor(position.getX() + x) : x, yRelative ? MathHelper.floor(position.getY() + y) : y, zRelative ? MathHelper.floor(position.getZ() + z) : z);
     }
 
     @Override
@@ -204,80 +225,15 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     @Override
     public @NotNull String asString() {
       final StringBuilder sb = new StringBuilder();
+      final boolean isInt = intAlignType != null;
       if (xRelative) sb.append('~');
-      if (!xRelative || x != 0) sb.append(x).append(' ');
+      if (!xRelative || x != 0) sb.append(isInt && !xRelative ? Integer.toString((int) x) : x);
+      sb.append(' ');
       if (yRelative) sb.append('~');
-      if (!yRelative || y != 0) sb.append(y).append(' ');
+      if (!yRelative || y != 0) sb.append(isInt && !yRelative ? Integer.toString((int) y) : y);
+      sb.append(' ');
       if (zRelative) sb.append('~');
-      if (!zRelative || z != 0) sb.append(z);
-      return sb.toString();
-    }
-  }
-
-  record IntPos(int x, int y, int z, boolean xRelative, boolean yRelative, boolean zRelative, EnhancedPosArgumentType.IntAlignType alignType) implements EnhancedPosArgument {
-    public static final MapCodec<IntPos> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-        Codec.INT.fieldOf("x").forGetter(IntPos::x),
-        Codec.INT.fieldOf("y").forGetter(IntPos::y),
-        Codec.INT.fieldOf("z").forGetter(IntPos::z),
-        Codec.BOOL.optionalFieldOf("x_relative", false).forGetter(IntPos::xRelative),
-        Codec.BOOL.optionalFieldOf("y_relative", false).forGetter(IntPos::yRelative),
-        Codec.BOOL.optionalFieldOf("z_relative", false).forGetter(IntPos::zRelative),
-        EnhancedPosArgumentType.IntAlignType.CODEC.optionalFieldOf("align_type", EnhancedPosArgumentType.IntAlignType.HORIZONTALLY_CENTERED).forGetter(IntPos::alignType)
-    ).apply(i, IntPos::new));
-
-    @Override
-    public boolean isInt() {
-      return true;
-    }
-
-    @Override
-    public Vec3d toAbsolutePos(PositionProvider positionProvider) {
-      final BlockPos blockPos = toAbsoluteBlockPos(positionProvider);
-      return alignType.mayAdjustToCenter(blockPos);
-    }
-
-    @Override
-    public Vec2f toAbsoluteRotation(PositionProvider positionProvider) {
-      if (!xRelative && !yRelative) {
-        return new Vec2f((float) x, (float) y);
-      }
-      final Vec2f rotation = positionProvider.getRotation$ec();
-      return new Vec2f(xRelative ? rotation.x + x : x, yRelative ? rotation.y + y : y);
-    }
-
-    @Override
-    public BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
-      if (!xRelative && !yRelative && !zRelative) {
-        return new BlockPos(x, y, z);
-      }
-      final Vec3d position = positionProvider.getPosition$ec();
-      return new BlockPos(xRelative ? MathHelper.floor(position.getX() + x) : x, yRelative ? MathHelper.floor(position.getY() + y) : y, zRelative ? MathHelper.floor(position.getZ() + z) : z);
-    }
-
-    @Override
-    public boolean isXRelative() {
-      return xRelative;
-    }
-
-    @Override
-    public boolean isYRelative() {
-      return yRelative;
-    }
-
-    @Override
-    public boolean isZRelative() {
-      return zRelative;
-    }
-
-    @Override
-    public @NotNull String asString() {
-      final StringBuilder sb = new StringBuilder();
-      if (xRelative) sb.append('~');
-      if (!xRelative || x != 0) sb.append(x).append(' ');
-      if (yRelative) sb.append('~');
-      if (!yRelative || y != 0) sb.append(y).append(' ');
-      if (zRelative) sb.append('~');
-      if (!zRelative || z != 0) sb.append(z);
+      if (!zRelative || z != 0) sb.append(isInt && !zRelative ? Integer.toString((int) z) : z);
       return sb.toString();
     }
   }

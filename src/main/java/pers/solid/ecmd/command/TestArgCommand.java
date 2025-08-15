@@ -17,10 +17,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.command.argument.NbtCompoundArgumentType;
-import net.minecraft.command.argument.NbtElementArgumentType;
-import net.minecraft.command.argument.Vec3ArgumentType;
+import net.minecraft.command.argument.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
@@ -39,6 +36,7 @@ import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
@@ -267,19 +265,34 @@ public enum TestArgCommand implements CommandRegistrationCallback {
 
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addPosProperties(T argumentBuilder) {
     final Command<ServerCommandSource> execution = context -> {
-      final EnhancedPosArgument pos = getPosArgument(context, "pos");
+      final PosArgument pos = context.getArgument("pos", PosArgument.class);
       final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
       context.getSource().sendFeedback$ecBridge(() -> Text.literal(EnhancedPosArgument.asString(pos)), false);
-      context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(EnhancedPosArgument.CODEC.encodeStart(NbtOps.INSTANCE, pos).getOrThrow()), false);
+      if (pos instanceof final EnhancedPosArgument enhanced) {
+        context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(EnhancedPosArgument.CODEC.encodeStart(NbtOps.INSTANCE, enhanced).getOrThrow()), false);
+      }
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.pos.result").append(ScreenTexts.LINE_BREAK).append(Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY)), false);
       return 1;
     };
     for (final EnhancedPosArgumentType.NumberType numberType : EnhancedPosArgumentType.NumberType.values()) {
       final LiteralArgumentBuilder<ServerCommandSource> node = literal(numberType.name().toLowerCase());
       for (EnhancedPosArgumentType.IntAlignType intAlignType : EnhancedPosArgumentType.IntAlignType.values()) {
+        final EnhancedPosArgumentType type = new EnhancedPosArgumentType(numberType, intAlignType);
         node.then(literal(intAlignType.name().toLowerCase())
-            .then(argument("pos", new EnhancedPosArgumentType(numberType, intAlignType))
-                .executes(execution)));
+            .then(argument("pos", type)
+                .executes(execution)
+                .then(literal("string")
+                    .executes(context -> executeStringShow(context, getPosArgument(context, "pos"), ExpressionConvertible::asString)))
+                .then(literal("string_test")
+                    .executes(context -> executeStringTest(context, getPosArgument(context, "pos"), ExpressionConvertible::asString, s -> type.parse(new StringReader(s)))))
+                .then(literal("nbt")
+                    .executes(context -> executeCodecShow(context, getPosArgument(context, "pos"), EnhancedPosArgument.CODEC, NbtOps.INSTANCE)))
+                .then(literal("json")
+                    .executes(context -> executeCodecShow(context, getPosArgument(context, "pos"), EnhancedPosArgument.CODEC, JsonOps.INSTANCE)))
+                .then(literal("nbt_test")
+                    .executes(context -> executeCodecTest(context, getPosArgument(context, "pos"), EnhancedPosArgument.CODEC, NbtOps.INSTANCE)))
+                .then(literal("json_test")
+                    .executes(context -> executeCodecTest(context, getPosArgument(context, "pos"), EnhancedPosArgument.CODEC, JsonOps.INSTANCE)))));
       }
       argumentBuilder.then(node);
     }

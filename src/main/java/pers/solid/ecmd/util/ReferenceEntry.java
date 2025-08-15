@@ -7,6 +7,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -85,7 +86,14 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final Identifier id = DefaultNamespace.ENHANCED_COMMANDS.fromStringReader(reader);
       final int cursorAfterId = reader.getCursor();
       return getResultByEntrySupplier(() -> {
-        final Optional<RegistryEntry.Reference<E>> entry = parseContext.registryAccess().createRegistryLookup().getOptionalEntry(registryKey, RegistryKey.of(registryKey, id));
+        final RegistryEntryLookup.RegistryLookup registryLookup = parseContext.registryAccess().createRegistryLookup();
+        final RegistryKey<E> entryKey = RegistryKey.of(registryKey, id);
+        final Optional<RegistryEntryLookup<E>> registryEntryLookup = registryLookup.getOptional(registryKey);
+        if (registryEntryLookup.isEmpty()) {
+          // 考虑到有时客户端在解析命令时，会不知道该数据包中的内容，不应在客户端判定为解析错误。
+          return entryKey;
+        }
+        final Optional<RegistryEntry.Reference<E>> entry = registryEntryLookup.get().getOptional(entryKey);
         if (entry.isEmpty()) {
           reader.setCursor(cursorBeforeId);
           throw CommandSyntaxExceptionExtension.withCursorEnd(createExceptionForUnknownId(reader, id.toString()), cursorAfterId);
