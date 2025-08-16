@@ -14,8 +14,8 @@ import pers.solid.ecmd.argument.SimpleEnumArgumentType;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Optional;
 

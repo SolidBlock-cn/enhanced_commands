@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
-import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.HashSet;
 import java.util.Set;

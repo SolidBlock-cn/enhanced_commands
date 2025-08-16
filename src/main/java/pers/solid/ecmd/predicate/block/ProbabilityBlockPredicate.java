@@ -15,9 +15,9 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
-import pers.solid.ecmd.util.parse.NamedParamListParser;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.NamedParamListParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.OptionalLong;

@@ -10,9 +10,9 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.Parser;
-import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.parse.ParsingUtil;
 
 public enum UseOriginalBlockFunction implements BlockFunction {
   USE_ORIGINAL;

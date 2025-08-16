@@ -9,7 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 

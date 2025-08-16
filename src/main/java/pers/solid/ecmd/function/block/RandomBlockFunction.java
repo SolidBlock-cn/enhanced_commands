@@ -20,10 +20,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.parse.FunctionLikeParser;
-import pers.solid.ecmd.util.parse.NamedParamListParser;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.NamedParamListParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
 
 import java.util.Collection;
 import java.util.OptionalLong;

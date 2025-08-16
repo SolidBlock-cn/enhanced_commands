@@ -35,7 +35,7 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.ext.EntitySelectorReaderExtension;
 import pers.solid.ecmd.predicate.entity.*;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
-import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.List;
 import java.util.Map;

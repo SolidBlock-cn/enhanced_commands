@@ -12,7 +12,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.random.Random;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Arrays;
 import java.util.Optional;

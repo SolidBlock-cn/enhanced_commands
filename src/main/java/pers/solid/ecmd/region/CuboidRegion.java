@@ -8,8 +8,8 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 public interface CuboidRegion extends Region {
   MapCodec<CuboidRegion> CODEC = Codec.BOOL.dispatchMap("block", r -> r instanceof BlockCuboidRegion, isBlock -> isBlock ? BlockCuboidRegion.CODEC : PreciseCuboidRegion.CODEC);

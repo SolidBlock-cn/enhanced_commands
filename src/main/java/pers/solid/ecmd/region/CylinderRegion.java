@@ -13,8 +13,8 @@ import org.jetbrains.annotations.Range;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
 import java.util.function.Function;

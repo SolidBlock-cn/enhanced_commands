@@ -14,9 +14,9 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.Parser;
-import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,8 +1,8 @@
 package pers.solid.ecmd.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
 
 import java.util.HashMap;
 import java.util.Map;

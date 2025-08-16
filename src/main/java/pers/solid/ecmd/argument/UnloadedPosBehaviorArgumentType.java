@@ -5,7 +5,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.argument.EnumArgumentType;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
-import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.concurrent.CompletableFuture;
 

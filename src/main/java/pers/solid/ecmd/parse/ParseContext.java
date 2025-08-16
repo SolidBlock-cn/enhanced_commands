@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util.parse;
+package pers.solid.ecmd.parse;
 
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.ParseResults;

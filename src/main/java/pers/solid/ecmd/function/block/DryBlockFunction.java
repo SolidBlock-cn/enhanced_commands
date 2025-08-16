@@ -11,8 +11,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 /**
  * 去除方块函数中的流体，并将 waterlogged 设为 false。这不一定总是能够成功。

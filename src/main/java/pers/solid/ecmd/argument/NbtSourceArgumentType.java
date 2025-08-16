@@ -12,7 +12,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtSource;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;

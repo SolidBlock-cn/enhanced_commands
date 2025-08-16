@@ -16,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.parse.FunctionLikeParser;
-import pers.solid.ecmd.util.parse.NamedParamListParser;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.NamedParamListParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.*;
 import java.util.stream.Collectors;

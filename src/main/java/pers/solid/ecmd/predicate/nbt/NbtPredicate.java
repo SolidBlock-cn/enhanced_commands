@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.function.Predicate;
 

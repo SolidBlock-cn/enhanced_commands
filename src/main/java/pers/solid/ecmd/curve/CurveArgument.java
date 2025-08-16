@@ -4,8 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.PositionProvider;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
 
 public interface CurveArgument<T extends Curve> {
   Codec<CurveArgument<?>> CODEC = CurveType.REGISTRY.getCodec().dispatch(CurveArgument::getType, CurveType::getArgumentCodec);

@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util.parse;
+package pers.solid.ecmd.parse;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -61,11 +61,11 @@ public interface NamedParamListParser {
     }
   }
 
-  default char paramSeparator() {
+  default char separatorChar() {
     return ',';
   }
 
-  default char keyValueSeparator() {
+  default char keyValueSeparatorChar() {
     return '=';
   }
 
@@ -81,8 +81,8 @@ public interface NamedParamListParser {
 
     int paramCount = 0;
     while (true) {
-      final char KEY_VALUE_SEP = keyValueSeparator();
-      final char PARAMS_SEP = paramSeparator();
+      final char KEY_VALUE_SEP = keyValueSeparatorChar();
+      final char PARAMS_SEP = separatorChar();
       parseContext.addSuggestion((commandContext, suggestionsBuilder) -> CommandSource.suggestMatching(supportedParams().stream().filter(this::isValidParamName).map(s -> s + KEY_VALUE_SEP), suggestionsBuilder));
       final int cursorBeforeParamName = reader.getCursor();
       final String paramName = reader.readUnquotedString();

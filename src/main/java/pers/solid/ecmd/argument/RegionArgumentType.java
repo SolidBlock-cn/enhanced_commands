@@ -12,7 +12,7 @@ import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.PositionProvider;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;

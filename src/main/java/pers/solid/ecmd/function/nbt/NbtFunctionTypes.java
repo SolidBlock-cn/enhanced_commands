@@ -7,7 +7,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.nbt.PosNbtFunction;
-import pers.solid.ecmd.util.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

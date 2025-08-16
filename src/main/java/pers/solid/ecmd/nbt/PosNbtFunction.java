@@ -14,8 +14,8 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunctionType;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.parse.FunctionLikeParser;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 public record PosNbtFunction(EnhancedPosArgument pos) implements NbtFunction {
   public static final MapCodec<PosNbtFunction> CODEC = EnhancedPosArgument.CODEC.fieldOf("pos").xmap(PosNbtFunction::new, PosNbtFunction::pos);

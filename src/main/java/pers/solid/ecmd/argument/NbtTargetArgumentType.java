@@ -16,7 +16,7 @@ import pers.solid.ecmd.nbt.BlocksNbtData;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;

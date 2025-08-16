@@ -33,7 +33,7 @@ import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.CommandManagerMixin;
 import pers.solid.ecmd.mixins.mixin.WorldChunkMixin;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;

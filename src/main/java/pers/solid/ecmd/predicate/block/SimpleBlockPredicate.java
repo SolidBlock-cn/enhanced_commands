@@ -16,8 +16,8 @@ import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
 
 import java.util.ArrayList;
 import java.util.Collections;

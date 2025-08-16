@@ -35,8 +35,8 @@ import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.*;
 import java.util.function.Consumer;

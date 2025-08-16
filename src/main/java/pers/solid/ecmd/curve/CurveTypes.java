@@ -7,9 +7,9 @@ import net.minecraft.registry.Registry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.util.parse.FunctionLikeParser;
-import pers.solid.ecmd.util.parse.FunctionsParser;
-import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.parse.Parser;
 
 import java.util.LinkedHashMap;
 import java.util.List;

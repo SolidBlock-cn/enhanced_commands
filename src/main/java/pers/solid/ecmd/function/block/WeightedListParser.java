@@ -6,8 +6,8 @@ import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.util.iterator.IterateUtils;
-import pers.solid.ecmd.util.parse.ParseContext;
-import pers.solid.ecmd.util.parse.Parser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
 
 import java.util.ArrayList;
 import java.util.List;

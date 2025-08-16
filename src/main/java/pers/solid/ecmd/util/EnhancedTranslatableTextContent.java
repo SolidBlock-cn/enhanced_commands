@@ -15,7 +15,7 @@ import net.minecraft.util.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.TranslatableTextContentAccessor;
-import pers.solid.ecmd.util.parse.ParsingUtil;
+import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Arrays;
 import java.util.List;

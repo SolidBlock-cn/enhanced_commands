@@ -7,7 +7,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionParamsParser;
 
 public interface RegionType<R extends Region> {
   RegistryKey<Registry<RegionType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region_type"));

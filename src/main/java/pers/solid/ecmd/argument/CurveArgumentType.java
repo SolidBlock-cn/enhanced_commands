@@ -11,7 +11,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.curve.CurveArgument;
 import pers.solid.ecmd.util.PositionProvider;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;

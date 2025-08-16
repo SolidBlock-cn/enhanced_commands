@@ -15,8 +15,8 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.util.parse.FunctionParamsParser;
-import pers.solid.ecmd.util.parse.ParseContext;
+import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -96,7 +96,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
   /**
    * 直接将坐标形式的内容解析为区域，例如 {@code 1 2 3} 等价于 {@code single(1 2 3)}，{@code ~~~} 等价于 {@code single(~~~)}。
    */
-  public enum BareParser implements pers.solid.ecmd.util.parse.Parser<SingleBlockPosRegionArgument> {
+  public enum BareParser implements pers.solid.ecmd.parse.Parser<SingleBlockPosRegionArgument> {
     INSTANCE;
 
     @Override
