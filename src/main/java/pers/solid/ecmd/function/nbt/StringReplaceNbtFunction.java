@@ -1,6 +1,5 @@
 package pers.solid.ecmd.function.nbt;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -13,11 +12,10 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.parse.FunctionLikeParser;
-import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -46,7 +44,7 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
 
   @Override
   public @NotNull String asString() {
-    return "string.replace(" + NbtString.escape(target) + ", " + NbtString.escape(replacement) + "; recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> "; original = " + nbtFunction.asString()).orElse("") + ")";
+    return "string.replace(" + NbtString.escape(target) + ", " + NbtString.escape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> "; original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   @Override
@@ -86,7 +84,7 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
     }
   }
 
-  public static class Parser implements FunctionLikeParser<StringReplaceNbtFunction>, NamedParamListParser {
+  public static class Parser implements FunctionLikeParser.MixedParams<StringReplaceNbtFunction> {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
     private String target, replacement;
     private Boolean recursive, lenient;
@@ -98,23 +96,10 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
     }
 
     @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final StringReader reader = parseContext.reader();
-      target = reader.readString();
-      reader.skipWhitespace();
-      reader.expect(',');
-      reader.skipWhitespace();
-      replacement = reader.readString();
-      reader.skipWhitespace();
-
-      if (reader.canRead() && reader.peek() == ';') {
-        reader.skip();
-        reader.skipWhitespace();
-
-        if (reader.canRead() && reader.peek() == ')') {
-          return;
-        }
-        parseNamedParameters(parseContext);
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      switch (paramIndex) {
+        case 0 -> target = parseContext.reader().readString();
+        case 1 -> replacement = parseContext.reader().readString();
       }
     }
 

@@ -22,11 +22,7 @@ public interface MixedParamListParser extends SequentialParamListParser, NamedPa
       });
     }
 
-    if (reader.canRead() && reader.peek() == terminateChar()) {
-      return;
-    }
-
-    while (true) {
+    if (!reader.canRead() || reader.peek() != terminateChar()) while (true) {
       parseContext.clearSuggestion();
 
       final char KEY_VALUE_SEP = keyValueSeparatorChar();

@@ -16,10 +16,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.regex.Pattern;
 
@@ -78,7 +78,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     }
   }
 
-  public static class Parser implements FunctionParamsParser<IdReplaceBlockFunction> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<IdReplaceBlockFunction> {
     private Pattern pattern;
     private String replacement;
 
@@ -91,7 +91,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         pattern = ParsingUtil.readRegex(reader);
@@ -101,12 +101,12 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 2;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 2;
     }
   }

@@ -15,7 +15,7 @@ public final class RegionTypes {
   public static final Map<String, RegionType<?>> FUNCTIONS = new LinkedHashMap<>();
   public static final List<Parser<? extends RegionArgument<?>>> PARSERS = Lists.newArrayList(SingleBlockPosRegion.BareParser.INSTANCE, new FunctionsParser<>(FUNCTIONS.keySet(), s -> {
     final RegionType<?> regionType = FUNCTIONS.get(s);
-    return regionType == null ? null : regionType.functionParamsParser();
+    return regionType == null ? null : regionType.parser();
   }, s -> {
     final RegionType<?> regionType = FUNCTIONS.get(s);
     return regionType == null ? null : regionType.tooltip();

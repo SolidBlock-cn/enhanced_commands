@@ -6,10 +6,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
 
 /**
  * 在 NBT 中进行替换，将符合谓词的值都应用指定的函数。
@@ -44,12 +44,12 @@ public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFu
     }
   }
 
-  public static class Parser implements FunctionParamsParser<ReplaceNbtFunction> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<ReplaceNbtFunction> {
     private NbtPredicate nbtPredicate;
     private NbtFunction nbtFunction;
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
         case 0 -> nbtPredicate = NbtPredicate.parse(parseContext, false, false);
         case 1 -> nbtFunction = NbtFunction.parse(parseContext, false, false);
@@ -62,12 +62,12 @@ public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFu
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 2;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 2;
     }
   }

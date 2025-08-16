@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<OverlayBlockFunction> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<OverlayBlockFunction> {
     private final List<BlockFunction> blockFunctions = new ArrayList<>();
 
     @Override
@@ -67,7 +67,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       blockFunctions.add(BlockFunction.parse(parseContext));
     }
   }

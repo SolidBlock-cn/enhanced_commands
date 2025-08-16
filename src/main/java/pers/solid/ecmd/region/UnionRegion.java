@@ -11,7 +11,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public FunctionParamsParser<UnionRegionArgument> functionParamsParser() {
+    public FunctionLikeParser.SequentialParams<UnionRegionArgument> parser() {
       return new Parser();
     }
 
@@ -111,7 +111,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<UnionRegionArgument> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<UnionRegionArgument> {
     private final List<RegionArgument<?>> regions = new ArrayList<>();
 
     @Override
@@ -120,7 +120,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       regions.add(RegionArgument.parse(parseContext));
     }
   }

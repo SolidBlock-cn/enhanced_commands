@@ -83,12 +83,8 @@ public interface NamedParamListParser {
   default void parseNamedParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     reader.skipWhitespace();
-    if (reader.canRead() && reader.peek() == terminateChar()) {
-      return;
-    }
-
     int paramCount = 0;
-    while (true) {
+    if (!reader.canRead() || reader.peek() != terminateChar()) while (true) {
       final char KEY_VALUE_SEP = keyValueSeparatorChar();
       final char PARAMS_SEP = separatorChar();
       parseContext.addSuggestion((commandContext, suggestionsBuilder) -> CommandSource.suggestMatching(supportedParams().stream().filter(this::isValidParamName).map(s -> s + KEY_VALUE_SEP), suggestionsBuilder));
@@ -130,5 +126,9 @@ public interface NamedParamListParser {
         break;
       }
     }
+    else {
+      return;
+    }
+
   }
 }

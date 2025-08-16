@@ -14,13 +14,13 @@ import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,7 +143,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<ExposeBlockPredicate> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<ExposeBlockPredicate> {
     private final Set<@NotNull Direction> directions = new TreeSet<>();
     private ExposureType exposureType;
 
@@ -153,17 +153,17 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 2;
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         parseContext.clearSuggestion();

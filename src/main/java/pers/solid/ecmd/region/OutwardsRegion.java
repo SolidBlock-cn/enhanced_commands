@@ -14,9 +14,9 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.GeoUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -82,7 +82,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public FunctionParamsParser<OutwardsRegionArgument> functionParamsParser() {
+    public FunctionLikeParser.SequentialParams<OutwardsRegionArgument> parser() {
       return new Parser();
     }
 
@@ -97,7 +97,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<OutwardsRegionArgument> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<OutwardsRegionArgument> {
     private EnhancedPosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
     private int x, y, z;
     private int dimensionNumber = 0;
@@ -110,7 +110,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 1) {
         ArgumentType<EnhancedPosArgument> argumentType = EnhancedPosArgumentType.blockPos();
         center = parseContext.parseAndSuggestArgument(argumentType);

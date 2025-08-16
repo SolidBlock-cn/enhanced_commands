@@ -1,6 +1,5 @@
 package pers.solid.ecmd.function.nbt;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -14,12 +13,10 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.parse.FunctionLikeParser;
-import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -49,7 +46,7 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
 
   @Override
   public @NotNull String asString() {
-    return "substring(" + startIndex + (endIndex.isPresent() ? ", " + endIndex.get() : "") + "; lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
+    return "substring(" + startIndex + (endIndex.isPresent() ? ", " + endIndex.get() : "") + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   private static int actualIndex(int index, int length) throws CommandSyntaxException {
@@ -115,7 +112,7 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
     }
   }
 
-  public static class Parser implements FunctionLikeParser<SubstringNbtFunction>, NamedParamListParser {
+  public static class Parser implements FunctionLikeParser.MixedParams<SubstringNbtFunction> {
     private Integer startIndex, endIndex;
     private Boolean lenient;
     private @Nullable NbtFunction original;
@@ -125,43 +122,6 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
     public SubstringNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final Optional<Integer> endIndex = Optional.ofNullable(this.endIndex);
       return new SubstringNbtFunction(startIndex, endIndex, Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
-    }
-
-    @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final StringReader reader = parseContext.reader();
-      startIndex = reader.readInt();
-      parseContext.addSuggestion((context, builder) -> builder.suggest(",").suggest(";").buildFuture());
-
-      if (!reader.canRead()) {
-        throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.create(",", ";");
-      } else if (reader.peek() == ';') {
-        // 直接跳过此 if 语句
-      } else if (reader.peek() != ',') {
-        parseContext.clearSuggestion();
-        return;
-      } else {
-        // 以下为 reader.peek() == ',' 时
-
-        reader.skip();
-        reader.skipWhitespace();
-        parseContext.clearSuggestion();
-
-        endIndex = reader.readInt();
-        reader.skipWhitespace();
-        parseContext.addSuggestion((context, builder) -> builder.suggest(";").buildFuture());
-      }
-
-      if (reader.canRead() && reader.peek() == ';') {
-        reader.skip();
-        reader.skipWhitespace();
-        parseContext.clearSuggestion();
-
-        if (reader.canRead() && reader.peek() == ')') {
-          return;
-        }
-        parseNamedParameters(parseContext);
-      }
     }
 
     @Override
@@ -187,6 +147,24 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
         }
         case "original" -> original = NbtFunction.parse(parseContext, false, false);
       }
+    }
+
+    @Override
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      switch (paramIndex) {
+        case 0 -> startIndex = parseContext.reader().readInt();
+        case 1 -> endIndex = parseContext.reader().readInt();
+      }
+    }
+
+    @Override
+    public int minSequentialParamsCount() {
+      return 1;
+    }
+
+    @Override
+    public int maxSequentialParamsCount() {
+      return 2;
     }
   }
 }

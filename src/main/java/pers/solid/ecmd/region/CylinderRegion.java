@@ -9,14 +9,19 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
+import org.jetbrains.annotations.Unmodifiable;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -145,7 +150,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
 
     @Override
-    public FunctionParamsParser<CylinderRegionArgument> functionParamsParser() {
+    public Parser parser() {
       return new Parser();
     }
 
@@ -160,20 +165,23 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<CylinderRegionArgument> {
-    private double radius;
-    private double height = 1;
-    private EnhancedPosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
+  public static final class Parser implements FunctionLikeParser.MixedParams<CylinderRegionArgument> {
+    private @Nullable Double radius = null;
+    private @Nullable Double height = null;
+    private @Nullable EnhancedPosArgument center = null;
 
     @Override
     public CylinderRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new CylinderRegionArgument(radius, height, center);
+      return new CylinderRegionArgument(radius == null ? 1 : radius, height == null ? 1 : height, center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : center);
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
+        if (radius != null) {
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "radius");
+        }
         final int cursorBeforeReadDouble = reader.getCursor();
         radius = reader.readDouble();
         if (radius < 0) {
@@ -181,6 +189,9 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, radius);
         }
       } else if (paramIndex == 1) {
+        if (height != null) {
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "height");
+        }
         final int cursorBeforeReadDouble = reader.getCursor();
         height = reader.readDouble();
         if (height < 0) {
@@ -188,19 +199,48 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, 0, height);
         }
       } else if (paramIndex == 2) {
+        if (center != null) {
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
+        }
         final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(type);
       }
     }
 
     @Override
-    public int minParamsCount() {
-      return 1;
+    public int minSequentialParamsCount() {
+      return radius == null ? 1 : 0;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 3;
+    }
+
+    private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "height", "center");
+
+    @Override
+    public @Unmodifiable Collection<String> supportedParams() {
+      return SUPPORTED_PARAMS;
+    }
+
+    @Override
+    public boolean isDuplicateParamName(String paramName) {
+      return switch (paramName) {
+        case "radius" -> radius != null;
+        case "height" -> height != null;
+        case "center" -> center != null;
+        default -> false;
+      };
+    }
+
+    @Override
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      switch (paramName) {
+        case "radius" -> parseSequentialParameter(parseContext, 0);
+        case "height" -> parseSequentialParameter(parseContext, 1);
+        case "center" -> parseSequentialParameter(parseContext, 2);
+      }
     }
   }
 }

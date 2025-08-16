@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 
@@ -64,7 +64,7 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<PostProcessBlockFunction> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<PostProcessBlockFunction> {
     private final Set<@NotNull Direction> directions = new TreeSet<>();
 
     @Override
@@ -73,17 +73,17 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 0;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         do {

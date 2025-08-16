@@ -331,7 +331,7 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
    */
   public <T> T parseAndSuggestArgument(ArgumentType<T> argumentType) throws CommandSyntaxException {
     final int cursorBeforeParse = reader.getCursor();
-    setSuggestion((context, builder) -> {
+    addSuggestion((context, builder) -> {
       final SuggestionsBuilder builderOffset = builder.createOffset(cursorBeforeParse);
       return argumentType.listSuggestions(context, builderOffset);
     });

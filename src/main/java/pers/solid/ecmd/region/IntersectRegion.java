@@ -11,7 +11,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public FunctionParamsParser<IntersectRegionArgument> functionParamsParser() {
+    public FunctionLikeParser.SequentialParams<IntersectRegionArgument> parser() {
       return new Parser();
     }
 
@@ -122,7 +122,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<IntersectRegionArgument> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<IntersectRegionArgument> {
     private final List<RegionArgument<?>> regions = new ArrayList<>();
 
     @Override
@@ -131,7 +131,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       regions.add(RegionArgument.parse(parseContext));
     }
   }

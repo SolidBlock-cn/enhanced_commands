@@ -20,12 +20,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.bridge.LootBridge;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -61,7 +61,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
   }
 
-  public static class Parser implements FunctionParamsParser<LootConditionBlockPredicate> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<LootConditionBlockPredicate> {
     protected Identifier id;
     protected LootCondition anonymous;
     protected int cursorBeforeId, cursorAfterId;
@@ -77,12 +77,12 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 1;
     }
 
@@ -103,7 +103,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       final int cursorBeforeId = reader.getCursor();
       parseContext.setSuggestion((context1, suggestionsBuilder1) -> getLootConditionIdSuggestions(context1, suggestionsBuilder1, cursorBeforeId));

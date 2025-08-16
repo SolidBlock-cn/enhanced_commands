@@ -15,7 +15,7 @@ import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
@@ -78,7 +78,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public FunctionParamsParser<RegionArgument<SingleBlockPosRegion>> functionParamsParser() {
+    public FunctionLikeParser.SequentialParams<RegionArgument<SingleBlockPosRegion>> parser() {
       return FunctionParser.INSTANCE;
     }
 
@@ -119,17 +119,17 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
   }
 
-  public enum FunctionParser implements FunctionParamsParser<RegionArgument<SingleBlockPosRegion>> {
+  public enum FunctionParser implements FunctionLikeParser.SequentialParams<RegionArgument<SingleBlockPosRegion>> {
     INSTANCE;
     private EnhancedPosArgument posArgument;
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 1;
     }
 
@@ -141,7 +141,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       ArgumentType<EnhancedPosArgument> argumentType = EnhancedPosArgumentType.blockPos();
       posArgument = parseContext.parseAndSuggestArgument(argumentType);
     }

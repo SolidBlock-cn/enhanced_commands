@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
@@ -120,7 +120,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     }
 
     @Override
-    public FunctionParamsParser<CuboidWallRegionArgument> functionParamsParser() {
+    public FunctionLikeParser.SequentialParams<CuboidWallRegionArgument> parser() {
       return new Parser();
     }
 

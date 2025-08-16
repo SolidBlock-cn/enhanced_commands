@@ -19,9 +19,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.StateUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.StateUtil;
 
 import java.util.List;
 
@@ -80,7 +80,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     }
   }
 
-  public static class Parser implements FunctionParamsParser<StonecutBlockFunction> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<StonecutBlockFunction> {
     private BlockFunction blockFunction = null;
 
     @Override
@@ -89,17 +89,17 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       blockFunction = BlockFunction.parse(parseContext);
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 0;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 1;
     }
   }

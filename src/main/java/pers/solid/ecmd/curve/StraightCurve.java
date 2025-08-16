@@ -14,10 +14,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.util.StringUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -141,7 +141,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     }
   }
 
-  protected static final class Parser implements FunctionParamsParser<CurveArgument<StraightCurve>> {
+  protected static final class Parser implements FunctionLikeParser.SequentialParams<CurveArgument<StraightCurve>> {
     private EnhancedPosArgument from, to;
     private boolean usingKeyword = false;
 
@@ -154,31 +154,11 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {
-        parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
-        final int cursorBeforeKeyword = reader.getCursor();
-        final String unquotedString = reader.readUnquotedString();
-        if (unquotedString.equals("from")) {
-          parseContext.clearSuggestion();
-          usingKeyword = true;
-          ParsingUtil.expectAndSkipWhitespace(reader);
-          from = parseContext.parseAndSuggestArgument(argumentType);
-          ParsingUtil.expectAndSkipWhitespace(reader);
-          final int cursorBeforeKeyword2 = reader.getCursor();
-          parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("to", suggestionsBuilder).buildFuture());
-          if (reader.readUnquotedString().equals("to")) {
-            parseContext.clearSuggestion();
-            ParsingUtil.expectAndSkipWhitespace(reader);
-            to = parseContext.parseAndSuggestArgument(argumentType);
-          } else {
-            reader.setCursor(cursorBeforeKeyword2);
-            throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "to");
-          }
-        } else {
-          reader.setCursor(cursorBeforeKeyword);
+        {
           if (reader.canRead() && !CommandSource.shouldSuggest(reader.getRemaining().toLowerCase(), "from")) {
             // 避免在输入了部分坐标后仍建议输入 “from” 的情况
             parseContext.clearSuggestion();
@@ -191,13 +171,41 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     }
 
     @Override
-    public int minParamsCount() {
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final StringReader reader = parseContext.reader();
+      final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
+      final int cursorBeforeKeyword = reader.getCursor();
+      final String unquotedString = reader.readUnquotedString();
+      if (unquotedString.equals("from")) {
+        parseContext.clearSuggestion();
+        usingKeyword = true;
+        ParsingUtil.expectAndSkipWhitespace(reader);
+        from = parseContext.parseAndSuggestArgument(argumentType);
+        ParsingUtil.expectAndSkipWhitespace(reader);
+        final int cursorBeforeKeyword2 = reader.getCursor();
+        parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("to", suggestionsBuilder).buildFuture());
+        if (reader.readUnquotedString().equals("to")) {
+          parseContext.clearSuggestion();
+          ParsingUtil.expectAndSkipWhitespace(reader);
+          to = parseContext.parseAndSuggestArgument(argumentType);
+        } else {
+          reader.setCursor(cursorBeforeKeyword2);
+          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "to");
+        }
+      } else {
+        parseSequentialParameters(parseContext);
+      }
+    }
+
+    @Override
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
-      return usingKeyword ? 1 : 2;
+    public int maxSequentialParamsCount() {
+      return 2;
     }
   }
 }

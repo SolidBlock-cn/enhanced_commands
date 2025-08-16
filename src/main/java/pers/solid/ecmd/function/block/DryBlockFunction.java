@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 /**
@@ -51,7 +51,7 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
     }
   }
 
-  public static class Parser implements FunctionParamsParser<DryBlockFunction> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<DryBlockFunction> {
     BlockFunction blockFunction = null;
 
     @Override
@@ -60,17 +60,17 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       blockFunction = BlockFunction.parse(parseContext);
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 0;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 1;
     }
   }

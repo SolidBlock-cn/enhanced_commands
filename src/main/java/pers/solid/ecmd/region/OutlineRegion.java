@@ -10,9 +10,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.enums.OutlineType;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.enums.OutlineType;
 
 import java.util.Iterator;
 import java.util.List;
@@ -113,7 +113,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public FunctionParamsParser<? extends OutlineRegionArgument> functionParamsParser() {
+    public FunctionLikeParser.SequentialParams<? extends OutlineRegionArgument> parser() {
       return new Parser();
     }
 
@@ -128,7 +128,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<OutlineRegionArgument> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<OutlineRegionArgument> {
     private OutlineType outlineType = OutlineType.OUTLINE;
     private RegionArgument<?> regionArgument;
 
@@ -138,7 +138,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 1) {
         outlineType = parseContext.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
       } else if (paramIndex == 0) {
@@ -147,12 +147,12 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 2;
     }
   }

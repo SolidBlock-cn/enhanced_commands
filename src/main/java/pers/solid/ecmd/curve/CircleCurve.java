@@ -7,27 +7,28 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
-import net.minecraft.command.CommandSource;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.joml.AxisAngle4d;
 import org.joml.Vector3d;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.Vect3dArgument;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -209,7 +210,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
    * <p>
    * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <axis>} 的默认值为 {@code 0 1 0}。当 {@code <radius>} 指定为标量时，其方向相当于 {@code <axis>} 与 y 轴正方向的向量积的方向。当 {@code <axis>} 正好指定为 y 轴正方向时，{@code <radius>} 方向为 x 正方向，若为 y 轴负方向，则 {@code <radius>} 方向为 x 负方向。
    */
-  protected static class Parser implements FunctionParamsParser<CurveArgument<CircleCurve>> {
+  protected static class Parser implements FunctionLikeParser.MixedParams<CurveArgument<CircleCurve>> {
     private @Nullable Double radius;
     private @Nullable EnhancedPosArgument center;
     private @Nullable Vect3dArgument axis;
@@ -217,94 +218,15 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
 
     @Override
     public CurveArgument<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      if (this.radius == null) {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(parseContext.reader(), "radius");
-      }
       final EnhancedPosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
-      return new CircleCurveArgument(radius, center, axis == null ? new Vect3dArgument.Fixed(new Vec3d(0, 1, 0)) : axis, range == null ? FULL_MIN : range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
-    }
-
-    @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      parseRadius(parseContext);
-      while (true) {
-        final int cursorBeforeWhite = parseContext.reader().getCursor();
-        parseContext.reader().skipWhitespace();
-        if (parseContext.reader().getCursor() > cursorBeforeWhite) {
-          if (parseAdditionalParameters(parseContext)) {
-            break;
-          }
-        } else {
-          break;
-        }
-      }
+      return new CircleCurveArgument(radius == null ? 1 : radius, center, axis == null ? new Vect3dArgument.Fixed(new Vec3d(0, 1, 0)) : axis, range == null ? FULL_MIN : range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
     }
 
     /**
      * 解析半径。即：{@code <double> | from (<vector> | <double> <direction>)}。
      */
     private void parseRadius(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final StringReader reader = parseContext.reader();
-      radius = reader.readDouble();
-    }
-
-    private boolean parseAdditionalParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
-      parseContext.setSuggestion((context, suggestionsBuilder) -> {
-        if (center == null) ParsingUtil.suggestString("at", suggestionsBuilder);
-        if (axis == null) CommandSource.suggestMatching(List.of("around", "facing", "rotated"), suggestionsBuilder);
-        if (range == null) ParsingUtil.suggestString("ranging", suggestionsBuilder);
-        return suggestionsBuilder.buildFuture();
-      });
-      final int cursorBeforeKeyword = parseContext.reader().getCursor();
-      final String unquotedString = parseContext.reader().readUnquotedString();
-      if (unquotedString.isEmpty()) {
-        return true;
-      } else if ("at".equals(unquotedString)) {
-        if (center != null) {
-          parseContext.reader().setCursor(cursorBeforeKeyword);
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
-        }
-        parseContext.clearSuggestion();
-        ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-        EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
-        center = parseContext.parseAndSuggestArgument(argumentType);
-      } else if ("around".equals(unquotedString) || "rotated".equals(unquotedString) || "facing".equals(unquotedString)) {
-        if (axis != null) {
-          parseContext.reader().setCursor(cursorBeforeKeyword);
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
-        }
-        parseContext.clearSuggestion();
-        ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-        switch (unquotedString) {
-          case "around" -> {
-            axis = parseContext.parseAndSuggestVec3d();
-          }/* todo implement
-          case "rotated" -> {
-            final PosArgument posArgument = parseContext.parseAndSuggestArgument(new RotationArgumentType());
-            axis = (source, ignored) -> {
-              final Vec2f rotation = posArgument.toAbsoluteRotation(source);
-              return new Vec3d(0, 0, 1).rotateX(-MathHelper.RADIANS_PER_DEGREE * rotation.x).rotateY(-MathHelper.RADIANS_PER_DEGREE * rotation.y);
-            };
-          }*/
-          case "facing" -> {
-            EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
-            final EnhancedPosArgument posArgument = parseContext.parseAndSuggestArgument(argumentType);
-            axis = new Vect3dArgument.Facing(posArgument);
-          }
-        }
-      } else if ("ranging".equals(unquotedString)) {
-        if (range != null) {
-          parseContext.reader().setCursor(cursorBeforeKeyword);
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
-        }
-        parseContext.clearSuggestion();
-        ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-        range = parseAngleRange(parseContext);
-      } else {
-        parseContext.reader().setCursor(cursorBeforeKeyword);
-        throw ModCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(parseContext.reader(), unquotedString);
-      }
-      return false;
+      radius = parseContext.reader().readDouble();
     }
 
     private DoubleDoublePair parseAngleRange(ParseContext<?> parseContext) throws CommandSyntaxException {
@@ -325,14 +247,68 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
       }
     }
 
+    private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "center", "pivot", "range");
+
     @Override
-    public int minParamsCount() {
-      return 1;
+    public @Unmodifiable Collection<String> supportedParams() {
+      return SUPPORTED_PARAMS;
     }
 
     @Override
-    public int maxParamsCount() {
-      return 1;
+    public boolean isDuplicateParamName(String paramName) {
+      return switch (paramName) {
+        case "radius" -> radius != null;
+        case "center" -> center != null;
+        case "pivot" -> axis != null;
+        case "range" -> range != null;
+        default -> false;
+      };
+    }
+
+    @Override
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      switch (paramName) {
+        case "radius" -> parseRadius(parseContext);
+        case "center" -> {
+          EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+          center = parseContext.parseAndSuggestArgument(argumentType);
+        }
+        case "pivot" -> {
+          EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+          final EnhancedPosArgument posArgument = parseContext.parseAndSuggestArgument(argumentType);
+          axis = new Vect3dArgument.Facing(posArgument);
+        }
+        case "range" -> {
+          ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
+          range = parseAngleRange(parseContext);
+        }
+      }
+    }
+
+    @Override
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      if (paramIndex == 0) {
+        if (radius != null) {
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "radius");
+        }
+        parseRadius(parseContext);
+      } else if (paramIndex == 1) {
+        if (center != null) {
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "center");
+        }
+        EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+        center = parseContext.parseAndSuggestArgument(argumentType);
+      }
+    }
+
+    @Override
+    public int minSequentialParamsCount() {
+      return radius == null ? 1 : 0;
+    }
+
+    @Override
+    public int maxSequentialParamsCount() {
+      return 2;
     }
   }
 }

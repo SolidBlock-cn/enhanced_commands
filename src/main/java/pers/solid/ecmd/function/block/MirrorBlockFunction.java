@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.MirrorArgument;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 public record MirrorBlockFunction(@NotNull MirrorArgument mirror) implements BlockFunction {
@@ -41,16 +41,16 @@ public record MirrorBlockFunction(@NotNull MirrorArgument mirror) implements Blo
     }
   }
 
-  public static class Parser implements FunctionParamsParser<MirrorBlockFunction> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<MirrorBlockFunction> {
     private MirrorArgument mirror;
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 1;
     }
 
@@ -60,7 +60,7 @@ public record MirrorBlockFunction(@NotNull MirrorArgument mirror) implements Blo
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       mirror = parseContext.parseAndSuggestEnums(MirrorArgument.values(), mirrorArgument -> null, MirrorArgument.CODEC);
     }
   }

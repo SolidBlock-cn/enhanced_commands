@@ -7,14 +7,14 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
 
 public record RegionBlockPredicate(RegionArgument<?> region) implements BlockPredicate {
   public static final MapCodec<RegionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RegionBlockPredicate::new, RegionArgument.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
@@ -51,7 +51,7 @@ public record RegionBlockPredicate(RegionArgument<?> region) implements BlockPre
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<RegionBlockPredicate> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<RegionBlockPredicate> {
     private RegionArgument<?> regionArgument;
 
     @Override
@@ -60,13 +60,13 @@ public record RegionBlockPredicate(RegionArgument<?> region) implements BlockPre
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       regionArgument = RegionArgument.parse(parseContext);
     }
 
     // @formatter:off
-    @Override public int minParamsCount() { return 1; }
-    @Override public int maxParamsCount() { return 1; }
+    @Override public int minSequentialParamsCount() { return 1; }
+    @Override public int maxSequentialParamsCount() { return 1; }
     // @formatter:on
   }
 }

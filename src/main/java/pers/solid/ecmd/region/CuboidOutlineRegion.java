@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
@@ -118,7 +118,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public FunctionParamsParser<CuboidOutlineRegionArgument> functionParamsParser() {
+    public FunctionLikeParser.SequentialParams<CuboidOutlineRegionArgument> parser() {
       return new Parser();
     }
 
@@ -133,7 +133,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
   }
 
-  public static abstract sealed class AbstractParser<R extends RegionArgument<?>> implements FunctionParamsParser<R> permits Parser, CuboidWallRegion.Parser {
+  public static abstract sealed class AbstractParser<R extends RegionArgument<?>> implements FunctionLikeParser.SequentialParams<R> permits Parser, CuboidWallRegion.Parser {
     protected EnhancedPosArgument fromPos, toPos;
     protected int thickness = 1;
     protected int cursorBefore = 0, cursorAfter = 0;
@@ -145,13 +145,13 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
 
     @Override
     public R parseAfterLeftParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final R parsed = FunctionParamsParser.super.parseAfterLeftParenthesis(parseContext);
+      final R parsed = SequentialParams.super.parseAfterLeftParenthesis(parseContext);
       cursorAfter = parseContext.reader().getCursor();
       return parsed;
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {

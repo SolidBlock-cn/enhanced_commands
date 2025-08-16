@@ -10,7 +10,6 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.SequentialParamListParser;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
@@ -63,7 +62,7 @@ public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
     }
   }
 
-  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionLikeParser<AllBlockPredicate>, SequentialParamListParser {
+  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionLikeParser.SequentialParams<AllBlockPredicate> {
     public Parser() {
       this(new ArrayList<>());
     }
@@ -71,11 +70,6 @@ public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
     @Override
     public AllBlockPredicate getParseResult(ParseContext<?> parseContext) {
       return new AllBlockPredicate(blockPredicates);
-    }
-
-    @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      parseSequentialParameters(parseContext);
     }
 
     @Override

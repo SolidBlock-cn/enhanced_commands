@@ -7,7 +7,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 
 public interface RegionType<R extends Region> {
   RegistryKey<Registry<RegionType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region_type"));
@@ -30,7 +30,7 @@ public interface RegionType<R extends Region> {
   /**
    * 在解析完函数名称并确定为此函数之后，解析相应的函数名称后的内容。如果返回 null，则跳过此解析。注意：只有当函数名称匹配时，此方法才会被调用。
    */
-  default FunctionParamsParser<? extends RegionArgument<? extends R>> functionParamsParser() {
+  default FunctionLikeParser<? extends RegionArgument<? extends R>> parser() {
     return null;
   }
 

@@ -1,7 +1,6 @@
 package pers.solid.ecmd.function.block;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -17,11 +16,10 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.parse.FunctionLikeParser;
-import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collection;
 import java.util.OptionalLong;
@@ -57,7 +55,7 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   @Override
   public @NotNull String asString() {
-    return "idcontain(" + NbtString.escape(pattern.toString()) + (seed.isPresent() ? "; seed = " + seed.getAsLong() : "") + ")";
+    return "idcontain(" + NbtString.escape(pattern.toString()) + (seed.isPresent() ? ", seed = " + seed.getAsLong() : "") + ")";
   }
 
   @Override
@@ -106,7 +104,7 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   }
 
-  public static class Parser implements FunctionLikeParser<IdContainBlockFunction>, NamedParamListParser {
+  public static class Parser implements FunctionLikeParser.MixedParams<IdContainBlockFunction> {
     private static final Set<String> SUPPORTED_PARAM_NAMES = ImmutableSet.of("seed");
     private Pattern pattern;
     private OptionalLong seed = OptionalLong.empty();
@@ -123,25 +121,31 @@ public final class IdContainBlockFunction implements BlockFunction {
 
     @Override
     public boolean isDuplicateParamName(String paramName) {
-      return seed.isPresent();
+      return paramName.equals("seed") && seed.isPresent();
     }
 
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
-      seed = OptionalLong.of(parseContext.reader().readLong());
+      if (paramName.equals("seed")) {
+        seed = OptionalLong.of(parseContext.reader().readLong());
+      }
     }
 
     @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final StringReader reader = parseContext.reader();
-      pattern = ParsingUtil.readRegex(reader);
-      if (reader.canRead() && reader.peek() == ';') {
-        reader.skip();
-        reader.skipWhitespace();
-        parseContext.clearSuggestion();
-
-        parseNamedParameters(parseContext);
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      if (paramIndex == 0) {
+        pattern = ParsingUtil.readRegex(parseContext.reader());
       }
+    }
+
+    @Override
+    public int minSequentialParamsCount() {
+      return 1;
+    }
+
+    @Override
+    public int maxSequentialParamsCount() {
+      return 1;
     }
   }
 }

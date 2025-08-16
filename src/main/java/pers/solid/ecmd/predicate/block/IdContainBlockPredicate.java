@@ -8,13 +8,13 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.regex.Pattern;
 
@@ -67,16 +67,16 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     }
   }
 
-  public static class Parser implements FunctionParamsParser<IdContainBlockPredicate> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<IdContainBlockPredicate> {
     private Pattern pattern;
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 1;
     }
 
@@ -86,7 +86,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       parseContext.clearSuggestion();
       pattern = ParsingUtil.readRegex(parseContext.reader());
     }

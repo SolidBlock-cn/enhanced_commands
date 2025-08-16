@@ -12,7 +12,6 @@ import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionLikeParser;
-import pers.solid.ecmd.parse.MixedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -83,7 +82,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
     }
   }
 
-  public static final class Parser implements FunctionLikeParser<ProbabilityBlockPredicate>, MixedParamListParser {
+  public static final class Parser implements FunctionLikeParser.MixedParams<ProbabilityBlockPredicate> {
     private float value;
     private BlockPredicate predicate;
     private OptionalLong seed = OptionalLong.empty();
@@ -94,11 +93,6 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
         predicate = ConstantBlockPredicate.ALWAYS_TRUE;
       }
       return new ProbabilityBlockPredicate(value, predicate, seed);
-    }
-
-    @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      parseMixedParameters(parseContext);
     }
 
     @Override

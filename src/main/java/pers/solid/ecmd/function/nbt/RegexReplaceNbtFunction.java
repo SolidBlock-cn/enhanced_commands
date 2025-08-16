@@ -1,6 +1,5 @@
 package pers.solid.ecmd.function.nbt;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -10,13 +9,12 @@ import net.minecraft.nbt.NbtString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.parse.FunctionLikeParser;
-import pers.solid.ecmd.parse.NamedParamListParser;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -43,7 +41,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
 
   @Override
   public @NotNull String asString() {
-    return "regex.replace(" + pattern.pattern() + ", " + NbtString.escape(replacement) + "; recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> "; original = " + nbtFunction.asString()).orElse("") + ")";
+    return "regex.replace(" + pattern.pattern() + ", " + NbtString.escape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   @Override
@@ -105,7 +103,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
     }
   }
 
-  public static class Parser implements FunctionLikeParser<RegexReplaceNbtFunction>, NamedParamListParser {
+  public static class Parser implements FunctionLikeParser.MixedParams<RegexReplaceNbtFunction> {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
     private Pattern regex;
     private String replacement;
@@ -118,23 +116,20 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
     }
 
     @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final StringReader reader = parseContext.reader();
-      regex = ParsingUtil.readRegex(reader);
-      reader.skipWhitespace();
-      reader.expect(',');
-      reader.skipWhitespace();
-      replacement = reader.readString();
-      reader.skipWhitespace();
+    public int minSequentialParamsCount() {
+      return 2;
+    }
 
-      if (reader.canRead() && reader.peek() == ';') {
-        reader.skip();
-        reader.skipWhitespace();
+    @Override
+    public int maxSequentialParamsCount() {
+      return 2;
+    }
 
-        if (reader.canRead() && reader.peek() == ')') {
-          return;
-        }
-        parseNamedParameters(parseContext);
+    @Override
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      switch (paramIndex) {
+        case 0 -> regex = ParsingUtil.readRegex(parseContext.reader());
+        case 1 -> replacement = parseContext.reader().readString();
       }
     }
 

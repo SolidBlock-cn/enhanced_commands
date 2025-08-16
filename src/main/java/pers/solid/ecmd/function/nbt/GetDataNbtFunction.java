@@ -13,9 +13,9 @@ import pers.solid.ecmd.argument.NbtSourceArgumentType;
 import pers.solid.ecmd.argument.SimpleEnumArgumentType;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
-import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Optional;
 
@@ -46,23 +46,23 @@ public record GetDataNbtFunction(NbtSource<?> nbtSource, Optional<NbtPathArgumen
     }
   }
 
-  public static class Parser implements FunctionParamsParser<GetDataNbtFunction> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<GetDataNbtFunction> {
     private NbtSource<?> nbtSource;
     private @Nullable NbtPathArgumentType.NbtPath nbtPath;
     private NbtConcentrationType nbtConcentrationType = NbtConcentrationType.ALL;
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 3;
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
         case 0 -> nbtSource = parseContext.parseAndSuggestArgument(NbtSourceArgumentType.nbtSource(parseContext.registryAccess()));
         case 1 -> nbtPath = parseContext.parseAndSuggestArgument(NbtPathArgumentType.nbtPath());

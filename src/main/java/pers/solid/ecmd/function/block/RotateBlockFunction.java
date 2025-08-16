@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.EnumOrRandom;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation) implements BlockFunction {
@@ -41,16 +41,16 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
     }
   }
 
-  public static class Parser implements FunctionParamsParser<RotateBlockFunction> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<RotateBlockFunction> {
     private EnumOrRandom<BlockRotation> rotation;
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 1;
     }
 
@@ -60,7 +60,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<BlockRotation> rotation)
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       rotation = EnumOrRandom.parseAndSuggest(BlockRotation.values(), BlockRotation.CODEC, parseContext);
     }
   }

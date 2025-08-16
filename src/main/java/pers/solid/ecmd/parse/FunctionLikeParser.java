@@ -77,4 +77,25 @@ public interface FunctionLikeParser<T> extends Parser<T> {
    */
   default void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
   }
+
+  interface SequentialParams<T> extends FunctionLikeParser<T>, SequentialParamListParser {
+    @Override
+    default void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      parseSequentialParameters(parseContext);
+    }
+  }
+
+  interface NamedParams<T> extends FunctionLikeParser<T>, NamedParamListParser {
+    @Override
+    default void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      parseNamedParameters(parseContext);
+    }
+  }
+
+  interface MixedParams<T> extends FunctionLikeParser<T>, MixedParamListParser {
+    @Override
+    default void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      parseMixedParameters(parseContext);
+    }
+  }
 }

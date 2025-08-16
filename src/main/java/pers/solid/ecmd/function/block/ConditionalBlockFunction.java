@@ -10,9 +10,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 
 /**
  * 当原先的方块符合方块谓词时，应用函数 1，否则应用函数 2。例如：
@@ -56,7 +56,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     }
   }
 
-  public static class Parser implements FunctionParamsParser<ConditionalBlockFunction> {
+  public static class Parser implements FunctionLikeParser.SequentialParams<ConditionalBlockFunction> {
     private BlockPredicate condition;
     private BlockFunction valueIfTrue, valueIfFalse;
 
@@ -66,7 +66,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
         condition = BlockPredicate.parse(parseContext);
       } else if (paramIndex == 1) {
@@ -77,12 +77,12 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 2;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 3;
     }
   }

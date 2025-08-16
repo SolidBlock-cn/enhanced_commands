@@ -13,12 +13,17 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Function;
 
 public record SphereRegion(double radius, Vec3d center) implements Region {
@@ -94,7 +99,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     }
 
     @Override
-    public FunctionParamsParser<SphereRegionArgument> functionParamsParser() {
+    public Parser parser() {
       return new Parser();
     }
 
@@ -109,34 +114,64 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<SphereRegionArgument> {
-    private EnhancedPosArgument centerPos = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
-    private double radius;
+  public static final class Parser implements FunctionLikeParser.MixedParams<SphereRegionArgument> {
+    private @Nullable EnhancedPosArgument centerPos = null;
+    private @Nullable Double radius = null;
 
     @Override
     public SphereRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new SphereRegionArgument(radius, centerPos);
+      return new SphereRegionArgument(radius == null ? 0 : radius, centerPos == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : centerPos);
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
+        if (radius != null) {
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "radius");
+        }
         radius = reader.readDouble();
       } else if (paramIndex == 1) {
+        if (centerPos != null) {
+          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
+        }
+        final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
         centerPos = parseContext.parseAndSuggestArgument(type);
       }
     }
 
     @Override
-    public int minParamsCount() {
-      return 1;
+    public int minSequentialParamsCount() {
+      return radius == null ? 1 : 0;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 2;
+    }
+
+    private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "center");
+
+    @Override
+    public @Unmodifiable Collection<String> supportedParams() {
+      return SUPPORTED_PARAMS;
+    }
+
+    @Override
+    public boolean isDuplicateParamName(String paramName) {
+      return switch (paramName) {
+        case "radius" -> radius != null;
+        case "center" -> centerPos != null;
+        default -> false;
+      };
+    }
+
+    @Override
+    public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
+      switch (paramName) {
+        case "radius" -> parseSequentialParameter(parseContext, 0);
+        case "center" -> parseSequentialParameter(parseContext, 1);
+      }
     }
   }
 }

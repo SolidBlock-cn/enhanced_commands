@@ -41,10 +41,7 @@ public interface SequentialParamListParser {
         return builder.buildFuture();
       });
     }
-    if (reader.canRead() && reader.peek() == terminateChar()) {
-      return;
-    }
-    while (true) {
+    if (!reader.canRead() || reader.peek() != terminateChar()) while (true) {
       parseContext.clearSuggestion();
 
       // 检查参数数量

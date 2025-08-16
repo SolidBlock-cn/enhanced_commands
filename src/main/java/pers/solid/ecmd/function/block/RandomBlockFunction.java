@@ -18,12 +18,11 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.util.StateUtil;
-import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.parse.FunctionLikeParser;
-import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.util.StateUtil;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collection;
 import java.util.OptionalLong;
@@ -122,19 +121,13 @@ public final class RandomBlockFunction implements BlockFunction {
     }
   }
 
-  public static class RandFuncParser implements FunctionLikeParser<RandomBlockFunction>, NamedParamListParser {
+  public static class RandFuncParser implements FunctionLikeParser.NamedParams<RandomBlockFunction> {
     protected OptionalLong seed = OptionalLong.empty();
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 
     @Override
     public RandomBlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       return new RandomBlockFunction(seed);
-    }
-
-    @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      parseContext.clearSuggestion();
-      parseNamedParameters(parseContext);
     }
 
     @Override

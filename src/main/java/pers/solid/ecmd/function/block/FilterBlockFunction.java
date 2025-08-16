@@ -11,9 +11,9 @@ import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 
 /**
  * 一种特殊的方块函数，当指定的方块函数的结果只有符合指定的谓词时，才会应用。例如：
@@ -58,7 +58,7 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<FilterBlockFunction> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<FilterBlockFunction> {
     private BlockPredicate blockPredicate;
     private BlockFunction blockFunction;
     private @Nullable BlockFunction elseFunction;
@@ -69,7 +69,7 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
         blockFunction = BlockFunction.parse(parseContext);
       } else if (paramIndex == 1) {
@@ -80,8 +80,8 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
     }
 
     // @formatter:off
-    @Override public int minParamsCount() {return 2;}
-    @Override public int maxParamsCount() {return 3;}
+    @Override public int minSequentialParamsCount() {return 2;}
+    @Override public int maxSequentialParamsCount() {return 3;}
     // @formatter:on
   }
 }

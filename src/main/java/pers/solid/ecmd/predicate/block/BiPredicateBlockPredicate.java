@@ -8,9 +8,7 @@ import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
-import pers.solid.ecmd.parse.FunctionParamsParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.SequentialParamListParser;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
@@ -54,7 +52,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
   }
 
-  public static final class Parser implements FunctionLikeParser<BiPredicateBlockPredicate>, SequentialParamListParser {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<BiPredicateBlockPredicate> {
     private final boolean same;
     private BlockPredicate value1;
     private BlockPredicate value2;
@@ -66,14 +64,9 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     @Override
     public BiPredicateBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (value1 == null) {
-        throw FunctionParamsParser.PARAMS_TOO_FEW.createWithContext(parseContext.reader(), 2, 1);
+        throw SequentialParams.PARAMS_TOO_FEW.createWithContext(parseContext.reader(), 2, 1);
       }
       return new BiPredicateBlockPredicate(value1, value2, same);
-    }
-
-    @Override
-    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      parseSequentialParameters(parseContext);
     }
 
     @Override
@@ -84,7 +77,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
       } else if (value2 == null) {
         value2 = parse;
       } else {
-        throw FunctionParamsParser.PARAMS_TOO_MANY.createWithContext(parseContext.reader(), 2, 3);
+        throw SequentialParams.PARAMS_TOO_MANY.createWithContext(parseContext.reader(), 2, 3);
       }
     }
   }

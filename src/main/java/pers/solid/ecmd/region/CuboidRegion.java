@@ -8,7 +8,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.parse.FunctionParamsParser;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 public interface CuboidRegion extends Region {
@@ -28,7 +28,7 @@ public interface CuboidRegion extends Region {
     }
 
     @Override
-    public FunctionParamsParser<? extends RegionArgument<? extends CuboidRegion>> functionParamsParser() {
+    public FunctionLikeParser.SequentialParams<? extends RegionArgument<? extends CuboidRegion>> parser() {
       return new PreciseCuboidRegion.Parser();
     }
 
@@ -43,7 +43,7 @@ public interface CuboidRegion extends Region {
     }
   }
 
-  final class Parser implements FunctionParamsParser<CuboidRegionArgument<?>> {
+  final class Parser implements FunctionLikeParser.SequentialParams<CuboidRegionArgument<?>> {
     private EnhancedPosArgument from;
     private EnhancedPosArgument to;
 
@@ -61,7 +61,7 @@ public interface CuboidRegion extends Region {
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
@@ -82,12 +82,12 @@ public interface CuboidRegion extends Region {
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return (to != null || EnhancedPosArgument.isInt(from)) ? 1 : 2;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       // 如果接受到了以空格区分的参数，那么不需要接受第二个参数了。
       return to != null ? 1 : 2;
     }

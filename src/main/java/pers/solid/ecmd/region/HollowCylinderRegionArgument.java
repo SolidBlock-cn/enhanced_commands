@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.enums.OutlineType;
 
-public record HollowCylinderRegionArgument(OutlineType outlineType, CylinderRegionArgument region) implements RegionArgument<HollowCylinderRegion> {
+public record HollowCylinderRegionArgument(@NotNull OutlineType outlineType, @NotNull CylinderRegionArgument region) implements RegionArgument<HollowCylinderRegion> {
   public static final MapCodec<HollowCylinderRegionArgument> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
           OutlineType.OUTLINE_TYPE_FIELD.forGetter(HollowCylinderRegionArgument::outlineType),
           CylinderRegionArgument.CODEC.fieldOf("region").forGetter(HollowCylinderRegionArgument::region))

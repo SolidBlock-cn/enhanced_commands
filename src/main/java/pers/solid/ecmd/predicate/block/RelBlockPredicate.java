@@ -9,11 +9,11 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.List;
 import java.util.function.Function;
@@ -54,7 +54,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<RegionBlockPredicate> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<RegionBlockPredicate> {
     private Function<ServerCommandSource, Vec3i> relPos;
     private BlockPredicate blockPredicate;
 
@@ -67,17 +67,17 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 2;
     }
 
     @Override
-    public int maxParamsCount() {
+    public int maxSequentialParamsCount() {
       return 2;
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
         relPos = parseContext.parseAndSuggestVec3i();
       } else if (paramIndex == 1) {
