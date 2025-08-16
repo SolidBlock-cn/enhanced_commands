@@ -1,14 +1,15 @@
 package pers.solid.ecmd.predicate.block;
 
+import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.Vec3iArgument;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -16,23 +17,23 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
-import java.util.function.Function;
 
-public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate predicate) implements BlockPredicate {
+public record RelBlockPredicate(@NotNull Vec3iArgument relPos, @NotNull BlockPredicate predicate) implements BlockPredicate {
 
-  public static final MapCodec<RelBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RelBlockPredicate::new, Vec3i.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
+  public static final MapCodec<RelBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RelBlockPredicate::new, Vec3iArgument.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
 
   @Override
   public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockPos pos = cachedBlockPosition.getBlockPos().add(relPos);
+    final BlockPos pos = cachedBlockPosition.getBlockPos().add(relPos.toActualVector(context.positionProvider));
     return predicate.test(new CachedBlockPosition(cachedBlockPosition.getWorld(), pos, false), context);
   }
 
   @Override
   public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockPos pos = cachedBlockPosition.getBlockPos().add(relPos);
+    final Vec3i vector = relPos.toActualVector(context.positionProvider);
+    final BlockPos pos = cachedBlockPosition.getBlockPos().add(vector);
     final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(cachedBlockPosition.getWorld(), pos, false), context);
-    return TestResult.of(testResult.successes(), Text.translatable("enhanced_commands.block_predicate.rel." + (testResult.successes() ? "pass" : "fail"), TextUtil.wrapVector(relPos)), List.of(testResult));
+    return TestResult.of(testResult.successes(), Text.translatable("enhanced_commands.block_predicate.rel." + (testResult.successes() ? "pass" : "fail"), TextUtil.wrapVector(vector)), List.of(testResult));
   }
 
   @Override
@@ -42,7 +43,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
 
   @Override
   public @NotNull String asString() {
-    return "rel(%s %s %s, %s)".formatted(relPos.getX(), relPos.getY(), relPos.getZ(), predicate.asString());
+    return "rel(%s, %s)".formatted(relPos.asString(), predicate.asString());
   }
 
   public enum Type implements BlockPredicateType<RelBlockPredicate> {
@@ -54,16 +55,15 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<RegionBlockPredicate> {
-    private Function<ServerCommandSource, Vec3i> relPos;
+  public static final class Parser implements FunctionLikeParser.SequentialParams<RelBlockPredicate> {
+    private Vec3iArgument relPos;
     private BlockPredicate blockPredicate;
 
     @Override
-    public RegionBlockPredicate getParseResult(ParseContext<?> parseContext) {
-      return null; // implement
-//      Preconditions.checkNotNull(relPos, "relPos (argument 1)");
-//      Preconditions.checkNotNull(blockPredicate, "predicate (argument 2)");
-//      return new RelBlockPredicate(relPos, blockPredicate);
+    public RelBlockPredicate getParseResult(ParseContext<?> parseContext) {
+      Preconditions.checkNotNull(relPos, "relPos (argument 1)");
+      Preconditions.checkNotNull(blockPredicate, "predicate (argument 2)");
+      return new RelBlockPredicate(relPos, blockPredicate);
     }
 
     @Override
@@ -79,7 +79,7 @@ public record RelBlockPredicate(@NotNull Vec3i relPos, @NotNull BlockPredicate p
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        relPos = parseContext.parseAndSuggestVec3i();
+        relPos = Vec3iArgument.parse(parseContext);
       } else if (paramIndex == 1) {
         blockPredicate = BlockPredicate.parse(parseContext);
       }

@@ -1,5 +1,6 @@
 package pers.solid.ecmd.argument;
 
+import com.google.common.base.Suppliers;
 import com.mojang.brigadier.arguments.ArgumentType;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
@@ -24,8 +25,9 @@ public class ModArgumentTypes {
     register("keyword_args", KeywordArgsArgumentType.class, KeywordArgsArgumentSerializer.INSTANCE);
     registerTrustingType("omitted_registry_entry", OmittedRegistryEntryArgumentType.class, OmittedRegistryEntryArgumentType.Serializer.INSTANCE);
     register("pos", EnhancedPosArgumentType.class, EnhancedPosArgumentType.Serializer.INSTANCE);
-    register("regex", RegexArgumentType.class, ConstantArgumentSerializer.of(() -> RegexArgumentType.REGEX));
+    register("regex", RegexArgumentType.class, ConstantArgumentSerializer.of(Suppliers.ofInstance(RegexArgumentType.REGEX)));
     register("region", RegionArgumentType.class, ConstantArgumentSerializer.of(RegionArgumentType::new));
+    register("rotation", EnhancedRotationArgumentType.class, ConstantArgumentSerializer.of(Suppliers.ofInstance(EnhancedRotationArgumentType.INSTANCE)));
     register("simple_enum", SimpleEnumArgumentType.class, SimpleEnumArgumentType.Serializer.INSTANCE);
     register("string_enum", StringEnumArgumentType.class, StringEnumArgumentType.Serializer.INSTANCE);
     register("unloaded_pos_behavior", UnloadedPosBehaviorArgumentType.class, ConstantArgumentSerializer.of(UnloadedPosBehaviorArgumentType::new));

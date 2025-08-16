@@ -1,0 +1,63 @@
+package pers.solid.ecmd.argument;
+
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.argument.RotationArgumentType;
+import net.minecraft.command.argument.Vec3ArgumentType;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
+
+public enum EnhancedRotationArgumentType implements ArgumentType<EnhancedRotationArgument> {
+  INSTANCE;
+  private static final Collection<String> EXAMPLES = Arrays.asList("0 0", "~~", "~-5~5");
+
+  @Override
+  public EnhancedRotationArgument parse(StringReader reader) throws CommandSyntaxException {
+    if (!reader.canRead()) {
+      throw RotationArgumentType.INCOMPLETE_ROTATION_EXCEPTION.createWithContext(reader);
+    } else {
+
+      float[] values = new float[2];
+      boolean[] isRelatives = new boolean[2];
+      Arrays.fill(isRelatives, false);
+
+      for (int i = 0; i < 2; i++) {
+        if (!reader.canRead()) {
+          throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+        }
+
+        boolean hasTilde = false;
+        if (reader.peek() == '~') {
+          isRelatives[i] = true;
+          hasTilde = true;
+          reader.skip();
+        } else if (reader.peek() == '^') {
+          throw withCursorEnd(Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
+        }
+
+        float num;
+        if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
+          num = reader.readFloat();
+        } else {
+          num = 0;
+        }
+        values[i] = num;
+
+        if (i < 1) {
+          reader.skipWhitespace();
+        }
+      }
+
+      return new EnhancedRotationArgument(values[1], values[0], isRelatives[0], isRelatives[1]);
+    }
+  }
+
+  @Override
+  public Collection<String> getExamples() {
+    return EXAMPLES;
+  }
+}

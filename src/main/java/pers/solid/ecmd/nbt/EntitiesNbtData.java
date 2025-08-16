@@ -36,7 +36,6 @@ public record EntitiesNbtData(EntitySelector entitySelector) implements NbtTarge
     }
     return new EntitiesNbtData(selector);
   }
-  // todo: consider using an entity selector as a record component, instead of the actual collection of entities
 
   @Override
   public Collection<Entity> values(ServerCommandSource source) throws CommandSyntaxException {

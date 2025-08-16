@@ -12,19 +12,13 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.argument.DirectionArgument;
-import pers.solid.ecmd.argument.Vect3dArgument;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.ArrayList;
@@ -145,87 +139,6 @@ public record ParseContext<S>(CommandRegistryAccess registryAccess, StringReader
 
   public void clearSuggestion() {
     this.suggestions.clear();
-  }
-
-  /**
-   * 解析整数的向量。这不是代表一个坐标，因此也不支持绝对坐标和局部坐标。
-   */
-  public Function<ServerCommandSource, Vec3i> parseAndSuggestVec3i() throws CommandSyntaxException {
-    // todo improve
-    final StringReader reader = this.reader;
-    {
-      setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
-      final int cursorBeforeDirection = reader.getCursor();
-      final String unquotedString = this.reader.readUnquotedString();
-      final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
-      if (byName != null) {
-        clearSuggestion();
-        return source -> byName.apply((PositionProvider) source).getVector();
-      } else {
-        this.reader.setCursor(cursorBeforeDirection);
-      }
-    }
-    final int x = reader.readInt();
-    clearSuggestion();
-    ParsingUtil.expectAndSkipWhitespace(reader);
-    {
-      setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
-      final int cursorBeforeDirection = reader.getCursor();
-      final String unquotedString = this.reader.readUnquotedString();
-      final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
-      if (byName != null) {
-        clearSuggestion();
-        return source -> byName.apply((PositionProvider) source).getVector().multiply(x);
-      } else {
-        this.reader.setCursor(cursorBeforeDirection);
-      }
-    }
-    final int y = reader.readInt();
-    clearSuggestion();
-    ParsingUtil.expectAndSkipWhitespace(reader);
-    final int z = reader.readInt();
-    final Vec3i vec3i = new Vec3i(x, y, z);
-    return source -> vec3i;
-  }
-
-  /**
-   * 解析双精度浮点数的向量。这不是代表一个坐标，因此也不支持绝对坐标和局部坐标。形式为 {@code (<x> <y> <z> | [length] <direction>)}。
-   */
-  public Vect3dArgument parseAndSuggestVec3d() throws CommandSyntaxException {
-    final StringReader reader = this.reader;
-    {
-      setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
-      final int cursorBeforeDirection = reader.getCursor();
-      final String unquotedString = reader.readUnquotedString();
-      final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
-      if (byName != null) {
-        clearSuggestion();
-        return new Vect3dArgument.Directional(byName, 1);
-      } else {
-        reader.setCursor(cursorBeforeDirection);
-      }
-    }
-    final double x = reader.readDouble();
-    clearSuggestion();
-    ParsingUtil.expectAndSkipWhitespace(reader);
-    {
-      setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestDirections(suggestionsBuilder));
-      final int cursorBeforeDirection = reader.getCursor();
-      final String unquotedString = reader.readUnquotedString();
-      final DirectionArgument byName = DirectionArgument.CODEC.byId(unquotedString);
-      if (byName != null) {
-        clearSuggestion();
-        return new Vect3dArgument.Directional(byName, x);
-      } else {
-        reader.setCursor(cursorBeforeDirection);
-      }
-    }
-    final double y = reader.readDouble();
-    clearSuggestion();
-    ParsingUtil.expectAndSkipWhitespace(reader);
-    final double z = reader.readDouble();
-    final Vec3d vec3d = new Vec3d(x, y, z);
-    return new Vect3dArgument.Fixed(vec3d);
   }
 
   /**

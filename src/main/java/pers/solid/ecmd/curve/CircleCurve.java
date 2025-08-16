@@ -18,7 +18,7 @@ import org.joml.AxisAngle4d;
 import org.joml.Vector3d;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.Vect3dArgument;
+import pers.solid.ecmd.argument.Vec3dArgument;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -213,13 +213,13 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
   protected static class Parser implements FunctionLikeParser.MixedParams<CurveArgument<CircleCurve>> {
     private @Nullable Double radius;
     private @Nullable EnhancedPosArgument center;
-    private @Nullable Vect3dArgument axis;
+    private @Nullable Vec3dArgument axis;
     private @Nullable DoubleDoublePair range;
 
     @Override
     public CurveArgument<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final EnhancedPosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
-      return new CircleCurveArgument(radius == null ? 1 : radius, center, axis == null ? new Vect3dArgument.Fixed(new Vec3d(0, 1, 0)) : axis, range == null ? FULL_MIN : range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
+      return new CircleCurveArgument(radius == null ? 1 : radius, center, axis == null ? new Vec3dArgument.Fixed(new Vec3d(0, 1, 0)) : axis, range == null ? FULL_MIN : range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
     }
 
     /**
@@ -273,11 +273,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
           EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
           center = parseContext.parseAndSuggestArgument(argumentType);
         }
-        case "pivot" -> {
-          EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
-          final EnhancedPosArgument posArgument = parseContext.parseAndSuggestArgument(argumentType);
-          axis = new Vect3dArgument.Facing(posArgument);
-        }
+        case "pivot" -> axis = Vec3dArgument.parse(parseContext);
         case "range" -> {
           ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
           range = parseAngleRange(parseContext);
