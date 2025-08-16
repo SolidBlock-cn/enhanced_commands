@@ -69,6 +69,10 @@ public interface NamedParamListParser {
     return '=';
   }
 
+  default char terminateChar() {
+    return ')';
+  }
+
   /**
    * 解析一个参数，此时 {@code cursor} 已经在等号后面，并验证了参数名称，且跳过了空白字符。
    *
@@ -78,6 +82,10 @@ public interface NamedParamListParser {
 
   default void parseNamedParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
+    reader.skipWhitespace();
+    if (reader.canRead() && reader.peek() == terminateChar()) {
+      return;
+    }
 
     int paramCount = 0;
     while (true) {
@@ -88,12 +96,7 @@ public interface NamedParamListParser {
       final String paramName = reader.readUnquotedString();
       final int cursorAfterParamName = reader.getCursor();
 
-      if (paramCount == 0 && paramName.isEmpty()) {
-        // 考虑一个参数也没有的情况
-        break;
-      } else {
-        paramCount++;
-      }
+      paramCount++;
 
       checkParamNameValidity(paramName, reader, cursorBeforeParamName, cursorAfterParamName);
 
@@ -108,8 +111,9 @@ public interface NamedParamListParser {
       parseNamedParameter(paramName, parseContext);
 
       reader.skipWhitespace();
+
+      // 如果还有可用的参数名称，提供逗号的建议
       if (supportedParams().stream().anyMatch(this::isValidParamName)) {
-        // 如果后面没有可用的参数名称了，就不再逗号。
         parseContext.setSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(Character.toString(PARAMS_SEP)).buildFuture());
       } else {
         parseContext.clearSuggestion();
@@ -118,6 +122,10 @@ public interface NamedParamListParser {
         reader.skip();
         reader.skipWhitespace();
         parseContext.clearSuggestion();
+
+        if (reader.canRead() && reader.peek() == terminateChar()) {
+          return;
+        }
       } else {
         break;
       }

@@ -7,10 +7,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.FunctionParamsParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.SequentialParamListParser;
+import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.TestResult;
 
 import java.util.List;
 
@@ -52,44 +54,38 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<BiPredicateBlockPredicate> {
-    private final String functionName;
-    private final Text tooltip;
+  public static final class Parser implements FunctionLikeParser<BiPredicateBlockPredicate>, SequentialParamListParser {
     private final boolean same;
     private BlockPredicate value1;
     private BlockPredicate value2;
 
-    public Parser(String functionName, Text tooltip, boolean same) {
-      this.functionName = functionName;
-      this.tooltip = tooltip;
+    public Parser(boolean same) {
       this.same = same;
     }
 
     @Override
-    public BiPredicateBlockPredicate getParseResult(ParseContext<?> parseContext) {
+    public BiPredicateBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      if (value1 == null) {
+        throw FunctionParamsParser.PARAMS_TOO_FEW.createWithContext(parseContext.reader(), 2, 1);
+      }
       return new BiPredicateBlockPredicate(value1, value2, same);
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      parseSequentialParameters(parseContext);
+    }
+
+    @Override
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final BlockPredicate parse = BlockPredicate.parse(parseContext);
       if (value1 == null) {
         value1 = parse;
       } else if (value2 == null) {
         value2 = parse;
       } else {
-        throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseContext.reader());
+        throw FunctionParamsParser.PARAMS_TOO_MANY.createWithContext(parseContext.reader(), 2, 3);
       }
-    }
-
-    @Override
-    public int minParamsCount() {
-      return 2;
-    }
-
-    @Override
-    public int maxParamsCount() {
-      return 2;
     }
   }
 }

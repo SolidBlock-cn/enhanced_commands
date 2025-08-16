@@ -60,7 +60,7 @@ public final class BlockPredicateTypes {
     map.put("all", AllBlockPredicate.Parser::new);
     map.put("any", AnyBlockPredicate.Parser::new);
     map.put("checkerboard", CheckerboardBlockPredicate.Parser::new);
-    map.put("diff", () -> new BiPredicateBlockPredicate.Parser("diff", Text.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), false));
+    map.put("diff", () -> new BiPredicateBlockPredicate.Parser(false));
     map.put("expose", ExposeBlockPredicate.Parser::new);
     map.put("idcontain", IdContainBlockPredicate.Parser::new);
     map.put("noise", NoiseBlockPredicate.Parser::new);
@@ -68,7 +68,7 @@ public final class BlockPredicateTypes {
     map.put("probability", ProbabilityBlockPredicate.Parser::new);
     map.put("region", RegionBlockPredicate.Parser::new);
     map.put("rel", RelBlockPredicate.Parser::new);
-    map.put("same", () -> new BiPredicateBlockPredicate.Parser("same", Text.translatable("enhanced_commands.block_predicate.bi_predicate_same"), true));
+    map.put("same", () -> new BiPredicateBlockPredicate.Parser(true));
   }
 
   private static void registerFunctionNames(Map<String, Text> map) {

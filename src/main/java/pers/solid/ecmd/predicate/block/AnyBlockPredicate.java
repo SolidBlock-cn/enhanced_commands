@@ -8,16 +8,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.SequentialParamListParser;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record AnyBlockPredicate(List<BlockPredicate> predicates) implements BlockPredicate {
+public record AnyBlockPredicate(List<@NotNull BlockPredicate> predicates) implements BlockPredicate {
   public static final MapCodec<AnyBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("predicates").forGetter(AnyBlockPredicate::predicates)).apply(i, AnyBlockPredicate::new));
 
   public AnyBlockPredicate(BlockPredicate... predicates) {
@@ -66,13 +67,13 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
     }
   }
 
-  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionParamsParser<AnyBlockPredicate> {
+  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionLikeParser<AnyBlockPredicate>, SequentialParamListParser {
     public Parser() {
       this(new ArrayList<>());
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final BlockPredicate parse = BlockPredicate.parse(parseContext);
       blockPredicates.add(parse);
     }
@@ -80,6 +81,11 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
     @Override
     public AnyBlockPredicate getParseResult(ParseContext<?> parseContext) {
       return new AnyBlockPredicate(blockPredicates);
+    }
+
+    @Override
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      parseSequentialParameters(parseContext);
     }
   }
 }

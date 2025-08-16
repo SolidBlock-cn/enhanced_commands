@@ -11,9 +11,9 @@ import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.List;
 import java.util.OptionalLong;
@@ -69,7 +69,6 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   }
 
   public static class Parser extends Noise.Parser<BlockPredicate> {
-
     @Override
     protected BlockPredicate parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
       return BlockPredicate.parse(parseContext);

@@ -8,16 +8,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.SequentialParamListParser;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record AllBlockPredicate(List<BlockPredicate> predicates) implements BlockPredicate {
+public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implements BlockPredicate {
   public static final MapCodec<AllBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("predicates").forGetter(AllBlockPredicate::predicates)).apply(i, AllBlockPredicate::new));
 
   @Override
@@ -62,7 +63,7 @@ public record AllBlockPredicate(List<BlockPredicate> predicates) implements Bloc
     }
   }
 
-  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionParamsParser<AllBlockPredicate> {
+  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionLikeParser<AllBlockPredicate>, SequentialParamListParser {
     public Parser() {
       this(new ArrayList<>());
     }
@@ -73,7 +74,12 @@ public record AllBlockPredicate(List<BlockPredicate> predicates) implements Bloc
     }
 
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      parseSequentialParameters(parseContext);
+    }
+
+    @Override
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       blockPredicates.add(BlockPredicate.parse(parseContext));
     }
   }

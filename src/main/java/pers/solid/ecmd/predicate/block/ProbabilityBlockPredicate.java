@@ -11,13 +11,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.MixedParamListParser;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.parse.FunctionParamsParser;
-import pers.solid.ecmd.parse.NamedParamListParser;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.OptionalLong;
@@ -39,7 +39,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
 
   @Override
   public @NotNull String asString() {
-    final String seedParams = seed.isPresent() ? "; seed = " + seed.getAsLong() : "";
+    final String seedParams = seed.isPresent() ? ", seed = " + seed.getAsLong() : "";
     if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
       return "probability(" + probability + seedParams + ")";
     } else {
@@ -83,7 +83,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
     }
   }
 
-  public static final class Parser implements FunctionParamsParser<ProbabilityBlockPredicate>, NamedParamListParser {
+  public static final class Parser implements FunctionLikeParser<ProbabilityBlockPredicate>, MixedParamListParser {
     private float value;
     private BlockPredicate predicate;
     private OptionalLong seed = OptionalLong.empty();
@@ -96,22 +96,25 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
       return new ProbabilityBlockPredicate(value, predicate, seed);
     }
 
-    private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
+    @Override
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      parseMixedParameters(parseContext);
+    }
 
     @Override
-    public int minParamsCount() {
+    public int minSequentialParamsCount() {
       return 1;
     }
 
-    public int maxParamsCount() {
-      if (seed.isPresent() && predicate == null) {
-        return 1;
-      }
+    @Override
+    public int maxSequentialParamsCount() {
       return 2;
     }
 
+    private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
+
     @Override
-    public void parseParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         value = reader.readFloat();
@@ -123,14 +126,6 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
         }
       } else if (paramIndex == 1) {
         predicate = BlockPredicate.parse(parseContext);
-      }
-
-      if (reader.canRead() && reader.peek() == ';') {
-        reader.skip();
-        reader.skipWhitespace();
-        parseContext.clearSuggestion();
-
-        parseNamedParameters(parseContext);
       }
     }
 
