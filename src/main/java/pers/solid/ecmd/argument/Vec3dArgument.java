@@ -37,7 +37,7 @@ public sealed interface Vec3dArgument extends ExpressionConvertible {
       if ("facing".equals(unquotedString)) {
         parseContext.clearSuggestion();
         ParsingUtil.expectAndSkipWhitespace(reader);
-        final EnhancedPosArgument posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgumentType.posPreferringCenteredInt());
+        final EnhancedPosArgument posArgument = parseContext.parseAndSuggestArgument(new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.DOUBLE_ONLY, EnhancedPosArgumentType.IntAlignType.CENTERED));
         return new Facing(posArgument);
       } else if ("rotated".equals(unquotedString)) {
         parseContext.clearSuggestion();
