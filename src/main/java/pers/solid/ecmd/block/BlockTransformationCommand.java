@@ -124,7 +124,7 @@ public interface BlockTransformationCommand {
     }
     final RegionSelection transformedRegionSelection = oldActiveRegion != null && region.equals(oldActiveRegion.region()) ? oldActiveRegion.transformed(this::transformPos) : null;
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      final IteratorTask<?> iteratorTask = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
+      final IteratorTask<Void> iteratorTask = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
 
         if (transformedRegionSelection != null) {
           history.reverseEntities.add(Triple.of(player, Pair.of(

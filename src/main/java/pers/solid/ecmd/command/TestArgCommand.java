@@ -42,6 +42,7 @@ import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
@@ -49,7 +50,6 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -338,10 +338,12 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               for (BlockPos blockPos : collect) {
                 if (region.contains(blockPos)) {
                   history.recordBlockAndEntity(world, blockPos, Blocks.GLASS.getDefaultState());
+                  world.removeBlockEntity(blockPos);
                   world.setBlockState(blockPos, Blocks.GLASS.getDefaultState(), Block.NOTIFY_LISTENERS);
                 } else {
                   numOfIteratedButNotMatch++;
                   history.recordBlockAndEntity(world, blockPos, Blocks.RED_STAINED_GLASS.getDefaultState());
+                  world.removeBlockEntity(blockPos);
                   world.setBlockState(blockPos, Blocks.RED_STAINED_GLASS.getDefaultState(), Block.NOTIFY_LISTENERS);
                 }
                 for (Direction direction : Direction.values()) {
@@ -350,6 +352,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
                     if (region.contains(offset)) {
                       numOfNotIteratedButMatch++;
                       history.recordBlockAndEntity(world, blockPos, Blocks.ORANGE_STAINED_GLASS.getDefaultState());
+                      world.removeBlockEntity(blockPos);
                       world.setBlockState(offset, Blocks.ORANGE_STAINED_GLASS.getDefaultState(), Block.NOTIFY_LISTENERS);
                     }
                     iteratedNearby.add(offset);

@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -71,11 +72,15 @@ public class BlockPlacementHistory implements History {
       if (reverse != null) {
         reverse.recordBlockAndEntity(world, mutable, undoState);
       }
-      MixinShared.setBlockStateWithModFlags(world, mutable, undoState, flag, modFlag);
-      final BlockEntity blockEntity = world.getBlockEntity(mutable);
-      if (blockEntity != null && oldEntityData.containsKey(posLong)) {
+      final BlockEntity oldBlockEntity = world.getBlockEntity(mutable);
+      if (oldBlockEntity != null && !oldBlockEntity.supports(undoState)) {
+        world.removeBlockEntity(mutable);
+      }
+      MixinShared.setBlockStateWithModFlags(world, mutable, undoState, flag | Block.FORCE_STATE & ~Block.NOTIFY_NEIGHBORS, modFlag);
+      final BlockEntity newBlockEntity = world.getBlockEntity(mutable);
+      if (newBlockEntity != null && oldEntityData.containsKey(posLong)) {
         final NbtCompound undoEntityData = oldEntityData.get(posLong);
-        blockEntity.read(undoEntityData, world.getRegistryManager());
+        newBlockEntity.read(undoEntityData, world.getRegistryManager());
       }
       return null;
     });
@@ -93,8 +98,11 @@ public class BlockPlacementHistory implements History {
   }
 
   public void recordBlockAndEntity(World world, BlockPos blockPos, @Nullable BlockState newState) {
-    final BlockState oldState = world.getBlockState(blockPos);
-    if (!oldState.equals(newState)) {
+    recordBlockAndEntity(world, blockPos, world.getBlockState(blockPos), newState);
+  }
+
+  public void recordBlockAndEntity(World world, BlockPos blockPos, BlockState oldState, @Nullable BlockState newState) {
+    if (oldState != null && !oldState.equals(newState)) {
       oldStates.put(blockPos.asLong(), oldState);
     }
     final BlockEntity oldEntity = world.getBlockEntity(blockPos);

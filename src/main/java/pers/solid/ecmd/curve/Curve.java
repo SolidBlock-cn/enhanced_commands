@@ -26,7 +26,7 @@ public interface Curve extends ExpressionConvertible {
   /**
    * 沿着这条曲线产生一条像素化的连续的线。这个 BlockPos 有可能是 {@link BlockPos.Mutable}。
    */
-  default @NotNull Iterator<BlockPos> iterator() {
+  default @NotNull Iterator<@NotNull BlockPos> iterator() {
     return streamBlockPos().iterator();
   }
 
@@ -35,7 +35,7 @@ public interface Curve extends ExpressionConvertible {
    *
    * @param interval 间距，可变，例如 {@link MutableDouble}。但是在迭代的过程中不应该修改它，而应该由调用者来修改。
    */
-  @NotNull Iterator<Vec3d> iteratePoints(Number interval);
+  @NotNull Iterator<@NotNull Vec3d> iteratePoints(Number interval);
 
   /**
    * 沿着这条线，按恒定的距离产生点。
@@ -43,7 +43,7 @@ public interface Curve extends ExpressionConvertible {
    * @param interval 恒定的间距。
    */
   @ApiStatus.NonExtendable
-  default @NotNull Iterator<Vec3d> iteratePoints(double interval) {
+  default @NotNull Iterator<@NotNull Vec3d> iteratePoints(double interval) {
     return iteratePoints(Double.valueOf(interval));
   }
 
@@ -52,7 +52,7 @@ public interface Curve extends ExpressionConvertible {
    *
    * @implNote 此方法会被 {@link #iterator()} 使用。如果覆盖了 {@link #iterator()}，那么应该一并覆盖此方法。
    */
-  default @NotNull Stream<BlockPos> streamBlockPos() {
+  default @NotNull Stream<@NotNull BlockPos> streamBlockPos() {
     return streamPoints(0.1d).map(BlockPos::ofFloored).distinct();
   }
 
@@ -61,13 +61,13 @@ public interface Curve extends ExpressionConvertible {
    *
    * @param interval 间距，可变，例如 {@link MutableDouble}。但是在迭代的过程中不应该修改它，而应该由调用者来修改。
    */
-  default @NotNull Stream<Vec3d> streamPoints(Number interval) {
+  default @NotNull Stream<@NotNull Vec3d> streamPoints(Number interval) {
     Iterable<Vec3d> iterable = () -> iteratePoints(interval);
     return Streams.stream(iterable);
   }
 
   @ApiStatus.NonExtendable
-  default @NotNull Stream<Vec3d> streamPoints(double interval) {
+  default @NotNull Stream<@NotNull Vec3d> streamPoints(double interval) {
     return streamPoints(Double.valueOf(interval));
   }
 

@@ -16,6 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.parse.ParseContext;
@@ -73,6 +74,11 @@ public record StorageNbtData(Identifier identifier) implements NbtTarget.Single<
   }
 
   @Override
+  public Type getType() {
+    return Type.STORAGE;
+  }
+
+  @Override
   public void setNbtFor(ServerCommandSource commandSource, DataCommandStorage target, NbtCompound nbt) throws CommandSyntaxException {
     target.set(identifier, nbt);
   }
@@ -80,5 +86,10 @@ public record StorageNbtData(Identifier identifier) implements NbtTarget.Single<
   @Override
   public Text feedbackModify(Collection<DataCommandStorage> values) {
     return Text.translatable("commands.data.storage.modified", this.identifier);
+  }
+
+  @Override
+  public @NotNull String asString() {
+    return "storage " + identifier.toString();
   }
 }

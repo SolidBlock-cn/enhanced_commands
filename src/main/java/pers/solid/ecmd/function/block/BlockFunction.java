@@ -34,12 +34,12 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.math.WeightedList;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.mixin.MixinShared;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.Collections;
 import java.util.List;
@@ -135,27 +135,31 @@ public interface BlockFunction extends ExpressionConvertible {
   }
 
   default boolean setBlock(World world, BlockPos pos, BlockFunctionContext context) {
-    return setBlock(world, pos, context, null);
+    return setBlock(world, pos, context, null, null);
   }
 
-  default boolean setBlock(World world, BlockPos pos, BlockFunctionContext context, @Nullable BlockPlacementHistory history) {
+  default boolean setBlock(World world, BlockPos pos, BlockFunctionContext context, @Nullable BlockState oldState, @Nullable BlockPlacementHistory history) {
     final BlockState origState = world.getBlockState(pos);
     MutableObject<NbtCompound> blockEntityData = new MutableObject<>(null);
-    BlockState modifiedState = getModifiedState(origState, origState, world, pos, blockEntityData, context);
+    BlockState newState = getModifiedState(origState, origState, world, pos, blockEntityData, context);
     final int modFlags = context.modFlags;
     if ((modFlags & FillReplaceCommand.POST_PROCESS_FLAG) != 0) {
-      modifiedState = Block.postProcessState(modifiedState, world, pos);
+      newState = Block.postProcessState(newState, world, pos);
     }
 
     if (history != null) {
-      history.recordBlockAndEntity(world, pos, modifiedState);
+      history.recordBlockAndEntity(world, pos, oldState == null ? world.getBlockState(pos) : oldState, newState);
     }
-    boolean result = MixinShared.setBlockStateWithModFlags(world, pos, modifiedState, context.flags, modFlags);
-    final BlockEntity blockEntity = world.getBlockEntity(pos);
-    if (blockEntity != null) {
+    final BlockEntity oldEntity = world.getBlockEntity(pos);
+    if (oldEntity != null && !oldEntity.supports(newState)) {
+      world.removeBlockEntity(pos);
+    }
+    boolean result = MixinShared.setBlockStateWithModFlags(world, pos, newState, context.flags, modFlags);
+    final BlockEntity newEntity = world.getBlockEntity(pos);
+    if (newEntity != null) {
       final NbtCompound modifiedData = blockEntityData.getValue();
       if (modifiedData != null) {
-        blockEntity.read(modifiedData, world.getRegistryManager());
+        newEntity.read(modifiedData, world.getRegistryManager());
         result = true;
       }
     }

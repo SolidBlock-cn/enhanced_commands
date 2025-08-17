@@ -51,8 +51,8 @@ public final class NbtDataRegistry {
   }
 
   public static void init() {
-    register("block", BlocksNbtData::handle);
-    register("entity", EntitiesNbtData::handle);
+    register("block", BlockNbtData::handle);
+    register("entity", EntityNbtData::handle);
     register("literal", LiteralNbtData::handle);
     register("storage", StorageNbtData::handle);
   }

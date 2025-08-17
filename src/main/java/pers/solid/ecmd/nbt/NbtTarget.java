@@ -1,6 +1,7 @@
 package pers.solid.ecmd.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -20,6 +21,8 @@ import java.util.Collections;
  * @param <T> NBT 目标所含具体对象的类型，可以是方块、实体等。
  */
 public interface NbtTarget<T> extends NbtSource<T> {
+  Codec<NbtTarget<?>> CODEC = Type.CODEC.dispatch(NbtTarget::getType, Type::getCodec);
+
   /**
    * @return 所有可修改 NBT 数据的对象的集合。
    */

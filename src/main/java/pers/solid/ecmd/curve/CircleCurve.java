@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +74,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
         }
         radiusVec.set(radius.x, radius.y, radius.z);
         axisAngle4d.transform(radiusVec);
-        axisAngle4d.angle += interval.doubleValue() / c;
+        axisAngle4d.angle += interval.doubleValue() / radius.length();
         return new Vec3d(radiusVec.x + center.x, radiusVec.y + center.y, radiusVec.z + center.z);
       }
     };
@@ -134,8 +135,9 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
   @Override
   public @Nullable Box minContainingBox() {
     double minX, minY, minZ, maxX, maxY, maxZ;
-    minX = minY = minZ = maxX = maxY = maxZ = 0;
-    final Iterator<Vec3d> vec3dIterator = iteratePoints(1);
+    minX = minY = minZ = Double.POSITIVE_INFINITY;
+    maxX = maxY = maxZ = Double.NEGATIVE_INFINITY;
+    final Iterator<Vec3d> vec3dIterator = iteratePoints(radius.length() * MathHelper.RADIANS_PER_DEGREE * 30); // 30 度
     if (!vec3dIterator.hasNext()) {
       // 含有零个点时，返回空。
       return null;

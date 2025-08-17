@@ -12,14 +12,15 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
-import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 import java.util.Collection;
 
@@ -57,6 +58,11 @@ public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Singl
   }
 
   @Override
+  public Type getType() {
+    return Type.LITERAL;
+  }
+
+  @Override
   public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
     final NbtCompound nbt = value(source).getValue();
     if (path == null) {
@@ -72,5 +78,10 @@ public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Singl
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.literal.query_scale", path.toString(), scale, NbtHelper.toPrettyPrintedText(nbtAtPath)), false);
       return MathHelper.floor(scaledValue);
     }
+  }
+
+  @Override
+  public @NotNull String asString() {
+    return "literal " + nbtFunction.asString();
   }
 }

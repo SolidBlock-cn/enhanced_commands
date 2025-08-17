@@ -6,7 +6,6 @@ import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -20,11 +19,9 @@ import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableConsumer;
 import pers.solid.ecmd.argument.NbtTargetArgumentType;
 import pers.solid.ecmd.configs.CommandsConfig;
-import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.region.ActiveRegionArgument;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.Collections;
 import java.util.function.Predicate;
@@ -93,7 +90,8 @@ public enum ModCommands implements CommandRegistrationCallback {
     final Command<ServerCommandSource> directCommand = regionArgument.getCommand();
     if (directCommand != null && indirectBuilder.getCommand() == null) {
       indirectBuilder.executes(context -> {
-        ((CommandContextAccessor<?>) context).getArguments().put("region", new ParsedArgument<>(0, 0, ((ServerPlayerEntityExtension) context.getSource().getPlayerOrThrow()).getActiveRegionOrThrow$ec()));
+        final ServerCommandSource source = context.getSource();
+        source.addExtraArgument$ec("region", ActiveRegionArgument.INSTANCE);
         return directCommand.run(context);
       });
     }

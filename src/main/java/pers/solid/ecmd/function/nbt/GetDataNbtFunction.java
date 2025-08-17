@@ -1,8 +1,8 @@
 package pers.solid.ecmd.function.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.server.command.ServerCommandSource;
@@ -19,13 +19,16 @@ import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Optional;
 
-public record GetDataNbtFunction(NbtSource<?> nbtSource, Optional<NbtPathArgumentType.NbtPath> path, NbtConcentrationType concentrationType) implements NbtFunction {
-  // todo implement
-  public static final MapCodec<GetDataNbtFunction> CODEC = MapCodec.unit(null).flatXmap(o -> DataResult.error(() -> "not implemented yet"), function -> null);
+public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgumentType.NbtPath> path, NbtConcentrationType concentrationType) implements NbtFunction {
+  public static final MapCodec<GetDataNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      NbtSource.CODEC.fieldOf("source").forGetter(GetDataNbtFunction::source),
+      NbtPathArgumentType.NbtPath.CODEC.optionalFieldOf("path").forGetter(GetDataNbtFunction::path),
+      NbtConcentrationType.CODEC.optionalFieldOf("concentration_type", NbtConcentrationType.ALL).forGetter(GetDataNbtFunction::concentrationType)
+  ).apply(i, GetDataNbtFunction::new));
 
   @Override
   public @NotNull String asString() {
-    return "from(" + nbtSource + ")";
+    return "from(" + source.asString() + ")";
   }
 
   @Override
@@ -35,7 +38,7 @@ public record GetDataNbtFunction(NbtSource<?> nbtSource, Optional<NbtPathArgumen
 
   @Override
   public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
-    return nbtSource.getConcentratedNbts((ServerCommandSource) context.positionProvider, path.orElse(null), concentrationType, Random.create());
+    return source.getConcentratedNbts((ServerCommandSource) context.positionProvider, path.orElse(null), concentrationType, Random.create());
   }
 
   public enum Type implements NbtFunctionType<GetDataNbtFunction> {

@@ -4,14 +4,19 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.*;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.*;
 
@@ -20,7 +25,9 @@ import java.util.*;
  *
  * @param <T> 包含 NBT 数据的对象，如方块实体、实体等。
  */
-public interface NbtSource<T> {
+public interface NbtSource<T> extends ExpressionConvertible {
+  Codec<NbtSource<?>> CODEC = Type.CODEC.dispatch(NbtSource::getType, Type::getCodec);
+
   DynamicCommandExceptionType QUERY_SCALE_NOT_NUMBER = new DynamicCommandExceptionType((path) -> Text.translatable("enhanced_commands.commands.nbt.query_scale_not_number", path.toString()));
   int QUERY_LIMIT = 12;
   SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.data.get.multiple"));
@@ -59,6 +66,8 @@ public interface NbtSource<T> {
   Collection<T> values(ServerCommandSource source) throws CommandSyntaxException;
 
   NbtCompound getNbtFor(ServerCommandSource commandSource, T source);
+
+  Type getType();
 
   default NbtElement getNbtInPathFor(ServerCommandSource commandSource, T source, @Nullable NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
     final NbtCompound nbt = getNbtFor(commandSource, source);
@@ -112,6 +121,31 @@ public interface NbtSource<T> {
     @Override
     default Map<T, NbtElement> getNbtsInPath(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path) throws CommandSyntaxException {
       return Map.of(value(source), getNbtInPath(source, path));
+    }
+  }
+
+  enum Type implements StringIdentifiable {
+    BLOCK("block", BlockNbtData.CODEC),
+    ENTITY("entity", EntityNbtData.CODEC),
+    LITERAL("literal", LiteralNbtData.CODEC),
+    STORAGE("storage", StorageNbtData.CODEC);
+    public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(values());
+
+    private final String name;
+    private final MapCodec<? extends NbtTarget<?>> codec;
+
+    Type(String name, MapCodec<? extends NbtTarget<?>> codec) {
+      this.name = name;
+      this.codec = codec;
+    }
+
+    public MapCodec<? extends NbtTarget<?>> getCodec() {
+      return codec;
+    }
+
+    @Override
+    public String asString() {
+      return name;
     }
   }
 }

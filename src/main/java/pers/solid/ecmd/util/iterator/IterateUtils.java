@@ -3,13 +3,12 @@ package pers.solid.ecmd.util.iterator;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Contract;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -19,6 +18,8 @@ public final class IterateUtils {
   private IterateUtils() {
   }
 
+  private static final List<Optional<Void>> singleList = List.of(Optional.empty());
+
   @Contract(pure = true)
   public static <T> Stream<T> singletonNullStream() {
     return Stream.of((T) null);
@@ -27,8 +28,8 @@ public final class IterateUtils {
   /**
    * 返回一个仅产生一个 {@code null} 的流，这个流在运行过程中会执行一次 {@code runnable}。例如：
    * <pre>{@code
-   *  singletonPeekingStream(() -> System.out.println("Hello sourceWorld!")).toList();
-   *  // 输出 "Hello sourceWorld!"，同时返回一个含有单个 null 的列表。
+   *  singletonPeekingStream(() -> System.out.println("Hello world!")).toList();
+   *  // 输出 "Hello world!"，同时返回一个含有单个 null 的列表。
    * }</pre>
    *
    * @param runnable 流在运行中需要运行的 {@link Runnable}。
@@ -40,20 +41,41 @@ public final class IterateUtils {
   }
 
   /**
+   * 返回一个仅产生一个 {@code null} 的 iterable，这个 iterable 在运行过程中会执行一次 {@code runnable}。例如：
+   * <pre>{@code
+   *  var iterable = singletonPeekingIterable(() -> System.out.println("Hello world!"));
+   *  for (var n : iterable) {
+   *    System.out.println(iterator.next());
+   *  }
+   *  // 输出 "Hello world!"，同时输出一个 null。
+   * }</pre>
+   *
+   * @param runnable 迭代器在迭代过程中需要运行的 {@link Runnable}。
+   * @return 仅产生一个 {@code null} 的流。
+   */
+  public static <T> Iterable<T> singletonPeekingIterable(Runnable runnable) {
+    return Iterables.transform(singleList, input -> {
+      runnable.run();
+      return null;
+    });
+  }
+
+  /**
    * 返回一个仅产生一个 {@code null} 的迭代器，这个迭代器在运行过程中会执行一次 {@code runnable}。例如：
    * <pre>{@code
-   *  var iterator = singletonPeekingIterator(() -> System.out.println("Hello sourceWorld!"));
+   *  var iterator = singletonPeekingIterator(() -> System.out.println("Hello world!"));
    *  while (iterator.hasNext()) {
    *    System.out.println(iterator.next());
    *  }
-   *  // 输出 "Hello sourceWorld!"，同时输入一个 null。
+   *  // 输出 "Hello world!"，同时输出一个 null。
    * }</pre>
    *
    * @param runnable 迭代器在迭代过程中需要运行的 {@link Runnable}。
    * @return 仅产生一个 {@code null} 的流。
    */
   public static <T> Iterator<T> singletonPeekingIterator(Runnable runnable) {
-    return IterateUtils.<T>singletonPeekingStream(runnable).iterator();
+    final Iterable<T> iterable = singletonPeekingIterable(runnable);
+    return iterable.iterator();
   }
 
   /**

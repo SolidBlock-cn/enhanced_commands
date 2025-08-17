@@ -12,11 +12,11 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.nbt.BlocksNbtData;
+import pers.solid.ecmd.nbt.BlockNbtData;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtTarget;
-import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,8 +29,8 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
 
   public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name, @Nullable BlockPredicate blockPredicate) throws CommandSyntaxException {
     final NbtTarget<?> argument = context.getArgument(name, NbtTarget.class);
-    if (argument instanceof BlocksNbtData blocksNbtData && blockPredicate != null) {
-      return new BlocksNbtData(blocksNbtData.region(), blockPredicate);
+    if (argument instanceof BlockNbtData blockNbtData && blockPredicate != null) {
+      return new BlockNbtData(blockNbtData.region(), blockPredicate);
     }
     return argument;
   }

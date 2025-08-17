@@ -24,8 +24,8 @@ public interface ThreadExecutorExtension {
     getUUIDToIteratorTasks$ec().put(task.uuid, task);
   }
 
-  default IteratorTask<?> addIteratorTask$ec(Text name, Iterator<?> iterator) {
-    final IteratorTask<?> task = new IteratorTask<>(name, UUID.randomUUID(), iterator);
+  default <T> IteratorTask<T> addIteratorTask$ec(Text name, Iterator<T> iterator) {
+    final IteratorTask<T> task = new IteratorTask<>(name, UUID.randomUUID(), iterator);
     addIteratorTask$ec(task);
     return task;
   }

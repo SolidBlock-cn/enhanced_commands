@@ -80,7 +80,8 @@ public final class KeywordArgsCommon {
       .addOptionalArg("nbt", NbtFunctionArgumentType.compound(registryAccess), null)
       .addOptionalArg("affect_fluid", BoolArgumentType.bool(), false)
       .build());
-  public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> FILLING = register("filling", KeywordArgsArgumentType.builder()
+  public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> FILLING = register("filling", registryAccess -> KeywordArgsArgumentType.builder()
+      .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
       .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)
       .addOptionalArg("skip_light_update", BoolArgumentType.bool(), false)
@@ -97,7 +98,6 @@ public final class KeywordArgsCommon {
       .build());
   public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> BLOCK_TRANSFORMATION = register("block_transformation", registryAccess -> KeywordArgsArgumentType.builderFromShared(FILLING, registryAccess)
       .addOptionalArg("affect_entities", EntityPredicateArgumentType.entityPredicate(registryAccess), null)
-      .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
       .addOptionalArg("keep_remaining", BoolArgumentType.bool(), false)
       .addOptionalArg("keep_state", BoolArgumentType.bool(), false)
       .addOptionalArg("remaining", BlockFunctionArgumentType.blockFunction(registryAccess), BlockTransformationTask.DEFAULT_REMAINING_FUNCTION)

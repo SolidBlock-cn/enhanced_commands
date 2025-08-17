@@ -1,6 +1,7 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -20,8 +21,10 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec2f;
 import org.apache.commons.lang3.BooleanUtils;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.util.*;
 
@@ -32,6 +35,7 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
 
   public static final KeywordArgsArgumentType BLOCK_KEYWORD_ARGS = KeywordArgsArgumentType.builder()
       .addOptionalArg("force_load", BoolArgumentType.bool(), false)
+      .addOptionalArg("seed", LongArgumentType.longArg(), null)
       .build();
   public static final DynamicCommandExceptionType TEST_FOR_BLOCK_NOT_LOADED = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.testfor.block.not_loaded", o));
   public static final DynamicCommandExceptionType TEST_FOR_BLOCK_PREDICATE_NOT_LOADED = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.testfor.block.not_loaded_for_predicate", o));
@@ -41,9 +45,9 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
         .then(CommandManager.argument("pos", EnhancedPosArgumentType.blockPos())
             .executes(TestForBlockCommand::executeTestForBlock)
             .then(CommandManager.argument("predicate", new BlockPredicateArgumentType(registryAccess))
-                .executes(context -> executeTestForBlockPredicate(context, false))
+                .executes(context -> executeTestForBlockPredicate(context, false, null))
                 .then(CommandManager.argument("keyword_args", BLOCK_KEYWORD_ARGS)
-                    .executes(context -> executeTestForBlockPredicate(context, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getBoolean("force_load"))))));
+                    .executes(context -> executeTestForBlockPredicate(context, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"))))));
   }
 
   private static int executeTestForBlock(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -72,17 +76,20 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     return 1;
   }
 
-  private static int executeTestForBlockPredicate(CommandContext<ServerCommandSource> context, boolean forceLoad) throws CommandSyntaxException {
+  private static int executeTestForBlockPredicate(CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
+    return executeTestForBlockPredicate(context, keywordArgs.getBoolean("force_load"), keywordArgs.getArg("seed"));
+  }
+
+  private static int executeTestForBlockPredicate(CommandContext<ServerCommandSource> context, boolean forceLoad, @Nullable Long seed) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
-    // todo 考虑在 /testfor 命令加入种子
 
     // 检查方块的代码在后面
     final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(source.getWorld(), blockPos, forceLoad);
     if (cachedBlockPosition.getBlockState() == null) {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
-    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition, new ExecutionContext(source.getWorld().getRandom(), PositionProvider.of(blockPos.toCenterPos(), Vec2f.ZERO, null, EntityAnchorArgumentType.EntityAnchor.FEET), null));
+    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition, new ExecutionContext(source.getWorld().getRandom(), PositionProvider.of(blockPos.toCenterPos(), Vec2f.ZERO, null, EntityAnchorArgumentType.EntityAnchor.FEET), seed));
     testResult.sendMessage(source);
     return BooleanUtils.toInteger(testResult.successes());
   }

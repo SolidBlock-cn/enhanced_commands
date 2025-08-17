@@ -1,13 +1,12 @@
 package pers.solid.ecmd.command;
 
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import it.unimi.dsi.fastutil.longs.Long2ReferenceLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ReferenceMap;
+import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -24,6 +23,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.*;
@@ -31,10 +31,15 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
+import pers.solid.ecmd.extensions.HistoryHolder;
+import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionselection.RegionSelection;
@@ -42,14 +47,13 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
+import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
 import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -73,8 +77,6 @@ public enum StackCommand implements CommandRegistrationCallback {
     final KeywordArgsArgumentType keywordArgsForVector = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess)
         // 是否一并对实体进行堆叠
         .addOptionalArg("affect_entities", EntityArgumentType.entities(), null)
-        // 仅允许对符合此谓词的方块进行修改
-        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
         // 是否将活动区域设置为堆叠后的区域
         .addOptionalArg("select", BoolArgumentType.bool(), false)
         // 只堆叠符合指定的谓词的方块
@@ -168,100 +170,143 @@ public enum StackCommand implements CommandRegistrationCallback {
     final ObjectList<Triple<Vec3d, EntityType<?>, NbtCompound>> sourceEntities = new ObjectArrayList<>();
     final MutableBoolean hasUnloadedPos = new MutableBoolean();
 
-    final List<Iterator<?>> iterators = new ArrayList<>();
+    final BlockPredicate affectOnly = keywordArgs.getArg("affect_only");
+    final BlockPredicate transformOnly = keywordArgs.getArg("transform_only");
 
-    final BlockPredicate affectOnly, transformOnly;
-    {
-      affectOnly = keywordArgs.getArg("affect_only");
-      transformOnly = keywordArgs.getArg("transform_only");
-    }
+
+    final MutableText taskName = Text.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount));
+    final int flags = FillReplaceCommand.getFlags(keywordArgs);
+    final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
+    final @Nullable BlockPlacementHistory history = keywordArgs.getBoolean("undoable") ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;
 
     // 收集需要影响的方块和方块实体
-    Stream<BlockPos> stream = region.stream();
+    Iterable<@Nullable BlockPos> posIterable;
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
-      stream = stream.peek(blockPos -> {
+      posIterable = UnloadedPosException.catching(Iterables.transform(region, blockPos -> {
         if (!world.isChunkLoaded(blockPos)) {
           hasUnloadedPos.setTrue();
           throw new UnloadedPosException(blockPos.toImmutable());
         }
-      });
-    }
-    if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-      stream = stream.filter(blockPos -> {
+        return blockPos;
+      }));
+    } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
+      posIterable = new BatchedFilterIterable<>(region, 16, blockPos -> {
         final boolean chunkLoaded = world.isChunkLoaded(blockPos);
         if (!chunkLoaded) hasUnloadedPos.setTrue();
         return chunkLoaded;
       });
+    } else {
+      posIterable = region;
     }
-    final Stream<Void> collectBlocks = stream
-        .map(blockPos -> {
-          final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-          if (transformOnly == null || transformOnly.test(cachedBlockPosition, executionContext)) {
-            sourceStates.put(blockPos.asLong(), cachedBlockPosition.getBlockState());
-            if (cachedBlockPosition.getBlockEntity() != null) {
-              sourceBlockEntities.put(blockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt(world.getRegistryManager()));
-            }
-          }
-          return null;
-        });
-    iterators.add(IterateUtils.batchAndSkip(collectBlocks.iterator(), 16384, 3));
+    final Iterable<Void> collectSourceBlocks = Iterables.transform(posIterable, blockPos -> {
+      if (blockPos == null) return null;
+      final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+      if (transformOnly == null || transformOnly.test(cachedBlockPosition, executionContext)) {
+        sourceStates.put(blockPos.asLong(), cachedBlockPosition.getBlockState());
+        if (cachedBlockPosition.getBlockEntity() != null) {
+          sourceBlockEntities.put(blockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt(world.getRegistryManager()));
+        }
+      }
+      return null;
+    });
 
     // 收集需要影响的实体
     final EntitySelector affectEntities = keywordArgs.getArg("affect_entities");
+    final Iterable<Void> collectSourceEntities;
     if (affectEntities != null) {
-      final List<? extends Entity> entities = affectEntities.getEntities(source).stream().filter(entity -> region.contains(entity.getPos())).toList();
-      final Stream<Void> collectEntities = entities.stream().map(entity -> {
+      final List<? extends @NotNull Entity> entities = affectEntities.getEntities(source).stream().filter(entity -> region.contains(entity.getPos())).toList();
+      collectSourceEntities = Iterables.transform(entities, entity -> {
         sourceEntities.add(new ImmutableTriple<>(entity.getPos(), entity.getType(), entity.writeNbt(new NbtCompound())));
         return null;
       });
-      iterators.add(IterateUtils.batchAndSkip(collectEntities.iterator(), 16384, 3));
+    } else {
+      collectSourceEntities = Collections.emptyList();
     }
 
-    // 此操作过程影响的方块数量。注意：当 offset 为负数时，一个位置的方块可能被重复多次设置，这种情况下会被记录为多次。。
+    // 此操作过程影响的方块数量。注意：当 offset 为负数时，一个位置的方块可能被重复多次设置，这种情况下会被记录为多次。
     MutableInt blocksAffected = new MutableInt();
     // 此操作过程复制的实体数量。
     MutableInt entitiesAffected = new MutableInt();
 
     final BlockPos.Mutable stackedRelativePos = new BlockPos.Mutable();
     final BlockPos.Mutable posToPlace = new BlockPos.Mutable();
-    final Stream<Void> setBlocks = IntStream.rangeClosed(1, stackAmount).mapToObj(i -> {
-      stackedRelativePos.set(relativeVec.multiply(i));
-      Stream<Long2ReferenceMap.Entry<BlockState>> targetPosStream = sourceStates.long2ReferenceEntrySet().stream()
-          .peek(entry -> posToPlace.set(entry.getLongKey()).move(stackedRelativePos));
-      if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-        targetPosStream = targetPosStream.peek(entry -> {
-          if (!world.isChunkLoaded(posToPlace)) {
-            hasUnloadedPos.setTrue();
-            throw new UnloadedPosException(posToPlace.toImmutable());
-          }
-        });
-      }
-      if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-        targetPosStream = targetPosStream.filter(entry -> {
-          final boolean chunkLoaded = world.isChunkLoaded(posToPlace);
-          if (!chunkLoaded) hasUnloadedPos.setTrue();
-          return chunkLoaded;
-        });
-      }
-      final Stream<Void> affectBlocksStream = targetPosStream
-          .map(entry -> {
-            if (affectOnly == null || affectOnly.test(new CachedBlockPosition(world, posToPlace, false), executionContext)) {
-              boolean modofied = MixinShared.setBlockStateWithModFlags(world, posToPlace, entry.getValue(), FillReplaceCommand.getFlags(keywordArgs), FillReplaceCommand.getModFlags(keywordArgs));
 
-              final BlockEntity blockEntity = world.getBlockEntity(posToPlace);
-              if (blockEntity != null) {
-                final NbtCompound nbtCompound = sourceBlockEntities.get(entry.getLongKey());
-                if (nbtCompound != null) {
-                  blockEntity.read(nbtCompound, world.getRegistryManager());
-                  modofied = true;
-                }
-              }
-              if (modofied) blocksAffected.increment();
+    final Long2ReferenceMap<BlockState> oldStates = new Long2ReferenceLinkedOpenHashMap<>();
+
+    final boolean immediately = keywordArgs.getBoolean("immediately");
+    final boolean useTasks = !immediately && region.numberOfBlocksAffected() * stackAmount > 16384;
+    final Iterable<Void> executeStack = Iterables.concat((Iterable<Iterable<Void>>) () -> IntStream.rangeClosed(1, stackAmount).mapToObj(stackId -> {
+      final Long2LongMap stackedToSourceOnThisStack = new Long2LongArrayMap();
+      stackedRelativePos.set(relativeVec.multiply(stackId));
+
+      Iterable<Void> collectPosToAffectOnThickStack = () -> {
+        Stream<LongLongPair> posPairStream = sourceStates.keySet().longStream().mapToObj(sourcePosLong -> {
+          posToPlace.set(sourcePosLong).move(stackedRelativePos);
+
+          return LongLongPair.of(posToPlace.asLong(), sourcePosLong);
+        });
+
+        if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
+          posPairStream = posPairStream.takeWhile(pair -> {
+            if (!world.isChunkLoaded(posToPlace.set(pair.firstLong()))) {
+              hasUnloadedPos.setTrue();
+              return false;
             }
-            return null;
+            return true;
           });
-      if (affectEntities == null) return affectBlocksStream;
-      final Stream<Void> affectEntitiesStream = sourceEntities.stream().map(triple -> {
+        }
+        if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
+          posPairStream = posPairStream.filter(pair -> {
+            final boolean chunkLoaded = world.isChunkLoaded(posToPlace.set(pair.firstLong()));
+            if (!chunkLoaded) hasUnloadedPos.setTrue();
+            return chunkLoaded;
+          });
+        }
+
+        return posPairStream.map(pair -> {
+          posToPlace.set(pair.firstLong());
+
+          final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, posToPlace, false);
+          if (affectOnly == null || affectOnly.test(cachedBlockPosition, executionContext)) {
+            oldStates.put(posToPlace.asLong(), cachedBlockPosition.getBlockState());
+            stackedToSourceOnThisStack.put(posToPlace.asLong(), pair.secondLong());
+          }
+          return (Void) null;
+        }).iterator();
+      };
+      if (useTasks) {
+        collectPosToAffectOnThickStack = IterateUtils.batchAndSkip(collectPosToAffectOnThickStack, 16384, 1);
+      }
+
+      Iterable<Void> setBlocksOnThisStack = Iterables.transform(stackedToSourceOnThisStack.long2LongEntrySet(), entry -> {
+        final BlockState newState = sourceStates.get(entry.getLongValue());
+        final BlockEntity oldEntity = world.getBlockEntity(posToPlace.set(entry.getLongKey()));
+        if (history != null) {
+          history.recordBlockAndEntity(world, posToPlace, oldStates.get(entry.getLongKey()), newState);
+        }
+        if (oldEntity != null && !oldEntity.supports(newState)) {
+          world.removeBlockEntity(posToPlace);
+        }
+
+        boolean modified = MixinShared.setBlockStateWithModFlags(world, posToPlace, newState, flags, modFlags);
+
+        final BlockEntity newEntity = world.getBlockEntity(posToPlace);
+        if (newEntity != null) {
+          final NbtCompound nbtCompound = sourceBlockEntities.get(entry.getLongValue());
+          if (nbtCompound != null) {
+            newEntity.read(nbtCompound, world.getRegistryManager());
+            modified = true;
+          }
+        }
+        if (modified) blocksAffected.increment();
+        return null;
+      });
+      setBlocksOnThisStack = UnloadedPosException.catching(setBlocksOnThisStack);
+      if (useTasks) {
+        setBlocksOnThisStack = IterateUtils.batchAndSkip(setBlocksOnThisStack, 16384, 7);
+      }
+
+      Iterable<Void> stackEntitiesOnThisStack = Iterables.transform(sourceEntities, triple -> {
         final Vec3d vec3d = triple.getLeft().add(stackedRelativePos.getX(), stackedRelativePos.getY(), stackedRelativePos.getZ());
         final EntityType<?> entityType = triple.getMiddle();
         final NbtCompound nbt = triple.getRight();
@@ -276,11 +321,14 @@ public enum StackCommand implements CommandRegistrationCallback {
         }
         return null;
       });
-      return Stream.concat(affectBlocksStream, affectEntitiesStream);
-    }).flatMap(Function.identity());
-    iterators.add(IterateUtils.batchAndSkip(setBlocks.iterator(), 32767, 15));
+      if (useTasks) {
+        stackEntitiesOnThisStack = IterateUtils.batchAndSkip(stackEntitiesOnThisStack, 32767, 15);
+      }
 
-    Iterator<?> iterator = Iterators.concat(UnloadedPosException.catching(Iterators.concat(iterators.iterator())), IterateUtils.singletonPeekingIterator(() -> {
+      return Iterables.concat(collectPosToAffectOnThickStack, setBlocksOnThisStack, stackEntitiesOnThisStack);
+    }).iterator());
+
+    final Iterable<Void> finalClaim = IterateUtils.singletonPeekingIterable(() -> {
       if (hasUnloadedPos.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.broken").styled(Styles.ACTUAL), false);
@@ -299,16 +347,28 @@ public enum StackCommand implements CommandRegistrationCallback {
           ((ServerPlayerEntityExtension) player).setActiveRegion$ec(activeRegion.moved(multiplied));
         }
       }
-    }));
+    });
 
-    final boolean immediately = keywordArgs.getBoolean("immediately");
-    if (!immediately && region.numberOfBlocksAffected() * stackAmount > 16384) {
+    if (history != null) {
+      if (((ServerCommandSourceAccessor) source).getOutput() instanceof HistoryHolder historyHolder) {
+        historyHolder.addUndoableHistory$ec(history);
+      }
+    }
+    if (useTasks) {
       // The region is too large. Send a server task.
-      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(Text.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount)), UnloadedPosException.catching(iterator));
+      final IteratorTask<?> task = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
+          IterateUtils.batchAndSkip(collectSourceBlocks, 16384, 3),
+          IterateUtils.batchAndSkip(collectSourceEntities, 16384, 3),
+          executeStack,
+          finalClaim
+      ).iterator());
+      if (history != null) {
+        history.task = task;
+      }
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
-      IterateUtils.exhaust(iterator);
+      IterateUtils.exhaust(Iterables.concat(collectSourceBlocks, collectSourceEntities, executeStack, finalClaim).iterator());
       return blocksAffected.intValue() + entitiesAffected.intValue();
     }
   }
