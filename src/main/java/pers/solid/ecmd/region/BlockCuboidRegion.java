@@ -1,13 +1,20 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.base.Preconditions;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -35,7 +42,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   public BlockCuboidRegion {
     Preconditions.checkArgument(minX <= maxX, "minX should not be larger than maxX");
     Preconditions.checkArgument(minY <= maxY, "minY should not be larger than maxY");
-    Preconditions.checkArgument(minZ <= maxZ, "minZ should not be larger than maxX");
+    Preconditions.checkArgument(minZ <= maxZ, "minZ should not be larger than maxXZ");
   }
 
   /**
@@ -180,7 +187,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull PreciseCuboidRegion.Type getType() {
+  public @NotNull BlockCuboidRegion.Type getType() {
     return RegionTypes.CUBOID;
   }
 
@@ -217,5 +224,76 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   @Override
   public boolean contains(@NotNull Vec3d vec3d) {
     return contains(BlockPos.ofFloored(vec3d));
+  }
+
+  public enum Type implements RegionType<BlockCuboidRegion> {
+    CUBOID_TYPE;
+
+    @Override
+    public String functionName() {
+      return "cuboid";
+    }
+
+    @Override
+    public Text tooltip() {
+      return Text.translatable("enhanced_commands.region.cuboid");
+    }
+
+    @Override
+    public FunctionLikeParser.SequentialParams<? extends RegionArgument<? extends BlockCuboidRegion>> parser() {
+      return new Parser();
+    }
+
+    @Override
+    public @NotNull MapCodec<BlockCuboidRegion> getCodec() {
+      return CODEC;
+    }
+
+    @Override
+    public @NotNull MapCodec<? extends RegionArgument<? extends BlockCuboidRegion>> getArgumentCodec() {
+      return BlockCuboidRegionArgument.CODEC;
+    }
+  }
+
+  public static final class Parser implements FunctionLikeParser.SequentialParams<BlockCuboidRegionArgument> {
+    private EnhancedPosArgument from;
+    private EnhancedPosArgument to;
+
+    @Override
+    public BlockCuboidRegionArgument getParseResult(ParseContext<?> parseContext) {
+      return new BlockCuboidRegionArgument(from, to == null ? from : to);
+    }
+
+    @Override
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
+      final StringReader reader = parseContext.reader();
+      if (paramIndex == 0) {
+        from = parseContext.parseAndSuggestArgument(type);
+        if (reader.canRead() && Character.isWhitespace(reader.peek())) {
+          reader.skipWhitespace();
+          // 在有接受到空格后，可直接接受第二个参数
+          if (reader.canRead()) {
+            final char peek = reader.peek();
+            if (peek != ',' && peek != ')') {
+              to = parseContext.parseAndSuggestArgument(type);
+            }
+          }
+        }
+      } else if (paramIndex == 1) {
+        to = parseContext.parseAndSuggestArgument(type);
+      }
+    }
+
+    @Override
+    public int minSequentialParamsCount() {
+      return (to != null || EnhancedPosArgument.isInt(from)) ? 1 : 2;
+    }
+
+    @Override
+    public int maxSequentialParamsCount() {
+      // 如果接受到了以空格区分的参数，那么不需要接受第二个参数了。
+      return to != null ? 1 : 2;
+    }
   }
 }

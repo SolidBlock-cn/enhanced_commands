@@ -161,26 +161,26 @@ public final class EntitySelectors {
     final PositionOffsetInfo positionOffsetInfo = extras.positionOffsetInfo;
     if (positionOffsetInfo != PositionOffsetInfo.NO_OP) {
       if (positionOffsetInfo.x() != null) {
-        joiner.add("x=" + positionOffsetInfo.x());
+        joiner.add("x=" + StringUtil.nf.format(positionOffsetInfo.x()));
       }
       if (positionOffsetInfo.y() != null) {
-        joiner.add("y=" + positionOffsetInfo.y());
+        joiner.add("y=" + StringUtil.nf.format(positionOffsetInfo.y()));
       }
       if (positionOffsetInfo.z() != null) {
-        joiner.add("z=" + positionOffsetInfo.z());
+        joiner.add("z=" + StringUtil.nf.format(positionOffsetInfo.z()));
       }
     }
 
     final Vec3d dxDyDz = extras.dxDyDz;
     if (dxDyDz != null) {
       if (dxDyDz.x != 0) {
-        joiner.add("dx=" + dxDyDz.x);
+        joiner.add("dx=" + StringUtil.nf.format(dxDyDz.x));
       }
       if (dxDyDz.y != 0) {
-        joiner.add("dy=" + dxDyDz.y);
+        joiner.add("dy=" + StringUtil.nf.format(dxDyDz.y));
       }
       if (dxDyDz.z != 0) {
-        joiner.add("dz=" + dxDyDz.z);
+        joiner.add("dz=" + StringUtil.nf.format(dxDyDz.z));
       }
     }
 

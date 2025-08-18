@@ -1,13 +1,20 @@
 package pers.solid.ecmd.region;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -53,13 +60,13 @@ public record PreciseCuboidRegion(Box box) implements CuboidRegion {
    * Round the cuboid region into a block cuboid region, in which each block position's center position is in this cuboid region. It may be {@code null} if the region does not contain any block.
    */
   public @Nullable BlockCuboidRegion round() {
-    final int minX = (int) Math.round(box.minX);
-    final int minY = (int) Math.round(box.minY);
-    final int minZ = (int) Math.round(box.minZ);
-    final int maxX = (int) Math.round(box.maxX);
-    final int maxY = (int) Math.round(box.maxY);
-    final int maxZ = (int) Math.round(box.maxZ);
-    if (minX == maxX || minY == maxX || minZ == maxX) {
+    final int minX = -(int) Math.round(-box.minX);
+    final int minY = -(int) Math.round(-box.minY);
+    final int minZ = -(int) Math.round(-box.minZ);
+    final int maxX = -(int) Math.round(-box.maxX);
+    final int maxY = -(int) Math.round(-box.maxY);
+    final int maxZ = -(int) Math.round(-box.maxZ);
+    if (minX >= maxX || minY >= maxY || minZ >= maxZ) {
       return null;
     }
     return new BlockCuboidRegion(minX, minY, minZ, maxX - 1, maxY - 1, maxZ - 1);
@@ -121,7 +128,7 @@ public record PreciseCuboidRegion(Box box) implements CuboidRegion {
 
   @Override
   public @NotNull Type getType() {
-    return RegionTypes.CUBOID;
+    return RegionTypes.CUBOID_PRECISE;
   }
 
   @Override
@@ -137,7 +144,7 @@ public record PreciseCuboidRegion(Box box) implements CuboidRegion {
 
   @Override
   public @NotNull String asString() {
-    return "cuboid(%s %s %s, %s %s %s)".formatted(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+    return "cuboid_precise(%s %s %s, %s %s %s)".formatted(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
   }
 
   @Override
@@ -145,4 +152,75 @@ public record PreciseCuboidRegion(Box box) implements CuboidRegion {
     return box;
   }
 
+
+  public enum Type implements RegionType<PreciseCuboidRegion> {
+    PRECISE_CUBOID_TYPE;
+
+    @Override
+    public String functionName() {
+      return "cuboid_precise";
+    }
+
+    @Override
+    public Text tooltip() {
+      return Text.translatable("enhanced_commands.region.cuboid");
+    }
+
+    @Override
+    public FunctionLikeParser.SequentialParams<? extends RegionArgument<? extends PreciseCuboidRegion>> parser() {
+      return new PreciseCuboidRegion.Parser();
+    }
+
+    @Override
+    public @NotNull MapCodec<PreciseCuboidRegion> getCodec() {
+      return CODEC;
+    }
+
+    @Override
+    public @NotNull MapCodec<? extends RegionArgument<? extends PreciseCuboidRegion>> getArgumentCodec() {
+      return PreciseCuboidRegionArgument.CODEC;
+    }
+  }
+
+  public static final class Parser implements FunctionLikeParser.SequentialParams<PreciseCuboidRegionArgument> {
+    private EnhancedPosArgument from;
+    private EnhancedPosArgument to;
+
+    @Override
+    public PreciseCuboidRegionArgument getParseResult(ParseContext<?> parseContext) {
+      return new PreciseCuboidRegionArgument(from, to);
+    }
+
+    @Override
+    public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
+      final EnhancedPosArgumentType type = new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.DOUBLE_ONLY, EnhancedPosArgumentType.IntAlignType.UNCHANGED);
+      final StringReader reader = parseContext.reader();
+      if (paramIndex == 0) {
+        from = parseContext.parseAndSuggestArgument(type);
+        if (reader.canRead() && Character.isWhitespace(reader.peek())) {
+          reader.skipWhitespace();
+          // 在有接受到空格后，可直接接受第二个参数
+          if (reader.canRead()) {
+            final char peek = reader.peek();
+            if (peek != ',' && peek != ')') {
+              to = parseContext.parseAndSuggestArgument(type);
+            }
+          }
+        }
+      } else if (paramIndex == 1) {
+        to = parseContext.parseAndSuggestArgument(type);
+      }
+    }
+
+    @Override
+    public int minSequentialParamsCount() {
+      return (to != null || EnhancedPosArgument.isInt(from)) ? 1 : 2;
+    }
+
+    @Override
+    public int maxSequentialParamsCount() {
+      // 如果接受到了以空格区分的参数，那么不需要接受第二个参数了。
+      return to != null ? 1 : 2;
+    }
+  }
 }

@@ -18,7 +18,7 @@ public record BlockCuboidRegionArgument(EnhancedPosArgument from, EnhancedPosArg
   }
 
   @Override
-  public @NotNull RegionType<CuboidRegion> getType() {
+  public @NotNull RegionType<BlockCuboidRegion> getType() {
     return RegionTypes.CUBOID;
   }
 

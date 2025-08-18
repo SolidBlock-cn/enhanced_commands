@@ -21,6 +21,7 @@ import pers.solid.ecmd.mixins.accessor.DefaultPosArgumentAccessor;
 import pers.solid.ecmd.mixins.accessor.LookingPosArgumentAccessor;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.List;
@@ -61,15 +62,15 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
 
       final StringBuilder sb = new StringBuilder();
       if (x.isRelative()) sb.append('~');
-      sb.append(x.toAbsoluteCoordinate(0)).append(' ');
+      sb.append(StringUtil.nf.format(x.toAbsoluteCoordinate(0))).append(' ');
       if (y.isRelative()) sb.append('~');
-      sb.append(y.toAbsoluteCoordinate(0)).append(' ');
+      sb.append(StringUtil.nf.format(y.toAbsoluteCoordinate(0))).append(' ');
       if (z.isRelative()) sb.append('~');
-      sb.append(z.toAbsoluteCoordinate(0));
+      sb.append(StringUtil.nf.format(z.toAbsoluteCoordinate(0)));
       return sb.toString();
     } else if (posArgument instanceof LookingPosArgument lookingPosArgument) {
       final LookingPosArgumentAccessor a = (LookingPosArgumentAccessor) lookingPosArgument;
-      return "^" + a.getX() + " ^" + a.getY() + " ^" + a.getZ();
+      return "^" + StringUtil.nf.format(a.getX()) + " ^" + StringUtil.nf.format(a.getY()) + " ^" + StringUtil.nf.format(a.getZ());
     } else if (posArgument instanceof EnhancedPosArgument enhancedPosArgument) {
       return enhancedPosArgument.asString();
     } else {
@@ -227,13 +228,13 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
       final StringBuilder sb = new StringBuilder();
       final boolean isInt = intAlignType != null;
       if (xRelative) sb.append('~');
-      if (!xRelative || x != 0) sb.append(isInt && !xRelative ? Integer.toString((int) x) : x);
+      if (!xRelative || x != 0) sb.append(isInt && !xRelative ? Integer.toString((int) x) : StringUtil.nf.format(x));
       sb.append(' ');
       if (yRelative) sb.append('~');
-      if (!yRelative || y != 0) sb.append(isInt && !yRelative ? Integer.toString((int) y) : y);
+      if (!yRelative || y != 0) sb.append(isInt && !yRelative ? Integer.toString((int) y) : StringUtil.nf.format(y));
       sb.append(' ');
       if (zRelative) sb.append('~');
-      if (!zRelative || z != 0) sb.append(isInt && !zRelative ? Integer.toString((int) z) : z);
+      if (!zRelative || z != 0) sb.append(isInt && !zRelative ? Integer.toString((int) z) : StringUtil.nf.format(z));
       return sb.toString();
     }
   }
@@ -296,11 +297,11 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     public @NotNull String asString() {
       final StringBuilder sb = new StringBuilder();
       sb.append('^');
-      if (x() != 0) sb.append(x());
+      if (x() != 0) sb.append(StringUtil.nf.format(x()));
       sb.append(" ^");
-      if (y() != 0) sb.append(y());
+      if (y() != 0) sb.append(StringUtil.nf.format(y()));
       sb.append(" ^");
-      if (z() != 0) sb.append(z());
+      if (z() != 0) sb.append(StringUtil.nf.format(z()));
       return sb.toString();
     }
   }

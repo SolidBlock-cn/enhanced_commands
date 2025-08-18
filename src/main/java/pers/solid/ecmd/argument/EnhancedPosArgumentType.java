@@ -34,9 +34,11 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
@@ -318,10 +320,13 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
             }
           }
           if (crossHairPos != null && !numberType.intOnly()) {
+            final NumberFormat nf = NumberFormat.getNumberInstance(Locale.ROOT);
+            nf.setGroupingUsed(false);
+            nf.setMaximumFractionDigits(Integer.MAX_VALUE);
             switch (i) {
-              case 0 -> builder.suggest(crossHairPos.getX() + " " + crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_double"));
-              case 1 -> builder.suggest(crossHairPos.getY() + " " + crossHairPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
-              case 2 -> builder.suggest(String.valueOf(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+              case 0 -> builder.suggest(nf.format(crossHairPos.getX()) + " " + nf.format(crossHairPos.getY()) + " " + nf.format(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double"));
+              case 1 -> builder.suggest(nf.format(crossHairPos.getY()) + " " + nf.format(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+              case 2 -> builder.suggest(nf.format(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
             }
           }
         }

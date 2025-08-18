@@ -19,7 +19,7 @@ public record PreciseCuboidRegionArgument(EnhancedPosArgument from, EnhancedPosA
 
   @Override
   public @NotNull RegionType<? super PreciseCuboidRegion> getType() {
-    return RegionTypes.CUBOID;
+    return RegionTypes.CUBOID_PRECISE;
   }
 
   @Override

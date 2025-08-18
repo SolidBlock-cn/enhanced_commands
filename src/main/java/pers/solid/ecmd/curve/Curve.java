@@ -1,6 +1,7 @@
 package pers.solid.ecmd.curve;
 
 import com.google.common.collect.Streams;
+import com.mojang.serialization.Codec;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
  * Curve 是指可以绘制的曲线。与 {@link Region} 不同，曲线没有面积，也无法判断某个坐标是否在这个线内。但是，曲线仍然可以对点进行迭代。不同的是，对于曲线而言，产生迭代的点需要指定一个间距（这个间距可能会在迭代的过程中发生改变），否则会不知道如何进行迭代。
  */
 public interface Curve extends ExpressionConvertible {
+  Codec<Curve> CODEC = CurveType.REGISTRY.getCodec().dispatch(Curve::getType, CurveType::getCodec);
 
   /**
    * 沿着这条曲线产生一条像素化的连续的线。这个 BlockPos 有可能是 {@link BlockPos.Mutable}。

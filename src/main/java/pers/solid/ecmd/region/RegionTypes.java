@@ -22,7 +22,8 @@ public final class RegionTypes {
   }));
 
   public static final SingleBlockPosRegion.Type SINGLE = register("single", SingleBlockPosRegion.Type.INSTANCE);
-  public static final PreciseCuboidRegion.Type CUBOID = register("cuboid", CuboidRegion.Type.CUBOID_TYPE);
+  public static final BlockCuboidRegion.Type CUBOID = register("cuboid", BlockCuboidRegion.Type.CUBOID_TYPE);
+  public static final PreciseCuboidRegion.Type CUBOID_PRECISE = register("cuboid_precise", PreciseCuboidRegion.Type.PRECISE_CUBOID_TYPE);
   public static final SphereRegion.Type SPHERE = register("sphere", SphereRegion.Type.SPHERE_TYPE);
   public static final IntersectRegion.Type INTERSECT = register("intersect", IntersectRegion.Type.INTERSECT_TYPE);
   public static final UnionRegion.Type UNION = register("union", UnionRegion.Type.UNION_TYPE);

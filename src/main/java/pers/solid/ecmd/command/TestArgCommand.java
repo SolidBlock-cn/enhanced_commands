@@ -37,6 +37,8 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.argument.BlockPredicateArgumentType;
+import pers.solid.ecmd.curve.Curve;
+import pers.solid.ecmd.curve.CurveArgument;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
@@ -61,6 +63,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 import static pers.solid.ecmd.argument.BlockFunctionArgumentType.getBlockFunction;
 import static pers.solid.ecmd.argument.BlockPredicateArgumentType.getBlockPredicate;
+import static pers.solid.ecmd.argument.CurveArgumentType.getCurve;
 import static pers.solid.ecmd.argument.EnhancedPosArgumentType.getPosArgument;
 import static pers.solid.ecmd.argument.EntityPredicateArgumentType.entityPredicate;
 import static pers.solid.ecmd.argument.EntityPredicateArgumentType.getEntityPredicate;
@@ -271,7 +274,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
       if (pos instanceof final EnhancedPosArgument enhanced) {
         context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(EnhancedPosArgument.CODEC.encodeStart(NbtOps.INSTANCE, enhanced).getOrThrow()), false);
       }
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.pos.result").append(ScreenTexts.LINE_BREAK).append(Text.literal(String.format(" x = %s\n y = %s\n z = %s", absolutePos.x, absolutePos.y, absolutePos.z)).formatted(Formatting.GRAY)), false);
+      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.pos.result").append(ScreenTexts.LINE_BREAK).append(Text.literal(String.format(" x = %s\n y = %s\n z = %s", StringUtil.nf.format(absolutePos.x), StringUtil.nf.format(absolutePos.y), StringUtil.nf.format(absolutePos.z))).formatted(Formatting.GRAY)), false);
       return 1;
     };
     for (final EnhancedPosArgumentType.NumberType numberType : EnhancedPosArgumentType.NumberType.values()) {
@@ -370,6 +373,24 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
+  private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addCurveProperties(T argumentBuilder, CommandRegistryAccess registryAccess) {
+    return argumentBuilder.then(argument("curve", CurveArgumentType.curve(registryAccess))
+        .executes(context -> executeStringShow(context, getCurve(context, "curve"), Curve::asString))
+        .then(literal("string")
+            .executes(context -> executeStringShow(context, getCurve(context, "curve"), Curve::asString)))
+        .then(literal("nbt")
+            .executes(context -> executeCodecShow(context, getCurve(context, "curve"), Curve.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json")
+            .executes(context -> executeCodecShow(context, getCurve(context, "curve"), Curve.CODEC, JsonOps.INSTANCE)))
+        .then(literal("string_test")
+            .executes(context -> executeStringTest(context, getCurve(context, "curve"), Curve::asString, s -> CurveArgument.parse(new ParseContext<>(registryAccess, s, false, true)).toAbsoluteRegion((PositionProvider) context.getSource()))))
+        .then(literal("nbt_test")
+            .executes(context -> executeCodecTest(context, getCurve(context, "curve"), Curve.CODEC, NbtOps.INSTANCE)))
+        .then(literal("json_test")
+            .executes(context -> executeCodecTest(context, getCurve(context, "curve"), Curve.CODEC, JsonOps.INSTANCE)))
+    );
+  }
+
   private static <A> int executeConvertShow(NbtElement nbtElement, Codec<A> codec, Consumer<A> resultConsumer, RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     final DataResult<Pair<A, NbtElement>> decode = codec.decode(registryLookup.getOps(NbtOps.INSTANCE), nbtElement);
     final A result = decode.getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
@@ -433,6 +454,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     dispatcher.register(literalR2("testarg")
         .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
         .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
+        .then(addCurveProperties(literal("curve"), registryAccess))
         .then(addEntityPredicateProperties(literal("entity_predicate"), registryAccess))
         .then(addNbtProperties(literal("nbt"), registryAccess))
         .then(addNbtCompoundProperties(literal("nbt_compound")))
