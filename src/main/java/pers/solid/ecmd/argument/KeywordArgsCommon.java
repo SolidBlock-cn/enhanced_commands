@@ -79,6 +79,7 @@ public final class KeywordArgsCommon {
       .addOptionalArg("force", BoolArgumentType.bool(), false)
       .addOptionalArg("nbt", NbtFunctionArgumentType.compound(registryAccess), null)
       .addOptionalArg("affect_fluid", BoolArgumentType.bool(), false)
+      .addOptionalArg("seed", LongArgumentType.longArg(), null)
       .build());
   public static final Function<CommandRegistryAccess, KeywordArgsArgumentType> FILLING = register("filling", registryAccess -> KeywordArgsArgumentType.builder()
       .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)

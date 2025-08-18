@@ -1,7 +1,6 @@
 package pers.solid.ecmd.command;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Streams;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -38,11 +37,10 @@ import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.SphereRegion;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
-import pers.solid.ecmd.util.iterator.BatchedFilterIterator;
+import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
@@ -97,32 +95,33 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
     // 尽可能使用 mutable，避免每次都创建对象；在构造流的过程中，转化为 long 是为了能够执行 distinct
     // 请注意：每次迭代时，可能都是同一个对象。
-    Stream<BlockPos.@Nullable Mutable> posStream;
+    LongStream longStream;
     BlockPos.Mutable mutable = new BlockPos.Mutable();
     final Double i = interval;
     if (thickness > 0) {
-      posStream = curve.streamPoints(i).flatMapToLong(vec3d -> LongStream.concat(LongStream.of(mutable.set(vec3d.x, vec3d.y, vec3d.z).asLong()), new SphereRegion(thickness, vec3d).stream().mapToLong(BlockPos::asLong))).distinct().mapToObj(mutable::set);
+      longStream = curve.streamPoints(i).flatMapToLong(vec3d -> LongStream.concat(LongStream.of(mutable.set(vec3d.x, vec3d.y, vec3d.z).asLong()), new SphereRegion(thickness, vec3d).stream().mapToLong(BlockPos::asLong)).distinct().sequential()).distinct();
     } else {
-      posStream = curve.streamPoints(i).mapToLong(value -> mutable.set(value.x, value.y, value.z).asLong()).distinct().mapToObj(mutable::set);
+      longStream = curve.streamPoints(i).mapToLong(value -> mutable.set(value.x, value.y, value.z).asLong()).distinct();
     }
+    Iterable<BlockPos.Mutable> posIterable = () -> IterateUtils.transformLongToObject(longStream.iterator(), mutable::set);
 
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();
 
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-      // todo 为什么iterator基于stream会出问题
-      posStream = Streams.stream(new BatchedFilterIterator<>(posStream.iterator(), 16, blockPos -> {
+      posIterable = new BatchedFilterIterable<>(posIterable, 16, blockPos -> {
         final boolean chunkLoaded = world.isChunkLoaded(blockPos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
-      }));
+      });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-      posStream = posStream.peek(blockPos -> {
+      posIterable = Iterables.transform(posIterable, blockPos -> {
         final boolean chunkLoaded = world.isChunkLoaded(blockPos);
         if (!chunkLoaded) {
           hasUnloaded.setTrue();
           throw new UnloadedPosException(blockPos);
         }
+        return blockPos;
       });
     }
 
@@ -134,22 +133,21 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
     final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
     final Iterable<Void> collectPosToAffect;
-    Stream<BlockPos.@Nullable Mutable> finalPosStream = posStream;
     if (predicate == null) {
-      collectPosToAffect = () -> finalPosStream.map(blockPos -> {
+      collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
         if (blockPos == null) return null;
         oldStates.put(blockPos.asLong(), world.getBlockState(blockPos));
         return (Void) null;
-      }).iterator();
+      });
     } else {
-      collectPosToAffect = () -> finalPosStream.map(blockPos -> {
+      collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
         if (blockPos == null) return null;
         final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
         if (cachedBlockPosition.getBlockState() != null && predicate.test(cachedBlockPosition, context)) {
           oldStates.put(blockPos.asLong(), cachedBlockPosition.getBlockState());
         }
         return (Void) null;
-      }).iterator();
+      });
     }
 
     // 第二部分：放置方块

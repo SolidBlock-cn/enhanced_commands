@@ -219,7 +219,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
 
     @Override
     public boolean isInt() {
-      return false;
+      return intAlignType != null;
     }
 
     @Override

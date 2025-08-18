@@ -9,6 +9,7 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Contract;
 
 import java.util.*;
+import java.util.function.LongFunction;
 import java.util.stream.Stream;
 
 /**
@@ -166,5 +167,19 @@ public final class IterateUtils {
       builder.put(entry.getKey(), failableFunction.apply(entry.getValue()));
     }
     return builder.build();
+  }
+
+  public static <T> Iterator<T> transformLongToObject(PrimitiveIterator.OfLong iterator, LongFunction<T> transformer) {
+    return new Iterator<>() {
+      @Override
+      public boolean hasNext() {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public T next() {
+        return transformer.apply(iterator.nextLong());
+      }
+    };
   }
 }
