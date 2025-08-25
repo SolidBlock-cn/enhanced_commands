@@ -113,13 +113,13 @@ public class BlockTransformationTask {
    * 是否允许突破方块数量限制。
    */
   private final boolean bypassLimit;
-  private final @Nullable CommandOutput historyTarget;
+  private final @Nullable HistoryHolder historyHolder;
   private final @Nullable BlockTransformationHistory history;
 
   /**
    * @see Builder#build()
    */
-  private BlockTransformationTask(@NotNull Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3d, Vec3d> posTransformer, @Nullable Function<Vec3d, Vec3d> invertedPosTransformer, @NotNull Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @Nullable Consumer<Entity> reverseEntityTransformer, @NotNull World world, @NotNull Region region, ExecutionContext executionContext, BlockFunctionContext blockFunctionContext, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, @NotNull UnloadedPosBehavior unloadedPosBehavior, boolean bypassLimit, @Nullable CommandOutput historyTarget, @Nullable BlockTransformationHistory history) {
+  private BlockTransformationTask(@NotNull Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3d, Vec3d> posTransformer, @Nullable Function<Vec3d, Vec3d> invertedPosTransformer, @NotNull Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @Nullable Consumer<Entity> reverseEntityTransformer, @NotNull World world, @NotNull Region region, ExecutionContext executionContext, BlockFunctionContext blockFunctionContext, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, @NotNull UnloadedPosBehavior unloadedPosBehavior, boolean bypassLimit, @Nullable HistoryHolder historyHolder, @Nullable BlockTransformationHistory history) {
     this.blockPosTransformer = blockPosTransformer;
     this.posTransformer = posTransformer;
     this.invertedPosTransformer = invertedPosTransformer;
@@ -137,7 +137,7 @@ public class BlockTransformationTask {
     this.interpolation = interpolation;
     this.unloadedPosBehavior = unloadedPosBehavior;
     this.bypassLimit = bypassLimit;
-    this.historyTarget = historyTarget;
+    this.historyHolder = historyHolder;
     this.history = history;
   }
 
@@ -390,8 +390,10 @@ public class BlockTransformationTask {
   }
 
   public void addUndoableHistory() {
-    if (history == null || !(historyTarget instanceof final HistoryHolder historyHolder)) return;
-    historyHolder.addUndoableHistory$ec(history);
+    if (history == null) return;
+    if (historyHolder != null) {
+      historyHolder.addUndoableHistory$ec(history);
+    }
   }
 
   public static Builder builder(World world, Region region) {
@@ -448,7 +450,7 @@ public class BlockTransformationTask {
     private @NotNull UnloadedPosBehavior unloadedPosBehavior = UnloadedPosBehavior.REJECT;
     private boolean bypassLimit = false;
     private @Nullable BlockTransformationHistory history;
-    private CommandOutput historyTarget;
+    private HistoryHolder historyHolder;
 
     public Builder(@NotNull World world, @NotNull Region region) {
       this.world = world;
@@ -531,14 +533,14 @@ public class BlockTransformationTask {
       return this;
     }
 
-    public Builder history(@Nullable CommandOutput historyTarget, @Nullable BlockTransformationHistory history) {
-      this.historyTarget = historyTarget;
+    public Builder history(@Nullable HistoryHolder historyHolder, @Nullable BlockTransformationHistory history) {
+      this.historyHolder = historyHolder;
       this.history = history;
       return this;
     }
 
     public BlockTransformationTask build() {
-      return new BlockTransformationTask(blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, executionContext, blockFunctionContext, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyTarget, history);
+      return new BlockTransformationTask(blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, executionContext, blockFunctionContext, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyHolder, history);
     }
   }
 }

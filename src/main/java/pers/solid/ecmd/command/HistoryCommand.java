@@ -6,12 +6,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
@@ -24,7 +24,6 @@ import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.history.History;
-import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -56,12 +55,31 @@ public enum HistoryCommand implements CommandRegistrationCallback {
       .addOptionalArg("sort", stringEnum("latest", "oldest"), "latest")
       .build();
 
+  public static @NotNull HistoryHolder getHistoryHolderFromArgs(ServerCommandSource source, KeywordArgs keywordArgs) throws CommandSyntaxException {
+    final EntitySelector selector = keywordArgs.getArg("target");
+    if (selector == null) {
+      if (keywordArgs.getBoolean("target-server")) {
+        return ((HistoryHolder) source.getServer());
+      } else {
+        return fromSourceOrThrow(source);
+      }
+    } else if (keywordArgs.getBoolean("target-server")) {
+      throw UndoCommand.CONFLICT_ARGUMENT.create();
+    }
+    final ServerPlayerEntity player = selector.getPlayer(source);
+    if (player instanceof HistoryHolder holder) {
+      return holder;
+    } else {
+      throw NOT_SUPPORTED_HISTORY.create(targetName(player));
+    }
+  }
+
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
     dispatcher.register(literalR2("history")
         .executes(context -> executeList(context.getSource()))
         .then(literal("clear")
-            .executes(context -> executeClear(context.getSource(), ((ServerCommandSourceAccessor) context.getSource()).getOutput(), false))
+            .executes(context -> executeClear(context.getSource(), fromSourceOrThrow(context.getSource()), false))
             .then(argument("keyword_args", CLEAR_KEYWORD_ARGS)
                 .executes(context -> executeClear(context.getSource(), getKeywordArgs(context, "keyword_args")))))
         .then(literal("list")
@@ -70,10 +88,10 @@ public enum HistoryCommand implements CommandRegistrationCallback {
                 .executes(context -> executeList(context.getSource(), getKeywordArgs(context, "keyword_args"))))));
   }
 
-  private static Text targetName(CommandOutput target) {
-    if (target instanceof Entity entity) {
+  private static Text targetName(Object object) {
+    if (object instanceof Entity entity) {
       return TextUtil.styled(entity.getDisplayName(), Styles.TARGET);
-    } else if (target instanceof MinecraftServer server) {
+    } else if (object instanceof MinecraftServer server) {
       return Text.literal(server.getName()).styled(Styles.TARGET);
     } else {
       return Text.literal("<unknown source>").styled(Styles.TARGET);
@@ -83,15 +101,12 @@ public enum HistoryCommand implements CommandRegistrationCallback {
   public static final DynamicCommandExceptionType NOT_SUPPORTED_HISTORY = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.history.not_supported", o));
 
   private static int executeClear(ServerCommandSource source, KeywordArgs keywordArgs) throws CommandSyntaxException {
-    CommandOutput target = UndoCommand.getTargetFromArgs(source, keywordArgs);
-    return executeClear(source, target, "redo".equals(keywordArgs.getArg("type")));
+    HistoryHolder holder = getHistoryHolderFromArgs(source, keywordArgs);
+    return executeClear(source, holder, "redo".equals(keywordArgs.getArg("type")));
   }
 
-  private static int executeClear(ServerCommandSource source, @NotNull CommandOutput target, boolean redo) throws CommandSyntaxException {
-    final Text targetName = targetName(target);
-    if (!(target instanceof HistoryHolder historyHolder)) {
-      throw NOT_SUPPORTED_HISTORY.create(targetName);
-    }
+  private static int executeClear(ServerCommandSource source, @NotNull HistoryHolder historyHolder, boolean redo) {
+    final Text targetName = targetName(historyHolder);
     if (redo) {
       historyHolder = historyHolder.inverse();
     }
@@ -103,19 +118,30 @@ public enum HistoryCommand implements CommandRegistrationCallback {
   }
 
   private static int executeList(ServerCommandSource source, KeywordArgs keywordArgs) throws CommandSyntaxException {
-    CommandOutput target = UndoCommand.getTargetFromArgs(source, keywordArgs);
-    return executeList(source, target, keywordArgs.getInt("from"), keywordArgs.getInt("limit"), "latest".equals(keywordArgs.getArg("sort")), "redo".equals(keywordArgs.getArg("type")));
+    HistoryHolder holder = getHistoryHolderFromArgs(source, keywordArgs);
+    return executeList(source, holder, keywordArgs.getInt("from"), keywordArgs.getInt("limit"), "latest".equals(keywordArgs.getArg("sort")), "redo".equals(keywordArgs.getArg("type")));
   }
 
   private static int executeList(ServerCommandSource source) throws CommandSyntaxException {
-    return executeList(source, ((ServerCommandSourceAccessor) source).getOutput(), 0, 7, true, false);
+    return executeList(source, fromSourceOrThrow(source), 0, 7, true, false);
   }
 
-  private static int executeList(ServerCommandSource source, @NotNull CommandOutput target, int from, int limit, boolean latestFirst, boolean redo) throws CommandSyntaxException {
-    final Text targetName = targetName(target);
-    if (!(target instanceof HistoryHolder historyHolder)) {
-      throw NOT_SUPPORTED_HISTORY.create(targetName);
+  private static @NotNull HistoryHolder fromSourceOrThrow(ServerCommandSource source) throws CommandSyntaxException {
+    final HistoryHolder holder = HistoryHolder.fromSource(source);
+    if (holder != null) {
+      return holder;
     }
+    if (source.getEntity() != null) {
+      throw NOT_SUPPORTED_HISTORY.create(targetName(source.getEntity()));
+    } else if (source.getServer() != null) {
+      throw NOT_SUPPORTED_HISTORY.create(targetName(source.getServer()));
+    } else {
+      throw NOT_SUPPORTED_HISTORY.create(targetName(null));
+    }
+  }
+
+  private static int executeList(ServerCommandSource source, @NotNull HistoryHolder historyHolder, int from, int limit, boolean latestFirst, boolean redo) {
+    final Text targetName = targetName(historyHolder);
     if (redo) {
       historyHolder = historyHolder.inverse();
     }
@@ -127,6 +153,7 @@ public enum HistoryCommand implements CommandRegistrationCallback {
 
     final int size = histories.size();
     Iterable<History> iterable = Iterables.limit(Iterables.skip(histories, from), limit);
+    @NotNull HistoryHolder finalHistoryHolder = historyHolder;
     source.sendFeedback$ecBridge(() -> {
       if (size == 0) {
         return Text.translatable("enhanced_commands.commands.history.no_history", targetName);
@@ -150,9 +177,9 @@ public enum HistoryCommand implements CommandRegistrationCallback {
       List<Text> buttons = new ArrayList<>(3);
 
       final StringBuilder sb = new StringBuilder();
-      if (target instanceof MinecraftServer) {
+      if (finalHistoryHolder instanceof MinecraftServer) {
         sb.append(" target-server=true");
-      } else if (target instanceof ServerPlayerEntity player) {
+      } else if (finalHistoryHolder instanceof ServerPlayerEntity player) {
         sb.append(" target=").append(player.getGameProfile().getName());
       } else {
         // 无法描述对象（通常不是这样的情况，但是需要考虑）

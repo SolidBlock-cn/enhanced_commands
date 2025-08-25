@@ -99,7 +99,7 @@ public interface BlockTransformationCommand {
         .setUnloadedPosBehavior(unloadedPosBehavior)
         .interpolates(keywordArgs.supportsArg("interpolate") && keywordArgs.getBoolean("interpolate"))
         .bypassLimit(bypassLimit)
-        .history(history != null ? ((ServerCommandSourceAccessor) source).getOutput() : null, history);
+        .history(HistoryHolder.fromSource(source), history);
     if (keywordArgs.getBoolean("keep_remaining")) {
       builder.keepRemaining();
     }
