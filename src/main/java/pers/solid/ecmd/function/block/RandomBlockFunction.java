@@ -55,7 +55,7 @@ public final class RandomBlockFunction implements BlockFunction {
 
   private @NotNull Block[] calculateBlocks(DynamicRegistryManager rm, FeatureSet fs) {
     this.featureSet = fs;
-    return rm.get(RegistryKeys.BLOCK).stream().filter(block -> block.isEnabled(fs)).toArray(Block[]::new);
+    return rm.getOrThrow(RegistryKeys.BLOCK).stream().filter(block -> block.isEnabled(fs)).toArray(Block[]::new);
   }
 
   @Override

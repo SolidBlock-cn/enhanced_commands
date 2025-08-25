@@ -7,9 +7,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -43,7 +43,7 @@ public record LootTablePredicateEntityPredicateEntry(@NotNull RegistryEntry<Loot
       } else {
         lootCondition = predicate.value();
       }
-      LootContext lootContext = new LootContext.Builder(new LootContextParameterSet.Builder(serverWorld)
+      LootContext lootContext = new LootContext.Builder(new LootWorldContext.Builder(serverWorld)
           .add(LootContextParameters.THIS_ENTITY, entity)
           .add(LootContextParameters.ORIGIN, entity.getPos())
           .build(LootContextTypes.SELECTOR)).build(Optional.empty());
@@ -64,7 +64,7 @@ public record LootTablePredicateEntityPredicateEntry(@NotNull RegistryEntry<Loot
           return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.predicate.unknown_predicate", TextUtil.literal(reference.registryKey().getValue()).styled(Styles.TARGET)));
         }
         lootCondition = optional.get();
-        LootContext lootContext = new LootContext.Builder(new LootContextParameterSet.Builder(serverWorld)
+        LootContext lootContext = new LootContext.Builder(new LootWorldContext.Builder(serverWorld)
             .add(LootContextParameters.THIS_ENTITY, entity)
             .add(LootContextParameters.ORIGIN, entity.getPos())
             .build(LootContextTypes.SELECTOR)).build(Optional.empty());
@@ -76,7 +76,7 @@ public record LootTablePredicateEntityPredicateEntry(@NotNull RegistryEntry<Loot
         }
       } else {
         lootCondition = predicate.value();
-        LootContext lootContext = new LootContext.Builder(new LootContextParameterSet.Builder(serverWorld)
+        LootContext lootContext = new LootContext.Builder(new LootWorldContext.Builder(serverWorld)
             .add(LootContextParameters.THIS_ENTITY, entity)
             .add(LootContextParameters.ORIGIN, entity.getPos())
             .build(LootContextTypes.SELECTOR))

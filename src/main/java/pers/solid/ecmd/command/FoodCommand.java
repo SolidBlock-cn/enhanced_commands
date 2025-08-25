@@ -17,8 +17,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import pers.solid.ecmd.math.ConcentrationType;
+import pers.solid.ecmd.mixins.accessor.HungerManagerAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -56,7 +58,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
       final HungerManager hungerManager = player.getHungerManager();
       final int foodLevel = hungerManager.getFoodLevel();
       final float saturationLevel = hungerManager.getSaturationLevel();
-      final float exhaustion = hungerManager.getExhaustion();
+      final float exhaustion = ((HungerManagerAccessor) hungerManager).getExhaustion();
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.get.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.literal(foodLevel).styled(Styles.RESULT), TextUtil.literal(saturationLevel).styled(Styles.RESULT), TextUtil.literal(exhaustion).styled(Styles.RESULT)), false);
     } else {
       final IntList foodLevels = new IntArrayList(size);
@@ -120,7 +122,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
   public static int executeSetExhaustion(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, float value) {
     final int size = players.size();
     for (PlayerEntity player : players) {
-      player.getHungerManager().setExhaustion(value);
+      ((HungerManagerAccessor) player.getHungerManager()).setExhaustion(value);
     }
     if (size == 1) {
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.set_exhaustion.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)), true);
@@ -136,7 +138,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
       final HungerManager hungerManager = player.getHungerManager();
       hungerManager.setFoodLevel(20);
       hungerManager.setSaturationLevel(20);
-      hungerManager.setExhaustion(0);
+      ((HungerManagerAccessor) hungerManager).setExhaustion(0);
     }
     if (size == 1) {
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.food.add_to_max.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET)), true);
@@ -266,9 +268,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
                     .executes(context -> executeTick(context, getPlayers(context, "players"), getInteger(context, "times")))))));
   }
 
-  private int executeTick(CommandContext<ServerCommandSource> context, Collection<? extends PlayerEntity> players, int times) {
+  private int executeTick(CommandContext<ServerCommandSource> context, Collection<? extends ServerPlayerEntity> players, int times) {
     int updated = 0;
-    for (PlayerEntity player : players) {
+    for (ServerPlayerEntity player : players) {
       for (int i = 0; i < times; i++) {
         player.getHungerManager().update(player);
         updated++;

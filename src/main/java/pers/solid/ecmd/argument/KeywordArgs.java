@@ -62,6 +62,6 @@ public class KeywordArgs {
 
   public Vec3d getPosition(@NotNull String name, ServerCommandSource source) {
     PosArgument argument = getArg(name);
-    return argument.toAbsolutePos(source);
+    return argument.getPos(source);
   }
 }

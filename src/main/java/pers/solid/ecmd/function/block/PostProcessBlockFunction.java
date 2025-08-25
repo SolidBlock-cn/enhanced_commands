@@ -39,7 +39,7 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
 
     for (Direction direction : directions) {
       mutable.set(pos, direction);
-      blockState = blockState.getStateForNeighborUpdate(direction, world.getBlockState(mutable), world, pos, mutable);
+      blockState = blockState.getStateForNeighborUpdate(world, world, pos, direction, mutable, world.getBlockState(mutable), context.random);
     }
 
     return blockState;

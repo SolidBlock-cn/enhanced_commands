@@ -30,6 +30,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.scoreboard.ReadableScoreboardScore;
 import net.minecraft.scoreboard.Scoreboard;
@@ -50,6 +51,8 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.RegionArgument;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
@@ -57,8 +60,6 @@ import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.mixin.MixinShared;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -492,7 +493,7 @@ public class EntitySelectorOptionsExtension {
     putOption("effect", reader -> {
       final StringReader stringReader = reader.getReader();
       stringReader.skipWhitespace();
-      final RegistryWrapper<StatusEffect> wrapper = MixinShared.getCommandRegistryAccess().getWrapperOrThrow(RegistryKeys.STATUS_EFFECT);
+      final RegistryWrapper<StatusEffect> wrapper = MixinShared.getCommandRegistryAccess().getOrThrow(RegistryKeys.STATUS_EFFECT);
       final var type = RegistryEntryReferenceArgumentType.registryEntry(MixinShared.getCommandRegistryAccess(), RegistryKeys.STATUS_EFFECT);
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
@@ -682,7 +683,7 @@ public class EntitySelectorOptionsExtension {
         // 提供游戏模式（包括本模组中提供的 a、1 等名称）的建议。
         reader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
           CommandSource.suggestFromIdentifier(Registries.ENTITY_TYPE.streamEntries().filter(r -> !parsedTypes.contains(r.value())), suggestionsBuilder, r -> r.registryKey().getValue(), r -> r.value().getName());
-          return CommandSource.suggestIdentifiers(Registries.ENTITY_TYPE.streamTags().filter(tagKey -> !parsedTypeKeys.contains(tagKey)).map(TagKey::id), suggestionsBuilder, "#");
+          return CommandSource.suggestIdentifiers(Registries.ENTITY_TYPE.streamTags().map(RegistryEntryList.Named::getTag).filter(tagKey -> !parsedTypeKeys.contains(tagKey)).map(TagKey::id), suggestionsBuilder, "#");
         });
 
         if (reader.readTagCharacter()) {
@@ -702,7 +703,7 @@ public class EntitySelectorOptionsExtension {
         } else {
           Identifier identifier = Identifier.fromCommandInput(reader.getReader());
           final int cursorAfterNext = stringReader.getCursor();
-          EntityType<?> entityType = Registries.ENTITY_TYPE.getOrEmpty(identifier).orElseThrow(() -> {
+          EntityType<?> entityType = Registries.ENTITY_TYPE.getOptionalValue(identifier).orElseThrow(() -> {
             stringReader.setCursor(cursorBeforeNext);
             return CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.INVALID_TYPE_EXCEPTION.createWithContext(stringReader, identifier.toString()), cursorAfterNext);
           });

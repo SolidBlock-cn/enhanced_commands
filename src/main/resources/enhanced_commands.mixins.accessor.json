@@ -13,11 +13,13 @@
     "EntitySelectorReaderAccessor",
     "ExecuteCommandAccessor",
     "FallingBlockEntityAccessor",
+    "HungerManagerAccessor",
     "JsonReaderUtilsAccessor",
     "LookingPosArgumentAccessor",
     "MutableTextAccessor",
     "ServerCommandSourceAccessor",
     "ServerWorldAccessor",
+    "SingleStackRecipeAccessor",
     "TranslatableTextContentAccessor"
   ],
   "client": [

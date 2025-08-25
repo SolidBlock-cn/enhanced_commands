@@ -25,10 +25,10 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.predicate.property.Comparator;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.predicate.property.Comparator;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -65,13 +65,13 @@ public abstract class SimpleBlockParser<S> {
 
   public void parseBlockId() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    final RegistryWrapper.Impl<Block> registryWrapper = parseContext.registryAccess().getWrapperOrThrow(RegistryKeys.BLOCK);
+    final RegistryWrapper.Impl<Block> registryWrapper = parseContext.registryAccess().getOrThrow(RegistryKeys.BLOCK);
     if (reader.canRead() && reader.peek() == '@') {
       reader.skip();
       int cursorBeforeParsing = reader.getCursor();
       parseContext.setSuggestion((context, suggestionsBuilder) -> CommandSource.suggestFromIdentifier(Registries.BLOCK.streamEntries(), suggestionsBuilder, reference -> reference.registryKey().getValue(), reference -> reference.value().getName()));
       blockId = Identifier.fromCommandInput(reader);
-      block = Registries.BLOCK.getOrEmpty(blockId).orElseThrow(() -> {
+      block = Registries.BLOCK.getOptionalValue(blockId).orElseThrow(() -> {
         final int cursorAfterParsing = reader.getCursor();
         reader.setCursor(cursorBeforeParsing);
         return CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString()), cursorAfterParsing);
@@ -224,7 +224,7 @@ public abstract class SimpleBlockParser<S> {
   public void parseBlockTagId() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorBeforeHash = reader.getCursor();
-    final RegistryWrapper.Impl<Block> registryWrapper = parseContext.registryAccess().getWrapperOrThrow(RegistryKeys.BLOCK);
+    final RegistryWrapper.Impl<Block> registryWrapper = parseContext.registryAccess().getOrThrow(RegistryKeys.BLOCK);
     if (reader.canRead() && reader.peek() == '#') {
       reader.skip();
 

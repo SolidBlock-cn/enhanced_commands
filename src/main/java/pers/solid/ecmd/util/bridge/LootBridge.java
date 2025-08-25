@@ -12,9 +12,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.context.LootContext;
-import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
+import net.minecraft.loot.context.LootWorldContext;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtString;
@@ -39,7 +39,7 @@ public final class LootBridge {
     return server
         .getReloadableRegistries()
         .createRegistryLookup()
-        .getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, identifier))
+        .getOptionalEntry(RegistryKey.of(RegistryKeys.PREDICATE, identifier))
         .map(RegistryEntry::value);
   }
 
@@ -47,7 +47,7 @@ public final class LootBridge {
     return server
         .getReloadableRegistries()
         .createRegistryLookup()
-        .getOptionalEntry(RegistryKeys.PREDICATE, registryKey)
+        .getOptionalEntry(registryKey)
         .map(RegistryEntry::value);
   }
 
@@ -69,23 +69,23 @@ public final class LootBridge {
   }
 
   public static LootContext createContextForBlock(CachedBlockPosition cachedBlockPosition, ServerWorld serverWorld, long seed) {
-    final LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverWorld)
+    final LootWorldContext lootWorldContext = new LootWorldContext.Builder(serverWorld)
         .add(LootContextParameters.ORIGIN, cachedBlockPosition.getBlockPos().toCenterPos())
         .add(LootContextParameters.BLOCK_STATE, cachedBlockPosition.getBlockState())
         .add(LootContextParameters.BLOCK_ENTITY, cachedBlockPosition.getBlockEntity())
         .addOptional(LootContextParameters.TOOL, ItemStack.EMPTY)
         .build(LootContextTypes.BLOCK);
-    return new LootContext.Builder(lootContextParameterSet)
+    return new LootContext.Builder(lootWorldContext)
         .random(seed)
         .build(Optional.empty());
   }
 
   public static LootContext createContextForEntity(Entity entity, ServerWorld serverWorld) {
-    LootContextParameterSet lootContextParameterSet = new LootContextParameterSet.Builder(serverWorld)
+    LootWorldContext lootWorldContext = new LootWorldContext.Builder(serverWorld)
         .add(LootContextParameters.THIS_ENTITY, entity)
         .add(LootContextParameters.ORIGIN, entity.getPos())
         .build(LootContextTypes.SELECTOR);
-    return new LootContext.Builder(lootContextParameterSet).build(Optional.empty());
+    return new LootContext.Builder(lootWorldContext).build(Optional.empty());
   }
 
   public static RegistryEntry<LootCondition> parseLootConditionOrLiteral(RegistryWrapper.WrapperLookup registryLookup, StringReader stringReader) throws CommandSyntaxException {

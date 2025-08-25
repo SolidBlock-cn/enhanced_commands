@@ -32,8 +32,8 @@ import pers.solid.ecmd.configs.RegistryParsingConfig;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.CommandManagerMixin;
 import pers.solid.ecmd.mixins.mixin.WorldChunkMixin;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -148,17 +148,17 @@ public final class MixinShared {
 
   public static <T> CommandSyntaxException modifiedRegistryEntryException(RegistryKey<? extends Registry<T>> registryRef, StringReader stringReader, Identifier identifier, int cursorAfterId) {
     if (RegistryKeys.BLOCK.equals(registryRef)) {
-      final Optional<Block> block = Registries.BLOCK.getOrEmpty(identifier);
+      final Optional<Block> block = Registries.BLOCK.getOptionalValue(identifier);
       if (block.isPresent()) {
         return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, block.get().getName()), cursorAfterId);
       }
     } else if (RegistryKeys.ITEM.equals(registryRef)) {
-      final Optional<Item> item = Registries.ITEM.getOrEmpty(identifier);
+      final Optional<Item> item = Registries.ITEM.getOptionalValue(identifier);
       if (item.isPresent()) {
         return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getName()), cursorAfterId);
       }
     } else if (RegistryKeys.ENTITY_TYPE.equals(registryRef)) {
-      final Optional<EntityType<?>> entityType = Registries.ENTITY_TYPE.getOrEmpty(identifier);
+      final Optional<EntityType<?>> entityType = Registries.ENTITY_TYPE.getOptionalValue(identifier);
       if (entityType.isPresent()) {
         return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, entityType.get().getName()), cursorAfterId);
       }

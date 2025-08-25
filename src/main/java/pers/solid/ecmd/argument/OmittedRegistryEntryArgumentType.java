@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 
 public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, RegistryWrapper<T> registryWrapper, RegistryKey<? extends Registry<T>> registryRef) implements ArgumentType<RegistryEntry.Reference<T>> {
   public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull String omittedNamespace, @NotNull CommandRegistryAccess registryAccess, @NotNull RegistryKey<? extends Registry<T>> registryRef) {
-    return new OmittedRegistryEntryArgumentType<>(omittedNamespace, registryAccess.getWrapperOrThrow(registryRef), registryRef);
+    return new OmittedRegistryEntryArgumentType<>(omittedNamespace, registryAccess.getOrThrow(registryRef), registryRef);
   }
 
   public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull CommandRegistryAccess registryAccess, @NotNull RegistryKey<? extends Registry<T>> registryRef) {

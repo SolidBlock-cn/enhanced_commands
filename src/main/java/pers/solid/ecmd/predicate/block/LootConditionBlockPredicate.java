@@ -89,7 +89,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     @Override
     public LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
-        final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = parseContext.registryAccess().createRegistryLookup().getOptionalEntry(RegistryKeys.PREDICATE, RegistryKey.of(RegistryKeys.PREDICATE, id));
+        final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = parseContext.registryAccess().getOptionalEntry(RegistryKey.of(RegistryKeys.PREDICATE, id));
         if (lootCondition.isEmpty()) {
           parseContext.reader().setCursor(cursorBeforeId);
           throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);

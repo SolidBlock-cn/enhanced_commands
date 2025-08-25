@@ -75,7 +75,7 @@ public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull L
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         final TagKey<Block> tagKey = parser.tagId.getTag();
-        return new TagBlockFunction(parseContext.registryAccess().getWrapperOrThrow(RegistryKeys.BLOCK).getOrThrow(tagKey), parser.propertyNameFunctions);
+        return new TagBlockFunction(parseContext.registryAccess().getOrThrow(RegistryKeys.BLOCK).getOrThrow(tagKey), parser.propertyNameFunctions);
       } else {
         return null;
       }

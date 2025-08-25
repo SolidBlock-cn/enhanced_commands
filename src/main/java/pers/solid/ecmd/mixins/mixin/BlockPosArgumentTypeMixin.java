@@ -57,11 +57,7 @@ public abstract class BlockPosArgumentTypeMixin implements ArgumentTypeExtension
 
   @Inject(method = "getLoadedBlockPos(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/server/world/ServerWorld;Ljava/lang/String;)Lnet/minecraft/util/math/BlockPos;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;create()Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/argument/BlockPosArgumentType;OUT_OF_WORLD_EXCEPTION:Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;", remap = false)), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void injectedThrowOutOfWorld(CommandContext<ServerCommandSource> context, ServerWorld world, String name, CallbackInfoReturnable<BlockPos> cir, BlockPos blockPos) throws CommandSyntaxException {
-    if (world.isOutOfHeightLimit(blockPos)) {
-      throw EnhancedPosArgumentType.OUT_OF_HEIGHT_LIMIT.create(TextUtil.wrapVector(blockPos), world.getBottomY(), world.getTopY());
-    } else {
-      throw EnhancedPosArgumentType.OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapVector(blockPos));
-    }
+    throw EnhancedPosArgumentType.OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapVector(blockPos));
   }
 
   @Override

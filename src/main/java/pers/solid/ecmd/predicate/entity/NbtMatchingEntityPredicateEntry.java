@@ -25,7 +25,7 @@ public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound nbt, boolean 
     if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
       ItemStack itemStack = serverPlayerEntity.getInventory().getMainHandStack();
       if (!itemStack.isEmpty()) {
-        actualNbt.put("SelectedItem", itemStack.encode(serverPlayerEntity.getRegistryManager()));
+        actualNbt.put("SelectedItem", itemStack.toNbt(serverPlayerEntity.getRegistryManager()));
       }
     }
 
@@ -38,7 +38,7 @@ public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound nbt, boolean 
     if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
       ItemStack itemStack = serverPlayerEntity.getInventory().getMainHandStack();
       if (!itemStack.isEmpty()) {
-        actualNbt.put("SelectedItem", itemStack.encode(serverPlayerEntity.getRegistryManager()));
+        actualNbt.put("SelectedItem", itemStack.toNbt(serverPlayerEntity.getRegistryManager()));
       }
     }
 

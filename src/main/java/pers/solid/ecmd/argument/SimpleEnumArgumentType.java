@@ -113,7 +113,7 @@ public final class SimpleEnumArgumentType<E extends Enum<E>> implements Argument
     @Override
     public SimpleEnumArgumentType<E> fromPacket(PacketByteBuf buf) {
       final Identifier id = buf.readIdentifier();
-      return new SimpleEnumArgumentType<>((CommandEnumType<E>) CommandEnumType.REGISTRY.getOrEmpty(id).orElseThrow(() -> new NoSuchElementException("unknown enum argument type id: " + id)));
+      return new SimpleEnumArgumentType<>((CommandEnumType<E>) CommandEnumType.REGISTRY.getOptionalValue(id).orElseThrow(() -> new NoSuchElementException("unknown enum argument type id: " + id)));
     }
 
     @Override

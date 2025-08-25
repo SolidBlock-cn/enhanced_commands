@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.mixins.accessor.HungerManagerAccessor;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
@@ -21,7 +22,7 @@ public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolea
 
   @Override
   public boolean test(@NotNull Entity entity) {
-    return entity instanceof final PlayerEntity player && exhaustion.test(player.getHungerManager().getExhaustion()) != inverted;
+    return entity instanceof final PlayerEntity player && exhaustion.test(((HungerManagerAccessor) player.getHungerManager()).getExhaustion()) != inverted;
   }
 
   @Override
@@ -29,7 +30,7 @@ public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolea
     if (!(entity instanceof final PlayerEntity player)) {
       return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
-      return EntityPredicateEntry.testFloat(player, player.getHungerManager().getExhaustion(), exhaustion, CRITERION_NAME, displayName, inverted);
+      return EntityPredicateEntry.testFloat(player, ((HungerManagerAccessor) player.getHungerManager()).getExhaustion(), exhaustion, CRITERION_NAME, displayName, inverted);
     }
   }
 

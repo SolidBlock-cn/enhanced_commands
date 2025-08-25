@@ -26,11 +26,11 @@ public enum DirectionArgument implements StringIdentifiable, Function<@NotNull P
     } else if (rotation.x < -60) {
       return Direction.UP;
     } else {
-      return Direction.fromRotation(rotation.y);
+      return Direction.fromHorizontalDegrees(rotation.y);
     }
   }),
   BACK("back", FRONT.function.andThen(Direction::getOpposite)),
-  FRONT_HORIZONTAL("front_horizontal", positionProvider -> Direction.fromRotation(positionProvider.getRotation$ec().y)),
+  FRONT_HORIZONTAL("front_horizontal", positionProvider -> Direction.fromHorizontalDegrees(positionProvider.getRotation$ec().y)),
   BACK_HORIZONTAL("back_horizontal", FRONT_HORIZONTAL.function.andThen(Direction::getOpposite)),
   FRONT_VERTICAL("front_vertical", positionProvider -> positionProvider.getRotation$ec().x > 0 ? Direction.UP : Direction.DOWN),
   BACK_VERTICAL("back_vertical", positionProvider -> positionProvider.getRotation$ec().x > 0 ? Direction.DOWN : Direction.UP),

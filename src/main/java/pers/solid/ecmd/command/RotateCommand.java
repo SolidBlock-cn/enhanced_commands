@@ -10,7 +10,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -156,7 +155,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
           newYaw = entity.getYaw() - (float) rotation;
         }
         if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getPitch(), PositionFlag.VALUES);
+          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getPitch());
         } else {
           entity.setYaw(newYaw);
         }
@@ -176,7 +175,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
           newYaw = entity.getYaw() + (float) rotation;
         }
         if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getPitch(), PositionFlag.VALUES);
+          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getPitch());
         } else {
           entity.setYaw(newYaw);
         }

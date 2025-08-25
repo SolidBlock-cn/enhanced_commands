@@ -22,11 +22,11 @@ public enum AxisArgument implements StringIdentifiable, Function<@NotNull Positi
     if (rotation.x > 60 || rotation.x < -60) {
       return Direction.Axis.Y;
     } else {
-      return Direction.fromRotation(rotation.y).getAxis();
+      return Direction.fromHorizontalDegrees(rotation.y).getAxis();
     }
   }),
-  FRONT_BACK_HORIZONTAL("front_back_horizontal", positionProvider -> Direction.fromRotation(positionProvider.getRotation$ec().y).getAxis()),
-  LEFT_RIGHT("left_right", positionProvider -> Direction.fromRotation(positionProvider.getRotation$ec().y).rotateYClockwise().getAxis()),
+  FRONT_BACK_HORIZONTAL("front_back_horizontal", positionProvider -> Direction.fromHorizontalDegrees(positionProvider.getRotation$ec().y).getAxis()),
+  LEFT_RIGHT("left_right", positionProvider -> Direction.fromHorizontalDegrees(positionProvider.getRotation$ec().y).rotateYClockwise().getAxis()),
   RANDOM("random", positionProvider -> Direction.Axis.pickRandomAxis(positionProvider.getWorld$ec().getRandom())),
   RANDOM_HORIZONTAL("random_horizontal", positionProvider -> positionProvider.getWorld$ec().getRandom().nextBoolean() ? Direction.Axis.X : Direction.Axis.Z);
 

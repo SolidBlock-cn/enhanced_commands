@@ -38,7 +38,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
 
   default RegistryEntry.Reference<E> getEntry(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
     final RegistryKey<E> id = id();
-    return registryLookup.getWrapperOrThrow(id.getRegistryRef()).getOptional(id).orElseThrow(() -> createExceptionForUnknownId(null, id.getValue().toString()));
+    return registryLookup.getOrThrow(id.getRegistryRef()).getOptional(id).orElseThrow(() -> createExceptionForUnknownId(null, id.getValue().toString()));
   }
 
   default E value(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
@@ -74,7 +74,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final int cursorBeforeId = reader.getCursor();
       parseContext.setSuggestion((context, builder) -> {
         if (context.getSource() instanceof ServerCommandSource) {
-          return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(parseContext.registryAccess().getWrapperOrThrow(registryKey).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
+          return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(parseContext.registryAccess().getOrThrow(registryKey).streamKeys().map(RegistryKey::getValue), builder.createOffset(cursorBeforeId));
         } else if (context.getSource() instanceof CommandSource commandSource) {
           return commandSource.getCompletions(context);
         } else {
@@ -86,9 +86,9 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final Identifier id = DefaultNamespace.ENHANCED_COMMANDS.fromStringReader(reader);
       final int cursorAfterId = reader.getCursor();
       return getResultByEntrySupplier(() -> {
-        final RegistryEntryLookup.RegistryLookup registryLookup = parseContext.registryAccess().createRegistryLookup();
+        final RegistryEntryLookup.RegistryLookup registryLookup = parseContext.registryAccess();
         final RegistryKey<E> entryKey = RegistryKey.of(registryKey, id);
-        final Optional<RegistryEntryLookup<E>> registryEntryLookup = registryLookup.getOptional(registryKey);
+        final Optional<? extends RegistryEntryLookup<E>> registryEntryLookup = registryLookup.getOptional(registryKey);
         if (registryEntryLookup.isEmpty()) {
           // 考虑到有时客户端在解析命令时，会不知道该数据包中的内容，不应在客户端判定为解析错误。
           return entryKey;

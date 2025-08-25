@@ -64,7 +64,7 @@ public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
     entries.add(of("rainbow_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new DoublePerlinNoiseSampler.NoiseParameters(-2, Noise.DEFAULT_AMPLITUDES), new Vec3d(0.125f, 0.125f, 0.125f), Vec3d.ZERO));
 
     final var natualizeIgnore = new TagBlockPredicate(ModBlockTags.NATUALIZE_IGNORE);
-    final RegistryWrapper.Impl<Block> wrapper = registries.getWrapperOrThrow(RegistryKeys.BLOCK);
+    final RegistryWrapper.Impl<Block> wrapper = registries.getOrThrow(RegistryKeys.BLOCK);
     entries.add(of("naturalize_vegetation"), new ConditionsBlockFunction(
         new ConditionalBlockFunction(
             new TagBlockPredicate(ModBlockTags.NETHER_FUNGUS),

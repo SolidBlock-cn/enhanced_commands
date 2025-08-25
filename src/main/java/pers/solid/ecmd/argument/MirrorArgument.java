@@ -13,8 +13,8 @@ public enum MirrorArgument implements StringIdentifiable, Function<@NotNull Serv
   NONE(BlockMirror.NONE),
   LEFT_RIGHT(BlockMirror.LEFT_RIGHT),
   FRONT_BACK(BlockMirror.FRONT_BACK),
-  FORWARD("entityPredicate", source -> Direction.fromRotation(source.getRotation().y).getAxis() == Direction.Axis.X ? BlockMirror.FRONT_BACK : BlockMirror.LEFT_RIGHT),
-  SIDE("side", source -> Direction.fromRotation(source.getRotation().y).getAxis() == Direction.Axis.Z ? BlockMirror.FRONT_BACK : BlockMirror.LEFT_RIGHT),
+  FORWARD("entityPredicate", source -> Direction.fromHorizontalDegrees(source.getRotation().y).getAxis() == Direction.Axis.X ? BlockMirror.FRONT_BACK : BlockMirror.LEFT_RIGHT),
+  SIDE("side", source -> Direction.fromHorizontalDegrees(source.getRotation().y).getAxis() == Direction.Axis.Z ? BlockMirror.FRONT_BACK : BlockMirror.LEFT_RIGHT),
   RANDOM("random", source -> BlockMirror.values()[(source.getWorld().getRandom().nextInt(BlockMirror.values().length))]);
 
   public static final StringIdentifiableCodec<MirrorArgument> CODEC = StringIdentifiableCodec.create(values());

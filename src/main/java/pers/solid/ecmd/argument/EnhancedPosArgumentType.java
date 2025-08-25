@@ -106,13 +106,12 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
 
 
   public static Vec3d getPos(CommandContext<ServerCommandSource> context, String name) {
-    return context.getArgument(name, PosArgument.class).toAbsolutePos(context.getSource());
+    return context.getArgument(name, PosArgument.class).getPos(context.getSource());
   }
 
   public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.unloaded", pos));
   public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.out_of_build_limit", pos));
   public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.out_of_bounds", pos));
-  public static final Dynamic3CommandExceptionType OUT_OF_HEIGHT_LIMIT = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhanced_commands.argument.pos.out_of_height_limit", pos, lowest, highest));
   public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhanced_commands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
 
   public static <T extends BlockPos> T checkChunkLoaded(ServerWorld world, T blockPos) throws CommandSyntaxException {
@@ -124,9 +123,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
 
   public static <T extends BlockPos> T checkBuildLimit(ServerWorld world, T blockPos) throws CommandSyntaxException {
     if (!world.isInBuildLimit(blockPos)) {
-      if (world.isOutOfHeightLimit(blockPos)) {
-        throw OUT_OF_HEIGHT_LIMIT.create(TextUtil.wrapVector(blockPos), world.getBottomY(), world.getTopY());
-      } else if (!isValidHorizontally(blockPos)) {
+      if (!isValidHorizontally(blockPos)) {
         throw OUT_OF_HORIZONTAL_BOUNDS.create(TextUtil.wrapVector(blockPos), -30000000, 30000000);
       } else {
         throw OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapVector(blockPos));

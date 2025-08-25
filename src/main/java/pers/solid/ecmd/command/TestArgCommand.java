@@ -43,7 +43,6 @@ import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
-import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
@@ -269,7 +268,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   private static <T extends ArgumentBuilder<ServerCommandSource, T>> T addPosProperties(T argumentBuilder) {
     final Command<ServerCommandSource> execution = context -> {
       final PosArgument pos = context.getArgument("pos", PosArgument.class);
-      final Vec3d absolutePos = pos.toAbsolutePos(context.getSource());
+      final Vec3d absolutePos = pos.getPos(context.getSource());
       context.getSource().sendFeedback$ecBridge(() -> Text.literal(EnhancedPosArgument.asString(pos)), false);
       if (pos instanceof final EnhancedPosArgument enhanced) {
         context.getSource().sendFeedback$ecBridge(() -> NbtHelper.toPrettyPrintedText(EnhancedPosArgument.CODEC.encodeStart(NbtOps.INSTANCE, enhanced).getOrThrow()), false);

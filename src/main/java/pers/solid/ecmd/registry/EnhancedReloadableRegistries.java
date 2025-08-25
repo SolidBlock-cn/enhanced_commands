@@ -1,6 +1,5 @@
 package pers.solid.ecmd.registry;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
 
 public class EnhancedReloadableRegistries {
   private static final List<EnhancedDynamicRegistryInfo<?>> REGISTRY = new ArrayList<>();
-  private static final Gson GSON = new Gson();
 
   public static Stream<CompletableFuture<MutableRegistry<?>>> getEnhancedMutableRegistries(RegistryOps<JsonElement> ops, ResourceManager resourceManager, Executor prepareExecutor) {
     return REGISTRY.stream().map(info -> enhancedPrepare(info, ops, resourceManager, prepareExecutor));
@@ -28,11 +26,9 @@ public class EnhancedReloadableRegistries {
     final Codec<T> codec = info.codec();
     return CompletableFuture.supplyAsync(() -> {
       MutableRegistry<T> mutableRegistry = new SimpleRegistry<>(registryKey, Lifecycle.experimental());
-      Map<Identifier, JsonElement> map = new HashMap<>();
-      final Identifier registry = registryKey.getValue();
-      String string = registry.getNamespace() + "/" + registry.getPath();
-      JsonDataLoader.load(resourceManager, string, GSON, map);
-      map.forEach((id, json) -> codec.parse(ops, json).result().ifPresent((value) -> mutableRegistry.add(RegistryKey.of(registryKey, id), value, new RegistryEntryInfo(Optional.empty(), Lifecycle.experimental()))));
+      Map<Identifier, T> map = new HashMap<>();
+      JsonDataLoader.load(resourceManager, registryKey, ops, codec, map);
+      map.forEach((id, value) -> mutableRegistry.add(RegistryKey.of(registryKey, id), value, new RegistryEntryInfo(Optional.empty(), Lifecycle.experimental())));
       return mutableRegistry;
     }, prepareExecutor);
   }

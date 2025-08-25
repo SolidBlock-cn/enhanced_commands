@@ -61,7 +61,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     final String replaced = pattern.matcher(old).replaceAll(replacement);
     final Identifier identifier = Identifier.tryParse(replaced);
     if (identifier == null) return blockState;
-    return world.getRegistryManager().get(RegistryKeys.BLOCK).getOrEmpty(identifier).filter(block1 -> block1.isEnabled(world.getEnabledFeatures())).map(Block::getDefaultState).orElse(blockState);
+    return world.getRegistryManager().getOrThrow(RegistryKeys.BLOCK).getOptionalValue(identifier).filter(block1 -> block1.isEnabled(world.getEnabledFeatures())).map(Block::getDefaultState).orElse(blockState);
   }
 
   @Override

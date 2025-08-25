@@ -18,7 +18,7 @@ public final class WandEvent {
         if (player instanceof ServerPlayerEntity) {
           final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
           final Text text = extension.getOrResetRegionSelection$ec().clickSecondPoint(hitResult.getBlockPos(), player).get();
-          if (text != null) player.sendMessage(text);
+          if (text != null) player.sendMessage(text, false);
         }
         return ActionResult.SUCCESS;
       }
@@ -32,7 +32,7 @@ public final class WandEvent {
         if (player instanceof ServerPlayerEntity) {
           final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
           final Text text = extension.getOrResetRegionSelection$ec().clickFirstPoint(pos, player).get();
-          if (text != null) player.sendMessage(text);
+          if (text != null) player.sendMessage(text, false);
         }
         return ActionResult.SUCCESS;
       }

@@ -4,6 +4,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.profiler.Profiler;
+import net.minecraft.util.profiler.Profilers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.api.FlipStateCallback;
@@ -59,9 +61,10 @@ public class EnhancedCommands implements ModInitializer {
 
     // 注册服务器运行任务的事件
     ServerTickEvents.END_SERVER_TICK.register(id("tick_iterator_task"), server -> {
-      server.getProfiler().push("enhanced_commands:tick_iterator_task");
+      final Profiler profiler = Profilers.get();
+      profiler.push("enhanced_commands:tick_iterator_task");
       ((ThreadExecutorExtension) server).ec_advanceTasks();
-      server.getProfiler().pop();
+      profiler.pop();
     });
 
     // 资源包

@@ -4,7 +4,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.*;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
+import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.command.argument.PosArgument;
+import net.minecraft.command.argument.RotationArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
@@ -22,6 +25,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.EnhancedRotationArgument;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.*;
@@ -43,7 +47,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                     Collections.singleton(context.getSource().getEntityOrThrow()),
                     context.getSource().getWorld(),
                     EnhancedPosArgumentType.getPosArgument(context, "location"),
-                    DefaultPosArgument.zero(),
+                    new EnhancedRotationArgument(0, 0, false, false),
                     null
                 )
             )
@@ -104,7 +108,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                                 context.getSource().getWorld(),
                                 EnhancedPosArgumentType.getPosArgument(context, "location"),
                                 null,
-                                new LookTarget(EnhancedPosArgumentType.getPosArgument(context, "facingLocation").toAbsolutePos(context.getSource()))
+                                new LookTarget(EnhancedPosArgumentType.getPosArgument(context, "facingLocation").getPos(context.getSource()))
                             )
                         )
                     )
@@ -146,9 +150,9 @@ public enum TpRelCommand implements CommandRegistrationCallback {
       }
     }
     for (Entity entity : targets) {
-      final ServerCommandSource modifiedSource = entity.getCommandSource();
-      vec3d = location.toAbsolutePos(modifiedSource);
-      vec2f = rotation == null ? null : rotation.toAbsoluteRotation(modifiedSource);
+      final ServerCommandSource modifiedSource = entity.getCommandSource((ServerWorld) entity.getWorld());
+      vec3d = location.getPos(modifiedSource);
+      vec2f = rotation == null ? null : rotation.getRotation(modifiedSource);
       if (rotation == null) {
         teleport(modifiedSource, entity, world, vec3d.x, vec3d.y, vec3d.z, set, entity.getYaw(), entity.getPitch(), facingLocation);
       } else {
@@ -194,12 +198,12 @@ public enum TpRelCommand implements CommandRegistrationCallback {
     } else {
       float f = MathHelper.wrapDegrees(yaw);
       float g = MathHelper.wrapDegrees(pitch);
-      if (target.teleport(world, x, y, z, movementFlags, f, g)) {
+      if (target.teleport(world, x, y, z, movementFlags, f, g, false)) {
         if (facingLocation != null) {
           facingLocation.look(source, target);
         }
 
-        if (!(target instanceof LivingEntity livingEntity) || !livingEntity.isFallFlying()) {
+        if (!(target instanceof LivingEntity livingEntity) || !livingEntity.isGliding()) {
           target.setVelocity(target.getVelocity().multiply(1.0, 0.0, 1.0));
           target.setOnGround(true);
         }

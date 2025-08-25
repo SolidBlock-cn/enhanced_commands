@@ -10,6 +10,7 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.decoration.DisplayEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.predicate.NbtPredicate;
@@ -93,7 +94,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
     BlockState state = world.getBlockState(pos);
     MixinShared.setBlockStateWithModFlags(world, pos, affectFluid ? Blocks.AIR.getDefaultState() : state.getFluidState().getBlockState(), flags, modFlags);
     if (!affectFluid) state = state.withIfExists(Properties.WATERLOGGED, false);
-    final DisplayEntity.BlockDisplayEntity blockDisplayEntity = EntityType.BLOCK_DISPLAY.create(world);
+    final DisplayEntity.BlockDisplayEntity blockDisplayEntity = EntityType.BLOCK_DISPLAY.create(world, SpawnReason.COMMAND);
     if (blockDisplayEntity == null) {
       return null;
     }

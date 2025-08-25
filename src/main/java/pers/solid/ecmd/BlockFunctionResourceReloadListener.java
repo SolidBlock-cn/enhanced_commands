@@ -1,17 +1,13 @@
 package pers.solid.ecmd;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.JsonOps;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryOps;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.resource.JsonDataLoader;
+import net.minecraft.resource.ResourceFinder;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
@@ -20,15 +16,14 @@ import pers.solid.ecmd.function.block.BlockFunction;
 
 import java.util.Map;
 
-public class BlockFunctionResourceReloadListener extends JsonDataLoader implements IdentifiableResourceReloadListener {
+public class BlockFunctionResourceReloadListener extends JsonDataLoader<BlockFunction> implements IdentifiableResourceReloadListener {
   private static final Identifier ID = EnhancedCommands.id("block_function");
-  private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
   private static final Logger LOGGER = LogUtils.getLogger();
   private final RegistryWrapper.WrapperLookup registryLookup;
   private Map<Identifier, BlockFunction> blockFunctionsById = ImmutableMap.of();
 
   public BlockFunctionResourceReloadListener(RegistryWrapper.WrapperLookup registryLookup) {
-    super(GSON, RegistryKeys.getPath(BlockFunction.REGISTRY_KEY));
+    super(BlockFunction.CODEC, ResourceFinder.json(RegistryKeys.getPath(BlockFunction.REGISTRY_KEY)));
     this.registryLookup = registryLookup;
   }
 
@@ -38,16 +33,14 @@ public class BlockFunctionResourceReloadListener extends JsonDataLoader implemen
   }
 
   @Override
-  protected void apply(Map<Identifier, JsonElement> prepared, ResourceManager manager, Profiler profiler) {
+  protected void apply(Map<Identifier, BlockFunction> prepared, ResourceManager manager, Profiler profiler) {
     ImmutableMap.Builder<Identifier, BlockFunction> builder = ImmutableMap.builder();
-    RegistryOps<JsonElement> registryOps = this.registryLookup.getOps(JsonOps.INSTANCE);
 
-    for (Map.Entry<Identifier, JsonElement> entry : prepared.entrySet()) {
+    for (Map.Entry<Identifier, BlockFunction> entry : prepared.entrySet()) {
       Identifier identifier = entry.getKey();
 
       try {
-        BlockFunction blockFunction = BlockFunction.CODEC.parse(registryOps, entry.getValue()).getOrThrow(JsonParseException::new);
-        builder.put(identifier, blockFunction);
+        builder.put(identifier, entry.getValue());
       } catch (IllegalArgumentException | JsonParseException var12) {
         LOGGER.error("Parsing error loading block function {}", identifier, var12);
       }

@@ -18,6 +18,7 @@ import net.minecraft.command.EntitySelector;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -39,7 +40,6 @@ import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.history.BlockPlacementHistory;
-import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionselection.RegionSelection;
@@ -311,7 +311,7 @@ public enum StackCommand implements CommandRegistrationCallback {
         final EntityType<?> entityType = triple.getMiddle();
         final NbtCompound nbt = triple.getRight();
 
-        final Entity newEntity = entityType.create(world);
+        final Entity newEntity = entityType.create(world, SpawnReason.COMMAND);
         if (newEntity != null) {
           newEntity.readNbt(nbt);
           newEntity.setPosition(vec3d);

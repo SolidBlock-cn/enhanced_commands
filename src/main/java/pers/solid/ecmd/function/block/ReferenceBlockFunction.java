@@ -26,7 +26,7 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
       if (!(world instanceof ServerWorld serverWorld)) {
         return blockState;
       }
-      final BlockFunction value = value(serverWorld.getServer().getReloadableRegistries().getRegistryManager());
+      final BlockFunction value = value(serverWorld.getServer().getRegistryManager()); // todo check
       return value.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);

@@ -24,12 +24,12 @@ public record EnhancedRotationArgument(float x, float y, boolean xRelative, bool
   }
 
   @Override
-  public Vec3d toAbsolutePos(ServerCommandSource source) {
+  public Vec3d getPos(ServerCommandSource source) {
     return source.getPosition();
   }
 
   @Override
-  public Vec2f toAbsoluteRotation(ServerCommandSource source) {
+  public Vec2f getRotation(ServerCommandSource source) {
     return this.toAbsoluteRotation((PositionProvider) source);
   }
 

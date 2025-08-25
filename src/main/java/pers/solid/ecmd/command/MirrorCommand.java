@@ -8,7 +8,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -81,7 +80,7 @@ public enum MirrorCommand implements CommandRegistrationCallback {
         });
         final float newPitch = axis == Direction.Axis.Y ? -entity.getPitch() : entity.getPitch();
         if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, newPitch, PositionFlag.VALUES);
+          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, newPitch);
         } else {
           entity.setYaw(newYaw);
           if (axis == Direction.Axis.Y) {

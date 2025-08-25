@@ -7,7 +7,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -53,7 +52,7 @@ public class BlockTransformationHistory extends BlockPlacementHistory {
       if (transformedPos != null) {
         oldPos = entity.getPos();
         if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-          serverPlayerEntity.networkHandler.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYaw(), serverPlayerEntity.getPitch(), PositionFlag.VALUES);
+          serverPlayerEntity.networkHandler.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYaw(), serverPlayerEntity.getPitch());
         } else {
           entity.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z);
         }

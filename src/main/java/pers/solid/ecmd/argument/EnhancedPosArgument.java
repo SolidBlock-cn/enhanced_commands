@@ -86,7 +86,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
   Vec3d toAbsolutePos(PositionProvider positionProvider);
 
   @Override
-  default Vec3d toAbsolutePos(ServerCommandSource source) {
+  default Vec3d getPos(ServerCommandSource source) {
     return toAbsolutePos(((PositionProvider) source));
   }
 
@@ -97,7 +97,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
   Vec2f toAbsoluteRotation(PositionProvider positionProvider);
 
   @Override
-  default Vec2f toAbsoluteRotation(ServerCommandSource source) {
+  default Vec2f getRotation(ServerCommandSource source) {
     return toAbsoluteRotation((PositionProvider) source);
   }
 

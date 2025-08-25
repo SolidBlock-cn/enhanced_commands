@@ -145,7 +145,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
     final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
     final ServerWorld world = source.getWorld();
     final BlockState blockState = world.getBlockState(pos);
-    final Vec3d modelOffset = blockState.getModelOffset(world, pos);
+    final Vec3d modelOffset = blockState.getModelOffset(pos);
     if (modelOffset.equals(Vec3d.ZERO)) {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blockinfo.model_offset.false", blockState.getBlock().getName().styled(Styles.TARGET), TextUtil.wrapVector(pos)), false);
       return 0;

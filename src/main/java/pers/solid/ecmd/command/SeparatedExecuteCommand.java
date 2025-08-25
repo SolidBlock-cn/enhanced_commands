@@ -140,7 +140,7 @@ public final class SeparatedExecuteCommand {
               }
             }))));
     dispatcher.register(literalR2("rotated")
-        .then(argument("rot", RotationArgumentType.rotation()).redirect(literalCommandNode, context -> context.getSource().withRotation(RotationArgumentType.getRotation(context, "rot").toAbsoluteRotation(context.getSource()))))
+        .then(argument("rot", RotationArgumentType.rotation()).redirect(literalCommandNode, context -> context.getSource().withRotation(RotationArgumentType.getRotation(context, "rot").getRotation(context.getSource()))))
         .then(literal("as")
             .then(argument("targets", EntityArgumentType.entities()).fork(literalCommandNode, context -> {
               List<ServerCommandSource> list = Lists.newArrayList();
@@ -231,7 +231,7 @@ public final class SeparatedExecuteCommand {
         .then(addBlockIntInfoConditionalLogic(root, literal("sky_light"), (state, serverWorld, pos) -> serverWorld.getLightLevel(LightType.SKY, pos), positive))
         .then(addBlockBooleanInfoConditionalLogicWith(root, literal("emits_redstone_power"), (state, serverWorld, pos) -> state.emitsRedstonePower(), positive))
         .then(addBlockBooleanInfoConditionalLogicWith(root, literal("opaque"), (state, serverWorld, pos) -> state.isOpaque(), positive))
-        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("model_offset"), (state, serverWorld, pos) -> !state.getModelOffset(serverWorld, pos).equals(Vec3d.ZERO), positive))
+        .then(addBlockBooleanInfoConditionalLogicWith(root, literal("model_offset"), (state, serverWorld, pos) -> !state.getModelOffset(pos).equals(Vec3d.ZERO), positive))
         .then(addBlockBooleanInfoConditionalLogicWith(root, literal("suffocate"), AbstractBlock.AbstractBlockState::shouldSuffocate, positive))
         .then(addBlockBooleanInfoConditionalLogicWith(root, literal("block_vision"), AbstractBlock.AbstractBlockState::shouldBlockVision, positive))
         .then(addBlockBooleanInfoConditionalLogicWith(root, literal("replaceable"), (state, serverWorld, pos) -> state.isReplaceable(), positive))
