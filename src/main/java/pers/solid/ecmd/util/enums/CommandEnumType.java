@@ -34,7 +34,7 @@ public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, 
   public static final Registry<CommandEnumType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
 
   public static final CommandEnumType<AxisArgument> AXIS = register("axis", new CommandEnumType<>(AxisArgument.VALUES, AxisArgument.CODEC, AxisArgument::getDisplayName));
-  public static final CommandEnumType<AxisArgument> AXIS_EXCLUDING_RANDOM = register("axis", new CommandEnumType<>(AxisArgument.VALUES_EXCEPT_RANDOM, AxisArgument.CODEC, AxisArgument::getDisplayName));
+  public static final CommandEnumType<AxisArgument> AXIS_EXCLUDING_RANDOM = register("axis_excluding_random", new CommandEnumType<>(AxisArgument.VALUES_EXCEPT_RANDOM, AxisArgument.CODEC, AxisArgument::getDisplayName));
   public static final CommandEnumType<ConcentrationType> CONCENTRATION_TYPE = register("concentration_type", new CommandEnumType<>(ImmutableList.copyOf(ConcentrationType.values()), ConcentrationType.CODEC, ConcentrationType::getDisplayName));
   public static final CommandEnumType<Direction.Type> DIRECTION_TYPE = register("direction_type", new CommandEnumType<>(ImmutableList.copyOf(Direction.Type.values()), new EnumCodec.Simple<>(s -> switch (s) {
     case "vertical" -> Direction.Type.VERTICAL;
