@@ -7,7 +7,7 @@
 ## 语法
 
 - `regex_replace(<正则表达式>, <替换成的内容>)`
-- `regex_replace(<正则表达式>, <替换成的内容>; [关键字参数：recursive | lenient | original])`
+- `regex_replace(<正则表达式>, <替换成的内容>, [关键字参数：recursive | lenient | original])`
 
 ## 参数
 
@@ -52,13 +52,13 @@ NBT 函数，可选。表示替换前的原始值。
     - 应用于 `1b`：错误。
     - 应用于 `[cat, sky]`：错误。
     - 应用于 `{a: cat, b: sky, c: [bat, chat]}`：错误。
-- `regex_replace("[ab]", "<$1>"; recursive = true)`：
+- `regex_replace("[ab]", "<$1>", recursive = true)`：
     - 应用于 `"cat"`：返回 `"c<a>t"`。
     - 应用于 `"sky"`：返回 `"sky"`（不变）。
     - 应用于 `1b`：错误。
     - 应用于 `[cat, sky]`：返回 `['c<a>t', sky]`。
     - 应用于 `{a: cat, b: sky, c: [bat, chat]}`：返回 `{a: 'c<a>t', b: sky, c: ['<b><a>t', 'ch<a>t']}`。
-- `regex_replace("[ab]", "<$1>"; lenient = true)`：
+- `regex_replace("[ab]", "<$1>", lenient = true)`：
     - 应用于 `"cat"`：返回 `"c<a>t"`。
     - 应用于 `"sky"`：返回 `"sky"`（不变）。
     - 应用于 `1b`：不变。
@@ -66,9 +66,9 @@ NBT 函数，可选。表示替换前的原始值。
     - 应用于 `{a: cat, b: sky, c: [bat, chat]}`：不变。
 - `regex_replace("[mn]", '$1')`：
     - 应用于 `"mine"`：错误（因为正则表达式中不存在分组 1）。
-- `regex_replace("[mn]", '$1'; lenient = true)`：
+- `regex_replace("[mn]", '$1', lenient = true)`：
     - 应用于 `"mine"`：不变（正则表达式中不存在分组 1，故没有进行替换）。
-- `regex_replace("[oe]", "<$1>"; original = "fromage")`：
+- `regex_replace("[oe]", "<$1>", original = "fromage")`：
     - 应用于任何 NBT：返回 `"fr<o>m<a>ge"`。
 
 ## 数据结构

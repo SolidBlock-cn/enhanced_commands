@@ -5,7 +5,7 @@
 ## 语法
 
 - `probability(<概率>, [方块谓词])`
-- `probability(<概率>, [方块谓词]; seed = <种子>)`
+- `probability(<概率>, [方块谓词], seed = <种子>)`
 
 ## 参数
 
@@ -24,8 +24,8 @@
 ## 示例
 
 - `probability(0.35)`：只有 0.35 的概率通过。
-- `probability(0.3; seed = 3)`：只有 0.3 的概率通过，其种子为 3。
+- `probability(0.3, seed = 3)`：只有 0.3 的概率通过，其种子为 3。
 - `probability(0.8, stone)`：只有 0.8 的概率，且方块为石头时通过。
-- `probability(0.7, stone; seed = 5)`：只有 0.7 的概率，且方块为石头时通过，其种子为 5。
+- `probability(0.7, stone, seed = 5)`：只有 0.7 的概率，且方块为石头时通过，其种子为 5。
 
 此方块谓词在实际应用时，可以制作随机的效果。例如，命令 `/replace sphere(20) probability(0.4, dirt) bedrock` 可以将 20 个方块内大约 40% 的泥土替换为基岩。 

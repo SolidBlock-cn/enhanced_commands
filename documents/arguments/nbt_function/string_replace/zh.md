@@ -7,7 +7,7 @@
 ## 语法
 
 - `string_replace(<查找内容>, <替换成的内容>)`
-- `string_replace(<查找内容>, <替换成的内容>; [关键字参数：recursive | lenient | original])`
+- `string_replace(<查找内容>, <替换成的内容>, [关键字参数：recursive | lenient | original])`
 
 ## 参数
 
@@ -52,26 +52,26 @@ NBT 函数，可选。表示替换前的原始值。
     - 应用于 `1b`：错误。
     - 应用于 `[cat, sky]`：错误。
     - 应用于 `{a: cat, b: sky, c: [bat, chat]}`：错误。
-- `string_replace("a", "u"; recursive = true)`：
+- `string_replace("a", "u", recursive = true)`：
     - 应用于 `"cat"`：返回 `"cut"`。
     - 应用于 `"sky"`：返回 `"sky"`（不变）。
     - 应用于 `1b`：错误。
     - 应用于 `[cat, sky]`：返回 `['cut', sky]`。
     - 应用于 `{a: cat, b: sky, c: [bat, chat]}`：返回 `{a: 'cut', b: sky, c: ['but', 'chut']}`。
-- `string_replace("a", "u"; lenient = true)`：
+- `string_replace("a", "u", lenient = true)`：
     - 应用于 `"cat"`：返回 `"cut"`。
     - 应用于 `"sky"`：返回 `"sky"`（不变）。
     - 应用于 `1b`：不变。
     - 应用于 `[cat, sky]`：不变。
     - 应用于 `{a: cat, b: sky, c: [bat, chat]}`：不变。
-- `string_replace("e", "es"; original = "fromage")`：
+- `string_replace("e", "es", original = "fromage")`：
     - 应用于任何 NBT：返回 `"fromages"`。
 
 以下是一些具体命令的示例：
 
-- `/nbt set block ~ ~ ~ {} string_replace(red, blue; recursive = true)`：将当前位置的方块的 NBT 中的“red”替换为“blue”；例如，如果这个方块是告示牌，牌上有文本“This is a red text”，并被染成红色，则替换后文本会变成蓝色，内容也会变成“This is a blue text”。
+- `/nbt set block ~ ~ ~ {} string_replace(red, blue, recursive = true)`：将当前位置的方块的 NBT 中的“red”替换为“blue”；例如，如果这个方块是告示牌，牌上有文本“This is a red text”，并被染成红色，则替换后文本会变成蓝色，内容也会变成“This is a blue text”。
 - `/nbt set block ~ ~-1 ~ Command string_replace(player, zombie)`：将下方的方块的 NBT 中的 `Command` 中的 player 替换为 zombie；例如，如果这个方块是命令方块，其命令为 `/testfor entity @e[type=player]`，则替换后为 `/testfor entity @e[type=zombie]`。
-- `/nbt set entity @s Inventory string_replace(cherry, oak; recursive = true)`：将玩家自身物品栏中的樱花相关物品替换为橡木相关物品。
+- `/nbt set entity @s Inventory string_replace(cherry, oak, recursive = true)`：将玩家自身物品栏中的樱花相关物品替换为橡木相关物品。
 
 ## 数据结构
 

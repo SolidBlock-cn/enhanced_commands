@@ -262,11 +262,11 @@ Entity selectors support serialization and deserialization through this mod. Som
 * `local_world_only`: Boolean, optional, by default `false`.
 * `predicates`: List, optional. Usually not including entity predicates of special types.
     * [Entity predicate](../entity_predicate/en.md)
-* `distance`: Double floating-point, or a range defined by a map, optional.
+* `distance`: Double-precision floating-point, or a range defined by a map, optional.
 * `position_offset`: Map, optional.
-* `dx`: Double floating-point, optional.
-* `dy`: Double floating-point, optional.
-* `dz`: Double floating-point, optional.
+* `dx`: Double-precision floating-point, optional.
+* `dy`: Double-precision floating-point, optional.
+* `dz`: Double-precision floating-point, optional.
 * `sort`: String, optional, by default `arbitrary`. The sorting that the entity selector uses.
 * `sender_only`: Boolean, optional, by default `false`.
 * `player_name`: String. Optional.

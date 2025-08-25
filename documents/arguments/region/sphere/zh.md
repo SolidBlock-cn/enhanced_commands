@@ -4,7 +4,8 @@
 
 ## 语法
 
-`sphere(<半径>, [中心])`
+- `sphere(<半径>, [中心])`
+- `sphere(radius = <半径>, center = [中心])`
 
 ## 参数
 

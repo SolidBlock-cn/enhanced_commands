@@ -5,7 +5,7 @@ This [NBT function](../en.md) is used to get a substring.
 ## Syntax
 
 - `substring(<start_index>, [end_index])`
-- `substring(<start_index>, [end_index]; [keyword arguments: lenient | original])`
+- `substring(<start_index>, [end_index], [keyword arguments: lenient | original])`
 
 ## Parameters
 
@@ -57,8 +57,8 @@ NBT function, optional. Indicating the original value.
     - Applied to `"sandwich"`: Returns `"dw"`.
     - Applied to `"mc"`: Error.
 - `substring(-3, -5)`: Error when applied to any string.
-- `substring(1, 3; original = "cake")`: Returns `"ak"` for any NBT.
-- `substring(2, 4; lenient = true)`:
+- `substring(1, 3, original = "cake")`: Returns `"ak"` for any NBT.
+- `substring(2, 4, lenient = true)`:
     - Applied to `"apple"`: Returns `"pl"`.
     - Applied to `"sandwich"`: Returns `"nd"`.
     - Applied to `"mc"`: Returns `"mc"` (unchanged).

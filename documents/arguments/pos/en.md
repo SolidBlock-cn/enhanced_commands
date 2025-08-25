@@ -42,15 +42,15 @@ If `type` is `default_int`, it supports the following fields:
 
 If `type` is `default_double`, it supports the following fields:
 
-- `x`: Double floating-point.
-- `y`: Double floating-point.
-- `z`: Double floating-point.
+- `x`: Double-precision floating-point.
+- `y`: Double-precision floating-point.
+- `z`: Double-precision floating-point.
 - `x_relative`: Boolean, optional, by default `false`.
 - `y_relative`: Boolean, optional, by default `false`.
 - `z_relative`: Boolean, optional, by default `false`.
 
 If `type` is `looking_pos`, it supports the following fields:
 
-- `x`: Double floating-point.
-- `y`: Double floating-point.
-- `z`: Double floating-point.
+- `x`: Double-precision floating-point.
+- `y`: Double-precision floating-point.
+- `z`: Double-precision floating-point.

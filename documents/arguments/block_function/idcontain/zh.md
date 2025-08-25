@@ -5,7 +5,7 @@
 ## 语法
 
 - `idcontain(<正则表达式>)`
-- `idcontain(<正则表达式>; seed = <种子>)`
+- `idcontain(<正则表达式>, seed = <种子>)`
 
 ## 参数
 
@@ -21,7 +21,7 @@
 
 - `idcontain(_terracotta$)`：随机选择 ID 含有“terracotta”结尾的方块，也就是陶瓦和带釉陶瓦。
 - `idcontain(red)`：随机选择 ID 含有“red”的方块。
-- `idcontain(stone; seed = 3)`：随机选择 ID 含有“stone”的方块，随机种子为 3。
+- `idcontain(stone, seed = 3)`：随机选择 ID 含有“stone”的方块，随机种子为 3。
 - `idcontain(*)`：无效的正则表达式，因此无法解析。
 
 ## 参见

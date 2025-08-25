@@ -28,6 +28,8 @@ import java.util.stream.Stream;
  * 直线段，由两个点连接而成的直线。语法为 {@code straight(<from>, <to>)} 或 {@code straight(from <from> to <to>)}。
  */
 public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
+  public static final MapCodec<StraightCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(StraightCurve::from), Vec3d.CODEC.fieldOf("to").forGetter(StraightCurve::to)).apply(i, StraightCurve::new));
+
   @Override
   public @NotNull Stream<BlockPos> streamBlockPos() {
     final BlockPos fromBlockPos = BlockPos.ofFloored(from);
@@ -125,8 +127,6 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
     return Type.INSTANCE;
   }
 
-  public static final MapCodec<StraightCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(StraightCurve::from), Vec3d.CODEC.fieldOf("to").forGetter(StraightCurve::to)).apply(i, StraightCurve::new));
-
   public enum Type implements CurveType<StraightCurve> {
     INSTANCE;
 
@@ -194,6 +194,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
           throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, "to");
         }
       } else {
+        reader.setCursor(cursorBeforeKeyword);
         parseSequentialParameters(parseContext);
       }
     }

@@ -22,7 +22,6 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.argument.Vec3dArgument;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
@@ -30,51 +29,74 @@ import pers.solid.ecmd.util.StringUtil;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
 /**
  * <p>完整的圆或者仅一个圆弧。语法规则：
- * <table>
- *   <tr><th>代码<th>描述
- *   <tr><td>{@code circle(<radius> [at <center>] [ranging <range>])}
- *    <td>绕 y 轴正方向单位向量，从 x 轴正方向单位向量旋转
- *   <tr><td>{@code circle(<radius> [at <center>] [around <axis>])}
- *    <td>绕指定坐标轴正方向单位向量，从另一坐标轴正方向单位向量旋转完整一周
- *   <tr><td>{@code circle(from <radiusVector> [at <center>] [around <axisVector>] [ranging <range>])}
- *    <td>绕指定坐标轴方向的单位向量，从另一坐标轴单位向量旋转。
- *   <tr><td>{@code circle(from <radiusVector> [at <center>] [around <axisVector>] [ranging <range>])}
- *    <td>绕指定向量，从另一向量开始旋转。
- * </table>
+ * <p>{@code circle(<radius>, <center>, pivot = <pivot>, range = <range>)} 或<br>
+ * {@code circle(radius = <radius>, center = <center>, pivot = <axis>, range = <range>)}
  *
- * <p>{@code around <axisVector>} 等价于 {@code rotated <x> <y>} 或 {@code facing <targetPos>}。所有轴向量都会被单位化。
- * <p>其中，{@code <radiusVector>} 和 {@code <axisVector>} 的解析方式为 {@code <x> <y> <z>} 或 {@code [length] <direction>}。
- * <p>当半径指定为标量时，其方向为轴向量与 y 轴正方向的向量积的方向，若轴向量为 y 轴正方向或负方向，则其方向为 x 轴正方向或负方向。
+ * <p>其中，{@code pivot} 参数支持以下写法：
+ * <ul>
+ *   <li>{@code pivot = <向量>}：直接指定由三个数表示的向量。
+ *   <li>{@code pivot = rotated <y> <x>}：表示由玩家的偏航角和俯仰角确定的方向向量。
+ *   <li>{@code pivot = facing <坐标>}：朝向指定的坐标的方向向量。
+ * </ul>
  *
- * @param radius   圆的半径，是一个相对向量。
+ * @param radius   圆的半径，是一个双精度浮点数。
  * @param center   圆的中心。
- * @param axis     旋转轴，通常应该要和 {@code radius} 垂直。
+ * @param pivot    旋转轴。
  * @param minAngle 初始旋转角。
  * @param maxAngle 终止旋转角。
  */
-public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngle, double maxAngle) implements Curve {
+public record CircleCurve(double radius, Vec3d center, Vec3d pivot, double minAngle, double maxAngle) implements Curve {
   public static final double FULL_MIN = 0;
   public static final double FULL_MAX = 2d * Math.PI;
+  public static final MapCodec<CircleCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CircleCurve::radius),
+      Vec3d.CODEC.fieldOf("center").forGetter(CircleCurve::center),
+      Vec3d.CODEC.fieldOf("pivot").forGetter(CircleCurve::pivot),
+      Codec.DOUBLE.optionalFieldOf("min_angle", FULL_MIN).forGetter(CircleCurve::minAngle),
+      Codec.DOUBLE.optionalFieldOf("max_angle", FULL_MAX).forGetter(CircleCurve::maxAngle)
+  ).apply(i, CircleCurve::new));
+
+  public static String wrapRadRange(double minAngle, double maxAngle) {
+    if (minAngle == 0) {
+      return maxAngle + "rad";
+    } else {
+      return minAngle + "rad.." + minAngle + "rad";
+    }
+  }
+
+  public static String wrapVector(Vec3d vec3d) {
+    return StringUtil.wrapVector(vec3d);
+  }
 
   @Override
   public @NotNull Iterator<Vec3d> iteratePoints(Number interval) {
+    final Vector3d radiusVecStart = new Vector3d(pivot.x, pivot.y, pivot.z).cross(0, 1, 0);
+    if (radiusVecStart.lengthSquared() == 0) {
+      if (pivot.y >= 0) {
+        radiusVecStart.set(1, 0, 0);
+      } else {
+        radiusVecStart.set(-1, 0, 0);
+      }
+    } else {
+      radiusVecStart.normalize();
+    }
+    radiusVecStart.mul(radius);
     return new AbstractIterator<>() {
-      final double c = 2 * Math.PI * radius.length();
-      private final Vector3d radiusVec = new Vector3d(radius.x, radius.y, radius.z);
-      private final AxisAngle4d axisAngle4d = new AxisAngle4d(minAngle, axis.x, axis.y, axis.z);
+      private final Vector3d radiusVec = new Vector3d(radiusVecStart);
+      private final AxisAngle4d axisAngle4d = new AxisAngle4d(minAngle, pivot.x, pivot.y, pivot.z);
 
       @Override
       protected Vec3d computeNext() {
-        if (axisAngle4d.angle > maxAngle) {
+        if (axisAngle4d.angle > maxAngle || Double.isNaN(axisAngle4d.angle)) {
           return endOfData();
         }
-        radiusVec.set(radius.x, radius.y, radius.z);
+        radiusVec.set(radiusVecStart);
         axisAngle4d.transform(radiusVec);
-        axisAngle4d.angle += interval.doubleValue() / radius.length();
+        axisAngle4d.angle += Math.abs(interval.doubleValue() / radius);
         return new Vec3d(radiusVec.x + center.x, radiusVec.y + center.y, radiusVec.z + center.z);
       }
     };
@@ -82,54 +104,41 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
 
   @Override
   public double length() {
-    return radius.length() * (maxAngle - minAngle);
+    return radius * (maxAngle - minAngle);
   }
 
   @Override
   public @NotNull CircleCurve transformed(Function<Vec3d, Vec3d> transformation) {
-    return new CircleCurve(radius, transformation.apply(center), axis, minAngle, maxAngle);
+    return new CircleCurve(radius, transformation.apply(center), pivot, minAngle, maxAngle);
   }
 
   @Override
   public @NotNull CircleCurve moved(@NotNull Vec3d relativePos) {
-    return new CircleCurve(radius, center.add(relativePos), axis, minAngle, maxAngle);
+    return new CircleCurve(radius, center.add(relativePos), pivot, minAngle, maxAngle);
   }
 
   @Override
   public @NotNull CircleCurve rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
-    return new CircleCurve(GeoUtil.rotate(radius, blockRotation, Vec3d.ZERO), GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(axis, blockRotation, Vec3d.ZERO), minAngle, maxAngle);
+    return new CircleCurve(radius, GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(pivot, blockRotation, Vec3d.ZERO), minAngle, maxAngle);
   }
 
   @Override
   public @NotNull CircleCurve mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
-    return new CircleCurve(GeoUtil.mirror(radius, axis, Vec3d.ZERO), GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.axis, axis, Vec3d.ZERO), minAngle, maxAngle);
+    return new CircleCurve(radius, GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.pivot, axis, Vec3d.ZERO), minAngle, maxAngle);
   }
 
   @Override
   public @NotNull String asString() {
-    if (axis.subtract(0, 1, 0).equals(Vec3d.ZERO)) {
-      // axis 是 y 轴上的单位向量
-      if (radius.subtract(1, 0, 0).equals(Vec3d.ZERO)) {
-        if (minAngle == FULL_MIN && maxAngle == FULL_MAX) {
-          // 表示一个最简单的旋转，绕 y 轴正方向，从 x 正方向开始旋转一周
-          return "circle(%s at %s)".formatted(radius.y, StringUtil.wrapVector(center));
-        } else {
-          // 表示绕 y 轴正方向，从 x 正方向开始旋转一个特定的范围
-          return "circle(%s at %s ranging %s)".formatted(radius.y, StringUtil.wrapVector(center), wrapRadRange(minAngle, maxAngle));
-        }
-      }
+    StringJoiner joiner = new StringJoiner(", ", "circle(", ")");
+    joiner.add("radius = " + radius);
+    joiner.add("center = " + StringUtil.wrapVector(center));
+    if (pivot.x != 0 || pivot.y != 1 || pivot.z != 0) {
+      joiner.add("pivot = " + StringUtil.wrapVector(pivot));
     }
-    if (minAngle == FULL_MIN && maxAngle == FULL_MAX) {
-      // 这种情况下，由于本来就是旋转一整周，因此没有必要指定开始坐标。
-      if (radius.dotProduct(axis) == 0) {
-        // 半径向量和轴向量垂直。
-        return "circle(%s at %s around %s)".formatted(radius.length(), StringUtil.wrapVector(center), wrapVector(axis));
-      } else {
-        return "circle(from %s at %s around %s)".formatted(wrapRadius(radius), StringUtil.wrapVector(center), wrapVector(axis));
-      }
-    } else {
-      return "circle(from %s at %s around %s ranging %s)".formatted(wrapRadius(radius), StringUtil.wrapVector(center), wrapVector(axis), wrapRadRange(minAngle, maxAngle));
+    if (minAngle != FULL_MIN || maxAngle != FULL_MAX) {
+      joiner.add("range = " + wrapRadRange(minAngle, maxAngle));
     }
+    return joiner.toString();
   }
 
   @Override
@@ -137,7 +146,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     double minX, minY, minZ, maxX, maxY, maxZ;
     minX = minY = minZ = Double.POSITIVE_INFINITY;
     maxX = maxY = maxZ = Double.NEGATIVE_INFINITY;
-    final Iterator<Vec3d> vec3dIterator = iteratePoints(radius.length() * MathHelper.RADIANS_PER_DEGREE * 30); // 30 度
+    final Iterator<Vec3d> vec3dIterator = iteratePoints(radius * MathHelper.RADIANS_PER_DEGREE * 30); // 30 度
     if (!vec3dIterator.hasNext()) {
       // 含有零个点时，返回空。
       return null;
@@ -160,30 +169,6 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     return CurveTypes.CIRCLE;
   }
 
-  public static String wrapRadRange(double minAngle, double maxAngle) {
-    if (minAngle == 0) {
-      return maxAngle + "rad";
-    } else {
-      return minAngle + "rad.." + minAngle + "rad";
-    }
-  }
-
-  public static String wrapVector(Vec3d vec3d) {
-    return StringUtil.wrapVector(vec3d);
-  }
-
-  public static String wrapRadius(Vec3d vec3d) {
-    return StringUtil.wrapVector(vec3d);
-  }
-
-
-  public static final MapCodec<CircleCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("radius").forGetter(CircleCurve::radius),
-      Vec3d.CODEC.fieldOf("center").forGetter(CircleCurve::center),
-      Vec3d.CODEC.fieldOf("axis").forGetter(CircleCurve::axis),
-      Codec.DOUBLE.optionalFieldOf("min_angle", FULL_MIN).forGetter(CircleCurve::minAngle),
-      Codec.DOUBLE.optionalFieldOf("max_angle", FULL_MAX).forGetter(CircleCurve::maxAngle)
-  ).apply(i, CircleCurve::new));
-
   public enum Type implements CurveType<CircleCurve> {
     INSTANCE;
 
@@ -201,18 +186,18 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
   /**
    * 语法：
    * <pre>{@code
-   *   circle(<radius> [at <center>] <=> [ranging <range>] <=> [around <axis>])
-   *   circle(from <radiusVec> [at <center>] <=> [around <axis>] <=> [ranging <range>])
+   *   circle(<radius>, <center>, pivot = <pivot>, range = <range>)
+   *   circle(radius = <radius>, center = <center>, pivot = <pivot>, range = <range>)
    *
-   *   <radiusVec> = (<radius: double> <direction>) | <vec>
-   *   <axis> = <direction> | <vec>
+   *   <pivot> = <vec> | <direction> | <length> <direction> | facing <pos> | rotated <y> <z>
    *   <range> = <angle>[..<angle>]
-   *   <angle> = <int>deg|<int>turn|<int>rad
+   *   <angle> = <double>deg|<double>turn|<double>rad|0
    * }</pre>
    * <p>
-   * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <axis>} 的默认值为 {@code 0 1 0}。当 {@code <radius>} 指定为标量时，其方向相当于 {@code <axis>} 与 y 轴正方向的向量积的方向。当 {@code <axis>} 正好指定为 y 轴正方向时，{@code <radius>} 方向为 x 正方向，若为 y 轴负方向，则 {@code <radius>} 方向为 x 负方向。
+   * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <pivot>} 的默认值为 {@code 0 1 0}。
    */
   protected static class Parser implements FunctionLikeParser.MixedParams<CurveArgument<CircleCurve>> {
+    private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "center", "pivot", "range");
     private @Nullable Double radius;
     private @Nullable EnhancedPosArgument center;
     private @Nullable Vec3dArgument axis;
@@ -221,14 +206,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     @Override
     public CurveArgument<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final EnhancedPosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
-      return new CircleCurveArgument(radius == null ? 1 : radius, center, axis == null ? new Vec3dArgument.Fixed(new Vec3d(0, 1, 0)) : axis, range == null ? FULL_MIN : range.firstDouble(), range == null ? FULL_MAX : range.secondDouble());
-    }
-
-    /**
-     * 解析半径。即：{@code <double> | from (<vector> | <double> <direction>)}。
-     */
-    private void parseRadius(ParseContext<?> parseContext) throws CommandSyntaxException {
-      radius = parseContext.reader().readDouble();
+      return new CircleCurveArgument(radius == null ? 1 : radius, center, axis == null ? new Vec3dArgument.Fixed(new Vec3d(0, 1, 0)) : axis, range == null ? FULL_MIN : Math.min(range.firstDouble(), range.secondDouble()), range == null ? FULL_MAX : Math.max(range.firstDouble(), range.secondDouble()));
     }
 
     private DoubleDoublePair parseAngleRange(ParseContext<?> parseContext) throws CommandSyntaxException {
@@ -249,8 +227,6 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
       }
     }
 
-    private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "center", "pivot", "range");
-
     @Override
     public @Unmodifiable Collection<String> supportedParams() {
       return SUPPORTED_PARAMS;
@@ -270,16 +246,13 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
     @Override
     public void parseNamedParameter(String paramName, ParseContext<?> parseContext) throws CommandSyntaxException {
       switch (paramName) {
-        case "radius" -> parseRadius(parseContext);
+        case "radius" -> radius = parseContext.reader().readDouble();
         case "center" -> {
           EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
           center = parseContext.parseAndSuggestArgument(argumentType);
         }
         case "pivot" -> axis = Vec3dArgument.parse(parseContext);
-        case "range" -> {
-          ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-          range = parseAngleRange(parseContext);
-        }
+        case "range" -> range = parseAngleRange(parseContext);
       }
     }
 
@@ -289,7 +262,7 @@ public record CircleCurve(Vec3d radius, Vec3d center, Vec3d axis, double minAngl
         if (radius != null) {
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "radius");
         }
-        parseRadius(parseContext);
+        radius = parseContext.reader().readDouble();
       } else if (paramIndex == 1) {
         if (center != null) {
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "center");

@@ -5,7 +5,7 @@
 ## 语法
 
 - `substring(<开始索引>, [结束索引])`
-- `substring(<开始索引>, [结束索引]; [关键字参数：lenient | original])`
+- `substring(<开始索引>, [结束索引], [关键字参数：lenient | original])`
 
 ## 参数
 
@@ -57,8 +57,8 @@ NBT 函数，可选。表示原始值。
     - 应用于 `"sandwich"`：返回 `"dw"`。
     - 应用于 `"mc"`：错误。
 - `substring(-3, -5)`：应用于任何字符串都是错误。
-- `substring(1, 3; original = "cake")`：对于任何 NBT，都返回 `"ak"`。
-- `substring(2, 4; lenient = true)`：
+- `substring(1, 3, original = "cake")`：对于任何 NBT，都返回 `"ak"`。
+- `substring(2, 4, lenient = true)`：
     - 应用于 `"apple"`：返回 `"pl"`。
     - 应用于 `"sandwich"`：返回 `"nd"`。
     - 应用于 `"mc"`：返回 `"mc"`（不变）。

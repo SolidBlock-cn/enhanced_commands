@@ -41,7 +41,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
 
   @Override
   public @NotNull String asString() {
-    return "regex.replace(" + pattern.pattern() + ", " + NbtString.escape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
+    return "regex_replace(" + NbtString.escape(pattern.pattern()) + ", " + NbtString.escape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   @Override
@@ -92,6 +92,23 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
       }
       throw StringReplaceNbtFunction.NOT_A_STRING.create(nbtElement.getNbtType().getCommandFeedbackName());
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof RegexReplaceNbtFunction that)) return false;
+
+    return lenient == that.lenient && recursive == that.recursive && pattern.pattern().equals(that.pattern.pattern()) && replacement.equals(that.replacement) && original.equals(that.original);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = pattern.pattern().hashCode();
+    result = 31 * result + replacement.hashCode();
+    result = 31 * result + Boolean.hashCode(recursive);
+    result = 31 * result + Boolean.hashCode(lenient);
+    result = 31 * result + original.hashCode();
+    return result;
   }
 
   public enum Type implements NbtFunctionType<RegexReplaceNbtFunction> {

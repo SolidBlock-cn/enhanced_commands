@@ -7,7 +7,9 @@
 ## 语法
 
 - `cyl(<半径>, [高度], [中心坐标])`
+- `cyl(radius = <半径>, height = [高度], center = [中心坐标])`
 - `hcyl(<半径>, [高度], [中心坐标], [边框类型])`
+- `hcyl(radius = <半径>, height = [高度], center = [中心坐标], type = [边框类型])`
 
 其中，`hcyl(...)` 在效果上等价于 `outline(cylinder(...))`，但是在实现上有专门的优化。
 

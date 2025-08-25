@@ -7,7 +7,7 @@ The [NBT function](../en.md) replaced regular expressions in the NBT.
 ## Syntax
 
 - `regex_replace(<pattern>, <replacement>)`
-- `regex_replace(<pattern>, <replacement>; [keyword args: recursive | lenient | original])`
+- `regex_replace(<pattern>, <replacement>, [keyword args: recursive | lenient | original])`
 
 ## Parameters
 
@@ -52,13 +52,13 @@ NBT function, optional. Indicating the original value before replacement.
     - Applied to `1b`: Error.
     - Applied to `[cat, sky]`: Error.
     - Applied to `{a: cat, b: sky, c: [bat, chat]}`: Error.
-- `regex_replace("[ab]", "<$1>"; recursive = true)`:
+- `regex_replace("[ab]", "<$1>", recursive = true)`:
     - Applied to `"cat"`: Returns `"c<a>t"`.
     - Applied to `"sky"`: Returns `"sky"` (unchanged).
     - Applied to `1b`: Error.
     - Applied to `[cat, sky]`: Returns `['c<a>t', sky]`.
     - Applied to `{a: cat, b: sky, c: [bat, chat]}`: Returns `{a: 'c<a>t', b: sky, c: ['<b><a>t', 'ch<a>t']}`.
-- `regex_replace("[ab]", "<$1>"; lenient = true)`:
+- `regex_replace("[ab]", "<$1>", lenient = true)`:
     - Applied to `"cat"`: Returns `"c<a>t"`.
     - Applied to `"sky"`: Returns `"sky"` (unchanged).
     - Applied to `1b`: Unchanged.
@@ -66,9 +66,9 @@ NBT function, optional. Indicating the original value before replacement.
     - Applied to `{a: cat, b: sky, c: [bat, chat]}`: Unchanged.
 - `regex_replace("[mn]", '$1')`:
     - Applied to `"mine"`: Error, because group 1 does not exist in the regular expression.
-- `regex_replace("[mn]", '$1'; lenient = true)`:
+- `regex_replace("[mn]", '$1', lenient = true)`:
     - Applied to `"mine"`: Unchanged (group 1 does not exist in the regular expression, so the replacement does not happen).
-- `regex_replace("[oe]", "<$1>"; original = "fromage")`:
+- `regex_replace("[oe]", "<$1>", original = "fromage")`:
     - Applied to any NBT: Returns `"fr<o>m<a>ge"`.
 
 ## Data format

@@ -85,7 +85,7 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   @Override
   public int hashCode() {
-    int result = pattern.hashCode();
+    int result = pattern.pattern().hashCode();
     result = 31 * result + seed.hashCode();
     return result;
   }

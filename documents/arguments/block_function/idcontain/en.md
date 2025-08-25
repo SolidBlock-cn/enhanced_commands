@@ -5,7 +5,7 @@ This [block function](../en.md) randomly selects a block whose ID match the spec
 ## Syntax
 
 - `idcontain(<regex>)`
-- `idcontain(<regex>; seed = <seed>)`
+- `idcontain(<regex>, seed = <seed>)`
 
 ## Parameters
 
@@ -21,7 +21,7 @@ Long integer. The seed used to randomly select blocks.
 
 - `idcontain(_terracotta$)`: Randomly selects blocks whose ID ends with "terracotta", which means terracotta and glazed terracotta.
 - `idcontain(red)`: Randomly selects blocks whose ID contains "red".
-- `idcontain(stone; seed = 3)`: Randomly selects blocks whose ID contains "stone", with the random seed 3.
+- `idcontain(stone, seed = 3)`: Randomly selects blocks whose ID contains "stone", with the random seed 3.
 - `idcontain(*)`: Invalid regex, which cannot be parsed.
 
 ## See also
