@@ -364,8 +364,9 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               }
               final int finalNumOfIteratedButNotMatch = numOfIteratedButNotMatch;
               final int finalNumOfNotIteratedButMatch = numOfNotIteratedButMatch;
-              if (((ServerCommandSourceAccessor) context.getSource()).getOutput() instanceof final HistoryHolder holder) {
-                holder.addUndoableHistory$ec(history);
+              final HistoryHolder historyHolder = HistoryHolder.fromSource(context.getSource());
+              if (historyHolder != null) {
+                historyHolder.addUndoableHistory$ec(history);
               }
               context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testarg.region.illustrate.result", TextUtil.literal(region).formatted(Formatting.GRAY), Integer.toString(finalNumOfIteratedButNotMatch), Blocks.RED_STAINED_GLASS.getName(), Integer.toString(finalNumOfNotIteratedButMatch), Blocks.ORANGE_STAINED_GLASS.getName()), false);
               return numOfIteratedButNotMatch;

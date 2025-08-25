@@ -32,7 +32,6 @@ import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockPlacementHistory;
-import pers.solid.ecmd.mixins.accessor.ServerCommandSourceAccessor;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.SphereRegion;
 import pers.solid.ecmd.util.LoadUtil;
@@ -169,7 +168,8 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
 
     if (history != null) {
-      if (((ServerCommandSourceAccessor) source).getOutput() instanceof HistoryHolder historyHolder) {
+      final HistoryHolder historyHolder = HistoryHolder.fromSource(source);
+      if (historyHolder != null) {
         historyHolder.addUndoableHistory$ec(history);
       }
     }

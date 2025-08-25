@@ -1,7 +1,9 @@
 package pers.solid.ecmd.extensions;
 
+import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.configs.CommandsConfig;
 import pers.solid.ecmd.history.History;
 
@@ -71,5 +73,15 @@ public interface HistoryHolder {
         return HistoryHolder.this.getUndoableHistories$ec();
       }
     };
+  }
+
+  static @Nullable HistoryHolder fromSource(ServerCommandSource source) {
+    if (source.getPlayer() instanceof HistoryHolder historyHolder) {
+      return historyHolder;
+    } else if (source.getServer() instanceof HistoryHolder historyHolder) {
+      return historyHolder;
+    } else {
+      return null;
+    }
   }
 }

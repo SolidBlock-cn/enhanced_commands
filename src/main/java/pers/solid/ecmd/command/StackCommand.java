@@ -350,7 +350,8 @@ public enum StackCommand implements CommandRegistrationCallback {
     });
 
     if (history != null) {
-      if (((ServerCommandSourceAccessor) source).getOutput() instanceof HistoryHolder historyHolder) {
+      final HistoryHolder historyHolder = HistoryHolder.fromSource(source);
+      if (historyHolder != null) {
         historyHolder.addUndoableHistory$ec(history);
       }
     }
