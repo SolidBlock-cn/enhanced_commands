@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -18,12 +19,12 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate predicate) imple
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    return predicate.test(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), entity.getCommandSource(), null));
+    return predicate.test(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), PositionProvider.of(entity), null));
   }
 
   @Override
   public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), entity.getCommandSource(), null));
+    final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), PositionProvider.of(entity), null));
     if (testResult.successes()) {
       return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.block.pass", displayName, TextUtil.wrapVector(entity.getBlockPos())), List.of(testResult));
     } else {

@@ -4,6 +4,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.util.PositionProvider;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -13,7 +14,7 @@ import java.util.function.Supplier;
  *
  * @see pers.solid.ecmd.mixins.impl.ServerCommandSourceExtensionImpl
  */
-public interface ServerCommandSourceExtension {
+public interface ServerCommandSourceExtension extends PositionProvider {
   /**
    * 在 1.20 之前，第一个参数是 {@code Text}，而自 1.20 之后，第一个参数调整为 {@code Supplier<Text>}，为减少在不同版本之间转换的成本，在这里做个桥梁方法。请优先使用此方法。
    */

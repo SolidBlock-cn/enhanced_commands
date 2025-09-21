@@ -1,6 +1,5 @@
 package pers.solid.ecmd.util;
 
-import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.math.random.RandomSplitter;
 import org.jetbrains.annotations.NotNull;
@@ -20,16 +19,12 @@ public class ExecutionContext {
     this.seed = seed;
   }
 
-  public ExecutionContext(Random random, ServerCommandSource source, @Nullable Long seed) {
-    this(random, (PositionProvider) source, seed);
+  public ExecutionContext(PositionProvider source, @Nullable Long seed) {
+    this(source.getWorld$ec().getRandom(), source, seed);
   }
 
-  public ExecutionContext(ServerCommandSource source, @Nullable Long seed) {
-    this(source.getWorld().getRandom(), (PositionProvider) source, seed);
-  }
-
-  public ExecutionContext(ServerCommandSource source) {
-    this(source.getWorld().getRandom(), (PositionProvider) source, null);
+  public ExecutionContext(PositionProvider source) {
+    this(source.getWorld$ec().getRandom(), source, null);
   }
 
   public long getSeed() {

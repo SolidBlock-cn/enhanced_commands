@@ -30,7 +30,7 @@ public record EnhancedRotationArgument(float x, float y, boolean xRelative, bool
 
   @Override
   public Vec2f toAbsoluteRotation(ServerCommandSource source) {
-    return this.toAbsoluteRotation((PositionProvider) source);
+    return this.toAbsoluteRotation(source);
   }
 
   @Override

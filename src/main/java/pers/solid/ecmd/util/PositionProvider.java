@@ -5,6 +5,7 @@ import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -66,6 +67,14 @@ public interface PositionProvider {
 
   static PositionProvider of(Vec3d position, Vec2f rotation, @Nullable PlayerEntity player, EntityAnchorArgumentType.EntityAnchor entityAnchor) {
     return new Simple(position, rotation, player, entityAnchor);
+  }
+
+  static PositionProvider of(Entity entity) {
+    if (entity.getWorld() instanceof ServerWorld serverWorld) {
+      return entity.getCommandSource(serverWorld);
+    } else {
+      return of(entity.getPos(), entity.getRotationClient(), null, EntityAnchorArgumentType.EntityAnchor.FEET);
+    }
   }
 
   record Simple(Vec3d getPosition$ec, Vec2f getRotation$ec, @Nullable PlayerEntity getEntity$ec, EntityAnchorArgumentType.EntityAnchor getEntityAnchor$ec) implements PositionProvider {

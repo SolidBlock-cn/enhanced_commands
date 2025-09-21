@@ -16,7 +16,6 @@ import pers.solid.ecmd.predicate.block.RegionBlockPredicate;
 import pers.solid.ecmd.region.OutlineRegion;
 import pers.solid.ecmd.region.OutlineRegionArgument;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.enums.OutlineType;
 
@@ -68,9 +67,9 @@ public enum OutlineCommand implements CommandRegistrationCallback {
     final RegionArgument<?> outlineRegion = new OutlineRegionArgument(outlineType, region);
     final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block");
     if (inner == null) {
-      return FillReplaceCommand.setBlocksFromKeywordArgs(outlineRegion.toAbsoluteRegion((PositionProvider) context.getSource()), blockFunction, context.getSource(), null, keywordArgs);
+      return FillReplaceCommand.setBlocksFromKeywordArgs(outlineRegion.toAbsoluteRegion(context.getSource()), blockFunction, context.getSource(), null, keywordArgs);
     } else {
-      return FillReplaceCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion((PositionProvider) context.getSource()), new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
+      return FillReplaceCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion(context.getSource()), new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
     }
   }
 }
