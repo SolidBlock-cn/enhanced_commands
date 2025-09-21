@@ -8,12 +8,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.pattern.CachedBlockPosition;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedPosArgument,
     for (Pair<EnhancedPosArgument, BlockPredicate> pair : predicates) {
       final var pos = pair.getFirst();
       final var predicate = pair.getSecond();
-      if (!predicate.test(new CachedBlockPosition(entity.getWorld(), pos.toAbsoluteBlockPos(entity.getCommandSource(((ServerWorld) entity.getWorld()))), false), new ExecutionContext(entity.getCommandSource(((ServerWorld) entity.getWorld()))))) {
+      if (!predicate.test(new CachedBlockPosition(entity.getWorld(), pos.toAbsoluteBlockPos(PositionProvider.of(entity)), false), new ExecutionContext(PositionProvider.of(entity)))) {
         return false;
       }
     }
@@ -42,7 +42,7 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedPosArgument,
     for (Pair<EnhancedPosArgument, BlockPredicate> pair : predicates) {
       final var pos = pair.getFirst();
       final var predicate = pair.getSecond();
-      final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), pos.toAbsoluteBlockPos(entity.getCommandSource(((ServerWorld) entity.getWorld()))), false), new ExecutionContext(entity.getCommandSource(((ServerWorld) entity.getWorld())))); // todo check cast
+      final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), pos.toAbsoluteBlockPos(PositionProvider.of(entity)), false), new ExecutionContext(PositionProvider.of(entity)));
       attachments.add(testResult);
       result &= testResult.successes();
     }

@@ -9,10 +9,9 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.util.PositionProvider;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collection;
 import java.util.List;
@@ -37,10 +36,10 @@ public record RegionArgumentType(CommandRegistryAccess registryAccess) implement
       if (!((CommandContextAccessor<?>) context).getArguments().containsKey(name)) {
         final RegionArgument<?> sourceArg = context.getSource().getExtraArgument$ec("region", RegionArgument.class);
         if (sourceArg != null) {
-          return sourceArg.toAbsoluteRegion((PositionProvider) context.getSource());
+          return sourceArg.toAbsoluteRegion(context.getSource());
         }
       }
-      return context.getArgument(name, RegionArgument.class).toAbsoluteRegion((PositionProvider) context.getSource());
+      return context.getArgument(name, RegionArgument.class).toAbsoluteRegion(context.getSource());
     } catch (RuntimeException e) {
       if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
         throw commandSyntaxException;

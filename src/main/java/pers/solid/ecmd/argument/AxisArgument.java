@@ -53,7 +53,7 @@ public enum AxisArgument implements StringIdentifiable, Function<@NotNull Positi
   }
 
   public @NotNull Direction.Axis apply(@NotNull ServerCommandSource source) {
-    return function.apply((PositionProvider) source);
+    return function.apply(source);
   }
 
   @Override

@@ -14,7 +14,6 @@ import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.argument.RegionArgumentType;
 import pers.solid.ecmd.function.block.PostProcessBlockFunction;
 import pers.solid.ecmd.region.RegionArgument;
-import pers.solid.ecmd.util.PositionProvider;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static pers.solid.ecmd.argument.RegionArgumentType.region;
@@ -36,11 +35,11 @@ public enum PostProcessCommand implements CommandRegistrationCallback {
 
   private int executeWithDefaultKeywordArgs(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final RegionArgument<?> region = RegionArgumentType.getRegionArgument(context, "region");
-    return FillReplaceCommand.setBlocksWithDefaultKeywordArgs(region.toAbsoluteRegion(((PositionProvider) context.getSource())), new PostProcessBlockFunction(PostProcessBlockFunction.ALL_DIRECTIONS), context.getSource(), null);
+    return FillReplaceCommand.setBlocksWithDefaultKeywordArgs(region.toAbsoluteRegion(context.getSource()), new PostProcessBlockFunction(PostProcessBlockFunction.ALL_DIRECTIONS), context.getSource(), null);
   }
 
   private int execute(CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final RegionArgument<?> region = RegionArgumentType.getRegionArgument(context, "region");
-    return FillReplaceCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion(((PositionProvider) context.getSource())), new PostProcessBlockFunction(PostProcessBlockFunction.ALL_DIRECTIONS), context.getSource(), null, keywordArgs);
+    return FillReplaceCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion(context.getSource()), new PostProcessBlockFunction(PostProcessBlockFunction.ALL_DIRECTIONS), context.getSource(), null, keywordArgs);
   }
 }

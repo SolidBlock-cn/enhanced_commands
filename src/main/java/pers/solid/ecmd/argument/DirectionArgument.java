@@ -60,7 +60,7 @@ public enum DirectionArgument implements StringIdentifiable, Function<@NotNull P
   }
 
   public @NotNull Direction apply(@NotNull ServerCommandSource source) {
-    return function.apply((PositionProvider) source);
+    return function.apply(source);
   }
 
   @Override

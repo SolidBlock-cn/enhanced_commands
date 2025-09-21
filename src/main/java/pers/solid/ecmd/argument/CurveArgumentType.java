@@ -10,7 +10,6 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.ServerCommandSource;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.curve.CurveArgument;
-import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collection;
@@ -26,7 +25,7 @@ public record CurveArgumentType(CommandRegistryAccess registryAccess) implements
 
   public static Curve getCurve(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
     try {
-      return context.getArgument(name, CurveArgument.class).toAbsoluteRegion((PositionProvider) context.getSource());
+      return context.getArgument(name, CurveArgument.class).toAbsoluteRegion(context.getSource());
     } catch (RuntimeException e) {
       if (e.getCause() instanceof CommandSyntaxException commandSyntaxException) {
         throw commandSyntaxException;
