@@ -25,7 +25,7 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
       if (!(world instanceof ServerWorld serverWorld)) {
         return false;
       }
-      final BlockPredicate value = value(serverWorld.getServer().getRegistryManager()); // todo registryManager 是否能够解析动态注册表
+      final BlockPredicate value = value(serverWorld.getServer().getReloadableRegistries().createRegistryLookup());
       return value.test(cachedBlockPosition, context);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);

@@ -9,7 +9,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -36,12 +35,13 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
 
   RegistryKey<E> id();
 
-  default RegistryEntry.Reference<E> getEntry(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+  default RegistryEntry.Reference<E> getEntry(RegistryEntryLookup.RegistryLookup registryLookup) throws CommandSyntaxException {
     final RegistryKey<E> id = id();
     return registryLookup.getOrThrow(id.getRegistryRef()).getOptional(id).orElseThrow(() -> createExceptionForUnknownId(null, id.getValue().toString()));
   }
 
-  default E value(RegistryWrapper.WrapperLookup registryLookup) throws CommandSyntaxException {
+  // note: 在 1.21.4 版本，可重新加载的注册表继承 RegistryEntryLookup.RegistryLookup，不再继承 RegistryWrapper.WrapperLookup，而 RegistryWrapper.WrapperLookup 继承 RegistryEntry.RegistryLookup。故在此版本中，此方法接收的参数为 RegistryEntryLookup.RegistryLookup。
+  default E value(RegistryEntryLookup.RegistryLookup registryLookup) throws CommandSyntaxException {
     return getEntry(registryLookup).value();
   }
 
