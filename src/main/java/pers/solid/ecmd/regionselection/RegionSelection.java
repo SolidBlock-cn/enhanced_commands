@@ -1,6 +1,10 @@
 package pers.solid.ecmd.regionselection;
 
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -116,4 +120,13 @@ public interface RegionSelection {
   void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world);
 
   void writeNbt(@NotNull NbtCompound nbtCompound);
+
+  /**
+   * <p>使用简单的线框来绘制这个区域，通常需要勾勒出该区域的大致图形以及关键点。
+   * <p>注意：覆盖此方法时，需要标上 {@code @Environment(EnvType.CLIENT)}。
+   *
+   * @implNote 在给 vertexConsumer 提供的顶点坐标中，传入的坐标应该是相对坐标（具体的世界具坐标减去相机坐标），然后再转为浮点数传入 vertexConsumer 中，因为相对坐标通常是比较小的值，转化为浮点数也不损失精度。
+   */
+  @Environment(EnvType.CLIENT)
+  void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos);
 }

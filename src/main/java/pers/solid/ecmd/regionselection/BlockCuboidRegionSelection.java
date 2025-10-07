@@ -1,6 +1,10 @@
 package pers.solid.ecmd.regionselection;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -14,6 +18,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.BlockCuboidRegion;
+import pers.solid.ecmd.render.RegionRendering;
 import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
@@ -162,5 +167,11 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   public void writeNbt(@NotNull NbtCompound nbtCompound) {
     nbtCompound.put("first", NbtUtil.fromVec3i(first));
     nbtCompound.put("second", NbtUtil.fromVec3i(second));
+  }
+
+  @Environment(EnvType.CLIENT)
+  @Override
+  public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos) {
+    RegionRendering.renderBlockCuboid(first, second, matrices, vertexConsumers.getBuffer(RegionRendering.reagionRenderLayer), cameraPos);
   }
 }
