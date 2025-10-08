@@ -67,6 +67,10 @@ public final class MixinShared {
    * 如果此值为 {@code true}，那么会抑制 {@link net.minecraft.world.chunk.WorldChunk#setBlockState(BlockPos, BlockState, boolean)} 对 {@link BlockState#onStateReplaced(World, BlockPos, BlockState, boolean)} 的调用。通常来说，这是一个临时的设置，在调用前修改此值，调用后立即复原，以免对其他模组产生影响。
    */
   public static boolean suppressOnStateReplaced = false;
+  private static Reference<CommandRegistryAccess> commandRegistryAccessReference;
+
+  private MixinShared() {
+  }
 
   public static void implementModFlag(int modFlags) {
     MixinShared.suppressOnBlockAdded = (modFlags & FillReplaceCommand.SUPPRESS_INITIAL_CHECK_FLAG) != 0;
@@ -88,8 +92,6 @@ public final class MixinShared {
     }
     return result;
   }
-
-  private static Reference<CommandRegistryAccess> commandRegistryAccessReference;
 
   /**
    * 在注册命令时调用此方法，以设置 {@link #commandRegistryAccessReference} 的值，注意它是个弱引用，通过来说在服务器关闭或者离开世界之前都不应该清除。
@@ -121,9 +123,6 @@ public final class MixinShared {
     return backup;
   }
 
-  private MixinShared() {
-  }
-
   public static <T> void mixinSuggestWithTooltip(RegistryKey<? extends Registry<T>> registryRef, RegistryWrapper<T> registryWrapper, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
     final Function<? super T, ? extends Message> nameSuggestionProvider = ParsingUtil.getNameSuggestionProvider(registryRef);
     if (nameSuggestionProvider != null) {
@@ -133,6 +132,11 @@ public final class MixinShared {
     }
   }
 
+  /**
+   * 在解析注册表项时，如果注册表项无效，反对更加详细的错误报错信息。
+   *
+   * @see RegistryParsingConfig#detailedUnknownRegistryEntry
+   */
   public static <T> Supplier<CommandSyntaxException> mixinModifiedParseThrow(RegistryKey<? extends Registry<T>> registryRef, Supplier<CommandSyntaxException> original, LocalIntRef localIntRef, StringReader stringReader, Identifier identifier) {
     if (!RegistryParsingConfig.CURRENT.detailedUnknownRegistryEntry) {
       return original;
