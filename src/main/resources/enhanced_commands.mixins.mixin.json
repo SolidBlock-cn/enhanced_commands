@@ -4,6 +4,7 @@
   "package": "pers.solid.ecmd.mixins.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "AbstractChunkHolderMixin",
     "BlockPosArgumentTypeMixin",
     "BlockPredicateArgumentTypeMixin",
     "BlockStateArgumentTypeMixin",
@@ -12,6 +13,7 @@
     "CommandSourceMixin",
     "CommandSyntaxExceptionMixin",
     "EntityArgumentTypeMixin",
+    "EntityMixin",
     "EntitySelectorMixin",
     "EntitySelectorOptionsMixin",
     "EntitySelectorReaderMixin",
@@ -22,17 +24,22 @@
     "LocateCommandMixin",
     "MinecraftServerMixin",
     "NbtPathArgumentTypeMixin",
+    "PlayerEntityMixin",
     "RegistryEntryPredicateArgumentTypeMixin",
     "RegistryEntryReferenceArgumentTypeMixin",
     "ServerPlayerEntityMixin",
+    "ServerPlayNetworkHandlerMixin",
     "StringReaderMixin",
     "ThreadExecutorMixin",
     "TranslatableTextContentMixin",
     "Vec3ArgumentTypeMixin",
-    "WorldChunkMixin"
+    "WorldBorderMixin",
+    "WorldChunkMixin",
+    "WorldMixin"
   ],
   "client": [
-    "ClientPlayerInteractionManagerMixin"
+    "ClientPlayerInteractionManagerMixin",
+    "InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1
