@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.StringUtil;
 
 public record SphereRegionArgument(double radius, EnhancedPosArgument center) implements RegionArgument<SphereRegion> {
   public static final MapCodec<SphereRegionArgument> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -25,6 +26,6 @@ public record SphereRegionArgument(double radius, EnhancedPosArgument center) im
 
   @Override
   public @NotNull String asString() {
-    return "sphere(" + radius + ", " + center.asString() + ")";
+    return "sphere(" + StringUtil.nf.format(radius) + ", " + center.asString() + ")";
   }
 }

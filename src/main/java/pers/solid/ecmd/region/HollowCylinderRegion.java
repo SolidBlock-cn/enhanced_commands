@@ -17,6 +17,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.enums.OutlineType;
 
 import java.util.*;
@@ -126,7 +127,7 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
 
   @Override
   public @NotNull String asString() {
-    return String.format("hcyl(%s, %s, %s %s %s, %s)", region.radius(), region.height(), region.center().x, region.center().y, region.center().z, outlineType.asString());
+    return String.format("hcyl(%s, %s, %s, %s)", StringUtil.nf.format(region.radius()), StringUtil.nf.format(region.height()), StringUtil.wrapVector(region.center()), outlineType.asString());
   }
 
   @Override

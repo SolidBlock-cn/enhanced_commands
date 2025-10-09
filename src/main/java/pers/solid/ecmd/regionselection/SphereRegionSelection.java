@@ -10,6 +10,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
@@ -33,6 +34,10 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   public Vec3d center;
   public Vec3d radiusTarget;
   public double radius;
+  protected List<Vec3d> circle1points = null;
+  protected List<Vec3d> circle2points = null;
+  protected List<Vec3d> circle3points = null;
+  protected List<List<Vec3d>> circlePointsList = null;
 
   public void updateRadius() {
     if (center != null && radiusTarget != null) {
@@ -78,7 +83,6 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
         radiusTarget = points.get(points.size() - 1);
       }
     }
-    updateRadius();
     resetCalculation();
   }
 
@@ -96,7 +100,6 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
     final Vec3d oldCenter = center;
     center = transformation.apply(oldCenter);
     radiusTarget = radiusTarget.add(center.subtract(oldCenter));
-    updateRadius();
     resetCalculation();
     return this;
   }
@@ -132,10 +135,10 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+  public void readNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
     center = nbtCompound.contains("center", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3d(nbtCompound.getCompound("center")) : null;
     radiusTarget = nbtCompound.contains("radius_target", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3d(nbtCompound.getCompound("radius_target")) : null;
-    updateRadius();
+    resetCalculation();
   }
 
   @Override
@@ -149,14 +152,29 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
     nbtCompound.put("radius_target", NbtUtil.fromVec3d(radiusTarget));
   }
 
-  protected List<Vec3d> circle1points = null;
-  protected List<Vec3d> circle2points = null;
-  protected List<Vec3d> circle3points = null;
-  protected List<List<Vec3d>> circlePointsList = null;
+  @Override
+  public void readPacket(PacketByteBuf buf) {
+    center = buf.readBoolean() ? buf.readVec3d() : null;
+    radiusTarget = buf.readBoolean() ? buf.readVec3d() : null;
+    resetCalculation();
+  }
+
+  @Override
+  public void writePacket(PacketByteBuf buf) {
+    buf.writeBoolean(center != null);
+    if (center != null) {
+      buf.writeVec3d(center);
+    }
+    buf.writeBoolean(radiusTarget != null);
+    if (radiusTarget != null) {
+      buf.writeVec3d(radiusTarget);
+    }
+  }
 
   @Override
   public void resetCalculation() {
     super.resetCalculation();
+    updateRadius();
     circle1points = null;
     circle2points = null;
     circle3points = null;
@@ -168,8 +186,8 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
       return;
     }
 
-    final int pointsNum = MathHelper.ceil(Math.PI * radius * 4) * 4;
-    final double angleInterval = 2 * Math.PI / pointsNum;
+    final int pointsNum = Math.min(MathHelper.ceil(Math.PI * radius * 4) * 4, 2048);
+    final double angleInterval = Math.max(2 * Math.PI / pointsNum, 1 / 2048d);
 
     final ImmutableList.Builder<Vec3d> builder1 = new ImmutableList.Builder<>();
     final ImmutableList.Builder<Vec3d> builder2 = new ImmutableList.Builder<>();
@@ -194,7 +212,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   @Environment(EnvType.CLIENT)
   @Override
   public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos) {
-    final VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RegionRendering.reagionRenderLayer);
+    final VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RegionRendering.regionRenderLayer);
 
     final double cameraX = cameraPos.x;
     final double cameraY = cameraPos.y;
@@ -257,4 +275,5 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
       }
     }
   }
+
 }

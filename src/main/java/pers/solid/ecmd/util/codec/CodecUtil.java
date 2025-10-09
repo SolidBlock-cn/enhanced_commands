@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 一些常用 codec 及处理 codec 的类，用于进行原版无法达成的复杂处理。。
+ * 一些常用 codec 及处理 codec 的类，用于进行原版无法达成的复杂处理。
  */
 public final class CodecUtil {
   /**

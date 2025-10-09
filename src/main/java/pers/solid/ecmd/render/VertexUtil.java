@@ -22,7 +22,7 @@ public final class VertexUtil {
   }
 
   /**
-   * 绘制一个单位为 1 的立方体，指定一个 {@link Vec3i} 表示立方体的坐标。。
+   * 绘制一个单位为 1 的立方体，指定一个 {@link Vec3i} 表示立方体的坐标。
    */
   public static void drawUnitBox(MatrixStack matrices, VertexConsumer vertexConsumer, Vec3i vec3i, float red, float green, float blue, float alpha) {
     drawUnitBox(matrices, vertexConsumer, vec3i.getX(), vec3i.getY(), vec3i.getZ(), red, green, blue, alpha);

@@ -22,7 +22,7 @@ public final class RegionRendering {
    *
    * @see DebugRenderLayerCommand
    */
-  public static RenderLayer reagionRenderLayer = RenderLayer.LINES;
+  public static RenderLayer regionRenderLayer = RenderLayer.LINES;
 
   private RegionRendering() {
   }

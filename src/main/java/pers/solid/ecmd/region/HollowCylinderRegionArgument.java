@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.enums.OutlineType;
 
 public record HollowCylinderRegionArgument(@NotNull OutlineType outlineType, @NotNull CylinderRegionArgument region) implements RegionArgument<HollowCylinderRegion> {
@@ -24,6 +25,6 @@ public record HollowCylinderRegionArgument(@NotNull OutlineType outlineType, @No
 
   @Override
   public @NotNull String asString() {
-    return "hcyl(" + region.radius() + ", " + region.height() + ", " + region.center().asString() + ", " + outlineType.asString() + ")";
+    return "hcyl(" + StringUtil.nf.format(region.radius()) + ", " + StringUtil.nf.format(region.height()) + ", " + region.center().asString() + ", " + outlineType.asString() + ")";
   }
 }

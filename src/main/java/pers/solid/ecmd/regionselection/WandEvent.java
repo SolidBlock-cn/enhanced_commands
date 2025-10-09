@@ -9,15 +9,14 @@ import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 public final class WandEvent {
   public static void registerEvents() {
     UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
       if (!player.isSpectator() && isWand(player.getStackInHand(hand))) {
-        if (player instanceof ServerPlayerEntity) {
-          final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
-          final Text text = extension.getOrResetRegionSelection$ec().clickSecondPoint(hitResult.getBlockPos(), player).get();
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+          final Text text = serverPlayer.getOrResetRegionSelection$ec().clickSecondPoint(hitResult.getBlockPos(), player).get();
+          serverPlayer.syncActiveRegion$ec();
           if (text != null) player.sendMessage(text);
         }
         return ActionResult.SUCCESS;
@@ -29,9 +28,9 @@ public final class WandEvent {
       // 因为 ClientPlayerInteractionManagerMixin 会在此情况下进行阻止，
       // 从而避免点击一下左键却被多次调用的情况。
       if (!player.isSpectator() && isWand(player.getMainHandStack())) {
-        if (player instanceof ServerPlayerEntity) {
-          final ServerPlayerEntityExtension extension = (ServerPlayerEntityExtension) player;
-          final Text text = extension.getOrResetRegionSelection$ec().clickFirstPoint(pos, player).get();
+        if (player instanceof ServerPlayerEntity serverPlayer) {
+          final Text text = serverPlayer.getOrResetRegionSelection$ec().clickFirstPoint(pos, player).get();
+          serverPlayer.syncActiveRegion$ec();
           if (text != null) player.sendMessage(text);
         }
         return ActionResult.SUCCESS;

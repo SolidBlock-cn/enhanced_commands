@@ -1,5 +1,7 @@
 package pers.solid.ecmd.regionselection;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -7,6 +9,9 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -28,6 +33,11 @@ import java.util.function.Supplier;
  */
 public interface RegionSelection {
   SimpleCommandExceptionType NOT_COMPLETED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region_selection.not_completed"));
+  PacketCodec<RegistryByteBuf, RegionSelection> PACKET_CODEC = RegionSelectionType.PACKET_CODEC.dispatch(RegionSelection::getSelectionType, CacheBuilder.newBuilder().build(CacheLoader.from((@NotNull RegionSelectionType type) -> PacketCodec.of(RegionSelection::writePacket, (PacketByteBuf buf) -> {
+    final RegionSelection regionSelection = type.createRegionSelection();
+    regionSelection.readPacket(buf);
+    return regionSelection;
+  })))::getUnchecked);
 
   /**
    * 设置第一个点时的操作。有可能是直接设置的特定的点，也有可能是重新开始一个全新的区域。
@@ -117,9 +127,13 @@ public interface RegionSelection {
   RegionSelectionType getSelectionType();
 
   @Contract(mutates = "this")
-  void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world);
+  void readNbt(@NotNull NbtCompound nbtCompound, @NotNull World world);
 
   void writeNbt(@NotNull NbtCompound nbtCompound);
+
+  void readPacket(PacketByteBuf buf);
+
+  void writePacket(PacketByteBuf buf);
 
   /**
    * <p>使用简单的线框来绘制这个区域，通常需要勾勒出该区域的大致图形以及关键点。
@@ -129,4 +143,5 @@ public interface RegionSelection {
    */
   @Environment(EnvType.CLIENT)
   void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos);
+
 }

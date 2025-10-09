@@ -50,7 +50,6 @@ import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.Collections;
 import java.util.List;
@@ -342,9 +341,9 @@ public enum StackCommand implements CommandRegistrationCallback {
         source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
       }
       if (transformsRegion && player != null) {
-        final RegionSelection activeRegion = ((ServerPlayerEntityExtension) player).getActiveRegion$ec();
+        final RegionSelection activeRegion = player.getActiveRegion$ec();
         if (activeRegion != null && region.equals(activeRegion.region())) {
-          ((ServerPlayerEntityExtension) player).setActiveRegion$ec(activeRegion.moved(multiplied));
+          player.setActiveRegion$ec(activeRegion.moved(multiplied));
         }
       }
     });

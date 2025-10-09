@@ -20,6 +20,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -77,7 +78,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
 
   @Override
   public @NotNull String asString() {
-    return "sphere(%s, %s %s %s)".formatted(radius, center.x, center.y, center.z);
+    return "sphere(%s, %s)".formatted(StringUtil.nf.format(radius), StringUtil.wrapVector(center));
   }
 
   @Override

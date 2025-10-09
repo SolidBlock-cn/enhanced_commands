@@ -19,6 +19,7 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.function.FailableFunction;
+import pers.solid.ecmd.ModTrackedData;
 import pers.solid.ecmd.argument.AxisArgument;
 import pers.solid.ecmd.argument.DirectionArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
@@ -27,8 +28,8 @@ import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.enums.CommandEnumType;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
@@ -48,7 +49,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
 
   public static int executeGet(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
-    final Region region = ((ServerPlayerEntityExtension) player).getActiveRegionOrThrow$ec().region();
+    final Region region = player.getActiveRegionOrThrow$ec().region();
     if (region == null) {
       context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.activeregion.get_none", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), false);
       return 0;
@@ -68,7 +69,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   public static int executeRemove(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final PlayerEntity player = source.getPlayerOrThrow();
-    ((ServerPlayerEntityExtension) player).setActiveRegion$ec(null);
+    player.setActiveRegion$ec(null);
     source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.activeregion.remove.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), true);
     return 1;
   }
@@ -129,10 +130,10 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   public static int executeRegionModification(FailableFunction<RegionSelection, RegionSelection, CommandSyntaxException> regionOperation, BiFunction<ServerPlayerEntity, RegionSelection, Text> messageSingle, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final ServerPlayerEntity player = source.getPlayerOrThrow();
-    final RegionSelection operatedRegion = invokeOperationOrThrow(regionOperation, ((ServerPlayerEntityExtension) player).getActiveRegion$ec());
+    final RegionSelection operatedRegion = invokeOperationOrThrow(regionOperation, player.getActiveRegion$ec());
 
     // 注意：当玩家有 regionBuilder 时，会自动生成 region，且理论上 regionBuilder 和 region 进行的操作应当是一致的。
-    ((ServerPlayerEntityExtension) player).setActiveRegion$ec(operatedRegion);
+    player.getDataTracker().set(ModTrackedData.PLAYER_REGION_SELECTION, Optional.ofNullable(operatedRegion), true);
     source.sendFeedback$ecBridge(() -> messageSingle.apply(player, operatedRegion), true);
     return 1;
   }

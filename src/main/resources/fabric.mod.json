@@ -52,6 +52,12 @@
       ],
       "net/minecraft/class_2303": [
         "pers/solid/ecmd/mixins/ext/EntitySelectorReaderExtension"
+      ],
+      "net/minecraft/class_1657": [
+        "pers/solid/ecmd/mixins/ext/PlayerEntityExtension"
+      ],
+      "net/minecraft/class_3222": [
+        "pers/solid/ecmd/mixins/ext/ServerPlayerEntityExtension"
       ]
     }
   }

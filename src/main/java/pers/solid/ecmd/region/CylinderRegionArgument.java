@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.StringUtil;
 
 public record CylinderRegionArgument(@Range(from = 0, to = Long.MAX_VALUE) double radius, @Range(from = 0, to = Long.MAX_VALUE) double height, @NotNull EnhancedPosArgument center) implements RegionArgument<CylinderRegion> {
   public static final MapCodec<CylinderRegionArgument> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CylinderRegionArgument::radius), Codec.DOUBLE.fieldOf("height").forGetter(CylinderRegionArgument::height), EnhancedPosArgument.CODEC.fieldOf("center").forGetter(CylinderRegionArgument::center)).apply(i, CylinderRegionArgument::new));
@@ -23,6 +24,6 @@ public record CylinderRegionArgument(@Range(from = 0, to = Long.MAX_VALUE) doubl
 
   @Override
   public @NotNull String asString() {
-    return "cylinder(" + radius + ", " + height + ", " + center.asString() + ")";
+    return "cylinder(" + StringUtil.nf.format(radius) + ", " + StringUtil.nf.format(height) + ", " + center.asString() + ")";
   }
 }
