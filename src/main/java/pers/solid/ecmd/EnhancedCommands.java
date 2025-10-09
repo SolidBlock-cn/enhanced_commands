@@ -53,6 +53,7 @@ public class EnhancedCommands implements ModInitializer {
     RegionSelectionTypes.init();
     ModArgumentTypes.init();
     EntitySelectorOptionsExtension.init();
+    ModTrackedData.init();
 
     // 注册命令
     CommandRegistrationCallback.EVENT.register(ModCommands.INSTANCE);

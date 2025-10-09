@@ -18,6 +18,7 @@ import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -128,7 +129,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
 
   @Override
   public @NotNull String asString() {
-    return String.format("cyl(%s, %s, %s %s %s)", radius, height, center.x, center.y, center.z);
+    return String.format("cyl(%s, %s, %s)", StringUtil.nf.format(radius), StringUtil.nf.format(height), StringUtil.wrapVector(center));
   }
 
   @Override

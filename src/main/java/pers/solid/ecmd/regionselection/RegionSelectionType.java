@@ -1,6 +1,10 @@
 package pers.solid.ecmd.regionselection;
 
+import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import pers.solid.ecmd.EnhancedCommands;
@@ -8,6 +12,8 @@ import pers.solid.ecmd.EnhancedCommands;
 public interface RegionSelectionType {
   RegistryKey<Registry<RegionSelectionType>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region_builder_type"));
   Registry<RegionSelectionType> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
+  Codec<RegionSelectionType> CODEC = REGISTRY.getCodec();
+  PacketCodec<RegistryByteBuf, RegionSelectionType> PACKET_CODEC = PacketCodecs.registryValue(REGISTRY_KEY);
 
   RegionSelection createRegionSelection();
 

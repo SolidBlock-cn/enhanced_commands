@@ -21,7 +21,6 @@ import pers.solid.ecmd.regionselection.RegionSelectionType;
 import pers.solid.ecmd.regionselection.WandEvent;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.function.Supplier;
 
@@ -58,7 +57,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
                   final ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
                   final RegistryEntry.Reference<RegionSelectionType> registryEntry = RegistryEntryReferenceArgumentType.getRegistryEntry(context, "type", RegionSelectionType.REGISTRY_KEY);
                   final RegionSelectionType type = registryEntry.value();
-                  ((ServerPlayerEntityExtension) player).switchRegionSelectionType$ec(type);
+                  player.switchRegionSelectionType$ec(type);
                   context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.regionselection.changed", TextUtil.literal(registryEntry.registryKey().getValue()).styled(Styles.RESULT)), true);
                   return 1;
                 }))));
@@ -70,12 +69,13 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
   public static int executeSetPoint(BlockPos blockPos, CommandContext<ServerCommandSource> context, int type) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final ServerPlayerEntity player = source.getPlayerOrThrow();
-    final RegionSelection regionSelection = ((ServerPlayerEntityExtension) player).getOrResetRegionSelection$ec();
+    final RegionSelection regionSelection = player.getOrResetRegionSelection$ec();
     final Supplier<Text> textSupplier = switch (type) {
       case 1 -> regionSelection.clickFirstPoint(blockPos, player);
       case 2 -> regionSelection.clickSecondPoint(blockPos, player);
       default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
     };
+    player.syncActiveRegion$ec();
     source.sendFeedback$ecBridge(textSupplier, true);
     return 1;
   }

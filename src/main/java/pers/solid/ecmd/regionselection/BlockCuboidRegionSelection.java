@@ -8,6 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -158,7 +159,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
     return (IntBackedRegionSelection) super.clone();
   }
 
-  public void fromNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
+  public void readNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
     first = nbtCompound.contains("first", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3i(nbtCompound.getCompound("first")) : null;
     second = nbtCompound.contains("second", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3i(nbtCompound.getCompound("second")) : null;
   }
@@ -169,9 +170,34 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
     nbtCompound.put("second", NbtUtil.fromVec3i(second));
   }
 
+  @Override
+  public void readPacket(PacketByteBuf buf) {
+    final boolean firstPresent = buf.readBoolean();
+    first = firstPresent ? new Vec3i(buf.readVarInt(), buf.readVarInt(), buf.readVarInt()) : null;
+    final boolean secondPresent = buf.readBoolean();
+    second = secondPresent ? new Vec3i(buf.readVarInt(), buf.readVarInt(), buf.readVarInt()) : null;
+  }
+
+  @Override
+  public void writePacket(PacketByteBuf buf) {
+    buf.writeBoolean(first != null);
+    if (first != null) {
+      buf.writeVarInt(first.getX());
+      buf.writeVarInt(first.getY());
+      buf.writeVarInt(first.getZ());
+    }
+    buf.writeBoolean(second != null);
+    if (second != null) {
+      buf.writeVarInt(second.getX());
+      buf.writeVarInt(second.getY());
+      buf.writeVarInt(second.getZ());
+    }
+  }
+
   @Environment(EnvType.CLIENT)
   @Override
   public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos) {
-    RegionRendering.renderBlockCuboid(first, second, matrices, vertexConsumers.getBuffer(RegionRendering.reagionRenderLayer), cameraPos);
+    RegionRendering.renderBlockCuboid(first, second, matrices, vertexConsumers.getBuffer(RegionRendering.regionRenderLayer), cameraPos);
   }
+
 }

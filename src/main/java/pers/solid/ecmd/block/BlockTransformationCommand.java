@@ -37,7 +37,6 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.IterateUtils;
-import pers.solid.ecmd.util.mixin.ServerPlayerEntityExtension;
 
 import java.util.function.Function;
 
@@ -118,7 +117,7 @@ public interface BlockTransformationCommand {
 
     final @Nullable RegionSelection oldActiveRegion; // 仅用于撤销操作
     if (transformsRegion && player != null && history != null) {
-      oldActiveRegion = ((ServerPlayerEntityExtension) player).getActiveRegionOrThrow$ec();
+      oldActiveRegion = player.getActiveRegionOrThrow$ec();
     } else {
       oldActiveRegion = null;
     }
@@ -128,10 +127,10 @@ public interface BlockTransformationCommand {
 
         if (transformedRegionSelection != null) {
           history.reverseEntities.add(Triple.of(player, Pair.of(
-              player0 -> ((ServerPlayerEntityExtension) player0).setActiveRegion$ec(oldActiveRegion),
-              player0 -> ((ServerPlayerEntityExtension) player0).setActiveRegion$ec(transformedRegionSelection)
+              player0 -> ((ServerPlayerEntity) player0).setActiveRegion$ec(oldActiveRegion),
+              player0 -> ((ServerPlayerEntity) player0).setActiveRegion$ec(transformedRegionSelection)
           ), null));
-          ((ServerPlayerEntityExtension) player).setActiveRegion$ec(transformedRegionSelection);
+          player.setActiveRegion$ec(transformedRegionSelection);
         }
         notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
@@ -147,10 +146,10 @@ public interface BlockTransformationCommand {
       notifyCompletion(source, affectedBlocks, entitiesToAffect == null ? -1 : affectedEntities);
       if (transformedRegionSelection != null) {
         history.reverseEntities.add(Triple.of(player, Pair.of(
-            player0 -> ((ServerPlayerEntityExtension) player0).setActiveRegion$ec(oldActiveRegion),
-            player0 -> ((ServerPlayerEntityExtension) player0).setActiveRegion$ec(transformedRegionSelection)
+            player0 -> ((ServerPlayerEntity) player0).setActiveRegion$ec(oldActiveRegion),
+            player0 -> ((ServerPlayerEntity) player0).setActiveRegion$ec(transformedRegionSelection)
         ), null));
-        ((ServerPlayerEntityExtension) player).setActiveRegion$ec(transformedRegionSelection);
+        player.setActiveRegion$ec(transformedRegionSelection);
       }
       return affectedBlocks + affectedEntities;
     }

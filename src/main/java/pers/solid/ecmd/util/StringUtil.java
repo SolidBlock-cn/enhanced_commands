@@ -15,6 +15,9 @@ import java.util.Optional;
  * 与字符串有关的实用类。
  */
 public final class StringUtil {
+  /**
+   * 在本模组中将数字格式化的数字格式，需要避免使用分组并避免使用科学记数法，以与命令中的内容保持一致。
+   */
   public static final NumberFormat nf = Util.make(NumberFormat.getInstance(Locale.ROOT), numberFormat -> {
     numberFormat.setMaximumFractionDigits(Integer.MAX_VALUE);
     numberFormat.setGroupingUsed(false);
@@ -28,7 +31,7 @@ public final class StringUtil {
   }
 
   public static String wrapVector(Position position) {
-    return position.getX() + " " + position.getY() + " " + position.getZ();
+    return nf.format(position.getX()) + " " + nf.format(position.getY()) + " " + nf.format(position.getZ());
   }
 
   public static <T extends Number> String wrapRange(NumberRange<T> numberRange) {

@@ -42,14 +42,14 @@ public enum DebugRenderLayerCommand implements ClientCommandRegistrationCallback
   public void register(CommandDispatcher<FabricClientCommandSource> commandDispatcher, CommandRegistryAccess commandRegistryAccess) {
     final LiteralArgumentBuilder<FabricClientCommandSource> literal = ClientCommandManager.literal("debug:renderlayer");
     LAYERS.forEach((s, renderLayer) -> literal.then(ClientCommandManager.literal(s).executes(commandContext -> {
-      RegionRendering.reagionRenderLayer = renderLayer;
+      RegionRendering.regionRenderLayer = renderLayer;
       commandContext.getSource().sendFeedback(Text.literal("set to " + s));
       return 1;
     })));
 
     literal.then(ClientCommandManager.literal("debug_line_strip").then(ClientCommandManager.argument("lineWidth", DoubleArgumentType.doubleArg()).executes(commandContext -> {
       final double lineWidth = DoubleArgumentType.getDouble(commandContext, "lineWidth");
-      RegionRendering.reagionRenderLayer = RenderLayer.getDebugLineStrip(lineWidth);
+      RegionRendering.regionRenderLayer = RenderLayer.getDebugLineStrip(lineWidth);
       commandContext.getSource().sendFeedback(Text.literal("set to debug_line_strip lineWidth = " + lineWidth));
       return 1;
     })));
