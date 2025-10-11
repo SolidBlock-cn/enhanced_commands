@@ -70,8 +70,8 @@ public interface PositionProvider {
   }
 
   static PositionProvider of(Entity entity) {
-    if (entity.getWorld() instanceof ServerWorld serverWorld) {
-      return entity.getCommandSource(serverWorld);
+    if (entity.getWorld() instanceof ServerWorld) {
+      return entity.getCommandSource();
     } else {
       return of(entity.getPos(), entity.getRotationClient(), null, EntityAnchorArgumentType.EntityAnchor.FEET);
     }

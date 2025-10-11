@@ -87,7 +87,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
 
   @Override
   default Vec3d toAbsolutePos(ServerCommandSource source) {
-    return toAbsolutePos(source);
+    return toAbsolutePos((PositionProvider) source);
   }
 
   default BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
@@ -98,7 +98,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
 
   @Override
   default Vec2f toAbsoluteRotation(ServerCommandSource source) {
-    return toAbsoluteRotation(source);
+    return toAbsoluteRotation((PositionProvider) source);
   }
 
   enum Type implements StringIdentifiable {
