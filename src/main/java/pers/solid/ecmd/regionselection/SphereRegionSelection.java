@@ -241,7 +241,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
 
     // 渲染半径向量
     if (center != null && radiusTarget != null) {
-      VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, radiusTarget.x - cameraX, radiusTarget.y - cameraY, radiusTarget.z - cameraZ, ColorHelper.fromFloats(0.9f, 0.6f, 0.9f, 1), ColorHelper.fromFloats(0.9f, 0.6f, 1f, 0.8f));
+      VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, radiusTarget.x - cameraX, radiusTarget.y - cameraY, radiusTarget.z - cameraZ, ColorHelper.Argb.fromFloats(0.9f, 0.6f, 0.9f, 1), ColorHelper.Argb.fromFloats(0.9f, 0.6f, 1f, 0.8f));
     }
 
     // 渲染圆
@@ -271,13 +271,13 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
       for (Direction direction : Direction.values()) {
         int color;
         if (direction == Direction.EAST) {
-          color = ColorHelper.fromFloats(1f, 0.9f, 0.5f, 0.5f);
+          color = ColorHelper.Argb.fromFloats(1f, 0.9f, 0.5f, 0.5f);
         } else if (direction == Direction.SOUTH) {
-          color = ColorHelper.fromFloats(1f, 0.5f, 0.9f, 0.5f);
+          color = ColorHelper.Argb.fromFloats(1f, 0.5f, 0.9f, 0.5f);
         } else if (direction == Direction.UP) {
-          color = ColorHelper.fromFloats(1f, 0.5f, 0.5f, 0.9f);
+          color = ColorHelper.Argb.fromFloats(1f, 0.5f, 0.5f, 0.9f);
         } else {
-          color = ColorHelper.fromFloats(1f, 0.9f, 0.9f, 0.9f);
+          color = ColorHelper.Argb.fromFloats(1f, 0.9f, 0.9f, 0.9f);
         }
         VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, center.x - cameraX + radius * direction.getOffsetX(), center.y - cameraY + radius * direction.getOffsetY(), center.z - cameraZ + radius * direction.getOffsetZ(), color);
       }
