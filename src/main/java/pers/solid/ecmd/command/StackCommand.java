@@ -35,6 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
@@ -343,7 +344,11 @@ public enum StackCommand implements CommandRegistrationCallback {
       if (transformsRegion && player != null) {
         final RegionSelection activeRegion = player.getActiveRegion$ec();
         if (activeRegion != null && region.equals(activeRegion.region())) {
-          player.setActiveRegion$ec(activeRegion.moved(multiplied));
+          try {
+            player.setActiveRegion$ec(activeRegion.moved(multiplied));
+          } catch (CommandSyntaxException e) {
+            throw new CommandRuntimeException(e);
+          }
         }
       }
     });
@@ -368,7 +373,15 @@ public enum StackCommand implements CommandRegistrationCallback {
       source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
       return 1;
     } else {
-      IterateUtils.exhaust(Iterables.concat(collectSourceBlocks, collectSourceEntities, executeStack, finalClaim).iterator());
+      try {
+        IterateUtils.exhaust(Iterables.concat(collectSourceBlocks, collectSourceEntities, executeStack, finalClaim).iterator());
+      } catch (CommandRuntimeException e) {
+        if (e.getCause() instanceof CommandSyntaxException es) {
+          throw es;
+        } else {
+          throw e;
+        }
+      }
       return blocksAffected.intValue() + entitiesAffected.intValue();
     }
   }

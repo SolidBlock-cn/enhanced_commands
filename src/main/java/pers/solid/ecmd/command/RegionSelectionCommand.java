@@ -15,6 +15,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
@@ -44,13 +45,13 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
         = dispatcher.register(literalR2("regionselection")
         .executes(executesWithoutParam)
         .then(literal("pos1")
-            .executes(context -> executeSetPoint(BlockPos.ofFloored(context.getSource().getPosition()), context, 1))
-            .then(argument("pos", EnhancedPosArgumentType.blockPos())
-                .executes(context -> executeSetPoint(EnhancedPosArgumentType.getBlockPos(context, "pos"), context, 1))))
+            .executes(context -> executeSetPoint(BlockPos.ofFloored(context.getSource().getPosition()).toCenterPos(), context, 1))
+            .then(argument("pos", EnhancedPosArgumentType.posPreferringCenteredInt())
+                .executes(context -> executeSetPoint(EnhancedPosArgumentType.getPos(context, "pos"), context, 1))))
         .then(literal("pos2")
-            .executes(context -> executeSetPoint(BlockPos.ofFloored(context.getSource().getPosition()), context, 2))
-            .then(argument("pos", EnhancedPosArgumentType.blockPos())
-                .executes(context -> executeSetPoint(EnhancedPosArgumentType.getBlockPos(context, "pos"), context, 2))))
+            .executes(context -> executeSetPoint(BlockPos.ofFloored(context.getSource().getPosition()).toCenterPos(), context, 2))
+            .then(argument("pos", EnhancedPosArgumentType.posPreferringCenteredInt())
+                .executes(context -> executeSetPoint(EnhancedPosArgumentType.getPos(context, "pos"), context, 2))))
         .then(literal("type")
             .then(argument("type", omittedRegistryEntry(registryAccess, RegionSelectionType.REGISTRY_KEY))
                 .executes(context -> {
@@ -66,13 +67,13 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
         .redirect(regionselection));
   }
 
-  public static int executeSetPoint(BlockPos blockPos, CommandContext<ServerCommandSource> context, int type) throws CommandSyntaxException {
+  public static int executeSetPoint(Vec3d pos, CommandContext<ServerCommandSource> context, int type) throws CommandSyntaxException {
     final ServerCommandSource source = context.getSource();
     final ServerPlayerEntity player = source.getPlayerOrThrow();
     final RegionSelection regionSelection = player.getOrResetRegionSelection$ec();
     final Supplier<Text> textSupplier = switch (type) {
-      case 1 -> regionSelection.clickFirstPoint(blockPos, player);
-      case 2 -> regionSelection.clickSecondPoint(blockPos, player);
+      case 1 -> regionSelection.clickFirstPoint(pos, player);
+      case 2 -> regionSelection.clickSecondPoint(pos, player);
       default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
     };
     player.syncActiveRegion$ec();

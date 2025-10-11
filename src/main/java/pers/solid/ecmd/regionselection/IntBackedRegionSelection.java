@@ -1,5 +1,6 @@
 package pers.solid.ecmd.regionselection;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -21,34 +22,34 @@ public interface IntBackedRegionSelection extends RegionSelection {
     return moved(IntBackedRegion.toFlooredIntOrThrow(relativePos, IntBackedRegion.MOVE_MUST_INT_VECTOR));
   }
 
-  default @NotNull RegionSelection expanded(double offset) {
+  default @NotNull RegionSelection expanded(double offset) throws CommandSyntaxException {
     expanded((int) offset);
     return this;
   }
 
-  @NotNull RegionSelection expanded(int offset);
+  @NotNull RegionSelection expanded(int offset) throws CommandSyntaxException;
 
-  default @NotNull RegionSelection expanded(double offset, Direction.Axis axis) {
+  default @NotNull RegionSelection expanded(double offset, Direction.Axis axis) throws CommandSyntaxException {
     expanded((int) offset, axis);
     return this;
   }
 
-  RegionSelection expanded(int offset, Direction.Axis axis);
+  RegionSelection expanded(int offset, Direction.Axis axis) throws CommandSyntaxException;
 
-  default @NotNull RegionSelection expanded(double offset, Direction direction) {
+  default @NotNull RegionSelection expanded(double offset, Direction direction) throws CommandSyntaxException {
     expanded((int) offset, direction);
     return this;
   }
 
-  @NotNull RegionSelection expanded(int offset, Direction direction);
+  @NotNull RegionSelection expanded(int offset, Direction direction) throws CommandSyntaxException;
 
   @Override
-  default @NotNull RegionSelection expanded(double offset, Direction.Type type) {
+  default @NotNull RegionSelection expanded(double offset, Direction.Type type) throws CommandSyntaxException {
     expanded((int) offset, type);
     return this;
   }
 
-  @NotNull RegionSelection expanded(int offset, Direction.Type type);
+  @NotNull RegionSelection expanded(int offset, Direction.Type type) throws CommandSyntaxException;
 
   default @NotNull RegionSelection rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
     return rotated(blockRotation, IntBackedRegion.toCenteredIntOrThrow(pivot, IntBackedRegion.ROTATION_PIVOT_MUST_CENTER));
