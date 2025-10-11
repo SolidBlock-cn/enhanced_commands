@@ -2,42 +2,59 @@ package pers.solid.ecmd.regionselection;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
+import net.minecraft.util.math.ColorHelper;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.SphereRegion;
 import pers.solid.ecmd.render.RegionRendering;
 import pers.solid.ecmd.render.VertexUtil;
-import pers.solid.ecmd.util.NbtUtil;
+import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion> implements RegionSelection, Cloneable {
-  public Vec3d center;
-  public Vec3d radiusTarget;
+  public static final MapCodec<SphereRegionSelection> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      Vec3d.CODEC.optionalFieldOf("center").forGetter(s -> Optional.ofNullable(s.center)),
+      Vec3d.CODEC.optionalFieldOf("radius_target").forGetter(s -> Optional.ofNullable(s.radiusTarget))
+  ).apply(i, SphereRegionSelection::fromOptional));
+
+  public @Nullable Vec3d center;
+  public @Nullable Vec3d radiusTarget;
   public double radius;
   protected List<Vec3d> circle1points = null;
   protected List<Vec3d> circle2points = null;
   protected List<Vec3d> circle3points = null;
   protected List<List<Vec3d>> circlePointsList = null;
+
+  private static SphereRegionSelection fromOptional(Optional<Vec3d> center, Optional<Vec3d> radiusTarget) {
+    final SphereRegionSelection s = new SphereRegionSelection();
+    s.center = center.orElse(null);
+    s.radiusTarget = radiusTarget.orElse(null);
+    s.updateRadius();
+    return s;
+  }
 
   public void updateRadius() {
     if (center != null && radiusTarget != null) {
@@ -48,15 +65,15 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public Supplier<Text> clickFirstPoint(BlockPos point, PlayerEntity player) {
-    center = point.toCenterPos();
+  public Supplier<Text> clickFirstPoint(Vec3d point, PlayerEntity player) {
+    center = point;
     resetCalculation();
     return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.sphere.set_center", TextUtil.wrapVector(point).styled(Styles.RESULT)), notifySphereStatistics());
   }
 
   @Override
-  public Supplier<Text> clickSecondPoint(BlockPos point, PlayerEntity player) {
-    radiusTarget = point.toCenterPos();
+  public Supplier<Text> clickSecondPoint(Vec3d point, PlayerEntity player) {
+    radiusTarget = point;
     resetCalculation();
     return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.sphere.set_radius", TextUtil.wrapVector(point).styled(Styles.RESULT)), notifySphereStatistics());
   }
@@ -64,7 +81,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   public Text notifySphereStatistics() {
     if (center != null && radiusTarget != null) {
       updateRadius();
-      return Text.translatable("enhanced_commands.region_selection.sphere.statistics", TextUtil.literal(radius).styled(Styles.RESULT)).formatted(Formatting.GRAY);
+      return Text.translatable("enhanced_commands.region_selection.sphere.statistics", Text.literal(StringUtil.nf.format(radius)).styled(Styles.RESULT)).formatted(Formatting.GRAY);
     } else {
       return null;
     }
@@ -72,7 +89,8 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
 
   @Override
   public List<@NotNull Vec3d> getPoints() {
-    return Stream.of(center, radiusTarget).filter(Objects::nonNull).toList();
+    final Stream<@NotNull Vec3d> stream = Stream.of(center, radiusTarget).filter(Objects::nonNull);
+    return stream.toList();
   }
 
   @Override
@@ -96,7 +114,10 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull SphereRegionSelection transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull SphereRegionSelection transformed(Function<Vec3d, Vec3d> transformation) throws CommandSyntaxException {
+    if (center == null || radiusTarget == null) {
+      throw NOT_COMPLETED.create();
+    }
     final Vec3d oldCenter = center;
     center = transformation.apply(oldCenter);
     radiusTarget = radiusTarget.add(center.subtract(oldCenter));
@@ -105,7 +126,10 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull SphereRegionSelection expanded(double offset) {
+  public @NotNull SphereRegionSelection expanded(double offset) throws CommandSyntaxException {
+    if (center == null || radiusTarget == null) {
+      throw NOT_COMPLETED.create();
+    }
     final Vec3d radiusVector = radiusTarget.subtract(center);
     final Vec3d newRadiusVector = radiusVector.multiply(1 + offset / radiusVector.length());
     radiusTarget = center.add(newRadiusVector);
@@ -130,26 +154,13 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull RegionSelectionType getSelectionType() {
+  public @NotNull RegionSelectionType getType() {
     return RegionSelectionTypes.SPHERE;
-  }
-
-  @Override
-  public void readNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-    center = nbtCompound.contains("center", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3d(nbtCompound.getCompound("center")) : null;
-    radiusTarget = nbtCompound.contains("radius_target", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3d(nbtCompound.getCompound("radius_target")) : null;
-    resetCalculation();
   }
 
   @Override
   public SphereRegionSelection clone() {
     return (SphereRegionSelection) super.clone();
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("center", NbtUtil.fromVec3d(center));
-    nbtCompound.put("radius_target", NbtUtil.fromVec3d(radiusTarget));
   }
 
   @Override
@@ -183,6 +194,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
 
   protected void updateCirclePoints() {
     if (center == null) {
+      circlePointsList = List.of();
       return;
     }
 
@@ -240,7 +252,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
       for (int i = 0; i < list.size(); i++) {
         final Vec3d current = list.get(i);
         final Vec3d next = list.get(i + 1 < list.size() ? i + 1 : 0);
-        VertexUtil.drawLineConnecting(matrices, vertexConsumer, current.x - cameraX, current.y - cameraY, current.z - cameraZ, next.x - cameraX, next.y - cameraY, next.z - cameraZ, 0xb0c0c0c0);
+        VertexUtil.drawLineConnecting(matrices, vertexConsumer, current.x - cameraX, current.y - cameraY, current.z - cameraZ, next.x - cameraX, next.y - cameraY, next.z - cameraZ, 0xeee8ffd0);
       }
     }
 
@@ -257,21 +269,17 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
     // 渲染半径
     if (center != null) {
       for (Direction direction : Direction.values()) {
-        int color1, color2;
+        int color;
         if (direction == Direction.EAST) {
-          color1 = ColorHelper.fromFloats(1f, 0.9f, 0.5f, 0.5f);
-          color2 = ColorHelper.fromFloats(0.8f, 0.75f, 0.5f, 0.5f);
+          color = ColorHelper.fromFloats(1f, 0.9f, 0.5f, 0.5f);
         } else if (direction == Direction.SOUTH) {
-          color1 = ColorHelper.fromFloats(1f, 0.5f, 0.9f, 0.5f);
-          color2 = ColorHelper.fromFloats(0.8f, 0.5f, 0.75f, 0.5f);
+          color = ColorHelper.fromFloats(1f, 0.5f, 0.9f, 0.5f);
         } else if (direction == Direction.UP) {
-          color1 = ColorHelper.fromFloats(1f, 0.5f, 0.5f, 0.9f);
-          color2 = ColorHelper.fromFloats(0.8f, 0.5f, 0.5f, 0.75f);
+          color = ColorHelper.fromFloats(1f, 0.5f, 0.5f, 0.9f);
         } else {
-          color1 = ColorHelper.fromFloats(1f, 0.9f, 0.9f, 0.9f);
-          color2 = ColorHelper.fromFloats(0.8f, 0.75f, 0.75f, 0.75f);
+          color = ColorHelper.fromFloats(1f, 0.9f, 0.9f, 0.9f);
         }
-        VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, center.x - cameraX + radius * direction.getOffsetX(), center.y - cameraY + radius * direction.getOffsetY(), center.z - cameraZ + radius * direction.getOffsetZ(), color1, color2);
+        VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, center.x - cameraX + radius * direction.getOffsetX(), center.y - cameraY + radius * direction.getOffsetY(), center.z - cameraZ + radius * direction.getOffsetZ(), color);
       }
     }
   }

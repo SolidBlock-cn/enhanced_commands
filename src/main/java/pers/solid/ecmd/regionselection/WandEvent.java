@@ -15,7 +15,7 @@ public final class WandEvent {
     UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
       if (!player.isSpectator() && isWand(player.getStackInHand(hand))) {
         if (player instanceof ServerPlayerEntity serverPlayer) {
-          final Text text = serverPlayer.getOrResetRegionSelection$ec().clickSecondPoint(hitResult.getBlockPos(), player).get();
+          final Text text = serverPlayer.getOrResetRegionSelection$ec().clickSecondPoint(hitResult.getBlockPos().toCenterPos(), player).get();
           serverPlayer.syncActiveRegion$ec();
           if (text != null) player.sendMessage(text, false);
         }
@@ -29,7 +29,7 @@ public final class WandEvent {
       // 从而避免点击一下左键却被多次调用的情况。
       if (!player.isSpectator() && isWand(player.getMainHandStack())) {
         if (player instanceof ServerPlayerEntity serverPlayer) {
-          final Text text = serverPlayer.getOrResetRegionSelection$ec().clickFirstPoint(pos, player).get();
+          final Text text = serverPlayer.getOrResetRegionSelection$ec().clickFirstPoint(pos.toCenterPos(), player).get();
           serverPlayer.syncActiveRegion$ec();
           if (text != null) player.sendMessage(text, false);
         }

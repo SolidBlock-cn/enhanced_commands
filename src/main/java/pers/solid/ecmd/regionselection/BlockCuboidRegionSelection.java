@@ -1,13 +1,13 @@
 package pers.solid.ecmd.regionselection;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -15,37 +15,33 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.BlockCuboidRegion;
 import pers.solid.ecmd.render.RegionRendering;
-import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCuboidRegion> implements IntBackedRegionSelection, Cloneable {
-  public Vec3i first;
-  public Vec3i second;
+  public static final MapCodec<BlockCuboidRegionSelection> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+      Vec3i.CODEC.optionalFieldOf("first").forGetter(s -> Optional.ofNullable(s.first)),
+      Vec3i.CODEC.optionalFieldOf("second").forGetter(s -> Optional.ofNullable(s.second))
+  ).apply(i, BlockCuboidRegionSelection::fromOptional));
+  public @Nullable Vec3i first;
+  public @Nullable Vec3i second;
 
-  @Override
-  public Supplier<Text> clickFirstPoint(BlockPos point, PlayerEntity player) {
-    first = point;
-    resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(Styles.RESULT)), notifyStatistics(first, second));
-  }
-
-  @Override
-  public Supplier<Text> clickSecondPoint(BlockPos point, PlayerEntity player) {
-    second = point;
-    resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_second", TextUtil.wrapVector(second).styled(Styles.RESULT)), notifyStatistics(first, second));
+  private static BlockCuboidRegionSelection fromOptional(Optional<Vec3i> first, Optional<Vec3i> second) {
+    final BlockCuboidRegionSelection n = new BlockCuboidRegionSelection();
+    n.first = first.orElse(null);
+    n.second = second.orElse(null);
+    return n;
   }
 
   public static Text notifyStatistics(@Nullable Vec3i first, @Nullable Vec3i second) {
@@ -54,10 +50,24 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
       final int dx = Math.abs(subtract.getX()) + 1;
       final int dy = Math.abs(subtract.getY()) + 1;
       final int dz = Math.abs(subtract.getZ()) + 1;
-      return (Text.translatable("enhanced_commands.region_selection.cuboid.statistics", Text.literal(dx + "×" + dy + "×" + dz).styled(Styles.RESULT), TextUtil.literal(dx * dy * dz).styled(Styles.RESULT)).formatted(Formatting.GRAY));
+      return (Text.translatable("enhanced_commands.region_selection.cuboid.statistics", Text.literal(dx + "×" + dy + "×" + dz).styled(Styles.RESULT), TextUtil.literal((long) dx * dy * dz).styled(Styles.RESULT)).formatted(Formatting.GRAY));
     } else {
       return null;
     }
+  }
+
+  @Override
+  public Supplier<Text> clickFirstPoint(Vec3d point, PlayerEntity player) {
+    first = BlockPos.ofFloored(point);
+    resetCalculation();
+    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(Styles.RESULT)), notifyStatistics(first, second));
+  }
+
+  @Override
+  public Supplier<Text> clickSecondPoint(Vec3d point, PlayerEntity player) {
+    second = BlockPos.ofFloored(point);
+    resetCalculation();
+    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_second", TextUtil.wrapVector(second).styled(Styles.RESULT)), notifyStatistics(first, second));
   }
 
   @Override
@@ -86,7 +96,10 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelection expanded(int offset) {
+  public @NotNull RegionSelection expanded(int offset) throws CommandSyntaxException {
+    if (first == null || second == null) {
+      throw NOT_COMPLETED.create();
+    }
     int x1 = first.getX();
     int y1 = first.getY();
     int z1 = first.getZ();
@@ -101,7 +114,10 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelection expanded(int offset, Direction direction) {
+  public @NotNull RegionSelection expanded(int offset, Direction direction) throws CommandSyntaxException {
+    if (first == null || second == null) {
+      throw NOT_COMPLETED.create();
+    }
     final Vec3i vector = direction.getVector();
     final Direction.Axis axis = direction.getAxis();
     int unitPosOffset = vector.getComponentAlongAxis(axis);
@@ -120,7 +136,10 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public RegionSelection expanded(int offset, Direction.Axis axis) {
+  public RegionSelection expanded(int offset, Direction.Axis axis) throws CommandSyntaxException {
+    if (first == null || second == null) {
+      throw NOT_COMPLETED.create();
+    }
     final Vec3i pos1Offset = new Vec3i(first.getX() > second.getX() ? offset : -offset, first.getY() > second.getY() ? offset : -offset, first.getZ() > second.getZ() ? offset : -offset);
 
     first = first.add(pos1Offset);
@@ -130,7 +149,10 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelection expanded(int offset, Direction.Type type) {
+  public @NotNull RegionSelection expanded(int offset, Direction.Type type) throws CommandSyntaxException {
+    if (first == null || second == null) {
+      throw NOT_COMPLETED.create();
+    }
     final Vec3i pos1Offset = switch (type) {
       case VERTICAL -> new Vec3i(0, first.getY() > second.getY() ? offset : -offset, 0);
       case HORIZONTAL -> new Vec3i(first.getX() > second.getX() ? offset : -offset, 0, first.getZ() > second.getZ() ? offset : -offset);
@@ -142,14 +164,14 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelectionType getSelectionType() {
+  public @NotNull RegionSelectionType getType() {
     return RegionSelectionTypes.CUBOID;
   }
 
   @Override
   public @NotNull IntBackedRegionSelection transformedInt(Function<Vec3i, Vec3i> transformation) {
-    first = transformation.apply(first);
-    second = transformation.apply(second);
+    first = first == null ? null : transformation.apply(first);
+    second = second == null ? null : transformation.apply(second);
     resetCalculation();
     return this;
   }
@@ -157,17 +179,6 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   @Override
   public @NotNull IntBackedRegionSelection clone() {
     return (IntBackedRegionSelection) super.clone();
-  }
-
-  public void readNbt(@NotNull NbtCompound nbtCompound, @NotNull World world) {
-    first = nbtCompound.contains("first", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3i(nbtCompound.getCompound("first")) : null;
-    second = nbtCompound.contains("second", NbtElement.COMPOUND_TYPE) ? NbtUtil.toVec3i(nbtCompound.getCompound("second")) : null;
-  }
-
-  @Override
-  public void writeNbt(@NotNull NbtCompound nbtCompound) {
-    nbtCompound.put("first", NbtUtil.fromVec3i(first));
-    nbtCompound.put("second", NbtUtil.fromVec3i(second));
   }
 
   @Override

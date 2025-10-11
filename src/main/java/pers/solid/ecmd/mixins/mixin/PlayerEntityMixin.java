@@ -3,6 +3,8 @@ package pers.solid.ecmd.mixins.mixin;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,4 +46,25 @@ public abstract class PlayerEntityMixin implements PlayerEntityExtension {
   public void setActiveRegion$ec(@Nullable RegionSelection region) {
     ((PlayerEntity) (Object) this).getDataTracker().set(ModTrackedData.PLAYER_REGION_SELECTION, Optional.ofNullable(region));
   }
+
+  @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
+  private void readModDataFromNbt(NbtCompound nbt, CallbackInfo ci) {
+    final NbtElement value = nbt.get("active_region_ec");
+    if (value != null) {
+      setActiveRegion$ec(RegionSelection.fromNbt(value));
+    } else {
+      setActiveRegion$ec(null);
+    }
+  }
+
+  @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
+  private void writeModDataToNbt(NbtCompound nbt, CallbackInfo ci) {
+    final RegionSelection activeRegion = getActiveRegion$ec();
+    if (activeRegion != null) {
+      nbt.put("active_region_ec", activeRegion.createNbt());
+    } else {
+      nbt.remove("active_region_ec");
+    }
+  }
+
 }

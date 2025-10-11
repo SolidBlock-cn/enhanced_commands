@@ -80,6 +80,8 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
     } catch (Throwable e) {
       if (e.getCause() instanceof CommandSyntaxException c) {
         throw UNSUPPORTED_WITH_REASON.create(c.getRawMessage());
+      } else if (e instanceof CommandSyntaxException) {
+        throw e;
       } else {
         throw UNSUPPORTED.create();
       }
@@ -87,7 +89,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   }
 
   public static int executeMoveDirection(double offset, Direction direction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.moved(Vec3d.of(direction.getVector()).multiply(offset)), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.move.single", TextUtil.styled(serverPlayerEntity.getName(), Styles.TARGET), TextUtil.literal(region.region()).styled(Styles.RESULT)), context);
+    return executeRegionModification(region -> region.moved(Vec3d.of(direction.getVector()).multiply(offset)), (serverPlayerEntity, region) -> Text.translatable("enhanced_commands.commands.activeregion.move.single", TextUtil.styled(serverPlayerEntity.getName(), Styles.TARGET), Text.literal(region.asString()).styled(Styles.RESULT)), context);
   }
 
   public static int executeMoveVector(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
