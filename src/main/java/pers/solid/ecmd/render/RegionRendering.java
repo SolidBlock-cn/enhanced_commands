@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexRendering;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
@@ -50,7 +50,7 @@ public final class RegionRendering {
       double x2 = Math.max(first.getX(), second.getX()) + 1d;
       double z2 = Math.max(first.getZ(), second.getZ()) + 1d;
       double y2 = Math.max(first.getY(), second.getY()) + 1d;
-      VertexRendering.drawBox(matrices, vertexConsumer, x1 - cameraPos.x, y1 - cameraPos.y, z1 - cameraPos.z, x2 - cameraPos.x, y2 - cameraPos.y, z2 - cameraPos.z, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
+      WorldRenderer.drawBox(matrices, vertexConsumer, x1 - cameraPos.x, y1 - cameraPos.y, z1 - cameraPos.z, x2 - cameraPos.x, y2 - cameraPos.y, z2 - cameraPos.z, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
     }
     if (first != null) {
       matrices.push();
