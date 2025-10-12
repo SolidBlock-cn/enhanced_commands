@@ -48,15 +48,20 @@ public enum ModCommands implements CommandRegistrationCallback {
     ConvertBlockCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     ConvertBlocksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     DrawCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    EnhancedCommandsConfigCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     FillReplaceCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     FireCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     FoodCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     HealthCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     HistoryCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    MirrorCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    if (CommandsConfig.CURRENT.enableMirrorCommand) {
+      MirrorCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    }
     MoonCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    MoveCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    if (CommandsConfig.CURRENT.enableMoveCommand) {
+      MoveCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    }
     NbtCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     OutlineCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     PileCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -65,7 +70,9 @@ public enum ModCommands implements CommandRegistrationCallback {
     RegionSelectionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RotateCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     SeparatedExecuteCommand.register(dispatcher, registryAccess);
-    StackCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    if (CommandsConfig.CURRENT.enableStackCommand) {
+      StackCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    }
     TameCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TasksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     TestArgCommand.INSTANCE.register(dispatcher, registryAccess, environment);

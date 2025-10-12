@@ -1,6 +1,6 @@
 package pers.solid.ecmd.configs;
 
-public class EntitySelectorParsingConfig {
+public class EntitySelectorParsingConfig implements Cloneable {
   public static final EntitySelectorParsingConfig DEFAULT = new EntitySelectorParsingConfig();
   public static EntitySelectorParsingConfig CURRENT = DEFAULT;
 
@@ -83,4 +83,13 @@ public class EntitySelectorParsingConfig {
    * 在实体选择器中输入战利品表谓词时，允许直接输入 json 指定谓词，而不是使用其 id。
    */
   public boolean allowLiteralPredicateJson = true;
+
+  @Override
+  public EntitySelectorParsingConfig clone() {
+    try {
+      return (EntitySelectorParsingConfig) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
+  }
 }

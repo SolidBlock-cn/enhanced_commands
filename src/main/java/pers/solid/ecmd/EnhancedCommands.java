@@ -2,6 +2,7 @@ package pers.solid.ecmd;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
@@ -11,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.api.FlipStateCallback;
 import pers.solid.ecmd.argument.ModArgumentTypes;
 import pers.solid.ecmd.command.ModCommands;
+import pers.solid.ecmd.configs.ConfigCategories;
+import pers.solid.ecmd.configs.ConfigCategory;
+import pers.solid.ecmd.configs.ConfigManager;
 import pers.solid.ecmd.curve.CurveTypes;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
@@ -41,6 +45,9 @@ public class EnhancedCommands implements ModInitializer {
 
   @Override
   public void onInitialize() {
+    ConfigCategories.init();
+    ConfigManager.loadAllConfigsFromJson();
+
     BlockPredicateTypes.init();
     BlockFunctionTypes.init();
     CommandEnumType.init();
@@ -66,6 +73,13 @@ public class EnhancedCommands implements ModInitializer {
       profiler.push("enhanced_commands:tick_iterator_task");
       ((ThreadExecutorExtension) server).ec_advanceTasks();
       profiler.pop();
+    });
+    ServerLifecycleEvents.AFTER_SAVE.register(id("save_config"), (server, flush, force) -> {
+      for (ConfigCategory<?> category : ConfigCategory.REGISTRY.values()) {
+        if (category.isDirty()) {
+          ConfigManager.saveCategoryToFile(category);
+        }
+      }
     });
 
     // 资源包

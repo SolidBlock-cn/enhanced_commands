@@ -7,7 +7,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.function.Supplier;
 
-public class RegistryParsingConfig {
+public class RegistryParsingConfig implements Cloneable {
   public static final RegistryParsingConfig DEFAULT = new RegistryParsingConfig();
   public static RegistryParsingConfig CURRENT = DEFAULT;
 
@@ -17,4 +17,13 @@ public class RegistryParsingConfig {
    * @see pers.solid.ecmd.util.mixin.MixinShared#mixinModifiedParseThrow(RegistryKey, Supplier, LocalIntRef, StringReader, Identifier)
    */
   public boolean detailedUnknownRegistryEntry = true;
+
+  @Override
+  public RegistryParsingConfig clone() {
+    try {
+      return (RegistryParsingConfig) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
+  }
 }
