@@ -118,6 +118,15 @@ public final class TextUtil {
   }
 
   /**
+   * 给文本设置颜色样式，同时避免对文本自身进行复制。如果文本已经有样式，这些样式不会被覆盖。
+   *
+   * @param color 0xAARRGGBB 格式的颜色
+   */
+  public static MutableText styledWithColor(Text text, int color) {
+    return styled(text, style -> style.withColor(color));
+  }
+
+  /**
    * 组合两部分可能为 {@code null｝ 的文本。如果一个为 {@code null} 另一个未 {@code null}，则直接返回其中的非 ｛@code null} 值。如果两个都不是 {@code null}，将其组合。如果 两个都是 {@code null}，返回空文本。
    */
   @Contract(value = "null, null -> !null; null, !null -> param2; !null, null -> param1", pure = true)

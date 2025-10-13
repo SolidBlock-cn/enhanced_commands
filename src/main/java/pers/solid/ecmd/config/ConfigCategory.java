@@ -1,4 +1,4 @@
-package pers.solid.ecmd.configs;
+package pers.solid.ecmd.config;
 
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -28,17 +28,19 @@ public class ConfigCategory<C> {
     this.currentConfigSetter = currentConfigSetter;
   }
 
-  public ConfigCategory(@NotNull String name, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter) {
-    this(name, Text.translatable("enhanced_commands.config." + name + ".name"), Text.translatable("enhanced_cCommands.config." + name + ".description"), defaultConfig, currentConfigGetter, currentConfigSetter);
+  public static <C> ConfigCategory<C> create(@NotNull String name, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter, boolean hasDescription) {
+    return new ConfigCategory<>(name, Text.translatable("enhanced_commands.config." + name), hasDescription ? Text.translatable("enhanced_commands.config." + name + ".description") : null, defaultConfig, currentConfigGetter, currentConfigSetter);
   }
 
-  public <T> ConfigEntry<C, T> createEntry(@NotNull String name, @NotNull ConfigEntryType<T> type, @NotNull Function<C, T> getter, @NotNull BiConsumer<C, T> setter, @NotNull T defaultValue, @Nullable EntryModifier<C, T> modifier) {
+  public <T> ConfigEntry<C, T> createEntry(@NotNull String name, @NotNull ConfigEntryType<T> type, @NotNull Function<C, T> getter, @NotNull BiConsumer<C, T> setter, @NotNull T defaultValue, @Nullable EntryModifier<C, T> modifier, boolean hasDescription) {
     ConfigEntry.Builder<C, T> builder = ConfigEntry.builder(this, type, name)
         .setGetter(getter)
         .setSetter(setter)
         .setDefaultValue(defaultValue)
-        .setDisplayName(Text::translatable)
-        .setDescription(Text::translatable);
+        .setDisplayName(Text::translatable);
+    if (hasDescription) {
+      builder.setDescription(Text::translatable);
+    }
     if (modifier != null) {
       builder = modifier.apply(builder);
     }

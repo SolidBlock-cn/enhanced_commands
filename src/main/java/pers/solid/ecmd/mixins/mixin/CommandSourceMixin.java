@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import pers.solid.ecmd.configs.GeneralParsingConfig;
+import pers.solid.ecmd.config.GeneralParsingConfig;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -48,7 +48,7 @@ public interface CommandSourceMixin {
    */
   @Unique
   private static <T> Consumer<T> getModifiedConsumer(Function<T, Identifier> identifierFunction, Consumer<T> action, String remaining, BiConsumer<Identifier, T> modifiedSuggestion) {
-    if (GeneralParsingConfig.CURRENT.suggestionEmitDefaultNamespace) {
+    if (GeneralParsingConfig.current.suggestionEmitDefaultNamespace) {
       if (remaining.indexOf(':') == -1) {
         return t -> {
           final Identifier identifier = identifierFunction.apply(t);
@@ -69,6 +69,6 @@ public interface CommandSourceMixin {
    */
   @ModifyExpressionValue(method = "forEachMatching(Ljava/lang/Iterable;Ljava/lang/String;Ljava/util/function/Function;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Ljava/lang/String;equals(Ljava/lang/Object;)Z"))
   private static boolean suggestNonDefaultNamespacedIds(boolean original) {
-    return original || GeneralParsingConfig.CURRENT.suggestNonDefaultNamespacedIds;
+    return original || GeneralParsingConfig.current.suggestNonDefaultNamespacedIds;
   }
 }

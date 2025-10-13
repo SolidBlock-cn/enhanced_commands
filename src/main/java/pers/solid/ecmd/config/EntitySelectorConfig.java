@@ -1,8 +1,8 @@
-package pers.solid.ecmd.configs;
+package pers.solid.ecmd.config;
 
-public class EntitySelectorParsingConfig implements Cloneable {
-  public static final EntitySelectorParsingConfig DEFAULT = new EntitySelectorParsingConfig();
-  public static EntitySelectorParsingConfig CURRENT = DEFAULT;
+public class EntitySelectorConfig implements Cloneable {
+  public static final EntitySelectorConfig DEFAULT = new EntitySelectorConfig();
+  public static EntitySelectorConfig current = DEFAULT;
 
   /**
    * 在读取实体选择器时，如果遇到可识别但因某些原因不可应用的选项名称，则尝试详细描述其原因，而非仅表明某选项不适用于这里。
@@ -25,17 +25,12 @@ public class EntitySelectorParsingConfig implements Cloneable {
   public boolean allowNegativeDistanceForNearest = true;
 
   /**
-   * 在解析游戏模式时，允许使用其别称。
-   */
-  public boolean acceptGameModeAlias = true;
-
-  /**
    * 允许使用像 {@code gamemode=creative|adventure} 这样的方式选择多个游戏模式。
    */
   public boolean allowMultipleGameModes = true;
 
   /**
-   * 在显示实体类型 id 时，应当同时显示其实体名称。
+   * 在显示实体类型 id 时，应当同时提示其实体名称。
    */
   public boolean improveEntityTypeSuggestion = true;
 
@@ -55,7 +50,7 @@ public class EntitySelectorParsingConfig implements Cloneable {
   public boolean showScoreObjectiveSuggestions = true;
 
   /**
-   * 在输入分数时，允许将分数的预期值取反，例如 {@code = scores={a=!1}}。
+   * 在输入分数时，允许将分数的预期值取反，例如 {@code @a[scores={a=!1}]}。
    */
   public boolean allowScoreInversion = true;
 
@@ -65,12 +60,12 @@ public class EntitySelectorParsingConfig implements Cloneable {
   public boolean showAdvancementsSuggestions = true;
 
   /**
-   * 在实体选择器中输入进度条件时，提供进度条件名称的建议。
+   * 在实体选择器中输入进度准则时，提供进度准则名称的建议。
    */
   public boolean showAdvancementsCriterionSuggestions = true;
 
   /**
-   * 在实体选择器中输入进度条件的名称时，允许使用带有引号的字符串，从而避免含有空格等特殊字符的条件名称无法使用的问题。
+   * 在实体选择器中输入进度准则的名称时，允许使用带有引号的字符串，从而避免含有空格等特殊字符的准则名称无法使用的问题。
    */
   public boolean acceptQuotedAdvancementCriterionName = true;
 
@@ -85,9 +80,9 @@ public class EntitySelectorParsingConfig implements Cloneable {
   public boolean allowLiteralPredicateJson = true;
 
   @Override
-  public EntitySelectorParsingConfig clone() {
+  public EntitySelectorConfig clone() {
     try {
-      return (EntitySelectorParsingConfig) super.clone();
+      return (EntitySelectorConfig) super.clone();
     } catch (CloneNotSupportedException e) {
       throw new AssertionError();
     }

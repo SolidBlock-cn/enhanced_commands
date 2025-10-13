@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
+import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
@@ -78,8 +79,9 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     final Region region = RegionArgumentType.getRegion(context, "region");
     final @Nullable Long seed = keywordArgs.getArg("seed");
 
-    if (!bypassLimit && region.numberOfBlocksAffected() > FillReplaceCommand.REGION_SIZE_LIMIT) {
-      throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), FillReplaceCommand.REGION_SIZE_LIMIT);
+    final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
+    if (!bypassLimit && region.numberOfBlocksAffected() > regionSizeLimit) {
+      throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
     }
     final ServerWorld world = source.getWorld();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {

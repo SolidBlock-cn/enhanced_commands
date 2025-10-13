@@ -18,7 +18,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.apache.commons.lang3.function.FailableConsumer;
 import pers.solid.ecmd.argument.NbtTargetArgumentType;
-import pers.solid.ecmd.configs.CommandsConfig;
+import pers.solid.ecmd.config.CommandsConfig;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.region.ActiveRegionArgument;
@@ -36,7 +36,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    if (CommandsConfig.CURRENT.enableDebugCommands) {
+    if (CommandsConfig.current.enableDebugCommands) {
       DebugDeOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
       DebugIgnoreBoundaryCommand.INSTANCE.register(dispatcher, registryAccess, environment);
       DebugOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -55,11 +55,11 @@ public enum ModCommands implements CommandRegistrationCallback {
     GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     HealthCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     HistoryCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    if (CommandsConfig.CURRENT.enableMirrorCommand) {
+    if (CommandsConfig.current.enableMirrorCommand) {
       MirrorCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     }
     MoonCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    if (CommandsConfig.CURRENT.enableMoveCommand) {
+    if (CommandsConfig.current.enableMoveCommand) {
       MoveCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     }
     NbtCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -70,7 +70,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     RegionSelectionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     RotateCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     SeparatedExecuteCommand.register(dispatcher, registryAccess);
-    if (CommandsConfig.CURRENT.enableStackCommand) {
+    if (CommandsConfig.current.enableStackCommand) {
       StackCommand.INSTANCE.register(dispatcher, registryAccess, environment);
     }
     TameCommand.INSTANCE.register(dispatcher, registryAccess, environment);

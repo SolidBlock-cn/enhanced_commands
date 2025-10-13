@@ -1,6 +1,5 @@
-package pers.solid.ecmd.configs;
+package pers.solid.ecmd.config;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,18 +7,11 @@ import java.util.Collections;
 import java.util.Map;
 
 public final class ConfigCategories {
-  public static final ConfigCategory<CommandsConfig> COMMANDS = register(CommandsConfig.class, Map.of(
-      "max_history_count", (ConfigCategory.EntryModifier<CommandsConfig, Integer>) c -> c.setValueValidator(integer -> {
-        if (integer < 0) {
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooLow().create(integer, 0);
-        } else if (integer > 32767) {
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.integerTooHigh().create(integer, 32767);
-        }
-      })
-  ));
-  public static final ConfigCategory<EntitySelectorParsingConfig> ENTITY_SELECTOR_PARSING = register(EntitySelectorParsingConfig.class);
+  public static final ConfigCategory<CommandsConfig> COMMANDS = register(CommandsConfig.class);
+  public static final ConfigCategory<EntitySelectorConfig> ENTITY_SELECTOR = register(EntitySelectorConfig.class);
   public static final ConfigCategory<GeneralParsingConfig> GENERAL = register(GeneralParsingConfig.class);
-  public static final ConfigCategory<RegistryParsingConfig> REGISTRY_PARSING = register(RegistryParsingConfig.class);
+  public static final ConfigCategory<DebugConfig> DEBUG = register(DebugConfig.class);
+  public static final ConfigCategory<BlockOperationConfig> BLOCK_OPERATION = register(BlockOperationConfig.class);
 
   private ConfigCategories() {
   }

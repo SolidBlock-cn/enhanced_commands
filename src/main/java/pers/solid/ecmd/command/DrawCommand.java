@@ -25,6 +25,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
+import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.extensions.IteratorTask;
@@ -80,8 +81,9 @@ public enum DrawCommand implements CommandRegistrationCallback {
     if (!Double.isFinite(estimatedIterationAmount)) {
       throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().create();
     }
-    if (!bypassLimit && estimatedIterationAmount > FillReplaceCommand.REGION_SIZE_LIMIT) {
-      throw FillReplaceCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, FillReplaceCommand.REGION_SIZE_LIMIT);
+    final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
+    if (!bypassLimit && estimatedIterationAmount > regionSizeLimit) {
+      throw FillReplaceCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, regionSizeLimit);
     }
 
     final ServerWorld world = source.getWorld();

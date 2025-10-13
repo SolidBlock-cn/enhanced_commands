@@ -1,4 +1,4 @@
-package pers.solid.ecmd.configs;
+package pers.solid.ecmd.config;
 
 import com.google.gson.*;
 import com.mojang.serialization.DataResult;
@@ -60,6 +60,7 @@ public final class ConfigManager {
       final JsonObject jsonObject = new JsonObject();
       category.configEntries.forEach((entryName, entry) -> writeConfigEntryToJson(entryName, entry, category.getCurrent(), jsonObject));
       GSON.toJson(jsonObject, writer);
+      category.dirty = false;
     } catch (IOException e) {
       LOGGER.error("Failed to write config file for {}:", name, e);
     }

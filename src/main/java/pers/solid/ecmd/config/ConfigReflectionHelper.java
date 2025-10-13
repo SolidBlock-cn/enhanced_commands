@@ -1,4 +1,4 @@
-package pers.solid.ecmd.configs;
+package pers.solid.ecmd.config;
 
 import net.minecraft.util.Util;
 import org.apache.commons.lang3.StringUtils;
@@ -23,13 +23,13 @@ public final class ConfigReflectionHelper {
     } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException("Get CURRENT_CONFIG field", e);
     }
-    final ConfigCategory<C> category = new ConfigCategory<>(categoryName, defaultConfig, () -> getCurrentConfigFromField(currentConfigField, configClass), s -> {
+    final ConfigCategory<C> category = ConfigCategory.create(categoryName, defaultConfig, () -> getCurrentConfigFromField(currentConfigField, configClass), s -> {
       try {
         currentConfigField.set(null, s);
       } catch (IllegalAccessException e) {
         throw new RuntimeException(e);
       }
-    });
+    }, !configClass.isAnnotationPresent(ConfigEntry.NoDescription.class));
 
 
     // 从类的字段中读取配置项
@@ -87,7 +87,7 @@ public final class ConfigReflectionHelper {
   }
 
   private static <C> @NotNull Field getCurrentConfigFieldFromClass(Class<C> configClass) throws NoSuchFieldException, IllegalAccessException {
-    final Field field = configClass.getField("CURRENT");
+    final Field field = configClass.getField("current");
     final int modifiers = field.getModifiers();
     if (!Modifier.isFinal(modifiers) && Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)) {
       return field;
@@ -117,7 +117,7 @@ public final class ConfigReflectionHelper {
       } catch (IllegalAccessException e) {
         throw new RuntimeException("Get default config value", e);
       }
-    }), (ConfigCategory.EntryModifier<C, T>) builderModifiers.get(name));
+    }), (ConfigCategory.EntryModifier<C, T>) builderModifiers.get(name), !field.isAnnotationPresent(ConfigEntry.NoDescription.class));
     category.configEntries.put(name, entry);
   }
 

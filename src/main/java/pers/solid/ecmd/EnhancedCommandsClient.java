@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
+import pers.solid.ecmd.config.CommandsConfig;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.render.DebugRenderLayerCommand;
 
@@ -27,6 +28,8 @@ public class EnhancedCommandsClient implements ClientModInitializer {
     WorldRenderEvents.BEFORE_DEBUG_RENDER.register(EnhancedCommands.id("active_region"), ActiveRegionRenderer.INSTANCE);
 
     // experimental: debug render layer command
-    ClientCommandRegistrationCallback.EVENT.register(EnhancedCommands.id("client_commands"), (DebugRenderLayerCommand.INSTANCE));
+    if (CommandsConfig.current.enableDebugCommands) {
+      ClientCommandRegistrationCallback.EVENT.register(EnhancedCommands.id("client_commands"), (DebugRenderLayerCommand.INSTANCE));
+    }
   }
 }

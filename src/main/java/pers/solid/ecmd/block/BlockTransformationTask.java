@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
@@ -170,8 +171,9 @@ public class BlockTransformationTask {
    * @throws CommandSyntaxException 区域影响的方块数量可能超过限制时抛出。
    */
   public void checkAndRejectLimit() throws CommandSyntaxException {
-    if (region.numberOfBlocksAffected() > FillReplaceCommand.REGION_SIZE_LIMIT) {
-      throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), FillReplaceCommand.REGION_SIZE_LIMIT);
+    final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
+    if (region.numberOfBlocksAffected() > regionSizeLimit) {
+      throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
     }
   }
 

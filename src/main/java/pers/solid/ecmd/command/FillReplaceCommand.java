@@ -28,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
+import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
@@ -55,7 +56,6 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final int SUPPRESS_REPLACED_CHECK_FLAG = 4;
 
   public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.commands.setblocks.region_too_large", a, b));
-  public static final int REGION_SIZE_LIMIT = 16777215;
 
   @Override
   public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
@@ -115,8 +115,9 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   }
 
   public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
-    if (!bypassLimit && region.numberOfBlocksAffected() > REGION_SIZE_LIMIT) {
-      throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), REGION_SIZE_LIMIT);
+    final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
+    if (!bypassLimit && region.numberOfBlocksAffected() > regionSizeLimit) {
+      throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
     }
     final ServerWorld world = source.getWorld();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {

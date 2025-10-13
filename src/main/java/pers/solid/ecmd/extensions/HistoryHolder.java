@@ -4,7 +4,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.configs.CommandsConfig;
+import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.history.History;
 
 import java.util.Deque;
@@ -58,7 +58,7 @@ public interface HistoryHolder {
    * @return 历史记录的最高数量。
    */
   default int getMaxHistoryCount$ec() {
-    return CommandsConfig.CURRENT.maxHistoryCount;
+    return BlockOperationConfig.current.maxHistoryCount;
   }
 
   default HistoryHolder inverse() {

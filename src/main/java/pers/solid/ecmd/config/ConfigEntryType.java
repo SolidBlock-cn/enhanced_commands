@@ -1,4 +1,4 @@
-package pers.solid.ecmd.configs;
+package pers.solid.ecmd.config;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.serialization.Codec;

@@ -14,6 +14,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +50,15 @@ public final class ModCommandExceptionTypes {
   public static final DynamicCommandExceptionType UNKNOWN_BIOME = new DynamicCommandExceptionType(id -> Text.translatable("enhanced_commands.parsing.unknown_registry_entry.biome", id));
   public static final SimpleCommandExceptionType CONTAINS_UPPER_CASE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.id.contains_upper_case"));
 
+  /**
+   * <p>用于在命令抛出异常时，像命令解析时异常一样，显示命令的原文本内容。这个 {@code cursorEnd} 对应的是 {@link  CommandSyntaxExceptionExtension#getCursorEnd$ec()} 中的 {@code cursorEnd}，如果未指定，则为 -1，不应是 null。
+   * <p>对此方法调用 {@link Dynamic4CommandExceptionType#create create} 时，4个参数分别是：<code>{@link Text}, {@link String}, int, int</code>。
+   * <p>示例：
+   * <pre>{@code
+   * final CommandSyntaxException commandSyntaxException = XXXX.createWithContext(stringReader, ...);
+   * throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), commandSyntaxException.getInput(), commandSyntaxException.getCursor(), cursorEnd);
+   * }</pre>
+   */
   public static final Dynamic4CommandExceptionType EXCEPTION_SHOWING_TEXT = new Dynamic4CommandExceptionType((message, input, cursor, cursorEnd) -> {
     Preconditions.checkArgument(message instanceof Text, "message not Text");
     Preconditions.checkArgument(input == null || input instanceof String, "input not string");
@@ -58,6 +68,8 @@ public final class ModCommandExceptionTypes {
   });
 
   /**
+   * 将命令异常的消息增加一行，以显示原始的命令输入以及出错位置，就像原版游戏在遇到命令解析异常时那样。其处理方法综合了原版的做法以及本模组对原版做法的 mixin。
+   *
    * @see CommandManager#checkCommand
    * @see pers.solid.ecmd.mixins.mixin.CommandManagerMixin#modifiedGetErrorMessage(String, CommandSyntaxException, int)
    */

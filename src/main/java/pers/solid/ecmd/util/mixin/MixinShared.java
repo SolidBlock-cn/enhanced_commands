@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
-import pers.solid.ecmd.configs.RegistryParsingConfig;
+import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.CommandManagerMixin;
 import pers.solid.ecmd.mixins.mixin.WorldChunkMixin;
@@ -135,10 +135,10 @@ public final class MixinShared {
   /**
    * 在解析注册表项时，如果注册表项无效，反对更加详细的错误报错信息。
    *
-   * @see RegistryParsingConfig#detailedUnknownRegistryEntry
+   * @see pers.solid.ecmd.config.GeneralParsingConfig#detailedUnknownRegistryEntry
    */
   public static <T> Supplier<CommandSyntaxException> mixinModifiedParseThrow(RegistryKey<? extends Registry<T>> registryRef, Supplier<CommandSyntaxException> original, LocalIntRef localIntRef, StringReader stringReader, Identifier identifier) {
-    if (!RegistryParsingConfig.CURRENT.detailedUnknownRegistryEntry) {
+    if (!GeneralParsingConfig.current.detailedUnknownRegistryEntry) {
       return original;
     }
     return () -> {

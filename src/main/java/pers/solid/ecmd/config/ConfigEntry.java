@@ -1,4 +1,4 @@
-package pers.solid.ecmd.configs;
+package pers.solid.ecmd.config;
 
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -8,6 +8,10 @@ import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -65,7 +69,7 @@ public class ConfigEntry<C, T> {
       this.category = category;
       this.type = type;
       this.name = name;
-      this.displayNameTranslationKey = "enhanced_commands.config." + category.name + "." + name + ".name";
+      this.displayNameTranslationKey = "enhanced_commands.config." + category.name + "." + name;
       this.descriptionTranslationKey = "enhanced_commands.config." + category.name + "." + name + ".description";
     }
 
@@ -129,4 +133,8 @@ public class ConfigEntry<C, T> {
       return new ConfigEntry<>(category, type, name, displayName, description, getter, setter, valueValidator, defaultValue);
     }
   }
+
+  @Target({ElementType.TYPE, ElementType.FIELD})
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface NoDescription {}
 }
