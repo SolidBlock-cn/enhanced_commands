@@ -1,12 +1,18 @@
 package pers.solid.ecmd.util;
 
+import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.*;
 import net.minecraft.command.EntitySelectorOptions;
 import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.screen.ScreenTexts;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 
 import java.util.HashMap;
@@ -42,6 +48,52 @@ public final class ModCommandExceptionTypes {
   public static final DynamicCommandExceptionType UNKNOWN_STATUS_EFFECT = new DynamicCommandExceptionType(id -> Text.translatable("enhanced_commands.parsing.unknown_registry_entry.effect", id));
   public static final DynamicCommandExceptionType UNKNOWN_BIOME = new DynamicCommandExceptionType(id -> Text.translatable("enhanced_commands.parsing.unknown_registry_entry.biome", id));
   public static final SimpleCommandExceptionType CONTAINS_UPPER_CASE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.id.contains_upper_case"));
+
+  public static final Dynamic4CommandExceptionType EXCEPTION_SHOWING_TEXT = new Dynamic4CommandExceptionType((message, input, cursor, cursorEnd) -> {
+    Preconditions.checkArgument(message instanceof Text, "message not Text");
+    Preconditions.checkArgument(input == null || input instanceof String, "input not string");
+    Preconditions.checkArgument(cursor instanceof Integer, "cursor not Integer");
+    Preconditions.checkArgument(cursorEnd instanceof Integer, "cursorEnd not Integer");
+    return toErrorShowingInput((Text) message, (String) input, (int) cursor, (int) cursorEnd);
+  });
+
+  /**
+   * @see CommandManager#checkCommand
+   * @see pers.solid.ecmd.mixins.mixin.CommandManagerMixin#modifiedGetErrorMessage(String, CommandSyntaxException, int)
+   */
+  private static Text toErrorShowingInput(Text message, String input, int cursor, int cursorEnd) {
+    if (input != null && cursor >= 0) {
+      int i = Math.min(input.length(), cursor);
+      MutableText mutableText = Text.empty().formatted(Formatting.GRAY).styled((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, input)));
+      if (i > 10) {
+        mutableText.append(ScreenTexts.ELLIPSIS);
+      }
+
+      mutableText.append(input.substring(Math.max(0, i - 10), i));
+      if (i < input.length()) {
+        if (cursorEnd >= i) {
+          mutableText.append(Text.literal("»").formatted(Formatting.DARK_RED));
+        }
+        cursorEnd = Math.min(input.length(), cursorEnd);
+        String redString = input.substring(i);
+        if (cursorEnd >= i) {
+          redString = redString.substring(0, cursorEnd - i);
+        }
+        Text text = Text.literal(redString).formatted(Formatting.RED, Formatting.UNDERLINE);
+        mutableText.append(text);
+      }
+      if (cursorEnd >= i) {
+        mutableText.append(Text.literal("«").formatted(Formatting.DARK_RED));
+        mutableText.append(Text.literal(input.substring(cursorEnd, Math.min(cursorEnd + 10, input.length()))));
+      }
+
+      mutableText.append(Text.translatable("command.context.here").formatted(Formatting.RED, Formatting.ITALIC));
+
+      return ScreenTexts.joinLines(message, mutableText);
+    } else {
+      return message;
+    }
+  }
 
   public static final Map<RegistryKey<? extends Registry<?>>, DynamicCommandExceptionType> REGISTRY_ENTRY_EXCEPTION_TYPES = Util.make(new HashMap<>(), map -> {
     map.put(RegistryKeys.BLOCK, BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION);

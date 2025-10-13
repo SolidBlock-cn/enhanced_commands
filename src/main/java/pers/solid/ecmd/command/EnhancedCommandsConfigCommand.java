@@ -25,7 +25,7 @@ import pers.solid.ecmd.argument.AnyTypeArgumentType;
 import pers.solid.ecmd.configs.ConfigCategory;
 import pers.solid.ecmd.configs.ConfigEntry;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.Styles;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -34,8 +34,8 @@ import static net.minecraft.server.command.CommandManager.literal;
 public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  public static final DynamicCommandExceptionType UNKNOWN_CATEGORY = new DynamicCommandExceptionType(object -> Text.translatable("<unknown cateogry %s>", object));
-  public static final Dynamic2CommandExceptionType UNKNOWN_ENTRY = new Dynamic2CommandExceptionType((name, categoryName) -> Text.translatable("<unknown entry %s for category %s>", name, categoryName));
+  public static final DynamicCommandExceptionType UNKNOWN_CATEGORY = new DynamicCommandExceptionType(object -> Text.translatable("enhanced_commands.commands.config.unknown_category", object));
+  public static final Dynamic2CommandExceptionType UNKNOWN_ENTRY = new Dynamic2CommandExceptionType((name, categoryName) -> Text.translatable("enhanced_commands.commands.config.unknown_entry_for_category", name, categoryName));
 
   private static @Nullable ConfigCategory<?> getCategoryFromContext(CommandContext<ServerCommandSource> commandContext) {
     final String categoryName = StringArgumentType.getString(commandContext, "category");
@@ -51,7 +51,8 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
       final StringRange range = parsed.getRange();
       final StringReader stringReader = new StringReader(input);
       stringReader.setCursor(range.getStart());
-      throw CommandSyntaxExceptionExtension.withCursorEnd(UNKNOWN_CATEGORY.createWithContext(stringReader, categoryName), range.getEnd());
+      final CommandSyntaxException commandSyntaxException = UNKNOWN_CATEGORY.createWithContext(stringReader, categoryName);
+      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), commandSyntaxException.getInput(), commandSyntaxException.getCursor(), range.getEnd());
     } else {
       return category;
     }
@@ -71,7 +72,8 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
       final StringRange range = parsed.getRange();
       final StringReader stringReader = new StringReader(input);
       stringReader.setCursor(range.getStart());
-      throw CommandSyntaxExceptionExtension.withCursorEnd(UNKNOWN_ENTRY.createWithContext(stringReader, entryName, category.name), range.getEnd());
+      final CommandSyntaxException commandSyntaxException = UNKNOWN_ENTRY.createWithContext(stringReader, entryName, category.name);
+      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), commandSyntaxException.getInput(), commandSyntaxException.getCursor(), range.getEnd());
     } else {
       return entry;
     }
@@ -112,18 +114,22 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     stringReader.setCursor(range.getStart());
 
     final T parse = entry.type.getArgumentType(value.registryAccess()).parse(stringReader, context.getSource());
-    entry.setCurrent(parse);
-    context.getSource().sendFeedback$ecBridge(() -> Text.translatable("<success set %s to %s>", entry.displayName, entry.type.displayValue(parse, Styles.RESULT)), true);
+    try {
+      entry.setCurrent(parse);
+    } catch (CommandSyntaxException e) {
+      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), input, range.getStart(), range.getEnd());
+    }
+    context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.config.set.success", entry.displayName, entry.type.displayValue(parse, Styles.RESULT)), true);
     return 1;
   }
 
   private static <C, T> Text getTextSummaryForEntry(ConfigEntry<C, T> entry) {
     final MutableText text = Text.empty().append(entry.name);
     if (entry.description != null) {
-      text.append("\n  ").append(Text.translatable("<description>: %s", entry.description).styled(style -> style.withColor(0xffc0c0c0)));
+      text.append("\n  ").append(Text.translatable("enhanced_commands.commands.config.get.description", entry.description).styled(style -> style.withColor(0xffc0c0c0)));
     }
-    text.append("\n  ").append(Text.translatable("<default>: %s", entry.type.displayValue(entry.defaultValue)).styled(style -> style.withColor(0xffc0c0c0)));
-    text.append("\n  ").append(Text.translatable("<current>: %s", entry.type.displayValue(entry.getCurrent(), Styles.RESULT)).styled(style -> style.withColor(0xffc0f8d8)));
+    text.append("\n  ").append(Text.translatable("enhanced_commands.commands.config.get.default", entry.type.displayValue(entry.defaultValue)).styled(style -> style.withColor(0xffc0c0c0)));
+    text.append("\n  ").append(Text.translatable("enhanced_commands.commands.config.get.current", entry.type.displayValue(entry.getCurrent(), Styles.RESULT)).styled(style -> style.withColor(0xffc0f8d8)));
     return text;
   }
 

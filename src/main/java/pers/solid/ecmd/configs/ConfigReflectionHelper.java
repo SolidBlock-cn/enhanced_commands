@@ -6,12 +6,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 
 public final class ConfigReflectionHelper {
   private ConfigReflectionHelper() {
   }
 
-  public static <C> ConfigCategory<C> createFromReflection(Class<C> configClass) {
+  public static <C> ConfigCategory<C> createFromReflection(Class<C> configClass, Map<String, ConfigCategory.EntryModifier<C, ?>> entryModifiers) {
     final String categoryName = convertCamelToUnderscore(StringUtils.removeEnd(configClass.getSimpleName(), "Config"));
 
     // 加载默认配置
@@ -38,7 +39,7 @@ public final class ConfigReflectionHelper {
         continue;
       }
       final String name = convertCamelToUnderscore(field.getName());
-      createEntryForField(field, category, name, defaultConfig);
+      createEntryForField(field, category, name, defaultConfig, entryModifiers);
     }
 
     return category;
@@ -96,9 +97,9 @@ public final class ConfigReflectionHelper {
   }
 
   @SuppressWarnings("unchecked")
-  private static <C, T> void createEntryForField(@NotNull Field field, @NotNull ConfigCategory<C> category, @NotNull String name, C defaultConfig) {
+  private static <C, T> void createEntryForField(@NotNull Field field, @NotNull ConfigCategory<C> category, @NotNull String name, C defaultConfig, Map<String, ConfigCategory.EntryModifier<C, ?>> builderModifiers) {
     final Class<T> type = (Class<T>) field.getType();
-    category.createAndRecordEntry(name, ConfigEntryTypes.fromClass(type), c -> {
+    final ConfigEntry<C, T> entry = category.createEntry(name, ConfigEntryTypes.fromClass(type), c -> {
       try {
         return (T) field.get(c);
       } catch (IllegalAccessException e) {
@@ -116,7 +117,8 @@ public final class ConfigReflectionHelper {
       } catch (IllegalAccessException e) {
         throw new RuntimeException("Get default config value", e);
       }
-    }));
+    }), (ConfigCategory.EntryModifier<C, T>) builderModifiers.get(name));
+    category.configEntries.put(name, entry);
   }
 
   public static String convertCamelToUnderscore(String s) {

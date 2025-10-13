@@ -6,10 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public class ConfigCategory<C> {
   public static final Map<String, ConfigCategory<?>> REGISTRY = new LinkedHashMap<>();
@@ -35,10 +32,17 @@ public class ConfigCategory<C> {
     this(name, Text.translatable("enhanced_commands.config." + name + ".name"), Text.translatable("enhanced_cCommands.config." + name + ".description"), defaultConfig, currentConfigGetter, currentConfigSetter);
   }
 
-  public <T> ConfigEntry<C, T> createAndRecordEntry(@NotNull String name, @NotNull ConfigEntryType<T> type, @NotNull Function<C, T> getter, @NotNull BiConsumer<C, T> setter, @NotNull T defaultValue) {
-    final ConfigEntry<C, T> configEntry = new ConfigEntry<>(this, type, name, getter, setter, defaultValue);
-    configEntries.put(name, configEntry);
-    return configEntry;
+  public <T> ConfigEntry<C, T> createEntry(@NotNull String name, @NotNull ConfigEntryType<T> type, @NotNull Function<C, T> getter, @NotNull BiConsumer<C, T> setter, @NotNull T defaultValue, @Nullable EntryModifier<C, T> modifier) {
+    ConfigEntry.Builder<C, T> builder = ConfigEntry.builder(this, type, name)
+        .setGetter(getter)
+        .setSetter(setter)
+        .setDefaultValue(defaultValue)
+        .setDisplayName(Text::translatable)
+        .setDescription(Text::translatable);
+    if (modifier != null) {
+      builder = modifier.apply(builder);
+    }
+    return builder.build();
   }
 
   public C getCurrent() {
@@ -55,4 +59,6 @@ public class ConfigCategory<C> {
   public boolean isDirty() {
     return this.dirty;
   }
+
+  public interface EntryModifier<C, T> extends UnaryOperator<ConfigEntry.Builder<C, T>> {}
 }
