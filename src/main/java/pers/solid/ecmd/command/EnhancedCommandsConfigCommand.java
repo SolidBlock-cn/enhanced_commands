@@ -24,6 +24,7 @@ import pers.solid.ecmd.argument.AnyTypeArgumentType;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigEntry;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
@@ -180,7 +181,12 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     final StringReader stringReader = new StringReader(input);
     stringReader.setCursor(range.getStart());
 
-    final T parse = entry.type.getArgumentType(value.registryAccess()).parse(stringReader, context.getSource());
+    final T parse;
+    try {
+      parse = entry.type.getArgumentType(value.registryAccess()).parse(stringReader, context.getSource());
+    } catch (CommandSyntaxException e) {
+      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), e.getInput(), e.getCursor(), ((CommandSyntaxExceptionExtension) e).getCursorEnd$ec());
+    }
     if (stringReader.canRead()) {
       final CommandSyntaxException commandSyntaxException = CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
       throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), input, stringReader.getCursor(), -1);
@@ -190,7 +196,13 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     } catch (CommandSyntaxException e) {
       throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), input, range.getStart(), range.getEnd());
     }
-    context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.config.set.success", getClickableEntryName(entry), entry.type.displayValue(parse, Styles.RESULT)), true);
+    context.getSource().sendFeedback$ecBridge(() -> {
+      final MutableText text = Text.translatable("enhanced_commands.commands.config.set.success", getClickableEntryName(entry), entry.type.displayValue(parse, Styles.RESULT));
+      if (parse instanceof Boolean b) {
+        text.append(ScreenTexts.SPACE).append(getButtonToSetValueTo(entry, !b));
+      }
+      return text;
+    }, true);
     return 1;
   }
 
@@ -204,7 +216,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
       tool.append(TextUtil.wrapBoolean(b).styled(style -> style
           .withUnderline(true)
           .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.config.entry.set_value_tooltip", TextUtil.wrapBoolean(!b))))
-          .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/enhanced_commands:config " + entry.category.name + " " + entry.name + " " + !b))));
+          .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, createCommandForEntry(entry) + " " + !b))));
     } else {
       tool.append(entry.type.displayValue(current, style -> style.withColor(0xd0d0d0)));
     }
@@ -230,15 +242,19 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     text.append("\n  ").append(Text.translatable("enhanced_commands.commands.config.get.current", entry.type.displayValue(current, Styles.RESULT)).withColor(0xffc0c0c0));
     if (current instanceof Boolean b) {
       text.append(ScreenTexts.SPACE);
-      text.append(Text.literal("[").formatted(Formatting.DARK_GRAY)
-          .append(Text.translatable("enhanced_commands.commands.config.entry.set_value", TextUtil.literal(!b))
-              .styled(style -> style
-                  .withColor(0xffffffc0)
-                  .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.config.entry.set_value_tooltip", TextUtil.wrapBoolean(!b))))
-                  .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/enhanced_commands:config " + entry.category.name + " " + entry.name + " " + !b))))
-          .append("]"));
+      text.append(getButtonToSetValueTo(entry, !b));
     }
     return text;
+  }
+
+  private static <C, T> MutableText getButtonToSetValueTo(ConfigEntry<C, T> entry, boolean target) {
+    return Text.literal("[").formatted(Formatting.DARK_GRAY)
+        .append(Text.translatable("enhanced_commands.commands.config.entry.set_value", TextUtil.literal(target))
+            .styled(style -> style
+                .withColor(0xffc8c8c8)
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.config.entry.set_value_tooltip", TextUtil.wrapBoolean(target))))
+                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, createCommandForEntry(entry) + " " + target))))
+        .append("]");
   }
 
   @Override

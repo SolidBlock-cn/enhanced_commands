@@ -99,7 +99,7 @@ public final class ConfigReflectionHelper {
   @SuppressWarnings("unchecked")
   private static <C, T> void createEntryForField(@NotNull Field field, @NotNull ConfigCategory<C> category, @NotNull String name, C defaultConfig, Map<String, ConfigCategory.EntryModifier<C, ?>> builderModifiers) {
     final Class<T> type = (Class<T>) field.getType();
-    final ConfigEntry<C, T> entry = category.createEntry(name, ConfigEntryTypes.fromClass(type), c -> {
+    final ConfigEntry<C, T> entry = category.createEntry(name, ConfigEntryType.fromClass(type), c -> {
       try {
         return (T) field.get(c);
       } catch (IllegalAccessException e) {

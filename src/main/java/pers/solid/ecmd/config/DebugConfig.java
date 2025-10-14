@@ -5,6 +5,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+/**
+ * 本模组中用于调试的一些配置项。
+ */
 public class DebugConfig implements Cloneable {
   public static final DebugConfig DEFAULT = new DebugConfig();
   public static DebugConfig current = DEFAULT;
@@ -26,6 +29,21 @@ public class DebugConfig implements Cloneable {
    * @see pers.solid.ecmd.mixins.mixin.WorldBorderMixin
    */
   public boolean ignoreBorder = false;
+
+  /**
+   * 免疫虚空伤害。
+   *
+   * @see pers.solid.ecmd.mixins.mixin.LivingEntityMixin#ignoreVoidTick
+   * @see pers.solid.ecmd.mixins.mixin.EntityMixin#ignoreVoidTick
+   */
+  public int immuneToVoid = 0;
+  /**
+   * 即使玩家处于较低的地方，仍正常渲染天空，包括下方的天空和雾。
+   *
+   * @see pers.solid.ecmd.mixins.mixin.WorldRendererMixin#neverSkyDark
+   * @see pers.solid.ecmd.mixins.mixin.BackgroundRendererMixin#noDarkFogColor
+   */
+  public boolean noDarkSky = false;
 
   @Override
   public DebugConfig clone() {

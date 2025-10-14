@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.*;
 import com.mojang.serialization.Codec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.util.Util;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.HashMap;
@@ -29,16 +28,6 @@ public final class ConfigEntryTypes {
     map.put(double.class, DOUBLE);
     map.put(Double.class, DOUBLE);
   });
-
-  @SuppressWarnings("unchecked")
-  public static <T> @NotNull ConfigEntryType<T> fromClass(Class<T> classObject) {
-    final ConfigEntryType<?> configEntryType = CLASS_TO_TYPE.get(classObject);
-    if (configEntryType == null) {
-      throw new IllegalArgumentException("No such config entry type for " + classObject.toString());
-    } else {
-      return (ConfigEntryType<T>) configEntryType;
-    }
-  }
 
   private ConfigEntryTypes() {
   }

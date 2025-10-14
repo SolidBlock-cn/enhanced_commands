@@ -14,6 +14,16 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public interface ConfigEntryType<T> {
+  @SuppressWarnings("unchecked")
+  static <T> @NotNull ConfigEntryType<T> fromClass(Class<T> classObject) {
+    final ConfigEntryType<?> configEntryType = ConfigEntryTypes.CLASS_TO_TYPE.get(classObject);
+    if (configEntryType == null) {
+      throw new IllegalArgumentException("No such config entry type for " + classObject.toString());
+    } else {
+      return (ConfigEntryType<T>) configEntryType;
+    }
+  }
+
   @NotNull Codec<T> codec();
 
   @NotNull PacketCodec<? super RegistryByteBuf, T> packetCodec();
@@ -36,7 +46,7 @@ public interface ConfigEntryType<T> {
     return new Simple<>(codec, packetCodec, displayFunction, argumentTypeProvider);
   }
 
-  record Simple<T>(Codec<T> codec, PacketCodec<? super RegistryByteBuf, T> packetCodec, Function<T, Text> displayFunction, Function<CommandRegistryAccess, ArgumentType<T>> argumentTypeProvider) implements ConfigEntryType<T> {
+  record Simple<T>(Codec<T> codec, PacketCodec<? super RegistryByteBuf, T> packetCodec, Function<T, Text> displayFunction, Function<CommandRegistryAccess, ? extends ArgumentType<T>> argumentTypeProvider) implements ConfigEntryType<T> {
     @Override
     public @NotNull Text displayValue(T value) {
       return displayFunction.apply(value);

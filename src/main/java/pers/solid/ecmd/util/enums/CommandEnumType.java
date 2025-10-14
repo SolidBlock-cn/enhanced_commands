@@ -9,6 +9,8 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.AxisArgument;
 import pers.solid.ecmd.argument.SimpleEnumArgumentType;
@@ -27,7 +29,7 @@ import java.util.function.Function;
  * @param nameProvider 将枚举常量转化为 {@link Message} 的函数，用于命令界面的 tooltip
  * @param <E>          枚举的类型
  */
-public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, EnumCodec<E> codec, Function<E, Message> nameProvider) {
+public record CommandEnumType<E extends Enum<E>>(@NotNull ImmutableCollection<E> values, @NotNull EnumCodec<E> codec, @NotNull Function<E, @Nullable Message> nameProvider) {
   public static final Text HORIZONTAL_TEXT = Text.translatable("enhanced_commands.direction_type.horizontal");
   public static final Text VERTICAL_TEXT = Text.translatable("enhanced_commands.direction_type.vertical");
   public static final RegistryKey<Registry<CommandEnumType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("command_enum_type"));

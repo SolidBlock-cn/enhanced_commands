@@ -21,6 +21,7 @@
     "GameModeArgumentTypeMixin",
     "GameModeMixin",
     "IdentifierMixin",
+    "LivingEntityMixin",
     "LocateCommandMixin",
     "MinecraftServerMixin",
     "NbtPathArgumentTypeMixin",
@@ -38,8 +39,10 @@
     "WorldMixin"
   ],
   "client": [
+    "BackgroundRendererMixin",
     "ClientPlayerInteractionManagerMixin",
-    "InGameHudMixin"
+    "InGameHudMixin",
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

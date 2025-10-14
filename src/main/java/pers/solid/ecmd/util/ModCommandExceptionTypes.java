@@ -76,7 +76,7 @@ public final class ModCommandExceptionTypes {
   private static Text toErrorShowingInput(Text message, String input, int cursor, int cursorEnd) {
     if (input != null && cursor >= 0) {
       int i = Math.min(input.length(), cursor);
-      MutableText mutableText = Text.empty().formatted(Formatting.GRAY).styled((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, input)));
+      MutableText mutableText = Text.empty().formatted(Formatting.GRAY).styled((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + input)));
       if (i > 10) {
         mutableText.append(ScreenTexts.ELLIPSIS);
       }
