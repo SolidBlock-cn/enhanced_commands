@@ -1,6 +1,6 @@
 package pers.solid.ecmd.region;
 
-import com.google.common.collect.Streams;
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -21,8 +21,6 @@ import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.enums.OutlineType;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull CylinderRegion region) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
   public static final MapCodec<HollowCylinderRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -72,35 +70,30 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
 
   @Override
   public @NotNull Iterator<BlockPos> iterator() {
-    return stream().iterator();
-  }
-
-  @Override
-  public Stream<@NotNull BlockPos> stream() {
     final Vec3d center = region.center();
     final double radius = region.radius();
     final int topHeight = region.getTopHeight();
     final int bottomHeight = region.getBottomHeight();
 
     final Iterable<@NotNull BlockPos> iterable = BlockPos.iterate(MathHelper.ceil(center.x - radius - 0.5), 0, MathHelper.ceil(center.z - radius - 0.5), MathHelper.floor(center.x + radius - 0.5), 0, MathHelper.floor(center.z + radius - 0.5));
-    final Stream<@NotNull BlockPos> flatOutlineRoundStream = Streams.stream(iterable).filter(blockPos -> horizontallyWithinHollowCylinder(region, outlineType, blockPos));
+    final Iterable<@NotNull BlockPos> flatOutlineRound = Iterables.filter(iterable, blockPos -> horizontallyWithinHollowCylinder(region, outlineType, blockPos));
     if (outlineType == OutlineType.OUTLINE || outlineType == OutlineType.OUTLINE_CONNECTED || outlineType == OutlineType.FLOOR_AND_CEIL) {
       if (topHeight == bottomHeight) {
-        return Streams.stream(iterable).map(blockPos -> blockPos.withY(bottomHeight));
+        return Iterables.transform(iterable, blockPos -> blockPos.withY(bottomHeight)).iterator();
       } else if (topHeight < bottomHeight) {
         throw new IllegalStateException("Invalid hollow cylinder! topHeight < bottomHeight, topHeight = " + topHeight + ", bottomHeight = " + bottomHeight);
       }
-      List<Stream<BlockPos>> parts = new ArrayList<>();
+      List<Iterable<@NotNull BlockPos>> parts = new ArrayList<>();
       // add top and bottom ceiling
-      parts.add(Streams.stream(iterable).filter(blockPos -> horizontallyWithinCylinder(region, Vec3d.ofCenter(blockPos))).flatMap(blockPos -> Stream.of(blockPos.withY(topHeight), blockPos.withY(bottomHeight))));
+      parts.add(Iterables.concat(Iterables.transform(Iterables.filter(iterable, blockPos -> horizontallyWithinCylinder(region, Vec3d.ofCenter(blockPos))), blockPos -> List.of(blockPos.withY(topHeight), blockPos.withY(bottomHeight)))));
       // add walls that excluded the top and bottom ceiling
       if (outlineType != OutlineType.FLOOR_AND_CEIL && topHeight - 1 > bottomHeight + 1) {
-        parts.add(flatOutlineRoundStream.flatMap(blockPos -> BlockPos.stream(blockPos.getX(), bottomHeight + 1, blockPos.getZ(), blockPos.getX(), topHeight - 1, blockPos.getZ()).map(BlockPos::toImmutable)));
+        parts.add(Iterables.concat(Iterables.transform(flatOutlineRound, blockPos -> Iterables.transform(BlockPos.iterate(blockPos.getX(), bottomHeight + 1, blockPos.getZ(), blockPos.getX(), topHeight - 1, blockPos.getZ()), BlockPos::toImmutable))));
       }
-      return parts.stream().flatMap(Function.identity());
+      return Iterables.concat(parts).iterator();
     } else {
       // walls only
-      return flatOutlineRoundStream.flatMap(blockPos -> BlockPos.stream(blockPos.getX(), bottomHeight, blockPos.getZ(), blockPos.getX(), topHeight, blockPos.getZ()));
+      return Iterables.concat(Iterables.transform(flatOutlineRound, blockPos -> BlockPos.iterate(blockPos.getX(), bottomHeight, blockPos.getZ(), blockPos.getX(), topHeight, blockPos.getZ()))).iterator();
     }
   }
 
@@ -165,6 +158,7 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
   }
 
   public static final class Parser implements FunctionLikeParser.MixedParams<HollowCylinderRegionArgument> {
+    private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "height", "center", "type");
     private @Nullable Double radius = null;
     private @Nullable Double height = null;
     private @Nullable EnhancedPosArgument center = null;
@@ -172,7 +166,7 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
 
     @Override
     public HollowCylinderRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new HollowCylinderRegionArgument(type == null ? OutlineType.WALL : type, new CylinderRegionArgument(radius == null ? 1 : radius, height == null ? 1 : 0, center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : center));
+      return new HollowCylinderRegionArgument(type == null ? OutlineType.WALL : type, new CylinderRegionArgument(radius == null ? 1 : radius, height == null ? 1 : height, center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : center));
     }
 
     @Override
@@ -221,8 +215,6 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
     public int maxSequentialParamsCount() {
       return 4;
     }
-
-    private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "height", "center", "type");
 
     @Override
     public @Unmodifiable Collection<String> supportedParams() {
