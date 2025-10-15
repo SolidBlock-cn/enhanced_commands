@@ -17,6 +17,10 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Objects;
 
+/**
+ * <p>此类用于管理各配置分类的读取和保存。
+ * <p>本模组的配置文件存储于：<code><游戏目录>/config/enhanced_command/<分类名称>.json</code>
+ */
 public final class ConfigManager {
   public static final Gson GSON = new GsonBuilder()
       .setPrettyPrinting()

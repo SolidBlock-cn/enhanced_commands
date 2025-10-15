@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * 本模组所使用的所有配置项。
+ */
 public final class ConfigCategories {
   public static final ConfigCategory<CommandsConfig> COMMANDS = register(CommandsConfig.class);
   public static final ConfigCategory<EntitySelectorConfig> ENTITY_SELECTOR = register(EntitySelectorConfig.class);

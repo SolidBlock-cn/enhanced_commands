@@ -9,6 +9,9 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 本模组使用的配置项的类型。
+ */
 public final class ConfigEntryTypes {
   public static final ConfigEntryType<Boolean> BOOLEAN = ConfigEntryType.of(Codec.BOOL, PacketCodecs.BOOLEAN, TextUtil::wrapBoolean, BoolArgumentType.bool());
   public static final ConfigEntryType<Integer> INTEGER = ConfigEntryType.of(Codec.INT, PacketCodecs.INTEGER, TextUtil::literal, IntegerArgumentType.integer());
@@ -16,6 +19,9 @@ public final class ConfigEntryTypes {
   public static final ConfigEntryType<Float> FLOAT = ConfigEntryType.of(Codec.FLOAT, PacketCodecs.FLOAT, TextUtil::literal, FloatArgumentType.floatArg());
   public static final ConfigEntryType<Double> DOUBLE = ConfigEntryType.of(Codec.DOUBLE, PacketCodecs.DOUBLE, TextUtil::literal, DoubleArgumentType.doubleArg());
 
+  /**
+   * 类到配置项类型对象的映射，主要用于 {@link ConfigEntryType#fromClass}。
+   */
   public static final Map<Class<?>, ConfigEntryType<?>> CLASS_TO_TYPE = Util.make(new HashMap<>(), map -> {
     map.put(boolean.class, BOOLEAN);
     map.put(Boolean.class, BOOLEAN);
