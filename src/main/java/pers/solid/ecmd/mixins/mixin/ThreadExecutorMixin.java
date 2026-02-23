@@ -1,7 +1,7 @@
 package pers.solid.ecmd.mixins.mixin;
 
 import com.google.common.collect.MapMaker;
-import net.minecraft.util.thread.ThreadExecutor;
+import net.minecraft.util.thread.BlockableEventLoop;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -13,7 +13,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-@Mixin(ThreadExecutor.class)
+@Mixin(BlockableEventLoop.class)
 public class ThreadExecutorMixin implements ThreadExecutorExtension {
   @Unique
   private final Map<UUID, IteratorTask<?>> uuidToTask = new MapMaker().weakValues().makeMap();

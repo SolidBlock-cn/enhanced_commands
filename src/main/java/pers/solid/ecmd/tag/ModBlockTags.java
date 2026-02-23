@@ -1,12 +1,12 @@
 package pers.solid.ecmd.tag;
 
-import net.minecraft.block.Block;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 import pers.solid.ecmd.EnhancedCommands;
 
 /**
- * @see net.minecraft.registry.tag.BlockTags
+ * @see net.minecraft.tags.BlockTags
  */
 public final class ModBlockTags {
   public static final TagKey<Block> RED_COLORS = of("red_colors");
@@ -34,6 +34,6 @@ public final class ModBlockTags {
   public static final TagKey<Block> NETHER_VINES = of("nether_vines");
 
   private static TagKey<Block> of(String name) {
-    return TagKey.of(RegistryKeys.BLOCK, EnhancedCommands.id(name));
+    return TagKey.create(Registries.BLOCK, EnhancedCommands.id(name));
   }
 }

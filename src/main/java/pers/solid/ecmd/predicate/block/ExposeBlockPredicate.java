@@ -5,14 +5,14 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.util.function.BooleanBiFunction;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -34,17 +34,17 @@ import java.util.TreeSet;
  * @param directions   The directions to test exposure.
  */
 public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull List<@NotNull Direction> directions) implements BlockPredicate {
-  public static final MapCodec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), Codecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", List.of(Direction.values())).forGetter(ExposeBlockPredicate::directions)));
+  public static final MapCodec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), ExtraCodecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", List.of(Direction.values())).forGetter(ExposeBlockPredicate::directions)));
 
   @Override
   public @NotNull String asString() {
-    return "expose(" + exposureType.asString() + ", " + String.join(" ", Iterables.transform(directions, Direction::asString)) + ")";
+    return "expose(" + exposureType.getSerializedName() + ", " + String.join(" ", Iterables.transform(directions, Direction::getSerializedName)) + ")";
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     for (Direction direction : directions) {
-      var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
+      var offsetCachedBlockPosition = new BlockInWorld(cachedBlockPosition.getLevel(), cachedBlockPosition.getPos().relative(direction), false);
       if (exposureType.test(offsetCachedBlockPosition, direction))
         return true;
     }
@@ -52,13 +52,13 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     List<TestResult> testResults = new ArrayList<>();
     boolean result = false;
     for (Direction direction : directions) {
-      var offsetCachedBlockPosition = new CachedBlockPosition(cachedBlockPosition.getWorld(), cachedBlockPosition.getBlockPos().offset(direction), false);
+      var offsetCachedBlockPosition = new BlockInWorld(cachedBlockPosition.getLevel(), cachedBlockPosition.getPos().relative(direction), false);
       final boolean test = exposureType.test(offsetCachedBlockPosition, direction);
-      testResults.add(TestResult.of(test, Text.translatable("enhanced_commands.block_predicate.expose.side." + (test ? "pass" : "fail"), TextUtil.wrapDirection(direction))));
+      testResults.add(TestResult.of(test, Component.translatable("enhanced_commands.block_predicate.expose.side." + (test ? "pass" : "fail"), TextUtil.wrapDirection(direction))));
       if (test) {
         result = true;
       }
@@ -66,7 +66,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     if (testResults.size() == 1) {
       return testResults.get(0);
     } else {
-      return TestResult.of(result, Text.translatable("enhanced_commands.block_predicate.expose." + (result ? "pass" : "fail")), testResults);
+      return TestResult.of(result, Component.translatable("enhanced_commands.block_predicate.expose." + (result ? "pass" : "fail")), testResults);
     }
   }
 
@@ -78,14 +78,14 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   /**
    * The type to test which the block is exposed.
    */
-  public enum ExposureType implements StringIdentifiable {
+  public enum ExposureType implements StringRepresentable {
     /**
      * The block is exposed to a block with empty collision shape, such as air, torch or flower.
      */
     EMPTY_COLLISION("empty_collision") {
       @Override
-      public boolean test(CachedBlockPosition offsetCachedBlockPosition, Direction direction) {
-        return offsetCachedBlockPosition.getBlockState().getCollisionShape(offsetCachedBlockPosition.getWorld(), offsetCachedBlockPosition.getBlockPos()).isEmpty();
+      public boolean test(BlockInWorld offsetCachedBlockPosition, Direction direction) {
+        return offsetCachedBlockPosition.getState().getCollisionShape(offsetCachedBlockPosition.getLevel(), offsetCachedBlockPosition.getPos()).isEmpty();
       }
     },
     /**
@@ -93,8 +93,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
      */
     EMPTY_SIDE_COLLISION("empty_side_collision") {
       @Override
-      public boolean test(CachedBlockPosition offsetCachedBlockPosition, Direction direction) {
-        return offsetCachedBlockPosition.getBlockState().getCollisionShape(offsetCachedBlockPosition.getWorld(), offsetCachedBlockPosition.getBlockPos()).getFace(direction.getOpposite()).isEmpty();
+      public boolean test(BlockInWorld offsetCachedBlockPosition, Direction direction) {
+        return offsetCachedBlockPosition.getState().getCollisionShape(offsetCachedBlockPosition.getLevel(), offsetCachedBlockPosition.getPos()).getFaceShape(direction.getOpposite()).isEmpty();
       }
     },
     /**
@@ -102,8 +102,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
      */
     AIR("air") {
       @Override
-      public boolean test(CachedBlockPosition offsetCachedBlockPosition, Direction direction) {
-        return offsetCachedBlockPosition.getBlockState().isAir();
+      public boolean test(BlockInWorld offsetCachedBlockPosition, Direction direction) {
+        return offsetCachedBlockPosition.getState().isAir();
       }
     },
     /**
@@ -111,8 +111,8 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
      */
     INCOMPLETE_SIDE_COLLISION("incomplete_side_collision") {
       @Override
-      public boolean test(CachedBlockPosition offsetCachedBlockPosition, Direction direction) {
-        return !VoxelShapes.combine(VoxelShapes.fullCube(), offsetCachedBlockPosition.getBlockState().getCollisionShape(offsetCachedBlockPosition.getWorld(), offsetCachedBlockPosition.getBlockPos()).getFace(direction.getOpposite()), BooleanBiFunction.ONLY_FIRST).isEmpty();
+      public boolean test(BlockInWorld offsetCachedBlockPosition, Direction direction) {
+        return !Shapes.joinUnoptimized(Shapes.block(), offsetCachedBlockPosition.getState().getCollisionShape(offsetCachedBlockPosition.getLevel(), offsetCachedBlockPosition.getPos()).getFaceShape(direction.getOpposite()), BooleanOp.ONLY_FIRST).isEmpty();
       }
     };
     public static final StringIdentifiableCodec<ExposureType> CODEC = StringIdentifiableCodec.create(ExposureType.values());
@@ -123,14 +123,14 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
 
-    public abstract boolean test(CachedBlockPosition offsetCachedBlockPosition, Direction direction);
+    public abstract boolean test(BlockInWorld offsetCachedBlockPosition, Direction direction);
 
-    public MutableText getDisplayName() {
-      return Text.translatable("enhanced_commands.exposure_type." + name);
+    public MutableComponent getDisplayName() {
+      return Component.translatable("enhanced_commands.exposure_type." + name);
     }
   }
 
@@ -174,9 +174,9 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
           reader.skipWhitespace();
           if (directions.isEmpty()) {
             parseContext.addSuggestion((context, suggestionsBuilder) -> {
-              ParsingUtil.suggestString("all", Text.translatable("enhanced_commands.direction.all"), suggestionsBuilder);
-              ParsingUtil.suggestString("horizontal", Text.translatable("enhanced_commands.direction.horizontal"), suggestionsBuilder);
-              ParsingUtil.suggestString("vertical", Text.translatable("enhanced_commands.direction.vertical"), suggestionsBuilder);
+              ParsingUtil.suggestString("all", Component.translatable("enhanced_commands.direction.all"), suggestionsBuilder);
+              ParsingUtil.suggestString("horizontal", Component.translatable("enhanced_commands.direction.horizontal"), suggestionsBuilder);
+              ParsingUtil.suggestString("vertical", Component.translatable("enhanced_commands.direction.vertical"), suggestionsBuilder);
               return suggestionsBuilder.buildFuture();
             });
           }
@@ -192,11 +192,11 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
                 continue;
               }
               case "horizontal" -> {
-                Direction.Type.HORIZONTAL.forEach(directions::add);
+                Direction.Plane.HORIZONTAL.forEach(directions::add);
                 continue;
               }
               case "vertical" -> {
-                Direction.Type.VERTICAL.forEach(directions::add);
+                Direction.Plane.VERTICAL.forEach(directions::add);
                 continue;
               }
             }

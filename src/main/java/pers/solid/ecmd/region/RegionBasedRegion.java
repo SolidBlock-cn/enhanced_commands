@@ -1,7 +1,12 @@
 package pers.solid.ecmd.region;
 
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,24 +41,24 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
 
   @Override
   @NotNull
-  default T moved(@NotNull Vec3d relativePos) {
+  default T moved(@NotNull Vec3 relativePos) {
     return newRegion((R) region().moved(relativePos));
   }
 
   @Override
   @NotNull
-  default T rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
+  default T rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
     return newRegion((R) region().rotated(blockRotation, pivot));
   }
 
   @Override
   @NotNull
-  default T mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
+  default T mirrored(Direction.@NotNull Axis axis, @NotNull Vec3 pivot) {
     return newRegion((R) region().mirrored(axis, pivot));
   }
 
   @Override
-  default @NotNull T transformed(Function<Vec3d, Vec3d> transformation) {
+  default @NotNull T transformed(Function<Vec3, Vec3> transformation) {
     return newRegion((R) region().transformed(transformation));
   }
 
@@ -77,12 +82,12 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
 
   @Override
   @NotNull
-  default T expanded(double offset, Direction.Type type) {
+  default T expanded(double offset, Direction.Plane type) {
     return newRegion((R) region().expanded(offset, type));
   }
 
   @Override
-  default boolean contains(@NotNull Vec3d vec3d) {
+  default boolean contains(@NotNull Vec3 vec3d) {
     return region().contains(vec3d);
   }
 
@@ -97,13 +102,13 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
   }
 
   @Override
-  default @Nullable BlockBox minContainingBlockBox() {
+  default @Nullable BoundingBox minContainingBlockBox() {
     return region().minContainingBlockBox();
   }
 
   @Override
   @Nullable
-  default Box minContainingBox() {
+  default AABB minContainingBox() {
     return region().minContainingBox();
   }
 
@@ -123,7 +128,7 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
 
     @Override
     @NotNull
-    default T moved(@NotNull Vec3d relativePos) {
+    default T moved(@NotNull Vec3 relativePos) {
       return RegionBasedRegion.super.moved(relativePos);
     }
 
@@ -143,24 +148,24 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
     }
 
     @Override
-    default T expanded(int offset, Direction.Type type) {
+    default T expanded(int offset, Direction.Plane type) {
       return newRegion((R) region().expanded(offset, type));
     }
 
     @Override
     @NotNull
-    default T rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
+    default T rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
       return RegionBasedRegion.super.rotated(blockRotation, pivot);
     }
 
     @Override
     @NotNull
-    default T mirrored(@NotNull Direction.Axis axis, @NotNull Vec3d pivot) {
+    default T mirrored(@NotNull Direction.Axis axis, @NotNull Vec3 pivot) {
       return RegionBasedRegion.super.mirrored(axis, pivot);
     }
 
     @Override
-    default @NotNull T transformed(Function<Vec3d, Vec3d> transformation) {
+    default @NotNull T transformed(Function<Vec3, Vec3> transformation) {
       return (T) IntBackedRegion.super.transformed(transformation);
     }
 
@@ -189,12 +194,12 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
 
     @Override
     @NotNull
-    default T expanded(double offset, Direction.Type type) {
+    default T expanded(double offset, Direction.Plane type) {
       return RegionBasedRegion.super.expanded(offset, type);
     }
 
     @Override
-    default boolean contains(@NotNull Vec3d vec3d) {
+    default boolean contains(@NotNull Vec3 vec3d) {
       return IntBackedRegion.super.contains(vec3d);
     }
 
@@ -210,13 +215,13 @@ public interface RegionBasedRegion<T extends RegionBasedRegion<T, R>, R extends 
 
     @Override
     @Nullable
-    default BlockBox minContainingBlockBox() {
+    default BoundingBox minContainingBlockBox() {
       return region().minContainingBlockBox();
     }
 
     @Override
     @Nullable
-    default Box minContainingBox() {
+    default AABB minContainingBox() {
       return region().minContainingBox();
     }
 

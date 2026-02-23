@@ -13,22 +13,22 @@ import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.chars.CharSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
@@ -52,17 +52,17 @@ import java.util.regex.PatternSyntaxException;
  * 此类包含与命令解析和建议有关的静态实用方法。
  */
 public final class ParsingUtil {
-  public static final DynamicCommandExceptionType UNKNOWN_VALUE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.unknown_value", o));
+  public static final DynamicCommandExceptionType UNKNOWN_VALUE = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.argument.unknown_value", o));
   private static final CharSet EXTENDED_ALLOWED_STRINGS = CharSet.of('!', '@', '#', '$', '%', '^', '&', '*', '?', '\\');
 
   private ParsingUtil() {
   }
 
   /**
-   * 提供基于指定的枚举值的建议，其中建议的内容由 {@link StringIdentifiable#asString()} 提供。
+   * 提供基于指定的枚举值的建议，其中建议的内容由 {@link StringRepresentable#getSerializedName()} 提供。
    */
-  public static <T extends StringIdentifiable> CompletableFuture<Suggestions> suggestMatchingEnumWithTooltip(Iterable<T> enumIterable, Function<T, Message> tooltip, SuggestionsBuilder builder) {
-    return CommandSource.suggestMatching(enumIterable, builder, StringIdentifiable::asString, tooltip);
+  public static <T extends StringRepresentable> CompletableFuture<Suggestions> suggestMatchingEnumWithTooltip(Iterable<T> enumIterable, Function<T, Message> tooltip, SuggestionsBuilder builder) {
+    return SharedSuggestionProvider.suggest(enumIterable, builder, StringRepresentable::getSerializedName, tooltip);
   }
 
   /**
@@ -72,7 +72,7 @@ public final class ParsingUtil {
    * @param tooltip    将字符串映射到 {@link Message} 以提供提示文本的函数。
    */
   public static CompletableFuture<Suggestions> suggestMatchingStringWithTooltip(Iterable<String> candidates, Function<String, Message> tooltip, SuggestionsBuilder builder) {
-    return CommandSource.suggestMatching(candidates, builder, Functions.identity(), tooltip);
+    return SharedSuggestionProvider.suggest(candidates, builder, Functions.identity(), tooltip);
   }
 
   public static CompletableFuture<Suggestions> suggestDirections(Iterable<Direction> directions, SuggestionsBuilder builder) {
@@ -87,7 +87,7 @@ public final class ParsingUtil {
    * 在输入布尔值时，提供布尔值的建议。
    */
   public static CompletableFuture<Suggestions> suggestBoolean(SuggestionsBuilder builder) {
-    return CommandSource.suggestMatching(new String[]{"true", "false"}, builder);
+    return SharedSuggestionProvider.suggest(new String[]{"true", "false"}, builder);
   }
 
   /**
@@ -98,7 +98,7 @@ public final class ParsingUtil {
    */
   public static SuggestionsBuilder suggestString(String candidate, Supplier<Message> tooltip, SuggestionsBuilder builder) {
     String remaining = builder.getRemainingLowerCase();
-    if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase(Locale.ROOT))) {
+    if (SharedSuggestionProvider.matchesSubStr(remaining, candidate.toLowerCase(Locale.ROOT))) {
       builder.suggest(candidate, tooltip.get());
     }
     return builder;
@@ -111,7 +111,7 @@ public final class ParsingUtil {
    */
   public static SuggestionsBuilder suggestString(String candidate, SuggestionsBuilder builder) {
     String remaining = builder.getRemainingLowerCase();
-    if (CommandSource.shouldSuggest(remaining, candidate.toLowerCase(Locale.ROOT))) {
+    if (SharedSuggestionProvider.matchesSubStr(remaining, candidate.toLowerCase(Locale.ROOT))) {
       builder.suggest(candidate);
     }
     return builder;
@@ -223,7 +223,7 @@ public final class ParsingUtil {
     if (isAllowedInUnquotedString(s)) {
       return s;
     } else {
-      return NbtString.escape(s);
+      return StringTag.quoteAndEscape(s);
     }
   }
 
@@ -294,8 +294,8 @@ public final class ParsingUtil {
     return JsonReaderUtilsAccessor.invokeGetPos(jsonReader) - 1;
   }
 
-  public static <A, E extends Throwable> A parseNbt(StringReader reader, FailableFunction<NbtElement, A, E> readFunction) throws E, CommandSyntaxException {
-    final NbtElement nbtElement = new StringNbtReader(reader).parseElement();
+  public static <A, E extends Throwable> A parseNbt(StringReader reader, FailableFunction<Tag, A, E> readFunction) throws E, CommandSyntaxException {
+    final Tag nbtElement = new TagParser(reader).readValue();
     return readFunction.apply(nbtElement);
   }
 
@@ -303,12 +303,12 @@ public final class ParsingUtil {
     return parseNbt(reader, element -> codec.parse(NbtOps.INSTANCE, element).getOrThrow(exceptionSupplier));
   }
 
-  public static <T> void registerNameSuggestionProvider(RegistryKey<? extends Registry<T>> registryKey, Function<? super T, ? extends Message> function) {
+  public static <T> void registerNameSuggestionProvider(ResourceKey<? extends Registry<T>> registryKey, Function<? super T, ? extends Message> function) {
     NameSuggestionsInitHolder.NAME_SUGGESTION_PROVIDERS.put(registryKey, function);
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Function<? super T, ? extends Message> getNameSuggestionProvider(RegistryKey<? extends Registry<T>> registryKey) {
+  public static <T> Function<? super T, ? extends Message> getNameSuggestionProvider(ResourceKey<? extends Registry<T>> registryKey) {
     return (Function<? super T, ? extends Message>) NameSuggestionsInitHolder.NAME_SUGGESTION_PROVIDERS.get(registryKey);
   }
 
@@ -321,7 +321,7 @@ public final class ParsingUtil {
    *   <li>{@code 1, 2, 3} -> {@code (1, 2, 3)}</li>
    * </ul>
    */
-  public static @NotNull Vec3d parseShortenableVec3d(StringReader reader) throws CommandSyntaxException {
+  public static @NotNull Vec3 parseShortenableVec3d(StringReader reader) throws CommandSyntaxException {
     final double x = reader.readDouble();
     final int beforeFirstWhite = reader.getCursor();
     reader.skipWhitespace();
@@ -331,29 +331,29 @@ public final class ParsingUtil {
       reader.skipWhitespace();
       if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
         final double z = reader.readDouble();
-        return new Vec3d(x, y, z);
+        return new Vec3(x, y, z);
       } else {
         reader.setCursor(beforeSecondWhite);
-        return new Vec3d(x, y, x);
+        return new Vec3(x, y, x);
       }
     } else {
       reader.setCursor(beforeFirstWhite);
-      return new Vec3d(x, x, x);
+      return new Vec3(x, x, x);
     }
   }
 
   private static class NameSuggestionsInitHolder {
-    private static final Reference2ReferenceMap<RegistryKey<? extends Registry<?>>, Function<?, ? extends Message>> NAME_SUGGESTION_PROVIDERS = new Reference2ReferenceOpenHashMap<>();
+    private static final Reference2ReferenceMap<ResourceKey<? extends Registry<?>>, Function<?, ? extends Message>> NAME_SUGGESTION_PROVIDERS = new Reference2ReferenceOpenHashMap<>();
 
     static {
       initDefaultSuggestionProviders();
     }
 
     private static void initDefaultSuggestionProviders() {
-      registerNameSuggestionProvider(RegistryKeys.BLOCK, Block::getName);
-      registerNameSuggestionProvider(RegistryKeys.ITEM, Item::getName);
-      registerNameSuggestionProvider(RegistryKeys.ENTITY_TYPE, EntityType::getName);
-      registerNameSuggestionProvider(RegistryKeys.STATUS_EFFECT, StatusEffect::getName);
+      registerNameSuggestionProvider(Registries.BLOCK, Block::getName);
+      registerNameSuggestionProvider(Registries.ITEM, Item::getDescription);
+      registerNameSuggestionProvider(Registries.ENTITY_TYPE, EntityType::getDescription);
+      registerNameSuggestionProvider(Registries.MOB_EFFECT, MobEffect::getDisplayName);
     }
   }
 }

@@ -1,9 +1,9 @@
 package pers.solid.ecmd.mixins.mixin;
 
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,7 +23,7 @@ import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-@Mixin(ServerPlayerEntity.class)
+@Mixin(ServerPlayer.class)
 public abstract class ServerPlayerEntityMixin implements ServerPlayerEntityExtension, HistoryHolder {
   @Shadow
   @Final
@@ -37,17 +37,17 @@ public abstract class ServerPlayerEntityMixin implements ServerPlayerEntityExten
 
   @Override
   public @Nullable RegionSelection getActiveRegion$ec() {
-    return ((PlayerEntity) (Object) this).getDataTracker().get(ModTrackedData.PLAYER_REGION_SELECTION).orElse(null);
+    return ((Player) (Object) this).getEntityData().get(ModTrackedData.PLAYER_REGION_SELECTION).orElse(null);
   }
 
   @Override
   public void syncActiveRegion$ec() {
-    final DataTracker dataTracker = ((PlayerEntity) (Object) this).getDataTracker();
+    final SynchedEntityData dataTracker = ((Player) (Object) this).getEntityData();
     dataTracker.set(ModTrackedData.PLAYER_REGION_SELECTION, dataTracker.get(ModTrackedData.PLAYER_REGION_SELECTION), true);
   }
 
-  @Inject(method = "copyFrom", at = @At("TAIL"))
-  public void injectedCopyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
+  @Inject(method = "restoreFrom", at = @At("TAIL"))
+  public void injectedCopyFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
     // 玩家重生时，需保留这些信息。
     setActiveRegion$ec(oldPlayer.getActiveRegion$ec());
     setRegionSelectionType$ec(oldPlayer.getRegionSelectionType$ec());

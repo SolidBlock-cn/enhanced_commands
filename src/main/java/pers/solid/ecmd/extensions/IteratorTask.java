@@ -1,20 +1,20 @@
 package pers.solid.ecmd.extensions;
 
 import com.google.common.collect.ForwardingIterator;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.UUID;
 
 public class IteratorTask<T> extends ForwardingIterator<T> {
-  public final Text name;
+  public final Component name;
   public final UUID uuid;
   private final Iterator<T> delegate;
   private boolean started;
   public boolean suspended = false;
 
-  public IteratorTask(@NotNull Text name, @NotNull UUID uuid, @NotNull Iterator<T> delegate) {
+  public IteratorTask(@NotNull Component name, @NotNull UUID uuid, @NotNull Iterator<T> delegate) {
     this.name = name;
     this.uuid = uuid;
     this.delegate = delegate;

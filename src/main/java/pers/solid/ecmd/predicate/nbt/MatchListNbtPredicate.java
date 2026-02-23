@@ -5,8 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -50,13 +50,13 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
   }
 
   @Override
-  public boolean test(@NotNull NbtElement nbtElement) {
-    if (!(nbtElement instanceof NbtList nbtList)) {
+  public boolean test(@NotNull Tag nbtElement) {
+    if (!(nbtElement instanceof ListTag nbtList)) {
       return inverted;
     }
     for (NbtPredicate nbtPredicate : expected) {
       boolean elementMatched = false;
-      for (NbtElement actualElement : nbtList) {
+      for (Tag actualElement : nbtList) {
         if (nbtPredicate.test(actualElement)) {
           elementMatched = true;
           break;
@@ -84,7 +84,7 @@ public record MatchListNbtPredicate(List<@NotNull NbtPredicate> expected, List<I
 
   @Override
   public @NotNull NbtPredicateType<MatchListNbtPredicate> getType() {
-    return Type.MATCH_LIST_TYPE;
+    return pers.solid.ecmd.predicate.nbt.MatchListNbtPredicate.Type.MATCH_LIST_TYPE;
   }
 
   public enum Type implements NbtPredicateType<MatchListNbtPredicate> {

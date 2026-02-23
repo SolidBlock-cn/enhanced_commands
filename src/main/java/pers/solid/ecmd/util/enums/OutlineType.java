@@ -1,18 +1,18 @@
 package pers.solid.ecmd.util.enums;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.StringRepresentable;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public enum OutlineType implements StringIdentifiable {
+public enum OutlineType implements StringRepresentable {
 
   /**
    * The pos itself is in the region, but one if its near pos is not in the region.
@@ -20,31 +20,31 @@ public enum OutlineType implements StringIdentifiable {
   OUTLINE("outline") {
     @Override
     public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
-      return Direction.stream().map(blockPos::offset);
+      return Direction.stream().map(blockPos::relative);
     }
   },
   OUTLINE_CONNECTED("outline_connected") {
     @Override
     public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
-      return BlockPos.stream(-1, -1, -1, 1, 1, 1).filter(blockPos1 -> blockPos1 != BlockPos.ORIGIN).map(blockPos::add);
+      return BlockPos.betweenClosedStream(-1, -1, -1, 1, 1, 1).filter(blockPos1 -> blockPos1 != BlockPos.ZERO).map(blockPos::offset);
     }
   },
   WALL("wall") {
     @Override
     public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
-      return Direction.Type.HORIZONTAL.stream().map(blockPos::offset);
+      return Direction.Plane.HORIZONTAL.stream().map(blockPos::relative);
     }
   },
   WALL_CONNECTED("wall_connected") {
     @Override
     public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
-      return BlockPos.stream(-1, 0, -1, 1, 0, 1).filter(blockPos1 -> blockPos1 != BlockPos.ORIGIN).map(blockPos::add);
+      return BlockPos.betweenClosedStream(-1, 0, -1, 1, 0, 1).filter(blockPos1 -> blockPos1 != BlockPos.ZERO).map(blockPos::offset);
     }
   },
   FLOOR_AND_CEIL("floor_and_ceil") {
     @Override
     public Stream<BlockPos> streamNearbyPos(BlockPos blockPos) {
-      return Stream.of(blockPos.up(), blockPos.down());
+      return Stream.of(blockPos.above(), blockPos.below());
     }
   };
 
@@ -63,11 +63,11 @@ public enum OutlineType implements StringIdentifiable {
   }
 
   @Override
-  public String asString() {
+  public String getSerializedName() {
     return name;
   }
 
-  public MutableText getDisplayName() {
-    return Text.translatable("enhanced_commands.outline_type." + name);
+  public MutableComponent getDisplayName() {
+    return Component.translatable("enhanced_commands.outline_type." + name);
   }
 }

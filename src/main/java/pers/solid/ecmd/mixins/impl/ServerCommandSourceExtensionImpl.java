@@ -1,15 +1,15 @@
 package pers.solid.ecmd.mixins.impl;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,41 +24,41 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * 此 mixin 用于让 {@link ServerCommandSource} 实现 {@link ServerCommandSourceExtension}。
+ * 此 mixin 用于让 {@link CommandSourceStack} 实现 {@link ServerCommandSourceExtension}。
  */
-@Mixin(ServerCommandSource.class)
+@Mixin(CommandSourceStack.class)
 public abstract class ServerCommandSourceExtensionImpl implements ServerCommandSourceExtension, PositionProvider {
   @Unique
   private Map<String, Object> extraArguments = null;
 
   @Shadow
-  public abstract void sendFeedback(Supplier<Text> feedbackSupplier, boolean broadcastToOps);
+  public abstract void sendSuccess(Supplier<Component> feedbackSupplier, boolean broadcastToOps);
 
   @Shadow
-  public abstract Vec3d getPosition();
+  public abstract Vec3 getPosition();
 
   @Shadow
-  public abstract Vec2f getRotation();
+  public abstract Vec2 getRotation();
 
   @Shadow
   @Nullable
-  public abstract ServerPlayerEntity getPlayer();
+  public abstract ServerPlayer getPlayer();
 
   @Shadow
-  public abstract EntityAnchorArgumentType.EntityAnchor getEntityAnchor();
+  public abstract EntityAnchorArgument.Anchor getAnchor();
 
   @Shadow
-  public abstract ServerPlayerEntity getPlayerOrThrow() throws CommandSyntaxException;
+  public abstract ServerPlayer getPlayerOrException() throws CommandSyntaxException;
 
   @Shadow
-  public abstract ServerWorld getWorld();
+  public abstract ServerLevel getLevel();
 
   @Shadow
-  public abstract Entity getEntityOrThrow() throws CommandSyntaxException;
+  public abstract Entity getEntityOrException() throws CommandSyntaxException;
 
   @Override
-  public final void sendFeedback$ecBridge(Supplier<Text> feedbackSupplier, boolean broadcastToOps) {
-    sendFeedback(feedbackSupplier, broadcastToOps);
+  public final void sendFeedback$ecBridge(Supplier<Component> feedbackSupplier, boolean broadcastToOps) {
+    sendSuccess(feedbackSupplier, broadcastToOps);
   }
 
   @Override
@@ -75,42 +75,42 @@ public abstract class ServerCommandSourceExtensionImpl implements ServerCommandS
   }
 
   @Override
-  public Vec3d getPosition$ec() {
+  public Vec3 getPosition$ec() {
     return getPosition();
   }
 
   @Override
-  public Vec2f getRotation$ec() {
+  public Vec2 getRotation$ec() {
     return getRotation();
   }
 
   @Override
-  public @Nullable PlayerEntity getEntity$ec() {
+  public @Nullable Player getEntity$ec() {
     return getPlayer();
   }
 
   @Override
   public @NotNull Entity getEntityOrThrow$ec() throws CommandSyntaxException {
-    return getEntityOrThrow();
+    return getEntityOrException();
   }
 
   @Override
-  public EntityAnchorArgumentType.EntityAnchor getEntityAnchor$ec() {
-    return getEntityAnchor();
+  public EntityAnchorArgument.Anchor getEntityAnchor$ec() {
+    return getAnchor();
   }
 
   @Override
-  public @Nullable PlayerEntity getPlayer$ec() {
+  public @Nullable Player getPlayer$ec() {
     return getPlayer();
   }
 
   @Override
-  public @NotNull PlayerEntity getPlayerOrThrow$ec() throws CommandSyntaxException {
-    return getPlayerOrThrow();
+  public @NotNull Player getPlayerOrThrow$ec() throws CommandSyntaxException {
+    return getPlayerOrException();
   }
 
   @Override
-  public ServerWorld getWorld$ec() {
-    return getWorld();
+  public ServerLevel getWorld$ec() {
+    return getLevel();
   }
 }

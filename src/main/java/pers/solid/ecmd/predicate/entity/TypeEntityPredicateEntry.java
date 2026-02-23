@@ -3,11 +3,11 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<TypeEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Registries.ENTITY_TYPE.getCodec().fieldOf("entity_type").forGetter(TypeEntityPredicateEntry::entityType),
+      BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("entity_type").forGetter(TypeEntityPredicateEntry::entityType),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(TypeEntityPredicateEntry::inverted)
   ).apply(i, TypeEntityPredicateEntry::new));
 
@@ -28,21 +28,21 @@ public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverte
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
     final EntityType<?> actualType = entity.getType();
     final boolean equals = Objects.equals(actualType, entityType);
-    final MutableText actualText = TextUtil.styled(actualType.getName(), Styles.ACTUAL);
+    final MutableComponent actualText = TextUtil.styled(actualType.getDescription(), Styles.ACTUAL);
     if (inverted) {
       if (equals) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal.fail_inverted", displayName, actualText));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.type.equal.fail_inverted", displayName, actualText));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal.pass_inverted", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.type.equal.pass_inverted", displayName, actualText, TextUtil.styled(entityType.getDescription(), Styles.EXPECTED)));
       }
     } else {
       if (equals) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal.pass", displayName, actualText));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.type.equal.pass", displayName, actualText));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal.fail", displayName, actualText, TextUtil.styled(entityType.getName(), Styles.EXPECTED)));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.type.equal.fail", displayName, actualText, TextUtil.styled(entityType.getDescription(), Styles.EXPECTED)));
       }
     }
   }
@@ -54,6 +54,6 @@ public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverte
 
   @Override
   public String toOptionEntry() {
-    return "type=" + (inverted ? "!" : "") + Registries.ENTITY_TYPE.getId(entityType);
+    return "type=" + (inverted ? "!" : "") + BuiltInRegistries.ENTITY_TYPE.getKey(entityType);
   }
 }

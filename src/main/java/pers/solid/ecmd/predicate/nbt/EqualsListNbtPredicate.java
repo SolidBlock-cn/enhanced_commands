@@ -3,8 +3,8 @@ package pers.solid.ecmd.predicate.nbt;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -28,8 +28,8 @@ public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expect
   }
 
   @Override
-  public boolean test(@NotNull NbtElement nbtElement) {
-    if (!(nbtElement instanceof final NbtList nbtList))
+  public boolean test(@NotNull Tag nbtElement) {
+    if (!(nbtElement instanceof final ListTag nbtList))
       return inverted;
     if (nbtList.size() != expected.size())
       return inverted;
@@ -45,7 +45,7 @@ public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expect
 
   @Override
   public @NotNull NbtPredicateType<EqualsListNbtPredicate> getType() {
-    return Type.EQUALS_LIST_TYPE;
+    return pers.solid.ecmd.predicate.nbt.EqualsListNbtPredicate.Type.EQUALS_LIST_TYPE;
   }
 
   public enum Type implements NbtPredicateType<EqualsListNbtPredicate> {

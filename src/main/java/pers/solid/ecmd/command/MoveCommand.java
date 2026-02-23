@@ -6,16 +6,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.BlockTransformationCommand;
@@ -26,8 +26,8 @@ import java.util.function.Function;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static pers.solid.ecmd.argument.DirectionArgumentType.getDirection;
 import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
@@ -36,7 +36,7 @@ public enum MoveCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
         .build();
 
@@ -70,29 +70,29 @@ public enum MoveCommand implements CommandRegistrationCallback {
     );
   }
 
-  public static int executeMoveFromDirection(Direction direction, int offset, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static int executeMoveFromDirection(Direction direction, int offset, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return executeMove(Either.left(ObjectIntPair.of(direction, offset)), keywordArgs, context);
   }
 
-  public static int executeMoveFromVectorArgs(KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static int executeMoveFromVectorArgs(KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return executeMove(Either.right(new Vec3i(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z"))), keywordArgs, context);
   }
 
-  public static int executeMove(Either<ObjectIntPair<Direction>, Vec3i> relativePos, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final Vec3i relativeVector = relativePos.map(pair -> Vec3i.ZERO.offset(pair.left(), pair.rightInt()), Function.identity());
+  public static int executeMove(Either<ObjectIntPair<Direction>, Vec3i> relativePos, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final Vec3i relativeVector = relativePos.map(pair -> Vec3i.ZERO.relative(pair.left(), pair.rightInt()), Function.identity());
     final BlockTransformationCommand blockTransformationCommand = new BlockTransformationCommand() {
       @Override
       public Vec3i transformBlockPos(Vec3i original) {
-        return original.add(relativeVector);
+        return original.offset(relativeVector);
       }
 
       @Override
-      public Vec3d transformPos(Vec3d original) {
+      public Vec3 transformPos(Vec3 original) {
         return original.add(relativeVector.getX(), relativeVector.getY(), relativeVector.getZ());
       }
 
       @Override
-      public Vec3d transformPosBack(Vec3d transformed) {
+      public Vec3 transformPosBack(Vec3 transformed) {
         return transformed.subtract(relativeVector.getX(), relativeVector.getY(), relativeVector.getZ());
       }
 
@@ -115,17 +115,17 @@ public enum MoveCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
+      public void notifyCompletion(CommandSourceStack source, int affectedBlocks, int affectedEntities) {
         if (affectedEntities == -1) {
-          source.sendFeedback$ecBridge(() -> relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.complete.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks)).enhanced$$(), vec3i -> Text.translatable("enhanced_commands.commands.move.complete.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks)).enhanced$$()), true);
+          source.sendFeedback$ecBridge(() -> relativePos.map(pair -> Component.translatable("enhanced_commands.commands.move.complete.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks)).enhanced$$(), vec3i -> Component.translatable("enhanced_commands.commands.move.complete.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks)).enhanced$$()), true);
         } else {
-          source.sendFeedback$ecBridge(() -> relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.complete_with_entities.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), vec3i -> Text.translatable("enhanced_commands.commands.move.complete_with_entities.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$()), true);
+          source.sendFeedback$ecBridge(() -> relativePos.map(pair -> Component.translatable("enhanced_commands.commands.move.complete_with_entities.direction", Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left()), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), vec3i -> Component.translatable("enhanced_commands.commands.move.complete_with_entities.vector", TextUtil.wrapVector(vec3i), Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$()), true);
         }
       }
 
       @Override
-      public @NotNull MutableText getIteratorTaskName(Region region) {
-        return relativePos.map(pair -> Text.translatable("enhanced_commands.commands.move.task.direction", region.asString(), Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left())), vec3i -> Text.translatable("enhanced_commands.commands.move.task.vector", region.asString(), TextUtil.wrapVector(vec3i)));
+      public @NotNull MutableComponent getIteratorTaskName(Region region) {
+        return relativePos.map(pair -> Component.translatable("enhanced_commands.commands.move.task.direction", region.asString(), Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left())), vec3i -> Component.translatable("enhanced_commands.commands.move.task.vector", region.asString(), TextUtil.wrapVector(vec3i)));
       }
     };
 

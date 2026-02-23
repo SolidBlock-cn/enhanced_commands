@@ -4,9 +4,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -21,24 +21,24 @@ public record PlayerNameEntityPredicate(@NotNull String name) implements Special
   ).apply(i, PlayerNameEntityPredicate::new));
 
   /**
-   * @see net.minecraft.server.PlayerManager#getPlayer(String)
+   * @see net.minecraft.server.players.PlayerList#getPlayerByName(String)
    */
   @Override
   public boolean test(@NotNull Entity entity) {
-    return entity instanceof PlayerEntity player && player.getGameProfile().getName().equalsIgnoreCase(name);
+    return entity instanceof Player player && player.getGameProfile().getName().equalsIgnoreCase(name);
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    if (entity instanceof PlayerEntity player) {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    if (entity instanceof Player player) {
       final boolean matches = player.getGameProfile().getName().equalsIgnoreCase(name);
       if (matches) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.player_name.true", displayName, Text.empty().append(name).styled(Styles.ACTUAL)));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.player_name.true", displayName, Component.empty().append(name).withStyle(Styles.ACTUAL)));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.player_name.false", displayName, Text.empty().append(player.getGameProfile().getName()).styled(Styles.ACTUAL), Text.literal(name).styled(Styles.EXPECTED)));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.player_name.false", displayName, Component.empty().append(player.getGameProfile().getName()).withStyle(Styles.ACTUAL), Component.literal(name).withStyle(Styles.EXPECTED)));
       }
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.player_name.not_player", entity.getDisplayName()));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.player_name.not_player", entity.getDisplayName()));
     }
   }
 

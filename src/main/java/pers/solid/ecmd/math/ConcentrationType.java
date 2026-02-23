@@ -10,12 +10,12 @@ import it.unimi.dsi.fastutil.ints.IntIterable;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.LongIterable;
 import it.unimi.dsi.fastutil.longs.LongList;
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtFloat;
-import net.minecraft.nbt.NbtLong;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringRepresentable;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Iterator;
@@ -23,7 +23,7 @@ import java.util.Iterator;
 /**
  * 数据的聚合类型，用于处理一组原始类型的数据。注意：必须是直接处理原始类型的数据，不对任何值进行装箱。为了提高性能，这里尽可能地避免了将可迭代的对象转换为流。
  */
-public enum ConcentrationType implements StringIdentifiable {
+public enum ConcentrationType implements StringRepresentable {
   FIRST("first", false) {
     @Override
     public double concentrateLong(LongIterable values) throws CommandSyntaxException {
@@ -255,10 +255,10 @@ public enum ConcentrationType implements StringIdentifiable {
       return sum;
     }
   };
-  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.concentration_type.no_value"));
+  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.concentration_type.no_value"));
   public static final StringIdentifiableCodec<ConcentrationType> CODEC = StringIdentifiableCodec.create(ConcentrationType.values());
   private final String name;
-  private final Text displayName;
+  private final Component displayName;
   /**
    * 如果此字段为 true，那么根据此聚合类型所计算出的结果一律为 {@code double}。
    */
@@ -266,7 +266,7 @@ public enum ConcentrationType implements StringIdentifiable {
 
   ConcentrationType(String name, boolean forcesDouble) {
     this.name = name;
-    this.displayName = Text.translatable("enhanced_commands.concentration_type." + name);
+    this.displayName = Component.translatable("enhanced_commands.concentration_type." + name);
     this.forcesDouble = forcesDouble;
   }
 
@@ -290,8 +290,8 @@ public enum ConcentrationType implements StringIdentifiable {
   /**
    * 对于求平均值的情况，以 double 的方式呈现结果，在其他情况下则以 long 的方式呈现结果（此时 NBT 为 long 值）。
    */
-  public AbstractNbtNumber longToNbt(double result) {
-    return forcesDouble ? NbtDouble.of(result) : NbtLong.of((long) result);
+  public NumericTag longToNbt(double result) {
+    return forcesDouble ? DoubleTag.valueOf(result) : LongTag.valueOf((long) result);
   }
 
   /**
@@ -304,8 +304,8 @@ public enum ConcentrationType implements StringIdentifiable {
   /**
    * 对于求平均值的情况，以 double 的方式呈现结果，在其他情况下则以 float 的方式呈现结果（此时 NBT 为 float 值）。
    */
-  public AbstractNbtNumber floatToNbt(double result) {
-    return forcesDouble ? NbtDouble.of(result) : NbtFloat.of((float) result);
+  public NumericTag floatToNbt(double result) {
+    return forcesDouble ? DoubleTag.valueOf(result) : FloatTag.valueOf((float) result);
   }
 
   private static void ensureHasNext(Iterator<?> iterator) throws CommandSyntaxException {
@@ -313,11 +313,11 @@ public enum ConcentrationType implements StringIdentifiable {
   }
 
   @Override
-  public String asString() {
+  public String getSerializedName() {
     return name;
   }
 
-  public Text getDisplayName() {
+  public Component getDisplayName() {
     return displayName;
   }
 }

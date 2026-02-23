@@ -3,8 +3,8 @@ package pers.solid.ecmd.predicate.nbt;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -17,7 +17,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  *   3b match 3 -> false
  * </pre>
  */
-public record MatchPrimitiveNbtPredicate(NbtElement expected, boolean inverted) implements NbtPredicate {
+public record MatchPrimitiveNbtPredicate(Tag expected, boolean inverted) implements NbtPredicate {
   public static final MapCodec<MatchPrimitiveNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       CodecUtil.NBT_ELEMENT.fieldOf("expected").forGetter(MatchPrimitiveNbtPredicate::expected),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MatchPrimitiveNbtPredicate::inverted)
@@ -34,13 +34,13 @@ public record MatchPrimitiveNbtPredicate(NbtElement expected, boolean inverted) 
   }
 
   @Override
-  public boolean test(@NotNull NbtElement nbtElement) {
-    return NbtHelper.matches(nbtElement, expected, true) != inverted;
+  public boolean test(@NotNull Tag nbtElement) {
+    return NbtUtils.compareNbt(nbtElement, expected, true) != inverted;
   }
 
   @Override
   public @NotNull NbtPredicateType<MatchPrimitiveNbtPredicate> getType() {
-    return Type.MATCH_PRIMITIVE_TYPE;
+    return pers.solid.ecmd.predicate.nbt.MatchPrimitiveNbtPredicate.Type.MATCH_PRIMITIVE_TYPE;
   }
 
   public enum Type implements NbtPredicateType<MatchPrimitiveNbtPredicate> {

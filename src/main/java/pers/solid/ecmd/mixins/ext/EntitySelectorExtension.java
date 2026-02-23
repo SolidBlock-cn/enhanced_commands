@@ -1,6 +1,6 @@
 package pers.solid.ecmd.mixins.ext;
 
-import net.minecraft.command.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import org.jetbrains.annotations.Contract;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorMixin;
 import pers.solid.ecmd.predicate.entity.EntitySelectorExtras;

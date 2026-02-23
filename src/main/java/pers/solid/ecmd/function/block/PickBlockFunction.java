@@ -5,21 +5,21 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.math.WeightedList;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collection;
 import java.util.OptionalLong;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  * 允许零值，但总和不能为零。
  */
 public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalLong seed) implements BlockFunction {
-  public static final SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.pick.zero_sum"));
+  public static final SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.block_function.pick.zero_sum"));
   public static final MapCodec<PickBlockFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(WeightedList.createMapCodec(BlockFunction.CODEC).forGetter(PickBlockFunction::functions), CodecUtil.optionalLongFieldOf("seed").forGetter(PickBlockFunction::seed)).apply(instance, PickBlockFunction::new));
 
   public PickBlockFunction(WeightedList<BlockFunction> functions) {
@@ -66,8 +66,8 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
 
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    final Random random = context.getSplitterForOptionalSeed(this, seed).split(pos);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(pos);
     return functions.getRandom(random).getModifiedState(blockState, origState, world, pos, blockEntityData, context);
   }
 

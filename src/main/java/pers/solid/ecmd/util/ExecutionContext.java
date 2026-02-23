@@ -1,19 +1,19 @@
 package pers.solid.ecmd.util;
 
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.math.random.RandomSplitter;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalLong;
 
 public class ExecutionContext {
-  public final Random random;
+  public final RandomSource random;
   public final PositionProvider positionProvider;
   private @Nullable Long seed;
   private @Nullable SeedStorage<Object> splitterStorage;
 
-  public ExecutionContext(Random random, PositionProvider positionProvider, @Nullable Long seed) {
+  public ExecutionContext(RandomSource random, PositionProvider positionProvider, @Nullable Long seed) {
     this.random = random;
     this.positionProvider = positionProvider;
     this.seed = seed;
@@ -47,15 +47,15 @@ public class ExecutionContext {
     return getSplitterStorage().getSeed(key);
   }
 
-  public @NotNull RandomSplitter getSplitter(Object key) {
+  public @NotNull PositionalRandomFactory getSplitter(Object key) {
     return getSplitterStorage().getSplitter(key);
   }
 
-  public @NotNull RandomSplitter getSplitterForSeed(long seed) {
+  public @NotNull PositionalRandomFactory getSplitterForSeed(long seed) {
     return getSplitterStorage().getSplitterForSeed(seed);
   }
 
-  public @NotNull RandomSplitter getSplitterForOptionalSeed(Object key, OptionalLong seed) {
+  public @NotNull PositionalRandomFactory getSplitterForOptionalSeed(Object key, OptionalLong seed) {
     return seed.isPresent() ? getSplitterForSeed(seed.getAsLong()) : getSplitter(key);
   }
 }

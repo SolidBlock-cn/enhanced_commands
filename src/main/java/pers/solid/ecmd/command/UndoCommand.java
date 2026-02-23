@@ -9,11 +9,11 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgumentType;
@@ -24,29 +24,29 @@ import pers.solid.ecmd.history.History;
 
 import java.util.Deque;
 
-import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum UndoCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  public static final SimpleCommandExceptionType NO_UNDOABLE_HISTORY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.undo.no_history"));
-  public static final SimpleCommandExceptionType NO_REDOABLE_HISTORY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.redo.no_history"));
-  public static final SimpleCommandExceptionType CONFLICT_ARGUMENT = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.undo.conflict_argument", "target", "target-server"));
+  public static final SimpleCommandExceptionType NO_UNDOABLE_HISTORY = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.undo.no_history"));
+  public static final SimpleCommandExceptionType NO_REDOABLE_HISTORY = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.redo.no_history"));
+  public static final SimpleCommandExceptionType CONFLICT_ARGUMENT = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.undo.conflict_argument", "target", "target-server"));
   public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
-      .addOptionalArg("target", EntityArgumentType.player(), null)
+      .addOptionalArg("target", EntityArgument.player(), null)
       .addOptionalArg("target-server", BoolArgumentType.bool(), false)
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
       .addOptionalArg("undoable", BoolArgumentType.bool(), true)
       .build();
 
-  private static int executeUndo(ServerCommandSource source, KeywordArgs keywordArgs, boolean inverse) throws CommandSyntaxException {
+  private static int executeUndo(CommandSourceStack source, KeywordArgs keywordArgs, boolean inverse) throws CommandSyntaxException {
     final HistoryHolder holder = HistoryCommand.getHistoryHolderFromArgs(source, keywordArgs);
     return executeUndo(source, holder, keywordArgs.getBoolean("immediately"), keywordArgs.getBoolean("undoable"), inverse);
   }
 
-  private static int executeUndo(ServerCommandSource source, @Nullable HistoryHolder historyHolder, boolean immediately, boolean undoable, boolean inverse) throws CommandSyntaxException {
+  private static int executeUndo(CommandSourceStack source, @Nullable HistoryHolder historyHolder, boolean immediately, boolean undoable, boolean inverse) throws CommandSyntaxException {
     if (historyHolder == null) {
       if (inverse) {
         throw NO_REDOABLE_HISTORY.create();
@@ -78,14 +78,14 @@ public enum UndoCommand implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final LiteralArgumentBuilder<ServerCommandSource> historyLiteral = literalR2("history");
-    final Command<ServerCommandSource> undoExecution, redoExecution;
-    final LiteralCommandNode<ServerCommandSource> undoNode = literalR2("undo")
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+    final LiteralArgumentBuilder<CommandSourceStack> historyLiteral = literalR2("history");
+    final Command<CommandSourceStack> undoExecution, redoExecution;
+    final LiteralCommandNode<CommandSourceStack> undoNode = literalR2("undo")
         .executes(undoExecution = context -> executeUndo(context.getSource(), HistoryHolder.fromSource(context.getSource()), false, true, false))
         .then(argument("keyword_args", KEYWORD_ARGS)
             .executes(context -> executeUndo(context.getSource(), getKeywordArgs(context, "keyword_args"), false))).build();
-    final LiteralCommandNode<ServerCommandSource> redoNode = literalR2("redo")
+    final LiteralCommandNode<CommandSourceStack> redoNode = literalR2("redo")
         .executes(redoExecution = context -> executeUndo(context.getSource(), HistoryHolder.fromSource(context.getSource()), false, true, true))
         .then(argument("keyword_args", KEYWORD_ARGS)
             .executes(context -> executeUndo(context.getSource(), getKeywordArgs(context, "keyword_args"), true))).build();

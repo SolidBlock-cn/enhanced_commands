@@ -5,10 +5,10 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.Message;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.AxisArgument;
 import pers.solid.ecmd.argument.SimpleEnumArgumentType;
@@ -28,17 +28,17 @@ import java.util.function.Function;
  * @param <E>          枚举的类型
  */
 public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, EnumCodec<E> codec, Function<E, Message> nameProvider) {
-  public static final Text HORIZONTAL_TEXT = Text.translatable("enhanced_commands.direction_type.horizontal");
-  public static final Text VERTICAL_TEXT = Text.translatable("enhanced_commands.direction_type.vertical");
-  public static final RegistryKey<Registry<CommandEnumType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("command_enum_type"));
+  public static final Component HORIZONTAL_TEXT = Component.translatable("enhanced_commands.direction_type.horizontal");
+  public static final Component VERTICAL_TEXT = Component.translatable("enhanced_commands.direction_type.vertical");
+  public static final ResourceKey<Registry<CommandEnumType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("command_enum_type"));
   public static final Registry<CommandEnumType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
 
   public static final CommandEnumType<AxisArgument> AXIS = register("axis", new CommandEnumType<>(AxisArgument.VALUES, AxisArgument.CODEC, AxisArgument::getDisplayName));
   public static final CommandEnumType<AxisArgument> AXIS_EXCLUDING_RANDOM = register("axis_excluding_random", new CommandEnumType<>(AxisArgument.VALUES_EXCEPT_RANDOM, AxisArgument.CODEC, AxisArgument::getDisplayName));
   public static final CommandEnumType<ConcentrationType> CONCENTRATION_TYPE = register("concentration_type", new CommandEnumType<>(ImmutableList.copyOf(ConcentrationType.values()), ConcentrationType.CODEC, ConcentrationType::getDisplayName));
-  public static final CommandEnumType<Direction.Type> DIRECTION_TYPE = register("direction_type", new CommandEnumType<>(ImmutableList.copyOf(Direction.Type.values()), new EnumCodec.Simple<>(s -> switch (s) {
-    case "vertical" -> Direction.Type.VERTICAL;
-    case "horizontal" -> Direction.Type.HORIZONTAL;
+  public static final CommandEnumType<Direction.Plane> DIRECTION_TYPE = register("direction_type", new CommandEnumType<>(ImmutableList.copyOf(Direction.Plane.values()), new EnumCodec.Simple<>(s -> switch (s) {
+    case "vertical" -> Direction.Plane.VERTICAL;
+    case "horizontal" -> Direction.Plane.HORIZONTAL;
     default -> null;
   }, type -> switch (type) {
     case VERTICAL -> "vertical";
@@ -50,7 +50,7 @@ public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, 
   public static final CommandEnumType<MoonPhase> MOON_PHASE = register("moon_phase", new CommandEnumType<>(MoonPhase.VALUES, MoonPhase.CODEC, moonPhase -> moonPhase.displayName));
   public static final CommandEnumType<NbtConcentrationType> NBT_CONCENTRATION_TYPE = register("nbt_concentration_type", new CommandEnumType<>(ImmutableList.copyOf(NbtConcentrationType.values()), NbtConcentrationType.CODEC, NbtConcentrationType::getDisplayName));
   public static final CommandEnumType<OutlineType> OUTLINE_TYPE = register("outline_type", new CommandEnumType<>(ImmutableList.copyOf(OutlineType.values()), OutlineType.CODEC, OutlineType::getDisplayName));
-  public static final CommandEnumType<TestForBlocksCommand.TestType> TEST_TYPE = register("test_type", new CommandEnumType<>(ImmutableList.copyOf(TestForBlocksCommand.TestType.values()), TestForBlocksCommand.TestType.CODEC, testType -> Text.literal(testType.asString())));
+  public static final CommandEnumType<TestForBlocksCommand.TestType> TEST_TYPE = register("test_type", new CommandEnumType<>(ImmutableList.copyOf(TestForBlocksCommand.TestType.values()), TestForBlocksCommand.TestType.CODEC, testType -> Component.literal(testType.getSerializedName())));
 
   private static <X extends CommandEnumType<E>, E extends Enum<E>> X register(String name, X commandEnumType) {
     return Registry.register(REGISTRY, EnhancedCommands.id(name), commandEnumType);

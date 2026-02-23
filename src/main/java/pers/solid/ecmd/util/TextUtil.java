@@ -2,21 +2,21 @@ package pers.solid.ecmd.util;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.visitor.NbtOrderedStringFormatter;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Position;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.SnbtPrinterTagVisitor;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.biome.Biome;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.function.UnaryOperator;
 
 /**
- * 和{@linkplain Text 文本组件}有关的实用方法。
+ * 和{@linkplain Component 文本组件}有关的实用方法。
  */
 public final class TextUtil {
 
@@ -37,94 +37,94 @@ public final class TextUtil {
   }
 
   /**
-   * 将 NBT 转换为可读的字符串。与 {@link net.minecraft.nbt.visitor.StringNbtWriter#apply(NbtElement)} 不同的是，此函数返回的结果中，会在适当的位置添加空格，同时不进行换行，从而确保适当美观，并与 {@link NbtPredicate#asString()} 和 {@link NbtFunction#asString()} 的结果保持一致。
+   * 将 NBT 转换为可读的字符串。与 {@link net.minecraft.nbt.StringTagVisitor#visit(Tag)} 不同的是，此函数返回的结果中，会在适当的位置添加空格，同时不进行换行，从而确保适当美观，并与 {@link NbtPredicate#asString()} 和 {@link NbtFunction#asString()} 的结果保持一致。
    */
-  public static String toSpacedStringNbt(@NotNull NbtElement nbtElement) {
-    return new NbtOrderedStringFormatter(StringUtils.EMPTY, 0, new ArrayList<>()).apply(nbtElement);
+  public static String toSpacedStringNbt(@NotNull Tag nbtElement) {
+    return new SnbtPrinterTagVisitor(StringUtils.EMPTY, 0, new ArrayList<>()).visit(nbtElement);
   }
 
-  public static MutableText literal(boolean value) {
-    return Text.literal(Boolean.toString(value));
+  public static MutableComponent literal(boolean value) {
+    return Component.literal(Boolean.toString(value));
   }
 
-  public static MutableText literal(long value) {
-    return Text.literal(Long.toString(value));
+  public static MutableComponent literal(long value) {
+    return Component.literal(Long.toString(value));
   }
 
-  public static MutableText literal(int value) {
-    return Text.literal(Integer.toString(value));
+  public static MutableComponent literal(int value) {
+    return Component.literal(Integer.toString(value));
   }
 
-  public static MutableText literal(float value) {
-    return Text.literal(Float.toString(value));
+  public static MutableComponent literal(float value) {
+    return Component.literal(Float.toString(value));
   }
 
-  public static MutableText literal(double value) {
-    return Text.literal(Double.toString(value));
+  public static MutableComponent literal(double value) {
+    return Component.literal(Double.toString(value));
   }
 
-  public static MutableText literal(Identifier value) {
-    return Text.literal(value.toString());
+  public static MutableComponent literal(ResourceLocation value) {
+    return Component.literal(value.toString());
   }
 
-  public static MutableText literal(StringIdentifiable value) {
-    return Text.literal(value.asString());
+  public static MutableComponent literal(StringRepresentable value) {
+    return Component.literal(value.getSerializedName());
   }
 
-  public static MutableText literal(ExpressionConvertible value) {
-    return Text.literal(value.asString());
+  public static MutableComponent literal(ExpressionConvertible value) {
+    return Component.literal(value.asString());
   }
 
   /**
    * 将方块坐标表示为文本组件。
    */
-  public static MutableText wrapVector(Vec3i blockPos) {
-    return Text.translatable("enhanced_commands.position", blockPos.getX(), blockPos.getY(), blockPos.getZ());
+  public static MutableComponent wrapVector(Vec3i blockPos) {
+    return Component.translatable("enhanced_commands.position", blockPos.getX(), blockPos.getY(), blockPos.getZ());
   }
 
   /**
    * 将坐标表示为文本组件，以用于命令输出。
    */
-  public static MutableText wrapVector(Position position) {
-    return Text.translatable("enhanced_commands.position", position.getX(), position.getY(), position.getZ());
+  public static MutableComponent wrapVector(Position position) {
+    return Component.translatable("enhanced_commands.position", position.x(), position.y(), position.z());
   }
 
   /**
    * 将方向表示为可翻译的文本组件。
    */
-  public static MutableText wrapDirection(Direction direction) {
-    return Text.translatable("enhanced_commands.direction." + direction.asString());
+  public static MutableComponent wrapDirection(Direction direction) {
+    return Component.translatable("enhanced_commands.direction." + direction.getSerializedName());
   }
 
   /**
    * 将坐标轴表示为可翻译的文本组件。
    */
-  public static MutableText wrapAxis(Direction.Axis axis) {
-    return Text.translatable("enhanced_commands.axis." + axis.asString());
+  public static MutableComponent wrapAxis(Direction.Axis axis) {
+    return Component.translatable("enhanced_commands.axis." + axis.getSerializedName());
   }
 
   /**
    * 将布尔值表示为文本组件，不翻译但是夫根据其值来应用格式。
    */
-  public static MutableText wrapBoolean(boolean b) {
-    return Text.literal(Boolean.toString(b)).formatted(b ? Formatting.GREEN : Formatting.RED);
+  public static MutableComponent wrapBoolean(boolean b) {
+    return Component.literal(Boolean.toString(b)).withStyle(b ? ChatFormatting.GREEN : ChatFormatting.RED);
   }
 
   /**
    * 给文本添加样式，同时避免对文本自身进行复制。如果文本已经有样式，这些样式不会被覆盖。
    */
-  public static MutableText styled(Text text, UnaryOperator<Style> styleUpdater) {
-    return Text.empty().styled(styleUpdater).append(text);
+  public static MutableComponent styled(Component text, UnaryOperator<Style> styleUpdater) {
+    return Component.empty().withStyle(styleUpdater).append(text);
   }
 
   /**
    * 组合两部分可能为 {@code null｝ 的文本。如果一个为 {@code null} 另一个未 {@code null}，则直接返回其中的非 ｛@code null} 值。如果两个都不是 {@code null}，将其组合。如果 两个都是 {@code null}，返回空文本。
    */
   @Contract(value = "null, null -> !null; null, !null -> param2; !null, null -> param1", pure = true)
-  public static Text joinNullableLines(@Nullable Text text1, @Nullable Text text2) {
+  public static Component joinNullableLines(@Nullable Component text1, @Nullable Component text2) {
     if (text1 == null) {
       if (text2 == null) {
-        return Text.empty();
+        return Component.empty();
       } else {
         return text2;
       }
@@ -132,17 +132,17 @@ public final class TextUtil {
       if (text2 == null) {
         return text1;
       } else {
-        return Text.empty().append(text1).append(ScreenTexts.LINE_BREAK).append(text2);
+        return Component.empty().append(text1).append(CommonComponents.NEW_LINE).append(text2);
       }
     }
   }
 
-  public static Text joinNullableLines(@Nullable Text... texts) {
-    return ScreenTexts.joinLines(Collections2.filter(Arrays.asList(texts), Predicates.notNull()));
+  public static Component joinNullableLines(@Nullable Component... texts) {
+    return CommonComponents.joinLines(Collections2.filter(Arrays.asList(texts), Predicates.notNull()));
   }
 
   @NotNull
-  public static MutableText biome(RegistryKey<Biome> key) {
-    return Text.translatableWithFallback(Util.createTranslationKey("biome", key.getValue()), key.getValue().getPath().replace('_', ' '));
+  public static MutableComponent biome(ResourceKey<Biome> key) {
+    return Component.translatableWithFallback(Util.makeDescriptionId("biome", key.location()), key.location().getPath().replace('_', ' '));
   }
 }

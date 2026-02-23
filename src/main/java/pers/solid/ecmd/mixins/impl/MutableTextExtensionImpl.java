@@ -1,6 +1,10 @@
 package pers.solid.ecmd.mixins.impl;
 
-import net.minecraft.text.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -11,24 +15,24 @@ import pers.solid.ecmd.util.EnhancedTranslatableTextContent;
 import java.util.List;
 
 /**
- * 此 mixin 用于让 {@link MutableText} 实现 {@link MutableTextExtension}。
+ * 此 mixin 用于让 {@link MutableComponent} 实现 {@link MutableTextExtension}。
  */
-@Mixin(MutableText.class)
+@Mixin(MutableComponent.class)
 public abstract class MutableTextExtensionImpl implements MutableTextExtension {
   @Shadow
   @Final
-  private TextContent content;
+  private ComponentContents contents;
 
   @Shadow
   @Final
-  private List<Text> siblings;
+  private List<Component> siblings;
 
   @Shadow
   private Style style;
 
   @Override
-  public MutableText enhanced$$() {
-    if (content instanceof TranslatableTextContent translatableTextContent) {
+  public MutableComponent enhanced$$() {
+    if (contents instanceof TranslatableContents translatableTextContent) {
       final EnhancedTranslatableTextContent enhancedContent = new EnhancedTranslatableTextContent(translatableTextContent.getKey(), translatableTextContent.getFallback(), translatableTextContent.getArgs());
       return MutableTextAccessor.createMutableText(enhancedContent, siblings, style);
     } else {

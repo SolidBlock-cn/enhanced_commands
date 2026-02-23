@@ -5,11 +5,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +24,7 @@ import pers.solid.ecmd.util.mixin.ArgumentTypeExtension;
 
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(BlockPosArgumentType.class)
+@Mixin(BlockPosArgument.class)
 public abstract class BlockPosArgumentTypeMixin implements ArgumentTypeExtension {
   @Unique
   private EnhancedPosArgumentType modArgumentType;
@@ -36,8 +36,8 @@ public abstract class BlockPosArgumentTypeMixin implements ArgumentTypeExtension
     modArgumentType = EnhancedPosArgumentType.blockPos();
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/PosArgument;", at = @At("HEAD"), cancellable = true)
-  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<PosArgument> cir) throws CommandSyntaxException {
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/coordinates/Coordinates;", at = @At("HEAD"), cancellable = true)
+  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<Coordinates> cir) throws CommandSyntaxException {
     if (modArgumentType != null && extension) {
       cir.setReturnValue(modArgumentType.parse(stringReader));
     }
@@ -50,15 +50,15 @@ public abstract class BlockPosArgumentTypeMixin implements ArgumentTypeExtension
     }
   }
 
-  @Inject(method = "getLoadedBlockPos(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/server/world/ServerWorld;Ljava/lang/String;)Lnet/minecraft/util/math/BlockPos;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;create()Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/argument/BlockPosArgumentType;UNLOADED_EXCEPTION:Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;isInBuildLimit(Lnet/minecraft/util/math/BlockPos;)Z")), locals = LocalCapture.CAPTURE_FAILSOFT)
-  private static void injectedThrowingUnloaded(CommandContext<ServerCommandSource> context, ServerWorld world, String name, CallbackInfoReturnable<BlockPos> cir, BlockPos blockPos) throws CommandSyntaxException {
+  @Inject(method = "getLoadedBlockPos(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/server/level/ServerLevel;Ljava/lang/String;)Lnet/minecraft/core/BlockPos;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;create()Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/coordinates/BlockPosArgument;ERROR_NOT_LOADED:Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;isInWorldBounds(Lnet/minecraft/core/BlockPos;)Z")), locals = LocalCapture.CAPTURE_FAILSOFT)
+  private static void injectedThrowingUnloaded(CommandContext<CommandSourceStack> context, ServerLevel world, String name, CallbackInfoReturnable<BlockPos> cir, BlockPos blockPos) throws CommandSyntaxException {
     throw EnhancedPosArgumentType.UNLOADED_EXCEPTION.create(TextUtil.wrapVector(blockPos));
   }
 
-  @Inject(method = "getLoadedBlockPos(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/server/world/ServerWorld;Ljava/lang/String;)Lnet/minecraft/util/math/BlockPos;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;create()Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/command/argument/BlockPosArgumentType;OUT_OF_WORLD_EXCEPTION:Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;", remap = false)), locals = LocalCapture.CAPTURE_FAILSOFT)
-  private static void injectedThrowOutOfWorld(CommandContext<ServerCommandSource> context, ServerWorld world, String name, CallbackInfoReturnable<BlockPos> cir, BlockPos blockPos) throws CommandSyntaxException {
-    if (world.isOutOfHeightLimit(blockPos)) {
-      throw EnhancedPosArgumentType.OUT_OF_HEIGHT_LIMIT.create(TextUtil.wrapVector(blockPos), world.getBottomY(), world.getTopY());
+  @Inject(method = "getLoadedBlockPos(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/server/level/ServerLevel;Ljava/lang/String;)Lnet/minecraft/core/BlockPos;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;create()Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/coordinates/BlockPosArgument;ERROR_OUT_OF_WORLD:Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;", remap = false)), locals = LocalCapture.CAPTURE_FAILSOFT)
+  private static void injectedThrowOutOfWorld(CommandContext<CommandSourceStack> context, ServerLevel world, String name, CallbackInfoReturnable<BlockPos> cir, BlockPos blockPos) throws CommandSyntaxException {
+    if (world.isOutsideBuildHeight(blockPos)) {
+      throw EnhancedPosArgumentType.OUT_OF_HEIGHT_LIMIT.create(TextUtil.wrapVector(blockPos), world.getMinBuildHeight(), world.getMaxBuildHeight());
     } else {
       throw EnhancedPosArgumentType.OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapVector(blockPos));
     }

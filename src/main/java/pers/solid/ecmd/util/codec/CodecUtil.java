@@ -6,16 +6,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.entity.Entity;
+import net.minecraft.Util;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.nbt.*;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,37 +48,37 @@ public final class CodecUtil {
   /**
    * NBT 元素的 codec，部分内容使用了和 {@link Codec#PASSTHROUGH} 相似的处理方式，但是对于非 NBT 的 ops，会先转换为字符串，以确保所有 NBT 数据的类型都不会失真。
    *
-   * @see net.minecraft.nbt.NbtCompound#CODEC
+   * @see net.minecraft.nbt.CompoundTag#CODEC
    */
-  public static final Codec<NbtElement> NBT_ELEMENT = new Codec<>() {
+  public static final Codec<Tag> NBT_ELEMENT = new Codec<>() {
     @Override
-    public <T> DataResult<Pair<NbtElement, T>> decode(DynamicOps<T> ops, T input) {
-      if (input instanceof NbtElement nbtElement) {
+    public <T> DataResult<Pair<Tag, T>> decode(DynamicOps<T> ops, T input) {
+      if (input instanceof Tag nbtElement) {
         return DataResult.success(Pair.of(nbtElement.copy(), input));
       }
       final DataResult<String> stringResult = Codec.STRING.parse(ops, input);
       if (stringResult.isSuccess()) {
         try {
-          return DataResult.success(Pair.of(new StringNbtReader(new StringReader(stringResult.getOrThrow())).parseElement(), input));
+          return DataResult.success(Pair.of(new TagParser(new StringReader(stringResult.getOrThrow())).readValue(), input));
         } catch (CommandSyntaxException e) {
           return DataResult.error(() -> "Got a string value but cannot parse as NBT: " + e.getMessage());
         }
       }
       final DataResult<Double> doubleResult = Codec.DOUBLE.parse(ops, input);
       if (doubleResult.isSuccess()) {
-        return DataResult.success(Pair.of(NbtDouble.of(doubleResult.getOrThrow()), input));
+        return DataResult.success(Pair.of(DoubleTag.valueOf(doubleResult.getOrThrow()), input));
       }
       return DataResult.error(() -> "Cannot parse value: not a string or number");
     }
 
     @Override
-    public <T> DataResult<T> encode(NbtElement input, DynamicOps<T> ops, T prefix) {
+    public <T> DataResult<T> encode(Tag input, DynamicOps<T> ops, T prefix) {
       if (input == ops.empty()) {
         return DataResult.success(prefix, Lifecycle.experimental());
       }
 
       final T casted;
-      if (ops.empty() instanceof NbtElement) {
+      if (ops.empty() instanceof Tag) {
         casted = (NbtOps.INSTANCE.convertTo(ops, input));
       } else {
         casted = (ops.createString(input.toString()));
@@ -100,23 +100,23 @@ public final class CodecUtil {
   /**
    * NBT 数字的 codec，类似于 {@link #NBT_ELEMENT}，但是遇到非数字的值会报错。
    */
-  public static final Codec<AbstractNbtNumber> NBT_NUMBER = NBT_ELEMENT.comapFlatMap(nbtElement -> nbtElement instanceof AbstractNbtNumber number ? DataResult.success(number) : DataResult.error(() -> "The NBT value is not a number"), Function.identity());
-  public static final BiMap<String, BiConsumer<Vec3d, List<? extends Entity>>> SORTER_MAP = Util.make(HashBiMap.create(), biMap -> {
-    biMap.put("arbitrary", EntitySelector.ARBITRARY);
-    biMap.put("random", EntitySelectorReader.RANDOM);
-    biMap.put("furthest", EntitySelectorReader.FURTHEST);
-    biMap.put("nearest", EntitySelectorReader.NEAREST);
+  public static final Codec<NumericTag> NBT_NUMBER = NBT_ELEMENT.comapFlatMap(nbtElement -> nbtElement instanceof NumericTag number ? DataResult.success(number) : DataResult.error(() -> "The NBT value is not a number"), Function.identity());
+  public static final BiMap<String, BiConsumer<Vec3, List<? extends Entity>>> SORTER_MAP = Util.make(HashBiMap.create(), biMap -> {
+    biMap.put("arbitrary", EntitySelector.ORDER_ARBITRARY);
+    biMap.put("random", EntitySelectorParser.ORDER_RANDOM);
+    biMap.put("furthest", EntitySelectorParser.ORDER_FURTHEST);
+    biMap.put("nearest", EntitySelectorParser.ORDER_NEAREST);
   });
   /**
    * 用于序列化实体选择器中的 {@link EntitySelector#sorter}，即实体选择器中的 {@code sort} 参数。
    */
-  public static final Codec<BiConsumer<Vec3d, List<? extends Entity>>> SORTER = Codec.STRING.flatXmap(string -> SORTER_MAP.containsKey(string) ? DataResult.success(SORTER_MAP.get(string)) : DataResult.error(() -> "unknown sorter: " + string + ", which may be provided by other mods and cannot be recognized by Enhanced Commands mod")
+  public static final Codec<BiConsumer<Vec3, List<? extends Entity>>> SORTER = Codec.STRING.flatXmap(string -> SORTER_MAP.containsKey(string) ? DataResult.success(SORTER_MAP.get(string)) : DataResult.error(() -> "unknown sorter: " + string + ", which may be provided by other mods and cannot be recognized by Enhanced Commands mod")
       , biConsumer -> SORTER_MAP.inverse().containsKey(biConsumer) ? DataResult.success(SORTER_MAP.inverse().get(biConsumer)) : DataResult.error(() -> "Unknown sorter which may be provided or modified by other mods and cannot be recognized by Enhanced Commands mod"));
 
   /**
    * 为特定的方块，创建其属性名称的 codec，将只能读取到符合该方块的属性名称，否则会发生错误。
    */
-  public static Codec<Property<?>> propertyForBlock(StateManager<Block, BlockState> stateManager) {
+  public static Codec<Property<?>> propertyForBlock(StateDefinition<Block, BlockState> stateManager) {
     return Codec.STRING.flatXmap(s -> {
       final Property<?> property = stateManager.getProperty(s);
       if (property == null) {

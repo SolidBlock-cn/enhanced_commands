@@ -1,8 +1,8 @@
 package pers.solid.ecmd.predicate.pos;
 
 import com.google.common.collect.Iterables;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public record UnionPosPredicate(Collection<PosPredicate> posPredicates) implements PosPredicatesBasedPosPredicate<UnionPosPredicate, PosPredicate> {
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
+  public boolean contains(@NotNull Vec3 vec3d) {
     return Iterables.any(posPredicates, input -> input.contains(vec3d));
   }
 

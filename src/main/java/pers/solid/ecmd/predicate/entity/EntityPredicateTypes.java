@@ -2,9 +2,9 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 
@@ -47,7 +47,7 @@ public final class EntityPredicateTypes {
   public static final EntityPredicateType<ScoresEntityPredicateEntry> SCORE = registerSimple("scores", ScoresEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<SelectorEntityPredicate> SELECTOR = registerSimple("selector", SelectorEntityPredicate.CODEC);
   public static final EntityPredicateType<SenderOnlyEntityPredicate> SENDER_ONLY = registerSimple("sender_only", SenderOnlyEntityPredicate.CODEC);
-  public static final SimpleBooleanEntityPredicateType SNEAKING = registerSimpleBoolean("sneaking", Entity::isSneaking);
+  public static final SimpleBooleanEntityPredicateType SNEAKING = registerSimpleBoolean("sneaking", Entity::isShiftKeyDown);
   public static final SimpleBooleanEntityPredicateType SPRINTING = registerSimpleBoolean("sprinting", Entity::isSprinting);
   public static final EntityPredicateType<SubPredicateEntityPredicateEntry> SUB_PREDICATE = registerSimple("sub_predicate", SubPredicateEntityPredicateEntry.CODEC);
   public static final SimpleBooleanEntityPredicateType SWIMMING = registerSimpleBoolean("swimming", Entity::isSwimming);

@@ -21,6 +21,6 @@ public record OutlineRegionArgument(OutlineType outlineType, RegionArgument<?> r
 
   @Override
   public @NotNull String asString() {
-    return "outline(" + region.asString() + ", " + outlineType.asString() + ")";
+    return "outline(" + region.asString() + ", " + outlineType.getSerializedName() + ")";
   }
 }

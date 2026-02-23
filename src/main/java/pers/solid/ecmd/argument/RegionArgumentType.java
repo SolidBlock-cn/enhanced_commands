@@ -6,8 +6,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.region.Region;
@@ -17,21 +17,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record RegionArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<RegionArgument<?>> {
+public record RegionArgumentType(CommandBuildContext registryAccess) implements ArgumentType<RegionArgument<?>> {
   private static final List<String> EXAMPLES = List.of("cuboid(1 1 1, 2 2 2)", "sphere(3)", "cyl(3, 2)", "outline(cuboid(~~~, ~~~5))");
 
-  public static RegionArgumentType region(CommandRegistryAccess registryAccess) {
+  public static RegionArgumentType region(CommandBuildContext registryAccess) {
     return new RegionArgumentType(registryAccess);
   }
 
-  public static RegionArgument<?> getRegionArgument(CommandContext<ServerCommandSource> context, String name) {
+  public static RegionArgument<?> getRegionArgument(CommandContext<CommandSourceStack> context, String name) {
     return context.getArgument(name, RegionArgument.class);
   }
 
   /**
-   * @see net.minecraft.command.argument.Vec3ArgumentType#getVec3(CommandContext, String)
+   * @see net.minecraft.commands.arguments.coordinates.Vec3Argument#getVec3(CommandContext, String)
    */
-  public static Region getRegion(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static Region getRegion(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
     try {
       if (!((CommandContextAccessor<?>) context).getArguments().containsKey(name)) {
         final RegionArgument<?> sourceArg = context.getSource().getExtraArgument$ec("region", RegionArgument.class);

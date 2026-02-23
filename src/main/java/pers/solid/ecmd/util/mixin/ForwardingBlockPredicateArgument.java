@@ -1,41 +1,41 @@
 package pers.solid.ecmd.util.mixin;
 
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.argument.BlockPredicateArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.NbtBlockPredicate;
 import pers.solid.ecmd.predicate.block.PropertiesNbtCombinationBlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 
-public class ForwardingBlockPredicateArgument implements BlockPredicateArgumentType.BlockPredicate {
+public class ForwardingBlockPredicateArgument implements BlockPredicateArgument.Result {
   private final BlockPredicate modBlockPredicate;
-  private ServerCommandSource source;
+  private CommandSourceStack source;
 
   public ForwardingBlockPredicateArgument(BlockPredicate modBlockPredicate) {
     this.modBlockPredicate = modBlockPredicate;
   }
 
   @Override
-  public boolean hasNbt() {
+  public boolean requiresNbt() {
     return modBlockPredicate instanceof NbtBlockPredicate || modBlockPredicate instanceof PropertiesNbtCombinationBlockPredicate p && p.nbt() != null;
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
+  public boolean test(BlockInWorld cachedBlockPosition) {
     if (modBlockPredicate != null) {
       if (source == null) {
         EnhancedCommands.LOGGER.warn("Enhanced Commands: Invoking ForwardedBlockPredicateArgument.test without source specified! This may cause potential issues. It is usually called when invoking vanilla BlockPredicateArgumentType.getBlockPredicate.");
-        source = ((ServerWorld) cachedBlockPosition.getWorld()).getServer().getCommandSource();
+        source = ((ServerLevel) cachedBlockPosition.getLevel()).getServer().createCommandSourceStack();
       }
       return modBlockPredicate.test(cachedBlockPosition, new ExecutionContext(source, null));
     }
     return false;
   }
 
-  public void setSource(ServerCommandSource source) {
+  public void setSource(CommandSourceStack source) {
     this.source = source;
   }
 }

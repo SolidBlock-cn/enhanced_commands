@@ -1,8 +1,8 @@
 package pers.solid.ecmd.extensions;
 
 import com.google.common.collect.Iterables;
-import net.minecraft.text.Text;
-import net.minecraft.util.thread.ThreadExecutor;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.thread.BlockableEventLoop;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import java.util.Queue;
 import java.util.UUID;
 
 /**
- * The interface will be injected into {@link ThreadExecutor}.
+ * The interface will be injected into {@link BlockableEventLoop}.
  */
 public interface ThreadExecutorExtension {
   Logger LOGGER = LoggerFactory.getLogger(ThreadExecutorExtension.class);
@@ -24,7 +24,7 @@ public interface ThreadExecutorExtension {
     getUUIDToIteratorTasks$ec().put(task.uuid, task);
   }
 
-  default <T> IteratorTask<T> addIteratorTask$ec(Text name, Iterator<T> iterator) {
+  default <T> IteratorTask<T> addIteratorTask$ec(Component name, Iterator<T> iterator) {
     final IteratorTask<T> task = new IteratorTask<>(name, UUID.randomUUID(), iterator);
     addIteratorTask$ec(task);
     return task;

@@ -3,9 +3,9 @@ package pers.solid.ecmd.predicate.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -25,16 +25,16 @@ public record RegionBlockPredicate(RegionArgument<?> region) implements BlockPre
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    return Region.getCached(region, context.positionProvider).contains(cachedBlockPosition.getBlockPos());
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    return Region.getCached(region, context.positionProvider).contains(cachedBlockPosition.getPos());
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockPos blockPos = cachedBlockPosition.getBlockPos();
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final BlockPos blockPos = cachedBlockPosition.getPos();
     final boolean contains;
     contains = region.toAbsoluteRegion(context.positionProvider).contains(blockPos);
-    return TestResult.of(contains, Text.translatable("enhanced_commands.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).styled(Styles.ACTUAL)));
+    return TestResult.of(contains, Component.translatable("enhanced_commands.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).withStyle(Styles.ACTUAL)));
   }
 
   @Override

@@ -3,9 +3,9 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -24,13 +24,13 @@ public record NameEntityPredicateEntry(String name, boolean inverted) implements
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
     final String actualName = entity.getName().getString();
-    final MutableText actualNameText = Text.literal(actualName).styled(Styles.ACTUAL);
+    final MutableComponent actualNameText = Component.literal(actualName).withStyle(Styles.ACTUAL);
     if (actualName.equals(name)) {
-      return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.name.equal", displayName, actualNameText));
+      return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.name.equal", displayName, actualNameText));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.empty", displayName, actualNameText, Text.literal(name).styled(Styles.EXPECTED)));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.empty", displayName, actualNameText, Component.literal(name).withStyle(Styles.EXPECTED)));
     }
   }
 

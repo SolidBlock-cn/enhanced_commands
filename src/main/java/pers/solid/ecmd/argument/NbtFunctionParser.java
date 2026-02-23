@@ -10,10 +10,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.function.nbt.*;
@@ -30,16 +30,16 @@ import java.util.Map;
 public class NbtFunctionParser<S> {
   private final ParseContext<S> parseContext;
 
-  public static final Text MERGE = Text.translatable("enhanced_commands.nbt_function.merge");
-  public static final Text EQUAL = Text.translatable("enhanced_commands.nbt_function.equal");
-  public static final Text SEMICOLON = Text.translatable("enhanced_commands.nbt_function.semicolon");
-  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.sign_expected"));
-  public static final SimpleCommandExceptionType SIGN_UNEXPECTED_WHEN_REMOVING_KEY = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.sign_unexpected_when_removing_key"));
-  public static final Text REMOVE_KEY = Text.translatable("enhanced_commands.nbt_function.remove_key");
-  public static final Text ECLIPSE = Text.translatable("enhanced_commands.nbt_function.eclipse");
-  public static final SimpleCommandExceptionType DUPLICATE_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.duplicate_eclipse"));
-  public static final SimpleCommandExceptionType DUPLICATE_SEMICOLON = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.duplicate_semicolon"));
-  public static final SimpleCommandExceptionType UNEXPECTED_SEMICOLON_AFTER_ECLIPSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.unexpected_semicolon_after_eclipse"));
+  public static final Component MERGE = Component.translatable("enhanced_commands.nbt_function.merge");
+  public static final Component EQUAL = Component.translatable("enhanced_commands.nbt_function.equal");
+  public static final Component SEMICOLON = Component.translatable("enhanced_commands.nbt_function.semicolon");
+  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.sign_expected"));
+  public static final SimpleCommandExceptionType SIGN_UNEXPECTED_WHEN_REMOVING_KEY = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.sign_unexpected_when_removing_key"));
+  public static final Component REMOVE_KEY = Component.translatable("enhanced_commands.nbt_function.remove_key");
+  public static final Component ECLIPSE = Component.translatable("enhanced_commands.nbt_function.eclipse");
+  public static final SimpleCommandExceptionType DUPLICATE_ECLIPSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.duplicate_eclipse"));
+  public static final SimpleCommandExceptionType DUPLICATE_SEMICOLON = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.duplicate_semicolon"));
+  public static final SimpleCommandExceptionType UNEXPECTED_SEMICOLON_AFTER_ECLIPSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.unexpected_semicolon_after_eclipse"));
 
   public NbtFunctionParser(ParseContext<S> parseContext) {
     this.parseContext = parseContext;
@@ -98,7 +98,7 @@ public class NbtFunctionParser<S> {
       final String key;
       boolean markAsRemoveKey = false;
       if (!reader.canRead()) {
-        throw StringNbtReader.EXPECTED_KEY.createWithContext(reader);
+        throw TagParser.ERROR_EXPECTED_KEY.createWithContext(reader);
       } else if (!isUsingEqual && reader.peek() == '-' && reader.canRead(2) && Character.isWhitespace(reader.peek(1))) {
         markAsRemoveKey = true;
         reader.skip();
@@ -108,7 +108,7 @@ public class NbtFunctionParser<S> {
       key = reader.readString();
       if (key != null && key.isEmpty()) {
         reader.setCursor(cursorBeforeKey);
-        throw StringNbtReader.EXPECTED_KEY.createWithContext(reader);
+        throw TagParser.ERROR_EXPECTED_KEY.createWithContext(reader);
       }
 
       reader.skipWhitespace();
@@ -142,7 +142,7 @@ public class NbtFunctionParser<S> {
   /**
    * 解析列表。
    *
-   * @see StringNbtReader#parseList()
+   * @see TagParser#readListTag()
    */
   public NbtFunction parseList(boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
@@ -215,7 +215,7 @@ public class NbtFunctionParser<S> {
             reader.skipWhitespace();
             parseContext.setSuggestion(suggestEndOfList);
             if (!reader.canRead()) {
-              throw StringNbtReader.EXPECTED_VALUE.createWithContext(reader);
+              throw TagParser.ERROR_EXPECTED_VALUE.createWithContext(reader);
             } else if (reader.peek() == ']') {
               reader.skip();
               parseContext.clearSuggestion();
@@ -276,7 +276,7 @@ public class NbtFunctionParser<S> {
           reader.skipWhitespace();
           parseContext.setSuggestion(suggestEndOfList);
           if (!reader.canRead()) {
-            throw StringNbtReader.EXPECTED_VALUE.createWithContext(reader);
+            throw TagParser.ERROR_EXPECTED_VALUE.createWithContext(reader);
           } else if (reader.peek() == ']') {
             reader.skip();
             parseContext.clearSuggestion();
@@ -297,7 +297,7 @@ public class NbtFunctionParser<S> {
           }
           parseContext.setSuggestion(suggestEndOfList);
           if (!reader.canRead()) {
-            throw StringNbtReader.EXPECTED_VALUE.createWithContext(reader);
+            throw TagParser.ERROR_EXPECTED_VALUE.createWithContext(reader);
           } else if (reader.peek() == ']') {
             reader.skip();
             parseContext.clearSuggestion();
@@ -393,17 +393,17 @@ public class NbtFunctionParser<S> {
       return suggestionsBuilder.buildFuture();
     });
     if (!reader.canRead()) {
-      throw StringNbtReader.EXPECTED_VALUE.createWithContext(reader);
+      throw TagParser.ERROR_EXPECTED_VALUE.createWithContext(reader);
     }
     if (reader.peek() == '{') {
       return parseCompound(isUsingEqual);
     } else if (reader.peek() == '[' && !(reader.canRead(3) && !StringReader.isQuotedStringStart(reader.peek()) && reader.peek(2) == ';')) {
       return parseList(isUsingEqual);
     } else {
-      final NbtElement element = new StringNbtReader(reader).parseElement();
+      final Tag element = new TagParser(reader).readValue();
 //      parseContext.clearSuggestion();
 
-      if (isUsingEqual && element instanceof AbstractNbtNumber abstractNbtNumber) {
+      if (isUsingEqual && element instanceof NumericTag abstractNbtNumber) {
         return new NumberValueNbtFunction(abstractNbtNumber);
       } else {
         return new SimpleNbtFunction(element);

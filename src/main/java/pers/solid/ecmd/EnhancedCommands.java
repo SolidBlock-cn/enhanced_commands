@@ -3,7 +3,7 @@ package pers.solid.ecmd;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.api.FlipStateCallback;
@@ -31,9 +31,9 @@ public class EnhancedCommands implements ModInitializer {
   public static final String MOD_ID = "enhanced_commands";
   public static final Logger LOGGER = LoggerFactory.getLogger(EnhancedCommands.class);
 
-  private static final Identifier EXAMPLE_ID = Identifier.of(MOD_ID, "");
+  private static final ResourceLocation EXAMPLE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "");
 
-  public static Identifier id(String path) {
+  public static ResourceLocation id(String path) {
     return EXAMPLE_ID.withPath(path);
   }
 

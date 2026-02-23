@@ -4,8 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -41,7 +41,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
 
   @Override
   public @NotNull String asString() {
-    return "regex_replace(" + NbtString.escape(pattern.pattern()) + ", " + NbtString.escape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
+    return "regex_replace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   @Override
@@ -50,16 +50,16 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (original.isPresent()) {
       nbtElement = original.get().apply(nbtElement, context);
     }
     if (recursive) {
       return NbtFunction.recursivelyApply(e -> {
-        if (e instanceof NbtString nbtString) {
-          final String string = nbtString.asString();
+        if (e instanceof StringTag nbtString) {
+          final String string = nbtString.getAsString();
           try {
-            return NbtString.of(pattern.matcher(string).replaceAll(replacement));
+            return StringTag.valueOf(pattern.matcher(string).replaceAll(replacement));
           } catch (RuntimeException ex) {
             if (lenient) {
               return e;
@@ -71,10 +71,10 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
         return null;
       }, nbtElement, null);
     }
-    if (nbtElement instanceof NbtString nbtString) {
-      final String string = nbtString.asString();
+    if (nbtElement instanceof StringTag nbtString) {
+      final String string = nbtString.getAsString();
       try {
-        return NbtString.of(pattern.matcher(string).replaceAll(replacement));
+        return StringTag.valueOf(pattern.matcher(string).replaceAll(replacement));
       } catch (RuntimeException ex) {
         if (lenient) {
           return nbtElement;
@@ -90,7 +90,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
       if (nbtElement == null) {
         throw StringReplaceNbtFunction.NO_VALUE.create();
       }
-      throw StringReplaceNbtFunction.NOT_A_STRING.create(nbtElement.getNbtType().getCommandFeedbackName());
+      throw StringReplaceNbtFunction.NOT_A_STRING.create(nbtElement.getType().getPrettyName());
     }
   }
 

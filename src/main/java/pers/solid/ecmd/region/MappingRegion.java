@@ -1,9 +1,9 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -13,16 +13,16 @@ import java.util.stream.Stream;
  * 基于现成的区域并进行特定的映射的区域。
  */
 public interface MappingRegion extends RegionBasedRegion<MappingRegion, Region> {
-  Vec3d getMappedPosOf(Vec3d original);
+  Vec3 getMappedPosOf(Vec3 original);
 
-  Vec3d getOriginalPosOf(Vec3d mapped);
+  Vec3 getOriginalPosOf(Vec3 mapped);
 
   default Vec3i getMappedPosOf(Vec3i original) {
-    return BlockPos.ofFloored(getMappedPosOf(Vec3d.ofCenter(original)));
+    return BlockPos.containing(getMappedPosOf(Vec3.atCenterOf(original)));
   }
 
   default Vec3i getOriginalPosOf(Vec3i mapped) {
-    return BlockPos.ofFloored(getMappedPosOf(Vec3d.ofCenter(mapped)));
+    return BlockPos.containing(getMappedPosOf(Vec3.atCenterOf(mapped)));
   }
 
   @Override
@@ -31,20 +31,20 @@ public interface MappingRegion extends RegionBasedRegion<MappingRegion, Region> 
   }
 
   @Override
-  default boolean contains(@NotNull Vec3d vec3d) {
+  default boolean contains(@NotNull Vec3 vec3d) {
     return region().contains(getOriginalPosOf(vec3d));
   }
 
   @Override
   @NotNull
   default Iterator<BlockPos> iterator() {
-    final BlockPos.Mutable mutable = new BlockPos.Mutable();
+    final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
     return Iterators.transform(region().iterator(), input -> mutable.set(getMappedPosOf(input)));
   }
 
   @Override
   default Stream<@NotNull BlockPos> stream() {
-    final BlockPos.Mutable mutable = new BlockPos.Mutable();
+    final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
     return region().stream().map(blockPos -> mutable.set(getMappedPosOf(blockPos)));
   }
 }

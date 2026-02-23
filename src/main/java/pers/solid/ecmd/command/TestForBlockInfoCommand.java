@@ -4,17 +4,17 @@ import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.LightType;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.DirectionArgumentType;
@@ -29,150 +29,150 @@ import pers.solid.ecmd.util.lambda.TriPredicate;
 public enum TestForBlockInfoCommand implements TestForCommands.Entry {
   INSTANCE;
 
-  private static LiteralArgumentBuilder<ServerCommandSource> addBlockInfoCommandProperties(LiteralArgumentBuilder<ServerCommandSource> argumentBuilder) {
+  private static LiteralArgumentBuilder<CommandSourceStack> addBlockInfoCommandProperties(LiteralArgumentBuilder<CommandSourceStack> argumentBuilder) {
     return argumentBuilder
-        .then(CommandManager.argument("pos", EnhancedPosArgumentType.blockPos())
-            .then(CommandManager.literal("hardness")
+        .then(Commands.argument("pos", EnhancedPosArgumentType.blockPos())
+            .then(Commands.literal("hardness")
                 .executes(context -> executeGetHardness(context, 1))
-                .then(CommandManager.argument("scale", FloatArgumentType.floatArg())
+                .then(Commands.argument("scale", FloatArgumentType.floatArg())
                     .executes(context -> executeGetHardness(context, FloatArgumentType.getFloat(context, "scale")))))
-            .then(CommandManager.literal("luminance")
+            .then(Commands.literal("luminance")
                 .executes(TestForBlockInfoCommand::executeGetLuminance))
-            .then(CommandManager.literal("strong_redstone_power")
-                .then(CommandManager.argument("direction", DirectionArgumentType.direction())
+            .then(Commands.literal("strong_redstone_power")
+                .then(Commands.argument("direction", DirectionArgumentType.direction())
                     .executes(TestForBlockInfoCommand::executeGetStrongRedstonePower)))
-            .then(CommandManager.literal("weak_redstone_power")
-                .then(CommandManager.argument("direction", DirectionArgumentType.direction())
+            .then(Commands.literal("weak_redstone_power")
+                .then(Commands.argument("direction", DirectionArgumentType.direction())
                     .executes(TestForBlockInfoCommand::executeGetWeakRedstonePower)))
-            .then(CommandManager.literal("light")
+            .then(Commands.literal("light")
                 .executes(context -> executeGetLight(context, null)))
-            .then(CommandManager.literal("block_light")
-                .executes(context -> executeGetLight(context, LightType.BLOCK)))
-            .then(CommandManager.literal("sky_light")
-                .executes(context -> executeGetLight(context, LightType.SKY)))
-            .then(CommandManager.literal("emits_redstone_power")
+            .then(Commands.literal("block_light")
+                .executes(context -> executeGetLight(context, LightLayer.BLOCK)))
+            .then(Commands.literal("sky_light")
+                .executes(context -> executeGetLight(context, LightLayer.SKY)))
+            .then(Commands.literal("emits_redstone_power")
                 .executes(TestForBlockInfoCommand::executeGetEmitsRedstonePower))
-            .then(CommandManager.literal("opaque")
+            .then(Commands.literal("opaque")
                 .executes(TestForBlockInfoCommand::executeGetOpaque))
-            .then(CommandManager.literal("model_offset")
+            .then(Commands.literal("model_offset")
                 .executes(TestForBlockInfoCommand::executeGetModelOffset))
-            .then(CommandManager.literal("suffocate")
+            .then(Commands.literal("suffocate")
                 .executes(TestForBlockInfoCommand::executeGetSuffocate))
-            .then(CommandManager.literal("block_vision")
+            .then(Commands.literal("block_vision")
                 .executes(TestForBlockInfoCommand::executeGetBlockVision))
-            .then(CommandManager.literal("replaceable")
+            .then(Commands.literal("replaceable")
                 .executes(TestForBlockInfoCommand::executeGetReplaceable))
-            .then(CommandManager.literal("random_ticks")
+            .then(Commands.literal("random_ticks")
                 .executes(TestForBlockInfoCommand::executeGetRandomTicks)));
   }
 
-  private static int getIntBlockInfo(CommandContext<ServerCommandSource> context, String translationKey, ToIntTriFunction<BlockState, ServerWorld, BlockPos> function) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static int getIntBlockInfo(CommandContext<CommandSourceStack> context, String translationKey, ToIntTriFunction<BlockState, ServerLevel, BlockPos> function) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
     final int value = function.applyAsInt(blockState, world, pos);
-    source.sendFeedback$ecBridge(() -> Text.translatable(translationKey, blockState.getBlock().getName().styled(Styles.TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(Styles.ACTUAL)), false);
+    source.sendFeedback$ecBridge(() -> Component.translatable(translationKey, blockState.getBlock().getName().withStyle(Styles.TARGET), TextUtil.wrapVector(pos), Component.literal(String.valueOf(value)).withStyle(Styles.ACTUAL)), false);
     return value;
   }
 
-  private static int getIntBlockInfoWithDirection(CommandContext<ServerCommandSource> context, String translationKey, ToIntQuadFunction<BlockState, ServerWorld, BlockPos, Direction> function) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static int getIntBlockInfoWithDirection(CommandContext<CommandSourceStack> context, String translationKey, ToIntQuadFunction<BlockState, ServerLevel, BlockPos, Direction> function) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
     final Direction direction = DirectionArgumentType.getDirection(context, "direction");
     final int value = function.applyAsInt(blockState, world, pos, direction);
-    source.sendFeedback$ecBridge(() -> Text.translatable(translationKey, blockState.getBlock().getName().styled(Styles.TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(Styles.ACTUAL), TextUtil.wrapDirection(direction).styled(Styles.TARGET)), false);
+    source.sendFeedback$ecBridge(() -> Component.translatable(translationKey, blockState.getBlock().getName().withStyle(Styles.TARGET), TextUtil.wrapVector(pos), Component.literal(String.valueOf(value)).withStyle(Styles.ACTUAL), TextUtil.wrapDirection(direction).withStyle(Styles.TARGET)), false);
     return value;
   }
 
-  private static float getFloatBlockInfo(CommandContext<ServerCommandSource> context, String translationKey, ToFloatTriFunction<BlockState, ServerWorld, BlockPos> function) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static float getFloatBlockInfo(CommandContext<CommandSourceStack> context, String translationKey, ToFloatTriFunction<BlockState, ServerLevel, BlockPos> function) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
     final float value = function.applyAsFloat(blockState, world, pos);
-    source.sendFeedback$ecBridge(() -> Text.translatable(translationKey, blockState.getBlock().getName().styled(Styles.TARGET), TextUtil.wrapVector(pos), Text.literal(String.valueOf(value)).styled(Styles.ACTUAL)), false);
+    source.sendFeedback$ecBridge(() -> Component.translatable(translationKey, blockState.getBlock().getName().withStyle(Styles.TARGET), TextUtil.wrapVector(pos), Component.literal(String.valueOf(value)).withStyle(Styles.ACTUAL)), false);
     return value;
   }
 
-  private static boolean getBooleanBlockInfo(CommandContext<ServerCommandSource> context, String translationKeyWhenFalse, String translationKeyWhenTrue, TriPredicate<BlockState, ServerWorld, BlockPos> predicate) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static boolean getBooleanBlockInfo(CommandContext<CommandSourceStack> context, String translationKeyWhenFalse, String translationKeyWhenTrue, TriPredicate<BlockState, ServerLevel, BlockPos> predicate) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
     final boolean value = predicate.test(blockState, world, pos);
-    source.sendFeedback$ecBridge(() -> Text.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().styled(Styles.TARGET), TextUtil.wrapVector(pos)), false);
+    source.sendFeedback$ecBridge(() -> Component.translatable(value ? translationKeyWhenTrue : translationKeyWhenFalse, blockState.getBlock().getName().withStyle(Styles.TARGET), TextUtil.wrapVector(pos)), false);
     return value;
   }
 
-  private static int executeGetHardness(CommandContext<ServerCommandSource> context, float scale) throws CommandSyntaxException {
-    final double hardness = getFloatBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.hardness", AbstractBlock.AbstractBlockState::getHardness);
+  private static int executeGetHardness(CommandContext<CommandSourceStack> context, float scale) throws CommandSyntaxException {
+    final double hardness = getFloatBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.hardness", BlockBehaviour.BlockStateBase::getDestroySpeed);
     return (int) (hardness * scale);
   }
 
-  private static int executeGetLuminance(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.luminance", (blockState, serverWorld, blockPos) -> blockState.getLuminance());
+  private static int executeGetLuminance(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.luminance", (blockState, serverWorld, blockPos) -> blockState.getLightEmission());
   }
 
-  private static int executeGetStrongRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return getIntBlockInfoWithDirection(context, "enhanced_commands.commands.testfor.blockinfo.strong_redstone_power", AbstractBlock.AbstractBlockState::getStrongRedstonePower);
+  private static int executeGetStrongRedstonePower(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return getIntBlockInfoWithDirection(context, "enhanced_commands.commands.testfor.blockinfo.strong_redstone_power", BlockBehaviour.BlockStateBase::getDirectSignal);
   }
 
-  private static int executeGetWeakRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return getIntBlockInfoWithDirection(context, "enhanced_commands.commands.testfor.blockinfo.weak_redstone_power", AbstractBlock.AbstractBlockState::getWeakRedstonePower);
+  private static int executeGetWeakRedstonePower(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return getIntBlockInfoWithDirection(context, "enhanced_commands.commands.testfor.blockinfo.weak_redstone_power", BlockBehaviour.BlockStateBase::getSignal);
   }
 
-  private static int executeGetLight(CommandContext<ServerCommandSource> context, @Nullable LightType lightType) throws CommandSyntaxException {
+  private static int executeGetLight(CommandContext<CommandSourceStack> context, @Nullable LightLayer lightType) throws CommandSyntaxException {
     if (lightType == null) {
-      return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.light", (blockState, serverWorld, blockPos) -> serverWorld.getLightLevel(blockPos));
+      return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.light", (blockState, serverWorld, blockPos) -> serverWorld.getMaxLocalRawBrightness(blockPos));
     } else {
-      return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo." + (lightType == LightType.BLOCK ? "block" : "sky") + "_light", (blockState, serverWorld, blockPos) -> serverWorld.getLightLevel(lightType, blockPos));
+      return getIntBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo." + (lightType == LightLayer.BLOCK ? "block" : "sky") + "_light", (blockState, serverWorld, blockPos) -> serverWorld.getBrightness(lightType, blockPos));
     }
   }
 
-  private static int executeGetEmitsRedstonePower(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.emits_redstone_power.false", "enhanced_commands.commands.testfor.blockinfo.emits_redstone_power.true", (blockState, serverWorld, blockPos) -> blockState.emitsRedstonePower()));
+  private static int executeGetEmitsRedstonePower(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.emits_redstone_power.false", "enhanced_commands.commands.testfor.blockinfo.emits_redstone_power.true", (blockState, serverWorld, blockPos) -> blockState.isSignalSource()));
   }
 
-  private static int executeGetOpaque(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.opaque.false", "enhanced_commands.commands.testfor.blockinfo.opaque.true", (blockState, serverWorld, blockPos) -> blockState.isOpaque()));
+  private static int executeGetOpaque(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.opaque.false", "enhanced_commands.commands.testfor.blockinfo.opaque.true", (blockState, serverWorld, blockPos) -> blockState.canOcclude()));
   }
 
-  private static int executeGetModelOffset(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static int executeGetModelOffset(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
-    final Vec3d modelOffset = blockState.getModelOffset(world, pos);
-    if (modelOffset.equals(Vec3d.ZERO)) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blockinfo.model_offset.false", blockState.getBlock().getName().styled(Styles.TARGET), TextUtil.wrapVector(pos)), false);
+    final Vec3 modelOffset = blockState.getOffset(world, pos);
+    if (modelOffset.equals(Vec3.ZERO)) {
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blockinfo.model_offset.false", blockState.getBlock().getName().withStyle(Styles.TARGET), TextUtil.wrapVector(pos)), false);
       return 0;
     } else {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blockinfo.model_offset.true", blockState.getBlock().getName().styled(Styles.TARGET), TextUtil.wrapVector(pos), TextUtil.wrapVector(modelOffset)), false);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blockinfo.model_offset.true", blockState.getBlock().getName().withStyle(Styles.TARGET), TextUtil.wrapVector(pos), TextUtil.wrapVector(modelOffset)), false);
       return 1;
     }
   }
 
-  private static int executeGetSuffocate(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.suffocate.false", "enhanced_commands.commands.testfor.blockinfo.suffocate.true", AbstractBlock.AbstractBlockState::shouldSuffocate));
+  private static int executeGetSuffocate(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.suffocate.false", "enhanced_commands.commands.testfor.blockinfo.suffocate.true", BlockBehaviour.BlockStateBase::isSuffocating));
   }
 
-  private static int executeGetBlockVision(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.block_vision.false", "enhanced_commands.commands.testfor.blockinfo.block_vision.true", AbstractBlock.AbstractBlockState::shouldBlockVision));
+  private static int executeGetBlockVision(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.block_vision.false", "enhanced_commands.commands.testfor.blockinfo.block_vision.true", BlockBehaviour.BlockStateBase::isViewBlocking));
   }
 
-  private static int executeGetReplaceable(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.replaceable.false", "enhanced_commands.commands.testfor.blockinfo.replaceable.true", (blockState, serverWorld, blockPos) -> blockState.isReplaceable()));
+  private static int executeGetReplaceable(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.replaceable.false", "enhanced_commands.commands.testfor.blockinfo.replaceable.true", (blockState, serverWorld, blockPos) -> blockState.canBeReplaced()));
   }
 
-  private static int executeGetRandomTicks(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.random_ticks.false", "enhanced_commands.commands.testfor.blockinfo.random_ticks.true", (blockState, serverWorld, blockPos) -> blockState.hasRandomTicks()));
+  private static int executeGetRandomTicks(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return BooleanUtils.toInteger(getBooleanBlockInfo(context, "enhanced_commands.commands.testfor.blockinfo.random_ticks.false", "enhanced_commands.commands.testfor.blockinfo.random_ticks.true", (blockState, serverWorld, blockPos) -> blockState.isRandomlyTicking()));
   }
 
   @Override
-  public void addArguments(LiteralArgumentBuilder<ServerCommandSource> testForBuilder, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    testForBuilder.then(addBlockInfoCommandProperties(CommandManager.literal("blockinfo")));
+  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+    testForBuilder.then(addBlockInfoCommandProperties(Commands.literal("blockinfo")));
   }
 }

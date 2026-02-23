@@ -2,8 +2,8 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -20,14 +20,14 @@ public enum SenderOnlyEntityPredicate implements SpecialEntityPredicate {
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
     final Entity sender = context.positionProvider.getEntity$ec();
     if (entity.equals(sender)) {
-      return (TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.sender.true", displayName)));
+      return (TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.sender.true", displayName)));
     } else if (sender != null) {
-      return (TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sender.false", displayName, TextUtil.styled(sender.getDisplayName(), Styles.EXPECTED))));
+      return (TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.sender.false", displayName, TextUtil.styled(sender.getDisplayName(), Styles.EXPECTED))));
     } else {
-      return (TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sender.false_without_sender", displayName)));
+      return (TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.sender.false_without_sender", displayName)));
     }
   }
 

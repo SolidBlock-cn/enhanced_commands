@@ -1,6 +1,6 @@
 package pers.solid.ecmd.extensions;
 
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,7 +75,7 @@ public interface HistoryHolder {
     };
   }
 
-  static @Nullable HistoryHolder fromSource(ServerCommandSource source) {
+  static @Nullable HistoryHolder fromSource(CommandSourceStack source) {
     if (source.getPlayer() instanceof HistoryHolder historyHolder) {
       return historyHolder;
     } else if (source.getServer() instanceof HistoryHolder historyHolder) {

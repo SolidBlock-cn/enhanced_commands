@@ -1,10 +1,10 @@
 package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.StateManager;
-import net.minecraft.util.dynamic.ForwardingDynamicOps;
+import net.minecraft.resources.DelegatingOps;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -17,22 +17,22 @@ import org.jetbrains.annotations.ApiStatus;
  * @see #of
  */
 @ApiStatus.Experimental
-public class BlockBiasedOps<T> extends ForwardingDynamicOps<T> {
-  private final StateManager<Block, BlockState> stateManager;
+public class BlockBiasedOps<T> extends DelegatingOps<T> {
+  private final StateDefinition<Block, BlockState> stateManager;
 
-  protected BlockBiasedOps(DynamicOps<T> delegate, StateManager<Block, BlockState> stateManager) {
+  protected BlockBiasedOps(DynamicOps<T> delegate, StateDefinition<Block, BlockState> stateManager) {
     super(delegate);
     this.stateManager = stateManager;
   }
 
-  public static <T> BlockBiasedOps<T> of(DynamicOps<T> delegate, StateManager<Block, BlockState> stateManager) {
+  public static <T> BlockBiasedOps<T> of(DynamicOps<T> delegate, StateDefinition<Block, BlockState> stateManager) {
     if (delegate instanceof BlockBiasedOps<T>) {
       throw new IllegalArgumentException("The delegate of " + BlockBiasedOps.class.getSimpleName() + " cannot be a " + BlockBiasedOps.class.getSimpleName() + "!");
     }
     return new BlockBiasedOps<>(delegate, stateManager);
   }
 
-  public StateManager<Block, BlockState> getStateManager() {
+  public StateDefinition<Block, BlockState> getStateManager() {
     return stateManager;
   }
 }

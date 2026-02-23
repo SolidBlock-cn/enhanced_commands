@@ -3,14 +3,14 @@ package pers.solid.ecmd.util.bridge;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.predicate.NumberRange;
+import net.minecraft.advancements.critereon.MinMaxBounds;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /**
  * @see org.apache.commons.lang3.DoubleRange
- * @see net.minecraft.predicate.NumberRange.DoubleRange
+ * @see net.minecraft.advancements.critereon.MinMaxBounds.Doubles
  */
 public class BridgeDoubleRange extends AbstractBridgeRange<Double> {
   public static final Codec<BridgeDoubleRange> CODEC = BridgeRange.createCodec(Codec.DOUBLE, BridgeDoubleRange::fromOptional);
@@ -44,10 +44,10 @@ public class BridgeDoubleRange extends AbstractBridgeRange<Double> {
     return BridgeRange.parse(reader, Double::parseDouble, (r, s) -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidDouble().createWithContext(r, s), BridgeDoubleRange::new);
   }
 
-  public NumberRange.DoubleRange toVanilla() {
+  public MinMaxBounds.Doubles toVanilla() {
     final Optional<Double> min = Optional.ofNullable(this.min);
     final Optional<Double> max = Optional.ofNullable(this.max);
-    return new NumberRange.DoubleRange(min, max, min.map(x -> x * x), max.map(x -> x * x));
+    return new MinMaxBounds.Doubles(min, max, min.map(x -> x * x), max.map(x -> x * x));
   }
 
   @Override

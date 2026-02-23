@@ -2,7 +2,7 @@ package pers.solid.ecmd.function.nbt;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -14,7 +14,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  *
  * @param element 使用时需要返回的值。
  */
-public record SimpleNbtFunction(@NotNull NbtElement element) implements NbtFunction {
+public record SimpleNbtFunction(@NotNull Tag element) implements NbtFunction {
   public static final MapCodec<SimpleNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_ELEMENT.fieldOf("element").forGetter(SimpleNbtFunction::element)).apply(i, SimpleNbtFunction::new));
 
   @Override
@@ -28,7 +28,7 @@ public record SimpleNbtFunction(@NotNull NbtElement element) implements NbtFunct
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) {
+  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) {
     return element;
   }
 

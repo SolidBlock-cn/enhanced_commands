@@ -4,17 +4,17 @@ import com.google.common.collect.Iterators;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,15 +41,15 @@ import pers.solid.ecmd.util.iterator.IterateUtils;
 import java.util.function.Function;
 
 public interface BlockTransformationCommand {
-  static KeywordArgsArgumentType.Builder createKeywordArgs(CommandRegistryAccess registryAccess) {
+  static KeywordArgsArgumentType.Builder createKeywordArgs(CommandBuildContext registryAccess) {
     return KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.BLOCK_TRANSFORMATION, registryAccess);
   }
 
   Vec3i transformBlockPos(Vec3i original);
 
-  Vec3d transformPos(Vec3d original);
+  Vec3 transformPos(Vec3 original);
 
-  Vec3d transformPosBack(Vec3d transformed);
+  Vec3 transformPosBack(Vec3 transformed);
 
   void transformEntity(@NotNull Entity entity);
 
@@ -67,17 +67,17 @@ public interface BlockTransformationCommand {
    * @param affectedBlocks   影响的方块的数量。
    * @param affectedEntities 影响的实体的数量，如果命令的参数未允许影响实体，则为 -1，如果允许影响实体但是没有影响到实体，则为 1。
    */
-  void notifyCompletion(ServerCommandSource source, @Range(from = 0, to = Long.MAX_VALUE) int affectedBlocks, @Range(from = -1, to = Long.MAX_VALUE) int affectedEntities);
+  void notifyCompletion(CommandSourceStack source, @Range(from = 0, to = Long.MAX_VALUE) int affectedBlocks, @Range(from = -1, to = Long.MAX_VALUE) int affectedEntities);
 
   @NotNull
-  MutableText getIteratorTaskName(Region region);
+  MutableComponent getIteratorTaskName(Region region);
 
-  default int execute(Region region, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  default int execute(Region region, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final @Nullable BlockPredicate affectOnly = keywordArgs.getArg("affect_only");
     final @Nullable BlockPredicate transformOnly = keywordArgs.getArg("transform_only");
     final @Nullable BlockFunction remaining = keywordArgs.getArg("remaining");
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     final boolean bypassLimit = keywordArgs.getArg("bypass_limit");
     final int flags = FillReplaceCommand.getFlags(keywordArgs);
@@ -105,11 +105,11 @@ public interface BlockTransformationCommand {
     final EntityPredicate entitiesToAffect = keywordArgs.getArg("affect_entities");
     if (entitiesToAffect != null) {
       final ExecutionContext executionContext = new ExecutionContext(context.getSource());
-      builder.entitiesToAffect(world.getEntitiesByClass(Entity.class, region.minContainingBox(), entity -> entitiesToAffect.test(entity, executionContext)).iterator());
+      builder.entitiesToAffect(world.getEntitiesOfClass(Entity.class, region.minContainingBox(), entity -> entitiesToAffect.test(entity, executionContext)).iterator());
     }
 
     final boolean transformsRegion = keywordArgs.getBoolean("select");
-    final ServerPlayerEntity player = source.getPlayer();
+    final ServerPlayer player = source.getPlayer();
 
     final boolean immediately = keywordArgs.getBoolean("immediately");
 
@@ -127,8 +127,8 @@ public interface BlockTransformationCommand {
 
         if (transformedRegionSelection != null) {
           history.reverseEntities.add(Triple.of(player, Pair.of(
-              player0 -> ((ServerPlayerEntity) player0).setActiveRegion$ec(oldActiveRegion),
-              player0 -> ((ServerPlayerEntity) player0).setActiveRegion$ec(transformedRegionSelection)
+              player0 -> ((ServerPlayer) player0).setActiveRegion$ec(oldActiveRegion),
+              player0 -> ((ServerPlayer) player0).setActiveRegion$ec(transformedRegionSelection)
           ), null));
           player.setActiveRegion$ec(transformedRegionSelection);
         }
@@ -136,7 +136,7 @@ public interface BlockTransformationCommand {
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
       })));
       history.task = iteratorTask;
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(task.transformBlocks().getImmediateTask());
@@ -146,8 +146,8 @@ public interface BlockTransformationCommand {
       notifyCompletion(source, affectedBlocks, entitiesToAffect == null ? -1 : affectedEntities);
       if (transformedRegionSelection != null) {
         history.reverseEntities.add(Triple.of(player, Pair.of(
-            player0 -> ((ServerPlayerEntity) player0).setActiveRegion$ec(oldActiveRegion),
-            player0 -> ((ServerPlayerEntity) player0).setActiveRegion$ec(transformedRegionSelection)
+            player0 -> ((ServerPlayer) player0).setActiveRegion$ec(oldActiveRegion),
+            player0 -> ((ServerPlayer) player0).setActiveRegion$ec(transformedRegionSelection)
         ), null));
         player.setActiveRegion$ec(transformedRegionSelection);
       }
@@ -155,12 +155,12 @@ public interface BlockTransformationCommand {
     }
   }
 
-  private static void notifyUnloadedPos(BlockTransformationTask task, UnloadedPosBehavior unloadedPosBehavior, ServerCommandSource source) {
+  private static void notifyUnloadedPos(BlockTransformationTask task, UnloadedPosBehavior unloadedPosBehavior, CommandSourceStack source) {
     if (task.hasUnloadedPos) {
       if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.broken").styled(Styles.ACTUAL), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.broken").withStyle(Styles.ACTUAL), false);
       } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.skipped").styled(Styles.ACTUAL), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.skipped").withStyle(Styles.ACTUAL), false);
       }
     }
   }

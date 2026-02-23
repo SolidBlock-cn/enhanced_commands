@@ -2,9 +2,9 @@ package pers.solid.ecmd.predicate.nbt;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.TextUtil;
@@ -18,7 +18,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  *   8s match 8L -> true
  * </pre>
  */
-public record ComparisonNbtPredicate(Comparator comparator, NbtElement expected) implements NbtPredicate {
+public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implements NbtPredicate {
   public static final MapCodec<ComparisonNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Comparator.CODEC.fieldOf("comparator").forGetter(ComparisonNbtPredicate::comparator),
       CodecUtil.NBT_ELEMENT.fieldOf("expected").forGetter(ComparisonNbtPredicate::expected)
@@ -26,31 +26,31 @@ public record ComparisonNbtPredicate(Comparator comparator, NbtElement expected)
 
   @Override
   public @NotNull String asString() {
-    return comparator.asString() + " " + TextUtil.toSpacedStringNbt(expected);
+    return comparator.getSerializedName() + " " + TextUtil.toSpacedStringNbt(expected);
   }
 
   @Override
-  public boolean test(@NotNull NbtElement nbtElement) {
-    if (nbtElement instanceof AbstractNbtNumber actualNumber && expected instanceof AbstractNbtNumber expectedNumber) {
-      final byte actualType = actualNumber.getType();
-      final byte expectedType = expectedNumber.getType();
-      if (actualType == NbtElement.DOUBLE_TYPE || expectedType == NbtElement.DOUBLE_TYPE) {
-        return comparator.compareDouble(actualNumber.doubleValue(), expectedNumber.doubleValue());
-      } else if (actualType == NbtElement.FLOAT_TYPE || expectedType == NbtElement.FLOAT_TYPE) {
-        return comparator.compareFloat(actualNumber.floatValue(), expectedNumber.floatValue());
-      } else if (actualType == NbtElement.LONG_TYPE || expectedType == NbtElement.LONG_TYPE) {
-        return comparator.compareLong(actualNumber.longValue(), expectedNumber.longValue());
-      } else if (actualType == NbtElement.INT_TYPE || expectedType == NbtElement.INT_TYPE) {
-        return comparator.compareInt(actualNumber.intValue(), expectedNumber.intValue());
-      } else if (actualType == NbtElement.SHORT_TYPE || expectedType == NbtElement.SHORT_TYPE) {
-        return comparator.compareShort(actualNumber.shortValue(), expectedNumber.shortValue());
-      } else if (actualType == NbtElement.BYTE_TYPE || expectedType == NbtElement.BYTE_TYPE) {
-        return comparator.compareByte(actualNumber.byteValue(), expectedNumber.byteValue());
+  public boolean test(@NotNull Tag nbtElement) {
+    if (nbtElement instanceof NumericTag actualNumber && expected instanceof NumericTag expectedNumber) {
+      final byte actualType = actualNumber.getId();
+      final byte expectedType = expectedNumber.getId();
+      if (actualType == Tag.TAG_DOUBLE || expectedType == Tag.TAG_DOUBLE) {
+        return comparator.compareDouble(actualNumber.getAsDouble(), expectedNumber.getAsDouble());
+      } else if (actualType == Tag.TAG_FLOAT || expectedType == Tag.TAG_FLOAT) {
+        return comparator.compareFloat(actualNumber.getAsFloat(), expectedNumber.getAsFloat());
+      } else if (actualType == Tag.TAG_LONG || expectedType == Tag.TAG_LONG) {
+        return comparator.compareLong(actualNumber.getAsLong(), expectedNumber.getAsLong());
+      } else if (actualType == Tag.TAG_INT || expectedType == Tag.TAG_INT) {
+        return comparator.compareInt(actualNumber.getAsInt(), expectedNumber.getAsInt());
+      } else if (actualType == Tag.TAG_SHORT || expectedType == Tag.TAG_SHORT) {
+        return comparator.compareShort(actualNumber.getAsShort(), expectedNumber.getAsShort());
+      } else if (actualType == Tag.TAG_BYTE || expectedType == Tag.TAG_BYTE) {
+        return comparator.compareByte(actualNumber.getAsByte(), expectedNumber.getAsByte());
       } else {
         return false;
       }
-    } else if (nbtElement instanceof NbtString actualString && expected instanceof NbtString expectedString) {
-      return comparator.test(actualString.asString(), expectedString.asString());
+    } else if (nbtElement instanceof StringTag actualString && expected instanceof StringTag expectedString) {
+      return comparator.test(actualString.getAsString(), expectedString.getAsString());
     } else {
       return false;
     }
@@ -58,7 +58,7 @@ public record ComparisonNbtPredicate(Comparator comparator, NbtElement expected)
 
   @Override
   public @NotNull NbtPredicateType<ComparisonNbtPredicate> getType() {
-    return Type.COMPARISON_TYPE;
+    return pers.solid.ecmd.predicate.nbt.ComparisonNbtPredicate.Type.COMPARISON_TYPE;
   }
 
   public enum Type implements NbtPredicateType<ComparisonNbtPredicate> {

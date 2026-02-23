@@ -1,7 +1,7 @@
 package pers.solid.ecmd.util.mixin;
 
 import com.mojang.serialization.*;
-import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.EnhancedTranslatableTextContent;
 
@@ -9,7 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class TranslatableTextContentMixinHelper {
-  public static @NotNull MapCodec<TranslatableTextContent> modifyTranslatableCodec(MapCodec<TranslatableTextContent> original) {
+  public static @NotNull MapCodec<TranslatableContents> modifyTranslatableCodec(MapCodec<TranslatableContents> original) {
     final String typeKey = "enhanced_commands:enhanced";
     return new MapCodec<>() {
       @Override
@@ -18,7 +18,7 @@ public final class TranslatableTextContentMixinHelper {
       }
 
       @Override
-      public <T> DataResult<TranslatableTextContent> decode(DynamicOps<T> ops, MapLike<T> input) {
+      public <T> DataResult<TranslatableContents> decode(DynamicOps<T> ops, MapLike<T> input) {
         final T t = input.get(typeKey);
         if (t == null) {
           return original.decode(ops, input).map(Function.identity());
@@ -28,7 +28,7 @@ public final class TranslatableTextContentMixinHelper {
       }
 
       @Override
-      public <T> RecordBuilder<T> encode(TranslatableTextContent input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
+      public <T> RecordBuilder<T> encode(TranslatableContents input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
         if (input instanceof EnhancedTranslatableTextContent enhanced) {
           final RecordBuilder<T> encode = EnhancedTranslatableTextContent.CODEC.encode(enhanced, ops, prefix);
           encode.add(typeKey, ops.createBoolean(true));

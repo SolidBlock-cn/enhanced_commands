@@ -6,13 +6,13 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.nbt.*;
@@ -32,10 +32,10 @@ import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static com.mojang.brigadier.arguments.StringArgumentType.string;
-import static net.minecraft.command.argument.NbtPathArgumentType.getNbtPath;
-import static net.minecraft.command.argument.NbtPathArgumentType.nbtPath;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.commands.arguments.NbtPathArgument.getPath;
+import static net.minecraft.commands.arguments.NbtPathArgument.nbtPath;
 import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
 import static pers.solid.ecmd.argument.NbtFunctionArgumentType.getNbtFunction;
 import static pers.solid.ecmd.argument.NbtPredicateArgumentType.getNbtPredicate;
@@ -48,18 +48,18 @@ import static pers.solid.ecmd.argument.SimpleEnumArgumentType.nbtConcentrationTy
 public enum NbtCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  private static int executeGet(NbtSource<?> nbtSource, NbtConcentrationType nbtConcentrationType, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
-    return nbtSource.executeQuery(source, null, 1, nbtConcentrationType, source.getWorld().getRandom());
+  private static int executeGet(NbtSource<?> nbtSource, NbtConcentrationType nbtConcentrationType, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
+    return nbtSource.executeQuery(source, null, 1, nbtConcentrationType, source.getLevel().getRandom());
   }
 
-  private static int executeGetInPath(NbtSource<?> nbtSource, NbtPathArgumentType.NbtPath nbtPath, NbtConcentrationType nbtConcentrationType, double scale, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
-    return nbtSource.executeQuery(source, nbtPath, scale, nbtConcentrationType, source.getWorld().getRandom());
+  private static int executeGetInPath(NbtSource<?> nbtSource, NbtPathArgument.NbtPath nbtPath, NbtConcentrationType nbtConcentrationType, double scale, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
+    return nbtSource.executeQuery(source, nbtPath, scale, nbtConcentrationType, source.getLevel().getRandom());
   }
 
-  private static <T> int executeSet(NbtTarget<T> target, NbtPathArgumentType.NbtPath nbtPath, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static <T> int executeSet(NbtTarget<T> target, NbtPathArgument.NbtPath nbtPath, NbtFunction nbtFunction, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final Collection<T> values = target.values(source);
     final ExecutionContext executionContext = new ExecutionContext(source);
     for (T value : values) {
@@ -69,15 +69,15 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return 1; // 应该修改为执行成功数量
   }
 
-  private static <T> int executeMerge(NbtTarget<T> target, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static <T> int executeMerge(NbtTarget<T> target, NbtFunction nbtFunction, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final Collection<T> values = target.values(source);
     final ExecutionContext executionContext = new ExecutionContext(source);
     final Collection<T> successValues = new ArrayList<>();
     for (T value : values) {
       target.transformNbtFor(context.getSource(), value, nbtCompound -> {
-        final NbtCompound old = nbtCompound.copy();
-        final NbtCompound applied = nbtFunction.apply(nbtCompound, executionContext) instanceof final NbtCompound newCompound ? newCompound : nbtCompound;
+        final CompoundTag old = nbtCompound.copy();
+        final CompoundTag applied = nbtFunction.apply(nbtCompound, executionContext) instanceof final CompoundTag newCompound ? newCompound : nbtCompound;
         if (!applied.equals(old)) {
           successValues.add(value);
         }
@@ -88,19 +88,19 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return successValues.size(); // 应该修改为执行成功数量
   }
 
-  private static int executeApply(NbtFunction nbtFunction, IntFunction<Text> message, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeApply(getNbtTarget(context, "target"), getNbtPath(context, "path"), nbtFunction, message, context);
+  private static int executeApply(NbtFunction nbtFunction, IntFunction<Component> message, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return executeApply(getNbtTarget(context, "target"), getPath(context, "path"), nbtFunction, message, context);
   }
 
-  private static <T> int executeApply(NbtTarget<T> target, NbtPathArgumentType.NbtPath nbtPath, NbtFunction nbtFunction, IntFunction<Text> message, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static <T> int executeApply(NbtTarget<T> target, NbtPathArgument.NbtPath nbtPath, NbtFunction nbtFunction, IntFunction<Component> message, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final Collection<T> values = target.values(source);
     final ExecutionContext executionContext = new ExecutionContext(source);
     final MutableInt success = new MutableInt();
     for (T value : values) {
       target.transformNbtInPathFor(source, value, nbtPath, nbtElement -> {
-        final NbtElement old = nbtElement.copy();
-        final NbtElement applied = nbtFunction.apply(nbtElement, executionContext);
+        final Tag old = nbtElement.copy();
+        final Tag applied = nbtFunction.apply(nbtElement, executionContext);
         if (!applied.equals(old)) {
           success.increment();
           return applied;
@@ -112,43 +112,43 @@ public enum NbtCommand implements CommandRegistrationCallback {
     return success.intValue();
   }
 
-  private static <T> int executeReplace(NbtTarget<T> target, NbtPredicate nbtPredicate, NbtFunction nbtFunction, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    return executeApply(new ReplaceNbtFunction(nbtPredicate, nbtFunction), success -> Text.translatable("enhanced_commands.commands.nbt.replace.success", success), context);
+  private static <T> int executeReplace(NbtTarget<T> target, NbtPredicate nbtPredicate, NbtFunction nbtFunction, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    return executeApply(new ReplaceNbtFunction(nbtPredicate, nbtFunction), success -> Component.translatable("enhanced_commands.commands.nbt.replace.success", success), context);
   }
 
-  private static int executeStringReplace(CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
+  private static int executeStringReplace(CommandContext<CommandSourceStack> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final String targetString = StringArgumentType.getString(context, "targetString");
     final String replacement = StringArgumentType.getString(context, "replacement");
     final StringReplaceNbtFunction nbtFunction = new StringReplaceNbtFunction(targetString, replacement, keywordArgs.getBoolean("recursive"), keywordArgs.getBoolean("lenient"), Optional.empty());
-    return executeApply(nbtFunction, success -> Text.translatable("enhanced_commands.commands.nbt.string_replace.success", success), context);
+    return executeApply(nbtFunction, success -> Component.translatable("enhanced_commands.commands.nbt.string_replace.success", success), context);
   }
 
-  private static int executeRegexReplace(CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
+  private static int executeRegexReplace(CommandContext<CommandSourceStack> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final Pattern pattern = RegexArgumentType.getRegex(context, "regex");
     final String replacement = StringArgumentType.getString(context, "replacement");
     final RegexReplaceNbtFunction nbtFunction = new RegexReplaceNbtFunction(pattern, replacement, keywordArgs.getBoolean("recursive"), keywordArgs.getBoolean("lenient"), Optional.empty());
-    return executeApply(nbtFunction, success -> Text.translatable("enhanced_commands.commands.nbt.regex_replace.success", success), context);
+    return executeApply(nbtFunction, success -> Component.translatable("enhanced_commands.commands.nbt.regex_replace.success", success), context);
   }
 
-  private static int executeSubstring(Optional<Integer> endIndex, CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
+  private static int executeSubstring(Optional<Integer> endIndex, CommandContext<CommandSourceStack> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final int startIndex = getInteger(context, "start_index");
     final SubstringNbtFunction nbtFunction = new SubstringNbtFunction(startIndex, endIndex, keywordArgs.getBoolean("lenient"), Optional.empty());
-    return executeApply(nbtFunction, success -> Text.translatable("enhanced_commands.commands.nbt.substring.success", success), context);
+    return executeApply(nbtFunction, success -> Component.translatable("enhanced_commands.commands.nbt.substring.success", success), context);
   }
 
-  private static <T> int executeRemove(NbtTarget<T> target, NbtPathArgumentType.NbtPath nbtPath, ServerCommandSource source) throws CommandSyntaxException {
+  private static <T> int executeRemove(NbtTarget<T> target, NbtPathArgument.NbtPath nbtPath, CommandSourceStack source) throws CommandSyntaxException {
     final MutableInt success = new MutableInt();
     target.transformNbt(source, input -> {
       final int remove = nbtPath.remove(input);
       success.add(remove);
       return input;
     });
-    source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.remove.success", success.intValue()).enhanced$$(), true);
+    source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.nbt.remove.success", success.intValue()).enhanced$$(), true);
     return success.intValue();
   }
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> commandDispatcher, CommandRegistryAccess commandRegistryAccess, CommandManager.RegistrationEnvironment registrationEnvironment) {
+  public void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandRegistryAccess, Commands.CommandSelection registrationEnvironment) {
     final KeywordArgsArgumentType transformKeywordArgs = KeywordArgsArgumentType.builder()
         .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess), null)
         .addOptionalArg("recursive", BoolArgumentType.bool(), false)
@@ -164,20 +164,20 @@ public enum NbtCommand implements CommandRegistrationCallback {
             .then(argument("source", nbtSource(commandRegistryAccess))
                 .executes(context -> executeGet(getNbtSource(context, "source"), NbtConcentrationType.ALL, context))
                 .then(argument("path", nbtPath())
-                    .executes(context -> executeGetInPath(getNbtSource(context, "source"), getNbtPath(context, "path"), NbtConcentrationType.ALL, 1, context))
+                    .executes(context -> executeGetInPath(getNbtSource(context, "source"), getPath(context, "path"), NbtConcentrationType.ALL, 1, context))
                     .then(argument("keyword_args", KeywordArgsArgumentType.builder()
                         .addOptionalArg("scale", doubleArg(), 1d)
                         .addOptionalArg("concentration_type", nbtConcentrationType(), NbtConcentrationType.ALL)
                         .build())
                         .executes(context -> {
                           final KeywordArgs keywordArgs = getKeywordArgs(context, "keyword_args");
-                          return executeGetInPath(getNbtSource(context, "source"), getNbtPath(context, "path"), keywordArgs.getArg("concentration_type"), keywordArgs.getDouble("scale"), context);
+                          return executeGetInPath(getNbtSource(context, "source"), getPath(context, "path"), keywordArgs.getArg("concentration_type"), keywordArgs.getDouble("scale"), context);
                         })))))
         .then(literal("set")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("path", nbtPath())
                     .then(argument("nbt_function", NbtFunctionArgumentType.element(commandRegistryAccess))
-                        .executes(context -> executeSet(getNbtTarget(context, "target"), getNbtPath(context, "path"), getNbtFunction(context, "nbt_function"), context))))))
+                        .executes(context -> executeSet(getNbtTarget(context, "target"), getPath(context, "path"), getNbtFunction(context, "nbt_function"), context))))))
         .then(literal("merge")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("nbt_function", NbtFunctionArgumentType.compound(commandRegistryAccess))
@@ -218,6 +218,6 @@ public enum NbtCommand implements CommandRegistrationCallback {
         .then(literal("remove")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("path", nbtPath())
-                    .executes(context -> executeRemove(getNbtTarget(context, "target"), getNbtPath(context, "path"), context.getSource()))))));
+                    .executes(context -> executeRemove(getNbtTarget(context, "target"), getPath(context, "path"), context.getSource()))))));
   }
 }

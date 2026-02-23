@@ -3,20 +3,20 @@ package pers.solid.ecmd.function.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.StonecuttingRecipe;
-import net.minecraft.recipe.input.SingleStackRecipeInput;
-import net.minecraft.state.property.Properties;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -34,31 +34,31 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     blockState = function.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     final Item item = blockState.getBlock().asItem();
     if (item == Items.AIR) {
       return blockState;
     }
-    final List<RecipeEntry<StonecuttingRecipe>> allMatches = world.getRecipeManager().getAllMatches(RecipeType.STONECUTTING, new SingleStackRecipeInput(item.getDefaultStack()), world);
+    final List<RecipeHolder<StonecutterRecipe>> allMatches = world.getRecipeManager().getRecipesFor(RecipeType.STONECUTTING, new SingleRecipeInput(item.getDefaultInstance()), world);
     if (allMatches.isEmpty()) {
       return blockState;
     }
-    final ItemStack output = allMatches.get(context.random.nextInt(allMatches.size())).value().getResult(world.getRegistryManager());
+    final ItemStack output = allMatches.get(context.random.nextInt(allMatches.size())).value().getResultItem(world.registryAccess());
     if (output.getItem() instanceof BlockItem blockItem) {
       BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), context.random);
       for (Property<?> property : result.getProperties()) {
-        if (blockState.contains(property)) {
+        if (blockState.hasProperty(property)) {
           result = StateUtil.withPropertyOfValueFromAnother(result, blockState, property);
         } else {
           result = StateUtil.withPropertyOfRandomValue(result, property, context.random);
         }
       }
-      if (!blockState.contains(Properties.WATERLOGGED)) {
-        result = result.withIfExists(Properties.WATERLOGGED, false);
+      if (!blockState.hasProperty(BlockStateProperties.WATERLOGGED)) {
+        result = result.trySetValue(BlockStateProperties.WATERLOGGED, false);
       }
-      if (!blockState.contains(Properties.POWERED)) {
-        result = result.withIfExists(Properties.POWERED, false);
+      if (!blockState.hasProperty(BlockStateProperties.POWERED)) {
+        result = result.trySetValue(BlockStateProperties.POWERED, false);
       }
       return result;
     } else {

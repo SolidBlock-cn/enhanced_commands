@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.Vec3iArgument;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -23,17 +23,17 @@ public record RelBlockPredicate(@NotNull Vec3iArgument relPos, @NotNull BlockPre
   public static final MapCodec<RelBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RelBlockPredicate::new, Vec3iArgument.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockPos pos = cachedBlockPosition.getBlockPos().add(relPos.toActualVector(context.positionProvider));
-    return predicate.test(new CachedBlockPosition(cachedBlockPosition.getWorld(), pos, false), context);
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final BlockPos pos = cachedBlockPosition.getPos().offset(relPos.toActualVector(context.positionProvider));
+    return predicate.test(new BlockInWorld(cachedBlockPosition.getLevel(), pos, false), context);
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     final Vec3i vector = relPos.toActualVector(context.positionProvider);
-    final BlockPos pos = cachedBlockPosition.getBlockPos().add(vector);
-    final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(cachedBlockPosition.getWorld(), pos, false), context);
-    return TestResult.of(testResult.successes(), Text.translatable("enhanced_commands.block_predicate.rel." + (testResult.successes() ? "pass" : "fail"), TextUtil.wrapVector(vector)), List.of(testResult));
+    final BlockPos pos = cachedBlockPosition.getPos().offset(vector);
+    final TestResult testResult = predicate.testAndDescribe(new BlockInWorld(cachedBlockPosition.getLevel(), pos, false), context);
+    return TestResult.of(testResult.successes(), Component.translatable("enhanced_commands.block_predicate.rel." + (testResult.successes() ? "pass" : "fail"), TextUtil.wrapVector(vector)), List.of(testResult));
   }
 
   @Override

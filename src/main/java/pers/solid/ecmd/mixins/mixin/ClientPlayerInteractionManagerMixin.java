@@ -2,11 +2,11 @@ package pers.solid.ecmd.mixins.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.GameMode;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -16,20 +16,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.regionselection.WandEvent;
 
 @Environment(EnvType.CLIENT)
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public abstract class ClientPlayerInteractionManagerMixin {
   @Shadow
   @Final
-  private MinecraftClient client;
+  private Minecraft minecraft;
 
   @Shadow
-  private GameMode gameMode;
+  private GameType localPlayerMode;
 
-  @Inject(method = "updateBlockBreakingProgress", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameMode;isCreative()Z", ordinal = 0), cancellable = true, order = 500)
+  @Inject(method = "continueDestroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameType;isCreative()Z", ordinal = 0), cancellable = true, order = 500)
   public void suspendsUpdatingWand(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
     // 当玩家手持区域选择工具时，阻止其通过此方法调用 AttackBlockCallback
     // 参见 WandEvent
-    if (gameMode != GameMode.SPECTATOR && client.player != null && WandEvent.isWand(client.player.getMainHandStack())) {
+    if (localPlayerMode != GameType.SPECTATOR && minecraft.player != null && WandEvent.isWand(minecraft.player.getMainHandItem())) {
       cir.setReturnValue(false);
     }
   }

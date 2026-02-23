@@ -6,22 +6,22 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.ServerCommandSource;
-import pers.solid.ecmd.predicate.block.BlockPredicate;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.predicate.block.BlockPredicate;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
- * @see net.minecraft.command.argument.BlockPredicateArgumentType
+ * @see net.minecraft.commands.arguments.blocks.BlockPredicateArgument
  */
-public record BlockPredicateArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<BlockPredicate> {
-  public static BlockPredicateArgumentType blockPredicate(CommandRegistryAccess registryAccess) {
+public record BlockPredicateArgumentType(CommandBuildContext registryAccess) implements ArgumentType<BlockPredicate> {
+  public static BlockPredicateArgumentType blockPredicate(CommandBuildContext registryAccess) {
     return new BlockPredicateArgumentType(registryAccess);
   }
 
-  public static BlockPredicate getBlockPredicate(CommandContext<ServerCommandSource> context, String name) {
+  public static BlockPredicate getBlockPredicate(CommandContext<CommandSourceStack> context, String name) {
     return context.getArgument(name, BlockPredicate.class);
   }
 

@@ -9,18 +9,18 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.RegistryEntryPredicateArgumentType;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.ResourceOrTagArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.util.mixin.MixinShared;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -41,27 +41,27 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Mixin(RegistryEntryPredicateArgumentType.class)
+@Mixin(ResourceOrTagArgument.class)
 public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
   @Shadow
   @Final
-  RegistryKey<? extends Registry<T>> registryRef;
+  ResourceKey<? extends Registry<T>> registryKey;
 
   @Shadow
   @Final
-  private RegistryWrapper<T> registryWrapper;
+  private HolderLookup<T> registryLookup;
 
   @Inject(
-      method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;",
+      method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$Result;",
       at = @At("HEAD")
   )
-  public void injectedParseHead(StringReader stringReader, CallbackInfoReturnable<RegistryEntry.Reference<T>> cir, @Share("cursorBeforeId") LocalIntRef localIntRef) {
+  public void injectedParseHead(StringReader stringReader, CallbackInfoReturnable<Holder.Reference<T>> cir, @Share("cursorBeforeId") LocalIntRef localIntRef) {
     localIntRef.set(stringReader.getCursor());
   }
 
   @Inject(method = "listSuggestions", at = @At(value = "RETURN"), cancellable = true)
   public <S> void suggestWithTooltip(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
-    MixinShared.mixinSuggestWithTooltip(registryRef, registryWrapper, builder, cir);
+    MixinShared.mixinSuggestWithTooltip(registryKey, registryLookup, builder, cir);
   }
 
   @Inject(method = "listSuggestions", at = @At("HEAD"), cancellable = true)
@@ -70,14 +70,14 @@ public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
     stringReader.setCursor(builder.getStart());
     try {
       int newStart = builder.getStart();
-      Set<Identifier> tagIds = new HashSet<>();
-      Set<Identifier> entryIds = new HashSet<>();
+      Set<ResourceLocation> tagIds = new HashSet<>();
+      Set<ResourceLocation> entryIds = new HashSet<>();
       while (stringReader.canRead()) {
         if (stringReader.canRead() && stringReader.peek() == '#') {
           stringReader.skip();
-          tagIds.add(Identifier.fromCommandInput(stringReader));
+          tagIds.add(ResourceLocation.read(stringReader));
         } else {
-          entryIds.add(Identifier.fromCommandInput(stringReader));
+          entryIds.add(ResourceLocation.read(stringReader));
         }
         if (stringReader.canRead() && stringReader.peek() == '|') {
           stringReader.skip();
@@ -92,27 +92,27 @@ public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
       }
 
       final SuggestionsBuilder offset = builder.createOffset(newStart);
-      final Function<? super T, ? extends Message> nameSuggestionProvider = ParsingUtil.getNameSuggestionProvider(registryRef);
+      final Function<? super T, ? extends Message> nameSuggestionProvider = ParsingUtil.getNameSuggestionProvider(registryKey);
 
       // 参见 MixinShared#mixinSuggestWithTooltip
-      CommandSource.suggestIdentifiers(this.registryWrapper.streamTagKeys().map(TagKey::id).filter(identifier -> !tagIds.contains(identifier)), offset, "#");
+      SharedSuggestionProvider.suggestResource(this.registryLookup.listTagIds().map(TagKey::location).filter(identifier -> !tagIds.contains(identifier)), offset, "#");
       if (nameSuggestionProvider != null) {
-        cir.setReturnValue(CommandSource.suggestFromIdentifier(registryWrapper.streamEntries().filter(r -> !entryIds.contains(r.registryKey().getValue())), offset, ref -> ref.registryKey().getValue(), ref -> nameSuggestionProvider.apply(ref.value())));
-      } else if (RegistryKeys.BIOME.equals(registryRef)) {
-        cir.setReturnValue(CommandSource.suggestFromIdentifier(registryWrapper.streamKeys().filter(key -> !entryIds.contains(key.getValue())), offset, RegistryKey::getValue, key -> Text.translatable(Util.createTranslationKey("biome", key.getValue()))));
+        cir.setReturnValue(SharedSuggestionProvider.suggestResource(registryLookup.listElements().filter(r -> !entryIds.contains(r.key().location())), offset, ref -> ref.key().location(), ref -> nameSuggestionProvider.apply(ref.value())));
+      } else if (Registries.BIOME.equals(registryKey)) {
+        cir.setReturnValue(SharedSuggestionProvider.suggestResource(registryLookup.listElementIds().filter(key -> !entryIds.contains(key.location())), offset, ResourceKey::location, key -> Component.translatable(Util.makeDescriptionId("biome", key.location()))));
       } else {
-        cir.setReturnValue(CommandSource.suggestIdentifiers(this.registryWrapper.streamKeys().map(RegistryKey::getValue).filter(identifier -> !entryIds.contains(identifier)), offset));
+        cir.setReturnValue(SharedSuggestionProvider.suggestResource(this.registryLookup.listElementIds().map(ResourceKey::location).filter(identifier -> !entryIds.contains(identifier)), offset));
       }
     } catch (CommandSyntaxException ignored) {
     }
   }
 
   @ModifyArg(
-      method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;",
+      method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$Result;",
       at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElseThrow(Ljava/util/function/Supplier;)Ljava/lang/Object;"),
       slice = @Slice(
-          from = @At(value = "INVOKE", target = "Lnet/minecraft/registry/tag/TagKey;of(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/util/Identifier;)Lnet/minecraft/registry/tag/TagKey;"),
-          to = @At(value = "INVOKE", target = "Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$TagBased;<init>(Lnet/minecraft/registry/entry/RegistryEntryList$Named;)V")
+          from = @At(value = "INVOKE", target = "Lnet/minecraft/tags/TagKey;create(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/tags/TagKey;"),
+          to = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/ResourceOrTagArgument$TagResult;<init>(Lnet/minecraft/core/HolderSet$Named;)V")
       )
   )
   public Supplier<CommandSyntaxException> modifiedParseTagException(Supplier<CommandSyntaxException> exceptionSupplier, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader) {
@@ -125,31 +125,31 @@ public abstract class RegistryEntryPredicateArgumentTypeMixin<T> {
     };
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;", at = @At(value = "NEW", target = "(Lnet/minecraft/registry/entry/RegistryEntryList$Named;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$TagBased;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
-  public void acceptMultipleValuesOnTag(StringReader stringReader, CallbackInfoReturnable<RegistryEntryPredicateArgumentType.EntryPredicate<T>> cir, int cursorBeforeValue, Identifier tagId, TagKey<T> tagKey, RegistryEntryList.Named<T> named) throws CommandSyntaxException {
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$Result;", at = @At(value = "NEW", target = "(Lnet/minecraft/core/HolderSet$Named;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$TagResult;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  public void acceptMultipleValuesOnTag(StringReader stringReader, CallbackInfoReturnable<ResourceOrTagArgument.Result<T>> cir, int cursorBeforeValue, ResourceLocation tagId, TagKey<T> tagKey, HolderSet.Named<T> named) throws CommandSyntaxException {
     if (stringReader.canRead() && stringReader.peek() == '|') {
       final EnhancedEntryPredicate.TagBased<T> firstValue = new EnhancedEntryPredicate.TagBased<>(named);
-      cir.setReturnValue(EnhancedEntryPredicate.mixinGetCompoundPredicate(registryWrapper, registryRef, stringReader, firstValue));
+      cir.setReturnValue(EnhancedEntryPredicate.mixinGetCompoundPredicate(registryLookup, registryKey, stringReader, firstValue));
     }
   }
 
   @ModifyArg(
-      method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;",
+      method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$Result;",
       at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElseThrow(Ljava/util/function/Supplier;)Ljava/lang/Object;"),
       slice = @Slice(
-          from = @At(value = "INVOKE", target = "Lnet/minecraft/registry/RegistryKey;of(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/util/Identifier;)Lnet/minecraft/registry/RegistryKey;"),
-          to = @At(value = "INVOKE", target = "Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryBased;<init>(Lnet/minecraft/registry/entry/RegistryEntry$Reference;)V")
+          from = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceKey;create(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/resources/ResourceKey;"),
+          to = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/ResourceOrTagArgument$ResourceResult;<init>(Lnet/minecraft/core/Holder$Reference;)V")
       )
   )
-  public Supplier<CommandSyntaxException> modifiedParseEntryException(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader, @Local Identifier identifier) {
-    return MixinShared.mixinModifiedParseThrow(registryRef, original, localIntRef, stringReader, identifier);
+  public Supplier<CommandSyntaxException> modifiedParseEntryException(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader, @Local ResourceLocation identifier) {
+    return MixinShared.mixinModifiedParseThrow(registryKey, original, localIntRef, stringReader, identifier);
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryPredicate;", at = @At(value = "NEW", target = "(Lnet/minecraft/registry/entry/RegistryEntry$Reference;)Lnet/minecraft/command/argument/RegistryEntryPredicateArgumentType$EntryBased;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
-  public void acceptMultipleValuesOnEntry(StringReader stringReader, CallbackInfoReturnable<RegistryEntryPredicateArgumentType.EntryPredicate<T>> cir, Identifier identifier2, RegistryKey<T> registryKey, RegistryEntry.Reference<T> reference) throws CommandSyntaxException {
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$Result;", at = @At(value = "NEW", target = "(Lnet/minecraft/core/Holder$Reference;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$ResourceResult;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  public void acceptMultipleValuesOnEntry(StringReader stringReader, CallbackInfoReturnable<ResourceOrTagArgument.Result<T>> cir, ResourceLocation identifier2, ResourceKey<T> registryKey, Holder.Reference<T> reference) throws CommandSyntaxException {
     if (stringReader.canRead() && stringReader.peek() == '|') {
       final EnhancedEntryPredicate.EntryBased<T> firstValue = new EnhancedEntryPredicate.EntryBased<>(reference);
-      cir.setReturnValue(EnhancedEntryPredicate.mixinGetCompoundPredicate(registryWrapper, registryRef, stringReader, firstValue));
+      cir.setReturnValue(EnhancedEntryPredicate.mixinGetCompoundPredicate(registryLookup, this.registryKey, stringReader, firstValue));
     }
   }
 }

@@ -2,7 +2,7 @@ package pers.solid.ecmd.mixins.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import pers.solid.ecmd.command.DebugIgnoreBoundaryCommand;
@@ -15,7 +15,7 @@ public abstract class EntityMixin {
    *
    * @see DebugIgnoreBoundaryCommand#ignoreBoundary
    */
-  @WrapOperation(method = "updatePosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;clamp(DDD)D"))
+  @WrapOperation(method = "absMoveTo(DDD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(DDD)D"))
   private double noClampWhenUpdating(double value, double min, double max, Operation<Double> original) {
     if (DebugIgnoreBoundaryCommand.ignoreBoundary) {
       return value;

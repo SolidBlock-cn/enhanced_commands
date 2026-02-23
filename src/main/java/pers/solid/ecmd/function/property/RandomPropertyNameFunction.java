@@ -3,9 +3,9 @@ package pers.solid.ecmd.function.property;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
   }
 
   @Override
-  public BlockState getModifiedState(BlockState origState, BlockState blockState, Random random) {
+  public BlockState getModifiedState(BlockState origState, BlockState blockState, RandomSource random) {
     final Property<?> property = PropertyNameFunction.getProperty(blockState, propertyName, must);
     if (property == null) {
       return blockState;
@@ -34,8 +34,8 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
   }
 
   private <T extends Comparable<T>> BlockState getModifiedStateForProperty(BlockState blockState, Property<T> property) {
-    final List<T> values = List.copyOf(property.getValues());
-    return blockState.with(property, values.get(ThreadLocalRandom.current().nextInt(values.size())));
+    final List<T> values = List.copyOf(property.getPossibleValues());
+    return blockState.setValue(property, values.get(ThreadLocalRandom.current().nextInt(values.size())));
   }
 
 }

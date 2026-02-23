@@ -1,20 +1,20 @@
 package pers.solid.ecmd.regionselection;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.BlockCuboidRegion;
@@ -44,44 +44,44 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
     return n;
   }
 
-  public static Text notifyStatistics(@Nullable Vec3i first, @Nullable Vec3i second) {
+  public static Component notifyStatistics(@Nullable Vec3i first, @Nullable Vec3i second) {
     if (first != null && second != null) {
       final Vec3i subtract = first.subtract(second);
       final int dx = Math.abs(subtract.getX()) + 1;
       final int dy = Math.abs(subtract.getY()) + 1;
       final int dz = Math.abs(subtract.getZ()) + 1;
-      return (Text.translatable("enhanced_commands.region_selection.cuboid.statistics", Text.literal(dx + "×" + dy + "×" + dz).styled(Styles.RESULT), TextUtil.literal((long) dx * dy * dz).styled(Styles.RESULT)).formatted(Formatting.GRAY));
+      return (Component.translatable("enhanced_commands.region_selection.cuboid.statistics", Component.literal(dx + "×" + dy + "×" + dz).withStyle(Styles.RESULT), TextUtil.literal((long) dx * dy * dz).withStyle(Styles.RESULT)).withStyle(ChatFormatting.GRAY));
     } else {
       return null;
     }
   }
 
   @Override
-  public Supplier<Text> clickFirstPoint(Vec3d point, PlayerEntity player) {
-    first = BlockPos.ofFloored(point);
+  public Supplier<Component> clickFirstPoint(Vec3 point, Player player) {
+    first = BlockPos.containing(point);
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).styled(Styles.RESULT)), notifyStatistics(first, second));
+    return () -> TextUtil.joinNullableLines(Component.translatable("enhanced_commands.region_selection.cuboid.set_first", TextUtil.wrapVector(first).withStyle(Styles.RESULT)), notifyStatistics(first, second));
   }
 
   @Override
-  public Supplier<Text> clickSecondPoint(Vec3d point, PlayerEntity player) {
-    second = BlockPos.ofFloored(point);
+  public Supplier<Component> clickSecondPoint(Vec3 point, Player player) {
+    second = BlockPos.containing(point);
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.cuboid.set_second", TextUtil.wrapVector(second).styled(Styles.RESULT)), notifyStatistics(first, second));
+    return () -> TextUtil.joinNullableLines(Component.translatable("enhanced_commands.region_selection.cuboid.set_second", TextUtil.wrapVector(second).withStyle(Styles.RESULT)), notifyStatistics(first, second));
   }
 
   @Override
-  public List<@NotNull Vec3d> getPoints() {
-    return Stream.of(first, second).filter(Objects::nonNull).map(Vec3d::ofCenter).toList();
+  public List<@NotNull Vec3> getPoints() {
+    return Stream.of(first, second).filter(Objects::nonNull).map(Vec3::atCenterOf).toList();
   }
 
   @Override
-  public void readPoints(List<Vec3d> points) {
+  public void readPoints(List<Vec3> points) {
     if (!points.isEmpty()) {
-      first = BlockPos.ofFloored(points.get(0));
+      first = BlockPos.containing(points.get(0));
     }
     if (points.size() > 1) {
-      second = BlockPos.ofFloored(points.get(points.size() - 1));
+      second = BlockPos.containing(points.get(points.size() - 1));
     }
     resetCalculation();
   }
@@ -107,7 +107,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
     int y2 = second.getY();
     int z2 = second.getZ();
     final Vec3i pos1Offset = new Vec3i(x1 > x2 ? offset : -offset, y1 > y2 ? offset : -offset, z1 > z2 ? offset : -offset);
-    first = first.add(pos1Offset);
+    first = first.offset(pos1Offset);
     second = second.subtract(pos1Offset);
     resetCalculation();
     return this;
@@ -118,18 +118,18 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
     if (first == null || second == null) {
       throw NOT_COMPLETED.create();
     }
-    final Vec3i vector = direction.getVector();
+    final Vec3i vector = direction.getNormal();
     final Direction.Axis axis = direction.getAxis();
-    int unitPosOffset = vector.getComponentAlongAxis(axis);
-    int coord1 = first.getComponentAlongAxis(axis);
-    int coord2 = second.getComponentAlongAxis(axis);
+    int unitPosOffset = vector.get(axis);
+    int coord1 = first.get(axis);
+    int coord2 = second.get(axis);
     if ((coord1 > coord2) == (unitPosOffset > 0)) {
       // unitPosOffset > 0，且 coord1 较大，或者两个都相反，
       // 此时修改 first
-      first = first.add(vector.multiply(offset));
+      first = first.offset(vector.multiply(offset));
     } else {
       // 此时修改 second
-      second = second.add(vector.multiply(offset));
+      second = second.offset(vector.multiply(offset));
     }
     resetCalculation();
     return this;
@@ -142,14 +142,14 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
     }
     final Vec3i pos1Offset = new Vec3i(first.getX() > second.getX() ? offset : -offset, first.getY() > second.getY() ? offset : -offset, first.getZ() > second.getZ() ? offset : -offset);
 
-    first = first.add(pos1Offset);
+    first = first.offset(pos1Offset);
     second = second.subtract(pos1Offset);
     resetCalculation();
     return this;
   }
 
   @Override
-  public @NotNull RegionSelection expanded(int offset, Direction.Type type) throws CommandSyntaxException {
+  public @NotNull RegionSelection expanded(int offset, Direction.Plane type) throws CommandSyntaxException {
     if (first == null || second == null) {
       throw NOT_COMPLETED.create();
     }
@@ -157,7 +157,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
       case VERTICAL -> new Vec3i(0, first.getY() > second.getY() ? offset : -offset, 0);
       case HORIZONTAL -> new Vec3i(first.getX() > second.getX() ? offset : -offset, 0, first.getZ() > second.getZ() ? offset : -offset);
     };
-    first = first.add(pos1Offset);
+    first = first.offset(pos1Offset);
     second = second.subtract(pos1Offset);
     resetCalculation();
     return this;
@@ -182,7 +182,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public void readPacket(PacketByteBuf buf) {
+  public void readPacket(FriendlyByteBuf buf) {
     final boolean firstPresent = buf.readBoolean();
     first = firstPresent ? new Vec3i(buf.readVarInt(), buf.readVarInt(), buf.readVarInt()) : null;
     final boolean secondPresent = buf.readBoolean();
@@ -190,7 +190,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public void writePacket(PacketByteBuf buf) {
+  public void serializeToNetwork(FriendlyByteBuf buf) {
     buf.writeBoolean(first != null);
     if (first != null) {
       buf.writeVarInt(first.getX());
@@ -207,7 +207,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
 
   @Environment(EnvType.CLIENT)
   @Override
-  public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos) {
+  public void render(PoseStack matrices, MultiBufferSource vertexConsumers, Vec3 cameraPos) {
     RegionRendering.renderBlockCuboid(first, second, matrices, vertexConsumers.getBuffer(RegionRendering.regionRenderLayer), cameraPos);
   }
 

@@ -6,8 +6,8 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.predicate.NumberRange;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.util.StringRepresentable;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * 本模组中使用的范围对象。每个范围都可能有一个最大值和最小值。与原版的 {@link NumberRange} 不同的是，本对象的方法更加统一，且在不同版本之间的用法基本一致。
+ * 本模组中使用的范围对象。每个范围都可能有一个最大值和最小值。与原版的 {@link MinMaxBounds} 不同的是，本对象的方法更加统一，且在不同版本之间的用法基本一致。
  */
 public interface BridgeRange<T extends Comparable<T>> extends ExpressionConvertible {
   MapCodec<BridgeRange<?>> CODEC = Type.CODEC.dispatchMap("range_number_type", BridgeRange::getType, type -> type.getCodec().fieldOf("range"));
@@ -57,7 +57,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
 
   static <T extends Comparable<T>, E1 extends Throwable, E2 extends CommandSyntaxException, R extends BridgeRange<T>> R parse(StringReader reader, FailableFunction<String, T, E1> numberConverter, BiFunction<StringReader, String, E2> exceptionSupplier, BiFunction<@Nullable T, @Nullable T, @NotNull R> function) throws CommandSyntaxException, E1 {
     if (!reader.canRead()) {
-      throw NumberRange.EXCEPTION_EMPTY.createWithContext(reader);
+      throw MinMaxBounds.ERROR_EMPTY.createWithContext(reader);
     } else {
       int cursorBeforeRange = reader.getCursor();
 
@@ -71,7 +71,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
         cursorAfterRange = reader.getCursor();
         if (min == null && max == null) {
           reader.setCursor(cursorBeforeRange);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(NumberRange.EXCEPTION_EMPTY.createWithContext(reader), cursorAfterRange);
+          throw CommandSyntaxExceptionExtension.withCursorEnd(MinMaxBounds.ERROR_EMPTY.createWithContext(reader), cursorAfterRange);
         }
       } else {
         max = min;
@@ -79,10 +79,10 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
 
       if (min == null && max == null) {
         reader.setCursor(cursorBeforeRange);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(NumberRange.EXCEPTION_EMPTY.createWithContext(reader), cursorAfterRange);
+        throw CommandSyntaxExceptionExtension.withCursorEnd(MinMaxBounds.ERROR_EMPTY.createWithContext(reader), cursorAfterRange);
       } else if (min != null && max != null && min.compareTo(max) > 0) {
         reader.setCursor(cursorBeforeRange);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(NumberRange.EXCEPTION_SWAPPED.createWithContext(reader), cursorAfterRange);
+        throw CommandSyntaxExceptionExtension.withCursorEnd(MinMaxBounds.ERROR_SWAPPED.createWithContext(reader), cursorAfterRange);
       } else {
         return function.apply(min, max);
       }
@@ -137,7 +137,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
 
   Type getType();
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     // 这里没有将 codec 作为字段存储，而是在 getCodec 方法中通过 switch 语句获取，是因为如果存储为字段，则出现过读取为 null 的问题。
     FLOAT("float"), INT("int"), DOUBLE("double");
 
@@ -158,7 +158,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return s;
     }
   }

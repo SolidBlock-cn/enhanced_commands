@@ -4,8 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Range;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public sealed interface WeightedList<E> {
-  E getRandom(Random random);
+  E getRandom(RandomSource random);
 
   /**
    * 获取位于绝对位置的元素。当该列表为均匀列表时，相同于获取特定元素下标的元素。
@@ -63,7 +63,7 @@ public sealed interface WeightedList<E> {
     }
 
     @Override
-    public E getRandom(Random random) {
+    public E getRandom(RandomSource random) {
       return elements.get(random.nextInt(elements.size()));
     }
 
@@ -72,7 +72,7 @@ public sealed interface WeightedList<E> {
       if (elements.isEmpty()) {
         return null;
       }
-      return elements.get(MathHelper.floor(MathHelper.floorMod(position, elements.size())));
+      return elements.get(Mth.floor(Mth.positiveModulo(position, elements.size())));
     }
 
     @Override
@@ -110,14 +110,14 @@ public sealed interface WeightedList<E> {
     }
 
     @Override
-    public E getRandom(Random random) {
+    public E getRandom(RandomSource random) {
       final double height = random.nextDouble() * sum;
       return getElementAt(height);
     }
 
     @Override
     public E getElementAt(double position) {
-      position = MathHelper.floorMod(position, sum);
+      position = Mth.positiveModulo(position, sum);
       double stackedHeight = 0;
 
       for (ObjectDoublePair<E> pair : entries) {

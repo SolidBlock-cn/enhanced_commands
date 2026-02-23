@@ -6,19 +6,19 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -35,8 +35,8 @@ import pers.solid.ecmd.util.iterator.IterateUtils;
 import java.util.Iterator;
 import java.util.List;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static pers.solid.ecmd.argument.BlockPredicateArgumentType.blockPredicate;
 import static pers.solid.ecmd.argument.BlockPredicateArgumentType.getBlockPredicate;
 import static pers.solid.ecmd.argument.RegionArgumentType.region;
@@ -51,7 +51,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       .build();
 
   @Override
-  public void addArguments(LiteralArgumentBuilder<ServerCommandSource> testForBuilder, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     testForBuilder.then(literal("blocks")
         .then(argument("region", region(registryAccess))
             .then(argument("block_predicate", blockPredicate(registryAccess))
@@ -62,16 +62,16 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
                         .executes(TestForBlocksCommand::executeTestForBlocks))))));
   }
 
-  private static int executeTestForBlocks(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private static int executeTestForBlocks(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return executeTestForBlocks(context, SimpleEnumArgumentType.getEnumValue(context, "test_type"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"));
   }
 
-  private static int executeTestForBlocks(CommandContext<ServerCommandSource> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
+  private static int executeTestForBlocks(CommandContext<CommandSourceStack> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
     return executeTestForBlocks(context, SimpleEnumArgumentType.getEnumValue(context, "test_type"), keywordArgs);
   }
 
-  private static int executeTestForBlocks(CommandContext<ServerCommandSource> context, TestType testType, KeywordArgs keywordArgs) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
+  private static int executeTestForBlocks(CommandContext<CommandSourceStack> context, TestType testType, KeywordArgs keywordArgs) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
     final boolean immediately = keywordArgs.getBoolean("immediately");
     final boolean bypassLimit = keywordArgs.getBoolean("bypass_limit");
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
@@ -81,9 +81,9 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     if (!bypassLimit && region.numberOfBlocksAffected() > FillReplaceCommand.REGION_SIZE_LIMIT) {
       throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), FillReplaceCommand.REGION_SIZE_LIMIT);
     }
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
-      final BlockBox box = region.minContainingBlockBox();
+      final BoundingBox box = region.minContainingBlockBox();
       if (box != null && !LoadUtil.isPosLoaded(world, box)) {
         throw FillReplaceCommand.UNLOADED_POS.create();
       }
@@ -97,13 +97,13 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     MutableBoolean shouldBreak = new MutableBoolean();
 
     final Iterable<Void> calculation = Iterables.transform(region.stream().takeWhile(i -> !shouldBreak.booleanValue())::iterator, blockPos -> {
-      final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-      if (cachedBlockPosition.getBlockState() == null) {
+      final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+      if (cachedBlockPosition.getState() == null) {
         if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
           blocksSkipped.increment();
           return null;
         } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.broken").formatted(Formatting.YELLOW), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.broken").withStyle(ChatFormatting.YELLOW), false);
           shouldBreak.setTrue();
           return null;
         }
@@ -113,12 +113,12 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       if (test) blocksMatched.increment();
 
       if (testType == TestType.ANY && test) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.any.true", TextUtil.wrapVector(blockPos.toImmutable()), cachedBlockPosition.getBlockState().getBlock().getName()).styled(Styles.TRUE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.any.true", TextUtil.wrapVector(blockPos.immutable()), cachedBlockPosition.getState().getBlock().getName()).withStyle(Styles.TRUE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
         returnValue.setValue(0);
         shouldBreak.setTrue();
         return null;
       } else if (testType == TestType.ALL && !test) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.all.false", TextUtil.wrapVector(blockPos.toImmutable()), cachedBlockPosition.getBlockState().getBlock().getName()).styled(Styles.FALSE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.all.false", TextUtil.wrapVector(blockPos.immutable()), cachedBlockPosition.getState().getBlock().getName()).withStyle(Styles.FALSE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
         returnValue.setValue(1);
         shouldBreak.setTrue();
         return null;
@@ -128,18 +128,18 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
 
     final Iterable<Void> notifySkip = () -> IterateUtils.singletonPeekingIterator(() -> {
       if (unloadedPosBehavior == UnloadedPosBehavior.SKIP && blocksSkipped.intValue() > 0)
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.skipped", blocksSkipped.intValue()).enhanced$$().formatted(Formatting.YELLOW), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.skipped", blocksSkipped.intValue()).enhanced$$().withStyle(ChatFormatting.YELLOW), false);
     });
     final Iterator<Void> conclusion = switch (testType) {
       case ANY -> IterateUtils.singletonPeekingIterator(() -> {
         if (blocksMatched.intValue() == 0) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.any.false", blocksCounted.intValue()).enhanced$$().styled(Styles.FALSE), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.any.false", blocksCounted.intValue()).enhanced$$().withStyle(Styles.FALSE), false);
           returnValue.setValue(0);
         }
       });
       case ALL -> IterateUtils.singletonPeekingIterator(() -> {
         if (blocksMatched.intValue() == blocksCounted.intValue()) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.all.true", blocksCounted.intValue()).enhanced$$().styled(Styles.TRUE), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.all.true", blocksCounted.intValue()).enhanced$$().withStyle(Styles.TRUE), false);
           returnValue.setValue(1);
         }
       });
@@ -149,9 +149,9 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         final int mismatched = counted - matched;
 
         if (matched >= mismatched) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.compare.true", counted, matched, mismatched).enhanced$$().styled(Styles.TRUE), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.compare.true", counted, matched, mismatched).enhanced$$().withStyle(Styles.TRUE), false);
         } else {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.compare.false", counted, matched, mismatched).enhanced$$().styled(Styles.FALSE), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.compare.false", counted, matched, mismatched).enhanced$$().withStyle(Styles.FALSE), false);
         }
         returnValue.setValue(matched >= mismatched ? 1 : 0);
       });
@@ -159,14 +159,14 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         final int counted = blocksCounted.intValue();
         final int matched = blocksMatched.intValue();
         final int mismatched = counted - matched;
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.count.result", TextUtil.literal(counted).styled(Styles.RESULT), TextUtil.literal(matched).styled(Styles.RESULT), TextUtil.literal(mismatched).styled(Styles.RESULT)).enhanced$$(), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.count.result", TextUtil.literal(counted).withStyle(Styles.RESULT), TextUtil.literal(matched).withStyle(Styles.RESULT), TextUtil.literal(mismatched).withStyle(Styles.RESULT)).enhanced$$(), false);
         returnValue.setValue(matched);
       });
       case PROPORTION -> IterateUtils.singletonPeekingIterator(() -> {
         final int counted = blocksCounted.intValue();
         final int matched = blocksMatched.intValue();
         final double proportion = 100d * matched / counted;
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.proportion.result", TextUtil.literal(counted).styled(Styles.RESULT), TextUtil.literal(matched).styled(Styles.RESULT), Text.literal(Double.isFinite(proportion) ? proportion + "%" : String.valueOf(proportion)).styled(Styles.RESULT)).enhanced$$(), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.proportion.result", TextUtil.literal(counted).withStyle(Styles.RESULT), TextUtil.literal(matched).withStyle(Styles.RESULT), Component.literal(Double.isFinite(proportion) ? proportion + "%" : String.valueOf(proportion)).withStyle(Styles.RESULT)).enhanced$$(), false);
         returnValue.setValue(proportion * 100);
       });
     };
@@ -174,9 +174,9 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     final Iterable<Void> mainIterable = Iterables.concat(calculation, notifySkip, () -> conclusion);
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      final Text taskName = Text.translatable("enhanced_commands.commands.testfor.blocks.task_name", region.asString());
+      final Component taskName = Component.translatable("enhanced_commands.commands.testfor.blocks.task_name", region.asString());
       ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(mainIterable.iterator(), 32768, 3));
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.testfor.blocks.large_region", Long.toString(region.numberOfBlocksAffected())).enhanced$$().formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.large_region", Long.toString(region.numberOfBlocksAffected())).enhanced$$().withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(mainIterable.iterator());
@@ -184,24 +184,24 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     }
   }
 
-  private static Text createToolbarText(BlockPos blockPos, BlockPredicate blockPredicate) {
-    return Text.literal("[").formatted(Formatting.DARK_GRAY).append(Texts.join(List.of(
-        Text.translatable("enhanced_commands.commands.testfor.blocks.detail").styled(style -> style
+  private static Component createToolbarText(BlockPos blockPos, BlockPredicate blockPredicate) {
+    return Component.literal("[").withStyle(ChatFormatting.DARK_GRAY).append(ComponentUtils.formatList(List.of(
+        Component.translatable("enhanced_commands.commands.testfor.blocks.detail").withStyle(style -> style
             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/testfor block " + StringUtil.wrapVector(blockPos)))
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.testfor_blocks.detail.description", TextUtil.wrapVector(blockPos))))),
-        Text.translatable("enhanced_commands.commands.testfor.blocks.test").styled(style -> style
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.testfor_blocks.detail.description", TextUtil.wrapVector(blockPos))))),
+        Component.translatable("enhanced_commands.commands.testfor.blocks.test").withStyle(style -> style
             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/testfor block " + StringUtil.wrapVector(blockPos) + " " + blockPredicate.asString()))
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.testfor_blocks.test.description", TextUtil.wrapVector(blockPos))))),
-        Text.translatable("enhanced_commands.commands.testfor.blocks.teleport").styled(style -> style
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.testfor_blocks.test.description", TextUtil.wrapVector(blockPos))))),
+        Component.translatable("enhanced_commands.commands.testfor.blocks.teleport").withStyle(style -> style
             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s " + StringUtil.wrapVector(blockPos)))
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.testfor_blocks.teleport.description", TextUtil.wrapVector(blockPos))))),
-        Text.translatable("enhanced_commands.commands.testfor.blocks.copy_pos").styled(style -> style
-            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, StringUtil.wrapVector(blockPos.toCenterPos())))
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("enhanced_commands.commands.testfor_blocks.copy_pos.description", StringUtil.wrapVector(blockPos)))))
-    ), Text.literal(" | "), text -> text.formatted(Formatting.UNDERLINE, Formatting.GRAY))).append("]");
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.testfor_blocks.teleport.description", TextUtil.wrapVector(blockPos))))),
+        Component.translatable("enhanced_commands.commands.testfor.blocks.copy_pos").withStyle(style -> style
+            .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, StringUtil.wrapVector(blockPos.getCenter())))
+            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.testfor_blocks.copy_pos.description", StringUtil.wrapVector(blockPos)))))
+    ), Component.literal(" | "), text -> text.withStyle(ChatFormatting.UNDERLINE, ChatFormatting.GRAY))).append("]");
   }
 
-  public enum TestType implements StringIdentifiable {
+  public enum TestType implements StringRepresentable {
     ANY("any"),
     ALL("all"),
     COMPARE("compare"),
@@ -216,7 +216,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
   }

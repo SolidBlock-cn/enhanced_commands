@@ -4,16 +4,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public final class RandomBlockFunction implements BlockFunction {
   public static final MapCodec<RandomBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.optionalLongFieldOf("seed").forGetter(RandomBlockFunction::seed)).apply(i, RandomBlockFunction::new));
-  private transient FeatureSet featureSet;
+  private transient FeatureFlagSet featureSet;
   private transient Block[] blocks;
   private final OptionalLong seed;
   public static final RandomBlockFunction RANDOM_SEED = new RandomBlockFunction(OptionalLong.empty());
@@ -46,16 +46,16 @@ public final class RandomBlockFunction implements BlockFunction {
     this.seed = seed;
   }
 
-  private @NotNull Block[] getBlocks(DynamicRegistryManager rm, FeatureSet fs) {
+  private @NotNull Block[] getBlocks(RegistryAccess rm, FeatureFlagSet fs) {
     if (blocks == null || featureSet != fs) {
       return (blocks = calculateBlocks(rm, fs));
     }
     return blocks;
   }
 
-  private @NotNull Block[] calculateBlocks(DynamicRegistryManager rm, FeatureSet fs) {
+  private @NotNull Block[] calculateBlocks(RegistryAccess rm, FeatureFlagSet fs) {
     this.featureSet = fs;
-    return rm.get(RegistryKeys.BLOCK).stream().filter(block -> block.isEnabled(fs)).toArray(Block[]::new);
+    return rm.registryOrThrow(Registries.BLOCK).stream().filter(block -> block.isEnabled(fs)).toArray(Block[]::new);
   }
 
   @Override
@@ -67,12 +67,12 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    final Block[] blocks = getBlocks(world.getRegistryManager(), world.getEnabledFeatures());
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    final Block[] blocks = getBlocks(world.registryAccess(), world.enabledFeatures());
     if (blocks.length == 0) {
       return blockState;
     }
-    final Random random = context.getSplitterForOptionalSeed(this, seed).split(pos);
+    final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(pos);
     final Block block = blocks[random.nextInt(blocks.length)];
     return StateUtil.getBlockWithRandomProperties(block, random);
   }
@@ -110,7 +110,7 @@ public final class RandomBlockFunction implements BlockFunction {
     public @Nullable RandomBlockFunction parse(ParseContext<?> parseContext) {
       final StringReader reader = parseContext.reader();
       if (reader.getRemaining().isEmpty()) {
-        parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Text.translatable("enhanced_commands.block_function.random")).buildFuture());
+        parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Component.translatable("enhanced_commands.block_function.random")).buildFuture());
       }
       if (reader.canRead() && reader.peek() == '*') {
         reader.skip();

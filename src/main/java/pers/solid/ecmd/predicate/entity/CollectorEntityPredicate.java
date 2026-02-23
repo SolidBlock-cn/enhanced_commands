@@ -5,8 +5,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -28,16 +28,16 @@ public record CollectorEntityPredicate(EntitySelectorCollector collector) implem
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
     final Entity sender = context.positionProvider.getEntity$ec();
     if (sender == null) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.collector.no_sender", displayName, collector.getDisplayName()));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.collector.no_sender", displayName, collector.getDisplayName()));
     }
     final List<? extends Entity> entities = cache.getUnchecked(collector).getUnchecked(sender);
     if (entities.contains(entity)) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.collector.true", displayName, collector.getDisplayName(), sender.getStyledDisplayName()));
+      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.collector.true", displayName, collector.getDisplayName(), sender.getFeedbackDisplayName()));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.collector.false", displayName, collector.getDisplayName(), sender.getStyledDisplayName()));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.collector.false", displayName, collector.getDisplayName(), sender.getFeedbackDisplayName()));
     }
   }
 
@@ -48,6 +48,6 @@ public record CollectorEntityPredicate(EntitySelectorCollector collector) implem
 
   @Override
   public @NotNull String asString() {
-    return "@" + collector.asString();
+    return "@" + collector.getSerializedName();
   }
 }

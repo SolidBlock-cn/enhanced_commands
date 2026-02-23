@@ -6,19 +6,19 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record BlockFunctionArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<BlockFunction> {
-  public static BlockFunctionArgumentType blockFunction(CommandRegistryAccess registryAccess) {
+public record BlockFunctionArgumentType(CommandBuildContext registryAccess) implements ArgumentType<BlockFunction> {
+  public static BlockFunctionArgumentType blockFunction(CommandBuildContext registryAccess) {
     return new BlockFunctionArgumentType(registryAccess);
   }
 
-  public static BlockFunction getBlockFunction(CommandContext<ServerCommandSource> context, String name) {
+  public static BlockFunction getBlockFunction(CommandContext<CommandSourceStack> context, String name) {
     return context.getArgument(name, BlockFunction.class);
   }
 

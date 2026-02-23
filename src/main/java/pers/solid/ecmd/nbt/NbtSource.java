@@ -6,13 +6,13 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.command.argument.NbtPathArgumentType;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.nbt.*;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -28,16 +28,16 @@ import java.util.*;
 public interface NbtSource<T> extends ExpressionConvertible {
   Codec<NbtSource<?>> CODEC = Type.CODEC.dispatch(NbtSource::getType, Type::getCodec);
 
-  DynamicCommandExceptionType QUERY_SCALE_NOT_NUMBER = new DynamicCommandExceptionType((path) -> Text.translatable("enhanced_commands.commands.nbt.query_scale_not_number", path.toString()));
+  DynamicCommandExceptionType QUERY_SCALE_NOT_NUMBER = new DynamicCommandExceptionType((path) -> Component.translatable("enhanced_commands.commands.nbt.query_scale_not_number", path.toString()));
   int QUERY_LIMIT = 12;
-  SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.data.get.multiple"));
+  SimpleCommandExceptionType GET_MULTIPLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.data.get.multiple"));
 
   /**
    * 类似于原版的行为，返回指定的 nbt 数值在缩放后的值。如果 nbt 的值不是数字，则抛出错误。
    */
-  static double scaleNbt(NbtElement nbtElement, double scale, NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
-    if (nbtElement instanceof AbstractNbtNumber number) {
-      return number.doubleValue() * scale;
+  static double scaleNbt(Tag nbtElement, double scale, NbtPathArgument.NbtPath path) throws CommandSyntaxException {
+    if (nbtElement instanceof NumericTag number) {
+      return number.getAsDouble() * scale;
     } else {
       throw QUERY_SCALE_NOT_NUMBER.create(path);
     }
@@ -46,37 +46,37 @@ public interface NbtSource<T> extends ExpressionConvertible {
   /**
    * 类似于原版的行为，将 nbtElement 转换为数字，可以是其包含的元素的数量，作为命令的返回值。
    */
-  static int toInt(NbtElement nbtElement) {
-    if (Objects.requireNonNull(nbtElement) instanceof NbtInt nbtInt) {
-      return nbtInt.intValue();
-    } else if (nbtElement instanceof NbtLong nbtLong) {
-      return nbtLong.intValue();
-    } else if (nbtElement instanceof NbtShort nbtShort) {
-      return nbtShort.intValue();
-    } else if (nbtElement instanceof AbstractNbtNumber nbtNumber) {
-      return MathHelper.floor(nbtNumber.doubleValue());
-    } else if (nbtElement instanceof AbstractNbtList<?> nbtList) {
+  static int toInt(Tag nbtElement) {
+    if (Objects.requireNonNull(nbtElement) instanceof IntTag nbtInt) {
+      return nbtInt.getAsInt();
+    } else if (nbtElement instanceof LongTag nbtLong) {
+      return nbtLong.getAsInt();
+    } else if (nbtElement instanceof ShortTag nbtShort) {
+      return nbtShort.getAsInt();
+    } else if (nbtElement instanceof NumericTag nbtNumber) {
+      return Mth.floor(nbtNumber.getAsDouble());
+    } else if (nbtElement instanceof CollectionTag<?> nbtList) {
       return nbtList.size();
-    } else if (nbtElement instanceof NbtCompound nbtCompound) {
-      return nbtCompound.getSize();
+    } else if (nbtElement instanceof CompoundTag nbtCompound) {
+      return nbtCompound.size();
     }
     return 1;
   }
 
-  Collection<T> values(ServerCommandSource source) throws CommandSyntaxException;
+  Collection<T> values(CommandSourceStack source) throws CommandSyntaxException;
 
-  NbtCompound getNbtFor(ServerCommandSource commandSource, T source);
+  CompoundTag getNbtFor(CommandSourceStack commandSource, T source);
 
   Type getType();
 
-  default NbtElement getNbtInPathFor(ServerCommandSource commandSource, T source, @Nullable NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
-    final NbtCompound nbt = getNbtFor(commandSource, source);
+  default Tag getNbtInPathFor(CommandSourceStack commandSource, T source, @Nullable NbtPathArgument.NbtPath path) throws CommandSyntaxException {
+    final CompoundTag nbt = getNbtFor(commandSource, source);
     if (path == null) {
       return nbt;
     }
-    final List<NbtElement> nbtInPath = path.get(nbt);
-    Iterator<NbtElement> iterator = nbtInPath.iterator();
-    NbtElement nbtElement = iterator.next();
+    final List<Tag> nbtInPath = path.get(nbt);
+    Iterator<Tag> iterator = nbtInPath.iterator();
+    Tag nbtElement = iterator.next();
     if (iterator.hasNext()) {
       throw GET_MULTIPLE_EXCEPTION.create();
     } else {
@@ -84,8 +84,8 @@ public interface NbtSource<T> extends ExpressionConvertible {
     }
   }
 
-  default Map<T, NbtElement> getNbtsInPath(ServerCommandSource source, @Nullable NbtPathArgumentType.NbtPath path) throws CommandSyntaxException {
-    final ImmutableMap.Builder<T, NbtElement> builder = new ImmutableMap.Builder<>();
+  default Map<T, Tag> getNbtsInPath(CommandSourceStack source, @Nullable NbtPathArgument.NbtPath path) throws CommandSyntaxException {
+    final ImmutableMap.Builder<T, Tag> builder = new ImmutableMap.Builder<>();
     for (T value : values(source)) {
       try {
         builder.put(value, getNbtInPathFor(source, value, path));
@@ -96,10 +96,10 @@ public interface NbtSource<T> extends ExpressionConvertible {
     return builder.build();
   }
 
-  int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException;
+  int executeQuery(CommandSourceStack source, NbtPathArgument.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, RandomSource random) throws CommandSyntaxException;
 
-  default NbtElement getConcentratedNbts(ServerCommandSource commandSource, @Nullable NbtPathArgumentType.NbtPath path, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
-    final Map<T, NbtElement> nbts = getNbtsInPath(commandSource, path);
+  default Tag getConcentratedNbts(CommandSourceStack commandSource, @Nullable NbtPathArgument.NbtPath path, NbtConcentrationType nbtConcentrationType, RandomSource random) throws CommandSyntaxException {
+    final Map<T, Tag> nbts = getNbtsInPath(commandSource, path);
     return nbtConcentrationType.concentrate(nbts.values(), random);
   }
 
@@ -107,24 +107,24 @@ public interface NbtSource<T> extends ExpressionConvertible {
    * 表示单个的 NBT 来源，其一些方法可以有所优化。
    */
   interface Single<T> extends NbtSource<T> {
-    T value(ServerCommandSource commandSource) throws CommandSyntaxException;
+    T value(CommandSourceStack commandSource) throws CommandSyntaxException;
 
     @Override
-    default Collection<T> values(ServerCommandSource source) throws CommandSyntaxException {
+    default Collection<T> values(CommandSourceStack source) throws CommandSyntaxException {
       return Collections.singletonList(value(source));
     }
 
-    default NbtElement getNbtInPath(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path) throws CommandSyntaxException {
+    default Tag getNbtInPath(CommandSourceStack source, NbtPathArgument.@Nullable NbtPath path) throws CommandSyntaxException {
       return getNbtInPathFor(source, value(source), path);
     }
 
     @Override
-    default Map<T, NbtElement> getNbtsInPath(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path) throws CommandSyntaxException {
+    default Map<T, Tag> getNbtsInPath(CommandSourceStack source, NbtPathArgument.@Nullable NbtPath path) throws CommandSyntaxException {
       return Map.of(value(source), getNbtInPath(source, path));
     }
   }
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     BLOCK("block", BlockNbtData.CODEC),
     ENTITY("entity", EntityNbtData.CODEC),
     LITERAL("literal", LiteralNbtData.CODEC),
@@ -144,7 +144,7 @@ public interface NbtSource<T> extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
   }

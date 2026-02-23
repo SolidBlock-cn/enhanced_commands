@@ -1,6 +1,6 @@
 package pers.solid.ecmd.util;
 
-import net.minecraft.text.Style;
+import net.minecraft.network.chat.Style;
 
 import java.awt.*;
 import java.util.function.UnaryOperator;

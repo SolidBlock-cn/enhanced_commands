@@ -6,7 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
@@ -19,7 +19,7 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<ActiveRegionA
 
   @Override
   public ActiveRegionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-    parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Text.translatable("enhanced_commands.region.active_region"), suggestionsBuilder).buildFuture());
+    parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Component.translatable("enhanced_commands.region.active_region"), suggestionsBuilder).buildFuture());
     final StringReader reader = parseContext.reader();
     if (reader.canRead() && reader.peek() == '$') {
       reader.skip();

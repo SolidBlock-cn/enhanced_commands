@@ -6,9 +6,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
@@ -22,12 +22,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtTarget<?>> {
-  public static NbtTargetArgumentType nbtTarget(CommandRegistryAccess registryAccess) {
+public record NbtTargetArgumentType(CommandBuildContext registryAccess) implements ArgumentType<NbtTarget<?>> {
+  public static NbtTargetArgumentType nbtTarget(CommandBuildContext registryAccess) {
     return new NbtTargetArgumentType(registryAccess);
   }
 
-  public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name, @Nullable BlockPredicate blockPredicate) throws CommandSyntaxException {
+  public static NbtTarget<?> getNbtTarget(CommandContext<CommandSourceStack> context, String name, @Nullable BlockPredicate blockPredicate) throws CommandSyntaxException {
     final NbtTarget<?> argument = context.getArgument(name, NbtTarget.class);
     if (argument instanceof BlockNbtData blockNbtData && blockPredicate != null) {
       return new BlockNbtData(blockNbtData.region(), blockPredicate);
@@ -35,7 +35,7 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
     return argument;
   }
 
-  public static NbtTarget<?> getNbtTarget(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static NbtTarget<?> getNbtTarget(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
     return getNbtTarget(context, name, ((CommandContextAccessor<?>) context).getArguments().containsKey("keyword_args") ? KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getArg("affect_only") : null);
   }
 
@@ -65,7 +65,7 @@ public record NbtTargetArgumentType(CommandRegistryAccess registryAccess) implem
       nbtTargetArgument = NbtDataRegistry.handleTarget(s, parseContext);
       if (nbtTargetArgument == null) {
         reader.setCursor(cursorBeforeString);
-        return CommandSource.suggestMatching(NbtDataRegistry.streamTargetTypes(), builder);
+        return SharedSuggestionProvider.suggest(NbtDataRegistry.streamTargetTypes(), builder);
       }
     } catch (CommandSyntaxException ignored) {
     }

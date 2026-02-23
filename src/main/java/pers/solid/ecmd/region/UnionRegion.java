@@ -4,11 +4,11 @@ import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -24,7 +24,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
   public static final MapCodec<UnionRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, UnionRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
+  public boolean contains(@NotNull Vec3 vec3d) {
     return regions.stream().anyMatch(region -> region.contains(vec3d));
   }
 
@@ -40,7 +40,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
 
   @Override
   public Stream<@NotNull BlockPos> stream() {
-    return regions.stream().flatMap(Region::stream).map(BlockPos::toImmutable).distinct();
+    return regions.stream().flatMap(Region::stream).map(BlockPos::immutable).distinct();
   }
 
   @Override
@@ -62,8 +62,8 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
-    final List<@NotNull Box> maxContainingBoxes = regions.stream().map(Region::minContainingBox).filter(Objects::nonNull).toList();
+  public @Nullable AABB minContainingBox() {
+    final List<@NotNull AABB> maxContainingBoxes = regions.stream().map(Region::minContainingBox).filter(Objects::nonNull).toList();
     final double minX = maxContainingBoxes.stream().mapToDouble(value -> value.minX).min().orElse(Double.POSITIVE_INFINITY);
     final double minY = maxContainingBoxes.stream().mapToDouble(value -> value.minY).min().orElse(Double.POSITIVE_INFINITY);
     final double minZ = maxContainingBoxes.stream().mapToDouble(value -> value.minZ).min().orElse(Double.POSITIVE_INFINITY);
@@ -73,7 +73,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     if (minX > maxX || minY > maxY || minZ > maxZ) {
       return null;
     } else {
-      return new Box(minX, minY, minZ, maxX, maxY, maxZ);
+      return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
   }
 
@@ -91,8 +91,8 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.union");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.union");
     }
 
     @Override

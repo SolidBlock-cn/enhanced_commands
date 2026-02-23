@@ -5,8 +5,8 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2LongMap;
 import it.unimi.dsi.fastutil.objects.Reference2LongOpenHashMap;
-import net.minecraft.util.math.random.CheckedRandom;
-import net.minecraft.util.math.random.RandomSplitter;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 
 /**
  * <p>用于处理对象与种子的映射关系的容器类。在一些涉及多个方块函数或方块谓词的情形中，如果各个方块函数应用相同的种子，就有可能出现一些问题，为了确保同一次执行时多个对象的种子互不相同，同时又确保带有同一种子多次执行命令的结果中的种子一致，故创设性类。
@@ -52,7 +52,7 @@ public class SeedStorage<K> {
    */
   private final long initialSeed;
   private final Reference2LongMap<K> seeds = new Reference2LongOpenHashMap<>();
-  private final Long2ObjectMap<RandomSplitter> splitters = new Long2ObjectOpenHashMap<>();
+  private final Long2ObjectMap<PositionalRandomFactory> splitters = new Long2ObjectOpenHashMap<>();
 
   /**
    * 创建新的种子存储容器。
@@ -76,14 +76,14 @@ public class SeedStorage<K> {
   /**
    * 获取特定对象对应的种子的 splitter。对于同一对象，不会多次创建 splitter 对象。
    */
-  public RandomSplitter getSplitter(K key) {
+  public PositionalRandomFactory getSplitter(K key) {
     return getSplitterForSeed(getSeed(key));
   }
 
   /**
    * 获取特定种子的 splitter。对于同一种子，不会多次创建 splitter 对象。
    */
-  public RandomSplitter getSplitterForSeed(long seed) {
-    return splitters.computeIfAbsent(seed, CheckedRandom.Splitter::new);
+  public PositionalRandomFactory getSplitterForSeed(long seed) {
+    return splitters.computeIfAbsent(seed, LegacyRandomSource.LegacyPositionalRandomFactory::new);
   }
 }

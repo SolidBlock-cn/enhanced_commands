@@ -3,10 +3,10 @@ package pers.solid.ecmd.function.nbt;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtSourceArgumentType;
@@ -19,10 +19,10 @@ import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Optional;
 
-public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgumentType.NbtPath> path, NbtConcentrationType concentrationType) implements NbtFunction {
+public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.NbtPath> path, NbtConcentrationType concentrationType) implements NbtFunction {
   public static final MapCodec<GetDataNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtSource.CODEC.fieldOf("source").forGetter(GetDataNbtFunction::source),
-      NbtPathArgumentType.NbtPath.CODEC.optionalFieldOf("path").forGetter(GetDataNbtFunction::path),
+      NbtPathArgument.NbtPath.CODEC.optionalFieldOf("path").forGetter(GetDataNbtFunction::path),
       NbtConcentrationType.CODEC.optionalFieldOf("concentration_type", NbtConcentrationType.ALL).forGetter(GetDataNbtFunction::concentrationType)
   ).apply(i, GetDataNbtFunction::new));
 
@@ -37,8 +37,8 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgumentTy
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
-    return source.getConcentratedNbts((ServerCommandSource) context.positionProvider, path.orElse(null), concentrationType, Random.create());
+  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+    return source.getConcentratedNbts((CommandSourceStack) context.positionProvider, path.orElse(null), concentrationType, RandomSource.create());
   }
 
   public enum Type implements NbtFunctionType<GetDataNbtFunction> {
@@ -52,7 +52,7 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgumentTy
 
   public static class Parser implements FunctionLikeParser.SequentialParams<GetDataNbtFunction> {
     private NbtSource<?> nbtSource;
-    private @Nullable NbtPathArgumentType.NbtPath nbtPath;
+    private @Nullable NbtPathArgument.NbtPath nbtPath;
     private NbtConcentrationType nbtConcentrationType = NbtConcentrationType.ALL;
 
     @Override
@@ -69,7 +69,7 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgumentTy
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
         case 0 -> nbtSource = parseContext.parseAndSuggestArgument(NbtSourceArgumentType.nbtSource(parseContext.registryAccess()));
-        case 1 -> nbtPath = parseContext.parseAndSuggestArgument(NbtPathArgumentType.nbtPath());
+        case 1 -> nbtPath = parseContext.parseAndSuggestArgument(NbtPathArgument.nbtPath());
         case 2 -> nbtConcentrationType = parseContext.parseAndSuggestArgument(SimpleEnumArgumentType.nbtConcentrationType());
       }
     }

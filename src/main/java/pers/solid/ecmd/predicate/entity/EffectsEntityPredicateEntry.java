@@ -4,15 +4,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.MobEffectsPredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.predicate.NumberRange;
-import net.minecraft.predicate.entity.EntityEffectPredicate;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -31,11 +31,11 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return false;
     }
-    final var actualEffects = livingEntity.getActiveStatusEffects();
+    final var actualEffects = livingEntity.getActiveEffectsMap();
     for (final var entry : effects) {
-      final RegistryEntry<StatusEffect> statusEffect = entry.effect;
-      StatusEffectInstance statusEffectInstance = actualEffects.get(statusEffect);
-      if (entry.data.test(statusEffectInstance) == entry.expected) {
+      final Holder<MobEffect> statusEffect = entry.effect;
+      MobEffectInstance statusEffectInstance = actualEffects.get(statusEffect);
+      if (entry.data.matches(statusEffectInstance) == entry.expected) {
         return false;
       }
     }
@@ -43,43 +43,43 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
     if (!(entity instanceof final LivingEntity livingEntity)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.not_living"));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
-    final Map<RegistryEntry<StatusEffect>, StatusEffectInstance> actualEffects = livingEntity.getActiveStatusEffects();
+    final Map<Holder<MobEffect>, MobEffectInstance> actualEffects = livingEntity.getActiveEffectsMap();
     boolean result = true;
     final List<TestResult> attachments = new ArrayList<>();
     for (final var entry : effects) {
-      final RegistryEntry<StatusEffect> effectEntry = entry.effect;
-      StatusEffectInstance statusEffectInstance = actualEffects.get(effectEntry);
-      final EntityEffectPredicate.EffectData effectData = entry.data;
-      final var testResult = effectData.test(statusEffectInstance);
+      final Holder<MobEffect> effectEntry = entry.effect;
+      MobEffectInstance statusEffectInstance = actualEffects.get(effectEntry);
+      final MobEffectsPredicate.MobEffectInstancePredicate effectData = entry.data;
+      final var testResult = effectData.matches(statusEffectInstance);
       final var expected = entry.expected;
       final var passes = testResult == expected;
       result &= passes;
 
-      final Text effectName = effectEntry.value().getName();
-      if (effectData.amplifier().isDummy() && effectData.duration().isDummy() && effectData.ambient().isEmpty() && effectData.visible().isEmpty()) {
+      final Component effectName = effectEntry.value().getDisplayName();
+      if (effectData.amplifier().isAny() && effectData.duration().isAny() && effectData.ambient().isEmpty() && effectData.visible().isEmpty()) {
         if (testResult) {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.true_dummy", displayName, effectName)));
+          attachments.add(TestResult.of(passes, Component.translatable("enhanced_commands.entity_predicate.effect.true_dummy", displayName, effectName)));
         } else {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.false_dummy", displayName, effectName)));
+          attachments.add(TestResult.of(passes, Component.translatable("enhanced_commands.entity_predicate.effect.false_dummy", displayName, effectName)));
         }
       } else {
         if (testResult) {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.true_advanced", displayName, effectName)));
+          attachments.add(TestResult.of(passes, Component.translatable("enhanced_commands.entity_predicate.effect.true_advanced", displayName, effectName)));
         } else if (statusEffectInstance != null) {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.false_advanced", displayName, effectName)));
+          attachments.add(TestResult.of(passes, Component.translatable("enhanced_commands.entity_predicate.effect.false_advanced", displayName, effectName)));
         } else {
-          attachments.add(TestResult.of(passes, Text.translatable("enhanced_commands.entity_predicate.effect.false_advanced_no_effect", displayName, effectName)));
+          attachments.add(TestResult.of(passes, Component.translatable("enhanced_commands.entity_predicate.effect.false_advanced_no_effect", displayName, effectName)));
         }
       }
     }
     if (result) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.effect.pass", displayName), attachments);
+      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.effect.pass", displayName), attachments);
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.effect.fail", displayName), attachments);
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.effect.fail", displayName), attachments);
     }
   }
 
@@ -98,26 +98,26 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
     return "effect=" + joiner;
   }
 
-  public record Entry(RegistryEntry<StatusEffect> effect, EntityEffectPredicate.EffectData data, boolean expected) implements ExpressionConvertible {
+  public record Entry(Holder<MobEffect> effect, MobEffectsPredicate.MobEffectInstancePredicate data, boolean expected) implements ExpressionConvertible {
     public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
-        StatusEffect.ENTRY_CODEC.fieldOf("effect").forGetter(Entry::effect),
-        EntityEffectPredicate.EffectData.CODEC.fieldOf("data").forGetter(Entry::data),
+        MobEffect.CODEC.fieldOf("effect").forGetter(Entry::effect),
+        MobEffectsPredicate.MobEffectInstancePredicate.CODEC.fieldOf("data").forGetter(Entry::data),
         Codec.BOOL.optionalFieldOf("expected", true).forGetter(Entry::expected)
     ).apply(i, Entry::new));
 
     @Override
     public @NotNull String asString() {
-      final RegistryEntry<StatusEffect> effectEntry = effect;
-      final EntityEffectPredicate.EffectData effectData = data;
+      final Holder<MobEffect> effectEntry = effect;
+      final MobEffectsPredicate.MobEffectInstancePredicate effectData = data;
       final StringJoiner joiner = new StringJoiner(", ", "{", "}");
-      final NumberRange.IntRange amplifier = effectData.amplifier();
+      final MinMaxBounds.Ints amplifier = effectData.amplifier();
       boolean dummy = true;
-      if (!amplifier.isDummy()) {
+      if (!amplifier.isAny()) {
         joiner.add("amplifier=" + StringUtil.wrapRange(amplifier));
         dummy = false;
       }
-      final NumberRange.IntRange duration = effectData.duration();
-      if (!duration.isDummy()) {
+      final MinMaxBounds.Ints duration = effectData.duration();
+      if (!duration.isAny()) {
         joiner.add("duration=" + StringUtil.wrapRange(duration));
         dummy = false;
       }
@@ -132,7 +132,7 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
         dummy = false;
       }
 
-      final String effectId = effectEntry.getKeyOrValue().map(key -> key.getValue().toString(), statusEffect -> StatusEffect.ENTRY_CODEC.encodeStart(NbtOps.INSTANCE, effectEntry).getOrThrow().toString());
+      final String effectId = effectEntry.unwrap().map(key -> key.location().toString(), statusEffect -> MobEffect.CODEC.encodeStart(NbtOps.INSTANCE, effectEntry).getOrThrow().toString());
       if (dummy) {
         return effectId + "=" + expected;
       } else {

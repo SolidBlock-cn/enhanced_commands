@@ -3,8 +3,8 @@ package pers.solid.ecmd.predicate.nbt;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParsingUtil;
 
@@ -36,15 +36,15 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
   }
 
   @Override
-  public boolean test(@NotNull NbtElement nbtElement) {
-    if (!(nbtElement instanceof final NbtCompound nbtCompound))
+  public boolean test(@NotNull Tag nbtElement) {
+    if (!(nbtElement instanceof final CompoundTag nbtCompound))
       return inverted;
-    if (nbtCompound.getSize() != map.size())
+    if (nbtCompound.size() != map.size())
       return inverted;
     for (Map.Entry<String, NbtPredicate> entry : map.entrySet()) {
       final String key = entry.getKey();
       final NbtPredicate valuePredicate = entry.getValue();
-      final NbtElement actualElement = nbtCompound.get(key);
+      final Tag actualElement = nbtCompound.get(key);
       if (actualElement == null || !valuePredicate.test(actualElement)) {
         return inverted;
       }
@@ -54,7 +54,7 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
 
   @Override
   public @NotNull NbtPredicateType<EqualsCompoundNbtPredicate> getType() {
-    return Type.EQUALS_COMPOUND_TYPE;
+    return pers.solid.ecmd.predicate.nbt.EqualsCompoundNbtPredicate.Type.EQUALS_COMPOUND_TYPE;
   }
 
   public enum Type implements NbtPredicateType<EqualsCompoundNbtPredicate> {

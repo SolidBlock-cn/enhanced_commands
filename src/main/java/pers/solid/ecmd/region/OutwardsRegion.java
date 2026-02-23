@@ -6,11 +6,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
@@ -26,12 +26,12 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
 
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
-    return this.minContainingBlockBox().contains(vec3i);
+    return this.minContainingBlockBox().isInside(vec3i);
   }
 
   @Override
   public @NotNull Iterator<BlockPos> iterator() {
-    return BlockPos.iterateOutwards(new BlockPos(center), x, y, z).iterator();
+    return BlockPos.withinManhattan(new BlockPos(center), x, y, z).iterator();
   }
 
   @Override
@@ -40,8 +40,8 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   }
 
   @Override
-  public @NotNull OutwardsRegion rotated(@NotNull Vec3i pivot, @NotNull BlockRotation blockRotation) {
-    if (blockRotation == BlockRotation.CLOCKWISE_90 || blockRotation == BlockRotation.COUNTERCLOCKWISE_90) {
+  public @NotNull OutwardsRegion rotated(@NotNull Vec3i pivot, @NotNull Rotation blockRotation) {
+    if (blockRotation == Rotation.CLOCKWISE_90 || blockRotation == Rotation.COUNTERCLOCKWISE_90) {
       return new OutwardsRegion(GeoUtil.rotate(center, blockRotation, pivot), z, y, x);
     } else {
       return new OutwardsRegion(GeoUtil.rotate(center, blockRotation, pivot), x, y, z);
@@ -59,8 +59,8 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   }
 
   @Override
-  public @NotNull BlockBox minContainingBlockBox() {
-    return BlockBox.create(center.add(-x, -y, -z), center.add(x, y, z));
+  public @NotNull BoundingBox minContainingBlockBox() {
+    return BoundingBox.fromCorners(center.offset(-x, -y, -z), center.offset(x, y, z));
   }
 
   @Override
@@ -77,8 +77,8 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.outwards");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.outwards");
     }
 
     @Override

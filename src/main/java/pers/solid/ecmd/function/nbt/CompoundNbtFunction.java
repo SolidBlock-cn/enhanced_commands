@@ -5,8 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -70,8 +70,8 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   }
 
   @Override
-  public @NotNull NbtCompound apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
-    final NbtCompound targetCompound = (nbtElement instanceof final NbtCompound nbtCompound && allowsMerge) ? nbtCompound : new NbtCompound();
+  public @NotNull CompoundTag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+    final CompoundTag targetCompound = (nbtElement instanceof final CompoundTag nbtCompound && allowsMerge) ? nbtCompound : new CompoundTag();
     for (Map.Entry<String, NbtFunction> entry : source.entrySet()) {
       String key = entry.getKey();
       NbtFunction nbtFunction = entry.getValue();

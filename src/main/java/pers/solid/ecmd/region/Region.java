@@ -5,10 +5,16 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Streams;
 import com.mojang.serialization.Codec;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,8 +33,8 @@ import java.util.stream.Stream;
  */
 @Unmodifiable
 public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
-  RegistryKey<Registry<Region>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region"));
-  Codec<Region> CODEC = RegionType.REGISTRY.getCodec().dispatch(Region::getType, RegionType::getCodec);
+  ResourceKey<Registry<Region>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region"));
+  Codec<Region> CODEC = RegionType.REGISTRY.byNameCodec().dispatch(Region::getType, RegionType::getCodec);
 
   static Region getCached(RegionArgument<?> regionArgument, PositionProvider positionProvider) {
     return CacheStorage.cache.getUnchecked(regionArgument).getUnchecked(positionProvider);
@@ -39,24 +45,24 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
    */
   @Contract(pure = true)
   default boolean contains(@NotNull Vec3i vec3i) {
-    return contains(Vec3d.ofCenter(vec3i));
+    return contains(Vec3.atCenterOf(vec3i));
   }
 
   /**
    * 判断精确坐标是否在该区域内。
    */
   @Contract(pure = true)
-  boolean contains(@NotNull Vec3d vec3d);
+  boolean contains(@NotNull Vec3 vec3d);
 
   /**
-   * 返回该区域内的所有{@linkplain BlockPos 方块坐标}的{@linkplain Iterator 迭代器}。<strong>注意：</strong>返回的 {@link BlockPos} 可能是 {@linkplain BlockPos.Mutable 可变的}，有可能是同一个对象但是一边修改一边返回。如果需要将返回的方块坐标存储到集合中，需要调用 {@link BlockPos.Mutable#toImmutable()} 以避免问题。
+   * 返回该区域内的所有{@linkplain BlockPos 方块坐标}的{@linkplain Iterator 迭代器}。<strong>注意：</strong>返回的 {@link BlockPos} 可能是 {@linkplain BlockPos.MutableBlockPos 可变的}，有可能是同一个对象但是一边修改一边返回。如果需要将返回的方块坐标存储到集合中，需要调用 {@link BlockPos.MutableBlockPos#immutable()} 以避免问题。
    */
   @NotNull
   @Override
   Iterator<BlockPos> iterator();
 
   /**
-   * 返回该区域内的所有方块坐标的{@linkplain Stream 流}。<strong>注意：</strong>返回的 {@link BlockPos} 可能是 {@linkplain BlockPos.Mutable 可变的}，参见 {@link #iterator()}。
+   * 返回该区域内的所有方块坐标的{@linkplain Stream 流}。<strong>注意：</strong>返回的 {@link BlockPos} 可能是 {@linkplain BlockPos.MutableBlockPos 可变的}，参见 {@link #iterator()}。
    */
   default Stream<@NotNull BlockPos> stream() {
     return Streams.stream(this);
@@ -67,14 +73,14 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
    */
   @NotNull
   default Region moved(@NotNull Vec3i relativePos) {
-    return moved(Vec3d.of(relativePos));
+    return moved(Vec3.atLowerCornerOf(relativePos));
   }
 
   /**
    * 该区域沿指定的浮点数向量移动后的区域。
    */
   @NotNull
-  default Region moved(@NotNull Vec3d relativePos) {
+  default Region moved(@NotNull Vec3 relativePos) {
     return transformed(vec3d -> vec3d.add(relativePos));
   }
 
@@ -84,7 +90,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
    * @implSpec 此区域内的所有坐标在旋转后都应该是旋转后的区域内的所有坐标，但是不需要确保旋转后的迭代顺序与之前的一致。
    */
   @NotNull
-  default Region rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
+  default Region rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
     return transformed(vec3d -> GeoUtil.rotate(vec3d, blockRotation, pivot));
   }
 
@@ -94,12 +100,12 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
    * @implSpec 此区域内的所有坐标在翻转后都应该是翻转后的区域内的所有坐标，但是不需要确保翻转后的迭代顺序与之前的一致。
    */
   @NotNull
-  default Region mirrored(@NotNull Direction.Axis axis, @NotNull Vec3d pivot) {
+  default Region mirrored(@NotNull Direction.Axis axis, @NotNull Vec3 pivot) {
     return transformed(vec3d -> GeoUtil.mirror(vec3d, axis, pivot));
   }
 
   @NotNull
-  Region transformed(Function<Vec3d, Vec3d> transformation);
+  Region transformed(Function<Vec3, Vec3> transformation);
 
   /**
    * 区域向各方向延伸浮点数值后的区域。
@@ -129,7 +135,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
    * 区域往水平或者竖直方向上延伸浮点数值后的区域。
    */
   @NotNull
-  default Region expanded(double offset, Direction.Type type) {
+  default Region expanded(double offset, Direction.Plane type) {
     throw new UnsupportedOperationException();
   }
 
@@ -158,14 +164,14 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
    * 包含该区域内所有坐标的最小长方体区域。
    */
   @Nullable
-  Box minContainingBox();
+  AABB minContainingBox();
 
   /**
    * 包含该区域内所有坐标的最小长方体方块区域，用于判断该区域内是否在坐标<em>可能</em>不在已加载的区块内。
    */
-  default @Nullable BlockBox minContainingBlockBox() {
-    final Box minContainingBox = minContainingBox();
-    return minContainingBox == null ? null : new BlockBox(MathHelper.floor(minContainingBox.minX), MathHelper.floor(minContainingBox.minY), MathHelper.floor(minContainingBox.minZ), MathHelper.floor(minContainingBox.maxX), MathHelper.floor(minContainingBox.maxY), MathHelper.floor(minContainingBox.maxZ));
+  default @Nullable BoundingBox minContainingBlockBox() {
+    final AABB minContainingBox = minContainingBox();
+    return minContainingBox == null ? null : new BoundingBox(Mth.floor(minContainingBox.minX), Mth.floor(minContainingBox.minY), Mth.floor(minContainingBox.minZ), Mth.floor(minContainingBox.maxX), Mth.floor(minContainingBox.maxY), Mth.floor(minContainingBox.maxZ));
   }
 
   class CacheStorage {

@@ -7,27 +7,28 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.network.FriendlyByteBuf;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtFunction> {
+public record NbtFunctionArgumentType(boolean onlyCompounds, CommandBuildContext registryAccess) implements ArgumentType<NbtFunction> {
 
-  public static NbtFunctionArgumentType compound(CommandRegistryAccess registryAccess) {
+  public static NbtFunctionArgumentType compound(CommandBuildContext registryAccess) {
     return new NbtFunctionArgumentType(true, registryAccess);
   }
 
-  public static NbtFunctionArgumentType element(CommandRegistryAccess registryAccess) {
+  public static NbtFunctionArgumentType element(CommandBuildContext registryAccess) {
     return new NbtFunctionArgumentType(false, registryAccess);
   }
 
-  public static NbtFunction getNbtFunction(CommandContext<ServerCommandSource> context, String name) {
+  public static NbtFunction getNbtFunction(CommandContext<CommandSourceStack> context, String name) {
     return context.getArgument(name, NbtFunction.class);
   }
 
@@ -60,39 +61,39 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandRegistryAcce
     return parseContext.buildSuggestions(context, builderOffset);
   }
 
-  public enum Serializer implements ArgumentSerializer<NbtFunctionArgumentType, NbtFunctionArgumentType.Properties> {
+  public enum Serializer implements ArgumentTypeInfo<NbtFunctionArgumentType, NbtFunctionArgumentType.Properties> {
     INSTANCE;
 
     @Override
-    public void writePacket(NbtFunctionArgumentType.Properties properties, PacketByteBuf buf) {
+    public void serializeToNetwork(NbtFunctionArgumentType.Properties properties, FriendlyByteBuf buf) {
       buf.writeBoolean(properties.onlyCompounds);
     }
 
     @Override
-    public NbtFunctionArgumentType.Properties fromPacket(PacketByteBuf buf) {
+    public NbtFunctionArgumentType.@NotNull Properties deserializeFromNetwork(FriendlyByteBuf buf) {
       return new Properties(buf.readBoolean());
     }
 
     @Override
-    public void writeJson(NbtFunctionArgumentType.Properties properties, JsonObject json) {
+    public void serializeToJson(NbtFunctionArgumentType.Properties properties, JsonObject json) {
       json.addProperty("onlyCompounds", properties.onlyCompounds);
     }
 
     @Override
-    public NbtFunctionArgumentType.Properties getArgumentTypeProperties(NbtFunctionArgumentType argumentType) {
+    public NbtFunctionArgumentType.@NotNull Properties unpack(NbtFunctionArgumentType argumentType) {
       return new Properties(argumentType.onlyCompounds);
     }
   }
 
-  public record Properties(boolean onlyCompounds) implements ArgumentSerializer.ArgumentTypeProperties<NbtFunctionArgumentType> {
+  public record Properties(boolean onlyCompounds) implements ArgumentTypeInfo.Template<NbtFunctionArgumentType> {
 
     @Override
-    public NbtFunctionArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+    public @NotNull NbtFunctionArgumentType instantiate(CommandBuildContext commandRegistryAccess) {
       return new NbtFunctionArgumentType(onlyCompounds, commandRegistryAccess);
     }
 
     @Override
-    public ArgumentSerializer<NbtFunctionArgumentType, ?> getSerializer() {
+    public @NotNull ArgumentTypeInfo<NbtFunctionArgumentType, ?> type() {
       return NbtFunctionArgumentType.Serializer.INSTANCE;
     }
   }

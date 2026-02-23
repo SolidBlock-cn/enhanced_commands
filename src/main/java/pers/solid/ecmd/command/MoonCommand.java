@@ -7,27 +7,27 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.NumberRangeArgumentType;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.RangeArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import pers.solid.ecmd.argument.SimpleEnumArgumentType;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.enums.MoonPhase;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public enum MoonCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final LiteralCommandNode<ServerCommandSource> moonNode = dispatcher.register(literal("moon")
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+    final LiteralCommandNode<CommandSourceStack> moonNode = dispatcher.register(literal("moon")
         .executes(MoonCommand::executeGetPhase)
         .then(literal("get")
             .executes(MoonCommand::executeGetPhase))
@@ -44,41 +44,41 @@ public enum MoonCommand implements CommandRegistrationCallback {
     dispatcher.register(literal("jadeplate").redirect(moonNode));
   }
 
-  private static int executeGetPhase(CommandContext<ServerCommandSource> context) {
-    final ServerCommandSource source = context.getSource();
-    final ServerWorld world = source.getWorld();
+  private static int executeGetPhase(CommandContext<CommandSourceStack> context) {
+    final CommandSourceStack source = context.getSource();
+    final ServerLevel world = source.getLevel();
     final int moonPhase = world.getMoonPhase();
     final MoonPhase moonPhaseValue = MoonPhase.byNumericId(moonPhase);
-    source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.moon.phase.get", TextUtil.styled(moonPhaseValue.displayName, Styles.RESULT)), false);
+    source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.moon.phase.get", TextUtil.styled(moonPhaseValue.displayName, Styles.RESULT)), false);
     return moonPhase;
   }
 
-  private static int executeSetPhase(CommandContext<ServerCommandSource> context) {
+  private static int executeSetPhase(CommandContext<CommandSourceStack> context) {
     final MoonPhase moonPhase = context.getArgument("moon_phase", MoonPhase.class);
-    final ServerCommandSource source = context.getSource();
-    final ServerWorld world = source.getWorld();
-    final long timeOfDay = world.getTimeOfDay();
+    final CommandSourceStack source = context.getSource();
+    final ServerLevel world = source.getLevel();
+    final long timeOfDay = world.getDayTime();
     final int actualMoonPhase = world.getMoonPhase();
-    world.setTimeOfDay(timeOfDay + (moonPhase.ordinal() - actualMoonPhase) * 24000L);
-    source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.moon.phase.set.success", TextUtil.styled(moonPhase.displayName, Styles.RESULT)), true);
+    world.setDayTime(timeOfDay + (moonPhase.ordinal() - actualMoonPhase) * 24000L);
+    source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.moon.phase.set.success", TextUtil.styled(moonPhase.displayName, Styles.RESULT)), true);
     return 1;
   }
 
-  private static int executeRotatePhase(CommandContext<ServerCommandSource> context, int steps) {
-    final ServerCommandSource source = context.getSource();
-    final ServerWorld world = source.getWorld();
-    final long timeOfDay = world.getTimeOfDay();
-    world.setTimeOfDay(timeOfDay + Math.floorMod(steps, 8) * 24000L);
+  private static int executeRotatePhase(CommandContext<CommandSourceStack> context, int steps) {
+    final CommandSourceStack source = context.getSource();
+    final ServerLevel world = source.getLevel();
+    final long timeOfDay = world.getDayTime();
+    world.setDayTime(timeOfDay + Math.floorMod(steps, 8) * 24000L);
     final MoonPhase moonPhase = MoonPhase.byNumericId(world.getMoonPhase());
-    source.sendFeedback$ecBridge(() -> steps >= 0 ? Text.translatable("enhanced_commands.commands.moon.phase.rotate.next", TextUtil.literal(steps).styled(Styles.TARGET), TextUtil.styled(moonPhase.displayName, Styles.RESULT)) : Text.translatable("enhanced_commands.commands.moon.phase.rotate.previous", TextUtil.literal(-steps).styled(Styles.TARGET), TextUtil.styled(moonPhase.displayName, Styles.RESULT)), true);
+    source.sendFeedback$ecBridge(() -> steps >= 0 ? Component.translatable("enhanced_commands.commands.moon.phase.rotate.next", TextUtil.literal(steps).withStyle(Styles.TARGET), TextUtil.styled(moonPhase.displayName, Styles.RESULT)) : Component.translatable("enhanced_commands.commands.moon.phase.rotate.previous", TextUtil.literal(-steps).withStyle(Styles.TARGET), TextUtil.styled(moonPhase.displayName, Styles.RESULT)), true);
     return 1;
   }
 
-  private static <X extends ArgumentBuilder<ServerCommandSource, X>> X addConditionArguments(CommandNode<ServerCommandSource> root, X argumentBuilder, boolean positive, CommandRegistryAccess commandRegistryAccess) {
+  private static <X extends ArgumentBuilder<CommandSourceStack, X>> X addConditionArguments(CommandNode<CommandSourceStack> root, X argumentBuilder, boolean positive, CommandBuildContext commandRegistryAccess) {
     return argumentBuilder
         .then(literal("phase")
-            .then(ModCommands.addConditionLogic(root, argument("moon_phase", SimpleEnumArgumentType.simpleEnum(CommandEnumType.MOON_PHASE)), positive, context -> context.getSource().getWorld().getMoonPhase() == context.getArgument("moon_phase", MoonPhase.class).ordinal())))
+            .then(ModCommands.addConditionLogic(root, argument("moon_phase", SimpleEnumArgumentType.simpleEnum(CommandEnumType.MOON_PHASE)), positive, context -> context.getSource().getLevel().getMoonPhase() == context.getArgument("moon_phase", MoonPhase.class).ordinal())))
         .then(literal("size")
-            .then(ModCommands.addConditionLogic(root, argument("size", NumberRangeArgumentType.floatRange()), positive, context -> NumberRangeArgumentType.FloatRangeArgumentType.getRangeArgument(context, "size").test(context.getSource().getWorld().getMoonSize()))));
+            .then(ModCommands.addConditionLogic(root, argument("size", RangeArgument.floatRange()), positive, context -> RangeArgument.Floats.getRange(context, "size").matches(context.getSource().getLevel().getMoonBrightness()))));
   }
 }

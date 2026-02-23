@@ -6,14 +6,14 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -25,31 +25,31 @@ import java.util.stream.Collectors;
 
 public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<EntityType<?>>>> types, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<TypesEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Codec.either(Registries.ENTITY_TYPE.getCodec(), TagKey.codec(RegistryKeys.ENTITY_TYPE)).listOf().fieldOf("types").forGetter(TypesEntityPredicateEntry::types),
+      Codec.either(BuiltInRegistries.ENTITY_TYPE.byNameCodec(), TagKey.hashedCodec(Registries.ENTITY_TYPE)).listOf().fieldOf("types").forGetter(TypesEntityPredicateEntry::types),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(TypesEntityPredicateEntry::inverted)
   ).apply(i, TypesEntityPredicateEntry::new));
 
   @Override
   public boolean test(@NotNull Entity entity) {
-    return Iterables.any(types, either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().isIn(tag))) != inverted;
+    return Iterables.any(types, either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().is(tag))) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final boolean anyMatch = types.stream().anyMatch(either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().isIn(tag)));
-    final MutableText actualText = TextUtil.styled(entity.getType().getName(), Styles.ACTUAL);
-    final MutableText expectedText = Texts.join(types, Texts.DEFAULT_SEPARATOR_TEXT, either -> either.map(type -> TextUtil.styled(type.getName(), Styles.EXPECTED), tag -> Text.literal("#" + tag.id()).styled(Styles.EXPECTED)));
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    final boolean anyMatch = types.stream().anyMatch(either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().is(tag)));
+    final MutableComponent actualText = TextUtil.styled(entity.getType().getDescription(), Styles.ACTUAL);
+    final MutableComponent expectedText = ComponentUtils.formatList(types, ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR, either -> either.map(type -> TextUtil.styled(type.getDescription(), Styles.EXPECTED), tag -> Component.literal("#" + tag.location()).withStyle(Styles.EXPECTED)));
     if (inverted) {
       if (anyMatch) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal_multiple.fail_inverted", displayName, actualText, expectedText));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.type.equal_multiple.fail_inverted", displayName, actualText, expectedText));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal_multiple.pass_inverted", displayName, actualText, expectedText));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.type.equal_multiple.pass_inverted", displayName, actualText, expectedText));
       }
     } else {
       if (anyMatch) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.type.equal_multiple.pass", displayName, actualText, expectedText));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.type.equal_multiple.pass", displayName, actualText, expectedText));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.type.equal_multiple.fail", displayName, actualText, expectedText));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.type.equal_multiple.fail", displayName, actualText, expectedText));
       }
     }
   }
@@ -61,6 +61,6 @@ public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<Entity
 
   @Override
   public String toOptionEntry() {
-    return "type=" + (inverted ? "!" : "") + types.stream().map(either -> either.map(type -> Registries.ENTITY_TYPE.getId(type).toString(), tag -> "#" + tag.id())).collect(Collectors.joining("|"));
+    return "type=" + (inverted ? "!" : "") + types.stream().map(either -> either.map(type -> BuiltInRegistries.ENTITY_TYPE.getKey(type).toString(), tag -> "#" + tag.location())).collect(Collectors.joining("|"));
   }
 }

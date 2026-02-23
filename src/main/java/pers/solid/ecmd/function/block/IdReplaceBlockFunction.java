@@ -5,15 +5,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -51,17 +51,17 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
 
   @Override
   public @NotNull String asString() {
-    return "idreplace(" + NbtString.escape(pattern.pattern()) + ", " + NbtString.escape(replacement) + ")";
+    return "idreplace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block block = blockState.getBlock();
-    final String old = Registries.BLOCK.getId(block).toString();
+    final String old = BuiltInRegistries.BLOCK.getKey(block).toString();
     final String replaced = pattern.matcher(old).replaceAll(replacement);
-    final Identifier identifier = Identifier.tryParse(replaced);
+    final ResourceLocation identifier = ResourceLocation.tryParse(replaced);
     if (identifier == null) return blockState;
-    return world.getRegistryManager().get(RegistryKeys.BLOCK).getOrEmpty(identifier).filter(block1 -> block1.isEnabled(world.getEnabledFeatures())).map(Block::getDefaultState).orElse(blockState);
+    return world.registryAccess().registryOrThrow(Registries.BLOCK).getOptional(identifier).filter(block1 -> block1.isEnabled(world.enabledFeatures())).map(Block::defaultBlockState).orElse(blockState);
   }
 
   @Override

@@ -3,22 +3,22 @@ package pers.solid.ecmd.predicate.nbt;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.NbtPredicateParser;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.function.Predicate;
 
-public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull NbtElement> {
-  Codec<NbtPredicate> CODEC = NbtPredicateType.REGISTRY.getCodec().dispatch(NbtPredicate::getType, NbtPredicateType::getCodec);
+public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull Tag> {
+  Codec<NbtPredicate> CODEC = NbtPredicateType.REGISTRY.byNameCodec().dispatch(NbtPredicate::getType, NbtPredicateType::getCodec);
 
-  static @NotNull NbtPredicate parse(CommandRegistryAccess registryAccess, String s, ServerCommandSource source) throws CommandSyntaxException {
+  static @NotNull NbtPredicate parse(CommandBuildContext registryAccess, String s, CommandSourceStack source) throws CommandSyntaxException {
     return new NbtPredicateParser<>(new ParseContext<>(registryAccess, new StringReader(s), false, true)).parsePredicate(false, false);
   }
 
@@ -35,11 +35,11 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
   }
 
   @Override
-  boolean test(@NotNull NbtElement nbtElement);
+  boolean test(@NotNull Tag nbtElement);
 
   @NotNull NbtPredicateType<?> getType();
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     COMPARISON("comparison"),
     CONSTANT("constant"),
     EQUALS_COMPOUND("equals_compound"),
@@ -58,7 +58,7 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
 

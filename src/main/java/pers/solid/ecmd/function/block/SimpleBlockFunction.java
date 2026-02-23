@@ -3,27 +3,27 @@ package pers.solid.ecmd.function.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.function.property.PropertyFunction;
-import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
-  public static final MapCodec<SimpleBlockFunction> CODEC = Registries.BLOCK.getCodec().dispatchMap("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
+  public static final MapCodec<SimpleBlockFunction> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
 
   public SimpleBlockFunction(Block block) {
     this(block, Collections.emptyList());
@@ -31,7 +31,7 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
 
   @Override
   public @NotNull String asString() {
-    final StringBuilder stringBuilder = new StringBuilder(Registries.BLOCK.getId(block).toString());
+    final StringBuilder stringBuilder = new StringBuilder(BuiltInRegistries.BLOCK.getKey(block).toString());
     if (!properties.isEmpty()) {
       stringBuilder.append('[');
       stringBuilder.append(properties.stream().map(PropertyFunction::asString).collect(Collectors.joining(", ")));
@@ -41,9 +41,9 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    BlockState stateToPlace = block.getDefaultState();
-    final Random random = context.getSplitter(this).split(pos);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    BlockState stateToPlace = block.defaultBlockState();
+    final RandomSource random = context.getSplitter(this).at(pos);
     for (PropertyFunction<?> propertyFunction : properties) {
       stateToPlace = propertyFunction.getModifiedState(stateToPlace, origState, random);
     }

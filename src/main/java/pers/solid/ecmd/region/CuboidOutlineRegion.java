@@ -9,11 +9,11 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,8 +27,8 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) implements RegionBasedRegion.IntBacked<CuboidOutlineRegion, BlockCuboidRegion> {
-  public static final DynamicCommandExceptionType NON_POSITIVE_THICKNESS = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.cuboid_outline.non_positive_thickness", o));
-  public static final Dynamic2CommandExceptionType TOO_THICK = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.region.cuboid_outline.too_thick", a, b));
+  public static final DynamicCommandExceptionType NON_POSITIVE_THICKNESS = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.region.cuboid_outline.non_positive_thickness", o));
+  public static final Dynamic2CommandExceptionType TOO_THICK = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("enhanced_commands.region.cuboid_outline.too_thick", a, b));
   public static final MapCodec<CuboidOutlineRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockCuboidRegion.CODEC.fieldOf("region").forGetter(CuboidOutlineRegion::region), Codec.INT.optionalFieldOf("thickness", 1).forGetter(CuboidOutlineRegion::thickness)).apply(i, CuboidOutlineRegion::new));
 
   public CuboidOutlineRegion {
@@ -90,7 +90,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public @NotNull BlockBox minContainingBlockBox() {
+  public @NotNull BoundingBox minContainingBlockBox() {
     return region.blockBox();
   }
 
@@ -100,7 +100,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
+  public @Nullable AABB minContainingBox() {
     return region.minContainingBox();
   }
 
@@ -113,8 +113,8 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.cuboid_outline");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.cuboid_outline");
     }
 
     @Override

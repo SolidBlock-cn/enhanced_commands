@@ -7,38 +7,38 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.predicate.property.Comparator;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.predicate.property.Comparator;
+import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public abstract class SimpleBlockParser<S> {
-  public static final DynamicCommandExceptionType UNKNOWN_COMPARATOR = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.block_predicate.unknown_comparator", o));
-  public static final SimpleCommandExceptionType COMPARATOR_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_predicate.comparator_expected"));
-  public static final Text START_OF_PROPERTIES = Text.translatable("enhanced_commands.block_predicate.start_of_properties");
-  public static final Text NEXT_PROPERTY = Text.translatable("enhanced_commands.block_predicate.next_property");
-  public static final Text END_OF_PROPERTIES = Text.translatable("enhanced_commands.block_predicate.end_of_properties");
+  public static final DynamicCommandExceptionType UNKNOWN_COMPARATOR = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.argument.block_predicate.unknown_comparator", o));
+  public static final SimpleCommandExceptionType COMPARATOR_EXPECTED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.block_predicate.comparator_expected"));
+  public static final Component START_OF_PROPERTIES = Component.translatable("enhanced_commands.block_predicate.start_of_properties");
+  public static final Component NEXT_PROPERTY = Component.translatable("enhanced_commands.block_predicate.next_property");
+  public static final Component END_OF_PROPERTIES = Component.translatable("enhanced_commands.block_predicate.end_of_properties");
   public static final SuggestionProvider<Object> PROPERTY_FINISHED = (context, builder) -> {
     if (builder.getRemaining().isEmpty()) {
       builder.suggest(",", NEXT_PROPERTY);
@@ -47,8 +47,8 @@ public abstract class SimpleBlockParser<S> {
     return builder.buildFuture();
   };
   public Block block;
-  public Identifier blockId;
-  public @Nullable RegistryEntryList.Named<Block> tagId;
+  public ResourceLocation blockId;
+  public @Nullable HolderSet.Named<Block> tagId;
   public final ParseContext<S> parseContext;
 
   protected SimpleBlockParser(ParseContext<S> parseContext) {
@@ -56,41 +56,41 @@ public abstract class SimpleBlockParser<S> {
   }
 
   protected static <T extends Comparable<T>> CompletableFuture<Suggestions> suggestValuesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder) {
-    return CommandSource.suggestMatching(property.getValues().stream().map(property::name), suggestionsBuilder);
+    return SharedSuggestionProvider.suggest(property.getPossibleValues().stream().map(property::getName), suggestionsBuilder);
   }
 
   protected static <T extends Comparable<T>> Stream<String> getPropertyValueNameStream(Property<T> property) {
-    return property.getValues().stream().map(property::name);
+    return property.getPossibleValues().stream().map(property::getName);
   }
 
   public void parseBlockId() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    final RegistryWrapper.Impl<Block> registryWrapper = parseContext.registryAccess().getWrapperOrThrow(RegistryKeys.BLOCK);
+    final HolderLookup.RegistryLookup<Block> registryWrapper = parseContext.registryAccess().lookupOrThrow(Registries.BLOCK);
     if (reader.canRead() && reader.peek() == '@') {
       reader.skip();
       int cursorBeforeParsing = reader.getCursor();
-      parseContext.setSuggestion((context, suggestionsBuilder) -> CommandSource.suggestFromIdentifier(Registries.BLOCK.streamEntries(), suggestionsBuilder, reference -> reference.registryKey().getValue(), reference -> reference.value().getName()));
-      blockId = Identifier.fromCommandInput(reader);
-      block = Registries.BLOCK.getOrEmpty(blockId).orElseThrow(() -> {
+      parseContext.setSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(BuiltInRegistries.BLOCK.holders(), suggestionsBuilder, reference -> reference.key().location(), reference -> reference.value().getName()));
+      blockId = ResourceLocation.read(reader);
+      block = BuiltInRegistries.BLOCK.getOptional(blockId).orElseThrow(() -> {
         final int cursorAfterParsing = reader.getCursor();
         reader.setCursor(cursorBeforeParsing);
-        return CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString()), cursorAfterParsing);
+        return CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, blockId.toString()), cursorAfterParsing);
       });
     } else {
       int cursorBeforeParsing = reader.getCursor();
       parseContext.addSuggestion((context, suggestionsBuilder) -> {
-        ParsingUtil.suggestString("@", Text.translatable("enhanced_commands.argument.block.ignore_feature_flag"), suggestionsBuilder);
-        return CommandSource.suggestFromIdentifier(registryWrapper.streamEntries(), suggestionsBuilder, r -> r.registryKey().getValue(), r -> r.value().getName());
+        ParsingUtil.suggestString("@", Component.translatable("enhanced_commands.argument.block.ignore_feature_flag"), suggestionsBuilder);
+        return SharedSuggestionProvider.suggestResource(registryWrapper.listElements(), suggestionsBuilder, r -> r.key().location(), r -> r.value().getName());
       });
-      this.blockId = Identifier.fromCommandInput(reader);
-      this.block = registryWrapper.getOptional(RegistryKey.of(RegistryKeys.BLOCK, this.blockId)).orElseThrow(() -> {
+      this.blockId = ResourceLocation.read(reader);
+      this.block = registryWrapper.get(ResourceKey.create(Registries.BLOCK, this.blockId)).orElseThrow(() -> {
         final int cursorAfterParsing = reader.getCursor();
         reader.setCursor(cursorBeforeParsing);
-        if (Registries.BLOCK.containsId(blockId)) {
-          final Block block1 = Registries.BLOCK.get(blockId);
+        if (BuiltInRegistries.BLOCK.containsKey(blockId)) {
+          final Block block1 = BuiltInRegistries.BLOCK.get(blockId);
           return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(reader, blockId, block1.getName()), cursorAfterParsing);
         } else {
-          return CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION.createWithContext(reader, blockId.toString()), cursorAfterParsing);
+          return CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, blockId.toString()), cursorAfterParsing);
         }
       }).value();
     }
@@ -129,7 +129,7 @@ public abstract class SimpleBlockParser<S> {
       addPropertiesFinishedSuggestions();
       if (parsePropertyEntryEnd()) return;
     }
-    throw BlockArgumentParser.UNCLOSED_PROPERTIES_EXCEPTION.createWithContext(reader);
+    throw BlockStateParser.ERROR_EXPECTED_END_OF_PROPERTIES.createWithContext(reader);
   }
 
   /**
@@ -169,7 +169,7 @@ public abstract class SimpleBlockParser<S> {
     if (reader.canRead()) {
       comparator = parseComparator();
     } else {
-      throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(reader, this.blockId.toString(), property.getName());
+      throw BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, this.blockId.toString(), property.getName());
     }
     reader.skipWhitespace();
 
@@ -187,14 +187,14 @@ public abstract class SimpleBlockParser<S> {
     if (propertyName.isEmpty()) {
       final int cursorAfterReadString = reader.getCursor();
       reader.setCursor(cursorBeforeReadString);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(reader, this.blockId.toString(), propertyName), cursorAfterReadString);
+      throw CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, this.blockId.toString(), propertyName), cursorAfterReadString);
     }
-    final StateManager<Block, BlockState> stateManager = block.getStateManager();
+    final StateDefinition<Block, BlockState> stateManager = block.getStateDefinition();
     Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) {
       final int cursorAfterReadString = reader.getCursor();
       reader.setCursor(cursorBeforeReadString);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.UNKNOWN_PROPERTY_EXCEPTION.createWithContext(reader, blockId, propertyName), cursorAfterReadString);
+      throw CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_PROPERTY.createWithContext(reader, blockId, propertyName), cursorAfterReadString);
     }
     parseContext.clearSuggestion();
     return property;
@@ -211,7 +211,7 @@ public abstract class SimpleBlockParser<S> {
   protected abstract void addComparatorTypeSuggestions();
 
   protected void addPropertyNameSuggestions() {
-    parseContext.addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(block.getStateManager().getProperties().stream().map(Property::getName), suggestionsBuilder));
+    parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(block.getStateDefinition().getProperties().stream().map(Property::getName), suggestionsBuilder));
   }
 
   public void parseBlockTagIdAndProperties() throws CommandSyntaxException {
@@ -224,16 +224,16 @@ public abstract class SimpleBlockParser<S> {
   public void parseBlockTagId() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorBeforeHash = reader.getCursor();
-    final RegistryWrapper.Impl<Block> registryWrapper = parseContext.registryAccess().getWrapperOrThrow(RegistryKeys.BLOCK);
+    final HolderLookup.RegistryLookup<Block> registryWrapper = parseContext.registryAccess().lookupOrThrow(Registries.BLOCK);
     if (reader.canRead() && reader.peek() == '#') {
       reader.skip();
 
       // start parsing tag id, after the hash symbol
-      parseContext.addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestIdentifiers(registryWrapper.streamTagKeys().map(TagKey::id), suggestionsBuilder, "#"));
-      Identifier identifier = Identifier.fromCommandInput(reader);
-      this.tagId = registryWrapper.getOptional(TagKey.of(RegistryKeys.BLOCK, identifier)).orElseThrow(() -> {
+      parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(registryWrapper.listTagIds().map(TagKey::location), suggestionsBuilder, "#"));
+      ResourceLocation identifier = ResourceLocation.read(reader);
+      this.tagId = registryWrapper.get(TagKey.create(Registries.BLOCK, identifier)).orElseThrow(() -> {
         reader.setCursor(cursorBeforeHash);
-        return BlockArgumentParser.UNKNOWN_BLOCK_TAG_EXCEPTION.createWithContext(reader, identifier.toString());
+        return BlockStateParser.ERROR_UNKNOWN_TAG.createWithContext(reader, identifier.toString());
       });
     }
   }
@@ -271,7 +271,7 @@ public abstract class SimpleBlockParser<S> {
 
       if (parsePropertyEntryEnd()) return;
     }
-    throw BlockArgumentParser.UNCLOSED_PROPERTIES_EXCEPTION.createWithContext(reader);
+    throw BlockStateParser.ERROR_EXPECTED_END_OF_PROPERTIES.createWithContext(reader);
   }
 
   protected void parsePropertyNameEntry() throws CommandSyntaxException {
@@ -282,15 +282,15 @@ public abstract class SimpleBlockParser<S> {
     final String propertyName = reader.readString();
     if (propertyName.isEmpty()) {
       reader.setCursor(cursorBeforePropertyName);
-      throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(reader, tagId == null ?
-          "" : this.tagId.getTag().id().toString(), propertyName);
+      throw BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, tagId == null ?
+          "" : this.tagId.key().location().toString(), propertyName);
     }
     // parse comparator
     reader.skipWhitespace();
     final int cursorBeforeReadingComparator = reader.getCursor();
     reader.setCursor(cursorBeforePropertyName);
     final String remaining = reader.getRemaining();
-    if (tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateManager().getProperties().stream()).distinct().noneMatch(property -> property.getName().startsWith(remaining) && !property.getName().equals(remaining))) {
+    if (tagId == null || tagId.stream().flatMap(entry -> entry.value().getStateDefinition().getProperties().stream()).distinct().noneMatch(property -> property.getName().startsWith(remaining) && !property.getName().equals(remaining))) {
       parseContext.clearSuggestion();
       reader.setCursor(cursorBeforeReadingComparator);
       addComparatorTypeSuggestions();
@@ -300,8 +300,8 @@ public abstract class SimpleBlockParser<S> {
     if (reader.canRead()) {
       comparator = parseComparator();
     } else {
-      throw BlockArgumentParser.EMPTY_PROPERTY_EXCEPTION.createWithContext(reader, tagId == null ?
-          "" : this.tagId.getTag().id().toString(), propertyName);
+      throw BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, tagId == null ?
+          "" : this.tagId.key().location().toString(), propertyName);
     }
     reader.skipWhitespace();
 
@@ -313,8 +313,8 @@ public abstract class SimpleBlockParser<S> {
     parseContext.addSuggestion((context, suggestionsBuilder) -> {
       String string = suggestionsBuilder.getRemainingLowerCase();
       if (this.tagId != null) {
-        for (RegistryEntry<Block> registryEntry : this.tagId) {
-          for (Property<?> property : registryEntry.value().getStateManager().getProperties()) {
+        for (Holder<Block> registryEntry : this.tagId) {
+          for (Property<?> property : registryEntry.value().getStateDefinition().getProperties()) {
             if (property.getName().startsWith(string)) {
               suggestionsBuilder.suggest(property.getName());
             }
@@ -325,11 +325,11 @@ public abstract class SimpleBlockParser<S> {
     });
   }
 
-  protected static <T> SuggestionProvider<T> getTagPropertiesValueSuggestions(@NotNull RegistryEntryList.Named<Block> tagId, String propertyName) {
+  protected static <T> SuggestionProvider<T> getTagPropertiesValueSuggestions(@NotNull HolderSet.Named<Block> tagId, String propertyName) {
     return (context, suggestionsBuilder) -> {
-      for (RegistryEntry<Block> registryEntry : tagId) {
+      for (Holder<Block> registryEntry : tagId) {
         Block block = registryEntry.value();
-        Property<?> property = block.getStateManager().getProperty(propertyName);
+        Property<?> property = block.getStateDefinition().getProperty(propertyName);
         if (property != null) {
           suggestValuesForProperty(property, suggestionsBuilder);
         }

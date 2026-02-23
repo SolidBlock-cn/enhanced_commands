@@ -3,7 +3,7 @@ package pers.solid.ecmd.predicate.nbt;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 
 public enum ConstantNbtPredicate implements NbtPredicate {
@@ -30,13 +30,13 @@ public enum ConstantNbtPredicate implements NbtPredicate {
   }
 
   @Override
-  public boolean test(@NotNull NbtElement nbtElement) {
+  public boolean test(@NotNull Tag nbtElement) {
     return value;
   }
 
   @Override
   public @NotNull NbtPredicateType<ConstantNbtPredicate> getType() {
-    return Type.CONSTANT_TYPE;
+    return pers.solid.ecmd.predicate.nbt.ConstantNbtPredicate.Type.CONSTANT_TYPE;
   }
 
   public static ConstantNbtPredicate of(boolean value) {

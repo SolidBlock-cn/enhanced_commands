@@ -3,21 +3,21 @@ package pers.solid.ecmd.regionselection;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.core.Registry;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.Contract;
 import pers.solid.ecmd.EnhancedCommands;
 
 import java.util.function.Supplier;
 
 public interface RegionSelectionType {
-  RegistryKey<Registry<RegionSelectionType>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region_builder_type"));
+  ResourceKey<Registry<RegionSelectionType>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_builder_type"));
   Registry<RegionSelectionType> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
-  Codec<RegionSelectionType> CODEC = REGISTRY.getCodec();
-  PacketCodec<RegistryByteBuf, RegionSelectionType> PACKET_CODEC = PacketCodecs.registryValue(REGISTRY_KEY);
+  Codec<RegionSelectionType> CODEC = REGISTRY.byNameCodec();
+  StreamCodec<RegistryFriendlyByteBuf, RegionSelectionType> PACKET_CODEC = ByteBufCodecs.registry(REGISTRY_KEY);
 
   /**
    * 创建一个属于此类型的新的区域选择。

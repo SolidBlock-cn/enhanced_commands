@@ -5,10 +5,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -47,8 +47,8 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final Random random = context.getSplitterForOptionalSeed(this, seed).split(cachedBlockPosition.getBlockPos());
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(cachedBlockPosition.getPos());
     if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
       return random.nextFloat() < probability;
     } else {
@@ -57,14 +57,14 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final float nextFloat = context.getSplitterForOptionalSeed(this, seed).split(cachedBlockPosition.getBlockPos()).nextFloat();
-    final MutableText o1 = Text.literal(String.valueOf(nextFloat)).styled(Styles.ACTUAL);
-    final MutableText o2 = Text.literal(String.valueOf(probability)).styled(Styles.EXPECTED);
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final float nextFloat = context.getSplitterForOptionalSeed(this, seed).at(cachedBlockPosition.getPos()).nextFloat();
+    final MutableComponent o1 = Component.literal(String.valueOf(nextFloat)).withStyle(Styles.ACTUAL);
+    final MutableComponent o2 = Component.literal(String.valueOf(probability)).withStyle(Styles.EXPECTED);
     if (nextFloat < probability) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.probability.pass", o1, o2));
+      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.probability.pass", o1, o2));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.probability.fail", o1, o2));
+      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.probability.fail", o1, o2));
     }
   }
 

@@ -3,23 +3,27 @@ package pers.solid.ecmd.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.*;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.command.TeleportCommand;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
+import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.commands.TeleportCommand;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.util.TextUtil;
@@ -33,78 +37,78 @@ public enum TpRelCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     final EnhancedPosArgumentType posType = new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.PREFER_DOUBLE, EnhancedPosArgumentType.IntAlignType.HORIZONTALLY_CENTERED);
     dispatcher.register(ModCommands.literalR2("tprel")
-        .requires(source -> source.hasPermissionLevel(2))
-        .then(CommandManager.argument("location", posType)
+        .requires(source -> source.hasPermission(2))
+        .then(Commands.argument("location", posType)
             .executes(context -> execute(
                     context.getSource(),
-                    Collections.singleton(context.getSource().getEntityOrThrow()),
-                    context.getSource().getWorld(),
+                    Collections.singleton(context.getSource().getEntityOrException()),
+                    context.getSource().getLevel(),
                     EnhancedPosArgumentType.getPosArgument(context, "location"),
-                    DefaultPosArgument.zero(),
+                    WorldCoordinates.current(),
                     null
                 )
             )
         )
-        .then(CommandManager.argument("targets", EntityArgumentType.entities())
-            .then(CommandManager.argument("location", posType)
+        .then(Commands.argument("targets", EntityArgument.entities())
+            .then(Commands.argument("location", posType)
                 .executes(context -> execute(
                         context.getSource(),
-                        EntityArgumentType.getEntities(context, "targets"),
-                        context.getSource().getWorld(),
+                        EntityArgument.getEntities(context, "targets"),
+                        context.getSource().getLevel(),
                         EnhancedPosArgumentType.getPosArgument(context, "location"),
                         null,
                         null
                     )
                 )
-                .then(CommandManager.argument("rotation", RotationArgumentType.rotation())
+                .then(Commands.argument("rotation", RotationArgument.rotation())
                     .executes(context -> execute(
                             context.getSource(),
-                            EntityArgumentType.getEntities(context, "targets"),
-                            context.getSource().getWorld(),
+                            EntityArgument.getEntities(context, "targets"),
+                            context.getSource().getLevel(),
                             EnhancedPosArgumentType.getPosArgument(context, "location"),
-                            RotationArgumentType.getRotation(context, "rotation"),
+                            RotationArgument.getRotation(context, "rotation"),
                             null
                         )
                     )
                 )
-                .then(CommandManager.literal("facing")
-                    .then(CommandManager.literal("entity")
-                        .then(CommandManager.argument("facingEntity", EntityArgumentType.entity())
+                .then(Commands.literal("facing")
+                    .then(Commands.literal("entity")
+                        .then(Commands.argument("facingEntity", EntityArgument.entity())
                             .executes(context -> execute(
                                     context.getSource(),
-                                    EntityArgumentType.getEntities(context, "targets"),
-                                    context.getSource().getWorld(),
+                                    EntityArgument.getEntities(context, "targets"),
+                                    context.getSource().getLevel(),
                                     EnhancedPosArgumentType.getPosArgument(context, "location"),
                                     null,
-                                    new LookTarget(EntityArgumentType.getEntity(context, "facingEntity"), EntityAnchorArgumentType.EntityAnchor.FEET)
+                                    new LookTarget(EntityArgument.getEntity(context, "facingEntity"), EntityAnchorArgument.Anchor.FEET)
                                 )
                             )
-                            .then(CommandManager.argument("facingAnchor", EntityAnchorArgumentType.entityAnchor())
+                            .then(Commands.argument("facingAnchor", EntityAnchorArgument.anchor())
                                 .executes(context -> execute(
                                         context.getSource(),
-                                        EntityArgumentType.getEntities(context, "targets"),
-                                        context.getSource().getWorld(),
+                                        EntityArgument.getEntities(context, "targets"),
+                                        context.getSource().getLevel(),
                                         EnhancedPosArgumentType.getPosArgument(context, "location"),
                                         null,
                                         new LookTarget(
-                                            EntityArgumentType.getEntity(context, "facingEntity"), EntityAnchorArgumentType.getEntityAnchor(context, "facingAnchor")
+                                            EntityArgument.getEntity(context, "facingEntity"), EntityAnchorArgument.getAnchor(context, "facingAnchor")
                                         )
                                     )
                                 )
                             )
                         )
                     )
-                    .then(CommandManager.argument("facingLocation", posType)
+                    .then(Commands.argument("facingLocation", posType)
                         .executes(context -> execute(
                                 context.getSource(),
-                                EntityArgumentType.getEntities(context, "targets"),
-                                context.getSource().getWorld(),
+                                EntityArgument.getEntities(context, "targets"),
+                                context.getSource().getLevel(),
                                 EnhancedPosArgumentType.getPosArgument(context, "location"),
                                 null,
-                                new LookTarget(EnhancedPosArgumentType.getPosArgument(context, "facingLocation").toAbsolutePos(context.getSource()))
+                                new LookTarget(EnhancedPosArgumentType.getPosArgument(context, "facingLocation").getPosition(context.getSource()))
                             )
                         )
                     )
@@ -115,50 +119,50 @@ public enum TpRelCommand implements CommandRegistrationCallback {
   }
 
   private static int execute(
-      ServerCommandSource source,
+      CommandSourceStack source,
       Collection<? extends Entity> targets,
-      ServerWorld world,
-      PosArgument location,
-      @Nullable PosArgument rotation,
+      ServerLevel world,
+      Coordinates location,
+      @Nullable Coordinates rotation,
       @Nullable LookTarget facingLocation
   ) throws CommandSyntaxException {
-    Vec3d vec3d = null;
-    Vec2f vec2f;
-    Set<PositionFlag> set = EnumSet.noneOf(PositionFlag.class);
+    Vec3 vec3d = null;
+    Vec2 vec2f;
+    Set<RelativeMovement> set = EnumSet.noneOf(RelativeMovement.class);
     if (location.isXRelative()) {
-      set.add(PositionFlag.X);
+      set.add(RelativeMovement.X);
     }
     if (location.isYRelative()) {
-      set.add(PositionFlag.Y);
+      set.add(RelativeMovement.Y);
     }
     if (location.isZRelative()) {
-      set.add(PositionFlag.Z);
+      set.add(RelativeMovement.Z);
     }
     if (rotation == null) {
-      set.add(PositionFlag.X_ROT);
-      set.add(PositionFlag.Y_ROT);
+      set.add(RelativeMovement.X_ROT);
+      set.add(RelativeMovement.Y_ROT);
     } else {
       if (rotation.isXRelative()) {
-        set.add(PositionFlag.X_ROT);
+        set.add(RelativeMovement.X_ROT);
       }
       if (rotation.isYRelative()) {
-        set.add(PositionFlag.Y_ROT);
+        set.add(RelativeMovement.Y_ROT);
       }
     }
     for (Entity entity : targets) {
-      final ServerCommandSource modifiedSource = entity.getCommandSource();
-      vec3d = location.toAbsolutePos(modifiedSource);
-      vec2f = rotation == null ? null : rotation.toAbsoluteRotation(modifiedSource);
+      final CommandSourceStack modifiedSource = entity.createCommandSourceStack();
+      vec3d = location.getPosition(modifiedSource);
+      vec2f = rotation == null ? null : rotation.getRotation(modifiedSource);
       if (rotation == null) {
-        teleport(modifiedSource, entity, world, vec3d.x, vec3d.y, vec3d.z, set, entity.getYaw(), entity.getPitch(), facingLocation);
+        teleport(modifiedSource, entity, world, vec3d.x, vec3d.y, vec3d.z, set, entity.getYRot(), entity.getXRot(), facingLocation);
       } else {
         teleport(modifiedSource, entity, world, vec3d.x, vec3d.y, vec3d.z, set, vec2f.y, vec2f.x, facingLocation);
       }
     }
 
     if (targets.size() == 1) {
-      Vec3d finalVec3d = vec3d;
-      source.sendFeedback$ecBridge(() -> Text.translatable(
+      Vec3 finalVec3d = vec3d;
+      source.sendFeedback$ecBridge(() -> Component.translatable(
           "commands.teleport.success.location.single",
           targets.iterator().next().getDisplayName(),
           formatFloat(finalVec3d.x),
@@ -166,7 +170,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
           formatFloat(finalVec3d.z)
       ), true);
     } else if (!targets.isEmpty()) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.tprel.multiple", targets.size()), true);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tprel.multiple", targets.size()), true);
     }
 
     return targets.size();
@@ -177,34 +181,34 @@ public enum TpRelCommand implements CommandRegistrationCallback {
   }
 
   private static void teleport(
-      ServerCommandSource source,
+      CommandSourceStack source,
       Entity target,
-      ServerWorld world,
+      ServerLevel world,
       double x,
       double y,
       double z,
-      Set<PositionFlag> movementFlags,
+      Set<RelativeMovement> movementFlags,
       float yaw,
       float pitch,
       @Nullable LookTarget facingLocation
   ) throws CommandSyntaxException {
-    BlockPos blockPos = BlockPos.ofFloored(x, y, z);
-    if (!World.isValid(blockPos)) {
+    BlockPos blockPos = BlockPos.containing(x, y, z);
+    if (!Level.isInSpawnableBounds(blockPos)) {
       throw EnhancedPosArgumentType.OUT_OF_BOUNDS_EXCEPTION.create(TextUtil.wrapVector(blockPos));
     } else {
-      float f = MathHelper.wrapDegrees(yaw);
-      float g = MathHelper.wrapDegrees(pitch);
-      if (target.teleport(world, x, y, z, movementFlags, f, g)) {
+      float f = Mth.wrapDegrees(yaw);
+      float g = Mth.wrapDegrees(pitch);
+      if (target.teleportTo(world, x, y, z, movementFlags, f, g)) {
         if (facingLocation != null) {
           facingLocation.look(source, target);
         }
 
         if (!(target instanceof LivingEntity livingEntity) || !livingEntity.isFallFlying()) {
-          target.setVelocity(target.getVelocity().multiply(1.0, 0.0, 1.0));
+          target.setDeltaMovement(target.getDeltaMovement().multiply(1.0, 0.0, 1.0));
           target.setOnGround(true);
         }
 
-        if (target instanceof PathAwareEntity pathAwareEntity) {
+        if (target instanceof PathfinderMob pathAwareEntity) {
           pathAwareEntity.getNavigation().stop();
         }
       }
@@ -212,31 +216,31 @@ public enum TpRelCommand implements CommandRegistrationCallback {
   }
 
   static class LookTarget {
-    private final Vec3d targetPos;
+    private final Vec3 targetPos;
     private final Entity target;
-    private final EntityAnchorArgumentType.EntityAnchor targetAnchor;
+    private final EntityAnchorArgument.Anchor targetAnchor;
 
-    public LookTarget(Entity target, EntityAnchorArgumentType.EntityAnchor targetAnchor) {
+    public LookTarget(Entity target, EntityAnchorArgument.Anchor targetAnchor) {
       this.target = target;
       this.targetAnchor = targetAnchor;
-      this.targetPos = targetAnchor.positionAt(target);
+      this.targetPos = targetAnchor.apply(target);
     }
 
-    public LookTarget(Vec3d targetPos) {
+    public LookTarget(Vec3 targetPos) {
       this.target = null;
       this.targetPos = targetPos;
       this.targetAnchor = null;
     }
 
-    public void look(ServerCommandSource source, Entity entity) {
+    public void look(CommandSourceStack source, Entity entity) {
       if (this.target != null) {
-        if (entity instanceof ServerPlayerEntity) {
-          ((ServerPlayerEntity) entity).lookAtEntity(source.getEntityAnchor(), this.target, this.targetAnchor);
+        if (entity instanceof ServerPlayer) {
+          ((ServerPlayer) entity).lookAt(source.getAnchor(), this.target, this.targetAnchor);
         } else {
-          entity.lookAt(source.getEntityAnchor(), this.targetPos);
+          entity.lookAt(source.getAnchor(), this.targetPos);
         }
       } else {
-        entity.lookAt(source.getEntityAnchor(), this.targetPos);
+        entity.lookAt(source.getAnchor(), this.targetPos);
       }
     }
   }

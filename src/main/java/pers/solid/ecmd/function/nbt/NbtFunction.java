@@ -2,17 +2,17 @@ package pers.solid.ecmd.function.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtFunctionParser;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Objects;
 import java.util.Set;
@@ -23,7 +23,7 @@ import java.util.function.Predicate;
  * <p>每个 NBT 函数都有对应的类型，即 {@link NbtFunctionType}，决定了该 NBT 函数将进行序列化和反序列化。
  */
 public interface NbtFunction extends ExpressionConvertible {
-  Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.getCodec().dispatch(NbtFunction::getType, NbtFunctionType::getCodec);
+  Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.byNameCodec().dispatch(NbtFunction::getType, NbtFunctionType::getCodec);
 
   /**
    * 对 NBT 函数在 NBT 元素上进行递归应用。如果该 NBT 元素是列表、复合标签等，则它的元素也会被应用，除非该列表或者复合标签自身即被应用。
@@ -33,52 +33,52 @@ public interface NbtFunction extends ExpressionConvertible {
    * @param predicate   仅符合该谓词的 NBT 元素会被应用。
    * @return 被修改后的 NBT 元素
    */
-  static @NotNull NbtElement recursivelyApply(FailableFunction<@Nullable NbtElement, @Nullable NbtElement, CommandSyntaxException> nbtFunction, NbtElement nbtElement, @Nullable Predicate<@NotNull NbtElement> predicate) throws CommandSyntaxException {
+  static @NotNull Tag recursivelyApply(FailableFunction<@Nullable Tag, @Nullable Tag, CommandSyntaxException> nbtFunction, Tag nbtElement, @Nullable Predicate<@NotNull Tag> predicate) throws CommandSyntaxException {
     if (predicate == null || predicate.test(nbtElement)) {
-      final NbtElement applied = nbtFunction.apply(nbtElement);
+      final Tag applied = nbtFunction.apply(nbtElement);
       if (applied != null) {
         return applied;
       }
-      if (Objects.requireNonNull(nbtElement) instanceof NbtCompound nbtCompound) {
-        final Set<String> keys = nbtCompound.getKeys();
+      if (Objects.requireNonNull(nbtElement) instanceof CompoundTag nbtCompound) {
+        final Set<String> keys = nbtCompound.getAllKeys();
         for (String key : keys) {
-          final NbtElement value = nbtCompound.get(key);
+          final Tag value = nbtCompound.get(key);
           if (value == null) continue;
-          final NbtElement appliedValue = recursivelyApply(nbtFunction, value, predicate);
+          final Tag appliedValue = recursivelyApply(nbtFunction, value, predicate);
           if (appliedValue != value) {
             nbtCompound.put(key, appliedValue);
           }
         }
         return nbtCompound;
-      } else if (nbtElement instanceof NbtList nbtList) {
+      } else if (nbtElement instanceof ListTag nbtList) {
         for (int i = 0; i < nbtList.size(); i++) {
-          final NbtElement value = nbtList.get(i);
-          final NbtElement appliedElement = recursivelyApply(nbtFunction, value, predicate);
+          final Tag value = nbtList.get(i);
+          final Tag appliedElement = recursivelyApply(nbtFunction, value, predicate);
           if (appliedElement != value) {
-            nbtList.setElement(i, appliedElement);
+            nbtList.setTag(i, appliedElement);
           }
         }
         return nbtList;
       }
       return nbtElement;
     } else {
-      if (nbtElement instanceof NbtCompound nbtCompound) {
-        final Set<String> keys = nbtCompound.getKeys();
+      if (nbtElement instanceof CompoundTag nbtCompound) {
+        final Set<String> keys = nbtCompound.getAllKeys();
         for (String key : keys) {
-          final NbtElement value = nbtCompound.get(key);
+          final Tag value = nbtCompound.get(key);
           if (value == null) continue;
-          final NbtElement appliedValue = recursivelyApply(nbtFunction, value, predicate);
+          final Tag appliedValue = recursivelyApply(nbtFunction, value, predicate);
           if (appliedValue != value) {
             nbtCompound.put(key, appliedValue);
           }
         }
         return nbtCompound;
-      } else if (nbtElement instanceof NbtList nbtList) {
+      } else if (nbtElement instanceof ListTag nbtList) {
         for (int i = 0; i < nbtList.size(); i++) {
-          final NbtElement value = nbtList.get(i);
-          final NbtElement appliedElement = recursivelyApply(nbtFunction, value, predicate);
+          final Tag value = nbtList.get(i);
+          final Tag appliedElement = recursivelyApply(nbtFunction, value, predicate);
           if (appliedElement != value) {
-            nbtList.setElement(i, appliedElement);
+            nbtList.setTag(i, appliedElement);
           }
         }
         return nbtList;
@@ -119,13 +119,13 @@ public interface NbtFunction extends ExpressionConvertible {
    *
    * @param nbtElement 需要被应用的 NBT 元素，可能自身会被修改
    */
-  @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException;
+  @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException;
 
-  default @NotNull FailableFunction<NbtElement, NbtElement, CommandSyntaxException> asJavaFunction(ExecutionContext context) {
+  default @NotNull FailableFunction<Tag, Tag, CommandSyntaxException> asJavaFunction(ExecutionContext context) {
     return input -> apply(input, context);
   }
 
-  default @NotNull NbtElement recursivelyApply(NbtElement nbtElement, NbtPredicate predicate, ExecutionContext context) throws CommandSyntaxException {
+  default @NotNull Tag recursivelyApply(Tag nbtElement, NbtPredicate predicate, ExecutionContext context) throws CommandSyntaxException {
     return recursivelyApply(input -> this.apply(input, context), nbtElement, predicate);
   }
 

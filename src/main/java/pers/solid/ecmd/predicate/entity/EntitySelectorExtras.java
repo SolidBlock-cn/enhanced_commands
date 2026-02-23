@@ -1,9 +1,9 @@
 package pers.solid.ecmd.predicate.entity;
 
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,24 +26,24 @@ public class EntitySelectorExtras {
   public static final Logger LOGGER = LoggerFactory.getLogger(EntitySelectorExtras.class);
   private final EntitySelector self;
   /**
-   * 该实体选择器所使用的 {@link ServerCommandSource}。可能会在实际调用时发生改变。
+   * 该实体选择器所使用的 {@link CommandSourceStack}。可能会在实际调用时发生改变。
    */
-  public ServerCommandSource source;
+  public CommandSourceStack source;
 
   /**
-   * 以可序列化的形式记录 {@link EntitySelector#positionOffset}，因为该字段类型为 {@link Function}，无法序列化其数据，因此需要在 {@link EntitySelectorReader#build()} 中手动存储其序列化数据。
+   * 以可序列化的形式记录 {@link EntitySelector#positionOffset}，因为该字段类型为 {@link Function}，无法序列化其数据，因此需要在 {@link EntitySelectorParser#getSelector()} 中手动存储其序列化数据。
    *
    * @see EntitySelectorReaderMixin#recordMoreInfoAtBuild(EntitySelector)
    */
   public @NotNull PositionOffsetInfo positionOffsetInfo = PositionOffsetInfo.NO_OP;
 
   /**
-   * 以可序列化的形式记录 {@link EntitySelectorReader#dx}、{@link EntitySelectorReader#dy}、{@link EntitySelectorReader#dz}，因为这些数据并不会存储在 {@link EntitySelector} 中。
+   * 以可序列化的形式记录 {@link EntitySelectorParser#dx}、{@link EntitySelectorParser#dy}、{@link EntitySelectorParser#dz}，因为这些数据并不会存储在 {@link EntitySelector} 中。
    */
-  public @Nullable Vec3d dxDyDz = null;
+  public @Nullable Vec3 dxDyDz = null;
 
   /**
-   * 此字段决定了在运行 {@link EntitySelector#getEntities(ServerCommandSource)} 和 {@link EntitySelector#getPlayers(ServerCommandSource)} 时，如何以特殊的方式收集实体。
+   * 此字段决定了在运行 {@link EntitySelector#findEntities(CommandSourceStack)} 和 {@link EntitySelector#findPlayers(CommandSourceStack)} 时，如何以特殊的方式收集实体。
    *
    * @see EntitySelectorReaderMixin#recordMoreInfoAtBuild(EntitySelector)
    */
@@ -73,7 +73,7 @@ public class EntitySelectorExtras {
     this.self = self;
   }
 
-  public void updateSource(@NotNull ServerCommandSource source) {
+  public void updateSource(@NotNull CommandSourceStack source) {
     if (!source.equals(this.source)) {
       this.source = source;
       this.contextWrapper.setValue(new ExecutionContext(source));

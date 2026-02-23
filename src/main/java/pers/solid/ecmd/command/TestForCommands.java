@@ -3,16 +3,16 @@ package pers.solid.ecmd.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 
 public enum TestForCommands implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    final LiteralArgumentBuilder<ServerCommandSource> literal = ModCommands.literalR2("testfor");
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+    final LiteralArgumentBuilder<CommandSourceStack> literal = ModCommands.literalR2("testfor");
     TestForBiomeCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlockCommand.INSTANCE.addArguments(literal, registryAccess, environment);
     TestForBlocksCommand.INSTANCE.addArguments(literal, registryAccess, environment);
@@ -23,6 +23,6 @@ public enum TestForCommands implements CommandRegistrationCallback {
   }
 
   public interface Entry {
-    void addArguments(LiteralArgumentBuilder<ServerCommandSource> testForBuilder, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment);
+    void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment);
   }
 }

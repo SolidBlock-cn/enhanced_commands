@@ -1,15 +1,15 @@
 package pers.solid.ecmd.util.enums;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.StringRepresentable;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 /**
  * 批量方块操作在遇到没有加载的坐标时的行为。
  */
-public enum UnloadedPosBehavior implements StringIdentifiable {
+public enum UnloadedPosBehavior implements StringRepresentable {
   /**
    * 在执行操作前，如果检测到没有加载的坐标，直接提前拒绝整个操作。
    */
@@ -35,7 +35,7 @@ public enum UnloadedPosBehavior implements StringIdentifiable {
   }
 
   @Override
-  public String asString() {
+  public String getSerializedName() {
     return name;
   }
 
@@ -44,7 +44,7 @@ public enum UnloadedPosBehavior implements StringIdentifiable {
     return name;
   }
 
-  public MutableText getDescription() {
-    return Text.translatable("enhanced_commands.argument.unloaded_pos_behavior." + name);
+  public MutableComponent getDescription() {
+    return Component.translatable("enhanced_commands.argument.unloaded_pos_behavior." + name);
   }
 }

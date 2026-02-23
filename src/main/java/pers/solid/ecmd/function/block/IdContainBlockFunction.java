@@ -4,15 +4,15 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -33,7 +33,7 @@ public final class IdContainBlockFunction implements BlockFunction {
   public static final MapCodec<IdContainBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(IdContainBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockFunction::pattern), CodecUtil.optionalLongFieldOf("seed").forGetter(IdContainBlockFunction::seed)));
   private final @NotNull Pattern pattern;
   private final OptionalLong seed;
-  private transient World world;
+  private transient Level world;
   private transient Block[] blocks;
 
   public IdContainBlockFunction(@NotNull Pattern pattern, OptionalLong seed) {
@@ -45,9 +45,9 @@ public final class IdContainBlockFunction implements BlockFunction {
     return seed;
   }
 
-  public @NotNull Block[] getBlocks(@NotNull World world) {
+  public @NotNull Block[] getBlocks(@NotNull Level world) {
     if (!world.equals(this.world)) {
-      blocks = world.createCommandRegistryWrapper(RegistryKeys.BLOCK).streamEntries().filter(reference -> pattern.matcher(reference.registryKey().getValue().toString()).find()).map(RegistryEntry.Reference::value).toArray(Block[]::new);
+      blocks = world.holderLookup(Registries.BLOCK).listElements().filter(reference -> pattern.matcher(reference.key().location().toString()).find()).map(Holder.Reference::value).toArray(Block[]::new);
       this.world = world;
     }
     return blocks;
@@ -55,17 +55,17 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   @Override
   public @NotNull String asString() {
-    return "idcontain(" + NbtString.escape(pattern.toString()) + (seed.isPresent() ? ", seed = " + seed.getAsLong() : "") + ")";
+    return "idcontain(" + StringTag.quoteAndEscape(pattern.toString()) + (seed.isPresent() ? ", seed = " + seed.getAsLong() : "") + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block[] blocks = getBlocks(world);
-    final Random random = context.getSplitterForOptionalSeed(this, seed).split(pos);
+    final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(pos);
     if (blocks.length == 0) {
       return blockState;
     }
-    return blocks[random.nextInt(blocks.length)].getDefaultState();
+    return blocks[random.nextInt(blocks.length)].defaultBlockState();
   }
 
   @Override

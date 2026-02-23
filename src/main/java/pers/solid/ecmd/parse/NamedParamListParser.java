@@ -2,7 +2,7 @@ package pers.solid.ecmd.parse;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
@@ -87,7 +87,7 @@ public interface NamedParamListParser {
     if (!reader.canRead() || reader.peek() != terminateChar()) while (true) {
       final char KEY_VALUE_SEP = keyValueSeparatorChar();
       final char PARAMS_SEP = separatorChar();
-      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> CommandSource.suggestMatching(supportedParams().stream().filter(this::isValidParamName).map(s -> s + KEY_VALUE_SEP), suggestionsBuilder));
+      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(supportedParams().stream().filter(this::isValidParamName).map(s -> s + KEY_VALUE_SEP), suggestionsBuilder));
       final int cursorBeforeParamName = reader.getCursor();
       final String paramName = reader.readUnquotedString();
       final int cursorAfterParamName = reader.getCursor();

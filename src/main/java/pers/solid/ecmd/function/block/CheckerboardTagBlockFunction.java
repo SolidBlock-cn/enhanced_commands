@@ -4,16 +4,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryCodecs;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
@@ -26,29 +26,29 @@ import java.util.stream.Collectors;
 
 public final class CheckerboardTagBlockFunction implements BlockFunction, Checkerboard<Block> {
   public static final MapCodec<CheckerboardTagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      RegistryCodecs.entryList(RegistryKeys.BLOCK).fieldOf("tag").forGetter(CheckerboardTagBlockFunction::entryList),
-      Vec3d.CODEC.optionalFieldOf("floor", Vec3d.ZERO).forGetter(CheckerboardTagBlockFunction::floor),
-      Vec3d.CODEC.optionalFieldOf("scale", UNIT).forGetter(CheckerboardTagBlockFunction::scale),
-      Vec3d.CODEC.optionalFieldOf("offset", Vec3d.ZERO).forGetter(CheckerboardTagBlockFunction::offset)
+      RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("tag").forGetter(CheckerboardTagBlockFunction::entryList),
+      Vec3.CODEC.optionalFieldOf("floor", Vec3.ZERO).forGetter(CheckerboardTagBlockFunction::floor),
+      Vec3.CODEC.optionalFieldOf("scale", UNIT).forGetter(CheckerboardTagBlockFunction::scale),
+      Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(CheckerboardTagBlockFunction::offset)
   ).apply(i, CheckerboardTagBlockFunction::new));
-  private final RegistryEntryList<Block> entryList;
+  private final HolderSet<Block> entryList;
   private final WeightedList<Block> weightedList;
-  private final @NotNull Vec3d floor;
-  private final @NotNull Vec3d scale;
-  private final @NotNull Vec3d offset;
+  private final @NotNull Vec3 floor;
+  private final @NotNull Vec3 scale;
+  private final @NotNull Vec3 offset;
 
-  public CheckerboardTagBlockFunction(@NotNull RegistryEntryList<Block> entryList, @NotNull Vec3d floor, @NotNull Vec3d scale, @NotNull Vec3d offset) {
+  public CheckerboardTagBlockFunction(@NotNull HolderSet<Block> entryList, @NotNull Vec3 floor, @NotNull Vec3 scale, @NotNull Vec3 offset) {
     this.entryList = entryList;
-    this.weightedList = new WeightedList.Uniform<>(entryList.stream().map(RegistryEntry::value).toList());
+    this.weightedList = new WeightedList.Uniform<>(entryList.stream().map(Holder::value).toList());
     this.floor = floor;
     this.scale = scale;
     this.offset = offset;
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block entry = getEntry(weightedList, pos);
-    return entry == null ? blockState : entry.getDefaultState();
+    return entry == null ? blockState : entry.defaultBlockState();
   }
 
   @Override
@@ -59,27 +59,27 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   @Override
   public @NotNull String asString() {
     final StringBuilder sb = new StringBuilder("checkerboard-tag(");
-    final String mapped = entryList.getStorage().map(tagKey -> tagKey.id().toString(), list -> list.stream().map(RegistryEntry::getIdAsString).collect(Collectors.joining(", ")));
+    final String mapped = entryList.unwrap().map(tagKey -> tagKey.location().toString(), list -> list.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ")));
     sb.append("#").append(mapped);
     return appendParameters(sb).append(")").toString();
   }
 
-  public RegistryEntryList<Block> entryList() {
+  public HolderSet<Block> entryList() {
     return entryList;
   }
 
   @Override
-  public @NotNull Vec3d floor() {
+  public @NotNull Vec3 floor() {
     return floor;
   }
 
   @Override
-  public @NotNull Vec3d scale() {
+  public @NotNull Vec3 scale() {
     return scale;
   }
 
   @Override
-  public @NotNull Vec3d offset() {
+  public @NotNull Vec3 offset() {
     return offset;
   }
 
@@ -118,10 +118,10 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   }
 
   public static class Parser extends CheckerboardParser<BlockFunction> {
-    protected RegistryEntryList.Named<Block> tagKey;
+    protected HolderSet.Named<Block> tagKey;
 
     @Override
-    protected CheckerboardTagBlockFunction getParseResult(Vec3d floor, Vec3d scale, Vec3d offset) {
+    protected CheckerboardTagBlockFunction getParseResult(Vec3 floor, Vec3 scale, Vec3 offset) {
       return new CheckerboardTagBlockFunction(tagKey, floor, scale, offset);
     }
 

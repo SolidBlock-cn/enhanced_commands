@@ -6,14 +6,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.ConcentrationType;
@@ -28,12 +28,12 @@ import java.util.Collections;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static net.minecraft.command.argument.EntityArgumentType.entities;
-import static net.minecraft.command.argument.EntityArgumentType.getEntities;
-import static net.minecraft.command.argument.NbtPathArgumentType.getNbtPath;
-import static net.minecraft.command.argument.NbtPathArgumentType.nbtPath;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.commands.arguments.EntityArgument.entities;
+import static net.minecraft.commands.arguments.EntityArgument.getEntities;
+import static net.minecraft.commands.arguments.NbtPathArgument.getPath;
+import static net.minecraft.commands.arguments.NbtPathArgument.nbtPath;
 import static pers.solid.ecmd.argument.NbtSourceArgumentType.getNbtSource;
 import static pers.solid.ecmd.argument.NbtSourceArgumentType.nbtSource;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.getNbtTarget;
@@ -45,10 +45,10 @@ public enum AirCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("air")
         .then(literal("get")
-            .executes(context -> executeGetAir(context, Collections.singleton(context.getSource().getEntityOrThrow()), null))
+            .executes(context -> executeGetAir(context, Collections.singleton(context.getSource().getEntityOrException()), null))
             .then(argument("entities", entities())
                 .executes(context -> executeGetAir(context, getEntities(context, "entities"), ConcentrationType.AVERAGE))
                 .then(argument("concentration_type", concentrationType())
@@ -58,8 +58,8 @@ public enum AirCommand implements CommandRegistrationCallback {
                             .then(argument("path", nbtPath())
                                 .executes(context -> {
                                   final NbtTarget<?> target = getNbtTarget(context, "target");
-                                  final NbtPathArgumentType.NbtPath path = getNbtPath(context, "path");
-                                  final ServerCommandSource source = context.getSource();
+                                  final NbtPathArgument.NbtPath path = getPath(context, "path");
+                                  final CommandSourceStack source = context.getSource();
                                   return executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), nbt -> target.setNbtInPath(source, path, nbt));
                                 })))))))
         .then(literal("set")
@@ -69,17 +69,17 @@ public enum AirCommand implements CommandRegistrationCallback {
                 .then(literal("from")
                     .then(literal("result").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
-                      return context.getSource().mergeReturnValueConsumers((success, result) -> {
+                      return context.getSource().withCallback((success, result) -> {
                         for (Entity entity : entities) {
-                          entity.setAir(result);
+                          entity.setAirSupply(result);
                         }
                       }, SeparatedExecuteCommand.BINARY_RESULT_CONSUMER);
                     }))
                     .then(literal("success").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
-                      return context.getSource().mergeReturnValueConsumers((success, result) -> {
+                      return context.getSource().withCallback((success, result) -> {
                         for (Entity entity : entities) {
-                          entity.setAir(success ? 1 : 0);
+                          entity.setAirSupply(success ? 1 : 0);
                         }
                       }, SeparatedExecuteCommand.BINARY_RESULT_CONSUMER);
                     }))
@@ -89,47 +89,47 @@ public enum AirCommand implements CommandRegistrationCallback {
                             .executes(context -> executeSetAir(context, getEntities(context, "entities"), getSourceEntityAir(context, getConcentrationType(context, "source_concentration_type")))))))
                     .then(argument("source", nbtSource(registryAccess))
                         .then(argument("path", nbtPath())
-                            .executes(context -> executeSetAirFromSource(context, getNbtPath(context, "path"), NbtConcentrationType.FIRST))
+                            .executes(context -> executeSetAirFromSource(context, getPath(context, "path"), NbtConcentrationType.FIRST))
                             .then(argument("concentration_type", nbtConcentrationType())
-                                .executes(context -> executeSetAirFromSource(context, getNbtPath(context, "path"), getNbtConcentrationType(context, "concentration_type")))))))))
+                                .executes(context -> executeSetAirFromSource(context, getPath(context, "path"), getNbtConcentrationType(context, "concentration_type")))))))))
         .then(literal("add")
-            .executes(context -> executeAddAir(context, Collections.singleton(context.getSource().getEntityOrThrow())))
+            .executes(context -> executeAddAir(context, Collections.singleton(context.getSource().getEntityOrException())))
             .then(argument("entities", entities())
                 .executes(context -> executeAddAir(context, getEntities(context, "entities")))
                 .then(argument("probability", integer())
                     .executes(context -> executeAddAir(context, getEntities(context, "entities"), getInteger(context, "probability"))))))
         .then(literal("remove")
-            .executes(context -> executeRemoveAir(context, Collections.singleton(context.getSource().getEntityOrThrow())))
+            .executes(context -> executeRemoveAir(context, Collections.singleton(context.getSource().getEntityOrException())))
             .then(argument("entities", entities())
                 .executes(context -> executeRemoveAir(context, getEntities(context, "entities")))
                 .then(argument("probability", integer())
                     .executes(context -> executeRemoveAir(context, getEntities(context, "entities"), getInteger(context, "probability")))))));
   }
 
-  private int executeSetAirFromSource(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path, NbtConcentrationType nbtConcentrationType) throws CommandSyntaxException {
-    return executeSetAir(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(context.getSource(), path, nbtConcentrationType, context.getSource().getWorld().getRandom()), path).intValue());
+  private int executeSetAirFromSource(CommandContext<CommandSourceStack> context, NbtPathArgument.NbtPath path, NbtConcentrationType nbtConcentrationType) throws CommandSyntaxException {
+    return executeSetAir(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(context.getSource(), path, nbtConcentrationType, context.getSource().getLevel().getRandom()), path).getAsInt());
   }
 
-  private static int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) throws CommandSyntaxException {
+  private static int executeGetAir(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) throws CommandSyntaxException {
     return executeGetAir(context, entities, concentrationType, null);
   }
 
-  private static <T extends Throwable> int executeGetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, @Nullable FailableConsumer<NbtElement, T> nbtElementConsumer) throws T, CommandSyntaxException {
+  private static <T extends Throwable> int executeGetAir(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, @Nullable FailableConsumer<Tag, T> nbtElementConsumer) throws T, CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
-      final int air = entity.getAir();
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(air).styled(Styles.RESULT)), false);
+      final int air = entity.getAirSupply();
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.air.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(air).withStyle(Styles.RESULT)), false);
       if (nbtElementConsumer != null) {
-        nbtElementConsumer.accept(NbtInt.of(air));
+        nbtElementConsumer.accept(IntTag.valueOf(air));
       }
       return air;
     } else {
       final IntList integers = new IntArrayList();
       for (Entity entity : entities) {
-        integers.add(entity.getAir());
+        integers.add(entity.getAirSupply());
       }
       final double result = concentrationType.concentrateInt(integers);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.get.multiple", integers.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.longToString(result)).styled(Styles.RESULT)).enhanced$$(), false);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.air.get.multiple", integers.size(), concentrationType.getDisplayName(), Component.literal(concentrationType.longToString(result)).withStyle(Styles.RESULT)).enhanced$$(), false);
       if (nbtElementConsumer != null) {
         nbtElementConsumer.accept(concentrationType.longToNbt(result));
       }
@@ -137,107 +137,107 @@ public enum AirCommand implements CommandRegistrationCallback {
     }
   }
 
-  private static int executeSetAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, int value) {
+  private static int executeSetAir(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, int value) {
     final int size = entities.size();
     if (size == 1) {
       final Entity entity = entities.iterator().next();
-      entity.setAir(value);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.set.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(entity.getAir()).styled(Styles.RESULT)), true);
+      entity.setAirSupply(value);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.air.set.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(entity.getAirSupply()).withStyle(Styles.RESULT)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
-        entity.setAir(value);
+        entity.setAirSupply(value);
       }
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.set.multiple", TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)).enhanced$$(), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.air.set.multiple", TextUtil.literal(size).withStyle(Styles.TARGET), TextUtil.literal(value).withStyle(Styles.TARGET)).enhanced$$(), true);
       return size;
     }
   }
 
-  private static int executeAddAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, int value) {
+  private static int executeAddAir(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, int value) {
     final int size = entities.size();
     if (size == 1) {
       final Entity entity = entities.iterator().next();
-      entity.setAir(entity.getAir() + value);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.add.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET), TextUtil.literal(entity.getAir()).styled(Styles.RESULT)), true);
+      entity.setAirSupply(entity.getAirSupply() + value);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.air.add.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).withStyle(Styles.TARGET), TextUtil.literal(entity.getAirSupply()).withStyle(Styles.RESULT)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
-        entity.setAir(entity.getAir() + value);
+        entity.setAirSupply(entity.getAirSupply() + value);
       }
       context.getSource().sendFeedback$ecBridge(() -> {
-        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)};
-        return Text.translatable("enhanced_commands.commands.air.add.multiple", args).enhanced$$();
+        Object[] args = new Object[]{TextUtil.literal(size).withStyle(Styles.TARGET), TextUtil.literal(value).withStyle(Styles.TARGET)};
+        return Component.translatable("enhanced_commands.commands.air.add.multiple", args).enhanced$$();
       }, true);
       return size;
     }
   }
 
-  private static int executeAddAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities) {
+  private static int executeAddAir(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities) {
     final int size = entities.size();
     if (size == 1) {
       final Entity entity = entities.iterator().next();
-      entity.setAir(entity.getMaxAir());
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.add_to_max.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(entity.getAir()).styled(Styles.RESULT)), true);
+      entity.setAirSupply(entity.getMaxAirSupply());
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.air.add_to_max.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(entity.getAirSupply()).withStyle(Styles.RESULT)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
-        entity.setAir(entity.getMaxAir());
+        entity.setAirSupply(entity.getMaxAirSupply());
       }
       context.getSource().sendFeedback$ecBridge(() -> {
-        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET)};
-        return Text.translatable("enhanced_commands.commands.air.add_to_max.multiple", args).enhanced$$();
+        Object[] args = new Object[]{TextUtil.literal(size).withStyle(Styles.TARGET)};
+        return Component.translatable("enhanced_commands.commands.air.add_to_max.multiple", args).enhanced$$();
       }, true);
       return size;
     }
   }
 
-  private static int executeRemoveAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, int value) {
+  private static int executeRemoveAir(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, int value) {
     final int size = entities.size();
     if (size == 1) {
       final Entity entity = entities.iterator().next();
-      entity.setAir(entity.getAir() - value);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.remove.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET), TextUtil.literal(entity.getAir()).styled(Styles.RESULT)), true);
+      entity.setAirSupply(entity.getAirSupply() - value);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.air.remove.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).withStyle(Styles.TARGET), TextUtil.literal(entity.getAirSupply()).withStyle(Styles.RESULT)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
-        entity.setAir(entity.getAir() - value);
+        entity.setAirSupply(entity.getAirSupply() - value);
       }
       context.getSource().sendFeedback$ecBridge(() -> {
-        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.TARGET)};
-        return Text.translatable("enhanced_commands.commands.air.remove.multiple", args).enhanced$$();
+        Object[] args = new Object[]{TextUtil.literal(size).withStyle(Styles.TARGET), TextUtil.literal(value).withStyle(Styles.TARGET)};
+        return Component.translatable("enhanced_commands.commands.air.remove.multiple", args).enhanced$$();
       }, true);
       return size;
     }
   }
 
-  private static int executeRemoveAir(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities) {
+  private static int executeRemoveAir(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities) {
     final int size = entities.size();
     if (size == 1) {
       final Entity entity = entities.iterator().next();
-      entity.setAir(0);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.air.remove_all.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)), true);
+      entity.setAirSupply(0);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.air.remove_all.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)), true);
       return 1;
     } else {
       for (Entity entity : entities) {
-        entity.setAir(0);
+        entity.setAirSupply(0);
       }
       context.getSource().sendFeedback$ecBridge(() -> {
-        Object[] args = new Object[]{TextUtil.literal(size).styled(Styles.TARGET)};
-        return Text.translatable("enhanced_commands.commands.air.remove_all.multiple", args).enhanced$$();
+        Object[] args = new Object[]{TextUtil.literal(size).withStyle(Styles.TARGET)};
+        return Component.translatable("enhanced_commands.commands.air.remove_all.multiple", args).enhanced$$();
       }, true);
       return size;
     }
   }
 
-  private static int getSourceEntityAir(CommandContext<ServerCommandSource> context, ConcentrationType concentrationType) throws CommandSyntaxException {
+  private static int getSourceEntityAir(CommandContext<CommandSourceStack> context, ConcentrationType concentrationType) throws CommandSyntaxException {
     final Collection<? extends Entity> sourceEntities = getEntities(context, "source_entities");
     if (sourceEntities.size() == 1) {
       final Entity entity = sourceEntities.iterator().next();
-      return entity.getAir();
+      return entity.getAirSupply();
     } else {
       IntList ints = new IntArrayList();
       for (Entity sourceEntity : sourceEntities) {
-        ints.add(sourceEntity.getAir());
+        ints.add(sourceEntity.getAirSupply());
       }
       return (int) concentrationType.concentrateInt(ints);
     }

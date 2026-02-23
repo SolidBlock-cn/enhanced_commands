@@ -2,9 +2,9 @@ package pers.solid.ecmd.function.nbt;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import net.minecraft.registry.Registry;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.nbt.PosNbtFunction;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -16,7 +16,7 @@ import java.util.Map;
 public final class NbtFunctionTypes {
 
   public static final Map<String, Supplier<FunctionLikeParser<? extends NbtFunction>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtFunctionTypes::registerFunctions);
-  public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtFunctionTypes::registerFunctionNames);
+  public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtFunctionTypes::registerFunctionNames);
 
   // 基本的 NBT 函数
 
@@ -54,13 +54,13 @@ public final class NbtFunctionTypes {
     map.put("substring", SubstringNbtFunction.Parser::new);
   }
 
-  private static void registerFunctionNames(Map<String, Text> map) {
-    map.put("concat", Text.translatable("enhanced_commands.nbt_function.concat"));
-    map.put("from", Text.translatable("enhanced_commands.nbt_function.from"));
-    map.put("pos", Text.translatable("enhanced_commands.nbt_function.pos"));
-    map.put("regex_replace", Text.translatable("enhanced_commands.nbt_function.regex_replace"));
-    map.put("replace", Text.translatable("enhanced_commands.nbt_function.replace"));
-    map.put("string_replace", Text.translatable("enhanced_commands.nbt_function.string_replace"));
-    map.put("substring", Text.translatable("enhanced_commands.nbt_function.substring"));
+  private static void registerFunctionNames(Map<String, Component> map) {
+    map.put("concat", Component.translatable("enhanced_commands.nbt_function.concat"));
+    map.put("from", Component.translatable("enhanced_commands.nbt_function.from"));
+    map.put("pos", Component.translatable("enhanced_commands.nbt_function.pos"));
+    map.put("regex_replace", Component.translatable("enhanced_commands.nbt_function.regex_replace"));
+    map.put("replace", Component.translatable("enhanced_commands.nbt_function.replace"));
+    map.put("string_replace", Component.translatable("enhanced_commands.nbt_function.string_replace"));
+    map.put("substring", Component.translatable("enhanced_commands.nbt_function.substring"));
   }
 }

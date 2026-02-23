@@ -6,20 +6,20 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.predicate.NbtPredicate;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.critereon.NbtPredicate;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -36,7 +36,7 @@ public record EntityNbtData(EntitySelector entitySelector) implements NbtTarget<
   public static EntityNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     ParsingUtil.expectAndSkipWhitespace(reader);
-    final EntitySelector selector = parseContext.parseAndSuggestArgument(EntityArgumentType.entities());
+    final EntitySelector selector = parseContext.parseAndSuggestArgument(EntityArgument.entities());
     if (reader.canRead()) {
       parseContext.clearSuggestion();
     }
@@ -44,14 +44,14 @@ public record EntityNbtData(EntitySelector entitySelector) implements NbtTarget<
   }
 
   @Override
-  public Collection<Entity> values(ServerCommandSource source) throws CommandSyntaxException {
-    final List<? extends Entity> entities = entitySelector.getEntities(source);
+  public Collection<Entity> values(CommandSourceStack source) throws CommandSyntaxException {
+    final List<? extends Entity> entities = entitySelector.findEntities(source);
     return Collections.unmodifiableList(entities);
   }
 
   @Override
-  public NbtCompound getNbtFor(ServerCommandSource commandSource, Entity source) {
-    return NbtPredicate.entityToNbt(source);
+  public CompoundTag getNbtFor(CommandSourceStack commandSource, Entity source) {
+    return NbtPredicate.getEntityTagToCompare(source);
   }
 
   @Override
@@ -60,30 +60,30 @@ public record EntityNbtData(EntitySelector entitySelector) implements NbtTarget<
   }
 
   @Override
-  public int executeQuery(ServerCommandSource source, NbtPathArgumentType.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, Random random) throws CommandSyntaxException {
+  public int executeQuery(CommandSourceStack source, NbtPathArgument.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, RandomSource random) throws CommandSyntaxException {
     final Collection<Entity> entities = values(source);
-    final Map<Entity, NbtElement> nbts = getNbtsInPath(source, path);
+    final Map<Entity, Tag> nbts = getNbtsInPath(source, path);
     if (nbts.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
       final var soleEntry = nbts.entrySet().iterator().next();
       final Entity entity = soleEntry.getKey();
-      final NbtElement nbt = soleEntry.getValue();
+      final Tag nbt = soleEntry.getValue();
       if (path == null) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entity.query", entity.getDisplayName(), NbtHelper.toPrettyPrintedText(nbt)), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.nbt.entity.query", entity.getDisplayName(), NbtUtils.toPrettyComponent(nbt)), false);
         return NbtSource.toInt(nbt);
       }
       if (scale == 1) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entity.query_path", entity.getDisplayName(), path.toString(), NbtHelper.toPrettyPrintedText(nbt)), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.nbt.entity.query_path", entity.getDisplayName(), path.toString(), NbtUtils.toPrettyComponent(nbt)), false);
         return NbtSource.toInt(nbt);
       } else {
         final double scaledValue = NbtSource.scaleNbt(nbt, scale, path);
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entity.query_scale", entity.getDisplayName(), path.toString(), scale, NbtHelper.toPrettyPrintedText(nbt)), false);
-        return MathHelper.floor(scaledValue);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.nbt.entity.query_scale", entity.getDisplayName(), path.toString(), scale, NbtUtils.toPrettyComponent(nbt)), false);
+        return Mth.floor(scaledValue);
       }
     }
     final Object2DoubleMap<Entity> scaledNbts;
     if (scale != 1 && path != null) {
       scaledNbts = new Object2DoubleOpenHashMap<>();
-      for (Map.Entry<Entity, NbtElement> entry : nbts.entrySet()) {
+      for (Map.Entry<Entity, Tag> entry : nbts.entrySet()) {
         scaledNbts.put(entry.getKey(), NbtSource.scaleNbt(entry.getValue(), scale, path));
       }
     } else {
@@ -92,53 +92,53 @@ public record EntityNbtData(EntitySelector entitySelector) implements NbtTarget<
 
     if (nbtConcentrationType == NbtConcentrationType.ALL) {
       source.sendFeedback$ecBridge(() -> {
-        List<Text> texts = new ArrayList<>();
-        texts.add(Text.translatable("enhanced_commands.commands.nbt.entities.query.header", Math.min(nbts.size(), QUERY_LIMIT)).enhanced$$().formatted(Formatting.AQUA));
+        List<Component> texts = new ArrayList<>();
+        texts.add(Component.translatable("enhanced_commands.commands.nbt.entities.query.header", Math.min(nbts.size(), QUERY_LIMIT)).enhanced$$().withStyle(ChatFormatting.AQUA));
         for (var entry : Iterables.limit(nbts.entrySet(), QUERY_LIMIT)) {
           final Entity entity = entry.getKey();
           if (path == null) {
-            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.commands.nbt.entity.query", entity.getDisplayName(), NbtHelper.toPrettyPrintedText(entry.getValue()))));
+            texts.add(Component.literal(" - ").append(Component.translatable("enhanced_commands.commands.nbt.entity.query", entity.getDisplayName(), NbtUtils.toPrettyComponent(entry.getValue()))));
           } else if (scale == 1) {
-            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.commands.nbt.entity.query_path", entity.getDisplayName(), path.toString(), NbtHelper.toPrettyPrintedText(entry.getValue()))));
+            texts.add(Component.literal(" - ").append(Component.translatable("enhanced_commands.commands.nbt.entity.query_path", entity.getDisplayName(), path.toString(), NbtUtils.toPrettyComponent(entry.getValue()))));
           } else {
-            texts.add(Text.literal(" - ").append(Text.translatable("enhanced_commands.commands.nbt.entity.query_scale", entity.getDisplayName(), path.toString(), scale, scaledNbts.getOrDefault(entity, 0))));
+            texts.add(Component.literal(" - ").append(Component.translatable("enhanced_commands.commands.nbt.entity.query_scale", entity.getDisplayName(), path.toString(), scale, scaledNbts.getOrDefault(entity, 0))));
           }
         }
         if (nbts.size() > QUERY_LIMIT) {
-          texts.add(Text.translatable("enhanced_commands.commands.nbt.query_limit_notice", QUERY_LIMIT).formatted(Formatting.YELLOW));
+          texts.add(Component.translatable("enhanced_commands.commands.nbt.query_limit_notice", QUERY_LIMIT).withStyle(ChatFormatting.YELLOW));
         }
-        return ScreenTexts.joinLines(texts);
+        return CommonComponents.joinLines(texts);
       }, false);
       return nbts.size();
     }
 
-    final NbtElement concentratedNbts = nbtConcentrationType.concentrate(nbts.values(), random);
+    final Tag concentratedNbts = nbtConcentrationType.concentrate(nbts.values(), random);
     if (path == null) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entities.query", entities.size(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.nbt.entities.query", entities.size(), NbtUtils.toPrettyComponent(concentratedNbts)).enhanced$$(), false);
       return NbtSource.toInt(concentratedNbts);
     } else if (scale == 1) {
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entities.query_path", entities.size(), path.toString(), NbtHelper.toPrettyPrintedText(concentratedNbts)).enhanced$$(), false);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.nbt.entities.query_path", entities.size(), path.toString(), NbtUtils.toPrettyComponent(concentratedNbts)).enhanced$$(), false);
       return NbtSource.toInt(concentratedNbts);
     } else {
       final double scaledConcentratedNbt = NbtSource.scaleNbt(concentratedNbts, scale, path);
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.nbt.entities.query_scale", entities.size(), path.toString(), scale, scaledConcentratedNbt).enhanced$$(), false);
-      return MathHelper.floor(scaledConcentratedNbt);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.nbt.entities.query_scale", entities.size(), path.toString(), scale, scaledConcentratedNbt).enhanced$$(), false);
+      return Mth.floor(scaledConcentratedNbt);
     }
   }
 
   @Override
-  public void setNbtFor(ServerCommandSource commandSource, Entity target, NbtCompound nbt) throws CommandSyntaxException {
-    UUID uuid = target.getUuid();
-    target.readNbt(nbt);
-    target.setUuid(uuid);
+  public void setNbtFor(CommandSourceStack commandSource, Entity target, CompoundTag nbt) throws CommandSyntaxException {
+    UUID uuid = target.getUUID();
+    target.load(nbt);
+    target.setUUID(uuid);
   }
 
   @Override
-  public Text feedbackModify(Collection<Entity> values) {
+  public Component feedbackModify(Collection<Entity> values) {
     if (values.size() == 1) {
-      return Text.translatable("commands.data.entity.modified", values.iterator().next().getDisplayName());
+      return Component.translatable("commands.data.entity.modified", values.iterator().next().getDisplayName());
     } else {
-      return Text.translatable("enhanced_commands.commands.nbt.entities.modify", values.size()).enhanced$$();
+      return Component.translatable("enhanced_commands.commands.nbt.entities.modify", values.size()).enhanced$$();
     }
   }
 

@@ -2,9 +2,9 @@ package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
@@ -22,7 +22,7 @@ public interface PropertyNamePredicate extends ExpressionConvertible {
   @NotNull
   Type getType();
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     COMPARISON("comparison", ComparisonPropertyNamePredicate.CODEC),
     EXISTENCE("existence", ExistencePropertyNamePredicate.CODEC),
     MULTI_VALUE("multi_value", MultiValuePropertyNamePredicate.CODEC);
@@ -37,7 +37,7 @@ public interface PropertyNamePredicate extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
   }

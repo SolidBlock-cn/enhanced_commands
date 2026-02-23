@@ -4,15 +4,15 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,18 +24,18 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class BlockTransformationHistory extends BlockPlacementHistory {
-  public final List<Triple<@NotNull Entity, @Nullable Pair<@NotNull Consumer<Entity>, @NotNull Consumer<Entity>>, @Nullable Vec3d>> reverseEntities = new ArrayList<>();
+  public final List<Triple<@NotNull Entity, @Nullable Pair<@NotNull Consumer<Entity>, @NotNull Consumer<Entity>>, @Nullable Vec3>> reverseEntities = new ArrayList<>();
 
-  public BlockTransformationHistory(Text name, ServerWorld world, int flag, int modFlag) {
+  public BlockTransformationHistory(Component name, ServerLevel world, int flag, int modFlag) {
     super(name, world, flag, modFlag);
   }
 
-  public BlockTransformationHistory(Text name, ServerWorld world, int flag, int modFlag, Long2ObjectMap<BlockState> oldStates, Long2ObjectMap<NbtCompound> oldEntityData) {
+  public BlockTransformationHistory(Component name, ServerLevel world, int flag, int modFlag, Long2ObjectMap<BlockState> oldStates, Long2ObjectMap<CompoundTag> oldEntityData) {
     super(name, world, flag, modFlag, oldStates, oldEntityData);
   }
 
   @Override
-  public @NotNull Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockTransformationHistory> undo(ServerCommandSource source, boolean immediately, boolean undoable) {
+  public @NotNull Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockTransformationHistory> undo(CommandSourceStack source, boolean immediately, boolean undoable) {
     final var s = super.undo(source, immediately, undoable);
     final @Nullable IteratorTask<?> superTask = s.getFirst();
     final @Nullable BlockPlacementHistory superHistory = s.getSecond();
@@ -45,17 +45,17 @@ public class BlockTransformationHistory extends BlockPlacementHistory {
       final Entity entity = entry.getLeft();
       final var pair = entry.getMiddle();
       final Consumer<Entity> undo = pair == null ? null : pair.getFirst();
-      final @Nullable Vec3d transformedPos = entry.getRight();
-      @Nullable Vec3d oldPos = null;
+      final @Nullable Vec3 transformedPos = entry.getRight();
+      @Nullable Vec3 oldPos = null;
       if (undo != null) {
         undo.accept(entity);
       }
       if (transformedPos != null) {
-        oldPos = entity.getPos();
-        if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-          serverPlayerEntity.networkHandler.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYaw(), serverPlayerEntity.getPitch(), PositionFlag.VALUES);
+        oldPos = entity.position();
+        if (entity instanceof ServerPlayer serverPlayerEntity) {
+          serverPlayerEntity.connection.teleport(transformedPos.x, transformedPos.y, transformedPos.z, serverPlayerEntity.getYRot(), serverPlayerEntity.getXRot(), RelativeMovement.ALL);
         } else {
-          entity.requestTeleport(transformedPos.x, transformedPos.y, transformedPos.z);
+          entity.teleportTo(transformedPos.x, transformedPos.y, transformedPos.z);
         }
       }
       if (redoHistory != null) {

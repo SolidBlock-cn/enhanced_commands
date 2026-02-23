@@ -5,19 +5,19 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.function.block.WeightedListParser;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.StringUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 public interface Noise {
   int DEFAULT_FIRST_OCTAVE = -1;
   DoubleList DEFAULT_AMPLITUDES = DoubleList.of(1);
-  Vec3d UNIT = new Vec3d(1, 1, 1);
-  WeakHashMap<Long, WeakHashMap<DoublePerlinNoiseSampler.NoiseParameters, DoublePerlinNoiseSampler>> SAMPLER_CACHE = new WeakHashMap<>();
+  Vec3 UNIT = new Vec3(1, 1, 1);
+  WeakHashMap<Long, WeakHashMap<NormalNoise.NoiseParameters, NormalNoise>> SAMPLER_CACHE = new WeakHashMap<>();
 
   Properties properties();
 
@@ -40,18 +40,18 @@ public interface Noise {
   /**
    * 噪声的参数。
    */
-  default DoublePerlinNoiseSampler.NoiseParameters noiseParameters() {
+  default NormalNoise.NoiseParameters noiseParameters() {
     return properties().noiseParameters();
   }
 
   /**
    * 噪声的缩放，其三个值会依次应用于坐标的三个值中。
    */
-  default Vec3d scale() {
+  default Vec3 scale() {
     return properties().scale();
   }
 
-  default Vec3d offset() {
+  default Vec3 offset() {
     return properties().offset();
   }
 
@@ -72,7 +72,7 @@ public interface Noise {
     if (!scale().equals(UNIT)) {
       stringJoiner.add("scale = " + StringUtil.wrapVector(scale()));
     }
-    if (!offset().equals(Vec3d.ZERO)) {
+    if (!offset().equals(Vec3.ZERO)) {
       stringJoiner.add("offset = " + StringUtil.wrapVector(offset()));
     }
     return stringJoiner.toString();
@@ -81,8 +81,8 @@ public interface Noise {
   /**
    * 返回用于采样的噪声对象。通常来说，该对象第一次生成时创建，然后被缓存。
    */
-  default DoublePerlinNoiseSampler getSampler(long seed) {
-    return SAMPLER_CACHE.computeIfAbsent(seed, x -> new WeakHashMap<>()).computeIfAbsent(noiseParameters(), noiseParameters -> DoublePerlinNoiseSampler.create(Random.create(seed), noiseParameters));
+  default NormalNoise getSampler(long seed) {
+    return SAMPLER_CACHE.computeIfAbsent(seed, x -> new WeakHashMap<>()).computeIfAbsent(noiseParameters(), noiseParameters -> NormalNoise.create(RandomSource.create(seed), noiseParameters));
   }
 
   default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, double x, double y, double z) {
@@ -91,17 +91,17 @@ public interface Noise {
   }
 
   default double getSampleValue(long seed, double x, double y, double z) {
-    final DoublePerlinNoiseSampler noiseSampler = getSampler(seed);
-    final Vec3d scale = scale();
+    final NormalNoise noiseSampler = getSampler(seed);
+    final Vec3 scale = scale();
     x -= offset().x;
     y -= offset().y;
     z -= offset().z;
-    double noiseValue = noiseSampler.sample(x * scale.x, y * scale.y, z * scale.z);
-    double d = MathHelper.clamp((1.0d + noiseValue) / 2.0d, 0.0F, 0.9999);
+    double noiseValue = noiseSampler.getValue(x * scale.x, y * scale.y, z * scale.z);
+    double d = Mth.clamp((1.0d + noiseValue) / 2.0d, 0.0F, 0.9999);
     return d;
   }
 
-  default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, Vec3d pos) {
+  default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, Vec3 pos) {
     return sample(seed, weightedList, pos.x, pos.y, pos.z);
   }
 
@@ -109,9 +109,9 @@ public interface Noise {
     protected OptionalLong seed = OptionalLong.empty();
     protected Integer firstOctave;
     protected DoubleList amplitudes;
-    protected Vec3d scale;
+    protected Vec3 scale;
     protected WeightedList<T> weightedList;
-    protected Vec3d offset;
+    protected Vec3 offset;
     protected final Set<String> SUPPORTED_PARAMS = ImmutableSet.of("first_octave", "amplitudes", "scale", "offset", "seed");
 
     protected abstract T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
@@ -181,11 +181,11 @@ public interface Noise {
       if (firstOctave == null) firstOctave = DEFAULT_FIRST_OCTAVE;
       if (amplitudes == null) amplitudes = DEFAULT_AMPLITUDES;
       if (scale == null) scale = UNIT;
-      if (offset == null) offset = Vec3d.ZERO;
+      if (offset == null) offset = Vec3.ZERO;
       return null;
     }
   }
 
-  record Properties(OptionalLong seed, DoublePerlinNoiseSampler.NoiseParameters noiseParameters, Vec3d scale, Vec3d offset) {
+  record Properties(OptionalLong seed, NormalNoise.NoiseParameters noiseParameters, Vec3 scale, Vec3 offset) {
   }
 }

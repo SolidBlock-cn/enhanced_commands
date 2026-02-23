@@ -2,10 +2,10 @@ package pers.solid.ecmd.function.property;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -19,7 +19,7 @@ public record AllOriginalPropertyFunction(@NotNull Set<Property<?>> except) impl
   }
 
   public static MapCodec<AllOriginalPropertyFunction> getCodec(Block block) {
-    return RecordCodecBuilder.mapCodec(i -> i.ap(AllOriginalPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateManager())).optionalFieldOf("except", Collections.emptySet()).forGetter(AllOriginalPropertyFunction::except)));
+    return RecordCodecBuilder.mapCodec(i -> i.ap(AllOriginalPropertyFunction::new, CodecUtil.set(CodecUtil.propertyForBlock(block.getStateDefinition())).optionalFieldOf("except", Collections.emptySet()).forGetter(AllOriginalPropertyFunction::except)));
   }
 
   @Override
@@ -28,9 +28,9 @@ public record AllOriginalPropertyFunction(@NotNull Set<Property<?>> except) impl
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, Random random) {
+  public BlockState getModifiedState(BlockState blockState, BlockState origState, RandomSource random) {
     for (Property<?> property : blockState.getProperties()) {
-      if (!except.contains(property) && origState.contains(property)) {
+      if (!except.contains(property) && origState.hasProperty(property)) {
         blockState = StateUtil.withPropertyOfValueFromAnother(blockState, origState, property);
       }
     }

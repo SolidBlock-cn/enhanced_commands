@@ -2,9 +2,9 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -19,16 +19,16 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate predicate) imple
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    return predicate.test(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), PositionProvider.of(entity), null));
+    return predicate.test(new BlockInWorld(entity.level(), entity.blockPosition(), false), new ExecutionContext(entity.getRandom(), PositionProvider.of(entity), null));
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), entity.getBlockPos(), false), new ExecutionContext(entity.getRandom(), PositionProvider.of(entity), null));
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    final TestResult testResult = predicate.testAndDescribe(new BlockInWorld(entity.level(), entity.blockPosition(), false), new ExecutionContext(entity.getRandom(), PositionProvider.of(entity), null));
     if (testResult.successes()) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.block.pass", displayName, TextUtil.wrapVector(entity.getBlockPos())), List.of(testResult));
+      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.block.pass", displayName, TextUtil.wrapVector(entity.blockPosition())), List.of(testResult));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.block.fail", displayName, TextUtil.wrapVector(entity.getBlockPos())), List.of(testResult));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.block.fail", displayName, TextUtil.wrapVector(entity.blockPosition())), List.of(testResult));
     }
   }
 

@@ -5,9 +5,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import pers.solid.ecmd.math.WeightedList;
-import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;
 import java.util.List;

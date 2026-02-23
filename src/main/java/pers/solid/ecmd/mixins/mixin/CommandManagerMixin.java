@@ -5,12 +5,12 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.context.ContextChain;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,17 +22,17 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
-@Mixin(CommandManager.class)
+@Mixin(Commands.class)
 public abstract class CommandManagerMixin {
-  @Inject(method = "checkCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;literal(Ljava/lang/String;)Lnet/minecraft/text/MutableText;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/text/MutableText;formatted([Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/MutableText;")), locals = LocalCapture.CAPTURE_FAILSOFT)
-  private static void injectedAppendText(ParseResults<ServerCommandSource> parseResults, String command, ServerCommandSource source, CallbackInfoReturnable<ContextChain<ServerCommandSource>> cir, CommandSyntaxException commandSyntaxException, int i, MutableText mutableText) {
+  @Inject(method = "finishParsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;withStyle([Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;")), locals = LocalCapture.CAPTURE_FAILSOFT)
+  private static void injectedAppendText(ParseResults<CommandSourceStack> parseResults, String command, CommandSourceStack source, CallbackInfoReturnable<ContextChain<CommandSourceStack>> cir, CommandSyntaxException commandSyntaxException, int i, MutableComponent mutableText) {
     final int cursorEnd = ((CommandSyntaxExceptionExtension) commandSyntaxException).getCursorEnd$ec();
     if (cursorEnd >= i) {
-      mutableText.append(Text.literal("»").formatted(Formatting.DARK_RED));
+      mutableText.append(Component.literal("»").withStyle(ChatFormatting.DARK_RED));
     }
   }
 
-  @ModifyArg(method = "checkCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;literal(Ljava/lang/String;)Lnet/minecraft/text/MutableText;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/text/MutableText;formatted([Lnet/minecraft/util/Formatting;)Lnet/minecraft/text/MutableText;")))
+  @ModifyArg(method = "finishParsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;withStyle([Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;")))
   private static String modifiedGetErrorMessage(String string, @Local CommandSyntaxException commandSyntaxException, @Local int i) {
     if (commandSyntaxException != null) {
       final int cursorEnd = Math.min(commandSyntaxException.getInput().length(), ((CommandSyntaxExceptionExtension) commandSyntaxException).getCursorEnd$ec());
@@ -43,22 +43,22 @@ public abstract class CommandManagerMixin {
     return string;
   }
 
-  @Inject(method = "checkCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/MutableText;append(Lnet/minecraft/text/Text;)Lnet/minecraft/text/MutableText;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;literal(Ljava/lang/String;)Lnet/minecraft/text/MutableText;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/text/Text;translatable(Ljava/lang/String;)Lnet/minecraft/text/MutableText;")), locals = LocalCapture.CAPTURE_FAILSOFT)
-  private static void injectedAppendText(ParseResults<ServerCommandSource> parseResults, String command, ServerCommandSource source, CallbackInfoReturnable<ContextChain<ServerCommandSource>> cir, CommandSyntaxException commandSyntaxException, int i, MutableText mutableText, Text text) {
+  @Inject(method = "finishParsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;append(Lnet/minecraft/network/chat/Component;)Lnet/minecraft/network/chat/MutableComponent;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;")), locals = LocalCapture.CAPTURE_FAILSOFT)
+  private static void injectedAppendText(ParseResults<CommandSourceStack> parseResults, String command, CommandSourceStack source, CallbackInfoReturnable<ContextChain<CommandSourceStack>> cir, CommandSyntaxException commandSyntaxException, int i, MutableComponent mutableText, Component text) {
     final int cursorEnd = ((CommandSyntaxExceptionExtension) commandSyntaxException).getCursorEnd$ec();
     if (cursorEnd >= i) {
-      mutableText.append(Text.literal("«").formatted(Formatting.DARK_RED));
-      mutableText.append(Text.literal(commandSyntaxException.getInput().substring(cursorEnd, Math.min(cursorEnd + 10, commandSyntaxException.getInput().length()))));
+      mutableText.append(Component.literal("«").withStyle(ChatFormatting.DARK_RED));
+      mutableText.append(Component.literal(commandSyntaxException.getInput().substring(cursorEnd, Math.min(cursorEnd + 10, commandSyntaxException.getInput().length()))));
     }
   }
 
-  @ModifyExpressionValue(method = "execute", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;isDebugEnabled()Z", remap = false))
+  @ModifyExpressionValue(method = "performCommand", at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;isDebugEnabled()Z", remap = false))
   public boolean forceEnableDebugging(boolean original) {
     return true;
   }
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void storeCommandRegistryAccess(CommandManager.RegistrationEnvironment environment, CommandRegistryAccess registryAccess, CallbackInfo ci) {
+  private void storeCommandRegistryAccess(Commands.CommandSelection environment, CommandBuildContext registryAccess, CallbackInfo ci) {
     MixinShared.setWeakCommandRegistryAccess(registryAccess);
   }
 }

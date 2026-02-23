@@ -1,7 +1,7 @@
 package pers.solid.ecmd.util.codec;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.enums.CommandEnumType;
@@ -15,10 +15,10 @@ import java.util.function.Function;
  *   <li>枚举到字符串：{@link #byId}、{@link #byIdOrThrow}。</li>
  *   <li>字符串到枚举：{@link #asString}</li>
  * </ul>
- * <p>需要注意的是，本类并不直接继承 Mojang 的 {@link Codec} 类，也不要求枚举直接继承 {@link StringIdentifiable}。对于继承了 {@link StringIdentifiable} 的枚举，可直接使用 {@link StringIdentifiableCodec}，这个类也继承了 {@link Codec} 类。而对于没有继承 {@link StringIdentifiableCodec} 的枚举，可直接使用 {@link Simple}，并通过 lambda 的方式指定枚举与字符串之间的转化。</p>
+ * <p>需要注意的是，本类并不直接继承 Mojang 的 {@link Codec} 类，也不要求枚举直接继承 {@link StringRepresentable}。对于继承了 {@link StringRepresentable} 的枚举，可直接使用 {@link StringIdentifiableCodec}，这个类也继承了 {@link Codec} 类。而对于没有继承 {@link StringIdentifiableCodec} 的枚举，可直接使用 {@link Simple}，并通过 lambda 的方式指定枚举与字符串之间的转化。</p>
  * <p>本接口可用于 {@link CommandEnumType}，从而处理命令中的枚举与字符串的转化。</p>
  *
- * @param <E> 枚举的类型，通常（但不一定）继承 {@link StringIdentifiable}。
+ * @param <E> 枚举的类型，通常（但不一定）继承 {@link StringRepresentable}。
  */
 public interface EnumCodec<E extends Enum<E>> {
   /**
@@ -67,7 +67,7 @@ public interface EnumCodec<E extends Enum<E>> {
   String asString(@NotNull E value);
 
   /**
-   * 对于没有继承 {@link StringIdentifiable} 也不需要 {@link Codec} 的枚举，可以利用此类创建一个简单的，需要直接提供枚举常量与字符串 id 之间的转化形式（通常是 lambda 的形式）。
+   * 对于没有继承 {@link StringRepresentable} 也不需要 {@link Codec} 的枚举，可以利用此类创建一个简单的，需要直接提供枚举常量与字符串 id 之间的转化形式（通常是 lambda 的形式）。
    */
   record Simple<E extends Enum<E>>(Function<@Nullable String, @Nullable E> byId, Function<@NotNull E, @NotNull String> toId) implements EnumCodec<E> {
     @Override

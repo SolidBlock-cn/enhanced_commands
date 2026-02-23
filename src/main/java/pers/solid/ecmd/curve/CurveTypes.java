@@ -3,9 +3,9 @@ package pers.solid.ecmd.curve;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
-import net.minecraft.registry.Registry;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.FunctionsParser;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 public final class CurveTypes {
   public static final Map<String, Supplier<FunctionLikeParser<? extends CurveArgument<?>>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctions);
-  public static final Map<String, Text> FUNCTION_NAMES = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctionNames);
+  public static final Map<String, Component> FUNCTION_NAMES = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctionNames);
   public static final Parser<CurveArgument<?>> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
   public static final List<Parser<CurveArgument<?>>> PARSERS = Lists.newArrayList(FUNCTIONS_PARSER);
 
@@ -43,6 +43,6 @@ public final class CurveTypes {
   }
 
 
-  private static void registerFunctionNames(Map<String, Text> map) {
+  private static void registerFunctionNames(Map<String, Component> map) {
   }
 }

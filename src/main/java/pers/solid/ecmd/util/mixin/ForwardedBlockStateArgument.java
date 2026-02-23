@@ -1,11 +1,11 @@
 package pers.solid.ecmd.util.mixin;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.argument.BlockStateArgument;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.blocks.BlockInput;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.function.block.BlockFunction;
@@ -13,35 +13,35 @@ import pers.solid.ecmd.function.block.BlockFunctionContext;
 
 import java.util.Set;
 
-public class ForwardedBlockStateArgument extends BlockStateArgument {
+public class ForwardedBlockStateArgument extends BlockInput {
   private final BlockFunction blockFunction;
-  private ServerCommandSource source;
+  private CommandSourceStack source;
 
   public ForwardedBlockStateArgument(BlockFunction blockFunction) {
-    super(Blocks.AIR.getDefaultState(), Set.of(), null);
+    super(Blocks.AIR.defaultBlockState(), Set.of(), null);
     this.blockFunction = blockFunction;
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition) {
+  public boolean test(BlockInWorld cachedBlockPosition) {
     return true;
   }
 
   @Override
-  public boolean test(ServerWorld world, BlockPos pos) {
+  public boolean test(ServerLevel world, BlockPos pos) {
     return true;
   }
 
-  public void setSource(@NotNull ServerCommandSource source) {
+  public void setSource(@NotNull CommandSourceStack source) {
     this.source = source;
   }
 
   @Override
-  public boolean setBlockState(ServerWorld world, BlockPos pos, int flags) {
+  public boolean place(ServerLevel world, BlockPos pos, int flags) {
     if (blockFunction != null) {
       if (source == null) {
         EnhancedCommands.LOGGER.warn("Enhanced Commands: Invoking ForwardedBlockStateArgument.setBlockState without source specified! This may cause potential issues. It is usually called when invoking vanilla BlockStateArgumentType.getBlockState.");
-        source = world.getServer().getCommandSource();
+        source = world.getServer().createCommandSourceStack();
       }
       return blockFunction.setBlock(world, pos, new BlockFunctionContext(flags, 0, world.random, source, null));
     } else {

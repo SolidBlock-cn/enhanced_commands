@@ -4,8 +4,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -40,19 +40,19 @@ public record SubPredicateEntityPredicateEntry(EntityPredicate predicate, boolea
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
     final TestResult testResult = predicate.testAndDescribe(entity, context, displayName);
     if (inverted) {
       if (testResult.successes()) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sub_predicate.fail_inverted", displayName), Collections.singletonList(testResult));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.sub_predicate.fail_inverted", displayName), Collections.singletonList(testResult));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.sub_predicate.pass_inverted", displayName), Collections.singletonList(testResult));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.sub_predicate.pass_inverted", displayName), Collections.singletonList(testResult));
       }
     } else {
       if (testResult.successes()) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.sub_predicate.pass", displayName), Collections.singletonList(testResult));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.sub_predicate.pass", displayName), Collections.singletonList(testResult));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.sub_predicate.fail", displayName), Collections.singletonList(testResult));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.sub_predicate.fail", displayName), Collections.singletonList(testResult));
       }
     }
   }

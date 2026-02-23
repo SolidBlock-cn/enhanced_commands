@@ -2,9 +2,9 @@ package pers.solid.ecmd.predicate.nbt;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
-import net.minecraft.registry.Registry;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 
@@ -15,7 +15,7 @@ import java.util.Map;
 public class NbtPredicateTypes {
 
   public static final Map<String, Supplier<FunctionLikeParser<? extends NbtPredicate>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtPredicateTypes::registerPredicates);
-  public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtPredicateTypes::registerFunctionNames);
+  public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtPredicateTypes::registerFunctionNames);
 
   // 基本的 NBT 谓词
   public static final NbtPredicateType<ComparisonNbtPredicate> COMPARISON = register("comparison", ComparisonNbtPredicate.Type.COMPARISON_TYPE);
@@ -41,7 +41,7 @@ public class NbtPredicateTypes {
 
   }
 
-  private static void registerFunctionNames(Map<String, Text> map) {
+  private static void registerFunctionNames(Map<String, Component> map) {
 
   }
 }

@@ -8,12 +8,12 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.ArgumentTypes;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -22,63 +22,63 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class KeywordArgsArgumentSerializer implements ArgumentSerializer<KeywordArgsArgumentType, KeywordArgsArgumentSerializer.Properties> {
+public class KeywordArgsArgumentSerializer implements ArgumentTypeInfo<KeywordArgsArgumentType, KeywordArgsArgumentSerializer.Properties> {
   public static final KeywordArgsArgumentSerializer INSTANCE = new KeywordArgsArgumentSerializer();
 
   private KeywordArgsArgumentSerializer() {
   }
 
   @Override
-  public void writePacket(Properties properties, PacketByteBuf buf) {
+  public void serializeToNetwork(Properties properties, FriendlyByteBuf buf) {
     buf.writeInt(properties.arguments.size());
 
     properties.arguments.forEach((argName, properties0) -> {
-      buf.writeString(argName);
+      buf.writeUtf(argName);
       buf.writeBoolean(properties.requiredArguments.contains(argName));
       write(properties0, buf);
     });
 
-    buf.writeCollection(properties.shared, PacketByteBuf::writeIdentifier);
+    buf.writeCollection(properties.shared, FriendlyByteBuf::writeResourceLocation);
   }
 
 
-  private static <A extends ArgumentType<?>> void write(ArgumentSerializer.ArgumentTypeProperties<A> properties, PacketByteBuf buf) {
-    write(properties.getSerializer(), properties, buf);
+  private static <A extends ArgumentType<?>> void write(ArgumentTypeInfo.Template<A> properties, FriendlyByteBuf buf) {
+    write(properties.type(), properties, buf);
   }
 
   @SuppressWarnings("unchecked")
-  private static <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void write(ArgumentSerializer<A, T> serializer, ArgumentTypeProperties<A> properties, PacketByteBuf buf) {
-    buf.writeIdentifier(Registries.COMMAND_ARGUMENT_TYPE.getId(serializer));
-    serializer.writePacket((T) properties, buf);
+  private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void write(ArgumentTypeInfo<A, T> serializer, Template<A> properties, FriendlyByteBuf buf) {
+    buf.writeResourceLocation(BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getKey(serializer));
+    serializer.serializeToNetwork((T) properties, buf);
   }
 
   @Override
-  public Properties fromPacket(PacketByteBuf buf) {
+  public @NotNull Properties deserializeFromNetwork(FriendlyByteBuf buf) {
     final int size = buf.readInt();
-    final Map<@NotNull String, ArgumentTypeProperties<?>> arguments = new LinkedHashMap<>(size);
+    final Map<@NotNull String, Template<?>> arguments = new LinkedHashMap<>(size);
     final Set<@NotNull String> requiredArguments = new HashSet<>();
     for (int i = 0; i < size; i++) {
-      final String argName = buf.readString();
+      final String argName = buf.readUtf();
       final boolean isRequired = buf.readBoolean();
-      final Identifier serializerId = buf.readIdentifier();
-      final ArgumentSerializer<?, ?> serializer = Registries.COMMAND_ARGUMENT_TYPE.get(serializerId);
+      final ResourceLocation serializerId = buf.readResourceLocation();
+      final ArgumentTypeInfo<?, ?> serializer = BuiltInRegistries.COMMAND_ARGUMENT_TYPE.get(serializerId);
       if (serializer == null) {
         throw new IllegalArgumentException("Unknown serializer id: " + serializerId);
       }
-      final ArgumentTypeProperties<?> properties = serializer.fromPacket(buf);
+      final Template<?> properties = serializer.deserializeFromNetwork(buf);
       arguments.put(argName, properties);
       if (isRequired) {
         requiredArguments.add(argName);
       }
     }
 
-    final Set<Identifier> shared = buf.readCollection(HashSet::new, PacketByteBuf::readIdentifier);
+    final Set<ResourceLocation> shared = buf.readCollection(HashSet::new, FriendlyByteBuf::readResourceLocation);
 
     return new Properties(arguments, requiredArguments, shared);
   }
 
   @Override
-  public void writeJson(Properties properties, JsonObject json) {
+  public void serializeToJson(Properties properties, JsonObject json) {
     final JsonArray arguments = new JsonArray();
     final JsonArray requiredArguments = new JsonArray();
     final JsonArray shared = new JsonArray();
@@ -88,7 +88,7 @@ public class KeywordArgsArgumentSerializer implements ArgumentSerializer<Keyword
     for (String name : properties.requiredArguments) {
       requiredArguments.add(name);
     }
-    for (Identifier identifier : properties.shared) {
+    for (ResourceLocation identifier : properties.shared) {
       shared.add(identifier.toString());
     }
     json.add("arguments", arguments);
@@ -97,32 +97,32 @@ public class KeywordArgsArgumentSerializer implements ArgumentSerializer<Keyword
   }
 
   @Override
-  public Properties getArgumentTypeProperties(KeywordArgsArgumentType argumentType) {
-    final Set<Identifier> shared = argumentType.shared();
+  public @NotNull Properties unpack(KeywordArgsArgumentType argumentType) {
+    final Set<ResourceLocation> shared = argumentType.shared();
     if (shared.isEmpty()) {
-      return new Properties(Maps.transformValues(argumentType.arguments(), ArgumentTypes::getArgumentTypeProperties), argumentType.requiredArguments(), shared);
+      return new Properties(Maps.transformValues(argumentType.arguments(), ArgumentTypeInfos::unpack), argumentType.requiredArguments(), shared);
     } else {
       final Set<String> argumentsFromShared = argumentType.argumentsFromShared();
       final Predicate<String> notFromShared = s -> !argumentsFromShared.contains(s);
 
-      return new Properties(Maps.transformValues(Maps.filterKeys(argumentType.arguments(), notFromShared), ArgumentTypes::getArgumentTypeProperties), Sets.filter(argumentType.requiredArguments(), notFromShared), shared);
+      return new Properties(Maps.transformValues(Maps.filterKeys(argumentType.arguments(), notFromShared), ArgumentTypeInfos::unpack), Sets.filter(argumentType.requiredArguments(), notFromShared), shared);
     }
   }
 
-  public final class Properties implements ArgumentTypeProperties<KeywordArgsArgumentType> {
-    private final @Unmodifiable Map<@NotNull String, ArgumentTypeProperties<?>> arguments;
+  public final class Properties implements ArgumentTypeInfo.Template<KeywordArgsArgumentType> {
+    private final @Unmodifiable Map<@NotNull String, Template<?>> arguments;
     private final @Unmodifiable Set<@NotNull String> requiredArguments;
-    private final @Unmodifiable Set<Identifier> shared;
+    private final @Unmodifiable Set<ResourceLocation> shared;
 
-    public Properties(Map<@NotNull String, ArgumentTypeProperties<?>> arguments, Set<@NotNull String> requiredArguments, Set<Identifier> shared) {
+    public Properties(Map<@NotNull String, Template<?>> arguments, Set<@NotNull String> requiredArguments, Set<ResourceLocation> shared) {
       this.arguments = arguments;
       this.requiredArguments = requiredArguments;
       this.shared = shared;
     }
 
     @Override
-    public KeywordArgsArgumentType createType(CommandRegistryAccess registryAccess) {
-      final ImmutableMap<@NotNull String, ArgumentType<?>> arguments1 = ImmutableMap.copyOf(Maps.transformValues(arguments, s -> s.createType(registryAccess)));
+    public @NotNull KeywordArgsArgumentType instantiate(CommandBuildContext registryAccess) {
+      final ImmutableMap<@NotNull String, ArgumentType<?>> arguments1 = ImmutableMap.copyOf(Maps.transformValues(arguments, s -> s.instantiate(registryAccess)));
       if (shared.isEmpty()) {
         return new KeywordArgsArgumentType(arguments1, requiredArguments, ImmutableMap.of(), shared, ImmutableSet.of());
       } else {
@@ -133,7 +133,7 @@ public class KeywordArgsArgumentSerializer implements ArgumentSerializer<Keyword
             ImmutableSet.builder(),
             ImmutableSet.builder()
         );
-        for (Identifier identifier : shared) {
+        for (ResourceLocation identifier : shared) {
           builder.addShared(KeywordArgsCommon.getByIdOrThrow(identifier), registryAccess);
         }
         return builder.build();
@@ -141,7 +141,7 @@ public class KeywordArgsArgumentSerializer implements ArgumentSerializer<Keyword
     }
 
     @Override
-    public ArgumentSerializer<KeywordArgsArgumentType, ?> getSerializer() {
+    public @NotNull ArgumentTypeInfo<KeywordArgsArgumentType, ?> type() {
       return KeywordArgsArgumentSerializer.this;
     }
   }

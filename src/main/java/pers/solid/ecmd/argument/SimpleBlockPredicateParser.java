@@ -7,29 +7,29 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.property.*;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 /**
- * @see net.minecraft.command.argument.BlockArgumentParser
+ * @see net.minecraft.commands.arguments.blocks.BlockStateParser
  */
 public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
-  public static final Text MATCH_ANY_VALUE = Text.translatable("enhanced_commands.block_predicate.any_value");
-  public static final Text MATCH_NONE_VALUE = Text.translatable("enhanced_commands.block_predicate.none_value");
+  public static final Component MATCH_ANY_VALUE = Component.translatable("enhanced_commands.block_predicate.any_value");
+  public static final Component MATCH_NONE_VALUE = Component.translatable("enhanced_commands.block_predicate.none_value");
   public final List<PropertyPredicate<?>> propertyPredicates = new ArrayList<>();
   public final List<PropertyNamePredicate> propertyNamePredicates = new ArrayList<>();
 
@@ -90,11 +90,11 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
       parseContext.addSuggestion((context, suggestionsBuilder) -> suggestValuesForProperty(property, suggestionsBuilder, t -> !values.contains(t)));
       final int cursorBeforeParseValue = reader.getCursor();
       final String valueName = reader.readString();
-      final Optional<T> parse = property.parse(valueName);
+      final Optional<T> parse = property.getValue(valueName);
       final int cursorAfterParseValue = reader.getCursor();
       if (parse.isEmpty()) {
         reader.setCursor(cursorBeforeParseValue);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
+        throw CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_INVALID_VALUE.createWithContext(reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
       } else if (values.contains(parse.get())) {
         reader.setCursor(cursorBeforeParseValue);
         throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, valueName), cursorAfterParseValue);
@@ -122,7 +122,7 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
 
 
   protected static <T extends Comparable<T>> CompletableFuture<Suggestions> suggestValuesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder, Predicate<T> predicate) {
-    return CommandSource.suggestMatching(property.getValues().stream().filter(predicate).map(property::name), suggestionsBuilder);
+    return SharedSuggestionProvider.suggest(property.getPossibleValues().stream().filter(predicate).map(property::getName), suggestionsBuilder);
   }
 
   private void addSpecialPropertyValueSuggestions() {
@@ -166,9 +166,9 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
     final LinkedHashSet<String> values = new LinkedHashSet<>(1);
     final SuggestionProvider<S> propertyValueSuggestion = (context, builder) -> {
       if (tagId != null) {
-        for (RegistryEntry<Block> registryEntry : this.tagId) {
+        for (Holder<Block> registryEntry : this.tagId) {
           Block block = registryEntry.value();
-          Property<?> property = block.getStateManager().getProperty(propertyName);
+          Property<?> property = block.getStateDefinition().getProperty(propertyName);
           if (property != null) {
             suggestValueNamesForProperty(property, builder, s -> !values.contains(s));
           }
@@ -215,11 +215,11 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
   }
 
   protected static <T extends Comparable<T>> void suggestValueNamesForProperty(Property<T> property, SuggestionsBuilder suggestionsBuilder, Predicate<String> predicate) {
-    CommandSource.suggestMatching(property.getValues().stream().map(property::name).filter(predicate), suggestionsBuilder);
+    SharedSuggestionProvider.suggest(property.getPossibleValues().stream().map(property::getName).filter(predicate), suggestionsBuilder);
   }
 
   @Override
   protected void addComparatorTypeSuggestions() {
-    parseContext.addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).map(Comparator::asString), suggestionsBuilder));
+    parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(Arrays.stream(Comparator.values()).map(Comparator::getSerializedName), suggestionsBuilder));
   }
 }

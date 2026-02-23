@@ -5,10 +5,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.BlockPredicateArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +21,7 @@ import pers.solid.ecmd.util.mixin.ForwardingBlockPredicateArgument;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-@Mixin(BlockPredicateArgumentType.class)
+@Mixin(BlockPredicateArgument.class)
 public abstract class BlockPredicateArgumentTypeMixin implements ArgumentTypeExtension {
   @Unique
   private pers.solid.ecmd.argument.BlockPredicateArgumentType modArgumentType;
@@ -29,12 +29,12 @@ public abstract class BlockPredicateArgumentTypeMixin implements ArgumentTypeExt
   private boolean extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void injectedInit(CommandRegistryAccess registryAccess, CallbackInfo ci) {
+  private void injectedInit(CommandBuildContext registryAccess, CallbackInfo ci) {
     this.modArgumentType = new pers.solid.ecmd.argument.BlockPredicateArgumentType(registryAccess);
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/BlockPredicateArgumentType$BlockPredicate;", at = @At("HEAD"), cancellable = true)
-  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<BlockPredicateArgumentType.BlockPredicate> cir) throws CommandSyntaxException {
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/blocks/BlockPredicateArgument$Result;", at = @At("HEAD"), cancellable = true)
+  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<BlockPredicateArgument.Result> cir) throws CommandSyntaxException {
     if (modArgumentType != null && extension) {
       cir.setReturnValue(new ForwardingBlockPredicateArgument(modArgumentType.parse(stringReader)));
     }
@@ -47,8 +47,8 @@ public abstract class BlockPredicateArgumentTypeMixin implements ArgumentTypeExt
   }
 
   @Inject(method = "getBlockPredicate", at = @At("RETURN"))
-  private static void injectedGetBlockPredicate(CommandContext<ServerCommandSource> context, String name, CallbackInfoReturnable<Predicate<CachedBlockPosition>> cir) throws CommandSyntaxException {
-    final Predicate<CachedBlockPosition> returnValue = cir.getReturnValue();
+  private static void injectedGetBlockPredicate(CommandContext<CommandSourceStack> context, String name, CallbackInfoReturnable<Predicate<BlockInWorld>> cir) throws CommandSyntaxException {
+    final Predicate<BlockInWorld> returnValue = cir.getReturnValue();
     if (returnValue instanceof ForwardingBlockPredicateArgument forwardedBlockStateArgument) {
       forwardedBlockStateArgument.setSource(context.getSource());
     }

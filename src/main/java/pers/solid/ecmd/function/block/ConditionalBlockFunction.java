@@ -3,11 +3,11 @@ package pers.solid.ecmd.function.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -33,8 +33,8 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, pos, false);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    final BlockInWorld cachedBlockPosition = new BlockInWorld(world, pos, false);
     if (condition.test(cachedBlockPosition, context)) {
       return functionIfTrue.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     } else {

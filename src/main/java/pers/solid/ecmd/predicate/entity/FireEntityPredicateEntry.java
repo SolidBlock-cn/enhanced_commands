@@ -3,15 +3,15 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 
 public record FireEntityPredicateEntry(BridgeIntRange time, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
-  public static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.fire");
+  public static final Component CRITERION_NAME = Component.translatable("enhanced_commands.entity_predicate.fire");
   public static final MapCodec<FireEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       BridgeIntRange.CODEC.fieldOf("time").forGetter(FireEntityPredicateEntry::time),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(FireEntityPredicateEntry::inverted)
@@ -19,12 +19,12 @@ public record FireEntityPredicateEntry(BridgeIntRange time, boolean inverted) im
 
   @Override
   public boolean test(@NotNull Entity entity) {
-    return time.test(entity.getFireTicks()) != inverted;
+    return time.test(entity.getRemainingFireTicks()) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
-    return EntityPredicateEntry.testInt(entity, entity.getFireTicks(), time, CRITERION_NAME, displayName, inverted);
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+    return EntityPredicateEntry.testInt(entity, entity.getRemainingFireTicks(), time, CRITERION_NAME, displayName, inverted);
   }
 
   @Override

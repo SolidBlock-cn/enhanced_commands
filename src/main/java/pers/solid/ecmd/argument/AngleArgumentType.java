@@ -7,10 +7,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.ArgumentHelper;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentUtils;
+import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.parse.ParseContext;
@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record AngleArgumentType(boolean returnRadians, double min, double max) implements ArgumentType<Double>, ArgumentSerializer.ArgumentTypeProperties<AngleArgumentType> {
+public record AngleArgumentType(boolean returnRadians, double min, double max) implements ArgumentType<Double>, ArgumentTypeInfo.Template<AngleArgumentType> {
   public static AngleArgumentType angle(boolean returnRadians, double minimum, double maximum) {
     return new AngleArgumentType(returnRadians, minimum, maximum);
   }
@@ -76,27 +76,27 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   }
 
   @Override
-  public AngleArgumentType createType(CommandRegistryAccess registryAccess) {
+  public AngleArgumentType instantiate(CommandBuildContext registryAccess) {
     return this;
   }
 
   @Override
-  public Serializer getSerializer() {
+  public Serializer type() {
     return Serializer.INSTANCE;
   }
 
-  public static class Serializer implements ArgumentSerializer<AngleArgumentType, AngleArgumentType> {
+  public static class Serializer implements ArgumentTypeInfo<AngleArgumentType, AngleArgumentType> {
     public static final Serializer INSTANCE = new Serializer();
 
     private Serializer() {
     }
 
     @Override
-    public void writePacket(AngleArgumentType properties, PacketByteBuf buf) {
+    public void serializeToNetwork(AngleArgumentType properties, FriendlyByteBuf buf) {
       buf.writeBoolean(properties.returnRadians);
       boolean hasMin = properties.min != Double.NEGATIVE_INFINITY;
       boolean hasMax = properties.max != Double.POSITIVE_INFINITY;
-      buf.writeByte(ArgumentHelper.getMinMaxFlag(hasMin, hasMax));
+      buf.writeByte(ArgumentUtils.createNumberFlags(hasMin, hasMax));
       if (hasMin) {
         buf.writeDouble(properties.min);
       }
@@ -107,16 +107,16 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
     }
 
     @Override
-    public AngleArgumentType fromPacket(PacketByteBuf buf) {
+    public AngleArgumentType deserializeFromNetwork(FriendlyByteBuf buf) {
       final boolean returnRadians = buf.readBoolean();
       byte b = buf.readByte();
-      double d = ArgumentHelper.hasMinFlag(b) ? buf.readDouble() : Double.NEGATIVE_INFINITY;
-      double e = ArgumentHelper.hasMaxFlag(b) ? buf.readDouble() : Double.POSITIVE_INFINITY;
+      double d = ArgumentUtils.numberHasMin(b) ? buf.readDouble() : Double.NEGATIVE_INFINITY;
+      double e = ArgumentUtils.numberHasMax(b) ? buf.readDouble() : Double.POSITIVE_INFINITY;
       return new AngleArgumentType(returnRadians, d, e);
     }
 
     @Override
-    public void writeJson(AngleArgumentType properties, JsonObject json) {
+    public void serializeToJson(AngleArgumentType properties, JsonObject json) {
       json.addProperty("radians", properties.returnRadians);
       if (properties.min != Double.NEGATIVE_INFINITY) {
         json.addProperty("min", properties.min);
@@ -128,7 +128,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
     }
 
     @Override
-    public AngleArgumentType getArgumentTypeProperties(AngleArgumentType argumentType) {
+    public AngleArgumentType unpack(AngleArgumentType argumentType) {
       return argumentType;
     }
   }

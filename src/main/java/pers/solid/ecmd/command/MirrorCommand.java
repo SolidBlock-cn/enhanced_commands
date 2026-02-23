@@ -4,21 +4,21 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.api.FlipStateCallback;
 import pers.solid.ecmd.argument.*;
@@ -26,14 +26,14 @@ import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.GeoUtil;
 
-import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum MirrorCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
         .addOptionalArg("pivot", EnhancedPosArgumentType.blockPos(), EnhancedPosArgumentType.CURRENT_POS)
         .build();
@@ -50,12 +50,12 @@ public enum MirrorCommand implements CommandRegistrationCallback {
     );
   }
 
-  public static int executeMirror(Direction.Axis axis, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static int executeMirror(Direction.Axis axis, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return executeMirror(RegionArgumentType.getRegion(context, "region"), axis, keywordArgs, context);
   }
 
-  public static int executeMirror(Region region, Direction.Axis axis, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final BlockPos pivot = keywordArgs.<PosArgument>getArg("pivot").toAbsoluteBlockPos(context.getSource());
+  public static int executeMirror(Region region, Direction.Axis axis, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final BlockPos pivot = keywordArgs.<Coordinates>getArg("pivot").getBlockPos(context.getSource());
     return new BlockTransformationCommand() {
       @Override
       public Vec3i transformBlockPos(Vec3i original) {
@@ -63,31 +63,31 @@ public enum MirrorCommand implements CommandRegistrationCallback {
       }
 
       @Override
-      public Vec3d transformPos(Vec3d original) {
-        return GeoUtil.mirror(original, axis, pivot.toCenterPos());
+      public Vec3 transformPos(Vec3 original) {
+        return GeoUtil.mirror(original, axis, pivot.getCenter());
       }
 
       @Override
-      public Vec3d transformPosBack(Vec3d transformed) {
-        return GeoUtil.mirror(transformed, axis, pivot.toCenterPos());
+      public Vec3 transformPosBack(Vec3 transformed) {
+        return GeoUtil.mirror(transformed, axis, pivot.getCenter());
       }
 
       @Override
       public void transformEntity(@NotNull Entity entity) {
-        final float newYaw = entity.applyMirror(switch (axis) {
-          case X -> BlockMirror.FRONT_BACK;
-          case Z -> BlockMirror.LEFT_RIGHT;
-          default -> BlockMirror.NONE;
+        final float newYaw = entity.mirror(switch (axis) {
+          case X -> Mirror.FRONT_BACK;
+          case Z -> Mirror.LEFT_RIGHT;
+          default -> Mirror.NONE;
         });
-        final float newPitch = axis == Direction.Axis.Y ? -entity.getPitch() : entity.getPitch();
-        if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, newPitch, PositionFlag.VALUES);
+        final float newPitch = axis == Direction.Axis.Y ? -entity.getXRot() : entity.getXRot();
+        if (entity instanceof ServerPlayer serverPlayerEntity) {
+          serverPlayerEntity.connection.teleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, newPitch, RelativeMovement.ALL);
         } else {
-          entity.setYaw(newYaw);
+          entity.setYRot(newYaw);
           if (axis == Direction.Axis.Y) {
-            entity.setPos(entity.getX(), entity.getY(), entity.getZ());
-            entity.setPitch(newPitch);
-            entity.resetPosition();
+            entity.setPosRaw(entity.getX(), entity.getY(), entity.getZ());
+            entity.setXRot(newPitch);
+            entity.setOldPosAndRot();
           }
         }
       }
@@ -104,21 +104,21 @@ public enum MirrorCommand implements CommandRegistrationCallback {
 
       @Override
       public @NotNull Region transformRegion(@NotNull Region region) {
-        return region.mirrored(axis, pivot.toCenterPos());
+        return region.mirrored(axis, pivot.getCenter());
       }
 
       @Override
-      public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
+      public void notifyCompletion(CommandSourceStack source, int affectedBlocks, int affectedEntities) {
         if (affectedEntities == -1) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.mirror.complete", Integer.toString(affectedBlocks)).enhanced$$(), true);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.mirror.complete", Integer.toString(affectedBlocks)).enhanced$$(), true);
         } else {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.mirror.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), true);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.mirror.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), true);
         }
       }
 
       @Override
-      public @NotNull MutableText getIteratorTaskName(Region region) {
-        return Text.translatable("enhanced_commands.commands.mirror.task", region.asString());
+      public @NotNull MutableComponent getIteratorTaskName(Region region) {
+        return Component.translatable("enhanced_commands.commands.mirror.task", region.asString());
       }
     }.execute(region, keywordArgs, context);
   }

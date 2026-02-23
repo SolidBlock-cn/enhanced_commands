@@ -3,8 +3,8 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionArgument;
@@ -23,16 +23,16 @@ public record RegionEntityPredicateEntry(@NotNull RegionArgument<?> region) impl
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    return Region.getCached(region, context.positionProvider).contains(entity.getPos());
+    return Region.getCached(region, context.positionProvider).contains(entity.position());
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
     final Region cached = Region.getCached(region, context.positionProvider);
-    if (cached.contains(entity.getPos())) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.region.true", displayName, cached.asString()));
+    if (cached.contains(entity.position())) {
+      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.region.true", displayName, cached.asString()));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.region.false", displayName, cached.asString()));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.region.false", displayName, cached.asString()));
     }
   }
 

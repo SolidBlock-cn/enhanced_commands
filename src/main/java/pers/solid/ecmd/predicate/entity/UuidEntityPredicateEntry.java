@@ -2,9 +2,9 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -16,20 +16,20 @@ import java.util.UUID;
  * 主要用于没有使用实体选择器参数而是直接指定 uuid 的情形。
  */
 public record UuidEntityPredicateEntry(@NotNull UUID uuid) implements SpecialEntityPredicate, StaticEntityPredicate {
-  public static final MapCodec<UuidEntityPredicateEntry> CODEC = Uuids.CODEC.fieldOf("uuid").xmap(UuidEntityPredicateEntry::new, UuidEntityPredicateEntry::uuid);
+  public static final MapCodec<UuidEntityPredicateEntry> CODEC = UUIDUtil.AUTHLIB_CODEC.fieldOf("uuid").xmap(UuidEntityPredicateEntry::new, UuidEntityPredicateEntry::uuid);
 
   @Override
   public boolean test(@NotNull Entity entity) {
-    return entity.getUuid().equals(uuid);
+    return entity.getUUID().equals(uuid);
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final UUID actual = entity.getUuid();
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    final UUID actual = entity.getUUID();
     if (uuid.equals(actual)) {
-      return (TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.uuid.true", displayName, actual)));
+      return (TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.uuid.true", displayName, actual)));
     } else {
-      return (TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.uuid.false", displayName, Text.literal(actual.toString()).styled(Styles.ACTUAL), Text.literal(uuid.toString()).styled(Styles.EXPECTED))));
+      return (TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.uuid.false", displayName, Component.literal(actual.toString()).withStyle(Styles.ACTUAL), Component.literal(uuid.toString()).withStyle(Styles.EXPECTED))));
     }
   }
 

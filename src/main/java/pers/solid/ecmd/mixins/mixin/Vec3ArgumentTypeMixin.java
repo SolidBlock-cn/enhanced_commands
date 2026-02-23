@@ -5,8 +5,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.command.argument.Vec3ArgumentType;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +18,7 @@ import pers.solid.ecmd.util.mixin.ArgumentTypeExtension;
 
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(Vec3ArgumentType.class)
+@Mixin(Vec3Argument.class)
 public abstract class Vec3ArgumentTypeMixin implements ArgumentTypeExtension {
   @Unique
   private EnhancedPosArgumentType modArgumentType;
@@ -30,8 +30,8 @@ public abstract class Vec3ArgumentTypeMixin implements ArgumentTypeExtension {
     modArgumentType = new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.PREFER_DOUBLE, centerIntegers ? EnhancedPosArgumentType.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgumentType.IntAlignType.UNCHANGED);
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/command/argument/PosArgument;", at = @At("HEAD"), cancellable = true)
-  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<PosArgument> cir) throws CommandSyntaxException {
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/coordinates/Coordinates;", at = @At("HEAD"), cancellable = true)
+  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<Coordinates> cir) throws CommandSyntaxException {
     if (modArgumentType != null && extension) {
       cir.setReturnValue(modArgumentType.parse(stringReader));
     }

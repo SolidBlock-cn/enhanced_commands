@@ -25,6 +25,6 @@ public record HollowCylinderRegionArgument(@NotNull OutlineType outlineType, @No
 
   @Override
   public @NotNull String asString() {
-    return "hcyl(" + StringUtil.nf.format(region.radius()) + ", " + StringUtil.nf.format(region.height()) + ", " + region.center().asString() + ", " + outlineType.asString() + ")";
+    return "hcyl(" + StringUtil.nf.format(region.radius()) + ", " + StringUtil.nf.format(region.height()) + ", " + region.center().asString() + ", " + outlineType.getSerializedName() + ")";
   }
 }

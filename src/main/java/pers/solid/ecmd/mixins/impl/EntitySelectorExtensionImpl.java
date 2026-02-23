@@ -1,6 +1,6 @@
 package pers.solid.ecmd.mixins.impl;
 
-import net.minecraft.command.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import pers.solid.ecmd.mixins.ext.EntitySelectorExtension;
