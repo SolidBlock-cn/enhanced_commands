@@ -11,17 +11,17 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +45,7 @@ import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.List;
 
-import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.argument.RegionArgumentType.region;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
@@ -55,14 +55,14 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final int SUPPRESS_INITIAL_CHECK_FLAG = 2;
   public static final int SUPPRESS_REPLACED_CHECK_FLAG = 4;
 
-  public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.commands.setblocks.region_too_large", a, b));
+  public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("enhanced_commands.commands.setblocks.region_too_large", a, b));
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
-    LiteralArgumentBuilder<ServerCommandSource> directBuilder = literalR2("setblocks");
-    LiteralArgumentBuilder<ServerCommandSource> indirectBuilder = literalR2("/setblocks");
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+    LiteralArgumentBuilder<CommandSourceStack> directBuilder = literalR2("setblocks");
+    LiteralArgumentBuilder<CommandSourceStack> indirectBuilder = literalR2("/setblocks");
     final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess).build();
-    final LiteralCommandNode<ServerCommandSource> setBlocksNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(registryAccess)).then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+    final LiteralCommandNode<CommandSourceStack> setBlocksNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(registryAccess)).then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
         .executes(context -> execute(context, null))
         .then(argument("keyword_args", keywordArgs)
             .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build()).build());
@@ -90,38 +90,38 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   /**
    * Execute the command with the default parameters.
    */
-  private static int execute(CommandContext<ServerCommandSource> context, @Nullable BlockPredicate predicate) throws CommandSyntaxException {
+  private static int execute(CommandContext<CommandSourceStack> context, @Nullable BlockPredicate predicate) throws CommandSyntaxException {
     return setBlocksWithDefaultKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate);
   }
 
   /**
    * Execute the command with the parameters read from args.
    */
-  private static int execute(CommandContext<ServerCommandSource> context, @Nullable BlockPredicate predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
+  private static int execute(CommandContext<CommandSourceStack> context, @Nullable BlockPredicate predicate, KeywordArgs kwArgs) throws CommandSyntaxException {
     if (kwArgs.supportsArg("affect_only") && kwArgs.getArg("affect_only") instanceof BlockPredicate blockPredicate) {
       predicate = predicate == null ? blockPredicate : new AllBlockPredicate(List.of(blockPredicate, predicate));
     }
     return setBlocksFromKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate, kwArgs);
   }
 
-  public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
+  public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
 
-  public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate replacingTarget) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, replacingTarget, false, false, new BlockFunctionContext(Block.NOTIFY_LISTENERS, 0, source.getWorld().getRandom(), source, null), UnloadedPosBehavior.REJECT, true);
+  public static int setBlocksWithDefaultKeywordArgs(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate replacingTarget) throws CommandSyntaxException {
+    return setBlocksInRegion(region, blockFunction, source, replacingTarget, false, false, new BlockFunctionContext(Block.UPDATE_CLIENTS, 0, source.getLevel().getRandom(), source, null), UnloadedPosBehavior.REJECT, true);
   }
 
-  public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate replacingTarget, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, replacingTarget, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getWorld().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
+  public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate replacingTarget, KeywordArgs kwArgs) throws CommandSyntaxException {
+    return setBlocksInRegion(region, blockFunction, source, replacingTarget, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getLevel().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
-  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
+  public static int setBlocksInRegion(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
     final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
     if (!bypassLimit && region.numberOfBlocksAffected() > regionSizeLimit) {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
     }
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
-      final BlockBox box = region.minContainingBlockBox();
+      final BoundingBox box = region.minContainingBlockBox();
       if (box != null && !LoadUtil.isPosLoaded(world, box)) {
         throw UNLOADED_POS.create();
       }
@@ -133,13 +133,13 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
 
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       posIterable = new BatchedFilterIterable<>(region, 16, blockPos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+        final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       posIterable = Iterables.transform(region, blockPos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+        final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloaded.setTrue();
           throw new UnloadedPosException(blockPos);
@@ -150,13 +150,13 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       posIterable = region;
     }
 
-    final Text taskName = Text.translatable("enhanced_commands.commands.setblocks.task_name", region.asString());
+    final Component taskName = Component.translatable("enhanced_commands.commands.setblocks.task_name", region.asString());
     final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, context.flags, context.modFlags) : null;
 
     // 第一部分：收集 oldStates
 
     final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
-    final BlockPos.Mutable mutable = new BlockPos.Mutable();
+    final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
     final Iterable<Void> collectPosToAffect;
     if (predicate == null) {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
@@ -165,9 +165,9 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       });
     } else {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
-        final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-        if (cachedBlockPosition.getBlockState() != null && predicate.test(cachedBlockPosition, context)) {
-          oldStates.put(blockPos.asLong(), cachedBlockPosition.getBlockState());
+        final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+        if (cachedBlockPosition.getState() != null && predicate.test(cachedBlockPosition, context)) {
+          oldStates.put(blockPos.asLong(), cachedBlockPosition.getState());
         }
         return null;
       });
@@ -185,10 +185,10 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     // 第三部分：结束时声明
 
     final Iterable<Void> finalClaim = IterateUtils.singletonPeekingIterable(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
-      case SKIP -> Text.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
-      case BREAK -> Text.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
-      default -> Text.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
-    } : Text.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue()).enhanced$$(), true));
+      case SKIP -> Component.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
+      case BREAK -> Component.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
+      default -> Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
+    } : Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue()).enhanced$$(), true));
 
     if (history != null) {
       final HistoryHolder historyHolder = HistoryHolder.fromSource(source);
@@ -206,7 +206,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       if (history != null) {
         history.task = task;
       }
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(Iterables.concat(collectPosToAffect, setBlocks, finalClaim).iterator());
@@ -217,17 +217,17 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static int getFlags(@NotNull KeywordArgs args) {
     int value = 0;
     if (args.getBoolean("notify_listeners")) {
-      value |= Block.NOTIFY_LISTENERS;
+      value |= Block.UPDATE_CLIENTS;
     }
     if (args.getBoolean("notify_neighbors")) {
-      value |= Block.NOTIFY_NEIGHBORS;
+      value |= Block.UPDATE_NEIGHBORS;
     }
     if (args.getBoolean("force_state")) {
-      value |= Block.FORCE_STATE;
+      value |= Block.UPDATE_KNOWN_SHAPE;
     }
     if (args.getBoolean("force")) {
-      value |= Block.FORCE_STATE;
-      value &= ~Block.NOTIFY_NEIGHBORS;
+      value |= Block.UPDATE_KNOWN_SHAPE;
+      value &= ~Block.UPDATE_NEIGHBORS;
     }
     return value;
   }

@@ -1,6 +1,6 @@
 package pers.solid.ecmd.config;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,11 +28,11 @@ public class ConfigCategory<C> {
   /**
    * 配置分类在游戏内的显示名称，可以带有格式或翻译等。
    */
-  public final @NotNull Text displayName;
+  public final @NotNull Component displayName;
   /**
    * 配置分类的描述。
    */
-  public final @Nullable Text description;
+  public final @Nullable Component description;
   /**
    * 代表该分类的默认配置的实例。这一实例通常不应当被修改。
    */
@@ -65,7 +65,7 @@ public class ConfigCategory<C> {
    *
    * @see #create
    */
-  public ConfigCategory(@NotNull String name, @NotNull Text displayName, @Nullable Text description, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter) {
+  public ConfigCategory(@NotNull String name, @NotNull Component displayName, @Nullable Component description, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter) {
     this.name = name;
     this.displayName = displayName;
     this.description = description;
@@ -78,7 +78,7 @@ public class ConfigCategory<C> {
    * 创建一个新的配置分类，其显示名称和描述都将根据 {@code name} 来决定。
    */
   public static <C> ConfigCategory<C> create(@NotNull String name, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter, boolean hasDescription) {
-    return new ConfigCategory<>(name, Text.translatable("enhanced_commands.config." + name), hasDescription ? Text.translatable("enhanced_commands.config." + name + ".description") : null, defaultConfig, currentConfigGetter, currentConfigSetter);
+    return new ConfigCategory<>(name, Component.translatable("enhanced_commands.config." + name), hasDescription ? Component.translatable("enhanced_commands.config." + name + ".description") : null, defaultConfig, currentConfigGetter, currentConfigSetter);
   }
 
   /**
@@ -89,9 +89,9 @@ public class ConfigCategory<C> {
         .setGetter(getter)
         .setSetter(setter)
         .setDefaultValue(defaultValue)
-        .setDisplayName(Text::translatable);
+        .setDisplayName(Component::translatable);
     if (hasDescription) {
-      builder.setDescription(Text::translatable);
+      builder.setDescription(Component::translatable);
     }
     if (modifier != null) {
       builder = modifier.apply(builder);

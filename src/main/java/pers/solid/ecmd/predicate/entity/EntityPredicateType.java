@@ -2,13 +2,13 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 
 public interface EntityPredicateType<T extends EntityPredicate> {
-  RegistryKey<Registry<EntityPredicateType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("entity_predicate_entry_type"));
+  ResourceKey<Registry<EntityPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("entity_predicate_entry_type"));
   Registry<EntityPredicateType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
 
   @NotNull

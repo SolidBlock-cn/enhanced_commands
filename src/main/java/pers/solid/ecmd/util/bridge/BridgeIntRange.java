@@ -3,13 +3,13 @@ package pers.solid.ecmd.util.bridge;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.predicate.NumberRange;
+import net.minecraft.advancements.critereon.MinMaxBounds;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /**
- * @see net.minecraft.predicate.NumberRange.IntRange
+ * @see net.minecraft.advancements.critereon.MinMaxBounds.Ints
  * @see org.apache.commons.lang3.IntegerRange
  */
 public final class BridgeIntRange extends AbstractBridgeRange<Integer> {
@@ -44,14 +44,14 @@ public final class BridgeIntRange extends AbstractBridgeRange<Integer> {
     return BridgeRange.parse(reader, Integer::parseInt, (r, s) -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidInt().createWithContext(r, s), BridgeIntRange::new);
   }
 
-  public static BridgeIntRange fromVanilla(NumberRange.IntRange range) {
+  public static BridgeIntRange fromVanilla(MinMaxBounds.Ints range) {
     return fromOptional(range.min(), range.max());
   }
 
-  public NumberRange.IntRange toVanilla() {
+  public MinMaxBounds.Ints toVanilla() {
     final Optional<Integer> min = Optional.ofNullable(this.min);
     final Optional<Integer> max = Optional.ofNullable(this.max);
-    return new NumberRange.IntRange(min, max, min.map(x -> x.longValue() * x.longValue()), max.map(x -> x.longValue() * x.longValue()));
+    return new MinMaxBounds.Ints(min, max, min.map(x -> x.longValue() * x.longValue()), max.map(x -> x.longValue() * x.longValue()));
   }
 
   @Override

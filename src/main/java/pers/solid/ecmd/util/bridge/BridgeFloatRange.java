@@ -3,13 +3,13 @@ package pers.solid.ecmd.util.bridge;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.command.FloatRangeArgument;
+import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /**
- * @see FloatRangeArgument
+ * @see WrappedMinMaxBounds
  */
 public class BridgeFloatRange extends AbstractBridgeRange<Float> {
   public static final Codec<BridgeFloatRange> CODEC = BridgeRange.createCodec(Codec.FLOAT, BridgeFloatRange::fromOptional);
@@ -43,12 +43,12 @@ public class BridgeFloatRange extends AbstractBridgeRange<Float> {
     return BridgeRange.parse(reader, Float::parseFloat, (r, s) -> CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidFloat().createWithContext(r, s), BridgeFloatRange::new);
   }
 
-  public static BridgeFloatRange fromVanilla(FloatRangeArgument range) {
+  public static BridgeFloatRange fromVanilla(WrappedMinMaxBounds range) {
     return new BridgeFloatRange(range.min(), range.max());
   }
 
-  public FloatRangeArgument toVanilla() {
-    return new FloatRangeArgument(min, max);
+  public WrappedMinMaxBounds toVanilla() {
+    return new WrappedMinMaxBounds(min, max);
   }
 
   @Override

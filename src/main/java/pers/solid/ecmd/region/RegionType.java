@@ -2,15 +2,15 @@ package pers.solid.ecmd.region;
 
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 
 public interface RegionType<R extends Region> {
-  RegistryKey<Registry<RegionType<?>>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("region_type"));
+  ResourceKey<Registry<RegionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_type"));
   Registry<RegionType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
 
   /**
@@ -23,7 +23,7 @@ public interface RegionType<R extends Region> {
   /**
    * 在解析区域函数名称所给出的建议中，显示相应的提示文本。
    */
-  default Text tooltip() {
+  default Component tooltip() {
     return null;
   }
 

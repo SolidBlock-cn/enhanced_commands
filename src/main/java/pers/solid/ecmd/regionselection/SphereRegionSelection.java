@@ -1,23 +1,23 @@
 package pers.solid.ecmd.regionselection;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.SphereRegion;
@@ -36,19 +36,19 @@ import java.util.stream.Stream;
 
 public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion> implements RegionSelection, Cloneable {
   public static final MapCodec<SphereRegionSelection> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Vec3d.CODEC.optionalFieldOf("center").forGetter(s -> Optional.ofNullable(s.center)),
-      Vec3d.CODEC.optionalFieldOf("radius_target").forGetter(s -> Optional.ofNullable(s.radiusTarget))
+      Vec3.CODEC.optionalFieldOf("center").forGetter(s -> Optional.ofNullable(s.center)),
+      Vec3.CODEC.optionalFieldOf("radius_target").forGetter(s -> Optional.ofNullable(s.radiusTarget))
   ).apply(i, SphereRegionSelection::fromOptional));
 
-  public @Nullable Vec3d center;
-  public @Nullable Vec3d radiusTarget;
+  public @Nullable Vec3 center;
+  public @Nullable Vec3 radiusTarget;
   public double radius;
-  protected List<Vec3d> circle1points = null;
-  protected List<Vec3d> circle2points = null;
-  protected List<Vec3d> circle3points = null;
-  protected List<List<Vec3d>> circlePointsList = null;
+  protected List<Vec3> circle1points = null;
+  protected List<Vec3> circle2points = null;
+  protected List<Vec3> circle3points = null;
+  protected List<List<Vec3>> circlePointsList = null;
 
-  private static SphereRegionSelection fromOptional(Optional<Vec3d> center, Optional<Vec3d> radiusTarget) {
+  private static SphereRegionSelection fromOptional(Optional<Vec3> center, Optional<Vec3> radiusTarget) {
     final SphereRegionSelection s = new SphereRegionSelection();
     s.center = center.orElse(null);
     s.radiusTarget = radiusTarget.orElse(null);
@@ -65,36 +65,36 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public Supplier<Text> clickFirstPoint(Vec3d point, PlayerEntity player) {
+  public Supplier<Component> clickFirstPoint(Vec3 point, Player player) {
     center = point;
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.sphere.set_center", TextUtil.wrapVector(point).styled(Styles.RESULT)), notifySphereStatistics());
+    return () -> TextUtil.joinNullableLines(Component.translatable("enhanced_commands.region_selection.sphere.set_center", TextUtil.wrapVector(point).withStyle(Styles.RESULT)), notifySphereStatistics());
   }
 
   @Override
-  public Supplier<Text> clickSecondPoint(Vec3d point, PlayerEntity player) {
+  public Supplier<Component> clickSecondPoint(Vec3 point, Player player) {
     radiusTarget = point;
     resetCalculation();
-    return () -> TextUtil.joinNullableLines(Text.translatable("enhanced_commands.region_selection.sphere.set_radius", TextUtil.wrapVector(point).styled(Styles.RESULT)), notifySphereStatistics());
+    return () -> TextUtil.joinNullableLines(Component.translatable("enhanced_commands.region_selection.sphere.set_radius", TextUtil.wrapVector(point).withStyle(Styles.RESULT)), notifySphereStatistics());
   }
 
-  public Text notifySphereStatistics() {
+  public Component notifySphereStatistics() {
     if (center != null && radiusTarget != null) {
       updateRadius();
-      return Text.translatable("enhanced_commands.region_selection.sphere.statistics", Text.literal(StringUtil.nf.format(radius)).styled(Styles.RESULT)).formatted(Formatting.GRAY);
+      return Component.translatable("enhanced_commands.region_selection.sphere.statistics", Component.literal(StringUtil.nf.format(radius)).withStyle(Styles.RESULT)).withStyle(ChatFormatting.GRAY);
     } else {
       return null;
     }
   }
 
   @Override
-  public List<@NotNull Vec3d> getPoints() {
-    final Stream<@NotNull Vec3d> stream = Stream.of(center, radiusTarget).filter(Objects::nonNull);
+  public List<@NotNull Vec3> getPoints() {
+    final Stream<@NotNull Vec3> stream = Stream.of(center, radiusTarget).filter(Objects::nonNull);
     return stream.toList();
   }
 
   @Override
-  public void readPoints(List<Vec3d> points) {
+  public void readPoints(List<Vec3> points) {
     if (!points.isEmpty()) {
       center = points.get(0);
       if (points.size() > 1) {
@@ -114,11 +114,11 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull SphereRegionSelection transformed(Function<Vec3d, Vec3d> transformation) throws CommandSyntaxException {
+  public @NotNull SphereRegionSelection transformed(Function<Vec3, Vec3> transformation) throws CommandSyntaxException {
     if (center == null || radiusTarget == null) {
       throw NOT_COMPLETED.create();
     }
-    final Vec3d oldCenter = center;
+    final Vec3 oldCenter = center;
     center = transformation.apply(oldCenter);
     radiusTarget = radiusTarget.add(center.subtract(oldCenter));
     resetCalculation();
@@ -130,8 +130,8 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
     if (center == null || radiusTarget == null) {
       throw NOT_COMPLETED.create();
     }
-    final Vec3d radiusVector = radiusTarget.subtract(center);
-    final Vec3d newRadiusVector = radiusVector.multiply(1 + offset / radiusVector.length());
+    final Vec3 radiusVector = radiusTarget.subtract(center);
+    final Vec3 newRadiusVector = radiusVector.scale(1 + offset / radiusVector.length());
     radiusTarget = center.add(newRadiusVector);
     radius += offset;
     resetCalculation();
@@ -144,7 +144,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull SphereRegionSelection expanded(double offset, Direction.Type type) {
+  public @NotNull SphereRegionSelection expanded(double offset, Direction.Plane type) {
     throw new UnsupportedOperationException(SphereRegion.EXPAND_FAILED.create());
   }
 
@@ -164,21 +164,21 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public void readPacket(PacketByteBuf buf) {
-    center = buf.readBoolean() ? buf.readVec3d() : null;
-    radiusTarget = buf.readBoolean() ? buf.readVec3d() : null;
+  public void readPacket(FriendlyByteBuf buf) {
+    center = buf.readBoolean() ? buf.readVec3() : null;
+    radiusTarget = buf.readBoolean() ? buf.readVec3() : null;
     resetCalculation();
   }
 
   @Override
-  public void writePacket(PacketByteBuf buf) {
+  public void serializeToNetwork(FriendlyByteBuf buf) {
     buf.writeBoolean(center != null);
     if (center != null) {
-      buf.writeVec3d(center);
+      buf.writeVec3(center);
     }
     buf.writeBoolean(radiusTarget != null);
     if (radiusTarget != null) {
-      buf.writeVec3d(radiusTarget);
+      buf.writeVec3(radiusTarget);
     }
   }
 
@@ -198,21 +198,21 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
       return;
     }
 
-    final int pointsNum = Math.min(MathHelper.ceil(Math.PI * radius * 4) * 4, 2048);
+    final int pointsNum = Math.min(Mth.ceil(Math.PI * radius * 4) * 4, 2048);
     final double angleInterval = Math.max(2 * Math.PI / pointsNum, 1 / 2048d);
 
-    final ImmutableList.Builder<Vec3d> builder1 = new ImmutableList.Builder<>();
-    final ImmutableList.Builder<Vec3d> builder2 = new ImmutableList.Builder<>();
-    final ImmutableList.Builder<Vec3d> builder3 = new ImmutableList.Builder<>();
+    final ImmutableList.Builder<Vec3> builder1 = new ImmutableList.Builder<>();
+    final ImmutableList.Builder<Vec3> builder2 = new ImmutableList.Builder<>();
+    final ImmutableList.Builder<Vec3> builder3 = new ImmutableList.Builder<>();
 
     for (double angle = 0; angle < 2 * Math.PI; angle += angleInterval) {
       final double cos = Math.cos(angle);
       final double sin = Math.sin(angle);
       final double r_cos = radius * cos;
       final double r_sin = radius * sin;
-      builder1.add(new Vec3d(center.x + r_cos, center.y + r_sin, center.z));
-      builder2.add(new Vec3d(center.x, center.y + r_cos, center.z + r_sin));
-      builder3.add(new Vec3d(center.x + r_sin, center.y, center.z + r_cos));
+      builder1.add(new Vec3(center.x + r_cos, center.y + r_sin, center.z));
+      builder2.add(new Vec3(center.x, center.y + r_cos, center.z + r_sin));
+      builder3.add(new Vec3(center.x + r_sin, center.y, center.z + r_cos));
     }
 
     circle1points = builder1.build();
@@ -223,7 +223,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
 
   @Environment(EnvType.CLIENT)
   @Override
-  public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d cameraPos) {
+  public void render(PoseStack matrices, MultiBufferSource vertexConsumers, Vec3 cameraPos) {
     final VertexConsumer vertexConsumer = vertexConsumers.getBuffer(RegionRendering.regionRenderLayer);
 
     final double cameraX = cameraPos.x;
@@ -233,7 +233,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
     // 构建未完成，闪烁
     if ((center == null) != (radiusTarget == null)) {
       // 构建未完成时，闪烁
-      final long measuringTimeMs = Util.getMeasuringTimeMs();
+      final long measuringTimeMs = Util.getMillis();
       if (measuringTimeMs % 600 > 300) {
         return;
       }
@@ -241,7 +241,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
 
     // 渲染半径向量
     if (center != null && radiusTarget != null) {
-      VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, radiusTarget.x - cameraX, radiusTarget.y - cameraY, radiusTarget.z - cameraZ, ColorHelper.fromFloats(0.9f, 0.6f, 0.9f, 1), ColorHelper.fromFloats(0.9f, 0.6f, 1f, 0.8f));
+      VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, radiusTarget.x - cameraX, radiusTarget.y - cameraY, radiusTarget.z - cameraZ, ARGB.colorFromFloat(0.9f, 0.6f, 0.9f, 1), ARGB.colorFromFloat(0.9f, 0.6f, 1f, 0.8f));
     }
 
     // 渲染圆
@@ -250,8 +250,8 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
     }
     for (var list : circlePointsList) {
       for (int i = 0; i < list.size(); i++) {
-        final Vec3d current = list.get(i);
-        final Vec3d next = list.get(i + 1 < list.size() ? i + 1 : 0);
+        final Vec3 current = list.get(i);
+        final Vec3 next = list.get(i + 1 < list.size() ? i + 1 : 0);
         VertexUtil.drawLineConnecting(matrices, vertexConsumer, current.x - cameraX, current.y - cameraY, current.z - cameraZ, next.x - cameraX, next.y - cameraY, next.z - cameraZ, 0xeee8ffd0);
       }
     }
@@ -271,15 +271,15 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
       for (Direction direction : Direction.values()) {
         int color;
         if (direction == Direction.EAST) {
-          color = ColorHelper.fromFloats(1f, 0.9f, 0.5f, 0.5f);
+          color = ARGB.colorFromFloat(1f, 0.9f, 0.5f, 0.5f);
         } else if (direction == Direction.SOUTH) {
-          color = ColorHelper.fromFloats(1f, 0.5f, 0.9f, 0.5f);
+          color = ARGB.colorFromFloat(1f, 0.5f, 0.9f, 0.5f);
         } else if (direction == Direction.UP) {
-          color = ColorHelper.fromFloats(1f, 0.5f, 0.5f, 0.9f);
+          color = ARGB.colorFromFloat(1f, 0.5f, 0.5f, 0.9f);
         } else {
-          color = ColorHelper.fromFloats(1f, 0.9f, 0.9f, 0.9f);
+          color = ARGB.colorFromFloat(1f, 0.9f, 0.9f, 0.9f);
         }
-        VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, center.x - cameraX + radius * direction.getOffsetX(), center.y - cameraY + radius * direction.getOffsetY(), center.z - cameraZ + radius * direction.getOffsetZ(), color);
+        VertexUtil.drawLineConnecting(matrices, vertexConsumer, center.x - cameraX, center.y - cameraY, center.z - cameraZ, center.x - cameraX + radius * direction.getStepX(), center.y - cameraY + radius * direction.getStepY(), center.z - cameraZ + radius * direction.getStepZ(), color);
       }
     }
   }

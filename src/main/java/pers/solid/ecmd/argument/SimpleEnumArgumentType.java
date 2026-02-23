@@ -7,13 +7,14 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Direction;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.math.EnumOrRandom;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -25,7 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-public final class SimpleEnumArgumentType<E extends Enum<E>> implements ArgumentType<E>, ArgumentSerializer.ArgumentTypeProperties<SimpleEnumArgumentType<E>> {
+public final class SimpleEnumArgumentType<E extends Enum<E>> implements ArgumentType<E>, ArgumentTypeInfo.Template<SimpleEnumArgumentType<E>> {
   private final CommandEnumType<E> commandEnumType;
 
   public SimpleEnumArgumentType(CommandEnumType<E> commandEnumType) {
@@ -36,7 +37,7 @@ public final class SimpleEnumArgumentType<E extends Enum<E>> implements Argument
     return new SimpleEnumArgumentType<>(excludeRandom ? CommandEnumType.AXIS_EXCLUDING_RANDOM : CommandEnumType.AXIS);
   }
 
-  public static Direction.Axis getAxis(CommandContext<ServerCommandSource> context, String name) {
+  public static Direction.Axis getAxis(CommandContext<CommandSourceStack> context, String name) {
     return context.getArgument(name, AxisArgument.class).apply(context.getSource());
   }
 
@@ -81,7 +82,7 @@ public final class SimpleEnumArgumentType<E extends Enum<E>> implements Argument
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-    return CommandSource.suggestMatching(commandEnumType.values(), builder, commandEnumType.codec()::asString, commandEnumType.nameProvider());
+    return SharedSuggestionProvider.suggest(commandEnumType.values(), builder, commandEnumType.codec()::asString, commandEnumType.nameProvider());
   }
 
   @Override
@@ -90,39 +91,39 @@ public final class SimpleEnumArgumentType<E extends Enum<E>> implements Argument
   }
 
   @Override
-  public SimpleEnumArgumentType<E> createType(CommandRegistryAccess commandRegistryAccess) {
+  public @NotNull SimpleEnumArgumentType<E> instantiate(CommandBuildContext commandRegistryAccess) {
     return this;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public ArgumentSerializer<SimpleEnumArgumentType<E>, SimpleEnumArgumentType<E>> getSerializer() {
+  public @NotNull ArgumentTypeInfo<SimpleEnumArgumentType<E>, SimpleEnumArgumentType<E>> type() {
     return (Serializer<E>) Serializer.INSTANCE;
   }
 
-  public static final class Serializer<E extends Enum<E>> implements ArgumentSerializer<SimpleEnumArgumentType<E>, SimpleEnumArgumentType<E>> {
+  public static final class Serializer<E extends Enum<E>> implements ArgumentTypeInfo<SimpleEnumArgumentType<E>, SimpleEnumArgumentType<E>> {
     @SuppressWarnings("rawtypes")
     public static final Serializer INSTANCE = new Serializer<>();
 
     @Override
-    public void writePacket(SimpleEnumArgumentType<E> properties, PacketByteBuf buf) {
-      buf.writeIdentifier(CommandEnumType.REGISTRY.getId(properties.commandEnumType));
+    public void serializeToNetwork(SimpleEnumArgumentType<E> properties, FriendlyByteBuf buf) {
+      buf.writeResourceLocation(CommandEnumType.REGISTRY.getKey(properties.commandEnumType));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public SimpleEnumArgumentType<E> fromPacket(PacketByteBuf buf) {
-      final Identifier id = buf.readIdentifier();
-      return new SimpleEnumArgumentType<>((CommandEnumType<E>) CommandEnumType.REGISTRY.getOptionalValue(id).orElseThrow(() -> new NoSuchElementException("unknown enum argument type id: " + id)));
+    public @NotNull SimpleEnumArgumentType<E> deserializeFromNetwork(FriendlyByteBuf buf) {
+      final ResourceLocation id = buf.readResourceLocation();
+      return new SimpleEnumArgumentType<>((CommandEnumType<E>) CommandEnumType.REGISTRY.getOptional(id).orElseThrow(() -> new NoSuchElementException("unknown enum argument type id: " + id)));
     }
 
     @Override
-    public void writeJson(SimpleEnumArgumentType<E> properties, JsonObject json) {
-      json.addProperty("type", Objects.toString(CommandEnumType.REGISTRY.getId(properties.commandEnumType), "<unregistered>"));
+    public void serializeToJson(SimpleEnumArgumentType<E> properties, JsonObject json) {
+      json.addProperty("type", Objects.toString(CommandEnumType.REGISTRY.getKey(properties.commandEnumType), "<unregistered>"));
     }
 
     @Override
-    public SimpleEnumArgumentType<E> getArgumentTypeProperties(SimpleEnumArgumentType<E> argumentType) {
+    public @NotNull SimpleEnumArgumentType<E> unpack(SimpleEnumArgumentType<E> argumentType) {
       return argumentType;
     }
   }

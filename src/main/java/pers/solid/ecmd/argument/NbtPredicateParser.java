@@ -9,16 +9,16 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.nbt.*;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.nbt.*;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.bridge.BridgeDoubleRange;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,23 +27,23 @@ import java.util.Map;
 
 public class NbtPredicateParser<S> {
   private final ParseContext<S> parseContext;
-  public static final Text MATCH = Text.translatable("enhanced_commands.nbt_predicate.tooltip.match");
-  public static final Text EQUAL = Text.translatable("enhanced_commands.nbt_predicate.tooltip.equal");
-  public static final Text NOT_MATCH = Text.translatable("enhanced_commands.nbt_predicate.tooltip.not_match");
-  public static final Text NOT_EQUAL = Text.translatable("enhanced_commands.nbt_predicate.tooltip.not_equal");
-  public static final Text REGEX = Text.translatable("enhanced_commands.nbt_predicate.tooltip.regex");
-  public static final Text NOT_REGEX = Text.translatable("enhanced_commands.nbt_predicate.tooltip.not_regex");
-  public static final Text ANY_KEY = Text.translatable("enhanced_commands.nbt_predicate.tooltip.any_key");
-  public static final Text ANY_VALUE = Text.translatable("enhanced_commands.nbt_predicate.tooltip.any_value");
-  public static final Text SEPARATE = Text.translatable("enhanced_commands.nbt_predicate.tooltip.separate");
-  public static final Text START_OF_COMPOUND = Text.translatable("enhanced_commands.nbt_predicate.tooltip.start_of_compound");
-  public static final Text END_OF_COMPOUND = Text.translatable("enhanced_commands.nbt_predicate.tooltip.end_of_compound");
-  public static final Text START_OF_LIST = Text.translatable("enhanced_commands.nbt_predicate.tooltip.start_of_list");
-  public static final Text END_OF_LIST = Text.translatable("enhanced_commands.nbt_predicate.tooltip.end_of_list");
+  public static final Component MATCH = Component.translatable("enhanced_commands.nbt_predicate.tooltip.match");
+  public static final Component EQUAL = Component.translatable("enhanced_commands.nbt_predicate.tooltip.equal");
+  public static final Component NOT_MATCH = Component.translatable("enhanced_commands.nbt_predicate.tooltip.not_match");
+  public static final Component NOT_EQUAL = Component.translatable("enhanced_commands.nbt_predicate.tooltip.not_equal");
+  public static final Component REGEX = Component.translatable("enhanced_commands.nbt_predicate.tooltip.regex");
+  public static final Component NOT_REGEX = Component.translatable("enhanced_commands.nbt_predicate.tooltip.not_regex");
+  public static final Component ANY_KEY = Component.translatable("enhanced_commands.nbt_predicate.tooltip.any_key");
+  public static final Component ANY_VALUE = Component.translatable("enhanced_commands.nbt_predicate.tooltip.any_value");
+  public static final Component SEPARATE = Component.translatable("enhanced_commands.nbt_predicate.tooltip.separate");
+  public static final Component START_OF_COMPOUND = Component.translatable("enhanced_commands.nbt_predicate.tooltip.start_of_compound");
+  public static final Component END_OF_COMPOUND = Component.translatable("enhanced_commands.nbt_predicate.tooltip.end_of_compound");
+  public static final Component START_OF_LIST = Component.translatable("enhanced_commands.nbt_predicate.tooltip.start_of_list");
+  public static final Component END_OF_LIST = Component.translatable("enhanced_commands.nbt_predicate.tooltip.end_of_list");
 
-  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_predicate.sign_expected"));
-  public static final DynamicCommandExceptionType DUPLICATE_KEY = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.nbt_predicate.duplicate_key", o));
-  public static final DynamicCommandExceptionType MUST_BE_NUMBER_OR_STRING = new DynamicCommandExceptionType(actualType -> Text.translatable("enhanced_commands.nbt_predicate.must_be_number_or_string", actualType));
+  public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_predicate.sign_expected"));
+  public static final DynamicCommandExceptionType DUPLICATE_KEY = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.nbt_predicate.duplicate_key", o));
+  public static final DynamicCommandExceptionType MUST_BE_NUMBER_OR_STRING = new DynamicCommandExceptionType(actualType -> Component.translatable("enhanced_commands.nbt_predicate.must_be_number_or_string", actualType));
 
   public NbtPredicateParser(ParseContext<S> parseContext) {
     this.parseContext = parseContext;
@@ -104,7 +104,7 @@ public class NbtPredicateParser<S> {
   /**
    * 解析复合标签。
    *
-   * @see StringNbtReader#parseCompound()
+   * @see TagParser#readStruct()
    */
   public NbtPredicate parseCompound(boolean isUsingEqual, boolean isNegated) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
@@ -120,7 +120,7 @@ public class NbtPredicateParser<S> {
       parseContext.setSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", ANY_KEY, suggestionsBuilder).buildFuture());
       final String key;
       if (!reader.canRead()) {
-        throw StringNbtReader.EXPECTED_KEY.createWithContext(reader);
+        throw TagParser.ERROR_EXPECTED_KEY.createWithContext(reader);
       } else if (!isUsingEqual && reader.peek() == '*') {
         key = null;
         reader.skip();
@@ -129,7 +129,7 @@ public class NbtPredicateParser<S> {
       }
       if (key != null && key.isEmpty()) {
         reader.setCursor(cursorBeforeKey);
-        throw StringNbtReader.EXPECTED_KEY.createWithContext(reader);
+        throw TagParser.ERROR_EXPECTED_KEY.createWithContext(reader);
       }
 
       reader.skipWhitespace();
@@ -162,7 +162,7 @@ public class NbtPredicateParser<S> {
   /**
    * 解析列表。
    *
-   * @see StringNbtReader#parseList()
+   * @see TagParser#readListTag()
    */
   public NbtPredicate parseList(boolean isUsingEqual, boolean isNegated) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
@@ -266,12 +266,12 @@ public class NbtPredicateParser<S> {
     }
 
     // 尝试读取比较值（除了等号和不等号之外的值）
-    parseContext.setSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(Arrays.stream(Comparator.values()).filter(comparator -> comparator != Comparator.EQ && comparator != Comparator.NE).map(Comparator::asString), suggestionsBuilder));
+    parseContext.setSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(Arrays.stream(Comparator.values()).filter(comparator -> comparator != Comparator.EQ && comparator != Comparator.NE).map(Comparator::getSerializedName), suggestionsBuilder));
 
     final int cursorBeforeSign = reader.getCursor();
     for (Comparator comparator : Comparator.values()) {
       if (comparator != Comparator.EQ && comparator != Comparator.NE) {
-        final String name = comparator.asString();
+        final String name = comparator.getSerializedName();
         if (reader.getRemaining().startsWith(name)) {
           // 防止这种情况：“<=”开头的被解析为“>”
           if (comparator == Comparator.LT || comparator == Comparator.GT) {
@@ -287,17 +287,17 @@ public class NbtPredicateParser<S> {
 
           // 尝试读取一个数字或字符串
           if (!reader.canRead()) {
-            throw StringNbtReader.EXPECTED_VALUE.createWithContext(reader);
+            throw TagParser.ERROR_EXPECTED_VALUE.createWithContext(reader);
           } else if (reader.peek() == '{') {
-            throw MUST_BE_NUMBER_OR_STRING.createWithContext(reader, NbtCompound.TYPE.getCommandFeedbackName());
+            throw MUST_BE_NUMBER_OR_STRING.createWithContext(reader, CompoundTag.TYPE.getPrettyName());
           } else if (reader.peek() == '[') {
-            throw MUST_BE_NUMBER_OR_STRING.createWithContext(reader, NbtList.TYPE.getCommandFeedbackName());
+            throw MUST_BE_NUMBER_OR_STRING.createWithContext(reader, ListTag.TYPE.getPrettyName());
           }
-          final NbtElement element = new StringNbtReader(reader).parseElement();
-          if (element instanceof NbtString || element instanceof AbstractNbtNumber) {
+          final Tag element = new TagParser(reader).readValue();
+          if (element instanceof StringTag || element instanceof NumericTag) {
             return new ComparisonNbtPredicate(comparator, element);
           } else {
-            throw MUST_BE_NUMBER_OR_STRING.createWithContext(reader, element.getNbtType().getCommandFeedbackName());
+            throw MUST_BE_NUMBER_OR_STRING.createWithContext(reader, element.getType().getPrettyName());
           }
         }
       }
@@ -319,7 +319,7 @@ public class NbtPredicateParser<S> {
       return suggestionsBuilder.buildFuture();
     });
     if (!reader.canRead()) {
-      throw StringNbtReader.EXPECTED_VALUE.createWithContext(reader);
+      throw TagParser.ERROR_EXPECTED_VALUE.createWithContext(reader);
     }
     if (reader.peek() == '*') {
       reader.skip();
@@ -342,9 +342,9 @@ public class NbtPredicateParser<S> {
       } catch (CommandSyntaxException ignored) {
       }
 
-      final NbtElement element = new StringNbtReader(reader).parseElement();
+      final Tag element = new TagParser(reader).readValue();
       if (isUsingEqual) {
-        if (element instanceof AbstractNbtNumber nbtNumber) {
+        if (element instanceof NumericTag nbtNumber) {
           return new ComparisonNbtPredicate(isNegated ? Comparator.NE : Comparator.EQ, nbtNumber);
         }
       }

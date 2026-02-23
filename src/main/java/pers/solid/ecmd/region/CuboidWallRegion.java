@@ -5,8 +5,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -35,7 +39,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   @Override
   public boolean contains(@NotNull Vec3i vec3i) {
     try {
-      return region.contains(vec3i) && !region.expanded(-thickness, Direction.Type.HORIZONTAL).contains(vec3i);
+      return region.contains(vec3i) && !region.expanded(-thickness, Direction.Plane.HORIZONTAL).contains(vec3i);
     } catch (IllegalArgumentException args) {
       // min max wrong
       return true;
@@ -64,7 +68,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public @NotNull BlockBox minContainingBlockBox() {
+  public @NotNull BoundingBox minContainingBlockBox() {
     return region.minContainingBlockBox();
   }
 
@@ -74,7 +78,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
+  public @Nullable AABB minContainingBox() {
     return region.minContainingBox();
   }
 
@@ -115,8 +119,8 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.cuboid_wall");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.cuboid_wall");
     }
 
     @Override

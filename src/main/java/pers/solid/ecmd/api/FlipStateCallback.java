@@ -2,19 +2,15 @@ package pers.solid.ecmd.api;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.enums.BlockFace;
-import net.minecraft.block.enums.BlockHalf;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.block.enums.SlabType;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * 本模组对方块状态进行上下的翻转时的事件，用于在 {@link #getMirroredState(BlockState, Direction.Axis)} 中在进行上下翻转时使用。对于水平方向的翻转，请直接使用 {@link BlockState#mirror(BlockMirror)} 方法。
+ * 本模组对方块状态进行上下的翻转时的事件，用于在 {@link #getMirroredState(BlockState, Direction.Axis)} 中在进行上下翻转时使用。对于水平方向的翻转，请直接使用 {@link BlockState#mirror(Mirror)} 方法。
  *
  * @see #DEFAULT
  */
@@ -48,41 +44,41 @@ public interface FlipStateCallback {
    * 本模组中默认为方块注册的一些事件，用于实现原版方块中的一些上下翻转。
    */
   FlipStateCallback DEFAULT = (intermediate, original) -> {
-    if (original.contains(Properties.BLOCK_HALF)) {
-      intermediate = intermediate.with(Properties.BLOCK_HALF, switch (original.get(Properties.BLOCK_HALF)) {
-        case TOP -> BlockHalf.BOTTOM;
-        case BOTTOM -> BlockHalf.TOP;
+    if (original.hasProperty(BlockStateProperties.HALF)) {
+      intermediate = intermediate.setValue(BlockStateProperties.HALF, switch (original.getValue(BlockStateProperties.HALF)) {
+        case TOP -> Half.BOTTOM;
+        case BOTTOM -> Half.TOP;
       });
     }
-    if (original.contains(Properties.DOUBLE_BLOCK_HALF)) {
-      intermediate = intermediate.with(Properties.DOUBLE_BLOCK_HALF, switch (original.get(Properties.DOUBLE_BLOCK_HALF)) {
+    if (original.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
+      intermediate = intermediate.setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, switch (original.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
         case LOWER -> DoubleBlockHalf.UPPER;
         case UPPER -> DoubleBlockHalf.LOWER;
       });
     }
-    if (original.contains(Properties.SLAB_TYPE)) {
-      intermediate = intermediate.with(Properties.SLAB_TYPE, switch (original.get(Properties.SLAB_TYPE)) {
+    if (original.hasProperty(BlockStateProperties.SLAB_TYPE)) {
+      intermediate = intermediate.setValue(BlockStateProperties.SLAB_TYPE, switch (original.getValue(BlockStateProperties.SLAB_TYPE)) {
         case TOP -> SlabType.BOTTOM;
         case BOTTOM -> SlabType.TOP;
         case DOUBLE -> SlabType.DOUBLE;
       });
     }
-    if (original.contains(Properties.FACING)) {
-      final Direction direction = original.get(Properties.FACING);
-      intermediate = intermediate.with(Properties.FACING, switch (direction) {
+    if (original.hasProperty(BlockStateProperties.FACING)) {
+      final Direction direction = original.getValue(BlockStateProperties.FACING);
+      intermediate = intermediate.setValue(BlockStateProperties.FACING, switch (direction) {
         case UP -> Direction.DOWN;
         case DOWN -> Direction.UP;
         default -> direction;
       });
     }
-    if (original.contains(Properties.UP) && original.contains(Properties.DOWN)) {
-      intermediate = intermediate.with(Properties.UP, original.get(Properties.DOWN)).with(Properties.DOWN, original.get(Properties.UP));
+    if (original.hasProperty(BlockStateProperties.UP) && original.hasProperty(BlockStateProperties.DOWN)) {
+      intermediate = intermediate.setValue(BlockStateProperties.UP, original.getValue(BlockStateProperties.DOWN)).setValue(BlockStateProperties.DOWN, original.getValue(BlockStateProperties.UP));
     }
-    if (original.contains(Properties.BLOCK_FACE)) {
-      intermediate = intermediate.with(Properties.BLOCK_FACE, switch (original.get(Properties.BLOCK_FACE)) {
-        case FLOOR -> BlockFace.CEILING;
-        case CEILING -> BlockFace.FLOOR;
-        case WALL -> BlockFace.WALL;
+    if (original.hasProperty(BlockStateProperties.ATTACH_FACE)) {
+      intermediate = intermediate.setValue(BlockStateProperties.ATTACH_FACE, switch (original.getValue(BlockStateProperties.ATTACH_FACE)) {
+        case FLOOR -> AttachFace.CEILING;
+        case CEILING -> AttachFace.FLOOR;
+        case WALL -> AttachFace.WALL;
       });
     }
     return intermediate;
@@ -101,8 +97,8 @@ public interface FlipStateCallback {
 
   static BlockState getMirroredState(BlockState blockState, Direction.Axis axis) {
     return switch (axis) {
-      case X -> blockState.mirror(BlockMirror.FRONT_BACK);
-      case Z -> blockState.mirror(BlockMirror.LEFT_RIGHT);
+      case X -> blockState.mirror(Mirror.FRONT_BACK);
+      case Z -> blockState.mirror(Mirror.LEFT_RIGHT);
       case Y -> EVENT.invoker().getFlippedState(blockState);
     };
   }

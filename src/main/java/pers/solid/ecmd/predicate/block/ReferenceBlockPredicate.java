@@ -3,11 +3,11 @@ package pers.solid.ecmd.predicate.block;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.world.WorldView;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
@@ -15,17 +15,17 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 
-public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
+public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
   public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(BlockPredicate.REGISTRY_KEY, ReferenceBlockPredicate::new);
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     try {
-      final WorldView world = cachedBlockPosition.getWorld();
-      if (!(world instanceof ServerWorld serverWorld)) {
+      final LevelReader world = cachedBlockPosition.getLevel();
+      if (!(world instanceof ServerLevel serverWorld)) {
         return false;
       }
-      final BlockPredicate value = value(serverWorld.getServer().getReloadableRegistries().createRegistryLookup());
+      final BlockPredicate value = value(serverWorld.getServer().reloadableRegistries().lookup());
       return value.test(cachedBlockPosition, context);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
@@ -39,7 +39,7 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
 
   @Override
   public @NotNull String asString() {
-    return "$" + id.getValue();
+    return "$" + id.location();
   }
 
   @Override
@@ -51,7 +51,7 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
     public static final Type INSTANCE = new Type();
 
     protected Type() {
-      super('$', Text.translatable("enhanced_commands.block_predicate.reference"), BlockPredicate.REGISTRY_KEY);
+      super('$', Component.translatable("enhanced_commands.block_predicate.reference"), BlockPredicate.REGISTRY_KEY);
     }
 
     @Override
@@ -60,7 +60,7 @@ public record ReferenceBlockPredicate(RegistryKey<BlockPredicate> id) implements
     }
 
     @Override
-    protected ReferenceBlockPredicate getResultByEntrySupplier(FailableSupplier<RegistryKey<BlockPredicate>, CommandSyntaxException> supplier) throws CommandSyntaxException {
+    protected ReferenceBlockPredicate getResultByEntrySupplier(FailableSupplier<ResourceKey<BlockPredicate>, CommandSyntaxException> supplier) throws CommandSyntaxException {
       return new ReferenceBlockPredicate(supplier.get());
     }
 

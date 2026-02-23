@@ -2,9 +2,9 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -17,17 +17,17 @@ public enum LocalWorldEntityPredicate implements SpecialEntityPredicate {
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
-    return entity.getWorld().equals(context.positionProvider.getWorld$ec());
+    return entity.level().equals(context.positionProvider.getWorld$ec());
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final World world = entity.getWorld();
-    final World sourceWorld = context.positionProvider.getWorld$ec();
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    final Level world = entity.level();
+    final Level sourceWorld = context.positionProvider.getWorld$ec();
     if (world.equals(sourceWorld)) {
-      return (TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.local_world.true", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(Styles.ACTUAL))));
+      return (TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.local_world.true", displayName, TextUtil.literal(world.dimension().location()).withStyle(Styles.ACTUAL))));
     } else {
-      return (TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.local_world.false", displayName, TextUtil.literal(world.getRegistryKey().getValue()).styled(Styles.ACTUAL), Text.literal(sourceWorld == null ? "<unknown>" : sourceWorld.getRegistryKey().getValue().toString()).styled(Styles.EXPECTED))));
+      return (TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.local_world.false", displayName, TextUtil.literal(world.dimension().location()).withStyle(Styles.ACTUAL), Component.literal(sourceWorld == null ? "<unknown>" : sourceWorld.dimension().location().toString()).withStyle(Styles.EXPECTED))));
     }
   }
 

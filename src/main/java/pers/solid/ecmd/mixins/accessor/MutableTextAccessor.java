@@ -1,18 +1,18 @@
 package pers.solid.ecmd.mixins.accessor;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextContent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import java.util.List;
 
-@Mixin(MutableText.class)
+@Mixin(MutableComponent.class)
 public interface MutableTextAccessor {
   @Invoker("<init>")
-  static MutableText createMutableText(TextContent content, List<Text> siblings, Style style) {
+  static MutableComponent createMutableText(ComponentContents content, List<Component> siblings, Style style) {
     throw new UnsupportedOperationException();
   }
 }

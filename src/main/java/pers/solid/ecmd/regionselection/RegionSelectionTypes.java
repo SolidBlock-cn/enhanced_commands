@@ -1,7 +1,7 @@
 package pers.solid.ecmd.regionselection;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
 import org.apache.commons.lang3.Validate;
 import pers.solid.ecmd.EnhancedCommands;
 
@@ -20,6 +20,6 @@ public final class RegionSelectionTypes {
   }
 
   public static void init() {
-    Validate.notEmpty(RegionSelectionType.REGISTRY.getEntrySet());
+    Validate.notEmpty(RegionSelectionType.REGISTRY.entrySet());
   }
 }

@@ -4,9 +4,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -17,19 +17,19 @@ public record SaturationEntityPredicateEntry(BridgeFloatRange saturation, boolea
       BridgeFloatRange.CODEC.fieldOf("saturation").forGetter(SaturationEntityPredicateEntry::saturation),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(SaturationEntityPredicateEntry::inverted)
   ).apply(i, SaturationEntityPredicateEntry::new));
-  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.saturation");
+  private static final Component CRITERION_NAME = Component.translatable("enhanced_commands.entity_predicate.saturation");
 
   @Override
   public boolean test(@NotNull Entity entity) {
-    return entity instanceof final PlayerEntity player && saturation.test(player.getHungerManager().getSaturationLevel()) != inverted;
+    return entity instanceof final Player player && saturation.test(player.getFoodData().getSaturationLevel()) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    if (!(entity instanceof final PlayerEntity player)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    if (!(entity instanceof final Player player)) {
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
-      return EntityPredicateEntry.testFloat(player, player.getHungerManager().getSaturationLevel(), saturation, CRITERION_NAME, displayName, inverted);
+      return EntityPredicateEntry.testFloat(player, player.getFoodData().getSaturationLevel(), saturation, CRITERION_NAME, displayName, inverted);
     }
   }
 

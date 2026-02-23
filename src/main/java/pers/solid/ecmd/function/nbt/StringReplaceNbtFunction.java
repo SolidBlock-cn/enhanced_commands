@@ -6,9 +6,9 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -31,8 +31,8 @@ import java.util.Set;
  * @param original    指定被替换前的 NBT 数据。如果未指定，则默认使用 NBT 函数运行时的参数。
  */
 public record StringReplaceNbtFunction(String target, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
-  public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.nbt_function.string_replace.not_a_string", s));
-  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.string_replace.not_value"));
+  public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Component.translatable("enhanced_commands.nbt_function.string_replace.not_a_string", s));
+  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.string_replace.not_value"));
 
   public static final MapCodec<StringReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.STRING.fieldOf("target").forGetter(StringReplaceNbtFunction::target),
@@ -44,7 +44,7 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
 
   @Override
   public @NotNull String asString() {
-    return "string_replace(" + NbtString.escape(target) + ", " + NbtString.escape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
+    return "string_replace(" + StringTag.quoteAndEscape(target) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   @Override
@@ -53,16 +53,16 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (original.isPresent()) {
       nbtElement = original.get().apply(nbtElement, context);
     }
     if (recursive) {
-      return NbtFunction.recursivelyApply(e -> e instanceof NbtString nbtString ? NbtString.of(nbtString.asString().replace(target, replacement)) : null, nbtElement, null);
+      return NbtFunction.recursivelyApply(e -> e instanceof StringTag nbtString ? StringTag.valueOf(nbtString.getAsString().replace(target, replacement)) : null, nbtElement, null);
     }
-    if (nbtElement instanceof NbtString nbtString) {
-      final String string = nbtString.asString();
-      return NbtString.of(string.replace(target, replacement));
+    if (nbtElement instanceof StringTag nbtString) {
+      final String string = nbtString.getAsString();
+      return StringTag.valueOf(string.replace(target, replacement));
     } else if (lenient && nbtElement != null) {
       // 在当 lenient 为 true 时，不会报错。但仅限 nbtElement 为非 null 的情况下。
       return nbtElement;
@@ -71,7 +71,7 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
       if (nbtElement == null) {
         throw NO_VALUE.create();
       }
-      throw NOT_A_STRING.create(nbtElement.getNbtType().getCommandFeedbackName());
+      throw NOT_A_STRING.create(nbtElement.getType().getPrettyName());
     }
   }
 

@@ -3,13 +3,13 @@ package pers.solid.ecmd.function.block;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
@@ -17,16 +17,16 @@ import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 
-public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements BlockFunction, ReferenceEntry<ReferenceBlockFunction, BlockFunction> {
+public record ReferenceBlockFunction(ResourceKey<BlockFunction> id) implements BlockFunction, ReferenceEntry<ReferenceBlockFunction, BlockFunction> {
   public static final MapCodec<ReferenceBlockFunction> CODEC = ReferenceEntry.createCodec(BlockFunction.REGISTRY_KEY, ReferenceBlockFunction::new);
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     try {
-      if (!(world instanceof ServerWorld serverWorld)) {
+      if (!(world instanceof ServerLevel serverWorld)) {
         return blockState;
       }
-      final BlockFunction value = value(serverWorld.getServer().getReloadableRegistries().createRegistryLookup());
+      final BlockFunction value = value(serverWorld.getServer().reloadableRegistries().lookup());
       return value.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
@@ -40,7 +40,7 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
 
   @Override
   public @NotNull String asString() {
-    return "$" + id.getValue();
+    return "$" + id.location();
   }
 
   @Override
@@ -53,7 +53,7 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
     public static final Type INSTANCE = new Type();
 
     protected Type() {
-      super('$', Text.translatable("enhanced_commands.block_function.reference"), BlockFunction.REGISTRY_KEY);
+      super('$', Component.translatable("enhanced_commands.block_function.reference"), BlockFunction.REGISTRY_KEY);
     }
 
     @Override
@@ -62,7 +62,7 @@ public record ReferenceBlockFunction(RegistryKey<BlockFunction> id) implements B
     }
 
     @Override
-    protected ReferenceBlockFunction getResultByEntrySupplier(FailableSupplier<RegistryKey<BlockFunction>, CommandSyntaxException> supplier) throws CommandSyntaxException {
+    protected ReferenceBlockFunction getResultByEntrySupplier(FailableSupplier<ResourceKey<BlockFunction>, CommandSyntaxException> supplier) throws CommandSyntaxException {
       return new ReferenceBlockFunction(supplier.get());
     }
 

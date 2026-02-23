@@ -1,7 +1,7 @@
 package pers.solid.ecmd.function.property;
 
 import com.google.common.collect.Collections2;
-import net.minecraft.state.property.Property;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

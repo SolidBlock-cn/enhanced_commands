@@ -2,8 +2,8 @@ package pers.solid.ecmd.config;
 
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,11 +43,11 @@ public class ConfigEntry<C, T> {
   /**
    * 配置项的显示名称，可以带有格式或翻译。
    */
-  public final @NotNull Text displayName;
+  public final @NotNull Component displayName;
   /**
    * 配置项的描述。
    */
-  public final @Nullable Text description;
+  public final @Nullable Component description;
   /**
    * 返回一个配置实例（不一定是当前配置实例）中代表该配置项的值的 {@link Function}。
    * <p>
@@ -72,7 +72,7 @@ public class ConfigEntry<C, T> {
   /**
    * @see #builder
    */
-  private ConfigEntry(@NotNull ConfigCategory<C> category, @NotNull ConfigEntryType<T> type, @NotNull String name, @NotNull Text displayName, @Nullable Text description, @NotNull Function<C, T> getter, @NotNull BiConsumer<C, T> setter, @NotNull FailableConsumer<? super T, CommandSyntaxException> valueValidator, @NotNull T defaultValue) {
+  private ConfigEntry(@NotNull ConfigCategory<C> category, @NotNull ConfigEntryType<T> type, @NotNull String name, @NotNull Component displayName, @Nullable Component description, @NotNull Function<C, T> getter, @NotNull BiConsumer<C, T> setter, @NotNull FailableConsumer<? super T, CommandSyntaxException> valueValidator, @NotNull T defaultValue) {
     this.category = category;
     this.type = type;
     this.name = name;
@@ -116,8 +116,8 @@ public class ConfigEntry<C, T> {
     private final String name;
     private final String displayNameTranslationKey;
     private final String descriptionTranslationKey;
-    private Text displayName;
-    private @Nullable Text description;
+    private Component displayName;
+    private @Nullable Component description;
     private Function<C, T> getter;
     private BiConsumer<C, T> setter;
     private FailableConsumer<? super T, CommandSyntaxException> valueValidator = NO_OP_VALIDATOR;
@@ -137,7 +137,7 @@ public class ConfigEntry<C, T> {
     /**
      * 设置配置项的显示名称。
      */
-    public Builder<C, T> setDisplayName(@NotNull Text displayName) {
+    public Builder<C, T> setDisplayName(@NotNull Component displayName) {
       this.displayName = displayName;
       return this;
     }
@@ -145,9 +145,9 @@ public class ConfigEntry<C, T> {
     /**
      * 设置配置项的显示名称，将以根据 {@link #name} 自动生成的翻译键作为参数。
      *
-     * @param translationKeyToText 以翻译键作为参数（可忽略）生成 {@link Text} 对象的函数，例如：{@code translationKey -> Text.translatable(translationKey, ...)}
+     * @param translationKeyToText 以翻译键作为参数（可忽略）生成 {@link Component} 对象的函数，例如：{@code translationKey -> Text.translatable(translationKey, ...)}
      */
-    public Builder<C, T> setDisplayName(@NotNull Function<@NotNull String, @NotNull Text> translationKeyToText) {
+    public Builder<C, T> setDisplayName(@NotNull Function<@NotNull String, @NotNull Component> translationKeyToText) {
       this.displayName = translationKeyToText.apply(displayNameTranslationKey);
       return this;
     }
@@ -155,7 +155,7 @@ public class ConfigEntry<C, T> {
     /**
      * 设置配置项的描述。
      */
-    public Builder<C, T> setDescription(@Nullable Text description) {
+    public Builder<C, T> setDescription(@Nullable Component description) {
       this.description = description;
       return this;
     }
@@ -163,9 +163,9 @@ public class ConfigEntry<C, T> {
     /**
      * 设置配置项的描述，将以根据 {@link #name} 自动生成的翻译键作为参数。
      *
-     * @param translationKeyToText 以翻译键作为参数（可忽略）生成 {@link Text} 对象的函数，例如：{@code translationKey -> Text.translatable(translationKey, ...)}
+     * @param translationKeyToText 以翻译键作为参数（可忽略）生成 {@link Component} 对象的函数，例如：{@code translationKey -> Text.translatable(translationKey, ...)}
      */
-    public Builder<C, T> setDescription(@NotNull Function<@NotNull String, @Nullable Text> translationKeyToText) {
+    public Builder<C, T> setDescription(@NotNull Function<@NotNull String, @Nullable Component> translationKeyToText) {
       this.description = translationKeyToText.apply(descriptionTranslationKey);
       return this;
     }
@@ -173,13 +173,13 @@ public class ConfigEntry<C, T> {
     /**
      * 在已有的描述的基础上增加一行描述。
      */
-    public Builder<C, T> appendDescription(@Nullable Text description) {
+    public Builder<C, T> appendDescription(@Nullable Component description) {
       if (this.description == null) {
         this.description = description;
       } else if (description != null) {
-        this.description = Text.empty()
+        this.description = Component.empty()
             .append(this.description)
-            .append(ScreenTexts.LINE_BREAK)
+            .append(CommonComponents.NEW_LINE)
             .append(description);
       }
       return this;

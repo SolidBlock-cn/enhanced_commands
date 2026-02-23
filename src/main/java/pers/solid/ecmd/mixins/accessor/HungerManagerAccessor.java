@@ -1,14 +1,14 @@
 package pers.solid.ecmd.mixins.accessor;
 
-import net.minecraft.entity.player.HungerManager;
+import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(HungerManager.class)
+@Mixin(FoodData.class)
 public interface HungerManagerAccessor {
   @Accessor
-  float getExhaustion();
+  float getExhaustionLevel();
 
   @Accessor
-  void setExhaustion(float exhaustion);
+  void setExhaustionLevel(float exhaustion);
 }

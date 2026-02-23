@@ -5,15 +5,15 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.DataCommandObject;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.entity.boss.CommandBossBar;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.scoreboard.ScoreHolder;
-import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.server.command.ExecuteCommand;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.bossevents.CustomBossEvent;
+import net.minecraft.server.commands.ExecuteCommand;
+import net.minecraft.server.commands.data.DataAccessor;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.ScoreHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -24,48 +24,48 @@ import java.util.function.IntFunction;
 @Mixin(ExecuteCommand.class)
 public interface ExecuteCommandAccessor {
   @Accessor
-  static SimpleCommandExceptionType getCONDITIONAL_FAIL_EXCEPTION() {
+  static SimpleCommandExceptionType getERROR_CONDITIONAL_FAILED() {
     throw new AssertionError();
   }
 
   @Invoker
-  static ServerCommandSource callExecuteStoreScore(
-      ServerCommandSource source, Collection<ScoreHolder> targets, ScoreboardObjective objective, boolean requestResult
+  static CommandSourceStack callStoreValue(
+      CommandSourceStack source, Collection<ScoreHolder> targets, Objective objective, boolean requestResult
   ) {
     throw new UnsupportedOperationException();
   }
 
   @Invoker
-  static ServerCommandSource callExecuteStoreBossbar(ServerCommandSource source, CommandBossBar bossBar, boolean storeInValue, boolean requestResult) {
+  static CommandSourceStack callStoreValue(CommandSourceStack source, CustomBossEvent bossBar, boolean storeInValue, boolean requestResult) {
     throw new UnsupportedOperationException();
   }
 
   @Invoker
-  static ServerCommandSource callExecuteStoreData(
-      ServerCommandSource source, DataCommandObject object, NbtPathArgumentType.NbtPath path, IntFunction<NbtElement> nbtSetter, boolean requestResult
+  static CommandSourceStack callStoreData(
+      CommandSourceStack source, DataAccessor object, NbtPathArgument.NbtPath path, IntFunction<Tag> nbtSetter, boolean requestResult
   ) {
     throw new UnsupportedOperationException();
   }
 
   @Invoker
-  static LiteralArgumentBuilder<ServerCommandSource> callAddOnArguments(
-      CommandNode<ServerCommandSource> node, LiteralArgumentBuilder<ServerCommandSource> builder
+  static LiteralArgumentBuilder<CommandSourceStack> callCreateRelationOperations(
+      CommandNode<CommandSourceStack> node, LiteralArgumentBuilder<CommandSourceStack> builder
   ) {
     throw new UnsupportedOperationException();
   }
 
   @Invoker
-  static ArgumentBuilder<ServerCommandSource, ?> callAddConditionArguments(
-      CommandNode<ServerCommandSource> root,
-      LiteralArgumentBuilder<ServerCommandSource> argumentBuilder,
+  static ArgumentBuilder<CommandSourceStack, ?> callAddConditionals(
+      CommandNode<CommandSourceStack> root,
+      LiteralArgumentBuilder<CommandSourceStack> argumentBuilder,
       boolean positive,
-      CommandRegistryAccess registryAccess
+      CommandBuildContext registryAccess
   ) {
     throw new UnsupportedOperationException();
   }
 
   @Invoker
-  static Collection<ServerCommandSource> callGetSourceOrEmptyForConditionFork(CommandContext<ServerCommandSource> context, boolean positive, boolean value) {
+  static Collection<CommandSourceStack> callExpect(CommandContext<CommandSourceStack> context, boolean positive, boolean value) {
     throw new UnsupportedOperationException();
   }
 }

@@ -2,8 +2,8 @@ package pers.solid.ecmd.config;
 
 import com.mojang.brigadier.arguments.*;
 import com.mojang.serialization.Codec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.network.codec.ByteBufCodecs;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.HashMap;
@@ -13,11 +13,11 @@ import java.util.Map;
  * 本模组使用的配置项的类型。
  */
 public final class ConfigEntryTypes {
-  public static final ConfigEntryType<Boolean> BOOLEAN = ConfigEntryType.of(Codec.BOOL, PacketCodecs.BOOLEAN, TextUtil::wrapBoolean, BoolArgumentType.bool());
-  public static final ConfigEntryType<Integer> INTEGER = ConfigEntryType.of(Codec.INT, PacketCodecs.INTEGER, TextUtil::literal, IntegerArgumentType.integer());
-  public static final ConfigEntryType<Long> LONG = ConfigEntryType.of(Codec.LONG, PacketCodecs.LONG, TextUtil::literal, LongArgumentType.longArg());
-  public static final ConfigEntryType<Float> FLOAT = ConfigEntryType.of(Codec.FLOAT, PacketCodecs.FLOAT, TextUtil::literal, FloatArgumentType.floatArg());
-  public static final ConfigEntryType<Double> DOUBLE = ConfigEntryType.of(Codec.DOUBLE, PacketCodecs.DOUBLE, TextUtil::literal, DoubleArgumentType.doubleArg());
+  public static final ConfigEntryType<Boolean> BOOLEAN = ConfigEntryType.of(Codec.BOOL, ByteBufCodecs.BOOL, TextUtil::wrapBoolean, BoolArgumentType.bool());
+  public static final ConfigEntryType<Integer> INTEGER = ConfigEntryType.of(Codec.INT, ByteBufCodecs.INT, TextUtil::literal, IntegerArgumentType.integer());
+  public static final ConfigEntryType<Long> LONG = ConfigEntryType.of(Codec.LONG, ByteBufCodecs.LONG, TextUtil::literal, LongArgumentType.longArg());
+  public static final ConfigEntryType<Float> FLOAT = ConfigEntryType.of(Codec.FLOAT, ByteBufCodecs.FLOAT, TextUtil::literal, FloatArgumentType.floatArg());
+  public static final ConfigEntryType<Double> DOUBLE = ConfigEntryType.of(Codec.DOUBLE, ByteBufCodecs.DOUBLE, TextUtil::literal, DoubleArgumentType.doubleArg());
 
   /**
    * 类到配置项类型对象的映射，主要用于 {@link ConfigEntryType#fromClass}。

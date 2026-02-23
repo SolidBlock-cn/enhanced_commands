@@ -6,16 +6,16 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.function.property.*;
-import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.predicate.property.Comparator;
 
 import java.util.*;
 
@@ -26,8 +26,8 @@ public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
   public final Set<Property<?>> mentionedProperties = new HashSet<>();
   public final List<PropertyNameFunction> propertyNameFunctions = new ArrayList<>();
   public final Set<String> mentionedPropertyNames = new HashSet<>();
-  public static final SimpleCommandExceptionType DUPLICATE_GENERAL_PROPERTY_FUNCTION = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.property.duplicate_general"));
-  public static final SimpleCommandExceptionType EXHAUSTED_GENERAL_PROPERTIES = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.block_function.property.exhausted_general_properties"));
+  public static final SimpleCommandExceptionType DUPLICATE_GENERAL_PROPERTY_FUNCTION = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.block_function.property.duplicate_general"));
+  public static final SimpleCommandExceptionType EXHAUSTED_GENERAL_PROPERTIES = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.block_function.property.exhausted_general_properties"));
   /**
    * 使用通用属性（<code>*</code> 或 <code>~</code> 不带具体的属性名称）时，此字段表示需要排除的属性（就是已经被其他属性函数使用了的）。没有使用通用属性时，则为 {@code null}。
    */
@@ -83,22 +83,22 @@ public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
     }
     final int cursorBeforeParseValue = reader.getCursor();
     final String valueName = reader.readString();
-    final Optional<T> parse = property.parse(valueName);
+    final Optional<T> parse = property.getValue(valueName);
     if (parse.isPresent()) {
       propertyFunctions.add(new SimplePropertyFunction<>(property, parse.get(), must));
       parseContext.clearSuggestion();
     } else {
       final int cursorAfterParseValue = reader.getCursor();
       reader.setCursor(cursorBeforeParseValue);
-      throw withCursorEnd(BlockArgumentParser.INVALID_PROPERTY_EXCEPTION.createWithContext(reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
+      throw withCursorEnd(BlockStateParser.ERROR_INVALID_VALUE.createWithContext(reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
     }
   }
 
   private void addSpecialPropertyValueSuggestions() {
     parseContext.addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
-        suggestionsBuilder.suggest("*", Text.translatable("enhanced_commands.block_function.random_value"));
-        suggestionsBuilder.suggest("~", Text.translatable("enhanced_commands.block_function.originalValue"));
+        suggestionsBuilder.suggest("*", Component.translatable("enhanced_commands.block_function.random_value"));
+        suggestionsBuilder.suggest("~", Component.translatable("enhanced_commands.block_function.originalValue"));
       }
       return suggestionsBuilder.buildFuture();
     });
@@ -110,7 +110,7 @@ public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
     final Property<?> property = super.parseProperty();
     // 增加了一个属性之后，需要检查是否已经有通用属性函数，且该函数是否是多余的（即已被所有其他属性指定）。
     mentionedProperties.add(property);
-    if (block != null && exceptionForGeneralProperty != null && exceptionForGeneralProperty.containsAll(block.getStateManager().getProperties())) {
+    if (block != null && exceptionForGeneralProperty != null && exceptionForGeneralProperty.containsAll(block.getStateDefinition().getProperties())) {
       parseContext.clearSuggestion();
       reader.setCursor(cursorBeforeGeneralFunction);
       throw EXHAUSTED_GENERAL_PROPERTIES.createWithContext(reader);
@@ -157,18 +157,18 @@ public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
 
   @Override
   protected void addComparatorTypeSuggestions() {
-    parseContext.addSuggestion((context, suggestionsBuilder) -> CommandSource.suggestMatching(List.of("=", "=="), suggestionsBuilder));
+    parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(List.of("=", "=="), suggestionsBuilder));
   }
 
   @Override
   protected void parsePropertyEntry() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    final boolean propertiesExhausted = block != null && mentionedProperties.containsAll(block.getStateManager().getProperties());
+    final boolean propertiesExhausted = block != null && mentionedProperties.containsAll(block.getStateDefinition().getProperties());
     if (exceptionForGeneralProperty == null) {
       if (!propertiesExhausted) {
         parseContext.addSuggestion((context, suggestionsBuilder) -> {
-          ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_function.property.all_random"), suggestionsBuilder);
-          ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.property.all_original"), suggestionsBuilder);
+          ParsingUtil.suggestString("*", Component.translatable("enhanced_commands.block_function.property.all_random"), suggestionsBuilder);
+          ParsingUtil.suggestString("~", Component.translatable("enhanced_commands.block_function.property.all_original"), suggestionsBuilder);
           return suggestionsBuilder.buildFuture();
         });
       }
@@ -197,8 +197,8 @@ public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
     final StringReader reader = parseContext.reader();
     if (exceptionForGeneralPropertyName == null) {
       parseContext.addSuggestion((context, suggestionsBuilder) -> {
-        ParsingUtil.suggestString("*", Text.translatable("enhanced_commands.block_function.property.all_random"), suggestionsBuilder);
-        ParsingUtil.suggestString("~", Text.translatable("enhanced_commands.block_function.property.all_original"), suggestionsBuilder);
+        ParsingUtil.suggestString("*", Component.translatable("enhanced_commands.block_function.property.all_random"), suggestionsBuilder);
+        ParsingUtil.suggestString("~", Component.translatable("enhanced_commands.block_function.property.all_original"), suggestionsBuilder);
         return suggestionsBuilder.buildFuture();
       });
     }

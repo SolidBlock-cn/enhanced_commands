@@ -2,21 +2,21 @@ package pers.solid.ecmd.mixins.ext;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.mixin.ServerPlayerEntityMixin;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
 
 /**
- * 此接口将通过 {@link ServerPlayerEntityMixin} 使 {@link ServerPlayerEntity} 实现此接口。
+ * 此接口将通过 {@link ServerPlayerEntityMixin} 使 {@link ServerPlayer} 实现此接口。
  */
 public interface ServerPlayerEntityExtension extends PlayerEntityExtension {
   /**
    * 玩家没有活动区域时抛出的异常。
    */
-  DynamicCommandExceptionType PLAYER_HAS_NO_ACTIVE_REGION = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.region.no_active_region", o));
+  DynamicCommandExceptionType PLAYER_HAS_NO_ACTIVE_REGION = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.region.no_active_region", o));
 
   /**
    * 获取玩家的活动区域，如果玩家不存在活动区域，则抛出异常。此方法通常用在必须要玩家拥有活动区域的命令中。
@@ -24,7 +24,7 @@ public interface ServerPlayerEntityExtension extends PlayerEntityExtension {
   default @NotNull RegionSelection getActiveRegionOrThrow$ec() throws CommandSyntaxException {
     final RegionSelection region = getActiveRegion$ec();
     if (region == null) {
-      throw PLAYER_HAS_NO_ACTIVE_REGION.create(((ServerPlayerEntity) this).getName());
+      throw PLAYER_HAS_NO_ACTIVE_REGION.create(((ServerPlayer) this).getName());
     }
     return region;
   }

@@ -7,14 +7,14 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtFloat;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -28,12 +28,12 @@ import java.util.Collections;
 
 import static com.mojang.brigadier.arguments.FloatArgumentType.floatArg;
 import static com.mojang.brigadier.arguments.FloatArgumentType.getFloat;
-import static net.minecraft.command.argument.EntityArgumentType.entities;
-import static net.minecraft.command.argument.EntityArgumentType.getEntities;
-import static net.minecraft.command.argument.NbtPathArgumentType.getNbtPath;
-import static net.minecraft.command.argument.NbtPathArgumentType.nbtPath;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.commands.arguments.EntityArgument.entities;
+import static net.minecraft.commands.arguments.EntityArgument.getEntities;
+import static net.minecraft.commands.arguments.NbtPathArgument.getPath;
+import static net.minecraft.commands.arguments.NbtPathArgument.nbtPath;
 import static pers.solid.ecmd.argument.NbtSourceArgumentType.getNbtSource;
 import static pers.solid.ecmd.argument.NbtSourceArgumentType.nbtSource;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.getNbtTarget;
@@ -45,11 +45,11 @@ public enum HealthCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("health")
-        .executes(context -> executeGetHealth(context, Collections.singleton(context.getSource().getEntityOrThrow()), null, 1))
+        .executes(context -> executeGetHealth(context, Collections.singleton(context.getSource().getEntityOrException()), null, 1))
         .then(literal("get")
-            .executes(context -> executeGetHealth(context, Collections.singleton(context.getSource().getEntityOrThrow()), null, 1))
+            .executes(context -> executeGetHealth(context, Collections.singleton(context.getSource().getEntityOrException()), null, 1))
             .then(argument("entities", entities())
                 .executes(context -> executeGetHealth(context, getEntities(context, "entities"), ConcentrationType.AVERAGE, 1))
                 .then(argument("concentration_type", concentrationType())
@@ -59,7 +59,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
                     .then(literal("store")
                         .then(argument("target", nbtTarget(registryAccess))
                             .then(argument("path", nbtPath())
-                                .executes(context -> executeGetHealth(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), 1, getNbtTarget(context, "target"), getNbtPath(context, "path")))))))))
+                                .executes(context -> executeGetHealth(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), 1, getNbtTarget(context, "target"), getPath(context, "path")))))))))
         .then(literal("set")
             .then(argument("entities", entities())
                 .then(argument("probability", floatArg())
@@ -67,7 +67,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
                 .then(literal("from")
                     .then(literal("result").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
-                      return context.getSource().mergeReturnValueConsumers((success, result) -> {
+                      return context.getSource().withCallback((success, result) -> {
                         for (Entity entity : entities) {
                           if (entity instanceof LivingEntity livingEntity) {
                             livingEntity.setHealth(result);
@@ -77,7 +77,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
                     }))
                     .then(literal("success").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
-                      return context.getSource().mergeReturnValueConsumers((success, result) -> {
+                      return context.getSource().withCallback((success, result) -> {
                         for (Entity entity : entities) {
                           if (entity instanceof LivingEntity livingEntity) {
                             livingEntity.setHealth(success ? 1 : 0);
@@ -91,44 +91,44 @@ public enum HealthCommand implements CommandRegistrationCallback {
                             .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getSourceEntityHealth(context, getConcentrationType(context, "source_concentration_type")))))))
                     .then(argument("source", nbtSource(registryAccess))
                         .then(argument("path", nbtPath())
-                            .executes(context -> executeSetHealthFromSource(context, getNbtPath(context, "path"), NbtConcentrationType.FIRST))
+                            .executes(context -> executeSetHealthFromSource(context, getPath(context, "path"), NbtConcentrationType.FIRST))
                             .then(argument("concentration_type", nbtConcentrationType())
-                                .executes(context -> executeSetHealthFromSource(context, getNbtPath(context, "path"), getNbtConcentrationType(context, "concentration_type")))))))))
+                                .executes(context -> executeSetHealthFromSource(context, getPath(context, "path"), getNbtConcentrationType(context, "concentration_type")))))))))
         .then(literal("add")
-            .executes(context -> executeAddHealth(context, Collections.singleton(context.getSource().getEntityOrThrow())))
+            .executes(context -> executeAddHealth(context, Collections.singleton(context.getSource().getEntityOrException())))
             .then(argument("entities", entities())
                 .executes(context -> executeAddHealth(context, getEntities(context, "entities")))
                 .then(argument("probability", floatArg())
                     .executes(context -> executeAddHealth(context, getEntities(context, "entities"), getFloat(context, "probability"))))))
         .then(literal("remove")
-            .executes(context -> executeRemoveHealth(context, Collections.singleton(context.getSource().getEntityOrThrow())))
+            .executes(context -> executeRemoveHealth(context, Collections.singleton(context.getSource().getEntityOrException())))
             .then(argument("entities", entities())
                 .executes(context -> executeRemoveHealth(context, getEntities(context, "entities")))
                 .then(argument("probability", floatArg())
                     .executes(context -> executeRemoveHealth(context, getEntities(context, "entities"), getFloat(context, "probability")))))));
   }
 
-  private int executeSetHealthFromSource(CommandContext<ServerCommandSource> context, NbtPathArgumentType.NbtPath path, NbtConcentrationType nbtConcentrationType) throws CommandSyntaxException {
-    return executeSetHealth(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(context.getSource(), path, nbtConcentrationType, context.getSource().getWorld().getRandom()), path).floatValue());
+  private int executeSetHealthFromSource(CommandContext<CommandSourceStack> context, NbtPathArgument.NbtPath path, NbtConcentrationType nbtConcentrationType) throws CommandSyntaxException {
+    return executeSetHealth(context, getEntities(context, "entities"), NbtUtil.toNumberOrThrow(getNbtSource(context, "source").getConcentratedNbts(context.getSource(), path, nbtConcentrationType, context.getSource().getLevel().getRandom()), path).getAsFloat());
   }
 
-  public static final DynamicCommandExceptionType NOT_LIVING = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.health.get.single.not_living", o));
-  public static final DynamicCommandExceptionType NOT_LIVING_MULTIPLE = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.commands.health.get.multiple.not_living", o).enhanced$$());
+  public static final DynamicCommandExceptionType NOT_LIVING = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.commands.health.get.single.not_living", o));
+  public static final DynamicCommandExceptionType NOT_LIVING_MULTIPLE = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.commands.health.get.multiple.not_living", o).enhanced$$());
 
-  private static int executeGetHealth(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, double scale) throws CommandSyntaxException {
+  private static int executeGetHealth(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, double scale) throws CommandSyntaxException {
     return executeGetHealth(context, entities, concentrationType, scale, null, null);
   }
 
-  private static int executeGetHealth(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, double scale, @Nullable NbtTarget<?> nbtTarget, NbtPathArgumentType.@Nullable NbtPath nbtPath) throws CommandSyntaxException {
+  private static int executeGetHealth(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, ConcentrationType concentrationType, double scale, @Nullable NbtTarget<?> nbtTarget, NbtPathArgument.@Nullable NbtPath nbtPath) throws CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       if (!(entity instanceof LivingEntity livingEntity)) {
         throw NOT_LIVING.create(entity.getDisplayName());
       }
       final float health = livingEntity.getHealth();
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(health).styled(Styles.RESULT)), false);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.literal(health).withStyle(Styles.RESULT)), false);
       if (nbtTarget != null && nbtPath != null) {
-        nbtTarget.setNbtInPath(context.getSource(), nbtPath, NbtFloat.of(health));
+        nbtTarget.setNbtInPath(context.getSource(), nbtPath, FloatTag.valueOf(health));
       }
       return (int) (health * scale);
     } else {
@@ -142,7 +142,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       final double result = concentrationType.concentrateFloat(floats);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.get.multiple", floats.size(), concentrationType.getDisplayName(), Text.literal(concentrationType.floatToString(result)).styled(Styles.RESULT)).enhanced$$(), false);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.get.multiple", floats.size(), concentrationType.getDisplayName(), Component.literal(concentrationType.floatToString(result)).withStyle(Styles.RESULT)).enhanced$$(), false);
       if (nbtTarget != null && nbtPath != null) {
         nbtTarget.setNbtInPath(context.getSource(), nbtPath, concentrationType.floatToNbt(result));
       }
@@ -150,14 +150,14 @@ public enum HealthCommand implements CommandRegistrationCallback {
     }
   }
 
-  private static int executeSetHealth(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, float value) throws CommandSyntaxException {
+  private static int executeSetHealth(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, float value) throws CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       if (!(entity instanceof LivingEntity livingEntity)) {
         throw NOT_LIVING.create(entity.getDisplayName());
       }
       livingEntity.setHealth(value);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.set.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET), TextUtil.literal(livingEntity.getHealth()).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.set.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET), TextUtil.literal(livingEntity.getHealth()).withStyle(Styles.RESULT)), true);
       return 1;
     } else {
       int successes = 0;
@@ -171,19 +171,19 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.set.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)).enhanced$$(), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.set.multiple", TextUtil.literal(finalSuccesses).withStyle(Styles.TARGET), TextUtil.literal(value).withStyle(Styles.RESULT)).enhanced$$(), true);
       return successes;
     }
   }
 
-  private static int executeAddHealth(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, float value) throws CommandSyntaxException {
+  private static int executeAddHealth(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, float value) throws CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       if (!(entity instanceof LivingEntity livingEntity)) {
         throw NOT_LIVING.create(entity.getDisplayName());
       }
       livingEntity.setHealth(livingEntity.getHealth() + value);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.add.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT), TextUtil.literal(livingEntity.getHealth()).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.add.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).withStyle(Styles.RESULT), TextUtil.literal(livingEntity.getHealth()).withStyle(Styles.RESULT)), true);
       return 1;
     } else {
       int successes = 0;
@@ -197,19 +197,19 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.add.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)).enhanced$$(), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.add.multiple", TextUtil.literal(finalSuccesses).withStyle(Styles.TARGET), TextUtil.literal(value).withStyle(Styles.RESULT)).enhanced$$(), true);
       return successes;
     }
   }
 
-  private static int executeAddHealth(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities) throws CommandSyntaxException {
+  private static int executeAddHealth(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities) throws CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       if (!(entity instanceof LivingEntity livingEntity)) {
         throw NOT_LIVING.create(entity.getDisplayName());
       }
       livingEntity.setHealth(livingEntity.getMaxHealth());
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.add_to_max.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET), TextUtil.literal(livingEntity.getHealth()).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.add_to_max.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET), TextUtil.literal(livingEntity.getHealth()).withStyle(Styles.RESULT)), true);
       return 1;
     } else {
       int successes = 0;
@@ -223,19 +223,19 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.add_to_max.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)).enhanced$$(), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.add_to_max.multiple", TextUtil.literal(finalSuccesses).withStyle(Styles.TARGET)).enhanced$$(), true);
       return successes;
     }
   }
 
-  private static int executeRemoveHealth(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities, float value) throws CommandSyntaxException {
+  private static int executeRemoveHealth(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, float value) throws CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       if (!(entity instanceof LivingEntity livingEntity)) {
         throw NOT_LIVING.create(entity.getDisplayName());
       }
       livingEntity.setHealth(livingEntity.getHealth() - value);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.remove.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT), TextUtil.literal(livingEntity.getHealth()).styled(Styles.RESULT)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.remove.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET), TextUtil.literal(value).withStyle(Styles.RESULT), TextUtil.literal(livingEntity.getHealth()).withStyle(Styles.RESULT)), true);
       return 1;
     } else {
       int successes = 0;
@@ -249,19 +249,19 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.remove.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET), TextUtil.literal(value).styled(Styles.RESULT)).enhanced$$(), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.remove.multiple", TextUtil.literal(finalSuccesses).withStyle(Styles.TARGET), TextUtil.literal(value).withStyle(Styles.RESULT)).enhanced$$(), true);
       return successes;
     }
   }
 
-  private static int executeRemoveHealth(CommandContext<ServerCommandSource> context, Collection<? extends Entity> entities) throws CommandSyntaxException {
+  private static int executeRemoveHealth(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities) throws CommandSyntaxException {
     if (entities.size() == 1) {
       final Entity entity = entities.iterator().next();
       if (!(entity instanceof LivingEntity livingEntity)) {
         throw NOT_LIVING.create(entity.getDisplayName());
       }
       livingEntity.setHealth(0);
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.remove_all.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET)), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.remove_all.single", TextUtil.styled(livingEntity.getDisplayName(), Styles.TARGET)), true);
       return 1;
     } else {
       int successes = 0;
@@ -275,12 +275,12 @@ public enum HealthCommand implements CommandRegistrationCallback {
         throw NOT_LIVING_MULTIPLE.create(entities.size());
       }
       int finalSuccesses = successes;
-      context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.health.remove_all.multiple", TextUtil.literal(finalSuccesses).styled(Styles.TARGET)).enhanced$$(), true);
+      context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.health.remove_all.multiple", TextUtil.literal(finalSuccesses).withStyle(Styles.TARGET)).enhanced$$(), true);
       return successes;
     }
   }
 
-  private static float getSourceEntityHealth(CommandContext<ServerCommandSource> context, ConcentrationType concentrationType) throws CommandSyntaxException {
+  private static float getSourceEntityHealth(CommandContext<CommandSourceStack> context, ConcentrationType concentrationType) throws CommandSyntaxException {
     final Collection<? extends Entity> sourceEntities = getEntities(context, "source_entities");
     if (sourceEntities.size() == 1) {
       final Entity entity = sourceEntities.iterator().next();

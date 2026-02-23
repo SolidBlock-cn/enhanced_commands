@@ -17,7 +17,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  *   2s(null) = 2s
  * </pre>
  */
-public record NumberValueNbtFunction(AbstractNbtNumber number) implements NbtFunction {
+public record NumberValueNbtFunction(NumericTag number) implements NbtFunction {
   @Override
   public @NotNull String asString() {
     return asString(true);
@@ -36,17 +36,17 @@ public record NumberValueNbtFunction(AbstractNbtNumber number) implements NbtFun
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) {
-    if (nbtElement instanceof NbtDouble) {
-      return NbtDouble.of(number.doubleValue());
-    } else if (nbtElement instanceof NbtFloat) {
-      return NbtFloat.of(number.floatValue());
-    } else if (nbtElement instanceof NbtLong) {
-      return NbtLong.of(number.longValue());
-    } else if (nbtElement instanceof NbtInt) {
-      return NbtInt.of(number.intValue());
-    } else if (nbtElement instanceof NbtShort) {
-      return NbtShort.of(number.shortValue());
+  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) {
+    if (nbtElement instanceof DoubleTag) {
+      return DoubleTag.valueOf(number.getAsDouble());
+    } else if (nbtElement instanceof FloatTag) {
+      return FloatTag.valueOf(number.getAsFloat());
+    } else if (nbtElement instanceof LongTag) {
+      return LongTag.valueOf(number.getAsLong());
+    } else if (nbtElement instanceof IntTag) {
+      return IntTag.valueOf(number.getAsInt());
+    } else if (nbtElement instanceof ShortTag) {
+      return ShortTag.valueOf(number.getAsShort());
     } else {
       return number;
     }

@@ -6,9 +6,9 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
@@ -28,7 +28,7 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedPosArgument,
     for (Pair<EnhancedPosArgument, BlockPredicate> pair : predicates) {
       final var pos = pair.getFirst();
       final var predicate = pair.getSecond();
-      if (!predicate.test(new CachedBlockPosition(entity.getWorld(), pos.toAbsoluteBlockPos(PositionProvider.of(entity)), false), new ExecutionContext(PositionProvider.of(entity)))) {
+      if (!predicate.test(new BlockInWorld(entity.level(), pos.toAbsoluteBlockPos(PositionProvider.of(entity)), false), new ExecutionContext(PositionProvider.of(entity)))) {
         return false;
       }
     }
@@ -36,20 +36,20 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedPosArgument,
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
     boolean result = true;
     for (Pair<EnhancedPosArgument, BlockPredicate> pair : predicates) {
       final var pos = pair.getFirst();
       final var predicate = pair.getSecond();
-      final TestResult testResult = predicate.testAndDescribe(new CachedBlockPosition(entity.getWorld(), pos.toAbsoluteBlockPos(PositionProvider.of(entity)), false), new ExecutionContext(PositionProvider.of(entity)));
+      final TestResult testResult = predicate.testAndDescribe(new BlockInWorld(entity.level(), pos.toAbsoluteBlockPos(PositionProvider.of(entity)), false), new ExecutionContext(PositionProvider.of(entity)));
       attachments.add(testResult);
       result &= testResult.successes();
     }
     if (result) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.block.pass_multiple", displayName), attachments.build());
+      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.block.pass_multiple", displayName), attachments.build());
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.block.fail_multiple", displayName), attachments.build());
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.block.fail_multiple", displayName), attachments.build());
     }
   }
 

@@ -1,25 +1,25 @@
 package pers.solid.ecmd.util;
 
-import net.minecraft.util.BlockMirror;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.Vec3;
 
 public interface GeoUtil {
-  static Vec3i rotate(Vec3i pos, BlockRotation rotation, Vec3i pivot) {
-    return transform(pos, BlockMirror.NONE, rotation, pivot);
+  static Vec3i rotate(Vec3i pos, Rotation rotation, Vec3i pivot) {
+    return transform(pos, Mirror.NONE, rotation, pivot);
   }
 
-  static Vec3d rotate(Vec3d point, BlockRotation rotation, Vec3d pivot) {
-    return transform(point, BlockMirror.NONE, rotation, pivot);
+  static Vec3 rotate(Vec3 point, Rotation rotation, Vec3 pivot) {
+    return transform(point, Mirror.NONE, rotation, pivot);
   }
 
   /**
-   * @see net.minecraft.structure.StructureTemplate#transformAround(BlockPos, BlockMirror, BlockRotation, BlockPos)
+   * @see net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#transform(BlockPos, Mirror, Rotation, BlockPos)
    */
-  static Vec3i transform(Vec3i pos, BlockMirror mirror, BlockRotation rotation, Vec3i pivot) {
+  static Vec3i transform(Vec3i pos, Mirror mirror, Rotation rotation, Vec3i pivot) {
     int x = pos.getX();
     int y = pos.getY();
     int z = pos.getZ();
@@ -41,9 +41,9 @@ public interface GeoUtil {
   }
 
   /**
-   * @see net.minecraft.structure.StructureTemplate#transformAround(Vec3d, BlockMirror, BlockRotation, BlockPos)
+   * @see net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate#transform(Vec3, Mirror, Rotation, BlockPos)
    */
-  static Vec3d transform(Vec3d point, BlockMirror mirror, BlockRotation rotation, Vec3d pivot) {
+  static Vec3 transform(Vec3 point, Mirror mirror, Rotation rotation, Vec3 pivot) {
     double x = point.x;
     double y = point.y;
     double z = point.z;
@@ -54,13 +54,13 @@ public interface GeoUtil {
       default -> useModifiedPoint = false;
     }
 
-    double i = pivot.getX();
-    double j = pivot.getZ();
+    double i = pivot.x();
+    double j = pivot.z();
     return switch (rotation) {
-      case COUNTERCLOCKWISE_90 -> new Vec3d((i - j) + z, y, (i + j) - x);
-      case CLOCKWISE_90 -> new Vec3d((i + j) - z, y, (j - i) + x);
-      case CLOCKWISE_180 -> new Vec3d((i + i) - x, y, (j + j) - z);
-      default -> useModifiedPoint ? new Vec3d(x, y, z) : point;
+      case COUNTERCLOCKWISE_90 -> new Vec3((i - j) + z, y, (i + j) - x);
+      case CLOCKWISE_90 -> new Vec3((i + j) - z, y, (j - i) + x);
+      case CLOCKWISE_180 -> new Vec3((i + i) - x, y, (j + j) - z);
+      default -> useModifiedPoint ? new Vec3(x, y, z) : point;
     };
   }
 
@@ -72,11 +72,11 @@ public interface GeoUtil {
     };
   }
 
-  static Vec3d mirror(Vec3d point, Direction.Axis axis, Vec3d pivot) {
+  static Vec3 mirror(Vec3 point, Direction.Axis axis, Vec3 pivot) {
     return switch (axis) {
-      case X -> new Vec3d(pivot.x * 2 - point.x, point.y, point.z);
-      case Y -> new Vec3d(point.x, pivot.y * 2 - point.y, point.z);
-      case Z -> new Vec3d(point.x, point.y, pivot.z * 2 - point.z);
+      case X -> new Vec3(pivot.x * 2 - point.x, point.y, point.z);
+      case Y -> new Vec3(point.x, pivot.y * 2 - point.y, point.z);
+      case Z -> new Vec3(point.x, point.y, pivot.z * 2 - point.z);
     };
   }
 }

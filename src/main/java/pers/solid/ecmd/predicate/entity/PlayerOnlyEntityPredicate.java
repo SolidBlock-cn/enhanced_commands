@@ -2,8 +2,8 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -17,16 +17,16 @@ public enum PlayerOnlyEntityPredicate implements SpecialEntityPredicate, StaticE
 
   @Override
   public boolean test(@NotNull Entity entity) {
-    return entity.isPlayer();
+    return entity.isAlwaysTicking();
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final boolean isPlayer = entity.isPlayer();
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    final boolean isPlayer = entity.isAlwaysTicking();
     if (isPlayer) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.player.true", displayName));
+      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.player.true", displayName));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.player.false", displayName));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.player.false", displayName));
     }
   }
 

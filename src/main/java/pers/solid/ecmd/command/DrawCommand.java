@@ -7,19 +7,19 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -42,14 +42,14 @@ import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.stream.LongStream;
 
-import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum DrawCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builder()
         .addShared(KeywordArgsCommon.FILLING, registryAccess)
         .addOptionalArg("interval", DoubleArgumentType.doubleArg(0d), 0d)
@@ -67,17 +67,17 @@ public enum DrawCommand implements CommandRegistrationCallback {
   }
 
 
-  private static int setBlocksWithDefaultKeywordArgs(Curve curve, BlockFunction blockFunction, ServerCommandSource source) throws CommandSyntaxException {
-    return execute(curve, blockFunction, source, null, false, false, 0d, new BlockFunctionContext(Block.NOTIFY_LISTENERS, 0, source.getWorld().getRandom(), source, null), 0d, UnloadedPosBehavior.REJECT, true);
+  private static int setBlocksWithDefaultKeywordArgs(Curve curve, BlockFunction blockFunction, CommandSourceStack source) throws CommandSyntaxException {
+    return execute(curve, blockFunction, source, null, false, false, 0d, new BlockFunctionContext(Block.UPDATE_CLIENTS, 0, source.getLevel().getRandom(), source, null), 0d, UnloadedPosBehavior.REJECT, true);
   }
 
-  private static int setBlocksFromKeywordArgs(Curve curve, BlockFunction blockFunction, ServerCommandSource source, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return execute(curve, blockFunction, source, kwArgs.getArg("affect_only"), kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), kwArgs.getArg("interval"), new BlockFunctionContext(FillReplaceCommand.getFlags(kwArgs), FillReplaceCommand.getModFlags(kwArgs), source.getWorld().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("thickness"), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
+  private static int setBlocksFromKeywordArgs(Curve curve, BlockFunction blockFunction, CommandSourceStack source, KeywordArgs kwArgs) throws CommandSyntaxException {
+    return execute(curve, blockFunction, source, kwArgs.getArg("affect_only"), kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), kwArgs.getArg("interval"), new BlockFunctionContext(FillReplaceCommand.getFlags(kwArgs), FillReplaceCommand.getModFlags(kwArgs), source.getLevel().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("thickness"), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
-  private static int execute(Curve curve, BlockFunction blockFunction, ServerCommandSource source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, double interval, BlockFunctionContext context, double thickness, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
+  private static int execute(Curve curve, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, double interval, BlockFunctionContext context, double thickness, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
     if (interval > -0.05 && interval < 0.05) interval = 0.05;
-    final double estimatedIterationAmount = curve.length() / Math.min(interval, 1) * (thickness == 0 ? 1 : Math.max(1d, MathHelper.square(thickness) * Math.PI));
+    final double estimatedIterationAmount = curve.length() / Math.min(interval, 1) * (thickness == 0 ? 1 : Math.max(1d, Mth.square(thickness) * Math.PI));
     if (!Double.isFinite(estimatedIterationAmount)) {
       throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().create();
     }
@@ -86,9 +86,9 @@ public enum DrawCommand implements CommandRegistrationCallback {
       throw FillReplaceCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, regionSizeLimit);
     }
 
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
-      final @Nullable Box box = curve.minContainingBox();
+      final @Nullable AABB box = curve.minContainingBox();
       if (box != null && !LoadUtil.isPosLoaded(world, box)) {
         throw FillReplaceCommand.UNLOADED_POS.create();
       }
@@ -97,27 +97,27 @@ public enum DrawCommand implements CommandRegistrationCallback {
     // 尽可能使用 mutable，避免每次都创建对象；在构造流的过程中，转化为 long 是为了能够执行 distinct
     // 请注意：每次迭代时，可能都是同一个对象。
     LongStream longStream;
-    BlockPos.Mutable mutable = new BlockPos.Mutable();
+    BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
     final Double i = interval;
     if (thickness > 0) {
       longStream = curve.streamPoints(i).flatMapToLong(vec3d -> LongStream.concat(LongStream.of(mutable.set(vec3d.x, vec3d.y, vec3d.z).asLong()), new SphereRegion(thickness, vec3d).stream().mapToLong(BlockPos::asLong)).distinct().sequential()).distinct();
     } else {
       longStream = curve.streamPoints(i).mapToLong(value -> mutable.set(value.x, value.y, value.z).asLong()).distinct();
     }
-    Iterable<BlockPos.Mutable> posIterable = () -> IterateUtils.transformLongToObject(longStream.iterator(), mutable::set);
+    Iterable<BlockPos.MutableBlockPos> posIterable = () -> IterateUtils.transformLongToObject(longStream.iterator(), mutable::set);
 
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();
 
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       posIterable = new BatchedFilterIterable<>(posIterable, 16, blockPos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+        final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       posIterable = Iterables.transform(posIterable, blockPos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+        final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloaded.setTrue();
           throw new UnloadedPosException(blockPos);
@@ -126,7 +126,7 @@ public enum DrawCommand implements CommandRegistrationCallback {
       });
     }
 
-    final MutableText taskName = Text.translatable("enhanced_commands.commands.draw.task_name", curve.asString());
+    final MutableComponent taskName = Component.translatable("enhanced_commands.commands.draw.task_name", curve.asString());
     final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, context.flags, context.modFlags) : null;
 
 
@@ -143,9 +143,9 @@ public enum DrawCommand implements CommandRegistrationCallback {
     } else {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
         if (blockPos == null) return null;
-        final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-        if (cachedBlockPosition.getBlockState() != null && predicate.test(cachedBlockPosition, context)) {
-          oldStates.put(blockPos.asLong(), cachedBlockPosition.getBlockState());
+        final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+        if (cachedBlockPosition.getState() != null && predicate.test(cachedBlockPosition, context)) {
+          oldStates.put(blockPos.asLong(), cachedBlockPosition.getState());
         }
         return (Void) null;
       });
@@ -163,10 +163,10 @@ public enum DrawCommand implements CommandRegistrationCallback {
     // 第三部分：结束时声明
 
     final Iterable<Void> finalClaim = IterateUtils.singletonPeekingIterable(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
-      case SKIP -> Text.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
-      case BREAK -> Text.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
-      default -> Text.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
-    } : Text.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue()).enhanced$$(), true));
+      case SKIP -> Component.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
+      case BREAK -> Component.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
+      default -> Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
+    } : Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue()).enhanced$$(), true));
 
 
     if (history != null) {
@@ -186,7 +186,7 @@ public enum DrawCommand implements CommandRegistrationCallback {
       if (history != null) {
         history.task = task;
       }
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Double.toString(estimatedIterationAmount)).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Double.toString(estimatedIterationAmount)).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(Iterables.concat(collectPosToAffect, setBlocks, finalClaim).iterator());

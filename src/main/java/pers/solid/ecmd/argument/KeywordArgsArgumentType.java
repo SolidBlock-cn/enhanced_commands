@@ -10,10 +10,10 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,15 +27,15 @@ import java.util.function.Function;
 
 import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 
-public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<@NotNull String, Object> defaultValues, Set<Identifier> shared, Set<String> argumentsFromShared) implements ArgumentType<KeywordArgs> {
-  public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.keyword_args.unknown_argument_name", o));
-  public static final DynamicCommandExceptionType DUPLICATE_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.argument.keyword_args.duplicate_argument_name", o));
+public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<@NotNull String, Object> defaultValues, Set<ResourceLocation> shared, Set<String> argumentsFromShared) implements ArgumentType<KeywordArgs> {
+  public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.argument.keyword_args.unknown_argument_name", o));
+  public static final DynamicCommandExceptionType DUPLICATE_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.argument.keyword_args.duplicate_argument_name", o));
 
   public static Builder builder() {
     return new Builder(new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableSet.Builder<>());
   }
 
-  public static Builder builderFromShared(@NotNull Function<CommandRegistryAccess, KeywordArgsArgumentType> source, CommandRegistryAccess registryAccess) {
+  public static Builder builderFromShared(@NotNull Function<CommandBuildContext, KeywordArgsArgumentType> source, CommandBuildContext registryAccess) {
     return builder().addShared(source, registryAccess);
   }
 
@@ -72,7 +72,7 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
 
   private <S> KeywordArgs parseAndSuggest(StringReader reader, @Nullable final MutableObject<SuggestionProvider<S>> suggestionProvider) throws CommandSyntaxException {
     final Map<String, Object> values = new HashMap<>();
-    final SuggestionProvider<S> nameSuggestion = (context, builder) -> CommandSource.suggestMatching(arguments.keySet().stream().filter(s -> !values.containsKey(s)), builder.createOffset(reader.getCursor()));
+    final SuggestionProvider<S> nameSuggestion = (context, builder) -> SharedSuggestionProvider.suggest(arguments.keySet().stream().filter(s -> !values.containsKey(s)), builder.createOffset(reader.getCursor()));
     if (suggestionProvider != null) {
       suggestionProvider.setValue(nameSuggestion);
     }
@@ -126,10 +126,10 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
     private final ImmutableMap.Builder<String, ArgumentType<?>> arguments;
     private final ImmutableSet.Builder<String> requiredArguments;
     private final ImmutableMap.Builder<String, Object> defaultValues;
-    private final ImmutableSet.Builder<Identifier> shared;
+    private final ImmutableSet.Builder<ResourceLocation> shared;
     private final ImmutableSet.Builder<String> argumentsFromShared;
 
-    Builder(ImmutableMap.Builder<String, ArgumentType<?>> arguments, ImmutableSet.Builder<String> requiredArgs, ImmutableMap.Builder<String, Object> defaultValues, ImmutableSet.Builder<Identifier> shared, ImmutableSet.Builder<String> argumentsFromShared) {
+    Builder(ImmutableMap.Builder<String, ArgumentType<?>> arguments, ImmutableSet.Builder<String> requiredArgs, ImmutableMap.Builder<String, Object> defaultValues, ImmutableSet.Builder<ResourceLocation> shared, ImmutableSet.Builder<String> argumentsFromShared) {
       this.arguments = arguments;
       this.requiredArguments = requiredArgs;
       this.defaultValues = defaultValues;
@@ -160,7 +160,7 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
       return this;
     }
 
-    public Builder addShared(Function<CommandRegistryAccess, KeywordArgsArgumentType> source, CommandRegistryAccess registryAccess) {
+    public Builder addShared(Function<CommandBuildContext, KeywordArgsArgumentType> source, CommandBuildContext registryAccess) {
       shared.add(KeywordArgsCommon.getIdOrThrow(source));
       final KeywordArgsArgumentType apply = source.apply(registryAccess);
       arguments.putAll(apply.arguments);

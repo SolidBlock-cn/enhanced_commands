@@ -2,17 +2,17 @@ package pers.solid.ecmd.predicate.property;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
-public enum Comparator implements StringIdentifiable {
+public enum Comparator implements StringRepresentable {
   EQ("=", Object::equals),
   GT(">", (actual, expected) -> actual.compareTo(expected) > 0),
   GE(">=", (actual, expected) -> actual.compareTo(expected) >= 0),
@@ -20,7 +20,7 @@ public enum Comparator implements StringIdentifiable {
   LE("<=", (actual, expected) -> actual.compareTo(expected) <= 0),
   NE("!=", (actual, expected) -> !actual.equals(expected));
 
-  public static final Map<String, Comparator> NAME_TO_VALUE = Util.make(new ImmutableMap.Builder<String, Comparator>(), builder -> Arrays.stream(values()).forEach(comparator -> builder.put(comparator.asString(), comparator))).put("=!", NE).build();
+  public static final Map<String, Comparator> NAME_TO_VALUE = Util.make(new ImmutableMap.Builder<String, Comparator>(), builder -> Arrays.stream(values()).forEach(comparator -> builder.put(comparator.getSerializedName(), comparator))).put("=!", NE).build();
   public static final StringIdentifiableCodec<Comparator> CODEC = StringIdentifiableCodec.create(Comparator.values());
   public static final MapCodec<Comparator> FIELD_CODEC = CODEC.optionalFieldOf("comparator").xmap(comparator -> comparator.orElse(EQ), Optional::of);
 
@@ -37,7 +37,7 @@ public enum Comparator implements StringIdentifiable {
   }
 
   @Override
-  public String asString() {
+  public String getSerializedName() {
     return name;
   }
 
@@ -46,15 +46,15 @@ public enum Comparator implements StringIdentifiable {
   }
 
   public <T extends Comparable<T>> boolean test(BlockState actual, Property<T> property, T expected) {
-    return biPredicate.test(actual.get(property), expected);
+    return biPredicate.test(actual.getValue(property), expected);
   }
 
   public <T extends Comparable<T>> boolean parseAndTest(BlockState actual, Property<T> property, String name) {
-    final Optional<T> parse = property.parse(name);
+    final Optional<T> parse = property.getValue(name);
     if (this == NE && parse.isEmpty()) {
       return true;
     }
-    return parse.filter(t -> biPredicate.test(actual.get(property), t)).isPresent();
+    return parse.filter(t -> biPredicate.test(actual.getValue(property), t)).isPresent();
   }
 
   public boolean compareDouble(double actual, double expected) {

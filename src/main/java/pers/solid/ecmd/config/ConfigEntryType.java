@@ -2,11 +2,11 @@ package pers.solid.ecmd.config;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.serialization.Codec;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -44,18 +44,18 @@ public interface ConfigEntryType<T> {
   /**
    * 配置类型的 packet codec，主要用于将该配置类型的值在客户端与服务器之间通信。
    */
-  @NotNull PacketCodec<? super RegistryByteBuf, T> packetCodec();
+  @NotNull StreamCodec<? super RegistryFriendlyByteBuf, T> packetCodec();
 
   /**
-   * 以 {@link Text} 的形式显示该配置类型的值。
+   * 以 {@link Component} 的形式显示该配置类型的值。
    */
-  @NotNull Text displayValue(T value);
+  @NotNull Component displayValue(T value);
 
   /**
-   * 以 {@link Text} 的形式显示该配置类型的值，并添加相应样式。不需要重写此方法。
+   * 以 {@link Component} 的形式显示该配置类型的值，并添加相应样式。不需要重写此方法。
    */
   @NotNull
-  default Text displayValue(T value, UnaryOperator<Style> styleUpdater) {
+  default Component displayValue(T value, UnaryOperator<Style> styleUpdater) {
     return TextUtil.styled(displayValue(value), styleUpdater);
   }
 
@@ -63,30 +63,30 @@ public interface ConfigEntryType<T> {
   /**
    * 该配置类型对应的 {@link ArgumentType}，用于在命令中解析参数。
    */
-  @NotNull ArgumentType<T> getArgumentType(CommandRegistryAccess registryAccess);
+  @NotNull ArgumentType<T> getArgumentType(CommandBuildContext registryAccess);
 
   /**
    * 创建一个简单的 {@link ConfigEntryType}，其中 {@link ArgumentType} 为恒定值，不受 {@code registryAccess} 的影响。
    */
-  static <T> ConfigEntryType<T> of(Codec<T> codec, PacketCodec<? super RegistryByteBuf, T> packetCodec, Function<T, Text> displayFunction, ArgumentType<T> argumentType) {
+  static <T> ConfigEntryType<T> of(Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> packetCodec, Function<T, Component> displayFunction, ArgumentType<T> argumentType) {
     return new Simple<>(codec, packetCodec, displayFunction, (n) -> argumentType);
   }
 
   /**
    * 创建一个简单的 {@link ConfigEntryType}。
    */
-  static <T> ConfigEntryType<T> of(Codec<T> codec, PacketCodec<? super RegistryByteBuf, T> packetCodec, Function<T, Text> displayFunction, Function<CommandRegistryAccess, ArgumentType<T>> argumentTypeProvider) {
+  static <T> ConfigEntryType<T> of(Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> packetCodec, Function<T, Component> displayFunction, Function<CommandBuildContext, ArgumentType<T>> argumentTypeProvider) {
     return new Simple<>(codec, packetCodec, displayFunction, argumentTypeProvider);
   }
 
-  record Simple<T>(Codec<T> codec, PacketCodec<? super RegistryByteBuf, T> packetCodec, Function<T, Text> displayFunction, Function<CommandRegistryAccess, ? extends ArgumentType<T>> argumentTypeProvider) implements ConfigEntryType<T> {
+  record Simple<T>(Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> packetCodec, Function<T, Component> displayFunction, Function<CommandBuildContext, ? extends ArgumentType<T>> argumentTypeProvider) implements ConfigEntryType<T> {
     @Override
-    public @NotNull Text displayValue(T value) {
+    public @NotNull Component displayValue(T value) {
       return displayFunction.apply(value);
     }
 
     @Override
-    public @NotNull ArgumentType<T> getArgumentType(CommandRegistryAccess registryAccess) {
+    public @NotNull ArgumentType<T> getArgumentType(CommandBuildContext registryAccess) {
       return argumentTypeProvider.apply(registryAccess);
     }
   }

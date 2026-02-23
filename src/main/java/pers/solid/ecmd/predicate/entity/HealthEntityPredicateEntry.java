@@ -3,9 +3,9 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -16,7 +16,7 @@ public record HealthEntityPredicateEntry(BridgeFloatRange health, boolean invert
       BridgeFloatRange.CODEC.fieldOf("health").forGetter(HealthEntityPredicateEntry::health),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(HealthEntityPredicateEntry::inverted)
   ).apply(i, HealthEntityPredicateEntry::new));
-  private static final Text CRITERION_NAME = Text.translatable("enhanced_commands.entity_predicate.health");
+  private static final Component CRITERION_NAME = Component.translatable("enhanced_commands.entity_predicate.health");
 
   @Override
   public boolean test(@NotNull Entity entity) {
@@ -24,9 +24,9 @@ public record HealthEntityPredicateEntry(BridgeFloatRange health, boolean invert
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
     if (!(entity instanceof LivingEntity livingEntity)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.general.not_living_entity", displayName, CRITERION_NAME));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.general.not_living_entity", displayName, CRITERION_NAME));
     } else {
       return EntityPredicateEntry.testFloat(livingEntity, livingEntity.getHealth(), health, CRITERION_NAME, displayName, inverted);
     }

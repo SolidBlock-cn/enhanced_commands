@@ -5,11 +5,11 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
@@ -27,20 +27,20 @@ import java.util.stream.Stream;
 /**
  * 直线段，由两个点连接而成的直线。语法为 {@code straight(<from>, <to>)} 或 {@code straight(from <from> to <to>)}。
  */
-public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
-  public static final MapCodec<StraightCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(StraightCurve::from), Vec3d.CODEC.fieldOf("to").forGetter(StraightCurve::to)).apply(i, StraightCurve::new));
+public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
+  public static final MapCodec<StraightCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3.CODEC.fieldOf("from").forGetter(StraightCurve::from), Vec3.CODEC.fieldOf("to").forGetter(StraightCurve::to)).apply(i, StraightCurve::new));
 
   @Override
   public @NotNull Stream<BlockPos> streamBlockPos() {
-    final BlockPos fromBlockPos = BlockPos.ofFloored(from);
-    final BlockPos toBlockPos = BlockPos.ofFloored(to);
+    final BlockPos fromBlockPos = BlockPos.containing(from);
+    final BlockPos toBlockPos = BlockPos.containing(to);
     if (fromBlockPos.equals(toBlockPos)) {
       return Stream.of(fromBlockPos);
     }
     final BlockPos d = toBlockPos.subtract(fromBlockPos);
     if (d.getX() == 0 && (d.getY() == 0 || d.getZ() == 0) || (d.getY() == 0 && d.getZ() == 0)) {
       // 如果至少两个坐标轴之差为零，那么绘制直线。
-      return BlockPos.stream(fromBlockPos, toBlockPos);
+      return BlockPos.betweenClosedStream(fromBlockPos, toBlockPos);
     }
 
     final int dx = Math.abs(d.getX());
@@ -63,17 +63,17 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
       otherAxis2 = Direction.Axis.Y;
     }
 
-    final int dMaxFrom = fromBlockPos.getComponentAlongAxis(maxAxis);
-    final int dMaxTo = toBlockPos.getComponentAlongAxis(maxAxis);
+    final int dMaxFrom = fromBlockPos.get(maxAxis);
+    final int dMaxTo = toBlockPos.get(maxAxis);
     final IntStream initialStream = dMaxTo > dMaxFrom ? IntStream.rangeClosed(dMaxFrom, dMaxTo) : IntStream.rangeClosed(-dMaxFrom, -dMaxTo).map(operand -> -operand);
-    final BlockPos.Mutable mutable = new BlockPos.Mutable();
-    final double grad1 = (to.getComponentAlongAxis(otherAxis1) - from.getComponentAlongAxis(otherAxis1)) / (to.getComponentAlongAxis(maxAxis) - from.getComponentAlongAxis(maxAxis));
-    final double grad2 = (to.getComponentAlongAxis(otherAxis2) - from.getComponentAlongAxis(otherAxis2)) / (to.getComponentAlongAxis(maxAxis) - from.getComponentAlongAxis(maxAxis));
+    final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
+    final double grad1 = (to.get(otherAxis1) - from.get(otherAxis1)) / (to.get(maxAxis) - from.get(maxAxis));
+    final double grad2 = (to.get(otherAxis2) - from.get(otherAxis2)) / (to.get(maxAxis) - from.get(maxAxis));
     return initialStream.mapToObj(value -> {
       // 例如，假如 maxAxis 为 x，componentAxis 为 y，则：
       // (y - fromY) / (x - fromX) = (toY - fromX) / (toX - fromX)
-      final double componentAxis1 = grad1 * (value + 0.5d - from.getComponentAlongAxis(maxAxis)) + from.getComponentAlongAxis(otherAxis1);
-      final double componentAxis2 = grad2 * (value + 0.5d - from.getComponentAlongAxis(maxAxis)) + from.getComponentAlongAxis(otherAxis2);
+      final double componentAxis1 = grad1 * (value + 0.5d - from.get(maxAxis)) + from.get(otherAxis1);
+      final double componentAxis2 = grad2 * (value + 0.5d - from.get(maxAxis)) + from.get(otherAxis2);
       return switch (maxAxis) {
         case X -> mutable.set(value, componentAxis1, componentAxis2);
         case Y -> mutable.set(componentAxis1, value, componentAxis2);
@@ -83,19 +83,19 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
   }
 
   @Override
-  public @NotNull Iterator<Vec3d> iteratePoints(Number interval) {
-    final Vec3d relVec = to.subtract(from);
+  public @NotNull Iterator<Vec3> iteratePoints(Number interval) {
+    final Vec3 relVec = to.subtract(from);
     final double totalLength = relVec.length();
-    final Vec3d unitVec = relVec.multiply(1 / totalLength);
+    final Vec3 unitVec = relVec.scale(1 / totalLength);
     return new AbstractIterator<>() {
       private double walkedLength = 0;
 
       @Override
-      protected Vec3d computeNext() {
+      protected Vec3 computeNext() {
         if (walkedLength > totalLength) {
           return endOfData();
         }
-        final Vec3d next = from.add(unitVec.multiply(walkedLength));
+        final Vec3 next = from.add(unitVec.scale(walkedLength));
         walkedLength += interval.doubleValue();
         return next;
       }
@@ -108,7 +108,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
   }
 
   @Override
-  public @NotNull StraightCurve transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull StraightCurve transformed(Function<Vec3, Vec3> transformation) {
     return new StraightCurve(transformation.apply(from), transformation.apply(to));
   }
 
@@ -118,8 +118,8 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
   }
 
   @Override
-  public @NotNull Box minContainingBox() {
-    return new Box(from, to);
+  public @NotNull AABB minContainingBox() {
+    return new AABB(from, to);
   }
 
   @Override
@@ -159,7 +159,7 @@ public record StraightCurve(Vec3d from, Vec3d to) implements Curve {
       final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
       if (paramIndex == 0) {
         {
-          if (reader.canRead() && !CommandSource.shouldSuggest(reader.getRemaining().toLowerCase(), "from")) {
+          if (reader.canRead() && !SharedSuggestionProvider.matchesSubStr(reader.getRemaining().toLowerCase(), "from")) {
             // 避免在输入了部分坐标后仍建议输入 “from” 的情况
             parseContext.clearSuggestion();
           }

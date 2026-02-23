@@ -7,11 +7,13 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Language;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.contents.TranslatableFormatException;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.TranslatableTextContentAccessor;
@@ -24,45 +26,45 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class EnhancedTranslatableTextContent extends TranslatableTextContent {
-  private static final StringVisitable LITERAL_PERCENT_SIGN = StringVisitable.plain("%");
+public class EnhancedTranslatableTextContent extends TranslatableContents {
+  private static final FormattedText LITERAL_PERCENT_SIGN = FormattedText.of("%");
   @Nullable
   private Language languageCache;
-  private List<StringVisitable> translations = ImmutableList.of();
+  private List<FormattedText> translations = ImmutableList.of();
   private static final Pattern ARG_FORMAT = Pattern.compile("%(?:(\\d+)\\$)?([A-Za-z])");
   public static final MapCodec<EnhancedTranslatableTextContent> CODEC = RecordCodecBuilder.mapCodec(
       instance -> instance.group(
-              Codec.STRING.fieldOf("translate").forGetter(TranslatableTextContent::getKey),
+              Codec.STRING.fieldOf("translate").forGetter(TranslatableContents::getKey),
               Codec.STRING.lenientOptionalFieldOf("fallback").forGetter(content -> Optional.ofNullable(content.getFallback())),
-              TranslatableTextContentAccessor.getARGUMENT_CODEC().listOf().optionalFieldOf("with").forGetter(content -> TranslatableTextContentAccessor.callToOptionalList(content.getArgs()))
+              TranslatableTextContentAccessor.getARG_CODEC().listOf().optionalFieldOf("with").forGetter(content -> TranslatableTextContentAccessor.callAdjustArgs(content.getArgs()))
           )
-          .apply(instance, EnhancedTranslatableTextContent::of));
+          .apply(instance, EnhancedTranslatableTextContent::create));
 
   public EnhancedTranslatableTextContent(String key, @Nullable String fallback, Object[] args) {
     super(key, fallback, args);
   }
 
-  private static EnhancedTranslatableTextContent of(String key, Optional<String> fallback, Optional<List<Object>> args) {
-    return new EnhancedTranslatableTextContent(key, fallback.orElse(null), TranslatableTextContentAccessor.callToArray(args));
+  private static EnhancedTranslatableTextContent create(String key, Optional<String> fallback, Optional<List<Object>> args) {
+    return new EnhancedTranslatableTextContent(key, fallback.orElse(null), TranslatableTextContentAccessor.callAdjustArgs(args));
   }
 
-  private void updateTranslations() {
+  private void decompose() {
     Language language = Language.getInstance();
     if (language != this.languageCache) {
       this.languageCache = language;
-      String string = this.getFallback() != null ? language.get(this.getKey(), this.getFallback()) : language.get(this.getKey());
+      String string = this.getFallback() != null ? language.getOrDefault(this.getKey(), this.getFallback()) : language.getOrDefault(this.getKey());
 
       try {
-        ImmutableList.Builder<StringVisitable> builder = ImmutableList.builder();
-        this.forEachPart(string, builder::add);
+        ImmutableList.Builder<FormattedText> builder = ImmutableList.builder();
+        this.decomposeTemplate(string, builder::add);
         this.translations = builder.build();
-      } catch (TranslationException var4) {
-        this.translations = ImmutableList.of(StringVisitable.plain(string));
+      } catch (TranslatableFormatException var4) {
+        this.translations = ImmutableList.of(FormattedText.of(string));
       }
     }
   }
 
-  private void forEachPart(@NotNull String translation, Consumer<StringVisitable> partsConsumer) {
+  private void decomposeTemplate(@NotNull String translation, Consumer<FormattedText> partsConsumer) {
     Matcher matcher = ARG_FORMAT.matcher(translation);
 
     int implicitIndex = 0;
@@ -71,7 +73,7 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
     for (int i = 0; i < translation.length(); i++) {
       final char c = translation.charAt(i);
       if (c == '%') {
-        partsConsumer.accept(StringVisitable.plain(translation.substring(startIndex, i)));
+        partsConsumer.accept(FormattedText.of(translation.substring(startIndex, i)));
 
         if (i + 1 < translation.length() && translation.charAt(i + 1) == '%') {
           partsConsumer.accept(LITERAL_PERCENT_SIGN);
@@ -83,17 +85,17 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
 
           String matchingFormat = matcher.group(2);
           if (!"s".equals(matchingFormat)) {
-            partsConsumer.accept(Text.literal("[Unsupported format: %s]".formatted(matchedPart)).formatted(Formatting.DARK_RED, Formatting.UNDERLINE));
+            partsConsumer.accept(Component.literal("[Unsupported format: %s]".formatted(matchedPart)).withStyle(ChatFormatting.DARK_RED, ChatFormatting.UNDERLINE));
           } else {
             String matchedParamIndexStr = matcher.group(1);
             int matchedParamIndex = matchedParamIndexStr != null ? Integer.parseInt(matchedParamIndexStr) - 1 : implicitIndex++;
-            partsConsumer.accept(this.getArg(matchedParamIndex));
+            partsConsumer.accept(this.getArgument(matchedParamIndex));
           }
         }
 
         startIndex = i;
       } else if (c == '$') {
-        partsConsumer.accept(StringVisitable.plain(translation.substring(startIndex, i)));
+        partsConsumer.accept(FormattedText.of(translation.substring(startIndex, i)));
         i += 1;
         final StringReader stringReader = new StringReader(translation);
         stringReader.setCursor(i);
@@ -152,20 +154,20 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
 
             final float pluralTestNumber = getFloatArg(pluralIndex);
             if ("plural".equals(unquotedString) ? (pluralTestNumber == 1) : (pluralTestNumber == 2)) {
-              forEachPart(singleTranslation, partsConsumer);
+              decomposeTemplate(singleTranslation, partsConsumer);
             } else {
-              forEachPart(pluralTranslation, partsConsumer);
+              decomposeTemplate(pluralTranslation, partsConsumer);
             }
             i = stringReader.getCursor();
           } else {
-            partsConsumer.accept(StringVisitable.plain("$"));
+            partsConsumer.accept(FormattedText.of("$"));
             i = startIndex + 1;
           }
         } catch (CommandSyntaxException commandSyntaxException) {
           final Message rawMessage = commandSyntaxException.getRawMessage();
-          partsConsumer.accept(rawMessage instanceof Text text ? Text.empty().formatted(Formatting.DARK_RED, Formatting.UNDERLINE).append(text) : Text.literal(rawMessage.getString()).formatted(Formatting.DARK_RED, Formatting.UNDERLINE));
+          partsConsumer.accept(rawMessage instanceof Component text ? Component.empty().withStyle(ChatFormatting.DARK_RED, ChatFormatting.UNDERLINE).append(text) : Component.literal(rawMessage.getString()).withStyle(ChatFormatting.DARK_RED, ChatFormatting.UNDERLINE));
           i = stringReader.getCursor();
-          partsConsumer.accept(Text.literal(translation.substring(startIndex, i)).formatted(Formatting.RED));
+          partsConsumer.accept(Component.literal(translation.substring(startIndex, i)).withStyle(ChatFormatting.RED));
         }
 
         startIndex = i;
@@ -175,7 +177,7 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
     if (startIndex < translation.length()) {
       String string4 = translation.substring(startIndex);
 
-      partsConsumer.accept(StringVisitable.plain(string4));
+      partsConsumer.accept(FormattedText.of(string4));
     }
   }
 
@@ -185,7 +187,7 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
       final Object arg = args[index];
       if (arg instanceof Number number) {
         return number.floatValue();
-      } else if (arg instanceof StringVisitable stringVisitable) {
+      } else if (arg instanceof FormattedText stringVisitable) {
         try {
           return Integer.parseInt(stringVisitable.getString());
         } catch (NumberFormatException ignored) {
@@ -201,10 +203,10 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
   }
 
   @Override
-  public <T> Optional<T> visit(StringVisitable.StyledVisitor<T> visitor, Style style) {
-    this.updateTranslations();
+  public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> visitor, Style style) {
+    this.decompose();
 
-    for (StringVisitable stringVisitable : this.translations) {
+    for (FormattedText stringVisitable : this.translations) {
       Optional<T> optional = stringVisitable.visit(visitor, style);
       if (optional.isPresent()) {
         return optional;
@@ -215,10 +217,10 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
   }
 
   @Override
-  public <T> Optional<T> visit(StringVisitable.Visitor<T> visitor) {
-    this.updateTranslations();
+  public <T> Optional<T> visit(FormattedText.ContentConsumer<T> visitor) {
+    this.decompose();
 
-    for (StringVisitable stringVisitable : this.translations) {
+    for (FormattedText stringVisitable : this.translations) {
       Optional<T> optional = stringVisitable.visit(visitor);
       if (optional.isPresent()) {
         return optional;
@@ -229,20 +231,20 @@ public class EnhancedTranslatableTextContent extends TranslatableTextContent {
   }
 
   @Override
-  public MutableText parse(@Nullable ServerCommandSource source, @Nullable Entity sender, int depth) throws CommandSyntaxException {
+  public MutableComponent resolve(@Nullable CommandSourceStack source, @Nullable Entity sender, int depth) throws CommandSyntaxException {
     final Object[] args = getArgs();
     final Object[] parsedObjects = new Object[args.length];
 
     for (int i = 0; i < parsedObjects.length; ++i) {
       Object object = args[i];
-      if (object instanceof final Text text) {
-        parsedObjects[i] = Texts.parse(source, text, sender, depth);
+      if (object instanceof final Component text) {
+        parsedObjects[i] = ComponentUtils.updateForEntity(source, text, sender, depth);
       } else {
         parsedObjects[i] = object;
       }
     }
 
-    return MutableText.of(new EnhancedTranslatableTextContent(getKey(), getFallback(), parsedObjects));
+    return MutableComponent.create(new EnhancedTranslatableTextContent(getKey(), getFallback(), parsedObjects));
   }
 
   public String toString() {

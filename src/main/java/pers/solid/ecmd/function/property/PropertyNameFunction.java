@@ -2,12 +2,12 @@ package pers.solid.ecmd.function.property;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,9 +22,9 @@ public interface PropertyNameFunction extends ExpressionConvertible {
    */
   @Nullable
   static Property<?> getProperty(@NotNull BlockState blockState, String propertyName, boolean must) {
-    final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
+    final StateDefinition<Block, BlockState> stateManager = blockState.getBlock().getStateDefinition();
     final Property<?> property = stateManager.getProperty(propertyName);
-    if (property == null || !blockState.contains(property)) {
+    if (property == null || !blockState.hasProperty(property)) {
       if (must) {
         throw new IllegalArgumentException("property propertyName");
       } else {
@@ -35,7 +35,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
   }
 
   @Contract(pure = true)
-  BlockState getModifiedState(BlockState origState, BlockState blockState, Random random);
+  BlockState getModifiedState(BlockState origState, BlockState blockState, RandomSource random);
 
   @Contract(pure = true)
   String propertyName();
@@ -43,7 +43,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
   @NotNull
   Type getType();
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     ALL_ORIGINAL("all_original", AllOriginalPropertyNameFunctions.CODEC),
     ALL_RANDOM("all_random", AllRandomPropertyNameFunction.CODEC),
     BYPASSING("bypassing", BypassingPropertyNameFunction.CODEC),
@@ -60,7 +60,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
   }

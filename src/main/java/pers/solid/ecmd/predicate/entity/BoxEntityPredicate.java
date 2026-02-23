@@ -5,19 +5,19 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
-public record BoxEntityPredicate(Box box, PositionOffsetInfo offset) implements SpecialEntityPredicate {
-  public static final MapCodec<BoxEntityPredicate> CODEC = MapCodec.unit(() -> new BoxEntityPredicate(Box.from(Vec3d.ZERO), PositionOffsetInfo.NO_OP));
-  private static final LoadingCache<@NotNull BoxEntityPredicate, LoadingCache<@NotNull Vec3d, Box>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(input -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(vec3d -> input.box.offset(input.offset.apply(vec3d))))));
+public record BoxEntityPredicate(AABB box, PositionOffsetInfo offset) implements SpecialEntityPredicate {
+  public static final MapCodec<BoxEntityPredicate> CODEC = MapCodec.unit(() -> new BoxEntityPredicate(AABB.unitCubeFromLowerCorner(Vec3.ZERO), PositionOffsetInfo.NO_OP));
+  private static final LoadingCache<@NotNull BoxEntityPredicate, LoadingCache<@NotNull Vec3, AABB>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(input -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(vec3d -> input.box.move(input.offset.apply(vec3d))))));
 
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
@@ -25,17 +25,17 @@ public record BoxEntityPredicate(Box box, PositionOffsetInfo offset) implements 
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    final World expected = context.positionProvider.getWorld$ec();
-    final World actual = entity.getWorld();
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    final Level expected = context.positionProvider.getWorld$ec();
+    final Level actual = entity.level();
     if (!expected.equals(actual)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.local_world.false", displayName, TextUtil.literal(actual.getRegistryKey().getValue()), TextUtil.literal(expected.getRegistryKey().getValue())));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.local_world.false", displayName, TextUtil.literal(actual.dimension().location()), TextUtil.literal(expected.dimension().location())));
     }
-    final Box box = cache.getUnchecked(this).getUnchecked(context.positionProvider.getPosition$ec());
+    final AABB box = cache.getUnchecked(this).getUnchecked(context.positionProvider.getPosition$ec());
     if (box.intersects(entity.getBoundingBox())) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.box.true", displayName, box.toString()));
+      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.box.true", displayName, box.toString()));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.box.false", displayName, box.toString()));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.box.false", displayName, box.toString()));
     }
   }
 

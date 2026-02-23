@@ -9,15 +9,15 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.nbt.NbtByte;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtFloat;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.nbt.ByteTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.Nullable;
@@ -31,9 +31,9 @@ import static com.mojang.brigadier.arguments.FloatArgumentType.floatArg;
 import static com.mojang.brigadier.arguments.FloatArgumentType.getFloat;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static net.minecraft.command.argument.NbtPathArgumentType.nbtPath;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.commands.arguments.NbtPathArgument.nbtPath;
 import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
 import static pers.solid.ecmd.command.ModCommands.consumerOf;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
@@ -53,10 +53,10 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
  */
 public enum RandCommand implements CommandRegistrationCallback {
   INSTANCE;
-  public static final Dynamic2CommandExceptionType MIN_MAX_WRONG = new Dynamic2CommandExceptionType((a, b) -> Text.translatable("enhanced_commands.commands.rand.min_max_wrong", a, b));
+  public static final Dynamic2CommandExceptionType MIN_MAX_WRONG = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("enhanced_commands.commands.rand.min_max_wrong", a, b));
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     dispatcher.register(appendStoreArguments(literal("rand")
         .executes(context -> executeRandFloat(context, 0, 1))
         .then(literal("int")
@@ -83,80 +83,80 @@ public enum RandCommand implements CommandRegistrationCallback {
                 .executes(context -> executeRandBoolean(context, getFloat(context, "probability"))))), registryAccess));
   }
 
-  private static int executeRandBoolean(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  private static int executeRandBoolean(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return executeRandBoolean(context, optionalNbtConsumer(context));
   }
 
-  private static <T extends Throwable> int executeRandBoolean(CommandContext<ServerCommandSource> context, @Nullable FailableConsumer<NbtElement, T> nbtConsumer) throws T {
-    final Random random = context.getSource().getWorld().getRandom();
+  private static <T extends Throwable> int executeRandBoolean(CommandContext<CommandSourceStack> context, @Nullable FailableConsumer<Tag, T> nbtConsumer) throws T {
+    final RandomSource random = context.getSource().getLevel().getRandom();
     final boolean value = random.nextBoolean();
-    context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.rand.boolean." + random.nextInt(10), Text.literal(Boolean.toString(value)).styled(Styles.RESULT)), false);
+    context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.rand.boolean." + random.nextInt(10), Component.literal(Boolean.toString(value)).withStyle(Styles.RESULT)), false);
     if (nbtConsumer != null) {
-      nbtConsumer.accept(NbtByte.of(value));
+      nbtConsumer.accept(ByteTag.valueOf(value));
     }
     return BooleanUtils.toInteger(value);
   }
 
-  private static int executeRandBoolean(CommandContext<ServerCommandSource> context, float probabilityOfTrue) throws CommandSyntaxException {
+  private static int executeRandBoolean(CommandContext<CommandSourceStack> context, float probabilityOfTrue) throws CommandSyntaxException {
     return executeRandBoolean(context, probabilityOfTrue, optionalNbtConsumer(context));
   }
 
-  private static <T extends Throwable> int executeRandBoolean(CommandContext<ServerCommandSource> context, float probabilityOfTrue, @Nullable FailableConsumer<NbtElement, T> nbtConsumer) throws T {
-    final Random random = context.getSource().getWorld().getRandom();
+  private static <T extends Throwable> int executeRandBoolean(CommandContext<CommandSourceStack> context, float probabilityOfTrue, @Nullable FailableConsumer<Tag, T> nbtConsumer) throws T {
+    final RandomSource random = context.getSource().getLevel().getRandom();
     final boolean value = random.nextFloat() < probabilityOfTrue;
-    context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.rand.boolean_with_probability." + random.nextInt(10), TextUtil.literal(probabilityOfTrue), Text.literal(Boolean.toString(value)).styled(Styles.RESULT)), false);
+    context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.rand.boolean_with_probability." + random.nextInt(10), TextUtil.literal(probabilityOfTrue), Component.literal(Boolean.toString(value)).withStyle(Styles.RESULT)), false);
     if (nbtConsumer != null) {
-      nbtConsumer.accept(NbtByte.of(value));
+      nbtConsumer.accept(ByteTag.valueOf(value));
     }
     return BooleanUtils.toInteger(value);
   }
 
-  private static int executeRandFloat(CommandContext<ServerCommandSource> context, float min, float max) throws CommandSyntaxException {
+  private static int executeRandFloat(CommandContext<CommandSourceStack> context, float min, float max) throws CommandSyntaxException {
     return executeRandFloat(context, min, max, optionalNbtConsumer(context));
   }
 
-  private static <T extends Throwable> int executeRandFloat(CommandContext<ServerCommandSource> context, float min, float max, @Nullable FailableConsumer<NbtElement, T> nbtConsumer) throws CommandSyntaxException, T {
+  private static <T extends Throwable> int executeRandFloat(CommandContext<CommandSourceStack> context, float min, float max, @Nullable FailableConsumer<Tag, T> nbtConsumer) throws CommandSyntaxException, T {
     if (min > max) {
       throw MIN_MAX_WRONG.create(min, max);
     }
-    final Random random = context.getSource().getWorld().getRandom();
+    final RandomSource random = context.getSource().getLevel().getRandom();
     final float value = min + (max - min) * random.nextFloat();
-    context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Float.toString(min), Float.toString(max), TextUtil.literal(value).styled(Styles.RESULT)), false);
+    context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Float.toString(min), Float.toString(max), TextUtil.literal(value).withStyle(Styles.RESULT)), false);
     if (nbtConsumer != null) {
-      nbtConsumer.accept(NbtFloat.of(value));
+      nbtConsumer.accept(FloatTag.valueOf(value));
     }
     return (int) value;
   }
 
-  private static int executeRandInt(CommandContext<ServerCommandSource> context, int min, int max) throws CommandSyntaxException {
+  private static int executeRandInt(CommandContext<CommandSourceStack> context, int min, int max) throws CommandSyntaxException {
     return executeRandInt(context, min, max, optionalNbtConsumer(context));
   }
 
-  private static <T extends Throwable> int executeRandInt(CommandContext<ServerCommandSource> context, int min, int max, @Nullable FailableConsumer<NbtElement, T> nbtConsumer) throws CommandSyntaxException, T {
+  private static <T extends Throwable> int executeRandInt(CommandContext<CommandSourceStack> context, int min, int max, @Nullable FailableConsumer<Tag, T> nbtConsumer) throws CommandSyntaxException, T {
     if (min > max) {
       throw MIN_MAX_WRONG.create(min, max);
     }
-    final Random random = context.getSource().getWorld().getRandom();
-    final int value = random.nextBetween(min, max);
-    context.getSource().sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Integer.toString(min), Integer.toString(max), TextUtil.literal(value).styled(Styles.RESULT)), false);
+    final RandomSource random = context.getSource().getLevel().getRandom();
+    final int value = random.nextIntBetweenInclusive(min, max);
+    context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.rand.number." + random.nextInt(10), Integer.toString(min), Integer.toString(max), TextUtil.literal(value).withStyle(Styles.RESULT)), false);
     if (nbtConsumer != null) {
-      nbtConsumer.accept(NbtInt.of(value));
+      nbtConsumer.accept(IntTag.valueOf(value));
     }
     return value;
   }
 
-  private static <A extends ArgumentBuilder<ServerCommandSource, ?>> A appendStoreArguments(A argumentBuilder, CommandRegistryAccess registryAccess) {
-    for (CommandNode<ServerCommandSource> node : argumentBuilder.getArguments()) {
+  private static <A extends ArgumentBuilder<CommandSourceStack, ?>> A appendStoreArguments(A argumentBuilder, CommandBuildContext registryAccess) {
+    for (CommandNode<CommandSourceStack> node : argumentBuilder.getArguments()) {
       appendStoreArguments(node, registryAccess);
     }
     return argumentBuilder;
   }
 
-  private static <N extends CommandNode<ServerCommandSource>> N appendStoreArguments(N node, CommandRegistryAccess registryAccess) {
-    for (CommandNode<ServerCommandSource> child : node.getChildren()) {
+  private static <N extends CommandNode<CommandSourceStack>> N appendStoreArguments(N node, CommandBuildContext registryAccess) {
+    for (CommandNode<CommandSourceStack> child : node.getChildren()) {
       appendStoreArguments(child, registryAccess);
     }
-    final Command<ServerCommandSource> command = node.getCommand();
+    final Command<CommandSourceStack> command = node.getCommand();
     if (command != null) {
       node.addChild(literal("store")
           .then(argument("target", nbtTarget(registryAccess))
@@ -167,8 +167,8 @@ public enum RandCommand implements CommandRegistrationCallback {
   }
 
   @SuppressWarnings("unchecked")
-  private static @Nullable FailableConsumer<NbtElement, CommandSyntaxException> optionalNbtConsumer(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final Map<String, ParsedArgument<ServerCommandSource, ?>> arguments = ((CommandContextAccessor<ServerCommandSource>) context).getArguments();
+  private static @Nullable FailableConsumer<Tag, CommandSyntaxException> optionalNbtConsumer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final Map<String, ParsedArgument<CommandSourceStack, ?>> arguments = ((CommandContextAccessor<CommandSourceStack>) context).getArguments();
     if (arguments.containsKey("target") && arguments.containsKey("path")) {
       return consumerOf(context);
     } else {

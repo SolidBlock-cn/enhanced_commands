@@ -4,9 +4,9 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.profiler.Profilers;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.api.FlipStateCallback;
@@ -37,9 +37,9 @@ public class EnhancedCommands implements ModInitializer {
   public static final String MOD_ID = "enhanced_commands";
   public static final Logger LOGGER = LoggerFactory.getLogger(EnhancedCommands.class);
 
-  private static final Identifier EXAMPLE_ID = Identifier.of(MOD_ID, "");
+  private static final ResourceLocation EXAMPLE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "");
 
-  public static Identifier id(String path) {
+  public static ResourceLocation id(String path) {
     return EXAMPLE_ID.withPath(path);
   }
 
@@ -69,7 +69,7 @@ public class EnhancedCommands implements ModInitializer {
 
     // 注册服务器运行任务的事件
     ServerTickEvents.END_SERVER_TICK.register(id("tick_iterator_task"), server -> {
-      final Profiler profiler = Profilers.get();
+      final ProfilerFiller profiler = Profiler.get();
       profiler.push("enhanced_commands:tick_iterator_task");
       ((ThreadExecutorExtension) server).ec_advanceTasks();
       profiler.pop();

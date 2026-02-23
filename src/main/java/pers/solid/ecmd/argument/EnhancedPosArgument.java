@@ -5,16 +5,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.CoordinateArgument;
-import net.minecraft.command.argument.DefaultPosArgument;
-import net.minecraft.command.argument.LookingPosArgument;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.LocalCoordinates;
+import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
+import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.DefaultPosArgumentAccessor;
@@ -29,11 +29,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * @see PosArgument
+ * @see Coordinates
  */
-public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible {
+public interface EnhancedPosArgument extends Coordinates, ExpressionConvertible {
   MapCodec<EnhancedPosArgument> MAP_BASED_CODEC = Type.CODEC.dispatchMap(posArgument -> {
-    if (posArgument instanceof DefaultPosArgument | posArgument instanceof DefaultPos) {
+    if (posArgument instanceof WorldCoordinates | posArgument instanceof DefaultPos) {
       return Type.DEFAULT;
     } else if (posArgument instanceof LookingPos) {
       return Type.LOOKING_POS;
@@ -49,26 +49,26 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
   Codec<DefaultPos> LIST_BASED_CODEC = Codec.DOUBLE.listOf(3, 3).xmap(doubles -> DefaultPos.doubleBased(doubles.get(0), doubles.get(1), doubles.get(2), false, false, false), defaultPos -> List.of(defaultPos.x, defaultPos.y, defaultPos.z));
   Codec<EnhancedPosArgument> CODEC = Codec.either(MAP_BASED_CODEC.codec(), LIST_BASED_CODEC).xmap(fsEither -> fsEither.map(Function.identity(), Function.identity()), Either::left);
 
-  static boolean isInt(PosArgument posArgument) {
+  static boolean isInt(Coordinates posArgument) {
     return posArgument instanceof EnhancedPosArgument enhancedPosArgument && enhancedPosArgument.isInt();
   }
 
-  static String asString(PosArgument posArgument) {
-    if (posArgument instanceof DefaultPosArgument defaultPosArgument) {
+  static String asString(Coordinates posArgument) {
+    if (posArgument instanceof WorldCoordinates defaultPosArgument) {
       final DefaultPosArgumentAccessor a = (DefaultPosArgumentAccessor) defaultPosArgument;
-      final CoordinateArgument x = a.getX();
-      final CoordinateArgument y = a.getY();
-      final CoordinateArgument z = a.getZ();
+      final WorldCoordinate x = a.getX();
+      final WorldCoordinate y = a.getY();
+      final WorldCoordinate z = a.getZ();
 
       final StringBuilder sb = new StringBuilder();
       if (x.isRelative()) sb.append('~');
-      sb.append(StringUtil.nf.format(x.toAbsoluteCoordinate(0))).append(' ');
+      sb.append(StringUtil.nf.format(x.get(0))).append(' ');
       if (y.isRelative()) sb.append('~');
-      sb.append(StringUtil.nf.format(y.toAbsoluteCoordinate(0))).append(' ');
+      sb.append(StringUtil.nf.format(y.get(0))).append(' ');
       if (z.isRelative()) sb.append('~');
-      sb.append(StringUtil.nf.format(z.toAbsoluteCoordinate(0)));
+      sb.append(StringUtil.nf.format(z.get(0)));
       return sb.toString();
-    } else if (posArgument instanceof LookingPosArgument lookingPosArgument) {
+    } else if (posArgument instanceof LocalCoordinates lookingPosArgument) {
       final LookingPosArgumentAccessor a = (LookingPosArgumentAccessor) lookingPosArgument;
       return "^" + StringUtil.nf.format(a.getX()) + " ^" + StringUtil.nf.format(a.getY()) + " ^" + StringUtil.nf.format(a.getZ());
     } else if (posArgument instanceof EnhancedPosArgument enhancedPosArgument) {
@@ -83,25 +83,25 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
    */
   boolean isInt();
 
-  Vec3d toAbsolutePos(PositionProvider positionProvider);
+  Vec3 toAbsolutePos(PositionProvider positionProvider);
 
   @Override
-  default Vec3d getPos(ServerCommandSource source) {
+  default Vec3 getPosition(CommandSourceStack source) {
     return toAbsolutePos(source);
   }
 
   default BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
-    return BlockPos.ofFloored(toAbsolutePos(positionProvider));
+    return BlockPos.containing(toAbsolutePos(positionProvider));
   }
 
-  Vec2f toAbsoluteRotation(PositionProvider positionProvider);
+  Vec2 toAbsoluteRotation(PositionProvider positionProvider);
 
   @Override
-  default Vec2f getRotation(ServerCommandSource source) {
+  default Vec2 getRotation(CommandSourceStack source) {
     return toAbsoluteRotation(source);
   }
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     DEFAULT("default"),
     LOOKING_POS("looking_pos"),
     UNKNOWN("unknown");
@@ -115,7 +115,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return this.name;
     }
   }
@@ -172,35 +172,35 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
 
     @Override
-    public Vec3d toAbsolutePos(PositionProvider positionProvider) {
+    public Vec3 toAbsolutePos(PositionProvider positionProvider) {
       if (!xRelative && !yRelative && !zRelative) {
-        return new Vec3d(x, y, z);
+        return new Vec3(x, y, z);
       }
-      final Vec3d position = positionProvider.getPosition$ec();
-      final Vec3d vec3d = new Vec3d(xRelative ? position.x + x : x, yRelative ? position.y + y : y, zRelative ? position.z + z : z);
+      final Vec3 position = positionProvider.getPosition$ec();
+      final Vec3 vec3d = new Vec3(xRelative ? position.x + x : x, yRelative ? position.y + y : y, zRelative ? position.z + z : z);
       if (intAlignType != null) {
-        final BlockPos blockPos = BlockPos.ofFloored(vec3d);
+        final BlockPos blockPos = BlockPos.containing(vec3d);
         return intAlignType.mayAdjustToCenter(blockPos);
       }
       return vec3d;
     }
 
     @Override
-    public Vec2f toAbsoluteRotation(PositionProvider positionProvider) {
+    public Vec2 toAbsoluteRotation(PositionProvider positionProvider) {
       if (!xRelative && !yRelative) {
-        return new Vec2f((float) x, (float) y);
+        return new Vec2((float) x, (float) y);
       }
-      final Vec2f rotation = positionProvider.getRotation$ec();
-      return new Vec2f((float) (xRelative ? rotation.x + x : x), (float) (yRelative ? rotation.y + y : y));
+      final Vec2 rotation = positionProvider.getRotation$ec();
+      return new Vec2((float) (xRelative ? rotation.x + x : x), (float) (yRelative ? rotation.y + y : y));
     }
 
     @Override
     public BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
       if (!xRelative && !yRelative && !zRelative) {
-        return BlockPos.ofFloored(x, y, z);
+        return BlockPos.containing(x, y, z);
       }
-      final Vec3d position = positionProvider.getPosition$ec();
-      return BlockPos.ofFloored(xRelative ? MathHelper.floor(position.getX() + x) : x, yRelative ? MathHelper.floor(position.getY() + y) : y, zRelative ? MathHelper.floor(position.getZ() + z) : z);
+      final Vec3 position = positionProvider.getPosition$ec();
+      return BlockPos.containing(xRelative ? Mth.floor(position.x() + x) : x, yRelative ? Mth.floor(position.y() + y) : y, zRelative ? Mth.floor(position.z() + z) : z);
     }
 
     @Override
@@ -240,7 +240,7 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
   }
 
   /**
-   * @see LookingPosArgument
+   * @see LocalCoordinates
    */
   record LookingPos(double x, double y, double z) implements EnhancedPosArgument {
     public static final MapCodec<LookingPos> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -255,26 +255,26 @@ public interface EnhancedPosArgument extends PosArgument, ExpressionConvertible 
     }
 
     @Override
-    public Vec3d toAbsolutePos(PositionProvider positionProvider) {
-      Vec2f vec2f = positionProvider.getRotation$ec();
-      Vec3d vec3d = positionProvider.getPositionAt$ec(positionProvider);
-      float f = MathHelper.cos((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
-      float g = MathHelper.sin((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
-      float h = MathHelper.cos(-vec2f.x * ((float) Math.PI / 180F));
-      float i = MathHelper.sin(-vec2f.x * ((float) Math.PI / 180F));
-      float j = MathHelper.cos((-vec2f.x + 90.0F) * ((float) Math.PI / 180F));
-      float k = MathHelper.sin((-vec2f.x + 90.0F) * ((float) Math.PI / 180F));
-      Vec3d vec3d2 = new Vec3d(f * h, i, g * h);
-      Vec3d vec3d3 = new Vec3d(f * j, k, g * j);
-      Vec3d vec3d4 = vec3d2.crossProduct(vec3d3).multiply(-1.0F);
+    public Vec3 toAbsolutePos(PositionProvider positionProvider) {
+      Vec2 vec2f = positionProvider.getRotation$ec();
+      Vec3 vec3d = positionProvider.getPositionAt$ec(positionProvider);
+      float f = Mth.cos((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
+      float g = Mth.sin((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
+      float h = Mth.cos(-vec2f.x * ((float) Math.PI / 180F));
+      float i = Mth.sin(-vec2f.x * ((float) Math.PI / 180F));
+      float j = Mth.cos((-vec2f.x + 90.0F) * ((float) Math.PI / 180F));
+      float k = Mth.sin((-vec2f.x + 90.0F) * ((float) Math.PI / 180F));
+      Vec3 vec3d2 = new Vec3(f * h, i, g * h);
+      Vec3 vec3d3 = new Vec3(f * j, k, g * j);
+      Vec3 vec3d4 = vec3d2.cross(vec3d3).scale(-1.0F);
       double d = vec3d2.x * this.z + vec3d3.x * this.y + vec3d4.x * this.x;
       double e = vec3d2.y * this.z + vec3d3.y * this.y + vec3d4.y * this.x;
       double l = vec3d2.z * this.z + vec3d3.z * this.y + vec3d4.z * this.x;
-      return new Vec3d(vec3d.x + d, vec3d.y + e, vec3d.z + l);
+      return new Vec3(vec3d.x + d, vec3d.y + e, vec3d.z + l);
     }
 
     @Override
-    public Vec2f toAbsoluteRotation(PositionProvider positionProvider) {
+    public Vec2 toAbsoluteRotation(PositionProvider positionProvider) {
       return null;
     }
 

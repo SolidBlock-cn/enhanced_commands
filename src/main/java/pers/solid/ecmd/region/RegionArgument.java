@@ -4,16 +4,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.PositionProvider;
 
 /**
- * @see net.minecraft.command.argument.PosArgument
+ * @see net.minecraft.commands.arguments.coordinates.Coordinates
  */
 public interface RegionArgument<R extends Region> extends ExpressionConvertible {
-  Codec<RegionArgument<?>> CODEC = RegionType.REGISTRY.getCodec().dispatch(RegionArgument::getType, RegionType::getArgumentCodec);
+  Codec<RegionArgument<?>> CODEC = RegionType.REGISTRY.byNameCodec().dispatch(RegionArgument::getType, RegionType::getArgumentCodec);
 
   @NotNull
   static RegionArgument<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {

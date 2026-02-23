@@ -3,10 +3,10 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -15,12 +15,12 @@ import pers.solid.ecmd.util.TextUtil;
 
 public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEntityPredicate {
   /**
-   * 经过 {@link MathHelper#wrapDegrees} 后处理的最小值，可以大于 max
+   * 经过 {@link Mth#wrapDegrees} 后处理的最小值，可以大于 max
    */
   float min();
 
   /**
-   * 经过 {@link MathHelper#wrapDegrees} 后处理的最大值，可以小于 max
+   * 经过 {@link Mth#wrapDegrees} 后处理的最大值，可以小于 max
    */
   float max();
 
@@ -38,7 +38,7 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
   default boolean test(@NotNull Entity entity) {
     double actualMin = min();
     double actualMax = max();
-    double actualAngle = MathHelper.wrapDegrees(angleOf(entity));
+    double actualAngle = Mth.wrapDegrees(angleOf(entity));
     if (actualMin > actualMax) {
       return actualAngle >= actualMin || actualAngle <= actualMax;
     } else {
@@ -48,8 +48,8 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
 
   record Pitch(float min, float max) implements RotationPredicateEntry {
     public Pitch(float min, float max) {
-      this.min = MathHelper.wrapDegrees(min);
-      this.max = MathHelper.wrapDegrees(max);
+      this.min = Mth.wrapDegrees(min);
+      this.max = Mth.wrapDegrees(max);
     }
 
     public static final MapCodec<Pitch> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -58,20 +58,20 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
     ).apply(i, Pitch::new));
 
     @Override
-    public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
-      final float angle = entity.getPitch();
-      final MutableText actual = TextUtil.literal(angle).styled(Styles.ACTUAL);
-      final MutableText expected = Text.literal(toRangeString()).styled(Styles.EXPECTED);
+    public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+      final float angle = entity.getXRot();
+      final MutableComponent actual = TextUtil.literal(angle).withStyle(Styles.ACTUAL);
+      final MutableComponent expected = Component.literal(toRangeString()).withStyle(Styles.EXPECTED);
       if (test(entity)) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.pitch.in_range", displayName, actual, expected));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.pitch.in_range", displayName, actual, expected));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.pitch.out_of_range", displayName, actual, expected));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.pitch.out_of_range", displayName, actual, expected));
       }
     }
 
     @Override
     public float angleOf(Entity entity) {
-      return entity.getPitch();
+      return entity.getXRot();
     }
 
     @Override
@@ -87,8 +87,8 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
 
   record Yaw(float min, float max) implements RotationPredicateEntry {
     public Yaw(float min, float max) {
-      this.min = MathHelper.wrapDegrees(min);
-      this.max = MathHelper.wrapDegrees(max);
+      this.min = Mth.wrapDegrees(min);
+      this.max = Mth.wrapDegrees(max);
     }
 
     public static final MapCodec<Yaw> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -97,20 +97,20 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
     ).apply(i, Yaw::new));
 
     @Override
-    public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
-      final float angle = entity.getYaw();
-      final MutableText actual = TextUtil.literal(angle).styled(Styles.ACTUAL);
-      final MutableText expected = Text.literal(toRangeString()).styled(Styles.EXPECTED);
+    public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+      final float angle = entity.getYRot();
+      final MutableComponent actual = TextUtil.literal(angle).withStyle(Styles.ACTUAL);
+      final MutableComponent expected = Component.literal(toRangeString()).withStyle(Styles.EXPECTED);
       if (test(entity)) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.yaw.in_range", displayName, actual, expected));
+        return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.yaw.in_range", displayName, actual, expected));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.yaw.out_of_range", displayName, actual, expected));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.yaw.out_of_range", displayName, actual, expected));
       }
     }
 
     @Override
     public float angleOf(Entity entity) {
-      return entity.getYaw();
+      return entity.getYRot();
     }
 
     @Override

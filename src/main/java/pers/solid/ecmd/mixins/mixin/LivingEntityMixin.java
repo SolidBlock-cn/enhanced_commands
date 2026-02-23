@@ -1,7 +1,7 @@
 package pers.solid.ecmd.mixins.mixin;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,7 +16,7 @@ public abstract class LivingEntityMixin {
    *
    * @see DebugConfig#immuneToVoid
    */
-  @Inject(method = "tickInVoid", at = @At("HEAD"), cancellable = true)
+  @Inject(method = "onBelowWorld", at = @At("HEAD"), cancellable = true)
   private void ignoreVoidTick(CallbackInfo ci) {
     final int immuneToVoid = DebugConfig.current.immuneToVoid;
     switch (immuneToVoid) {
@@ -26,7 +26,7 @@ public abstract class LivingEntityMixin {
       }
       case 2 -> {
         LivingEntity livingEntity = (LivingEntity) (Object) this;
-        if (livingEntity instanceof PlayerEntity) ci.cancel();
+        if (livingEntity instanceof Player) ci.cancel();
       }
       case 3, 4 -> ci.cancel();
     }

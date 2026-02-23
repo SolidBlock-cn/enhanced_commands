@@ -9,18 +9,18 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +46,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, registryAccess)
         .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
         .addOptionalArg("immediately", BoolArgumentType.bool(), false)
@@ -54,27 +54,27 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
         .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgumentType(), UnloadedPosBehavior.REJECT)
         .build();
 
-    final IntFunction<Text> fallingBlockFeedback = value -> Text.translatable("enhanced_commands.commands.convertblocks.falling_block.complete", value).enhanced$$();
-    final IntFunction<Text> blockDisplayFeedback = value -> Text.translatable("enhanced_commands.commands.convertblocks.block_display.complete", value).enhanced$$();
+    final IntFunction<Component> fallingBlockFeedback = value -> Component.translatable("enhanced_commands.commands.convertblocks.falling_block.complete", value).enhanced$$();
+    final IntFunction<Component> blockDisplayFeedback = value -> Component.translatable("enhanced_commands.commands.convertblocks.block_display.complete", value).enhanced$$();
     ModCommands.registerWithRegionArgumentModification(
         dispatcher,
         ModCommands.literalR2("convertblocks"),
         ModCommands.literalR2("/convertblocks"),
-        CommandManager.argument("region", RegionArgumentType.region(registryAccess))
-            .then(CommandManager.literal("falling_block")
+        Commands.argument("region", RegionArgumentType.region(registryAccess))
+            .then(Commands.literal("falling_block")
                 .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, keywordArgs.defaultArgs(), context))
-                .then(CommandManager.argument("keyword_args", keywordArgs)
+                .then(Commands.argument("keyword_args", keywordArgs)
                     .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
-            .then(CommandManager.literal("block_display")
+            .then(Commands.literal("block_display")
                 .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, keywordArgs.defaultArgs(), context))
-                .then(CommandManager.argument("keyword_args", keywordArgs)
+                .then(Commands.argument("keyword_args", keywordArgs)
                     .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
     );
   }
 
-  public static int executeConvertBlocksToFallingBlock(ConvertBlockCommand.Conversion conversion, IntFunction<Text> feedback, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static int executeConvertBlocksToFallingBlock(ConvertBlockCommand.Conversion conversion, IntFunction<Component> feedback, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     final Region region = RegionArgumentType.getRegion(context, "region");
-    final ServerCommandSource source = context.getSource();
+    final CommandSourceStack source = context.getSource();
     boolean bypassLimit = keywordArgs.getBoolean("bypass_limit");
     UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     CompoundNbtFunction nbtFunction = keywordArgs.getArg("nbt");
@@ -82,9 +82,9 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     if (!bypassLimit && region.numberOfBlocksAffected() > 16383) {
       throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), 16383);
     }
-    final ServerWorld world = source.getWorld();
+    final ServerLevel world = source.getLevel();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
-      final BlockBox box = region.minContainingBlockBox();
+      final BoundingBox box = region.minContainingBlockBox();
       if (box != null && !LoadUtil.isPosLoaded(world, box)) {
         throw FillReplaceCommand.UNLOADED_POS.create();
       }
@@ -95,13 +95,13 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     Stream<BlockPos> stream = region.stream();
     if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       stream = stream.takeWhile(pos -> {
-        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.isChunkLoaded(pos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(pos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       stream = stream.filter(pos -> {
-        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.isChunkLoaded(pos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(pos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
@@ -116,7 +116,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
       final Entity entity = conversion.getConvertedEntity(world, blockPos, flags, modFlags, affectFluid);
       if (nbtFunction != null) {
         try {
-          entity.readNbt(nbtFunction.apply(entity.writeNbt(new NbtCompound()), executionContext));
+          entity.load(nbtFunction.apply(entity.saveWithoutId(new CompoundTag()), executionContext));
         } catch (CommandSyntaxException e) {
           throw new CommandRuntimeException(e);
         }
@@ -130,7 +130,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
           stream = stream.filter(blockPos -> {
             final BlockState blockState = world.getBlockState(blockPos);
             // 纯流体应该被过滤掉。
-            return !blockState.isAir() && blockState != blockState.getFluidState().getBlockState();
+            return !blockState.isAir() && blockState != blockState.getFluidState().createLegacyBlock();
           });
         } else {
           stream = stream.filter(blockPos -> !world.getBlockState(blockPos).isAir());
@@ -140,9 +140,9 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
           .iterator();
     } else {
       LongList posThatMatch = new LongArrayList();
-      final BlockPos.Mutable mutable = new BlockPos.Mutable();
+      final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
       Iterator<Void> testPosIterator = stream.<Void>map(blockPos -> {
-            final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, true);
+            final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, true);
             if (predicate.test(cachedBlockPosition, executionContext)) {
               posThatMatch.add(blockPos.asLong());
             }
@@ -159,9 +159,9 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> {
       if (hasUnloaded.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.broken").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.broken").withStyle(Styles.ACTUAL), false);
         } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.skipped").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.skipped").withStyle(Styles.ACTUAL), false);
         }
       }
       source.sendFeedback$ecBridge(() -> feedback.apply(numbersAffected.intValue()), true);
@@ -169,8 +169,8 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!keywordArgs.getBoolean("immediately") && region.numberOfBlocksAffected() > 2048) {
-      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(Text.translatable("enhanced_commands.commands.convertblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(Component.translatable("enhanced_commands.commands.convertblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
       IterateUtils.exhaust(iterator);

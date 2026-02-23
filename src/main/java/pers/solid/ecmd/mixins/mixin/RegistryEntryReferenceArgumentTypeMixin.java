@@ -8,12 +8,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,29 +26,29 @@ import pers.solid.ecmd.util.mixin.MixinShared;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-@Mixin(RegistryEntryReferenceArgumentType.class)
+@Mixin(ResourceArgument.class)
 public abstract class RegistryEntryReferenceArgumentTypeMixin<T> {
 
   @Shadow
   @Final
-  RegistryKey<? extends Registry<T>> registryRef;
+  ResourceKey<? extends Registry<T>> registryKey;
 
   @Shadow
   @Final
-  private RegistryWrapper<T> registryWrapper;
+  private HolderLookup<T> registryLookup;
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/registry/entry/RegistryEntry$Reference;", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Identifier;fromCommandInput(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/util/Identifier;"))
-  public void injectedParse(StringReader stringReader, CallbackInfoReturnable<RegistryEntry.Reference<T>> cir, @Share("cursorBeforeId") LocalIntRef localIntRef) {
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/core/Holder$Reference;", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;read(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/resources/ResourceLocation;"))
+  public void injectedParse(StringReader stringReader, CallbackInfoReturnable<Holder.Reference<T>> cir, @Share("cursorBeforeId") LocalIntRef localIntRef) {
     localIntRef.set(stringReader.getCursor());
   }
 
   @Inject(method = "listSuggestions", at = @At(value = "RETURN"), cancellable = true)
   public <S> void suggestWithTooltip(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
-    MixinShared.mixinSuggestWithTooltip(registryRef, registryWrapper, builder, cir);
+    MixinShared.mixinSuggestWithTooltip(registryKey, registryLookup, builder, cir);
   }
 
-  @ModifyArg(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/registry/entry/RegistryEntry$Reference;", at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElseThrow(Ljava/util/function/Supplier;)Ljava/lang/Object;"))
-  public Supplier<CommandSyntaxException> modifiedParseThrow(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader, @Local Identifier identifier) {
-    return MixinShared.mixinModifiedParseThrow(registryRef, original, localIntRef, stringReader, identifier);
+  @ModifyArg(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/core/Holder$Reference;", at = @At(value = "INVOKE", target = "Ljava/util/Optional;orElseThrow(Ljava/util/function/Supplier;)Ljava/lang/Object;"))
+  public Supplier<CommandSyntaxException> modifiedParseThrow(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader, @Local ResourceLocation identifier) {
+    return MixinShared.mixinModifiedParseThrow(registryKey, original, localIntRef, stringReader, identifier);
   }
 }

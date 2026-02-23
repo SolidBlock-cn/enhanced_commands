@@ -3,10 +3,10 @@ package pers.solid.ecmd.predicate.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.Text;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -23,19 +23,19 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
 
   @Override
   public @NotNull String asString() {
-    return "idcontain(" + NbtString.escape(pattern.pattern()) + ")";
+    return "idcontain(" + StringTag.quoteAndEscape(pattern.pattern()) + ")";
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    return pattern.matcher(Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString()).find();
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    return pattern.matcher(BuiltInRegistries.BLOCK.getKey(cachedBlockPosition.getState().getBlock()).toString()).find();
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final String id = Registries.BLOCK.getId(cachedBlockPosition.getBlockState().getBlock()).toString();
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final String id = BuiltInRegistries.BLOCK.getKey(cachedBlockPosition.getState().getBlock()).toString();
     final boolean matches = pattern.matcher(id).find();
-    return TestResult.of(matches, Text.translatable("enhanced_commands.block_predicate.id_contain." + (matches ? "pass" : "fail"), Text.literal(pattern.toString()).styled(Styles.EXPECTED), Text.literal(id).styled(Styles.ACTUAL)));
+    return TestResult.of(matches, Component.translatable("enhanced_commands.block_predicate.id_contain." + (matches ? "pass" : "fail"), Component.literal(pattern.toString()).withStyle(Styles.EXPECTED), Component.literal(id).withStyle(Styles.ACTUAL)));
   }
 
   @Override

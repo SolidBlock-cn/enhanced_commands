@@ -3,10 +3,10 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -24,18 +24,18 @@ public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityP
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
     if (!(entity instanceof LivingEntity livingEntity)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.commands.health.get.single.not_living", displayName));
+      return TestResult.of(false, Component.translatable("enhanced_commands.commands.health.get.single.not_living", displayName));
     } else {
       final float actualHealth = livingEntity.getHealth();
-      final MutableText actualHealthText = TextUtil.literal(actualHealth).styled(Styles.ACTUAL);
+      final MutableComponent actualHealthText = TextUtil.literal(actualHealth).withStyle(Styles.ACTUAL);
       final float maxHealth = livingEntity.getMaxHealth();
-      final MutableText maxHealthText = TextUtil.literal(maxHealth);
+      final MutableComponent maxHealthText = TextUtil.literal(maxHealth);
       if (maxHealth == actualHealth) {
-        return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.health.is_max", displayName, actualHealthText));
+        return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.health.is_max", displayName, actualHealthText));
       } else {
-        return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.health.is_not_max", displayName, actualHealthText, maxHealthText));
+        return TestResult.of(inverted, Component.translatable("enhanced_commands.entity_predicate.health.is_not_max", displayName, actualHealthText, maxHealthText));
       }
     }
   }

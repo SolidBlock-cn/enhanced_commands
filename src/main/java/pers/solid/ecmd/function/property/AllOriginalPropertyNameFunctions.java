@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -28,9 +28,9 @@ public record AllOriginalPropertyNameFunctions(@NotNull Set<String> except) impl
   }
 
   @Override
-  public BlockState getModifiedState(BlockState origState, BlockState blockState, Random random) {
+  public BlockState getModifiedState(BlockState origState, BlockState blockState, RandomSource random) {
     for (Property<?> property : blockState.getProperties()) {
-      if (!except.contains(property.getName()) && origState.contains(property)) {
+      if (!except.contains(property.getName()) && origState.hasProperty(property)) {
         blockState = StateUtil.withPropertyOfValueFromAnother(blockState, origState, property);
       }
     }

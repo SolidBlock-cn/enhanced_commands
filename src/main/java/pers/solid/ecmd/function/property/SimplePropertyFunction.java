@@ -3,10 +3,10 @@ package pers.solid.ecmd.function.property;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -17,24 +17,24 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  */
 public record SimplePropertyFunction<T extends Comparable<T>>(Property<T> property, T value, boolean must) implements PropertyFunction<T> {
   public static MapCodec<SimplePropertyFunction<?>> getCodec(Block block) {
-    return CodecUtil.propertyForBlock(block.getStateManager()).dispatchMap("property", SimplePropertyFunction::property, SimplePropertyFunction::createCodecForProperty);
+    return CodecUtil.propertyForBlock(block.getStateDefinition()).dispatchMap("property", SimplePropertyFunction::property, SimplePropertyFunction::createCodecForProperty);
   }
 
   private static <T extends Comparable<T>> MapCodec<SimplePropertyFunction<T>> createCodecForProperty(Property<T> property) {
     return RecordCodecBuilder.mapCodec(i -> i.apply2((value, must) -> new SimplePropertyFunction<>(property, value, must),
-        property.getCodec().fieldOf("value").forGetter(SimplePropertyFunction::value),
+        property.codec().fieldOf("value").forGetter(SimplePropertyFunction::value),
         Codec.BOOL.optionalFieldOf("must", false).forGetter(SimplePropertyFunction::must)));
   }
 
   @Override
   public @NotNull String asString() {
-    return property.getName() + (must ? "==" : "=") + property.name(value);
+    return property.getName() + (must ? "==" : "=") + property.getName(value);
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, Random random) {
-    if (must || blockState.contains(property)) {
-      return blockState.with(property, value);
+  public BlockState getModifiedState(BlockState blockState, BlockState origState, RandomSource random) {
+    if (must || blockState.hasProperty(property)) {
+      return blockState.setValue(property, value);
     } else {
       return blockState;
     }

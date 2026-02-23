@@ -6,8 +6,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.curve.CurveArgument;
 import pers.solid.ecmd.parse.ParseContext;
@@ -16,14 +16,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record CurveArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<CurveArgument<?>> {
+public record CurveArgumentType(CommandBuildContext registryAccess) implements ArgumentType<CurveArgument<?>> {
   private static final List<String> EXAMPLES = List.of("straight(~~~, ~3~3~3)", "straight(from ^^^ to ^^^5)", "circle(5)");
 
-  public static CurveArgumentType curve(CommandRegistryAccess registryAccess) {
+  public static CurveArgumentType curve(CommandBuildContext registryAccess) {
     return new CurveArgumentType(registryAccess);
   }
 
-  public static Curve getCurve(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static Curve getCurve(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
     try {
       return context.getArgument(name, CurveArgument.class).toAbsoluteRegion(context.getSource());
     } catch (RuntimeException e) {

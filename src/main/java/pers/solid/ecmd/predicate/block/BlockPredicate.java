@@ -6,17 +6,20 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -24,28 +27,25 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.Parser;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Collections;
 import java.util.List;
 
 public interface BlockPredicate extends ExpressionConvertible {
-  Codec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.getCodec().dispatch(BlockPredicate::getType, BlockPredicateType::getCodec);
-  Codec<BlockPredicate> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), SimpleBlockPredicate::block), MAP_CODEC, blockPredicate -> blockPredicate instanceof SimpleBlockPredicate s && s.properties().isEmpty() ? s : null);
-  RegistryKey<Registry<BlockPredicate>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("block_predicate"));
+  Codec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.byNameCodec().dispatch(BlockPredicate::getType, BlockPredicateType::getCodec);
+  Codec<BlockPredicate> CODEC = CodecUtil.combined(BuiltInRegistries.BLOCK.byNameCodec().xmap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), SimpleBlockPredicate::block), MAP_CODEC, blockPredicate -> blockPredicate instanceof SimpleBlockPredicate s && s.properties().isEmpty() ? s : null);
+  ResourceKey<Registry<BlockPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_predicate"));
 
-  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
-  Text INTERSECT_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.all.symbol_tooltip");
-  Text UNION_TOOLTIP = Text.translatable("enhanced_commands.block_predicate.any.symbol_tooltip");
+  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
+  Component INTERSECT_TOOLTIP = Component.translatable("enhanced_commands.block_predicate.all.symbol_tooltip");
+  Component UNION_TOOLTIP = Component.translatable("enhanced_commands.block_predicate.any.symbol_tooltip");
 
   static TestResult successResult(BlockPos blockPos) {
-    return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.pass", TextUtil.wrapVector(blockPos)));
+    return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.pass", TextUtil.wrapVector(blockPos)));
   }
 
   static TestResult failResult(BlockPos blockPos) {
-    return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.fail", TextUtil.wrapVector(blockPos)));
+    return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.fail", TextUtil.wrapVector(blockPos)));
   }
 
   static TestResult successOrFail(boolean successes, BlockPos blockPos) {
@@ -119,11 +119,11 @@ public interface BlockPredicate extends ExpressionConvertible {
     throw CANNOT_PARSE.createWithContext(reader);
   }
 
-  boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context);
+  boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context);
 
-  default TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  default TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     final boolean test = test(cachedBlockPosition, context);
-    return successOrFail(test, cachedBlockPosition.getBlockPos());
+    return successOrFail(test, cachedBlockPosition.getPos());
   }
 
   @NotNull

@@ -3,11 +3,11 @@ package pers.solid.ecmd.predicate.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
@@ -23,28 +23,28 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   public static final MapCodec<NoiseBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
       WeightedList.createMapCodec(BlockPredicate.CODEC).fieldOf("list").forGetter(NoiseBlockPredicate::list),
       CodecUtil.optionalLongFieldOf("seed").forGetter(NoiseBlockPredicate::seed),
-      DoublePerlinNoiseSampler.NoiseParameters.CODEC.fieldOf("parameters").forGetter(NoiseBlockPredicate::noiseParameters),
-      Vec3d.CODEC.optionalFieldOf("scale", UNIT).forGetter(NoiseBlockPredicate::scale),
-      Vec3d.CODEC.optionalFieldOf("offset", Vec3d.ZERO).forGetter(NoiseBlockPredicate::offset)
+      NormalNoise.NoiseParameters.DIRECT_CODEC.fieldOf("parameters").forGetter(NoiseBlockPredicate::noiseParameters),
+      Vec3.CODEC.optionalFieldOf("scale", UNIT).forGetter(NoiseBlockPredicate::scale),
+      Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(NoiseBlockPredicate::offset)
   ).apply(instance, NoiseBlockPredicate::new));
 
 
-  public NoiseBlockPredicate(WeightedList<BlockPredicate> list, OptionalLong seed, DoublePerlinNoiseSampler.NoiseParameters noiseParameters, Vec3d scale, Vec3d offset) {
+  public NoiseBlockPredicate(WeightedList<BlockPredicate> list, OptionalLong seed, NormalNoise.NoiseParameters noiseParameters, Vec3 scale, Vec3 offset) {
     this(list, new Properties(seed, noiseParameters, scale, offset));
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3d.of(cachedBlockPosition.getBlockPos())).test(cachedBlockPosition, context);
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3.atLowerCornerOf(cachedBlockPosition.getPos())).test(cachedBlockPosition, context);
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockPos blockPos = cachedBlockPosition.getBlockPos();
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final BlockPos blockPos = cachedBlockPosition.getPos();
     final long actualSeed = seed().orElseGet(() -> context.getSeed(this));
     final double sampleValue = getSampleValue(actualSeed, blockPos.getX(), blockPos.getY(), blockPos.getZ());
     final TestResult testResult = list.getClampedElement(sampleValue).testAndDescribe(cachedBlockPosition, context);
-    return TestResult.of(testResult.successes(), Text.translatable("enhanced_commands.block_predicate.noise.result", TextUtil.wrapVector(blockPos).styled(Styles.TARGET), TextUtil.literal(actualSeed).styled(Styles.TARGET), TextUtil.literal(sampleValue).styled(Styles.RESULT)), List.of(testResult));
+    return TestResult.of(testResult.successes(), Component.translatable("enhanced_commands.block_predicate.noise.result", TextUtil.wrapVector(blockPos).withStyle(Styles.TARGET), TextUtil.literal(actualSeed).withStyle(Styles.TARGET), TextUtil.literal(sampleValue).withStyle(Styles.RESULT)), List.of(testResult));
   }
 
   @Override
@@ -77,7 +77,7 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
     @Override
     public NoiseBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       super.getParseResult(parseContext);
-      return new NoiseBlockPredicate(weightedList, seed, new DoublePerlinNoiseSampler.NoiseParameters(firstOctave, amplitudes), scale, offset);
+      return new NoiseBlockPredicate(weightedList, seed, new NormalNoise.NoiseParameters(firstOctave, amplitudes), scale, offset);
     }
   }
 }

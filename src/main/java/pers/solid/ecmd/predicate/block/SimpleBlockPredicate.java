@@ -4,20 +4,20 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.predicate.property.PropertyPredicate;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.Parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
-  public static final MapCodec<SimpleBlockPredicate> CODEC = Registries.BLOCK.getCodec().dispatchMap("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
+  public static final MapCodec<SimpleBlockPredicate> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
 
   public SimpleBlockPredicate(Block block) {
     this(block, Collections.emptyList());
@@ -34,35 +34,35 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
 
   @Override
   public @NotNull String asString() {
-    final String id = Registries.BLOCK.getId(block).toString();
+    final String id = BuiltInRegistries.BLOCK.getKey(block).toString();
     return properties.isEmpty() ? id : id + properties.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "[", "]"));
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    if (!cachedBlockPosition.getBlockState().isOf(block))
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    if (!cachedBlockPosition.getState().is(block))
       return false;
     for (PropertyPredicate<?> propertyPredicate : properties) {
-      if (!propertyPredicate.test(cachedBlockPosition.getBlockState()))
+      if (!propertyPredicate.test(cachedBlockPosition.getState()))
         return false;
     }
     return true;
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     boolean matches = true;
-    final BlockState blockState = cachedBlockPosition.getBlockState();
-    final List<Text> messages = new ArrayList<>();
-    final BlockPos blockPos = cachedBlockPosition.getBlockPos();
-    final MutableText posText = TextUtil.wrapVector(blockPos);
-    final MutableText actualText = blockState.getBlock().getName().styled(Styles.ACTUAL);
-    if (!blockState.isOf(block)) {
-      final MutableText expectedText = block.getName().styled(Styles.EXPECTED);
-      messages.add(Text.translatable("enhanced_commands.block_predicate.simple.not_the_block", posText, actualText, expectedText).styled(Styles.FALSE));
+    final BlockState blockState = cachedBlockPosition.getState();
+    final List<Component> messages = new ArrayList<>();
+    final BlockPos blockPos = cachedBlockPosition.getPos();
+    final MutableComponent posText = TextUtil.wrapVector(blockPos);
+    final MutableComponent actualText = blockState.getBlock().getName().withStyle(Styles.ACTUAL);
+    if (!blockState.is(block)) {
+      final MutableComponent expectedText = block.getName().withStyle(Styles.EXPECTED);
+      messages.add(Component.translatable("enhanced_commands.block_predicate.simple.not_the_block", posText, actualText, expectedText).withStyle(Styles.FALSE));
       matches = false;
     } else {
-      messages.add(Text.translatable("enhanced_commands.block_predicate.simple.is_the_block", posText, actualText).styled(Styles.TRUE));
+      messages.add(Component.translatable("enhanced_commands.block_predicate.simple.is_the_block", posText, actualText).withStyle(Styles.TRUE));
     }
     for (PropertyPredicate<?> propertyPredicate : properties) {
       final TestResult propertyResult = propertyPredicate.testAndDescribe(blockState, blockPos);

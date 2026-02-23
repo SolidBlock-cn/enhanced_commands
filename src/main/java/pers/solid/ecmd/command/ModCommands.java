@@ -10,12 +10,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.function.FailableConsumer;
 import pers.solid.ecmd.argument.NbtTargetArgumentType;
 import pers.solid.ecmd.config.CommandsConfig;
@@ -28,14 +28,14 @@ import java.util.function.Predicate;
 
 public enum ModCommands implements CommandRegistrationCallback {
   INSTANCE;
-  public static final Predicate<ServerCommandSource> REQUIRES_PERMISSION_2 = source -> source.hasPermissionLevel(2);
+  public static final Predicate<CommandSourceStack> REQUIRES_PERMISSION_2 = source -> source.hasPermission(2);
 
-  public static LiteralArgumentBuilder<ServerCommandSource> literalR2(String literal) {
-    return CommandManager.literal(literal).requires(REQUIRES_PERMISSION_2);
+  public static LiteralArgumentBuilder<CommandSourceStack> literalR2(String literal) {
+    return Commands.literal(literal).requires(REQUIRES_PERMISSION_2);
   }
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     if (CommandsConfig.current.enableDebugCommands) {
       DebugDeOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
       DebugIgnoreBoundaryCommand.INSTANCE.register(dispatcher, registryAccess, environment);
@@ -88,17 +88,17 @@ public enum ModCommands implements CommandRegistrationCallback {
     return register;
   }
 
-  public static final RedirectModifier<ServerCommandSource> REGION_ARGUMENTS_MODIFIER = context -> {
-    final ServerCommandSource source = context.getSource();
+  public static final RedirectModifier<CommandSourceStack> REGION_ARGUMENTS_MODIFIER = context -> {
+    final CommandSourceStack source = context.getSource();
     source.addExtraArgument$ec("region", ActiveRegionArgument.INSTANCE);
     return Collections.singleton(source);
   };
 
-  public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, CommandNode<ServerCommandSource> regionArgument) {
-    final Command<ServerCommandSource> directCommand = regionArgument.getCommand();
+  public static LiteralCommandNode<CommandSourceStack> registerWithRegionArgumentModification(CommandDispatcher<CommandSourceStack> dispatcher, LiteralArgumentBuilder<CommandSourceStack> directBuilder, LiteralArgumentBuilder<CommandSourceStack> indirectBuilder, CommandNode<CommandSourceStack> regionArgument) {
+    final Command<CommandSourceStack> directCommand = regionArgument.getCommand();
     if (directCommand != null && indirectBuilder.getCommand() == null) {
       indirectBuilder.executes(context -> {
-        final ServerCommandSource source = context.getSource();
+        final CommandSourceStack source = context.getSource();
         source.addExtraArgument$ec("region", ActiveRegionArgument.INSTANCE);
         return directCommand.run(context);
       });
@@ -106,30 +106,30 @@ public enum ModCommands implements CommandRegistrationCallback {
     return registerWithArgumentModification(dispatcher, directBuilder, indirectBuilder, regionArgument, REGION_ARGUMENTS_MODIFIER);
   }
 
-  public static LiteralCommandNode<ServerCommandSource> registerWithRegionArgumentModification(CommandDispatcher<ServerCommandSource> dispatcher, LiteralArgumentBuilder<ServerCommandSource> directBuilder, LiteralArgumentBuilder<ServerCommandSource> indirectBuilder, ArgumentBuilder<ServerCommandSource, ?> regionArgument) {
+  public static LiteralCommandNode<CommandSourceStack> registerWithRegionArgumentModification(CommandDispatcher<CommandSourceStack> dispatcher, LiteralArgumentBuilder<CommandSourceStack> directBuilder, LiteralArgumentBuilder<CommandSourceStack> indirectBuilder, ArgumentBuilder<CommandSourceStack, ?> regionArgument) {
     return registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, regionArgument.build());
   }
 
-  public static FailableConsumer<NbtElement, CommandSyntaxException> consumerOf(CommandContext<ServerCommandSource> context, String targetArgName, String pathArgName) throws CommandSyntaxException {
+  public static FailableConsumer<Tag, CommandSyntaxException> consumerOf(CommandContext<CommandSourceStack> context, String targetArgName, String pathArgName) throws CommandSyntaxException {
     final NbtTarget<?> target = NbtTargetArgumentType.getNbtTarget(context, targetArgName);
-    final NbtPathArgumentType.NbtPath path = NbtPathArgumentType.getNbtPath(context, pathArgName);
+    final NbtPathArgument.NbtPath path = NbtPathArgument.getPath(context, pathArgName);
     return nbt -> target.setNbtInPath(context.getSource(), path, nbt);
   }
 
-  public static FailableConsumer<NbtElement, CommandSyntaxException> consumerOf(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static FailableConsumer<Tag, CommandSyntaxException> consumerOf(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return consumerOf(context, "target", "path");
   }
 
   /**
    * 因原方法涉及非公开类，无法通过 mixin 取代，故需要重新做一遍方法。
    */
-  public static ArgumentBuilder<ServerCommandSource, ?> addConditionLogic(CommandNode<ServerCommandSource> root, ArgumentBuilder<ServerCommandSource, ?> builder, boolean positive, Predicate<CommandContext<ServerCommandSource>> condition) {
-    return builder.fork(root, (context) -> ExecuteCommandAccessor.callGetSourceOrEmptyForConditionFork(context, positive, condition.test(context))).executes((context) -> {
+  public static ArgumentBuilder<CommandSourceStack, ?> addConditionLogic(CommandNode<CommandSourceStack> root, ArgumentBuilder<CommandSourceStack, ?> builder, boolean positive, Predicate<CommandContext<CommandSourceStack>> condition) {
+    return builder.fork(root, (context) -> ExecuteCommandAccessor.callExpect(context, positive, condition.test(context))).executes((context) -> {
       if (positive == condition.test(context)) {
-        context.getSource().sendFeedback(() -> Text.translatable("commands.execute.conditional.pass"), false);
+        context.getSource().sendSuccess(() -> Component.translatable("commands.execute.conditional.pass"), false);
         return 1;
       } else {
-        throw ExecuteCommandAccessor.getCONDITIONAL_FAIL_EXCEPTION().create();
+        throw ExecuteCommandAccessor.getERROR_CONDITIONAL_FAILED().create();
       }
     });
   }

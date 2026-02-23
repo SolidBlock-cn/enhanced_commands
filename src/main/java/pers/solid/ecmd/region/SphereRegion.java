@@ -7,11 +7,11 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -27,22 +27,22 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Function;
 
-public record SphereRegion(double radius, Vec3d center) implements Region {
-  public static final SimpleCommandExceptionType EXPAND_FAILED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.region.exception.sphere_cannot_expand"));
-  public static final MapCodec<SphereRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(SphereRegion::radius), Vec3d.CODEC.fieldOf("center").forGetter(SphereRegion::center)).apply(i, SphereRegion::new));
+public record SphereRegion(double radius, Vec3 center) implements Region {
+  public static final SimpleCommandExceptionType EXPAND_FAILED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.region.exception.sphere_cannot_expand"));
+  public static final MapCodec<SphereRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(SphereRegion::radius), Vec3.CODEC.fieldOf("center").forGetter(SphereRegion::center)).apply(i, SphereRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
-    return vec3d.isInRange(center, radius);
+  public boolean contains(@NotNull Vec3 vec3d) {
+    return vec3d.closerThan(center, radius);
   }
 
   @Override
   public @NotNull Iterator<BlockPos> iterator() {
-    return Streams.stream(new PreciseCuboidRegion(center.add(-radius, -radius, -radius), center.add(radius, radius, radius))).filter(blockPos -> blockPos.isWithinDistance(center, radius)).iterator();
+    return Streams.stream(new PreciseCuboidRegion(center.add(-radius, -radius, -radius), center.add(radius, radius, radius))).filter(blockPos -> blockPos.closerToCenterThan(center, radius)).iterator();
   }
 
   @Override
-  public @NotNull SphereRegion transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull SphereRegion transformed(Function<Vec3, Vec3> transformation) {
     return new SphereRegion(radius, transformation.apply(center));
   }
 
@@ -57,7 +57,7 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   }
 
   @Override
-  public @NotNull SphereRegion expanded(double offset, Direction.Type type) {
+  public @NotNull SphereRegion expanded(double offset, Direction.Plane type) {
     throw new UnsupportedOperationException(EXPAND_FAILED.create());
   }
 
@@ -82,8 +82,8 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
   }
 
   @Override
-  public @NotNull Box minContainingBox() {
-    return Box.of(center, 2 * radius, 2 * radius, 2 * radius);
+  public @NotNull AABB minContainingBox() {
+    return AABB.ofSize(center, 2 * radius, 2 * radius, 2 * radius);
   }
 
   public enum Type implements RegionType<SphereRegion> {
@@ -95,8 +95,8 @@ public record SphereRegion(double radius, Vec3d center) implements Region {
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.sphere");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.sphere");
     }
 
     @Override

@@ -2,16 +2,16 @@ package pers.solid.ecmd.math;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.function.block.WeightedListParser;
-import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Set;
@@ -20,21 +20,21 @@ import java.util.Set;
  * 用于棋盘格相关代码的共通接口。
  */
 public interface Checkerboard<T> {
-  Vec3d UNIT = new Vec3d(1, 1, 1);
+  Vec3 UNIT = new Vec3(1, 1, 1);
 
   @NotNull
-  Vec3d floor();
+  Vec3 floor();
 
   @NotNull
-  Vec3d scale();
+  Vec3 scale();
 
   @NotNull
-  Vec3d offset();
+  Vec3 offset();
 
   default T getEntry(@NotNull WeightedList<T> entries, BlockPos pos) {
-    final Vec3d offset = offset();
-    final Vec3d floor = floor();
-    final Vec3d scale = scale();
+    final Vec3 offset = offset();
+    final Vec3 floor = floor();
+    final Vec3 scale = scale();
     double x = pos.getX() - offset.x;
     double y = pos.getY() - offset.y;
     double z = pos.getZ() - offset.z;
@@ -49,16 +49,16 @@ public interface Checkerboard<T> {
   }
 
   default StringBuilder appendParameters(StringBuilder sb) {
-    final Vec3d floor = floor();
-    final Vec3d scale = scale();
-    final Vec3d offset = offset();
-    if (!floor.equals(Vec3d.ZERO)) {
+    final Vec3 floor = floor();
+    final Vec3 scale = scale();
+    final Vec3 offset = offset();
+    if (!floor.equals(Vec3.ZERO)) {
       sb.append(" floor ").append(StringUtil.wrapVector(floor));
     }
     if (!scale.equals(UNIT)) {
       sb.append(" scale ").append(StringUtil.wrapVector(scale));
     }
-    if (!offset.equals(Vec3d.ZERO)) {
+    if (!offset.equals(Vec3.ZERO)) {
       sb.append(" offset ").append(offset);
     }
     return sb;
@@ -67,9 +67,9 @@ public interface Checkerboard<T> {
   abstract class CheckerboardParser<T> implements FunctionLikeParser<T>, NamedParamListParser {
     protected final Set<String> SUPPORTED_PARAMS = Set.of("scale", "floor", "offset");
     public final WeightedListParser<T> weightedListParser = WeightedListParser.of(this::parseElement);
-    protected Vec3d scale = null;
-    protected Vec3d floor = null;
-    protected Vec3d offset = null;
+    protected Vec3 scale = null;
+    protected Vec3 floor = null;
+    protected Vec3 offset = null;
     protected int cursorBeforeFunctionName;
     protected WeightedList<T> weightedList;
 
@@ -89,15 +89,15 @@ public interface Checkerboard<T> {
         scale = UNIT;
       }
       if (floor == null) {
-        floor = Vec3d.ZERO;
+        floor = Vec3.ZERO;
       }
       if (offset == null) {
-        offset = Vec3d.ZERO;
+        offset = Vec3.ZERO;
       }
       return getParseResult(floor, scale, offset);
     }
 
-    protected abstract T getParseResult(Vec3d floor, Vec3d scale, Vec3d offset);
+    protected abstract T getParseResult(Vec3 floor, Vec3 scale, Vec3 offset);
 
     protected abstract T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
 

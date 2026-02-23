@@ -7,26 +7,27 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
-import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.network.FriendlyByteBuf;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 
 import java.util.concurrent.CompletableFuture;
 
-public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAccess registryAccess) implements ArgumentType<NbtPredicate> {
+public record NbtPredicateArgumentType(boolean onlyCompounds, CommandBuildContext registryAccess) implements ArgumentType<NbtPredicate> {
 
-  public static NbtPredicateArgumentType compound(CommandRegistryAccess registryAccess) {
+  public static NbtPredicateArgumentType compound(CommandBuildContext registryAccess) {
     return new NbtPredicateArgumentType(true, registryAccess);
   }
 
-  public static NbtPredicateArgumentType element(CommandRegistryAccess registryAccess) {
+  public static NbtPredicateArgumentType element(CommandBuildContext registryAccess) {
     return new NbtPredicateArgumentType(false, registryAccess);
   }
 
-  public static NbtPredicate getNbtPredicate(CommandContext<ServerCommandSource> context, String name) {
+  public static NbtPredicate getNbtPredicate(CommandContext<CommandSourceStack> context, String name) {
     return context.getArgument(name, NbtPredicate.class);
   }
 
@@ -56,39 +57,39 @@ public record NbtPredicateArgumentType(boolean onlyCompounds, CommandRegistryAcc
   }
 
 
-  public enum Serializer implements ArgumentSerializer<NbtPredicateArgumentType, NbtPredicateArgumentType.Properties> {
+  public enum Serializer implements ArgumentTypeInfo<NbtPredicateArgumentType, NbtPredicateArgumentType.Properties> {
     INSTANCE;
 
     @Override
-    public void writePacket(Properties properties, PacketByteBuf buf) {
+    public void serializeToNetwork(Properties properties, FriendlyByteBuf buf) {
       buf.writeBoolean(properties.onlyCompounds);
     }
 
     @Override
-    public Properties fromPacket(PacketByteBuf buf) {
+    public @NotNull Properties deserializeFromNetwork(FriendlyByteBuf buf) {
       return new Properties(buf.readBoolean());
     }
 
     @Override
-    public void writeJson(Properties properties, JsonObject json) {
+    public void serializeToJson(Properties properties, JsonObject json) {
       json.addProperty("onlyCompounds", properties.onlyCompounds);
     }
 
     @Override
-    public Properties getArgumentTypeProperties(NbtPredicateArgumentType argumentType) {
+    public @NotNull Properties unpack(NbtPredicateArgumentType argumentType) {
       return new Properties(argumentType.onlyCompounds);
     }
   }
 
-  public record Properties(boolean onlyCompounds) implements ArgumentSerializer.ArgumentTypeProperties<NbtPredicateArgumentType> {
+  public record Properties(boolean onlyCompounds) implements ArgumentTypeInfo.Template<NbtPredicateArgumentType> {
 
     @Override
-    public NbtPredicateArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+    public @NotNull NbtPredicateArgumentType instantiate(CommandBuildContext commandRegistryAccess) {
       return new NbtPredicateArgumentType(onlyCompounds, commandRegistryAccess);
     }
 
     @Override
-    public ArgumentSerializer<NbtPredicateArgumentType, ?> getSerializer() {
+    public @NotNull ArgumentTypeInfo<NbtPredicateArgumentType, ?> type() {
       return Serializer.INSTANCE;
     }
   }

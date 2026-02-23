@@ -5,10 +5,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Mth;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -73,19 +73,19 @@ public sealed interface Vec3dArgument extends ExpressionConvertible {
     parseContext.clearSuggestion();
     ParsingUtil.expectAndSkipWhitespace(reader);
     final double z = reader.readDouble();
-    final Vec3d vec3d = new Vec3d(x, y, z);
+    final Vec3 vec3d = new Vec3(x, y, z);
     return new Fixed(vec3d);
   }
 
-  Vec3d toActualVector(PositionProvider positionProvider);
+  Vec3 toActualVector(PositionProvider positionProvider);
 
   Type getType();
 
-  record Fixed(Vec3d vec3d) implements Vec3dArgument {
-    public static final MapCodec<Fixed> CODEC = Vec3d.CODEC.fieldOf("value").xmap(Fixed::new, Fixed::vec3d);
+  record Fixed(Vec3 vec3d) implements Vec3dArgument {
+    public static final MapCodec<Fixed> CODEC = Vec3.CODEC.fieldOf("value").xmap(Fixed::new, Fixed::vec3d);
 
     @Override
-    public Vec3d toActualVector(PositionProvider positionProvider) {
+    public Vec3 toActualVector(PositionProvider positionProvider) {
       return vec3d;
     }
 
@@ -107,8 +107,8 @@ public sealed interface Vec3dArgument extends ExpressionConvertible {
     ).apply(i, Directional::new));
 
     @Override
-    public Vec3d toActualVector(PositionProvider positionProvider) {
-      return Vec3d.of(directionArgument.apply(positionProvider).getVector()).multiply(length);
+    public Vec3 toActualVector(PositionProvider positionProvider) {
+      return Vec3.atLowerCornerOf(directionArgument.apply(positionProvider).getUnitVec3i()).scale(length);
     }
 
     @Override
@@ -118,7 +118,7 @@ public sealed interface Vec3dArgument extends ExpressionConvertible {
 
     @Override
     public @NotNull String asString() {
-      return length() + " " + directionArgument().asString();
+      return length() + " " + directionArgument().getSerializedName();
     }
   }
 
@@ -126,9 +126,9 @@ public sealed interface Vec3dArgument extends ExpressionConvertible {
     public static final MapCodec<Rotated> CODEC = EnhancedRotationArgument.CODEC.fieldOf("rotation").xmap(Rotated::new, Rotated::rotation);
 
     @Override
-    public Vec3d toActualVector(PositionProvider positionProvider) {
-      final Vec2f r = rotation.toAbsoluteRotation(positionProvider);
-      return new Vec3d(0, 0, 1).rotateX(-MathHelper.RADIANS_PER_DEGREE * r.x).rotateY(-MathHelper.RADIANS_PER_DEGREE * r.y);
+    public Vec3 toActualVector(PositionProvider positionProvider) {
+      final Vec2 r = rotation.toAbsoluteRotation(positionProvider);
+      return new Vec3(0, 0, 1).xRot(-Mth.DEG_TO_RAD * r.x).yRot(-Mth.DEG_TO_RAD * r.y);
     }
 
     @Override
@@ -146,8 +146,8 @@ public sealed interface Vec3dArgument extends ExpressionConvertible {
     public static final MapCodec<Facing> CODEC = EnhancedPosArgument.CODEC.fieldOf("pos").xmap(Facing::new, Facing::pos);
 
     @Override
-    public Vec3d toActualVector(PositionProvider positionProvider) {
-      final Vec3d facingTarget = pos.toAbsolutePos(positionProvider);
+    public Vec3 toActualVector(PositionProvider positionProvider) {
+      final Vec3 facingTarget = pos.toAbsolutePos(positionProvider);
       return facingTarget.subtract(positionProvider.getPosition$ec()).normalize();
     }
 
@@ -162,7 +162,7 @@ public sealed interface Vec3dArgument extends ExpressionConvertible {
     }
   }
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     FIXED("fixed", Fixed.CODEC),
     DIRECTIONAL("directional", Directional.CODEC),
     ROTATED("rotated", Rotated.CODEC),
@@ -178,7 +178,7 @@ public sealed interface Vec3dArgument extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
 

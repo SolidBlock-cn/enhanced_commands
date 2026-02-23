@@ -7,17 +7,17 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandSource;
-import net.minecraft.loot.condition.LootCondition;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.WorldView;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -30,14 +30,14 @@ import pers.solid.ecmd.util.bridge.LootBridge;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) implements BlockPredicate {
-  public static final MapCodec<LootConditionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(LootCondition.ENTRY_CODEC.fieldOf("condition").forGetter(LootConditionBlockPredicate::entry)).apply(i, LootConditionBlockPredicate::new));
+public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) implements BlockPredicate {
+  public static final MapCodec<LootConditionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(LootItemCondition.CODEC.fieldOf("condition").forGetter(LootConditionBlockPredicate::entry)).apply(i, LootConditionBlockPredicate::new));
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final LootCondition lootCondition = entry.value();
-    final WorldView world = cachedBlockPosition.getWorld();
-    if (!(world instanceof final ServerWorld serverWorld)) return false;
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final LootItemCondition lootCondition = entry.value();
+    final LevelReader world = cachedBlockPosition.getLevel();
+    if (!(world instanceof final ServerLevel serverWorld)) return false;
     return lootCondition.test(LootBridge.createContextForBlock(cachedBlockPosition, serverWorld, context.getSeed(this)));
   }
 
@@ -49,7 +49,7 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
 
   @Override
   public @NotNull String asString() {
-    return "predicate(" + entry.getKeyOrValue().map(key -> key.getValue().toString(), lootCondition -> LootCondition.ENTRY_CODEC.encodeStart(NbtOps.INSTANCE, entry).toString()) + ")";
+    return "predicate(" + entry.unwrap().map(key -> key.location().toString(), lootCondition -> LootItemCondition.CODEC.encodeStart(NbtOps.INSTANCE, entry).toString()) + ")";
   }
 
   public enum Type implements BlockPredicateType<LootConditionBlockPredicate> {
@@ -62,15 +62,15 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
   }
 
   public static class Parser implements FunctionLikeParser.SequentialParams<LootConditionBlockPredicate> {
-    protected Identifier id;
-    protected LootCondition anonymous;
+    protected ResourceLocation id;
+    protected LootItemCondition anonymous;
     protected int cursorBeforeId, cursorAfterId;
 
     private static CompletableFuture<Suggestions> getLootConditionIdSuggestions(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder, int cursorBeforeId) {
-      if (context.getSource() instanceof final ServerCommandSource source) {
-        return CommandSource.suggestIdentifiers(LootBridge.getLootConditionIds(source), suggestionsBuilder.createOffset(cursorBeforeId));
-      } else if (context.getSource() instanceof CommandSource commandSource) {
-        return commandSource.getCompletions(context);
+      if (context.getSource() instanceof final CommandSourceStack source) {
+        return SharedSuggestionProvider.suggestResource(LootBridge.getLootConditionIds(source), suggestionsBuilder.createOffset(cursorBeforeId));
+      } else if (context.getSource() instanceof SharedSuggestionProvider commandSource) {
+        return commandSource.customSuggestion(context);
       } else {
         return Suggestions.empty();
       }
@@ -89,14 +89,14 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
     @Override
     public LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
-        final Optional<RegistryEntry.Reference<LootCondition>> lootCondition = parseContext.registryAccess().getOptionalEntry(RegistryKey.of(RegistryKeys.PREDICATE, id));
+        final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.registryAccess().get(ResourceKey.create(Registries.PREDICATE, id));
         if (lootCondition.isEmpty()) {
           parseContext.reader().setCursor(cursorBeforeId);
           throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);
         }
         return new LootConditionBlockPredicate(lootCondition.get());
       } else if (anonymous != null) {
-        return new LootConditionBlockPredicate(RegistryEntry.of(anonymous));
+        return new LootConditionBlockPredicate(Holder.direct(anonymous));
       } else {
         return null;
       }
@@ -111,13 +111,13 @@ public record LootConditionBlockPredicate(RegistryEntry<LootCondition> entry) im
         final char peek = reader.peek();
         if (peek == '{' || peek == '[' || StringReader.isQuotedStringStart(peek)) {
           parseContext.clearSuggestion();
-          this.anonymous = ParsingUtil.parseNbt(reader, LootCondition.CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
+          this.anonymous = ParsingUtil.parseNbt(reader, LootItemCondition.DIRECT_CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
           return;
         }
       }
       // 读取 id
       this.cursorBeforeId = reader.getCursor();
-      this.id = Identifier.fromCommandInput(reader);
+      this.id = ResourceLocation.read(reader);
       this.cursorAfterId = reader.getCursor();
       if (!reader.canRead() && parseContext.suggestionsOnly()) {
         // 在提供建议的过程中，如果后面没有内容，则提前中断建议，不提供“,”或“)”的建议。

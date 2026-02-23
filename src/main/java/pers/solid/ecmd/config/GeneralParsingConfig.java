@@ -2,8 +2,8 @@ package pers.solid.ecmd.config;
 
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.brigadier.StringReader;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.function.Supplier;
@@ -45,7 +45,7 @@ public class GeneralParsingConfig implements Cloneable {
   /**
    * 解析注册表项时，显示更加详细的报错信息。
    *
-   * @see MixinShared#mixinModifiedParseThrow(RegistryKey, Supplier, LocalIntRef, StringReader, Identifier)
+   * @see MixinShared#mixinModifiedParseThrow(ResourceKey, Supplier, LocalIntRef, StringReader, ResourceLocation)
    */
   public boolean detailedUnknownRegistryEntry = true;
 

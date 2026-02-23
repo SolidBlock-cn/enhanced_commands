@@ -6,20 +6,20 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4d;
@@ -29,8 +29,8 @@ import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.GeoUtil;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static pers.solid.ecmd.argument.EnhancedPosArgumentType.CURRENT_POS;
 import static pers.solid.ecmd.argument.EnhancedPosArgumentType.blockPos;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
@@ -39,7 +39,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
         .addOptionalArg("interpolate", BoolArgumentType.bool(), false)
         .addOptionalArg("pivot", blockPos(), CURRENT_POS)
@@ -56,9 +56,9 @@ public enum RotateCommand implements CommandRegistrationCallback {
                     .executes(context -> executeRotate(null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context)))
                 .then(literal("around")
                     .then(argument("around_direction", DirectionArgumentType.direction())
-                        .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").getUnitVector()), keywordArgs.defaultArgs(), context))
+                        .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").step()), keywordArgs.defaultArgs(), context))
                         .then(argument("keyword_args", keywordArgs)
-                            .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").getUnitVector()), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
+                            .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").step()), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
                     .then(literal("vector")
                         .then(argument("x", DoubleArgumentType.doubleArg())
                             .then(argument("y", DoubleArgumentType.doubleArg())
@@ -68,19 +68,19 @@ public enum RotateCommand implements CommandRegistrationCallback {
                                         .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))))))));
   }
 
-  public static int executeRotate(@Nullable AxisAngle4d axisAngle4d, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static int executeRotate(@Nullable AxisAngle4d axisAngle4d, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     final double rotation;
-    final @Nullable BlockRotation blockRotation;
+    final @Nullable Rotation blockRotation;
     if (axisAngle4d == null) {
-      rotation = MathHelper.wrapDegrees(AngleArgumentType.getAngle(context, "rotation"));
+      rotation = Mth.wrapDegrees(AngleArgumentType.getAngle(context, "rotation"));
       if (rotation == 0) {
-        blockRotation = BlockRotation.NONE;
+        blockRotation = Rotation.NONE;
       } else if (rotation == 90) {
-        blockRotation = BlockRotation.COUNTERCLOCKWISE_90;
+        blockRotation = Rotation.COUNTERCLOCKWISE_90;
       } else if (rotation == -180) {
-        blockRotation = BlockRotation.CLOCKWISE_180;
+        blockRotation = Rotation.CLOCKWISE_180;
       } else if (rotation == -90) {
-        blockRotation = BlockRotation.CLOCKWISE_90;
+        blockRotation = Rotation.CLOCKWISE_90;
       } else {
         blockRotation = null;
       }
@@ -89,20 +89,20 @@ public enum RotateCommand implements CommandRegistrationCallback {
       blockRotation = null;
     }
     axisAngle4d = axisAngle4d == null ? new AxisAngle4d(Math.toRadians(rotation), 0, 1, 0) : axisAngle4d;
-    final @NotNull BlockRotation nearestBlockRotation;
-    final BlockPos pivot = keywordArgs.<PosArgument>getArg("pivot").toAbsoluteBlockPos(context.getSource());
+    final @NotNull Rotation nearestBlockRotation;
+    final BlockPos pivot = keywordArgs.<Coordinates>getArg("pivot").getBlockPos(context.getSource());
 
     if (blockRotation != null) {
       nearestBlockRotation = blockRotation;
     } else {
       if (rotation < 45 || rotation >= 315) {
-        nearestBlockRotation = BlockRotation.NONE;
+        nearestBlockRotation = Rotation.NONE;
       } else if (rotation < 135) {
-        nearestBlockRotation = BlockRotation.CLOCKWISE_90;
+        nearestBlockRotation = Rotation.CLOCKWISE_90;
       } else if (rotation < 225) {
-        nearestBlockRotation = BlockRotation.CLOCKWISE_180;
+        nearestBlockRotation = Rotation.CLOCKWISE_180;
       } else {
-        nearestBlockRotation = BlockRotation.COUNTERCLOCKWISE_90;
+        nearestBlockRotation = Rotation.COUNTERCLOCKWISE_90;
       }
     }
 
@@ -116,33 +116,33 @@ public enum RotateCommand implements CommandRegistrationCallback {
         } else {
           original = original.subtract(pivot);
           final Vector3d transform = finalAxisAngle4d.transform(new Vector3d(original.getX(), original.getY(), original.getZ()));
-          return new BlockPos(MathHelper.floor(transform.x + 0.5), MathHelper.floor(transform.y + 0.5), MathHelper.floor(transform.z + 0.5)).add(pivot);
+          return new BlockPos(Mth.floor(transform.x + 0.5), Mth.floor(transform.y + 0.5), Mth.floor(transform.z + 0.5)).offset(pivot);
         }
       }
 
       @Override
-      public Vec3d transformPos(Vec3d original) {
+      public Vec3 transformPos(Vec3 original) {
         if (blockRotation != null) {
-          return GeoUtil.rotate(original, blockRotation, pivot.toCenterPos());
+          return GeoUtil.rotate(original, blockRotation, pivot.getCenter());
         } else {
-          original = original.subtract(pivot.toCenterPos());
+          original = original.subtract(pivot.getCenter());
           final Vector3d transform = finalAxisAngle4d.transform(new Vector3d(original.x, original.y, original.z));
-          return new Vec3d(transform.x, transform.y, transform.z).add(pivot.toCenterPos());
+          return new Vec3(transform.x, transform.y, transform.z).add(pivot.getCenter());
         }
       }
 
       @Override
-      public Vec3d transformPosBack(Vec3d transformed) {
+      public Vec3 transformPosBack(Vec3 transformed) {
         if (blockRotation != null) {
           return GeoUtil.rotate(transformed, switch (blockRotation) {
-            case CLOCKWISE_180 -> BlockRotation.COUNTERCLOCKWISE_90;
-            case COUNTERCLOCKWISE_90 -> BlockRotation.CLOCKWISE_90;
+            case CLOCKWISE_180 -> Rotation.COUNTERCLOCKWISE_90;
+            case COUNTERCLOCKWISE_90 -> Rotation.CLOCKWISE_90;
             default -> blockRotation;
-          }, pivot.toCenterPos());
+          }, pivot.getCenter());
         } else {
-          transformed = transformed.subtract(pivot.toCenterPos());
+          transformed = transformed.subtract(pivot.getCenter());
           final Vector3d transform = new AxisAngle4d(finalAxisAngle4d.angle, -finalAxisAngle4d.x, -finalAxisAngle4d.y, -finalAxisAngle4d.z).transform(new Vector3d(transformed.x, transformed.y, transformed.z));
-          return new Vec3d(transform.x, transform.y, transform.z).add(pivot.toCenterPos());
+          return new Vec3(transform.x, transform.y, transform.z).add(pivot.getCenter());
         }
       }
 
@@ -150,14 +150,14 @@ public enum RotateCommand implements CommandRegistrationCallback {
       public void transformEntity(@NotNull Entity entity) {
         final float newYaw;
         if (blockRotation != null) {
-          newYaw = entity.applyRotation(blockRotation);
+          newYaw = entity.rotate(blockRotation);
         } else {
-          newYaw = entity.getYaw() - (float) rotation;
+          newYaw = entity.getYRot() - (float) rotation;
         }
-        if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getPitch());
+        if (entity instanceof ServerPlayer serverPlayerEntity) {
+          serverPlayerEntity.connection.teleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getXRot());
         } else {
-          entity.setYaw(newYaw);
+          entity.setYRot(newYaw);
         }
       }
 
@@ -165,19 +165,19 @@ public enum RotateCommand implements CommandRegistrationCallback {
       public void transformEntityBack(@NotNull Entity entity) {
         final float newYaw;
         if (blockRotation != null) {
-          newYaw = entity.applyRotation(switch (blockRotation) {
-            case NONE -> BlockRotation.NONE;
-            case CLOCKWISE_90 -> BlockRotation.COUNTERCLOCKWISE_90;
-            case CLOCKWISE_180 -> BlockRotation.CLOCKWISE_180;
-            case COUNTERCLOCKWISE_90 -> BlockRotation.CLOCKWISE_90;
+          newYaw = entity.rotate(switch (blockRotation) {
+            case NONE -> Rotation.NONE;
+            case CLOCKWISE_90 -> Rotation.COUNTERCLOCKWISE_90;
+            case CLOCKWISE_180 -> Rotation.CLOCKWISE_180;
+            case COUNTERCLOCKWISE_90 -> Rotation.CLOCKWISE_90;
           });
         } else {
-          newYaw = entity.getYaw() + (float) rotation;
+          newYaw = entity.getYRot() + (float) rotation;
         }
-        if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-          serverPlayerEntity.networkHandler.requestTeleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getPitch());
+        if (entity instanceof ServerPlayer serverPlayerEntity) {
+          serverPlayerEntity.connection.teleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getXRot());
         } else {
-          entity.setYaw(newYaw);
+          entity.setYRot(newYaw);
         }
       }
 
@@ -188,21 +188,21 @@ public enum RotateCommand implements CommandRegistrationCallback {
 
       @Override
       public @NotNull Region transformRegion(@NotNull Region region) {
-        return region.rotated(nearestBlockRotation, pivot.toCenterPos());
+        return region.rotated(nearestBlockRotation, pivot.getCenter());
       }
 
       @Override
-      public void notifyCompletion(ServerCommandSource source, int affectedBlocks, int affectedEntities) {
+      public void notifyCompletion(CommandSourceStack source, int affectedBlocks, int affectedEntities) {
         if (affectedEntities == -1) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.rotate.complete", Integer.toString(affectedBlocks)).enhanced$$(), true);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.rotate.complete", Integer.toString(affectedBlocks)).enhanced$$(), true);
         } else {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.rotate.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), true);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.rotate.complete_with_entities", Integer.toString(affectedBlocks), Integer.toString(affectedEntities)).enhanced$$(), true);
         }
       }
 
       @Override
-      public @NotNull MutableText getIteratorTaskName(Region region) {
-        return Text.translatable("enhanced_commands.commands.rotate.task", region.asString());
+      public @NotNull MutableComponent getIteratorTaskName(Region region) {
+        return Component.translatable("enhanced_commands.commands.rotate.task", region.asString());
       }
     };
 

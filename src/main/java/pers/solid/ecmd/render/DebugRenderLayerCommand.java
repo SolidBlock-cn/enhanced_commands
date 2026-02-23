@@ -9,48 +9,48 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.network.chat.Component;
 
 @Environment(EnvType.CLIENT)
 public enum DebugRenderLayerCommand implements ClientCommandRegistrationCallback {
   INSTANCE;
 
-  public static final ImmutableBiMap<String, RenderLayer> LAYERS = ImmutableBiMap.<String, RenderLayer>builder()
-      .put("lines", RenderLayer.getLines())
-      .put("line_strip", RenderLayer.getLineStrip())
-      .put("secondary_block_outline", RenderLayer.getSecondaryBlockOutline())
-      .put("debug_filled_box", RenderLayer.getDebugFilledBox())
-      .put("debug_quads", RenderLayer.getDebugQuads())
-      .put("debug_section_quads", RenderLayer.getDebugSectionQuads())
-      .put("debug_structure_quads", RenderLayer.getDebugStructureQuads())
-      .put("debug_triangle_fan", RenderLayer.getDebugTriangleFan())
-      .put("gui", RenderLayer.getGui())
-      .put("gui_overlay", RenderLayer.getGuiOverlay())
-      .put("gui_ghost_recipe_overlay", RenderLayer.getGuiGhostRecipeOverlay())
-      .put("gui_text_highlight", RenderLayer.getGuiTextHighlight())
-      .put("sunrise_sunset", RenderLayer.getSunriseSunset())
-      .put("fancy_clouds", RenderLayer.getFancyClouds())
-      .put("fast_clouds", RenderLayer.getFastClouds())
-      .put("no_culling_clouds", RenderLayer.getNoCullingClouds())
-      .put("lightning", RenderLayer.getLightning())
-      .put("dragon_rays", RenderLayer.getDragonRays())
+  public static final ImmutableBiMap<String, RenderType> LAYERS = ImmutableBiMap.<String, RenderType>builder()
+      .put("lines", RenderType.lines())
+      .put("line_strip", RenderType.lineStrip())
+      .put("secondary_block_outline", RenderType.secondaryBlockOutline())
+      .put("debug_filled_box", RenderType.debugFilledBox())
+      .put("debug_quads", RenderType.debugQuads())
+      .put("debug_section_quads", RenderType.debugSectionQuads())
+      .put("debug_structure_quads", RenderType.debugStructureQuads())
+      .put("debug_triangle_fan", RenderType.debugTriangleFan())
+      .put("gui", RenderType.gui())
+      .put("gui_overlay", RenderType.guiOverlay())
+      .put("gui_ghost_recipe_overlay", RenderType.guiGhostRecipeOverlay())
+      .put("gui_text_highlight", RenderType.guiTextHighlight())
+      .put("sunrise_sunset", RenderType.sunriseSunset())
+      .put("fancy_clouds", RenderType.cloudsDepthOnly())
+      .put("fast_clouds", RenderType.clouds())
+      .put("no_culling_clouds", RenderType.flatClouds())
+      .put("lightning", RenderType.lightning())
+      .put("dragon_rays", RenderType.dragonRays())
       .build();
 
   @Override
-  public void register(CommandDispatcher<FabricClientCommandSource> commandDispatcher, CommandRegistryAccess commandRegistryAccess) {
+  public void register(CommandDispatcher<FabricClientCommandSource> commandDispatcher, CommandBuildContext commandRegistryAccess) {
     final LiteralArgumentBuilder<FabricClientCommandSource> literal = ClientCommandManager.literal("debug:renderlayer");
     LAYERS.forEach((s, renderLayer) -> literal.then(ClientCommandManager.literal(s).executes(commandContext -> {
       RegionRendering.regionRenderLayer = renderLayer;
-      commandContext.getSource().sendFeedback(Text.literal("set to " + s));
+      commandContext.getSource().sendFeedback(Component.literal("set to " + s));
       return 1;
     })));
 
     literal.then(ClientCommandManager.literal("debug_line_strip").then(ClientCommandManager.argument("lineWidth", DoubleArgumentType.doubleArg()).executes(commandContext -> {
       final double lineWidth = DoubleArgumentType.getDouble(commandContext, "lineWidth");
-      RegionRendering.regionRenderLayer = RenderLayer.getDebugLineStrip(lineWidth);
-      commandContext.getSource().sendFeedback(Text.literal("set to debug_line_strip lineWidth = " + lineWidth));
+      RegionRendering.regionRenderLayer = RenderType.debugLineStrip(lineWidth);
+      commandContext.getSource().sendFeedback(Component.literal("set to debug_line_strip lineWidth = " + lineWidth));
       return 1;
     })));
     commandDispatcher.register(literal);

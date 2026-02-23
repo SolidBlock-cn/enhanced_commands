@@ -3,18 +3,18 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.brigadier.context.CommandContext;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.EntitySelectorReader;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 
 /**
- * 这是在 {@link EntitySelectorReader} 中加入的一些额外的信息，用于本模组。
+ * 这是在 {@link EntitySelectorParser} 中加入的一些额外的信息，用于本模组。
  */
 public class EntitySelectorReaderExtras {
 
-  private final EntitySelectorReader self;
+  private final EntitySelectorParser self;
   /**
    * 在解析过程中，最近一次解析到的选项名称之前的位置所在的 cursor。
    */
@@ -32,7 +32,7 @@ public class EntitySelectorReaderExtras {
    */
   public boolean implicitEntityType = false;
   /**
-   * 如果是通过 @r、@p 等选择器指定的 {@link EntitySelectorReader#setIncludesNonPlayers(boolean)}，且没有通过 {@code gamemode} 等参数指定，则此字段为 true。
+   * 如果是通过 @r、@p 等选择器指定的 {@link EntitySelectorParser#setIncludesEntities(boolean)}，且没有通过 {@code gamemode} 等参数指定，则此字段为 true。
    */
   public boolean implicitNonPlayers = false;
   /**
@@ -58,7 +58,7 @@ public class EntitySelectorReaderExtras {
 
   public MutableObject<ExecutionContext> contextWrapper = new MutableObject<>();
 
-  public EntitySelectorReaderExtras(EntitySelectorReader self) {
+  public EntitySelectorReaderExtras(EntitySelectorParser self) {
     this.self = self;
   }
 

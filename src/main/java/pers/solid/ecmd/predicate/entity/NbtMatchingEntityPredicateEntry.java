@@ -3,51 +3,51 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
-public record NbtMatchingEntityPredicateEntry(@NotNull NbtCompound nbt, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record NbtMatchingEntityPredicateEntry(@NotNull CompoundTag nbt, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<NbtMatchingEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      NbtCompound.CODEC.fieldOf("nbt").forGetter(NbtMatchingEntityPredicateEntry::nbt),
+      CompoundTag.CODEC.fieldOf("nbt").forGetter(NbtMatchingEntityPredicateEntry::nbt),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(NbtMatchingEntityPredicateEntry::inverted)
   ).apply(i, NbtMatchingEntityPredicateEntry::new));
 
   @Override
   public boolean test(@NotNull Entity entity) {
-    NbtCompound actualNbt = entity.writeNbt(new NbtCompound());
-    if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-      ItemStack itemStack = serverPlayerEntity.getInventory().getMainHandStack();
+    CompoundTag actualNbt = entity.saveWithoutId(new CompoundTag());
+    if (entity instanceof ServerPlayer serverPlayerEntity) {
+      ItemStack itemStack = serverPlayerEntity.getInventory().getSelected();
       if (!itemStack.isEmpty()) {
-        actualNbt.put("SelectedItem", itemStack.toNbt(serverPlayerEntity.getRegistryManager()));
+        actualNbt.put("SelectedItem", itemStack.save(serverPlayerEntity.registryAccess()));
       }
     }
 
-    return NbtHelper.matches(nbt, actualNbt, true) != inverted;
+    return NbtUtils.compareNbt(nbt, actualNbt, true) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
-    NbtCompound actualNbt = entity.writeNbt(new NbtCompound());
-    if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-      ItemStack itemStack = serverPlayerEntity.getInventory().getMainHandStack();
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+    CompoundTag actualNbt = entity.saveWithoutId(new CompoundTag());
+    if (entity instanceof ServerPlayer serverPlayerEntity) {
+      ItemStack itemStack = serverPlayerEntity.getInventory().getSelected();
       if (!itemStack.isEmpty()) {
-        actualNbt.put("SelectedItem", itemStack.toNbt(serverPlayerEntity.getRegistryManager()));
+        actualNbt.put("SelectedItem", itemStack.save(serverPlayerEntity.registryAccess()));
       }
     }
 
-    boolean matches = NbtHelper.matches(nbt, actualNbt, true);
+    boolean matches = NbtUtils.compareNbt(nbt, actualNbt, true);
     final boolean result = matches != inverted;
     if (matches) {
-      return TestResult.of(result, Text.translatable("enhanced_commands.entity_predicate.nbt.pass", entity));
+      return TestResult.of(result, Component.translatable("enhanced_commands.entity_predicate.nbt.pass", entity));
     } else {
-      return TestResult.of(result, Text.translatable("enhanced_commands.entity_predicate.nbt.fail", entity));
+      return TestResult.of(result, Component.translatable("enhanced_commands.entity_predicate.nbt.fail", entity));
     }
   }
 

@@ -2,10 +2,10 @@ package pers.solid.ecmd.region;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -34,24 +34,24 @@ public interface RegionsBasedRegion<T extends RegionsBasedRegion<T, R>, R extend
 
   @Override
   @NotNull
-  default T moved(@NotNull Vec3d relativePos) {
+  default T moved(@NotNull Vec3 relativePos) {
     return newRegionWithTransformation(input -> (R) input.moved(relativePos));
   }
 
   @Override
   @NotNull
-  default T rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
+  default T rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
     return newRegionWithTransformation(input -> (R) input.rotated(blockRotation, pivot));
   }
 
   @Override
   @NotNull
-  default T mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
+  default T mirrored(Direction.@NotNull Axis axis, @NotNull Vec3 pivot) {
     return newRegionWithTransformation(input -> (R) input.mirrored(axis, pivot));
   }
 
   @Override
-  default @NotNull T transformed(Function<Vec3d, Vec3d> transformation) {
+  default @NotNull T transformed(Function<Vec3, Vec3> transformation) {
     return newRegionWithTransformation(input -> (R) input.transformed(transformation));
   }
 
@@ -75,7 +75,7 @@ public interface RegionsBasedRegion<T extends RegionsBasedRegion<T, R>, R extend
 
   @Override
   @NotNull
-  default T expanded(double offset, Direction.Type type) {
+  default T expanded(double offset, Direction.Plane type) {
     return newRegionWithTransformation(input -> (R) input.expanded(offset, type));
   }
 }

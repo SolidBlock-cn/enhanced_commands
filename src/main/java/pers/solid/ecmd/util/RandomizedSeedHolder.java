@@ -1,18 +1,18 @@
 package pers.solid.ecmd.util;
 
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.mutable.MutableLong;
 
 import java.util.OptionalLong;
 
 public sealed interface RandomizedSeedHolder {
-  Random RANDOM = Random.create();
+  RandomSource RANDOM = RandomSource.create();
 
   long seed();
 
   boolean canRandomize();
 
-  RandomizedSeedHolder getRefreshed(Random random);
+  RandomizedSeedHolder getRefreshed(RandomSource random);
 
   OptionalLong toFixedSeed();
 
@@ -44,7 +44,7 @@ public sealed interface RandomizedSeedHolder {
     }
 
     @Override
-    public RandomizedSeedHolder getRefreshed(Random random) {
+    public RandomizedSeedHolder getRefreshed(RandomSource random) {
       return of(random.nextLong());
     }
 
@@ -61,7 +61,7 @@ public sealed interface RandomizedSeedHolder {
     }
 
     @Override
-    public RandomizedSeedHolder getRefreshed(Random random) {
+    public RandomizedSeedHolder getRefreshed(RandomSource random) {
       return this;
     }
 

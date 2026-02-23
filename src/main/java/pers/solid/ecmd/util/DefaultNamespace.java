@@ -5,9 +5,9 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.InvalidIdentifierException;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
@@ -22,26 +22,26 @@ import java.util.stream.Stream;
  */
 public class DefaultNamespace {
   private final @NotNull String namespace;
-  private final @NotNull Identifier exampleId;
+  private final @NotNull ResourceLocation exampleId;
   public static final DefaultNamespace ENHANCED_COMMANDS = new DefaultNamespace(EnhancedCommands.MOD_ID);
 
   public DefaultNamespace(@NotNull String namespace) {
     this.namespace = namespace;
-    this.exampleId = Identifier.of(namespace, "");
+    this.exampleId = ResourceLocation.fromNamespaceAndPath(namespace, "");
   }
 
-  public DefaultNamespace(@NotNull Identifier exampleId) {
+  public DefaultNamespace(@NotNull ResourceLocation exampleId) {
     this.namespace = exampleId.getNamespace();
     this.exampleId = exampleId;
   }
 
-  public Identifier of(String id) {
+  public ResourceLocation of(String id) {
     int i = id.indexOf(':');
     if (i >= 0) {
       String path = id.substring(i + 1);
       if (i != 0) {
         String namespace = id.substring(0, i);
-        return Identifier.of(namespace, path);
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
       } else {
         return exampleId.withPath(path);
       }
@@ -50,7 +50,7 @@ public class DefaultNamespace {
     }
   }
 
-  public String toSimplerString(Identifier id) {
+  public String toSimplerString(ResourceLocation id) {
     if (this.namespace.equals(id.getNamespace())) {
       return id.getPath();
     } else {
@@ -75,16 +75,16 @@ public class DefaultNamespace {
   }
 
   /**
-   * @see Identifier#fromCommandInput(StringReader)
+   * @see ResourceLocation#read(StringReader)
    */
-  public Identifier fromStringReader(StringReader reader) throws CommandSyntaxException {
+  public ResourceLocation fromStringReader(StringReader reader) throws CommandSyntaxException {
     int cursorBeforeId = reader.getCursor();
     String string = readString(reader);
     final int cursorAfterId = reader.getCursor();
 
     try {
       return of(string);
-    } catch (InvalidIdentifierException var4) {
+    } catch (ResourceLocationException var4) {
       reader.setCursor(cursorBeforeId);
       for (int i = reader.getCursor(); i < cursorAfterId; i++) {
         final char c = string.charAt(i);
@@ -92,56 +92,56 @@ public class DefaultNamespace {
           throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterId);
         }
       }
-      throw CommandSyntaxExceptionExtension.withCursorEnd(Identifier.COMMAND_EXCEPTION.createWithContext(reader), cursorAfterId);
+      throw CommandSyntaxExceptionExtension.withCursorEnd(ResourceLocation.ERROR_INVALID.createWithContext(reader), cursorAfterId);
     }
   }
 
   /**
-   * @see CommandSource#suggestIdentifiers(Iterable, SuggestionsBuilder, String)
+   * @see SharedSuggestionProvider#suggestResource(Iterable, SuggestionsBuilder, String)
    */
-  public CompletableFuture<Suggestions> suggestIdentifiers(Iterable<Identifier> candidates, SuggestionsBuilder builder, String prefix) {
+  public CompletableFuture<Suggestions> suggestIdentifiers(Iterable<ResourceLocation> candidates, SuggestionsBuilder builder, String prefix) {
     String string = builder.getRemaining().toLowerCase(Locale.ROOT);
-    CommandSource.forEachMatching(candidates, string, prefix, Function.identity(), (id) -> builder.suggest(prefix + toSimplerString(id)));
+    SharedSuggestionProvider.filterResources(candidates, string, prefix, Function.identity(), (id) -> builder.suggest(prefix + toSimplerString(id)));
     return builder.buildFuture();
   }
 
   /**
-   * @see CommandSource#suggestIdentifiers(Stream, SuggestionsBuilder, String)
+   * @see SharedSuggestionProvider#suggestResource(Stream, SuggestionsBuilder, String)
    */
-  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Stream<Identifier> candidates, SuggestionsBuilder builder, String prefix) {
+  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Stream<ResourceLocation> candidates, SuggestionsBuilder builder, String prefix) {
     return suggestIdentifiers(candidates::iterator, builder, prefix);
   }
 
 
   /**
-   * @see CommandSource#suggestIdentifiers(Iterable, SuggestionsBuilder)
+   * @see SharedSuggestionProvider#suggestResource(Iterable, SuggestionsBuilder)
    */
-  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Iterable<Identifier> candidates, SuggestionsBuilder builder) {
+  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Iterable<ResourceLocation> candidates, SuggestionsBuilder builder) {
     String string = builder.getRemaining().toLowerCase(Locale.ROOT);
-    CommandSource.forEachMatching(candidates, string, Function.identity(), (id) -> builder.suggest(toSimplerString(id)));
+    SharedSuggestionProvider.filterResources(candidates, string, Function.identity(), (id) -> builder.suggest(toSimplerString(id)));
     return builder.buildFuture();
   }
 
   /**
-   * @see CommandSource#suggestFromIdentifier(Iterable, SuggestionsBuilder, Function, Function)
+   * @see SharedSuggestionProvider#suggestResource(Iterable, SuggestionsBuilder, Function, Function)
    */
-  public <T> CompletableFuture<Suggestions> suggestFromIdentifier(@NotNull Iterable<T> candidates, SuggestionsBuilder builder, Function<T, Identifier> identifier, Function<T, Message> tooltip) {
+  public <T> CompletableFuture<Suggestions> suggestFromIdentifier(@NotNull Iterable<T> candidates, SuggestionsBuilder builder, Function<T, ResourceLocation> identifier, Function<T, Message> tooltip) {
     String string = builder.getRemaining().toLowerCase(Locale.ROOT);
-    CommandSource.forEachMatching(candidates, string, identifier, (object) -> builder.suggest(toSimplerString(identifier.apply(object)), tooltip.apply(object)));
+    SharedSuggestionProvider.filterResources(candidates, string, identifier, (object) -> builder.suggest(toSimplerString(identifier.apply(object)), tooltip.apply(object)));
     return builder.buildFuture();
   }
 
   /**
-   * @see CommandSource#suggestIdentifiers(Stream, SuggestionsBuilder)
+   * @see SharedSuggestionProvider#suggestResource(Stream, SuggestionsBuilder)
    */
-  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Stream<Identifier> candidates, SuggestionsBuilder builder) {
+  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Stream<ResourceLocation> candidates, SuggestionsBuilder builder) {
     return suggestIdentifiers(candidates::iterator, builder);
   }
 
   /**
-   * @see CommandSource#suggestFromIdentifier(Stream, SuggestionsBuilder, Function, Function)
+   * @see SharedSuggestionProvider#suggestResource(Stream, SuggestionsBuilder, Function, Function)
    */
-  public <T> CompletableFuture<Suggestions> suggestFromIdentifier(@NotNull Stream<T> candidates, SuggestionsBuilder builder, Function<T, Identifier> identifier, Function<T, Message> tooltip) {
+  public <T> CompletableFuture<Suggestions> suggestFromIdentifier(@NotNull Stream<T> candidates, SuggestionsBuilder builder, Function<T, ResourceLocation> identifier, Function<T, Message> tooltip) {
     return suggestFromIdentifier(candidates::iterator, builder, identifier, tooltip);
   }
 }

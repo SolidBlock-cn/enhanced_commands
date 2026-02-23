@@ -10,11 +10,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-public record StringEnumArgumentType(Collection<String> values, boolean acceptsOtherValues) implements ArgumentType<String>, ArgumentSerializer.ArgumentTypeProperties<StringEnumArgumentType> {
+public record StringEnumArgumentType(Collection<String> values, boolean acceptsOtherValues) implements ArgumentType<String>, ArgumentTypeInfo.Template<StringEnumArgumentType> {
   public static StringEnumArgumentType stringEnum(String... values) {
     return new StringEnumArgumentType(Arrays.asList(values), false);
   }
@@ -49,7 +50,7 @@ public record StringEnumArgumentType(Collection<String> values, boolean acceptsO
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-    return CommandSource.suggestMatching(values, builder);
+    return SharedSuggestionProvider.suggest(values, builder);
   }
 
   @Override
@@ -58,31 +59,31 @@ public record StringEnumArgumentType(Collection<String> values, boolean acceptsO
   }
 
   @Override
-  public StringEnumArgumentType createType(CommandRegistryAccess commandRegistryAccess) {
+  public @NotNull StringEnumArgumentType instantiate(CommandBuildContext commandRegistryAccess) {
     return this;
   }
 
   @Override
-  public ArgumentSerializer<StringEnumArgumentType, ?> getSerializer() {
+  public @NotNull ArgumentTypeInfo<StringEnumArgumentType, ?> type() {
     return Serializer.INSTANCE;
   }
 
-  public enum Serializer implements ArgumentSerializer<StringEnumArgumentType, StringEnumArgumentType> {
+  public enum Serializer implements ArgumentTypeInfo<StringEnumArgumentType, StringEnumArgumentType> {
     INSTANCE;
 
     @Override
-    public void writePacket(StringEnumArgumentType properties, PacketByteBuf buf) {
-      buf.writeCollection(properties.values, PacketCodecs.STRING);
+    public void serializeToNetwork(StringEnumArgumentType properties, FriendlyByteBuf buf) {
+      buf.writeCollection(properties.values, ByteBufCodecs.STRING_UTF8);
       buf.writeBoolean(properties.acceptsOtherValues);
     }
 
     @Override
-    public StringEnumArgumentType fromPacket(PacketByteBuf buf) {
-      return new StringEnumArgumentType(buf.readCollection(ArrayList::new, PacketCodecs.STRING), buf.readBoolean());
+    public @NotNull StringEnumArgumentType deserializeFromNetwork(FriendlyByteBuf buf) {
+      return new StringEnumArgumentType(buf.readCollection(ArrayList::new, ByteBufCodecs.STRING_UTF8), buf.readBoolean());
     }
 
     @Override
-    public void writeJson(StringEnumArgumentType properties, JsonObject json) {
+    public void serializeToJson(StringEnumArgumentType properties, JsonObject json) {
       final JsonArray array = new JsonArray();
       for (String value : properties.values) {
         array.add(value);
@@ -92,7 +93,7 @@ public record StringEnumArgumentType(Collection<String> values, boolean acceptsO
     }
 
     @Override
-    public StringEnumArgumentType getArgumentTypeProperties(StringEnumArgumentType argumentType) {
+    public @NotNull StringEnumArgumentType unpack(StringEnumArgumentType argumentType) {
       return argumentType;
     }
   }

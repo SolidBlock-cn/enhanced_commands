@@ -2,7 +2,7 @@ package pers.solid.ecmd.parse;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 public interface MixedParamListParser extends SequentialParamListParser, NamedParamListParser {
   default void parseMixedParameters(ParseContext<?> parseContext) throws CommandSyntaxException {
@@ -30,7 +30,7 @@ public interface MixedParamListParser extends SequentialParamListParser, NamedPa
 
       // 提供命名参数名称的建议
       final int cursorBeforeParamName = reader.getCursor();
-      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> CommandSource.suggestMatching(supportedParams().stream().filter(this::isValidParamName).map(s -> s + KEY_VALUE_SEP), suggestionsBuilder.createOffset(cursorBeforeParamName)));
+      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(supportedParams().stream().filter(this::isValidParamName).map(s -> s + KEY_VALUE_SEP), suggestionsBuilder.createOffset(cursorBeforeParamName)));
       final String paramName = reader.readUnquotedString();
       final int cursorAfterParamName = reader.getCursor();
 

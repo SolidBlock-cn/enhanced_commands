@@ -2,18 +2,18 @@ package pers.solid.ecmd.util;
 
 import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.*;
-import net.minecraft.command.EntitySelectorOptions;
-import net.minecraft.command.argument.BlockArgumentParser;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 
 import java.util.HashMap;
@@ -23,36 +23,36 @@ import java.util.Map;
  * 此模组包含的一些扩展的 {@link CommandExceptionType}。
  */
 public final class ModCommandExceptionTypes {
-  public static final DynamicCommandExceptionType INVALID_REGEX = new DynamicCommandExceptionType(msg -> Text.translatable("enhanced_commands.argument.regex.invalid", msg));
-  public static final Dynamic2CommandExceptionType BLOCK_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((blockId, blockName) -> Text.translatable("enhanced_commands.argument.block.feature_required", blockId, blockName));
-  public static final Dynamic2CommandExceptionType ITEM_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((itemId, itemName) -> Text.translatable("enhanced_commands.argument.item.feature_required", itemId, itemName));
-  public static final Dynamic2CommandExceptionType ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((itemId, itemName) -> Text.translatable("enhanced_commands.argument.entity_type.feature_required", itemId, itemName));
-  public static final Dynamic2CommandExceptionType BIOME_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((biomeId, biomeName) -> Text.translatable("enhanced_commands.argument.biome.feature_required", biomeId, biomeName));
-  public static final Dynamic2CommandExceptionType EXPECTED_2_SYMBOLS = new Dynamic2CommandExceptionType((a, b) -> Text.stringifiedTranslatable("enhanced_commands.parsing.expected.2", a, b));
-  public static final Dynamic3CommandExceptionType EXPECTED_3_SYMBOLS = new Dynamic3CommandExceptionType((a, b, c) -> Text.stringifiedTranslatable("enhanced_commands.parsing.expected.3", a, b, c));
-  public static final Dynamic4CommandExceptionType EXPECTED_4_SYMBOLS = new Dynamic4CommandExceptionType((a, b, c, d) -> Text.stringifiedTranslatable("enhanced_commands.parsing.expected.4", a, b, c, d));
-  public static final DynamicCommandExceptionType UNKNOWN_KEYWORD = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.unknown_keyword", o));
-  public static final DynamicCommandExceptionType UNKNOWN_FUNCTION = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.unknown_function", o));
-  public static final DynamicCommandExceptionType DUPLICATE_KEYWORD = new DynamicCommandExceptionType(o -> Text.translatable("enhanced_commands.parsing.duplicate_keyword", o));
-  public static final DynamicCommandExceptionType DUPLICATE_VALUE = new DynamicCommandExceptionType(o -> Text.stringifiedTranslatable("enhanced_commands.parsing.duplicate_value", o));
-  private static final Text VALID_UNITS = Text.translatable("enhanced_commands.parsing.angle_accepted_values");
-  public static final DynamicCommandExceptionType ANGLE_UNIT_EXPECTED = new DynamicCommandExceptionType(number -> Text.translatable("enhanced_commands.parsing.angle_unit_expected", number, VALID_UNITS));
-  public static final DynamicCommandExceptionType ANGLE_UNIT_UNKNOWN = new DynamicCommandExceptionType(actual -> Text.translatable("enhanced_commands.parsing.angle_unit_unknown", actual, VALID_UNITS));
-  public static final DynamicCommandExceptionType CANNOT_PARSE = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.cannot_parse", reason));
-  public static final DynamicCommandExceptionType MALFORMED_JSON = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.malformed_json", reason));
-  public static final DynamicCommandExceptionType UNKNOWN_LOOT_TABLE_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.unknown_loot_table_predicate", reason));
-  public static final DynamicCommandExceptionType UNKNOWN_BLOCK_FUNCTION_ID = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.block_function.reference.unknown_id", reason));
-  public static final DynamicCommandExceptionType UNKNOWN_BLOCK_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.block_predicate.reference.unknown_id", reason));
-  public static final DynamicCommandExceptionType INVALID_LOOT_TABLE = new DynamicCommandExceptionType(reason -> Text.translatable("enhanced_commands.parsing.invalid_loot_table", reason));
-  public static final SimpleCommandExceptionType EXPECTED_WHITESPACE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.parsing.expected_whitespace"));
+  public static final DynamicCommandExceptionType INVALID_REGEX = new DynamicCommandExceptionType(msg -> Component.translatable("enhanced_commands.argument.regex.invalid", msg));
+  public static final Dynamic2CommandExceptionType BLOCK_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((blockId, blockName) -> Component.translatable("enhanced_commands.argument.block.feature_required", blockId, blockName));
+  public static final Dynamic2CommandExceptionType ITEM_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((itemId, itemName) -> Component.translatable("enhanced_commands.argument.item.feature_required", itemId, itemName));
+  public static final Dynamic2CommandExceptionType ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((itemId, itemName) -> Component.translatable("enhanced_commands.argument.entity_type.feature_required", itemId, itemName));
+  public static final Dynamic2CommandExceptionType BIOME_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((biomeId, biomeName) -> Component.translatable("enhanced_commands.argument.biome.feature_required", biomeId, biomeName));
+  public static final Dynamic2CommandExceptionType EXPECTED_2_SYMBOLS = new Dynamic2CommandExceptionType((a, b) -> Component.translatableEscape("enhanced_commands.parsing.expected.2", a, b));
+  public static final Dynamic3CommandExceptionType EXPECTED_3_SYMBOLS = new Dynamic3CommandExceptionType((a, b, c) -> Component.translatableEscape("enhanced_commands.parsing.expected.3", a, b, c));
+  public static final Dynamic4CommandExceptionType EXPECTED_4_SYMBOLS = new Dynamic4CommandExceptionType((a, b, c, d) -> Component.translatableEscape("enhanced_commands.parsing.expected.4", a, b, c, d));
+  public static final DynamicCommandExceptionType UNKNOWN_KEYWORD = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.parsing.unknown_keyword", o));
+  public static final DynamicCommandExceptionType UNKNOWN_FUNCTION = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.parsing.unknown_function", o));
+  public static final DynamicCommandExceptionType DUPLICATE_KEYWORD = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.parsing.duplicate_keyword", o));
+  public static final DynamicCommandExceptionType DUPLICATE_VALUE = new DynamicCommandExceptionType(o -> Component.translatableEscape("enhanced_commands.parsing.duplicate_value", o));
+  private static final Component VALID_UNITS = Component.translatable("enhanced_commands.parsing.angle_accepted_values");
+  public static final DynamicCommandExceptionType ANGLE_UNIT_EXPECTED = new DynamicCommandExceptionType(number -> Component.translatable("enhanced_commands.parsing.angle_unit_expected", number, VALID_UNITS));
+  public static final DynamicCommandExceptionType ANGLE_UNIT_UNKNOWN = new DynamicCommandExceptionType(actual -> Component.translatable("enhanced_commands.parsing.angle_unit_unknown", actual, VALID_UNITS));
+  public static final DynamicCommandExceptionType CANNOT_PARSE = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.parsing.cannot_parse", reason));
+  public static final DynamicCommandExceptionType MALFORMED_JSON = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.parsing.malformed_json", reason));
+  public static final DynamicCommandExceptionType UNKNOWN_LOOT_TABLE_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.parsing.unknown_loot_table_predicate", reason));
+  public static final DynamicCommandExceptionType UNKNOWN_BLOCK_FUNCTION_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.block_function.reference.unknown_id", reason));
+  public static final DynamicCommandExceptionType UNKNOWN_BLOCK_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.block_predicate.reference.unknown_id", reason));
+  public static final DynamicCommandExceptionType INVALID_LOOT_TABLE = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.parsing.invalid_loot_table", reason));
+  public static final SimpleCommandExceptionType EXPECTED_WHITESPACE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.parsing.expected_whitespace"));
 
-  public static final DynamicCommandExceptionType UNKNOWN_STATUS_EFFECT = new DynamicCommandExceptionType(id -> Text.translatable("enhanced_commands.parsing.unknown_registry_entry.effect", id));
-  public static final DynamicCommandExceptionType UNKNOWN_BIOME = new DynamicCommandExceptionType(id -> Text.translatable("enhanced_commands.parsing.unknown_registry_entry.biome", id));
-  public static final SimpleCommandExceptionType CONTAINS_UPPER_CASE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.id.contains_upper_case"));
+  public static final DynamicCommandExceptionType UNKNOWN_STATUS_EFFECT = new DynamicCommandExceptionType(id -> Component.translatable("enhanced_commands.parsing.unknown_registry_entry.effect", id));
+  public static final DynamicCommandExceptionType UNKNOWN_BIOME = new DynamicCommandExceptionType(id -> Component.translatable("enhanced_commands.parsing.unknown_registry_entry.biome", id));
+  public static final SimpleCommandExceptionType CONTAINS_UPPER_CASE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.id.contains_upper_case"));
 
   /**
    * <p>用于在命令抛出异常时，像命令解析时异常一样，显示命令的原文本内容。这个 {@code cursorEnd} 对应的是 {@link  CommandSyntaxExceptionExtension#getCursorEnd$ec()} 中的 {@code cursorEnd}，如果未指定，则为 -1，不应是 null。
-   * <p>对此方法调用 {@link Dynamic4CommandExceptionType#create create} 时，4个参数分别是：<code>{@link Text}, {@link String}, int, int</code>。
+   * <p>对此方法调用 {@link Dynamic4CommandExceptionType#create create} 时，4个参数分别是：<code>{@link Component}, {@link String}, int, int</code>。
    * <p>示例：
    * <pre>{@code
    * final CommandSyntaxException commandSyntaxException = XXXX.createWithContext(stringReader, ...);
@@ -60,59 +60,59 @@ public final class ModCommandExceptionTypes {
    * }</pre>
    */
   public static final Dynamic4CommandExceptionType EXCEPTION_SHOWING_TEXT = new Dynamic4CommandExceptionType((message, input, cursor, cursorEnd) -> {
-    Preconditions.checkArgument(message instanceof Text, "message not Text");
+    Preconditions.checkArgument(message instanceof Component, "message not Text");
     Preconditions.checkArgument(input == null || input instanceof String, "input not string");
     Preconditions.checkArgument(cursor instanceof Integer, "cursor not Integer");
     Preconditions.checkArgument(cursorEnd instanceof Integer, "cursorEnd not Integer");
-    return toErrorShowingInput((Text) message, (String) input, (int) cursor, (int) cursorEnd);
+    return toErrorShowingInput((Component) message, (String) input, (int) cursor, (int) cursorEnd);
   });
 
   /**
    * 将命令异常的消息增加一行，以显示原始的命令输入以及出错位置，就像原版游戏在遇到命令解析异常时那样。其处理方法综合了原版的做法以及本模组对原版做法的 mixin。
    *
-   * @see CommandManager#checkCommand
+   * @see Commands#finishParsing
    * @see pers.solid.ecmd.mixins.mixin.CommandManagerMixin#modifiedGetErrorMessage(String, CommandSyntaxException, int)
    */
-  private static Text toErrorShowingInput(Text message, String input, int cursor, int cursorEnd) {
+  private static Component toErrorShowingInput(Component message, String input, int cursor, int cursorEnd) {
     if (input != null && cursor >= 0) {
       int i = Math.min(input.length(), cursor);
-      MutableText mutableText = Text.empty().formatted(Formatting.GRAY).styled((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + input)));
+      MutableComponent mutableText = Component.empty().withStyle(ChatFormatting.GRAY).withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + input)));
       if (i > 10) {
-        mutableText.append(ScreenTexts.ELLIPSIS);
+        mutableText.append(CommonComponents.ELLIPSIS);
       }
 
       mutableText.append(input.substring(Math.max(0, i - 10), i));
       if (i < input.length()) {
         if (cursorEnd >= i) {
-          mutableText.append(Text.literal("»").formatted(Formatting.DARK_RED));
+          mutableText.append(Component.literal("»").withStyle(ChatFormatting.DARK_RED));
         }
         cursorEnd = Math.min(input.length(), cursorEnd);
         String redString = input.substring(i);
         if (cursorEnd >= i) {
           redString = redString.substring(0, cursorEnd - i);
         }
-        Text text = Text.literal(redString).formatted(Formatting.RED, Formatting.UNDERLINE);
+        Component text = Component.literal(redString).withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE);
         mutableText.append(text);
       }
       if (cursorEnd >= i) {
-        mutableText.append(Text.literal("«").formatted(Formatting.DARK_RED));
-        mutableText.append(Text.literal(input.substring(cursorEnd, Math.min(cursorEnd + 10, input.length()))));
+        mutableText.append(Component.literal("«").withStyle(ChatFormatting.DARK_RED));
+        mutableText.append(Component.literal(input.substring(cursorEnd, Math.min(cursorEnd + 10, input.length()))));
       }
 
-      mutableText.append(Text.translatable("command.context.here").formatted(Formatting.RED, Formatting.ITALIC));
+      mutableText.append(Component.translatable("command.context.here").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
 
-      return ScreenTexts.joinLines(message, mutableText);
+      return CommonComponents.joinLines(message, mutableText);
     } else {
       return message;
     }
   }
 
-  public static final Map<RegistryKey<? extends Registry<?>>, DynamicCommandExceptionType> REGISTRY_ENTRY_EXCEPTION_TYPES = Util.make(new HashMap<>(), map -> {
-    map.put(RegistryKeys.BLOCK, BlockArgumentParser.INVALID_BLOCK_ID_EXCEPTION);
-    map.put(RegistryKeys.ITEM, new DynamicCommandExceptionType(id -> Text.translatable("argument.item.id.invalid", id)));
-    map.put(RegistryKeys.BIOME, UNKNOWN_BIOME);
-    map.put(RegistryKeys.ENTITY_TYPE, EntitySelectorOptions.INVALID_TYPE_EXCEPTION);
-    map.put(RegistryKeys.STATUS_EFFECT, UNKNOWN_STATUS_EFFECT);
+  public static final Map<ResourceKey<? extends Registry<?>>, DynamicCommandExceptionType> REGISTRY_ENTRY_EXCEPTION_TYPES = Util.make(new HashMap<>(), map -> {
+    map.put(Registries.BLOCK, BlockStateParser.ERROR_UNKNOWN_BLOCK);
+    map.put(Registries.ITEM, new DynamicCommandExceptionType(id -> Component.translatable("argument.item.id.invalid", id)));
+    map.put(Registries.BIOME, UNKNOWN_BIOME);
+    map.put(Registries.ENTITY_TYPE, EntitySelectorOptions.ERROR_ENTITY_TYPE_INVALID);
+    map.put(Registries.MOB_EFFECT, UNKNOWN_STATUS_EFFECT);
   });
 
   private ModCommandExceptionTypes() {

@@ -5,8 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -26,12 +26,12 @@ public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     return predicates.stream().allMatch(blockPredicate -> blockPredicate.test(cachedBlockPosition, context));
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     final ImmutableList.Builder<TestResult> results = new ImmutableList.Builder<>();
     int successes = 0;
     for (BlockPredicate blockPredicate : predicates) {
@@ -42,9 +42,9 @@ public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes < build.size()) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.all.fail", successes, build.size()), build);
+      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.all.fail", successes, build.size()), build);
     } else {
-      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.all.pass", successes, build.size()), build);
+      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.all.pass", successes, build.size()), build);
     }
   }
 

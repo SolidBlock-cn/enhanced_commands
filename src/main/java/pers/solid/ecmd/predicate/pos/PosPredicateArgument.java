@@ -1,8 +1,8 @@
 package pers.solid.ecmd.predicate.pos;
 
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
 
 @FunctionalInterface
 public interface PosPredicateArgument {
-  PosPredicate toAbsolutePosPredicate(ServerCommandSource source);
+  PosPredicate toAbsolutePosPredicate(CommandSourceStack source);
 }

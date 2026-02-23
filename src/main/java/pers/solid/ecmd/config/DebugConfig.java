@@ -1,8 +1,8 @@
 package pers.solid.ecmd.config;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
@@ -14,7 +14,7 @@ public class DebugConfig implements Cloneable {
   /**
    * 忽略世界界限。
    *
-   * @see pers.solid.ecmd.mixins.mixin.PlayerEntityMixin#noClampPos(PlayerEntity, double, double, double)
+   * @see pers.solid.ecmd.mixins.mixin.PlayerEntityMixin#noClampPos(Player, double, double, double)
    * @see pers.solid.ecmd.mixins.mixin.ServerPlayNetworkHandlerMixin#noClampHorizontal(double, CallbackInfoReturnable)
    * @see pers.solid.ecmd.mixins.mixin.ServerPlayNetworkHandlerMixin#noClampVertical(double, CallbackInfoReturnable)
    * @see pers.solid.ecmd.mixins.mixin.WorldMixin#forceValidHorizontally(BlockPos, CallbackInfoReturnable)

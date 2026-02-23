@@ -4,10 +4,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Tameable;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.OwnableEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -38,48 +38,48 @@ public record OwnerEntityPredicateEntry(@Nullable EntityPredicate owner, boolean
   @Override
   public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
     if (owner == null) {
-      return (entity instanceof Tameable tameable && tameable.getOwnerUuid() != null) == inverted;
+      return (entity instanceof OwnableEntity tameable && tameable.getOwnerUUID() != null) == inverted;
     } else {
-      return entity instanceof Tameable tameable && tameable.getOwner() != null && owner.test(tameable.getOwner(), context) != inverted;
+      return entity instanceof OwnableEntity tameable && tameable.getOwner() != null && owner.test(tameable.getOwner(), context) != inverted;
     }
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException {
-    if (entity instanceof Tameable tameable) {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+    if (entity instanceof OwnableEntity tameable) {
       final LivingEntity actualOwner = tameable.getOwner();
       if (owner == null) {
-        final UUID ownerUuid = tameable.getOwnerUuid();
+        final UUID ownerUuid = tameable.getOwnerUUID();
         boolean hasOwner = ownerUuid != null;
         if (hasOwner) {
-          return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.owner.has_owner", displayName, actualOwner == null ? Text.literal(ownerUuid.toString()) : actualOwner.getDisplayName()));
+          return TestResult.of(inverted, Component.translatable("enhanced_commands.entity_predicate.owner.has_owner", displayName, actualOwner == null ? Component.literal(ownerUuid.toString()) : actualOwner.getDisplayName()));
         } else {
-          return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.owner.no_owner", displayName));
+          return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.owner.no_owner", displayName));
         }
       }
       if (actualOwner == null) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.owner.no_owner", displayName));
+        return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.owner.no_owner", displayName));
       }
-      final Text ownerDisplayName = actualOwner.getDisplayName();
+      final Component ownerDisplayName = actualOwner.getDisplayName();
       final TestResult ownerResult = owner.testAndDescribe(actualOwner, context);
       if (ownerResult.successes()) {
         if (inverted) {
-          return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.owner.fail_true", displayName, ownerDisplayName), List.of(ownerResult));
+          return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.owner.fail_true", displayName, ownerDisplayName), List.of(ownerResult));
         } else {
-          return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.owner.pass_true", displayName, ownerDisplayName), List.of(ownerResult));
+          return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.owner.pass_true", displayName, ownerDisplayName), List.of(ownerResult));
         }
       } else {
         if (inverted) {
-          return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.owner.pass_false", displayName, ownerDisplayName), List.of(ownerResult));
+          return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.owner.pass_false", displayName, ownerDisplayName), List.of(ownerResult));
         } else {
-          return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.owner.fail_false", displayName, ownerDisplayName), List.of(ownerResult));
+          return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.owner.fail_false", displayName, ownerDisplayName), List.of(ownerResult));
         }
       }
     } else {
       if (owner == null) {
-        return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.owner.not_tameable", displayName));
+        return TestResult.of(inverted, Component.translatable("enhanced_commands.entity_predicate.owner.not_tameable", displayName));
       }
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.owner.not_tameable", displayName));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.owner.not_tameable", displayName));
     }
   }
 

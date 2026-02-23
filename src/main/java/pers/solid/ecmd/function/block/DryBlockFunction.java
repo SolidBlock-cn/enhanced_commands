@@ -3,12 +3,12 @@ package pers.solid.ecmd.function.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -26,13 +26,13 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     BlockState state = function.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
-    if (state.contains(Properties.WATERLOGGED)) {
-      state = state.with(Properties.WATERLOGGED, false);
+    if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
+      state = state.setValue(BlockStateProperties.WATERLOGGED, false);
     }
     if (!state.getFluidState().isEmpty()) {
-      return Blocks.AIR.getDefaultState();
+      return Blocks.AIR.defaultBlockState();
     }
     return state;
   }

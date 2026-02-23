@@ -3,21 +3,21 @@ package pers.solid.ecmd.data;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
-import net.minecraft.block.Blocks;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.concurrent.CompletableFuture;
 
 import static pers.solid.ecmd.tag.ModBlockTags.*;
 
 public class BlockTagDataGenerator extends FabricTagProvider.BlockTagProvider {
-  public BlockTagDataGenerator(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+  public BlockTagDataGenerator(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
     super(output, registriesFuture);
   }
 
   @Override
-  protected void configure(RegistryWrapper.WrapperLookup wrapperLookup) {
+  protected void addTags(HolderLookup.Provider wrapperLookup) {
     getOrCreateTagBuilder(RED_COLORS).add(Blocks.RED_WOOL, Blocks.RED_CONCRETE, Blocks.REDSTONE_BLOCK, Blocks.NETHER_WART_BLOCK);
     getOrCreateTagBuilder(ORANGE_COLORS).add(Blocks.ORANGE_WOOL, Blocks.ORANGE_CONCRETE, Blocks.PUMPKIN);
     getOrCreateTagBuilder(YELLOW_COLORS).add(Blocks.YELLOW_WOOL, Blocks.YELLOW_CONCRETE, Blocks.YELLOW_TERRACOTTA, Blocks.GOLD_BLOCK);

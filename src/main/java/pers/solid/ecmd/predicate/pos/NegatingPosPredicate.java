@@ -1,11 +1,11 @@
 package pers.solid.ecmd.predicate.pos;
 
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public record NegatingPosPredicate(PosPredicate posPredicate) implements PosPredicateBasedPosPredicate<NegatingPosPredicate, PosPredicate> {
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
+  public boolean contains(@NotNull Vec3 vec3d) {
     return !posPredicate.contains(vec3d);
   }
 

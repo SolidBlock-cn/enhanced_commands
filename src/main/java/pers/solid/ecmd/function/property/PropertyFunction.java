@@ -2,11 +2,11 @@ package pers.solid.ecmd.function.property;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Contract;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
@@ -30,7 +30,7 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
    * @param origState  整个修改过程之前的方块状态
    */
   @Contract(pure = true)
-  BlockState getModifiedState(BlockState blockState, BlockState origState, Random random);
+  BlockState getModifiedState(BlockState blockState, BlockState origState, RandomSource random);
 
   /**
    * 该函数需要修改的那个属性，必须是准确的属性，而非根据属性的名称来匹配到那个名称的属性。
@@ -40,7 +40,7 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
 
   Type getType();
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     ALL_ORIGINAL("all_original", AllOriginalPropertyFunction::getCodec),
     ALL_RANDOM("all_random", AllRandomPropertyFunction::getCodec),
     BYPASSING("bypassing", BypassingPropertyFunction::getCodec),
@@ -57,7 +57,7 @@ public interface PropertyFunction<T extends Comparable<T>> extends ExpressionCon
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
 

@@ -4,8 +4,8 @@ import com.google.common.collect.Iterables;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -62,12 +62,12 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     return base.test(cachedBlockPosition, context) && (properties == null || properties.test(cachedBlockPosition, context)) && (nbt == null || nbt.test(cachedBlockPosition, context));
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     final List<TestResult> attachments = new ArrayList<>(3);
     attachments.add(base.testAndDescribe(cachedBlockPosition, context));
     if (properties != null) {
@@ -80,9 +80,9 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
     if (attachments.size() == 1) {
       return attachments.get(0);
     } else if (Iterables.all(attachments, TestResult::successes)) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.all.pass"), attachments);
+      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.all.pass"), attachments);
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.all.fail"), attachments);
+      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.all.fail"), attachments);
     }
   }
 

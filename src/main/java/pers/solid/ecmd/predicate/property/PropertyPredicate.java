@@ -2,13 +2,13 @@ package pers.solid.ecmd.predicate.property;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
@@ -22,8 +22,8 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
   }
 
   @NotNull
-  static <T extends Comparable<T>> MutableText propertyAndValue(BlockState blockState, Property<T> property) {
-    return Text.literal(property.getName() + "=" + property.name(blockState.get(property)));
+  static <T extends Comparable<T>> MutableComponent propertyAndValue(BlockState blockState, Property<T> property) {
+    return Component.literal(property.getName() + "=" + property.getName(blockState.getValue(property)));
   }
 
   @NotNull
@@ -35,7 +35,7 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
 
   Property<T> property();
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     COMPARISON("comparison", ComparisonPropertyPredicate::getCodec),
     EXISTENCE("existence", ExistencePropertyPredicate::getCodec),
     MULTI_VALUE("multi_value", MultiValuePropertyPredicate::getCodec);
@@ -50,7 +50,7 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
 

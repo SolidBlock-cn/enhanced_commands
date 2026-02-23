@@ -2,7 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;

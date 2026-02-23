@@ -1,15 +1,15 @@
 package pers.solid.ecmd.config.enums;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.StringRepresentable;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 /**
  * 处理如何对虚空伤害进行免疫。
  */
-public enum VoidImmuneType implements StringIdentifiable {
+public enum VoidImmuneType implements StringRepresentable {
   /**
    * 不免疫虚空伤害（原版行为）。
    */
@@ -30,9 +30,9 @@ public enum VoidImmuneType implements StringIdentifiable {
    * 所有实体均免疫虚空伤害。
    */
   ALL("all");
-  
+
   public static final StringIdentifiableCodec<VoidImmuneType> CODEC = StringIdentifiableCodec.create(values());
-  public static final PacketCodec<ByteBuf, VoidImmuneType> PACKET_CODEC = PacketCodecs.codec(CODEC);
+  public static final StreamCodec<ByteBuf, VoidImmuneType> PACKET_CODEC = ByteBufCodecs.fromCodec(CODEC);
   private final String name;
 
   VoidImmuneType(String name) {
@@ -40,7 +40,7 @@ public enum VoidImmuneType implements StringIdentifiable {
   }
 
   @Override
-  public String asString() {
+  public String getSerializedName() {
     return this.name;
   }
 }

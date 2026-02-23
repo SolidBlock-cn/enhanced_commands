@@ -4,21 +4,21 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtPredicateParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.Parser;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {
   public static final MapCodec<NbtBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt").forGetter(NbtBlockPredicate::nbtPredicate)));
@@ -29,23 +29,23 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockEntity blockEntity = cachedBlockPosition.getBlockEntity();
-    return blockEntity != null && nbtPredicate.test(blockEntity.createNbt(cachedBlockPosition.getWorld().getRegistryManager()));
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final BlockEntity blockEntity = cachedBlockPosition.getEntity();
+    return blockEntity != null && nbtPredicate.test(blockEntity.saveWithoutMetadata(cachedBlockPosition.getLevel().registryAccess()));
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockEntity blockEntity = cachedBlockPosition.getBlockEntity();
-    final MutableText nameText = cachedBlockPosition.getBlockState().getBlock().getName();
-    final MutableText posText = TextUtil.wrapVector(cachedBlockPosition.getBlockPos());
-    final DynamicRegistryManager registryManager = cachedBlockPosition.getWorld().getRegistryManager();
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final BlockEntity blockEntity = cachedBlockPosition.getEntity();
+    final MutableComponent nameText = cachedBlockPosition.getState().getBlock().getName();
+    final MutableComponent posText = TextUtil.wrapVector(cachedBlockPosition.getPos());
+    final RegistryAccess registryManager = cachedBlockPosition.getLevel().registryAccess();
     if (blockEntity == null) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.nbt.not_block_entity", nameText, posText));
-    } else if (nbtPredicate.test(blockEntity.createNbt(registryManager))) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.nbt.pass", nameText, posText));
+      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.nbt.not_block_entity", nameText, posText));
+    } else if (nbtPredicate.test(blockEntity.saveWithoutMetadata(registryManager))) {
+      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.nbt.pass", nameText, posText));
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.nbt.fail"));
+      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.nbt.fail"));
     }
   }
 

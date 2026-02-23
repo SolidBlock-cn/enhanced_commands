@@ -1,10 +1,10 @@
 package pers.solid.ecmd.util;
 
-import net.minecraft.command.FloatRangeArgument;
-import net.minecraft.predicate.NumberRange;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Position;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.Util;
+import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
+import net.minecraft.core.Position;
+import net.minecraft.core.Vec3i;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -31,10 +31,10 @@ public final class StringUtil {
   }
 
   public static String wrapVector(Position position) {
-    return nf.format(position.getX()) + " " + nf.format(position.getY()) + " " + nf.format(position.getZ());
+    return nf.format(position.x()) + " " + nf.format(position.y()) + " " + nf.format(position.z());
   }
 
-  public static <T extends Number> String wrapRange(NumberRange<T> numberRange) {
+  public static <T extends Number> String wrapRange(MinMaxBounds<T> numberRange) {
     final Optional<T> min = numberRange.min();
     final Optional<T> max = numberRange.max();
     if (min.isPresent() && min.equals(max)) {
@@ -43,7 +43,7 @@ public final class StringUtil {
     return min.map(StringUtil.nf::format).orElse("") + ".." + max.map(StringUtil.nf::format).orElse("");
   }
 
-  public static String wrapRange(FloatRangeArgument numberRange) {
+  public static String wrapRange(WrappedMinMaxBounds numberRange) {
     final Float min = numberRange.min();
     final Float max = numberRange.max();
     if (min != null && min.equals(max)) {

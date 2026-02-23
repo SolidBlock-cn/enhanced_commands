@@ -3,11 +3,11 @@ package pers.solid.ecmd.region;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -50,7 +50,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
+  public boolean contains(@NotNull Vec3 vec3d) {
     return false;
   }
 
@@ -86,11 +86,11 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
 
   @Override
   public @NotNull String asString() {
-    return "outline(" + region.asString() + ", " + outlineType.asString() + ")";
+    return "outline(" + region.asString() + ", " + outlineType.getSerializedName() + ")";
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
+  public @Nullable AABB minContainingBox() {
     return region.minContainingBox();
   }
 
@@ -108,8 +108,8 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.outline");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.outline");
     }
 
     @Override

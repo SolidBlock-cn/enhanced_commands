@@ -8,10 +8,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.mixin.command.ArgumentTypesAccessor;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.FriendlyByteBuf;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.mixin.ArgumentTypeExtension;
 
 import java.util.Collection;
@@ -46,54 +47,54 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
     return forward.getExamples();
   }
 
-  public static class Serializer<T, F extends ArgumentType<T>, FP extends ArgumentSerializer.ArgumentTypeProperties<F>> implements ArgumentSerializer<VanillaWrappedArgumentType<T, F>, Properties<T, F, FP>> {
+  public static class Serializer<T, F extends ArgumentType<T>, FP extends ArgumentTypeInfo.Template<F>> implements ArgumentTypeInfo<VanillaWrappedArgumentType<T, F>, Properties<T, F, FP>> {
     @SuppressWarnings("rawtypes")
     public static final Serializer<?, ?, ?> INSTANCE = new Serializer();
 
     @SuppressWarnings("unchecked")
     @Override
-    public void writePacket(Properties<T, F, FP> properties, PacketByteBuf buf) {
-      final ArgumentSerializer<F, FP> forwardSerializer = (ArgumentSerializer<F, FP>) properties.forwardProperties.getSerializer();
-      buf.writeIdentifier(Registries.COMMAND_ARGUMENT_TYPE.getId(forwardSerializer));
-      forwardSerializer.writePacket(properties.forwardProperties, buf);
+    public void serializeToNetwork(Properties<T, F, FP> properties, FriendlyByteBuf buf) {
+      final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) properties.forwardProperties.type();
+      buf.writeResourceLocation(BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getKey(forwardSerializer));
+      forwardSerializer.serializeToNetwork(properties.forwardProperties, buf);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Properties<T, F, FP> fromPacket(PacketByteBuf buf) {
-      final ArgumentSerializer<F, FP> forwardSerializer = (ArgumentSerializer<F, FP>) Registries.COMMAND_ARGUMENT_TYPE.get(buf.readIdentifier());
-      final FP forwardProperties = forwardSerializer.fromPacket(buf);
+    public Properties<T, F, FP> deserializeFromNetwork(FriendlyByteBuf buf) {
+      final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getValue(buf.readResourceLocation());
+      final FP forwardProperties = forwardSerializer.deserializeFromNetwork(buf);
       return new Properties<>(forwardProperties);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void writeJson(Properties<T, F, FP> properties, JsonObject json) {
-      final ArgumentSerializer<F, FP> forwardSerializer = (ArgumentSerializer<F, FP>) properties.forwardProperties.getSerializer();
-      json.addProperty("type", Registries.COMMAND_ARGUMENT_TYPE.getId(forwardSerializer).toString());
+    public void serializeToJson(Properties<T, F, FP> properties, JsonObject json) {
+      final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) properties.forwardProperties.type();
+      json.addProperty("type", BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getKey(forwardSerializer).toString());
       final JsonObject forward = new JsonObject();
-      forwardSerializer.writeJson(properties.forwardProperties, forward);
+      forwardSerializer.serializeToJson(properties.forwardProperties, forward);
       json.add("entityPredicate", forward);
     }
 
     @SuppressWarnings({"unchecked", "UnstableApiUsage"})
     @Override
-    public Properties<T, F, FP> getArgumentTypeProperties(VanillaWrappedArgumentType<T, F> argumentType) {
-      final ArgumentSerializer<F, FP> forwardSerializer = (ArgumentSerializer<F, FP>) ArgumentTypesAccessor.fabric_getClassMap().get(argumentType.forward.getClass());
-      return new Properties<>(forwardSerializer.getArgumentTypeProperties(argumentType.forward));
+    public @NotNull Properties<T, F, FP> unpack(VanillaWrappedArgumentType<T, F> argumentType) {
+      final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) ArgumentTypesAccessor.fabric_getClassMap().get(argumentType.forward.getClass());
+      return new Properties<>(forwardSerializer.unpack(argumentType.forward));
     }
   }
 
-  public record Properties<T, F extends ArgumentType<T>, FP extends ArgumentSerializer.ArgumentTypeProperties<F>>(FP forwardProperties) implements ArgumentSerializer.ArgumentTypeProperties<VanillaWrappedArgumentType<T, F>> {
+  public record Properties<T, F extends ArgumentType<T>, FP extends ArgumentTypeInfo.Template<F>>(FP forwardProperties) implements ArgumentTypeInfo.Template<VanillaWrappedArgumentType<T, F>> {
 
     @Override
-    public VanillaWrappedArgumentType<T, F> createType(CommandRegistryAccess registryAccess) {
-      return new VanillaWrappedArgumentType<>(forwardProperties.createType(registryAccess));
+    public @NotNull VanillaWrappedArgumentType<T, F> instantiate(CommandBuildContext registryAccess) {
+      return new VanillaWrappedArgumentType<>(forwardProperties.instantiate(registryAccess));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Serializer<T, F, FP> getSerializer() {
+    public @NotNull Serializer<T, F, FP> type() {
       return (Serializer<T, F, FP>) Serializer.INSTANCE;
     }
   }

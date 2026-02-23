@@ -4,7 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.Vec3dArgument;
@@ -21,8 +21,8 @@ public record CircleCurveArgument(double radius, EnhancedPosArgument center, Vec
 
   @Override
   public CircleCurve toAbsoluteRegion(PositionProvider positionProvider) throws CommandSyntaxException {
-    final Vec3d absoluteCenter = center.toAbsolutePos(positionProvider);
-    final Vec3d axis = this.pivot == null ? new Vec3d(0, 1, 0) : this.pivot.toActualVector(positionProvider).normalize();
+    final Vec3 absoluteCenter = center.toAbsolutePos(positionProvider);
+    final Vec3 axis = this.pivot == null ? new Vec3(0, 1, 0) : this.pivot.toActualVector(positionProvider).normalize();
     return new CircleCurve(this.radius, absoluteCenter, axis, minAngle, maxAngle);
   }
 

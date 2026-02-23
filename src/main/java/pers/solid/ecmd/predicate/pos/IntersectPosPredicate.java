@@ -1,7 +1,7 @@
 package pers.solid.ecmd.predicate.pos;
 
 import com.google.common.collect.Iterables;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public record IntersectPosPredicate(Collection<PosPredicate> posPredicates) implements PosPredicatesBasedPosPredicate<IntersectPosPredicate, PosPredicate> {
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
+  public boolean contains(@NotNull Vec3 vec3d) {
     return Iterables.all(posPredicates, input -> input.contains(vec3d));
   }
 

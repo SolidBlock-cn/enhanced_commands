@@ -3,12 +3,12 @@ package pers.solid.ecmd.curve;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.util.PositionProvider;
 
 public interface CurveArgument<T extends Curve> {
-  Codec<CurveArgument<?>> CODEC = CurveType.REGISTRY.getCodec().dispatch(CurveArgument::getType, CurveType::getArgumentCodec);
+  Codec<CurveArgument<?>> CODEC = CurveType.REGISTRY.byNameCodec().dispatch(CurveArgument::getType, CurveType::getArgumentCodec);
 
   @NotNull
   static CurveArgument<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {

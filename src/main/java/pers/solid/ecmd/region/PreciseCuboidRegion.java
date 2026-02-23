@@ -4,11 +4,11 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
@@ -28,25 +28,25 @@ import java.util.function.Function;
  *
  * @param box
  */
-public record PreciseCuboidRegion(Box box) implements CuboidRegion {
-  public static final MapCodec<PreciseCuboidRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3d.CODEC.fieldOf("from").forGetter(r -> new Vec3d(r.box.minX, r.box.minY, r.box.minZ)), Vec3d.CODEC.fieldOf("to").forGetter(r -> new Vec3d(r.box.maxX, r.box.maxY, r.box.maxZ))).apply(i, PreciseCuboidRegion::new));
+public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
+  public static final MapCodec<PreciseCuboidRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3.CODEC.fieldOf("from").forGetter(r -> new Vec3(r.box.minX, r.box.minY, r.box.minZ)), Vec3.CODEC.fieldOf("to").forGetter(r -> new Vec3(r.box.maxX, r.box.maxY, r.box.maxZ))).apply(i, PreciseCuboidRegion::new));
 
   /**
    * Create a cuboid region from several coordinates. The comparison is not required because it will be compared in implementation.
    */
   public PreciseCuboidRegion(double x1, double y1, double z1, double x2, double y2, double z2) {
-    this(new Box(x1, y1, z1, x2, y2, z2));
+    this(new AABB(x1, y1, z1, x2, y2, z2));
   }
 
   /**
    * Create a cuboid region from two positions. The relative relation is not required because the coordinates will be compared in implementation.
    */
-  public PreciseCuboidRegion(Vec3d fromPos, Vec3d toPos) {
-    this(new Box(fromPos, toPos));
+  public PreciseCuboidRegion(Vec3 fromPos, Vec3 toPos) {
+    this(new AABB(fromPos, toPos));
   }
 
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
+  public boolean contains(@NotNull Vec3 vec3d) {
     return box.contains(vec3d);
   }
 
@@ -73,13 +73,13 @@ public record PreciseCuboidRegion(Box box) implements CuboidRegion {
   }
 
   @Override
-  public @NotNull PreciseCuboidRegion transformed(Function<Vec3d, Vec3d> transformation) {
-    return new PreciseCuboidRegion(transformation.apply(new Vec3d(box.minX, box.minY, box.minZ)), transformation.apply(new Vec3d(box.maxX, box.maxY, box.maxZ)));
+  public @NotNull PreciseCuboidRegion transformed(Function<Vec3, Vec3> transformation) {
+    return new PreciseCuboidRegion(transformation.apply(new Vec3(box.minX, box.minY, box.minZ)), transformation.apply(new Vec3(box.maxX, box.maxY, box.maxZ)));
   }
 
   @Override
   public @NotNull Region expanded(double offset) {
-    return new PreciseCuboidRegion(box.expand(offset));
+    return new PreciseCuboidRegion(box.inflate(offset));
   }
 
   @Override
@@ -87,39 +87,39 @@ public record PreciseCuboidRegion(Box box) implements CuboidRegion {
     var x = axis.choose(offset, 0, 0);
     var y = axis.choose(0, offset, 0);
     var z = axis.choose(0, 0, offset);
-    return new PreciseCuboidRegion(box.expand(x, y, z));
+    return new PreciseCuboidRegion(box.inflate(x, y, z));
   }
 
   @Override
   public @NotNull Region expanded(double offset, Direction direction) {
     if (offset > 0) {
-      return new PreciseCuboidRegion(box.stretch(Vec3d.of(direction.getVector()).multiply(offset)));
+      return new PreciseCuboidRegion(box.expandTowards(Vec3.atLowerCornerOf(direction.getUnitVec3i()).scale(offset)));
     } else if (offset < 0) {
-      var vec = Vec3d.of(direction.getVector()).multiply(offset);
-      return new PreciseCuboidRegion(box.shrink(vec.x, vec.y, vec.z));
+      var vec = Vec3.atLowerCornerOf(direction.getUnitVec3i()).scale(offset);
+      return new PreciseCuboidRegion(box.contract(vec.x, vec.y, vec.z));
     } else {
       return this;
     }
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction.Type type) {
+  public @NotNull Region expanded(double offset, Direction.Plane type) {
     if (offset == 0) {
       return this;
     }
     switch (type) {
       case HORIZONTAL -> {
         if (offset > 0) {
-          return new PreciseCuboidRegion(box.stretch(offset, 0, offset));
+          return new PreciseCuboidRegion(box.expandTowards(offset, 0, offset));
         } else {
-          return new PreciseCuboidRegion(box.shrink(-offset, 0, -offset));
+          return new PreciseCuboidRegion(box.contract(-offset, 0, -offset));
         }
       }
       case VERTICAL -> {
         if (offset > 0) {
-          return new PreciseCuboidRegion(box.stretch(0, offset, 0));
+          return new PreciseCuboidRegion(box.expandTowards(0, offset, 0));
         } else {
-          return new PreciseCuboidRegion(box.shrink(0, -offset, 0));
+          return new PreciseCuboidRegion(box.contract(0, -offset, 0));
         }
       }
       default -> throw new IllegalStateException("Unexpected probability: " + type);
@@ -148,7 +148,7 @@ public record PreciseCuboidRegion(Box box) implements CuboidRegion {
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
+  public @Nullable AABB minContainingBox() {
     return box;
   }
 
@@ -162,8 +162,8 @@ public record PreciseCuboidRegion(Box box) implements CuboidRegion {
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.cuboid");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.cuboid");
     }
 
     @Override

@@ -3,8 +3,8 @@ package pers.solid.ecmd.mixins.accessor;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.entity.Entity;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -15,23 +15,23 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-@Mixin(EntitySelectorReader.class)
+@Mixin(EntitySelectorParser.class)
 public interface EntitySelectorReaderAccessor {
   @Accessor
   List<Predicate<Entity>> getPredicates();
 
   @Invoker
-  void callReadArguments() throws CommandSyntaxException;
+  void callParseOptions() throws CommandSyntaxException;
 
   @Invoker
-  void callBuildPredicate();
+  void callFinalizePredicates();
 
   @Accessor
-  BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> getSuggestionProvider();
+  BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> getSuggestions();
 
   @Invoker
-  CompletableFuture<Suggestions> callSuggestEndNext(SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer);
+  CompletableFuture<Suggestions> callSuggestOptionsNextOrClose(SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer);
 
   @Accessor
-  void setUsesAt(boolean usesAt);
+  void setUsesSelectors(boolean usesAt);
 }

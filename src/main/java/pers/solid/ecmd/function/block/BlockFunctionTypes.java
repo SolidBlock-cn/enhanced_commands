@@ -3,9 +3,9 @@ package pers.solid.ecmd.function.block;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
-import net.minecraft.registry.Registry;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.FunctionsParser;
@@ -28,7 +28,7 @@ public final class BlockFunctionTypes {
   /**
    * 所有方块函数的函数语法的名称，将用于命令建议中的提示信息。
    */
-  public static final Map<String, Text> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockFunctionTypes::registerFunctionNames);
+  public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockFunctionTypes::registerFunctionNames);
 
   /**
    * 解析方块函数中的括号语法。
@@ -103,22 +103,22 @@ public final class BlockFunctionTypes {
     map.put("checkerboard-tag", CheckerboardTagBlockFunction.Parser::new);
   }
 
-  private static void registerFunctionNames(Map<String, Text> map) {
-    map.put("pick", Text.translatable("enhanced_commands.block_function.pick"));
-    map.put("dry", Text.translatable("enhanced_commands.block_function.dry"));
-    map.put("overlay", Text.translatable("enhanced_commands.block_function.overlay"));
-    map.put("filter", Text.translatable("enhanced_commands.block_function.filter"));
-    map.put("idcontain", Text.translatable("enhanced_commands.block_function.id_contain"));
-    map.put("stonecut", Text.translatable("enhanced_commands.block_function.stone_cut"));
-    map.put("if", Text.translatable("enhanced_commands.block_function.conditional"));
-    map.put("ifs", Text.translatable("enhanced_commands.block_function.conditions"));
-    map.put("idreplace", Text.translatable("enhanced_commands.block_function.id_replace"));
-    map.put("postprocess", Text.translatable("enhanced_commands.block_function.post_process"));
-    map.put("random", Text.translatable("enhanced_commands.block_function.random"));
-    map.put("rotate", Text.translatable("enhanced_commands.block_function.rotate"));
-    map.put("mirror", Text.translatable("enhanced_commands.block_function.mirror"));
-    map.put("noise", Text.translatable("enhanced_commands.block_function.noise"));
-    map.put("checkerboard", Text.translatable("enhanced_commands.block_function.checkerboard"));
-    map.put("checkerboard-tag", Text.translatable("enhanced_commands.block_function.checkerboard-tag"));
+  private static void registerFunctionNames(Map<String, Component> map) {
+    map.put("pick", Component.translatable("enhanced_commands.block_function.pick"));
+    map.put("dry", Component.translatable("enhanced_commands.block_function.dry"));
+    map.put("overlay", Component.translatable("enhanced_commands.block_function.overlay"));
+    map.put("filter", Component.translatable("enhanced_commands.block_function.filter"));
+    map.put("idcontain", Component.translatable("enhanced_commands.block_function.id_contain"));
+    map.put("stonecut", Component.translatable("enhanced_commands.block_function.stone_cut"));
+    map.put("if", Component.translatable("enhanced_commands.block_function.conditional"));
+    map.put("ifs", Component.translatable("enhanced_commands.block_function.conditions"));
+    map.put("idreplace", Component.translatable("enhanced_commands.block_function.id_replace"));
+    map.put("postprocess", Component.translatable("enhanced_commands.block_function.post_process"));
+    map.put("random", Component.translatable("enhanced_commands.block_function.random"));
+    map.put("rotate", Component.translatable("enhanced_commands.block_function.rotate"));
+    map.put("mirror", Component.translatable("enhanced_commands.block_function.mirror"));
+    map.put("noise", Component.translatable("enhanced_commands.block_function.noise"));
+    map.put("checkerboard", Component.translatable("enhanced_commands.block_function.checkerboard"));
+    map.put("checkerboard-tag", Component.translatable("enhanced_commands.block_function.checkerboard-tag"));
   }
 }

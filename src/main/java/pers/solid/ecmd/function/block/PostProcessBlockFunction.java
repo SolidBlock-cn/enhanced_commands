@@ -4,15 +4,15 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -27,19 +27,19 @@ import java.util.stream.Collectors;
 public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directions) implements BlockFunction {
   public static final List<Direction> ALL_DIRECTIONS = List.of(Direction.values());
   public static final MapCodec<PostProcessBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Codecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", ALL_DIRECTIONS).forGetter(PostProcessBlockFunction::directions)
+      ExtraCodecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", ALL_DIRECTIONS).forGetter(PostProcessBlockFunction::directions)
   ).apply(i, PostProcessBlockFunction::new));
 
   /**
-   * @see Block#postProcessState(BlockState, WorldAccess, BlockPos)
+   * @see Block#updateFromNeighbourShapes(BlockState, LevelAccessor, BlockPos)
    */
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    BlockPos.Mutable mutable = new BlockPos.Mutable();
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
     for (Direction direction : directions) {
-      mutable.set(pos, direction);
-      blockState = blockState.getStateForNeighborUpdate(world, world, pos, direction, mutable, world.getBlockState(mutable), context.random);
+      mutable.setWithOffset(pos, direction);
+      blockState = blockState.updateShape(world, world, pos, direction, mutable, world.getBlockState(mutable), context.random);
     }
 
     return blockState;
@@ -52,7 +52,7 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
 
   @Override
   public @NotNull String asString() {
-    return "postprocess(" + (ALL_DIRECTIONS.equals(directions) ? "" : directions.stream().map(Direction::asString).collect(Collectors.joining(" "))) + ")";
+    return "postprocess(" + (ALL_DIRECTIONS.equals(directions) ? "" : directions.stream().map(Direction::getSerializedName).collect(Collectors.joining(" "))) + ")";
   }
 
   public enum Type implements BlockFunctionType<PostProcessBlockFunction> {
@@ -91,9 +91,9 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
           reader.skipWhitespace();
           if (directions.isEmpty()) {
             parseContext.addSuggestion((context, suggestionsBuilder) -> {
-              ParsingUtil.suggestString("all", Text.translatable("enhanced_commands.direction.all"), suggestionsBuilder);
-              ParsingUtil.suggestString("horizontal", Text.translatable("enhanced_commands.direction.horizontal"), suggestionsBuilder);
-              ParsingUtil.suggestString("vertical", Text.translatable("enhanced_commands.direction.vertical"), suggestionsBuilder);
+              ParsingUtil.suggestString("all", Component.translatable("enhanced_commands.direction.all"), suggestionsBuilder);
+              ParsingUtil.suggestString("horizontal", Component.translatable("enhanced_commands.direction.horizontal"), suggestionsBuilder);
+              ParsingUtil.suggestString("vertical", Component.translatable("enhanced_commands.direction.vertical"), suggestionsBuilder);
               return suggestionsBuilder.buildFuture();
             });
           }
@@ -109,11 +109,11 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
                 continue;
               }
               case "horizontal" -> {
-                Direction.Type.HORIZONTAL.forEach(directions::add);
+                Direction.Plane.HORIZONTAL.forEach(directions::add);
                 continue;
               }
               case "vertical" -> {
-                Direction.Type.VERTICAL.forEach(directions::add);
+                Direction.Plane.VERTICAL.forEach(directions::add);
                 continue;
               }
             }

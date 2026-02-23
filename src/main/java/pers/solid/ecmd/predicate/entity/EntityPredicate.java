@@ -3,11 +3,11 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.entity.Entity;
-import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.text.Text;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
@@ -19,13 +19,13 @@ import java.util.function.Predicate;
 
 /**
  * <p>实体谓词，用于判断某个实体是否符合指定的条件，同时还对其判断过程进行描述。
- * <p>实体谓词是对{@linkplain net.minecraft.command.EntitySelector 实体选择器}的扩展，会直接判断实体是否符合此条件，而不需要将实体选择器那样先选择出符合条件的实体。在一些情况下，实体谓词有些类似于 {@link LootCondition}。借助实体选择器实现的实体谓词是 {@link SelectorEntityPredicate}。
+ * <p>实体谓词是对{@linkplain net.minecraft.commands.arguments.selector.EntitySelector 实体选择器}的扩展，会直接判断实体是否符合此条件，而不需要将实体选择器那样先选择出符合条件的实体。在一些情况下，实体谓词有些类似于 {@link LootItemCondition}。借助实体选择器实现的实体谓词是 {@link SelectorEntityPredicate}。
  *
- * @see net.minecraft.predicate.entity.EntityPredicate
- * @see net.minecraft.loot.condition.EntityPropertiesLootCondition
+ * @see net.minecraft.advancements.critereon.EntityPredicate
+ * @see net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition
  */
 public interface EntityPredicate extends ExpressionConvertible {
-  Codec<EntityPredicate> CODEC = EntityPredicateType.REGISTRY.getCodec().dispatch(EntityPredicate::getType, EntityPredicateType::codec);
+  Codec<EntityPredicate> CODEC = EntityPredicateType.REGISTRY.byNameCodec().dispatch(EntityPredicate::getType, EntityPredicateType::codec);
 
   /**
    * 根据实体选择器，返回对应的实体谓词。如果实体选择器只指定了一个谓词，则返回此谓词（也就是将其简化为单个谓词），否则直接返回 {@link SelectorEntityPredicate}。这一功能目前仍不稳定，特别是如果有模组为实体选择器直接添加新的功能，可能会出现问题，但如果其他模组仅为实体选择器添加谓词，通常只会导致这些谓词无法正常序列化，但不会错误简化为单个的谓词。
@@ -33,17 +33,17 @@ public interface EntityPredicate extends ExpressionConvertible {
   static EntityPredicate simplifiedBySelector(EntitySelector selector) {
     final var accessor = (EntitySelectorAccessor) selector;
 
-    if (selector.isLocalWorldOnly() || !selector.includesNonPlayers()) {
+    if (selector.isWorldLimited() || !selector.includesEntities()) {
       return new SelectorEntityPredicate(selector);
     }
 
     final String playerName = accessor.getPlayerName();
-    final UUID uuid = accessor.getUuid();
+    final UUID uuid = accessor.getEntityUUID();
     final EntitySelectorCollector collector = selector.extension$ec().collector;
-    final boolean hasDistance = !accessor.getDistance().isDummy();
-    final boolean hasBox = accessor.getBox() != null;
-    final boolean senderOnly = selector.isSenderOnly();
-    final List<Predicate<Entity>> predicates = accessor.getPredicates();
+    final boolean hasDistance = !accessor.getRange().isAny();
+    final boolean hasBox = accessor.getAabb() != null;
+    final boolean senderOnly = selector.isSelfSelector();
+    final List<Predicate<Entity>> predicates = accessor.getContextFreePredicates();
     if ((collector != null
         || hasDistance
         || hasBox
@@ -72,8 +72,8 @@ public interface EntityPredicate extends ExpressionConvertible {
   }
 
   /**
-   * <p>根据 {@link EntitySelectorReader} 解析一个实体谓词，可以省略“at-变量”。
-   * <p>注意：如果在实体选择器参数的处理器中读取，不能直接将已有的 {@link EntitySelectorReader} 作为参数，而应该使用同一个 {@link StringReader} 并创建一个新的 {@link EntitySelectorReader}，例如：
+   * <p>根据 {@link EntitySelectorParser} 解析一个实体谓词，可以省略“at-变量”。
+   * <p>注意：如果在实体选择器参数的处理器中读取，不能直接将已有的 {@link EntitySelectorParser} 作为参数，而应该使用同一个 {@link StringReader} 并创建一个新的 {@link EntitySelectorParser}，例如：
    * <p>❎<i>错误写法：</i>
    * <pre>{@code
    * putOption("option-name", reader -> {
@@ -91,7 +91,7 @@ public interface EntityPredicate extends ExpressionConvertible {
    * }, predicate, text);
    * }</pre>
    */
-  static EntityPredicate parse(EntitySelectorReader entitySelectorReader) throws CommandSyntaxException {
+  static EntityPredicate parse(EntitySelectorParser entitySelectorReader) throws CommandSyntaxException {
     return simplifiedBySelector(EntitySelectors.readOmittibleEntitySelector(entitySelectorReader));
   }
 
@@ -104,11 +104,11 @@ public interface EntityPredicate extends ExpressionConvertible {
   boolean test(@NotNull Entity entity, @NotNull ExecutionContext context);
 
   static TestResult successResult(@NotNull Entity entity) {
-    return TestResult.of(true, Text.translatable("enhanced_commands.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
+    return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
 
   static TestResult failResult(@NotNull Entity entity) {
-    return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.fail", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
+    return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.fail", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
 
   static TestResult successOrFail(boolean successes, @NotNull Entity entity) {
@@ -116,7 +116,7 @@ public interface EntityPredicate extends ExpressionConvertible {
   }
 
   /**
-   * 测试实体并返回描述信息。调用时请使用此类，但覆盖时请覆盖 {@link #testAndDescribe(Entity, ExecutionContext, Text)}。
+   * 测试实体并返回描述信息。调用时请使用此类，但覆盖时请覆盖 {@link #testAndDescribe(Entity, ExecutionContext, Component)}。
    */
   @ApiStatus.NonExtendable
   default TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context) throws CommandSyntaxException {
@@ -130,7 +130,7 @@ public interface EntityPredicate extends ExpressionConvertible {
    * @param context     测试实体的环境。
    * @param displayName 被测试的实体的显示名称。
    */
-  TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) throws CommandSyntaxException;
+  TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException;
 
   @NotNull EntityPredicateType<?> getType();
 }

@@ -6,9 +6,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
@@ -46,17 +51,17 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   /**
-   * Create a block cuboid region from a vanilla {@link BlockBox} object.
+   * Create a block cuboid region from a vanilla {@link BoundingBox} object.
    */
-  public BlockCuboidRegion(BlockBox blockBox) {
-    this(blockBox.getMinX(), blockBox.getMinY(), blockBox.getMinZ(), blockBox.getMaxX(), blockBox.getMaxY(), blockBox.getMaxZ());
+  public BlockCuboidRegion(BoundingBox blockBox) {
+    this(blockBox.minX(), blockBox.minY(), blockBox.minZ(), blockBox.maxX(), blockBox.maxY(), blockBox.maxZ());
   }
 
   /**
    * Create a block cuboid region from two int positions (which can be {@link BlockPos}). The relative relation of the two positions is not required.
    */
   public BlockCuboidRegion(Vec3i from, Vec3i to) {
-    this(BlockBox.create(from, to));
+    this(BoundingBox.fromCorners(from, to));
   }
 
   /**
@@ -69,7 +74,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   @NotNull
   @Override
   public Iterator<BlockPos> iterator() {
-    return BlockPos.iterate(minX, minY, minZ, maxX, maxY, maxZ).iterator();
+    return BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ).iterator();
   }
 
   @Override
@@ -78,7 +83,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region moved(@NotNull Vec3d relativePos) {
+  public @NotNull Region moved(@NotNull Vec3 relativePos) {
     if (relativePos.x % 1d == 0 && relativePos.y % 1d == 0 && relativePos.z % 1d == 0) {
       return moved(new Vec3i((int) relativePos.x, (int) relativePos.y, (int) relativePos.z));
     } else {
@@ -87,25 +92,25 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
-    if (pivot.equals(Vec3d.ofCenter(BlockPos.ofFloored(pivot)))) {
-      return rotated(BlockPos.ofFloored(pivot), blockRotation);
+  public @NotNull Region rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
+    if (pivot.equals(Vec3.atCenterOf(BlockPos.containing(pivot)))) {
+      return rotated(BlockPos.containing(pivot), blockRotation);
     } else {
       return asCuboidRegion().rotated(blockRotation, pivot);
     }
   }
 
   @Override
-  public @NotNull Region mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
-    if (pivot.equals(Vec3d.ofCenter(BlockPos.ofFloored(pivot)))) {
-      return mirrored(BlockPos.ofFloored(pivot), axis);
+  public @NotNull Region mirrored(Direction.@NotNull Axis axis, @NotNull Vec3 pivot) {
+    if (pivot.equals(Vec3.atCenterOf(BlockPos.containing(pivot)))) {
+      return mirrored(BlockPos.containing(pivot), axis);
     } else {
       return asCuboidRegion().mirrored(axis, pivot);
     }
   }
 
-  public BlockBox blockBox() {
-    return new BlockBox(minX, minY, minZ, maxX, maxY, maxZ);
+  public BoundingBox blockBox() {
+    return new BoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
   }
 
   public PreciseCuboidRegion asCuboidRegion() {
@@ -118,7 +123,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull Region transformed(Function<Vec3, Vec3> transformation) {
     return asCuboidRegion().transformed(transformation);
   }
 
@@ -132,7 +137,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   public @NotNull BlockCuboidRegion expanded(int offset) {
-    return new BlockCuboidRegion(blockBox().expand(offset));
+    return new BlockCuboidRegion(blockBox().inflatedBy(offset));
   }
 
   @Override
@@ -161,8 +166,8 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   public @NotNull BlockCuboidRegion expanded(int offset, Direction direction) {
-    var vector = direction.getVector().multiply(offset);
-    if (direction.getOffsetX() + direction.getOffsetY() + direction.getOffsetZ() > 0) {
+    var vector = direction.getUnitVec3i().multiply(offset);
+    if (direction.getStepX() + direction.getStepY() + direction.getStepZ() > 0) {
       return new BlockCuboidRegion(minX, minY, minZ, maxX + vector.getX(), maxY + vector.getY(), maxZ + vector.getZ());
     } else {
       return new BlockCuboidRegion(minX + vector.getX(), minY + vector.getY(), minZ + vector.getZ(), maxX, maxY, maxZ);
@@ -170,7 +175,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction.Type type) {
+  public @NotNull Region expanded(double offset, Direction.Plane type) {
     if (offset % 1 == 0) {
       return expanded((int) offset, type);
     } else {
@@ -179,7 +184,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull BlockCuboidRegion expanded(int offset, Direction.Type type) {
+  public @NotNull BlockCuboidRegion expanded(int offset, Direction.Plane type) {
     return switch (type) {
       case HORIZONTAL -> new BlockCuboidRegion(minX - offset, minY, minZ - offset, maxX + offset, maxY, maxZ + offset);
       case VERTICAL -> new BlockCuboidRegion(minX, minY - offset, minZ, maxX, maxY + offset, maxZ);
@@ -197,7 +202,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull BlockBox minContainingBlockBox() {
+  public @NotNull BoundingBox minContainingBlockBox() {
     return blockBox();
   }
 
@@ -212,7 +217,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
+  public @Nullable AABB minContainingBox() {
     return asCuboidRegion().minContainingBox();
   }
 
@@ -222,8 +227,8 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
-    return contains(BlockPos.ofFloored(vec3d));
+  public boolean contains(@NotNull Vec3 vec3d) {
+    return contains(BlockPos.containing(vec3d));
   }
 
   public enum Type implements RegionType<BlockCuboidRegion> {
@@ -235,8 +240,8 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.cuboid");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.cuboid");
     }
 
     @Override

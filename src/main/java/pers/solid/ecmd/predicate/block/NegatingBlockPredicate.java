@@ -4,14 +4,14 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.TestResult;
 
 import java.util.List;
 
@@ -28,17 +28,17 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     return !predicate.test(cachedBlockPosition, context);
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
     final TestResult testResult = predicate.testAndDescribe(cachedBlockPosition, context);
     if (testResult.successes()) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.negation.fail"), List.of(testResult));
+      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.negation.fail"), List.of(testResult));
     } else {
-      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.negation.pass"), List.of(testResult));
+      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.negation.pass"), List.of(testResult));
     }
   }
 
@@ -57,7 +57,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
 
     @Override
     public BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
-      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Text.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Component.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
       boolean negates = false;
       boolean suffixed = false;
       final StringReader reader = parseContext.reader();

@@ -1,9 +1,9 @@
 package pers.solid.ecmd.predicate.pos;
 
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -27,24 +27,24 @@ public interface PosPredicatesBasedPosPredicate<T extends PosPredicatesBasedPosP
 
   @Override
   @NotNull
-  default PosPredicate moved(@NotNull Vec3d relativePos) {
+  default PosPredicate moved(@NotNull Vec3 relativePos) {
     return newPosPredicateWithTransformation(r -> (R) r.moved(relativePos));
   }
 
   @Override
   @NotNull
-  default PosPredicate rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
+  default PosPredicate rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
     return newPosPredicateWithTransformation(r -> (R) r.rotated(blockRotation, pivot));
   }
 
   @Override
   @NotNull
-  default PosPredicate mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
+  default PosPredicate mirrored(@NotNull Direction.Axis axis, @NotNull Vec3 pivot) {
     return newPosPredicateWithTransformation(r -> (R) r.mirrored(axis, pivot));
   }
 
   @Override
-  default PosPredicate transformed(Function<Vec3d, Vec3d> transformation) {
+  default PosPredicate transformed(Function<Vec3, Vec3> transformation) {
     return newPosPredicateWithTransformation(r -> (R) r.transformed(transformation));
   }
 }

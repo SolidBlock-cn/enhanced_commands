@@ -4,11 +4,11 @@ import com.google.common.collect.Collections2;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -23,7 +23,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   public static final MapCodec<IntersectRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, IntersectRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3d vec3d) {
+  public boolean contains(@NotNull Vec3 vec3d) {
     return regions.stream().allMatch(region -> region.contains(vec3d));
   }
 
@@ -73,8 +73,8 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
-    final List<@Nullable Box> maxContainingBoxes = regions.stream().map(Region::minContainingBox).toList();
+  public @Nullable AABB minContainingBox() {
+    final List<@Nullable AABB> maxContainingBoxes = regions.stream().map(Region::minContainingBox).toList();
     final double minX = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minX).max().orElse(Double.POSITIVE_INFINITY);
     final double minY = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minY).max().orElse(Double.POSITIVE_INFINITY);
     final double minZ = maxContainingBoxes.stream().mapToDouble(value -> value == null ? Double.POSITIVE_INFINITY : value.minZ).max().orElse(Double.POSITIVE_INFINITY);
@@ -84,7 +84,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     if (minX > maxX || minY > maxY || minZ > maxZ) {
       return null;
     } else {
-      return new Box(minX, minY, minZ, maxX, maxY, maxZ);
+      return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
     }
   }
 
@@ -102,8 +102,8 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.intersect");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.intersect");
     }
 
     @Override

@@ -4,13 +4,13 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -24,12 +24,12 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
   private static <T extends Comparable<T>> MapCodec<MultiValuePropertyPredicate<T>> getCodecByProperty(Property<T> property) {
     return RecordCodecBuilder.mapCodec(i -> i.apply2(
         (values, inverted) -> new MultiValuePropertyPredicate<>(property, values, inverted),
-        property.getCodec().listOf().optionalFieldOf("values", ImmutableList.of()).forGetter(MultiValuePropertyPredicate::values),
+        property.codec().listOf().optionalFieldOf("values", ImmutableList.of()).forGetter(MultiValuePropertyPredicate::values),
         Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MultiValuePropertyPredicate::inverted)));
   }
 
   public static MapCodec<MultiValuePropertyPredicate<?>> getCodec(Block block) {
-    return CodecUtil.propertyForBlock(block.getStateManager()).dispatchMap("property", MultiValuePropertyPredicate::property, MultiValuePropertyPredicate::getCodecByProperty);
+    return CodecUtil.propertyForBlock(block.getStateDefinition()).dispatchMap("property", MultiValuePropertyPredicate::property, MultiValuePropertyPredicate::getCodecByProperty);
   }
 
   @Override
@@ -39,42 +39,42 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
 
   @Override
   public boolean test(BlockState blockState) {
-    return blockState.contains(property) && values.contains(blockState.get(property)) != inverted;
+    return blockState.hasProperty(property) && values.contains(blockState.getValue(property)) != inverted;
   }
 
   @Override
   public TestResult testAndDescribe(BlockState blockState, BlockPos blockPos) {
     final String propertyName = property.getName();
-    if (!blockState.contains(property)) {
-      final MutableText nameText = blockState.getBlock().getName().styled(Styles.TARGET);
-      final MutableText propertyNameText = Text.literal(propertyName).styled(Styles.EXPECTED);
+    if (!blockState.hasProperty(property)) {
+      final MutableComponent nameText = blockState.getBlock().getName().withStyle(Styles.TARGET);
+      final MutableComponent propertyNameText = Component.literal(propertyName).withStyle(Styles.EXPECTED);
       if (propertyName.isEmpty()) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name_empty", nameText));
+        return TestResult.of(false, Component.translatable("enhanced_commands.property_predicate.no_property_this_name_empty", nameText));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name", nameText, propertyNameText));
+        return TestResult.of(false, Component.translatable("enhanced_commands.property_predicate.no_property_this_name", nameText, propertyNameText));
       }
     }
-    final Text pos = TextUtil.wrapVector(blockPos);
-    final Text actual = PropertyPredicate.propertyAndValue(blockState, property).styled(Styles.ACTUAL);
-    final Text expected = Texts.join(values, Texts.DEFAULT_SEPARATOR_TEXT, value -> Text.literal(property.name(value)).styled(Styles.EXPECTED));
-    final T actualValue = blockState.get(property);
+    final Component pos = TextUtil.wrapVector(blockPos);
+    final Component actual = PropertyPredicate.propertyAndValue(blockState, property).withStyle(Styles.ACTUAL);
+    final Component expected = ComponentUtils.formatList(values, ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR, value -> Component.literal(property.getName(value)).withStyle(Styles.EXPECTED));
+    final T actualValue = blockState.getValue(property);
     if (values.contains(actualValue)) {
       if (inverted) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.value_match_inverted", pos, actual, expected));
+        return TestResult.of(false, Component.translatable("enhanced_commands.property_predicate.value_match_inverted", pos, actual, expected));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.value_match", pos, actual, expected));
+        return TestResult.of(true, Component.translatable("enhanced_commands.property_predicate.value_match", pos, actual, expected));
       }
     } else {
       if (inverted) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.value_mismatch_inverted", pos, actual, expected));
+        return TestResult.of(true, Component.translatable("enhanced_commands.property_predicate.value_mismatch_inverted", pos, actual, expected));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.value_mismatch", pos, actual, expected));
+        return TestResult.of(false, Component.translatable("enhanced_commands.property_predicate.value_mismatch", pos, actual, expected));
       }
     }
   }
 
   @Override
   public @NotNull String asString() {
-    return property.getName() + (inverted ? "!=" : "=") + values.stream().map(property::name).collect(Collectors.joining("|"));
+    return property.getName() + (inverted ? "!=" : "=") + values.stream().map(property::getName).collect(Collectors.joining("|"));
   }
 }

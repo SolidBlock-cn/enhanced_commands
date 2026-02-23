@@ -1,14 +1,14 @@
 package pers.solid.ecmd.render;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexRendering;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShapeRenderer;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +22,7 @@ public final class RegionRendering {
    *
    * @see DebugRenderLayerCommand
    */
-  public static RenderLayer regionRenderLayer = RenderLayer.LINES;
+  public static RenderType regionRenderLayer = RenderType.LINES;
 
   private RegionRendering() {
   }
@@ -34,10 +34,10 @@ public final class RegionRendering {
    * @param second    第二个方块坐标。
    * @param cameraPos 相机坐标。
    */
-  public static void renderBlockCuboid(@Nullable Vec3i first, @Nullable Vec3i second, MatrixStack matrices, VertexConsumer vertexConsumer, @NotNull Vec3d cameraPos) {
+  public static void renderBlockCuboid(@Nullable Vec3i first, @Nullable Vec3i second, PoseStack matrices, VertexConsumer vertexConsumer, @NotNull Vec3 cameraPos) {
     if ((first == null) != (second == null)) {
       // 构建未完成时，闪烁
-      final long measuringTimeMs = Util.getMeasuringTimeMs();
+      final long measuringTimeMs = Util.getMillis();
       if (measuringTimeMs % 600 > 300) {
         return;
       }
@@ -50,19 +50,19 @@ public final class RegionRendering {
       double x2 = Math.max(first.getX(), second.getX()) + 1d;
       double z2 = Math.max(first.getZ(), second.getZ()) + 1d;
       double y2 = Math.max(first.getY(), second.getY()) + 1d;
-      VertexRendering.drawBox(matrices, vertexConsumer, x1 - cameraPos.x, y1 - cameraPos.y, z1 - cameraPos.z, x2 - cameraPos.x, y2 - cameraPos.y, z2 - cameraPos.z, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
+      ShapeRenderer.renderLineBox(matrices, vertexConsumer, x1 - cameraPos.x, y1 - cameraPos.y, z1 - cameraPos.z, x2 - cameraPos.x, y2 - cameraPos.y, z2 - cameraPos.z, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
     }
     if (first != null) {
-      matrices.push();
+      matrices.pushPose();
       matrices.translate(first.getX() - cameraPos.x, first.getY() - cameraPos.y, first.getZ() - cameraPos.z);
       VertexUtil.drawUnitBox(matrices, vertexConsumer, Vec3i.ZERO, 0.2f, 0.8f, 1f, 0.9f);
-      matrices.pop();
+      matrices.popPose();
     }
     if (second != null) {
-      matrices.push();
+      matrices.pushPose();
       matrices.translate(second.getX() - cameraPos.x, second.getY() - cameraPos.y, second.getZ() - cameraPos.z);
       VertexUtil.drawUnitBox(matrices, vertexConsumer, Vec3i.ZERO, 0.2f, 1f, 0.8f, 0.9f);
-      matrices.pop();
+      matrices.popPose();
     }
   }
 }

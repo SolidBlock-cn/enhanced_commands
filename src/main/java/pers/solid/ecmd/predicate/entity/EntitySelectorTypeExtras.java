@@ -3,12 +3,12 @@ package pers.solid.ecmd.predicate.entity;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.Util;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
 
 import java.util.HashMap;
@@ -47,30 +47,30 @@ public final class EntitySelectorTypeExtras {
   public static final String CONTROLLING_VEHICLE = "controlling_vehicle";
   public static final String CONTROLLER = "controller";
 
-  public static final Map<String, Text> EXTRA_NAMES = Util.make(new HashMap<>(), map -> {
-    map.put(NO_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.no_entity"));
-    map.put(ALL_INCLUDING_DEAD, Text.translatable("enhanced_commands.argument.entity.selector.all_including_dead"));
+  public static final Map<String, Component> EXTRA_NAMES = Util.make(new HashMap<>(), map -> {
+    map.put(NO_ENTITY, Component.translatable("enhanced_commands.argument.entity.selector.no_entity"));
+    map.put(ALL_INCLUDING_DEAD, Component.translatable("enhanced_commands.argument.entity.selector.all_including_dead"));
 //    predicates.put(NEAREST_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.nearest_entity"));
-    map.put(RANDOM_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.random_entity"));
-    map.put(FURTHEST_ENTITY, Text.translatable("enhanced_commands.argument.entity.selector.furthest_entity"));
+    map.put(RANDOM_ENTITY, Component.translatable("enhanced_commands.argument.entity.selector.random_entity"));
+    map.put(FURTHEST_ENTITY, Component.translatable("enhanced_commands.argument.entity.selector.furthest_entity"));
 
-    Text text;
-    map.put(NEAREST_NON_PLAYER, text = Text.translatable("enhanced_commands.argument.entity.selector.nearest_non_player"));
+    Component text;
+    map.put(NEAREST_NON_PLAYER, text = Component.translatable("enhanced_commands.argument.entity.selector.nearest_non_player"));
     map.put(NEAREST_NON_PLAYER2, text);
-    map.put(ALL_NON_PLAYERS, Text.translatable("enhanced_commands.argument.entity.selector.all_non_players"));
-    map.put(FURTHEST_NON_PLAYER, Text.translatable("enhanced_commands.argument.entity.selector.furthest_non_player"));
-    map.put(RANDOM_NON_PLAYER, text = Text.translatable("enhanced_commands.argument.entity.selector.random_non_player"));
+    map.put(ALL_NON_PLAYERS, Component.translatable("enhanced_commands.argument.entity.selector.all_non_players"));
+    map.put(FURTHEST_NON_PLAYER, Component.translatable("enhanced_commands.argument.entity.selector.furthest_non_player"));
+    map.put(RANDOM_NON_PLAYER, text = Component.translatable("enhanced_commands.argument.entity.selector.random_non_player"));
     map.put(RANDOM_NON_PLAYER2, text);
-    map.put(PETS, Text.translatable("enhanced_commands.argument.entity.selector.pets"));
-    map.put(OWNER, Text.translatable("enhanced_commands.argument.entity.selector.owner"));
-    map.put(VEHICLE, Text.translatable("enhanced_commands.argument.entity.selector.vehicle"));
-    map.put(PASSENGERS, Text.translatable("enhanced_commands.argument.entity.selector.passengers"));
-    map.put(LEASHER, Text.translatable("enhanced_commands.argument.entity.selector.leasher"));
-    map.put(ORIGIN, Text.translatable("enhanced_commands.argument.entity.selector.origin"));
-    map.put(ATTACKER, Text.translatable("enhanced_commands.argument.entity.selector.attacker"));
-    map.put(TARGET, Text.translatable("enhanced_commands.argument.entity.selector.target"));
-    map.put(CONTROLLING_VEHICLE, Text.translatable("enhanced_commands.argument.entity.selector.controlling_vehicle"));
-    map.put(CONTROLLER, Text.translatable("enhanced_commands.argument.entity.selector.controller"));
+    map.put(PETS, Component.translatable("enhanced_commands.argument.entity.selector.pets"));
+    map.put(OWNER, Component.translatable("enhanced_commands.argument.entity.selector.owner"));
+    map.put(VEHICLE, Component.translatable("enhanced_commands.argument.entity.selector.vehicle"));
+    map.put(PASSENGERS, Component.translatable("enhanced_commands.argument.entity.selector.passengers"));
+    map.put(LEASHER, Component.translatable("enhanced_commands.argument.entity.selector.leasher"));
+    map.put(ORIGIN, Component.translatable("enhanced_commands.argument.entity.selector.origin"));
+    map.put(ATTACKER, Component.translatable("enhanced_commands.argument.entity.selector.attacker"));
+    map.put(TARGET, Component.translatable("enhanced_commands.argument.entity.selector.target"));
+    map.put(CONTROLLING_VEHICLE, Component.translatable("enhanced_commands.argument.entity.selector.controlling_vehicle"));
+    map.put(CONTROLLER, Component.translatable("enhanced_commands.argument.entity.selector.controller"));
   });
 
   public static final Object2IntMap<String> EXTRA_LIMITS = Util.make(new Object2IntOpenHashMap<>(), map -> {
@@ -84,23 +84,23 @@ public final class EntitySelectorTypeExtras {
     map.put(RANDOM_NON_PLAYER2, 1);
   });
   public static final Set<String> FORCE_ONE_LIMIT = Sets.newHashSet(); // 考虑到有可能使用 of 属性，暂时使用空的集合
-  public static final Map<String, BiConsumer<Vec3d, List<? extends Entity>>> EXTRA_SORTERS = Util.make(new HashMap<>(), map -> {
+  public static final Map<String, BiConsumer<Vec3, List<? extends Entity>>> EXTRA_SORTERS = Util.make(new HashMap<>(), map -> {
 //    predicates.put(NEAREST_ENTITY, EntitySelectorReader.NEAREST);
-    map.put(RANDOM_ENTITY, EntitySelectorReader.RANDOM);
-    map.put(FURTHEST_ENTITY, EntitySelectorReader.FURTHEST);
-    map.put(NEAREST_NON_PLAYER, EntitySelectorReader.NEAREST);
-    map.put(NEAREST_NON_PLAYER2, EntitySelectorReader.NEAREST);
-    map.put(FURTHEST_NON_PLAYER, EntitySelectorReader.FURTHEST);
-    map.put(RANDOM_NON_PLAYER, EntitySelectorReader.RANDOM);
-    map.put(RANDOM_NON_PLAYER2, EntitySelectorReader.RANDOM);
+    map.put(RANDOM_ENTITY, EntitySelectorParser.ORDER_RANDOM);
+    map.put(FURTHEST_ENTITY, EntitySelectorParser.ORDER_FURTHEST);
+    map.put(NEAREST_NON_PLAYER, EntitySelectorParser.ORDER_NEAREST);
+    map.put(NEAREST_NON_PLAYER2, EntitySelectorParser.ORDER_NEAREST);
+    map.put(FURTHEST_NON_PLAYER, EntitySelectorParser.ORDER_FURTHEST);
+    map.put(RANDOM_NON_PLAYER, EntitySelectorParser.ORDER_RANDOM);
+    map.put(RANDOM_NON_PLAYER2, EntitySelectorParser.ORDER_RANDOM);
   });
-  public static final Map<String, Consumer<EntitySelectorReader>> EXTRA_READER_ATTRIBUTES = Util.make(new HashMap<>(), map -> {
+  public static final Map<String, Consumer<EntitySelectorParser>> EXTRA_READER_ATTRIBUTES = Util.make(new HashMap<>(), map -> {
     map.put(NO_ENTITY, entitySelectorReader -> {
-      entitySelectorReader.setLimit(0);
+      entitySelectorReader.setMaxResults(0);
       entitySelectorReader.addPredicate(EmptyEntityPredicateEntry.INSTANCE);
     });
-    final Consumer<EntitySelectorReader> excludesPlayersConsumer = reader -> {
-      reader.setExcludesEntityType();
+    final Consumer<EntitySelectorParser> excludesPlayersConsumer = reader -> {
+      reader.setTypeLimitedInversely();
       reader.addPredicate(new TypeEntityPredicateEntry(EntityType.PLAYER, true));
     };
     map.put(NEAREST_NON_PLAYER, excludesPlayersConsumer);

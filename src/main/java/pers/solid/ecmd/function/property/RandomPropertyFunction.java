@@ -3,10 +3,10 @@ package pers.solid.ecmd.function.property;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -21,7 +21,7 @@ public record RandomPropertyFunction<T extends Comparable<T>>(Property<T> proper
   public static MapCodec<RandomPropertyFunction<?>> getCodec(Block block) {
     return RecordCodecBuilder.mapCodec(i -> i.apply2(
         RandomPropertyFunction::new,
-        CodecUtil.propertyForBlock(block.getStateManager()).fieldOf("property").forGetter(RandomPropertyFunction::property),
+        CodecUtil.propertyForBlock(block.getStateDefinition()).fieldOf("property").forGetter(RandomPropertyFunction::property),
         MUST_FIELD_CODEC
     ));
   }
@@ -32,10 +32,10 @@ public record RandomPropertyFunction<T extends Comparable<T>>(Property<T> proper
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState origState, Random random) {
-    if (must || blockState.contains(property)) {
-      final List<T> values = List.copyOf(property.getValues());
-      return blockState.with(property, values.get(random.nextInt(values.size())));
+  public BlockState getModifiedState(BlockState blockState, BlockState origState, RandomSource random) {
+    if (must || blockState.hasProperty(property)) {
+      final List<T> values = List.copyOf(property.getPossibleValues());
+      return blockState.setValue(property, values.get(random.nextInt(values.size())));
     } else {
       return blockState;
     }

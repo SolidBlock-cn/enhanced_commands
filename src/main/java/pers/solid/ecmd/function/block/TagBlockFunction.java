@@ -3,17 +3,17 @@ package pers.solid.ecmd.function.block;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryCodecs;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -27,16 +27,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull List<PropertyNameFunction> properties) implements BlockFunction {
-  public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.entryList(RegistryKeys.BLOCK).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
+public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<PropertyNameFunction> properties) implements BlockFunction {
+  public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
 
-  public TagBlockFunction(@NotNull RegistryEntryList<Block> tag) {
+  public TagBlockFunction(@NotNull HolderSet<Block> tag) {
     this(tag, Collections.emptyList());
   }
 
   @Override
   public @NotNull String asString() {
-    final String tagString = tag.getStorage().map(blockTagKey -> "#" + blockTagKey.id(), entries -> entries.stream().map(RegistryEntry::getIdAsString).collect(Collectors.joining(", ")));
+    final String tagString = tag.unwrap().map(blockTagKey -> "#" + blockTagKey.location(), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ")));
     if (properties.isEmpty()) {
       return "#" + tagString;
     } else {
@@ -45,11 +45,11 @@ public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull L
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
-    final Random random = context.getSplitter(this).split(pos);
-    final Optional<RegistryEntry<Block>> randomTag = tag.getRandom(random);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    final RandomSource random = context.getSplitter(this).at(pos);
+    final Optional<Holder<Block>> randomTag = tag.getRandomElement(random);
     if (randomTag.isEmpty()) return blockState;
-    BlockState state = randomTag.get().value().getDefaultState();
+    BlockState state = randomTag.get().value().defaultBlockState();
     for (PropertyNameFunction propertyNameFunction : properties) {
       state = propertyNameFunction.getModifiedState(origState, state, random);
     }
@@ -74,8 +74,8 @@ public record TagBlockFunction(@NotNull RegistryEntryList<Block> tag, @NotNull L
       SimpleBlockFunctionParser<?> parser = new SimpleBlockFunctionParser<>(parseContext);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
-        final TagKey<Block> tagKey = parser.tagId.getTag();
-        return new TagBlockFunction(parseContext.registryAccess().getOrThrow(RegistryKeys.BLOCK).getOrThrow(tagKey), parser.propertyNameFunctions);
+        final TagKey<Block> tagKey = parser.tagId.key();
+        return new TagBlockFunction(parseContext.registryAccess().lookupOrThrow(Registries.BLOCK).getOrThrow(tagKey), parser.propertyNameFunctions);
       } else {
         return null;
       }

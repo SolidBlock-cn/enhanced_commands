@@ -3,8 +3,8 @@ package pers.solid.ecmd.predicate.nbt;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -18,19 +18,19 @@ public record RegexNbtPredicate(Pattern pattern, boolean inverted) implements Nb
 
   @Override
   public @NotNull String asString() {
-    return (inverted ? "!" : "") + "~ " + NbtString.escape(pattern.toString());
+    return (inverted ? "!" : "") + "~ " + StringTag.quoteAndEscape(pattern.toString());
   }
 
   @Override
-  public boolean test(@NotNull NbtElement nbtElement) {
-    if (!(nbtElement instanceof NbtString nbtString))
+  public boolean test(@NotNull Tag nbtElement) {
+    if (!(nbtElement instanceof StringTag nbtString))
       return inverted;
-    return inverted != pattern.matcher(nbtString.asString()).find();
+    return inverted != pattern.matcher(nbtString.getAsString()).find();
   }
 
   @Override
   public @NotNull NbtPredicateType<RegexNbtPredicate> getType() {
-    return Type.REGEX_TYPE;
+    return pers.solid.ecmd.predicate.nbt.RegexNbtPredicate.Type.REGEX_TYPE;
   }
 
   public enum Type implements NbtPredicateType<RegexNbtPredicate> {

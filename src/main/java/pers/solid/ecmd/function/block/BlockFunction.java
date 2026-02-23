@@ -7,20 +7,20 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.command.argument.BlockStateArgument;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryElementCodec;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.commands.arguments.blocks.BlockInput;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,17 +45,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockStateArgument} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
+ * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockInput} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
  */
 public interface BlockFunction extends ExpressionConvertible {
-  RegistryKey<Registry<BlockFunction>> REGISTRY_KEY = RegistryKey.ofRegistry(EnhancedCommands.id("block_function"));
-  MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.getCodec().dispatchMap(BlockFunction::getType, BlockFunctionType::getCodec);
-  Codec<BlockFunction> CODEC = CodecUtil.combined(Registries.BLOCK.getCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC.codec(), blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? s : null);
-  Codec<RegistryEntry<BlockFunction>> ENTRY_CODEC = RegistryElementCodec.of(REGISTRY_KEY, CODEC);
+  ResourceKey<Registry<BlockFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_function"));
+  MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.byNameCodec().dispatchMap(BlockFunction::getType, BlockFunctionType::getCodec);
+  Codec<BlockFunction> CODEC = CodecUtil.combined(BuiltInRegistries.BLOCK.byNameCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC.codec(), blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? s : null);
+  Codec<Holder<BlockFunction>> ENTRY_CODEC = RegistryFileCodec.create(REGISTRY_KEY, CODEC);
 
-  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.block_function.cannot_parse"));
-  Text OVERLAY_TOOLTIP = Text.translatable("enhanced_commands.block_function.overlay.symbol_tooltip");
-  Text PICK_TOOLTIP = Text.translatable("enhanced_commands.block_function.pick.symbol_tooltip");
+  SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_function.cannot_parse"));
+  Component OVERLAY_TOOLTIP = Component.translatable("enhanced_commands.block_function.overlay.symbol_tooltip");
+  Component PICK_TOOLTIP = Component.translatable("enhanced_commands.block_function.pick.symbol_tooltip");
 
   static @NotNull BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     return parsePick(parseContext);
@@ -134,32 +134,32 @@ public interface BlockFunction extends ExpressionConvertible {
     throw CANNOT_PARSE.createWithContext(reader);
   }
 
-  default boolean setBlock(World world, BlockPos pos, BlockFunctionContext context) {
+  default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context) {
     return setBlock(world, pos, context, null, null);
   }
 
-  default boolean setBlock(World world, BlockPos pos, BlockFunctionContext context, @Nullable BlockState oldState, @Nullable BlockPlacementHistory history) {
+  default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context, @Nullable BlockState oldState, @Nullable BlockPlacementHistory history) {
     final BlockState origState = world.getBlockState(pos);
-    MutableObject<NbtCompound> blockEntityData = new MutableObject<>(null);
+    MutableObject<CompoundTag> blockEntityData = new MutableObject<>(null);
     BlockState newState = getModifiedState(origState, origState, world, pos, blockEntityData, context);
     final int modFlags = context.modFlags;
     if ((modFlags & FillReplaceCommand.POST_PROCESS_FLAG) != 0) {
-      newState = Block.postProcessState(newState, world, pos);
+      newState = Block.updateFromNeighbourShapes(newState, world, pos);
     }
 
     if (history != null) {
       history.recordBlockAndEntity(world, pos, oldState == null ? world.getBlockState(pos) : oldState, newState);
     }
     final BlockEntity oldEntity = world.getBlockEntity(pos);
-    if (oldEntity != null && !oldEntity.supports(newState)) {
+    if (oldEntity != null && !oldEntity.isValidBlockState(newState)) {
       world.removeBlockEntity(pos);
     }
     boolean result = MixinShared.setBlockStateWithModFlags(world, pos, newState, context.flags, modFlags);
     final BlockEntity newEntity = world.getBlockEntity(pos);
     if (newEntity != null) {
-      final NbtCompound modifiedData = blockEntityData.getValue();
+      final CompoundTag modifiedData = blockEntityData.getValue();
       if (modifiedData != null) {
-        newEntity.read(modifiedData, world.getRegistryManager());
+        newEntity.loadWithComponents(modifiedData, world.registryAccess());
         result = true;
       }
     }
@@ -178,7 +178,7 @@ public interface BlockFunction extends ExpressionConvertible {
    * @return 修改后的方块状态。
    */
   @NotNull
-  BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context);
+  BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context);
 
   @NotNull
   BlockFunctionType<?> getType();
@@ -190,7 +190,7 @@ public interface BlockFunction extends ExpressionConvertible {
   /**
    * 取消该对象的缓存状态。例如，对于 {@link NoiseBlockFunction} 而言，调用一次该方法将会使其重新生成采样器，其种子可能随机生成。
    */
-  default BlockFunction getRefreshed(Random random) {
+  default BlockFunction getRefreshed(RandomSource random) {
     return this;
   }
 }

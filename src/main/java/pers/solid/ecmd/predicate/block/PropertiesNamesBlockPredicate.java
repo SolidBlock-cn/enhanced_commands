@@ -4,22 +4,22 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.property.PropertyNamePredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.parse.Parser;
-import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,8 +38,8 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   }
 
   @Override
-  public boolean test(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockState blockState = cachedBlockPosition.getBlockState();
+  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final BlockState blockState = cachedBlockPosition.getState();
     for (PropertyNamePredicate propertyNamePredicate : predicates) {
       if (!propertyNamePredicate.test(blockState))
         return false;
@@ -48,11 +48,11 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   }
 
   @Override
-  public TestResult testAndDescribe(CachedBlockPosition cachedBlockPosition, ExecutionContext context) {
-    final BlockState blockState = cachedBlockPosition.getBlockState();
+  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+    final BlockState blockState = cachedBlockPosition.getState();
     boolean successes = true;
     List<TestResult> attachments = new ArrayList<>();
-    final BlockPos blockPos = cachedBlockPosition.getBlockPos();
+    final BlockPos blockPos = cachedBlockPosition.getPos();
     for (PropertyNamePredicate propertyNamePredicate : predicates) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, blockPos);
       attachments.add(testResult);
@@ -63,9 +63,9 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     if (attachments.size() == 1) {
       return attachments.get(0);
     } else if (successes) {
-      return TestResult.of(true, Text.translatable("enhanced_commands.block_predicate.property_names.pass", TextUtil.wrapVector(blockPos)), attachments);
+      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.property_names.pass", TextUtil.wrapVector(blockPos)), attachments);
     } else {
-      return TestResult.of(false, Text.translatable("enhanced_commands.block_predicate.property_names.fail", TextUtil.wrapVector(blockPos)), attachments);
+      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.property_names.fail", TextUtil.wrapVector(blockPos)), attachments);
     }
   }
 

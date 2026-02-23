@@ -5,12 +5,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.NbtFunctionParser;
@@ -23,7 +23,7 @@ import pers.solid.ecmd.parse.ParsingUtil;
 
 public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements BlockFunction {
   public static final MapCodec<NbtBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockFunction::new, NbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
-  public static final DynamicCommandExceptionType NOT_COMPOUND = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.block_function.nbt_not_compound", s));
+  public static final DynamicCommandExceptionType NOT_COMPOUND = new DynamicCommandExceptionType(s -> Component.translatable("enhanced_commands.block_function.nbt_not_compound", s));
 
   @Override
   public @NotNull String asString() {
@@ -31,13 +31,13 @@ public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements Bloc
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, World world, BlockPos pos, MutableObject<NbtCompound> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     try {
-      final NbtElement applied = nbtFunction.apply(blockEntityData.getValue(), context);
-      if (applied instanceof NbtCompound nbtCompound) {
+      final Tag applied = nbtFunction.apply(blockEntityData.getValue(), context);
+      if (applied instanceof CompoundTag nbtCompound) {
         blockEntityData.setValue(nbtCompound);
       } else {
-        throw NOT_COMPOUND.create(applied.getNbtType().getCommandFeedbackName());
+        throw NOT_COMPOUND.create(applied.getType().getPrettyName());
       }
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);

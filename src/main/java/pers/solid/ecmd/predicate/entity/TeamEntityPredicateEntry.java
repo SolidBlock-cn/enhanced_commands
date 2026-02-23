@@ -3,11 +3,11 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.scoreboard.AbstractTeam;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.scores.Team;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -24,34 +24,34 @@ public record TeamEntityPredicateEntry(String team, boolean inverted) implements
     if (!(entity instanceof LivingEntity)) {
       return false;
     } else {
-      AbstractTeam abstractTeam = entity.getScoreboardTeam();
+      Team abstractTeam = entity.getTeam();
       String string2 = abstractTeam == null ? "" : abstractTeam.getName();
       return string2.equals(team) != inverted;
     }
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
     if (!(entity instanceof LivingEntity)) {
-      return TestResult.of(false, Text.translatable("enhanced_commands.entity_predicate.team.not_living", displayName));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.team.not_living", displayName));
     } else {
-      AbstractTeam abstractTeam = entity.getScoreboardTeam();
+      Team abstractTeam = entity.getTeam();
       String actualTeamName = abstractTeam == null ? "" : abstractTeam.getName();
       if (actualTeamName.equals(team)) {
         if (abstractTeam == null) {
-          return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.team.true_nil", displayName));
+          return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.team.true_nil", displayName));
         } else {
-          return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.team.true", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL)));
+          return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.team.true", displayName, Component.literal(actualTeamName).withStyle(Styles.ACTUAL)));
         }
       } else {
         if (team.isEmpty()) {
-          return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.team.false_expect_nil", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL)));
+          return TestResult.of(inverted, Component.translatable("enhanced_commands.entity_predicate.team.false_expect_nil", displayName, Component.literal(actualTeamName).withStyle(Styles.ACTUAL)));
         }
-        final MutableText expectedText = Text.literal(team).styled(Styles.EXPECTED);
+        final MutableComponent expectedText = Component.literal(team).withStyle(Styles.EXPECTED);
         if (abstractTeam == null) {
-          return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.team.false_nil", displayName, expectedText));
+          return TestResult.of(inverted, Component.translatable("enhanced_commands.entity_predicate.team.false_nil", displayName, expectedText));
         } else {
-          return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.team.false", displayName, Text.literal(actualTeamName).styled(Styles.ACTUAL), expectedText));
+          return TestResult.of(inverted, Component.translatable("enhanced_commands.entity_predicate.team.false", displayName, Component.literal(actualTeamName).withStyle(Styles.ACTUAL), expectedText));
         }
       }
     }

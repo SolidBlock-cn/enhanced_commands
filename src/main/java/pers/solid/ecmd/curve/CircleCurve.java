@@ -7,11 +7,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.doubles.DoubleDoublePair;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -50,12 +50,12 @@ import java.util.function.Function;
  * @param minAngle 初始旋转角。
  * @param maxAngle 终止旋转角。
  */
-public record CircleCurve(double radius, Vec3d center, Vec3d pivot, double minAngle, double maxAngle) implements Curve {
+public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngle, double maxAngle) implements Curve {
   public static final double FULL_MIN = 0;
   public static final double FULL_MAX = 2d * Math.PI;
   public static final MapCodec<CircleCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CircleCurve::radius),
-      Vec3d.CODEC.fieldOf("center").forGetter(CircleCurve::center),
-      Vec3d.CODEC.fieldOf("pivot").forGetter(CircleCurve::pivot),
+      Vec3.CODEC.fieldOf("center").forGetter(CircleCurve::center),
+      Vec3.CODEC.fieldOf("pivot").forGetter(CircleCurve::pivot),
       Codec.DOUBLE.optionalFieldOf("min_angle", FULL_MIN).forGetter(CircleCurve::minAngle),
       Codec.DOUBLE.optionalFieldOf("max_angle", FULL_MAX).forGetter(CircleCurve::maxAngle)
   ).apply(i, CircleCurve::new));
@@ -68,12 +68,12 @@ public record CircleCurve(double radius, Vec3d center, Vec3d pivot, double minAn
     }
   }
 
-  public static String wrapVector(Vec3d vec3d) {
+  public static String wrapVector(Vec3 vec3d) {
     return StringUtil.wrapVector(vec3d);
   }
 
   @Override
-  public @NotNull Iterator<Vec3d> iteratePoints(Number interval) {
+  public @NotNull Iterator<Vec3> iteratePoints(Number interval) {
     final Vector3d radiusVecStart = new Vector3d(pivot.x, pivot.y, pivot.z).cross(0, 1, 0);
     if (radiusVecStart.lengthSquared() == 0) {
       if (pivot.y >= 0) {
@@ -90,14 +90,14 @@ public record CircleCurve(double radius, Vec3d center, Vec3d pivot, double minAn
       private final AxisAngle4d axisAngle4d = new AxisAngle4d(minAngle, pivot.x, pivot.y, pivot.z);
 
       @Override
-      protected Vec3d computeNext() {
+      protected Vec3 computeNext() {
         if (axisAngle4d.angle > maxAngle || Double.isNaN(axisAngle4d.angle)) {
           return endOfData();
         }
         radiusVec.set(radiusVecStart);
         axisAngle4d.transform(radiusVec);
         axisAngle4d.angle += Math.abs(interval.doubleValue() / radius);
-        return new Vec3d(radiusVec.x + center.x, radiusVec.y + center.y, radiusVec.z + center.z);
+        return new Vec3(radiusVec.x + center.x, radiusVec.y + center.y, radiusVec.z + center.z);
       }
     };
   }
@@ -108,23 +108,23 @@ public record CircleCurve(double radius, Vec3d center, Vec3d pivot, double minAn
   }
 
   @Override
-  public @NotNull CircleCurve transformed(Function<Vec3d, Vec3d> transformation) {
+  public @NotNull CircleCurve transformed(Function<Vec3, Vec3> transformation) {
     return new CircleCurve(radius, transformation.apply(center), pivot, minAngle, maxAngle);
   }
 
   @Override
-  public @NotNull CircleCurve moved(@NotNull Vec3d relativePos) {
+  public @NotNull CircleCurve moved(@NotNull Vec3 relativePos) {
     return new CircleCurve(radius, center.add(relativePos), pivot, minAngle, maxAngle);
   }
 
   @Override
-  public @NotNull CircleCurve rotated(@NotNull BlockRotation blockRotation, @NotNull Vec3d pivot) {
-    return new CircleCurve(radius, GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(pivot, blockRotation, Vec3d.ZERO), minAngle, maxAngle);
+  public @NotNull CircleCurve rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
+    return new CircleCurve(radius, GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(pivot, blockRotation, Vec3.ZERO), minAngle, maxAngle);
   }
 
   @Override
-  public @NotNull CircleCurve mirrored(Direction.@NotNull Axis axis, @NotNull Vec3d pivot) {
-    return new CircleCurve(radius, GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.pivot, axis, Vec3d.ZERO), minAngle, maxAngle);
+  public @NotNull CircleCurve mirrored(Direction.@NotNull Axis axis, @NotNull Vec3 pivot) {
+    return new CircleCurve(radius, GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.pivot, axis, Vec3.ZERO), minAngle, maxAngle);
   }
 
   @Override
@@ -142,17 +142,17 @@ public record CircleCurve(double radius, Vec3d center, Vec3d pivot, double minAn
   }
 
   @Override
-  public @Nullable Box minContainingBox() {
+  public @Nullable AABB minContainingBox() {
     double minX, minY, minZ, maxX, maxY, maxZ;
     minX = minY = minZ = Double.POSITIVE_INFINITY;
     maxX = maxY = maxZ = Double.NEGATIVE_INFINITY;
-    final Iterator<Vec3d> vec3dIterator = iteratePoints(radius * MathHelper.RADIANS_PER_DEGREE * 30); // 30 度
+    final Iterator<Vec3> vec3dIterator = iteratePoints(radius * Mth.DEG_TO_RAD * 30); // 30 度
     if (!vec3dIterator.hasNext()) {
       // 含有零个点时，返回空。
       return null;
     }
     while (vec3dIterator.hasNext()) {
-      final Vec3d next = vec3dIterator.next();
+      final Vec3 next = vec3dIterator.next();
       minX = Math.min(minX, next.x);
       minY = Math.min(minY, next.y);
       minZ = Math.min(minZ, next.z);
@@ -161,7 +161,7 @@ public record CircleCurve(double radius, Vec3d center, Vec3d pivot, double minAn
       maxZ = Math.max(maxZ, next.z);
     }
 
-    return new Box(minX, minY, minZ, maxX, maxY, maxZ);
+    return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
   }
 
   @Override
@@ -206,7 +206,7 @@ public record CircleCurve(double radius, Vec3d center, Vec3d pivot, double minAn
     @Override
     public CurveArgument<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final EnhancedPosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
-      return new CircleCurveArgument(radius == null ? 1 : radius, center, axis == null ? new Vec3dArgument.Fixed(new Vec3d(0, 1, 0)) : axis, range == null ? FULL_MIN : Math.min(range.firstDouble(), range.secondDouble()), range == null ? FULL_MAX : Math.max(range.firstDouble(), range.secondDouble()));
+      return new CircleCurveArgument(radius == null ? 1 : radius, center, axis == null ? new Vec3dArgument.Fixed(new Vec3(0, 1, 0)) : axis, range == null ? FULL_MIN : Math.min(range.firstDouble(), range.secondDouble()), range == null ? FULL_MAX : Math.max(range.firstDouble(), range.secondDouble()));
     }
 
     private DoubleDoublePair parseAngleRange(ParseContext<?> parseContext) throws CommandSyntaxException {

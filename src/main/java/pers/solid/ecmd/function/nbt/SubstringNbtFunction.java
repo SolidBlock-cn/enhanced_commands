@@ -7,9 +7,9 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -38,11 +38,11 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
       NbtFunction.CODEC.optionalFieldOf("original").forGetter(SubstringNbtFunction::original)
   ).apply(i, SubstringNbtFunction::new));
 
-  public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Text.translatable("enhanced_commands.nbt_function.substring.not_a_string", s));
-  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.nbt_function.substring.no_value"));
-  public static final Dynamic2CommandExceptionType START_END_WRONG = new Dynamic2CommandExceptionType((start, end) -> Text.translatable("enhanced_commands.nbt_function.substring.start_end_wrong", start, end));
-  public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH = new Dynamic2CommandExceptionType((index, length) -> Text.translatable("enhanced_commands.nbt_function.substring.exceeds_string_length", index, length));
-  public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH_INVERSE = new Dynamic2CommandExceptionType((index, length) -> Text.translatable("enhanced_commands.nbt_function.substring.exceeds_string_length_inverse", index, length));
+  public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Component.translatable("enhanced_commands.nbt_function.substring.not_a_string", s));
+  public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.substring.no_value"));
+  public static final Dynamic2CommandExceptionType START_END_WRONG = new Dynamic2CommandExceptionType((start, end) -> Component.translatable("enhanced_commands.nbt_function.substring.start_end_wrong", start, end));
+  public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH = new Dynamic2CommandExceptionType((index, length) -> Component.translatable("enhanced_commands.nbt_function.substring.exceeds_string_length", index, length));
+  public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH_INVERSE = new Dynamic2CommandExceptionType((index, length) -> Component.translatable("enhanced_commands.nbt_function.substring.exceeds_string_length_inverse", index, length));
 
   @Override
   public @NotNull String asString() {
@@ -65,25 +65,25 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (original.isPresent()) {
       nbtElement = original.get().apply(nbtElement, context);
     }
-    if (!(nbtElement instanceof NbtString nbtString)) {
+    if (!(nbtElement instanceof StringTag nbtString)) {
       if (nbtElement == null) {
         throw NO_VALUE.create();
       } else if (lenient) {
         return nbtElement;
       } else {
-        throw NOT_A_STRING.create(nbtElement.getNbtType().getCommandFeedbackName());
+        throw NOT_A_STRING.create(nbtElement.getType().getPrettyName());
       }
     }
-    final String string = nbtString.asString();
+    final String string = nbtString.getAsString();
     final int length = string.length();
     try {
       final int actualStartIndex = actualIndex(startIndex, length);
       if (endIndex.isEmpty()) {
-        return NbtString.of(string.substring(actualStartIndex));
+        return StringTag.valueOf(string.substring(actualStartIndex));
       }
       final int actualEndIndex = actualIndex(endIndex.get(), length);
       if (actualStartIndex > actualEndIndex) {
@@ -93,7 +93,7 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
           throw START_END_WRONG.create(actualStartIndex, actualEndIndex);
         }
       }
-      return NbtString.of(string.substring(actualStartIndex, actualEndIndex));
+      return StringTag.valueOf(string.substring(actualStartIndex, actualEndIndex));
     } catch (CommandSyntaxException e) {
       if (lenient) {
         return nbtElement;

@@ -5,14 +5,14 @@ import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Property;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
@@ -30,7 +30,7 @@ public record MultiValuePropertyNamePredicate(String propertyName, List<String> 
 
   @Override
   public boolean test(BlockState blockState) {
-    final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
+    final StateDefinition<Block, BlockState> stateManager = blockState.getBlock().getStateDefinition();
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) return false;
     final String actualValue = StateUtil.namePropertyValue(blockState, property);
@@ -39,32 +39,32 @@ public record MultiValuePropertyNamePredicate(String propertyName, List<String> 
 
   @Override
   public TestResult testAndDescribe(BlockState blockState, BlockPos blockPos) {
-    final StateManager<Block, BlockState> stateManager = blockState.getBlock().getStateManager();
+    final StateDefinition<Block, BlockState> stateManager = blockState.getBlock().getStateDefinition();
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) {
-      final MutableText nameText = blockState.getBlock().getName().styled(Styles.TARGET);
-      final MutableText propertyNameText = Text.literal(propertyName).styled(Styles.EXPECTED);
+      final MutableComponent nameText = blockState.getBlock().getName().withStyle(Styles.TARGET);
+      final MutableComponent propertyNameText = Component.literal(propertyName).withStyle(Styles.EXPECTED);
       if (propertyName.isEmpty()) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name_empty", nameText));
+        return TestResult.of(false, Component.translatable("enhanced_commands.property_predicate.no_property_this_name_empty", nameText));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.no_property_this_name", nameText, propertyNameText));
+        return TestResult.of(false, Component.translatable("enhanced_commands.property_predicate.no_property_this_name", nameText, propertyNameText));
       }
     }
-    final Text pos = TextUtil.wrapVector(blockPos);
-    final Text actual = PropertyPredicate.propertyAndValue(blockState, property).styled(Styles.ACTUAL);
-    final Text expected = Texts.join(valueNames, Texts.DEFAULT_SEPARATOR_TEXT, string -> Text.literal(string).styled(Styles.EXPECTED));
+    final Component pos = TextUtil.wrapVector(blockPos);
+    final Component actual = PropertyPredicate.propertyAndValue(blockState, property).withStyle(Styles.ACTUAL);
+    final Component expected = ComponentUtils.formatList(valueNames, ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR, string -> Component.literal(string).withStyle(Styles.EXPECTED));
     final String actualValue = StateUtil.namePropertyValue(blockState, property);
     if (Iterables.any(valueNames, value -> value.equals(actualValue))) {
       if (inverted) {
-        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.value_match_inverted", pos, actual, expected));
+        return TestResult.of(false, Component.translatable("enhanced_commands.property_predicate.value_match_inverted", pos, actual, expected));
       } else {
-        return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.value_match", pos, actual, expected));
+        return TestResult.of(true, Component.translatable("enhanced_commands.property_predicate.value_match", pos, actual, expected));
       }
     } else {
       if (inverted) {
-        return TestResult.of(true, Text.translatable("enhanced_commands.property_predicate.value_mismatch_inverted", pos, actual, expected));
+        return TestResult.of(true, Component.translatable("enhanced_commands.property_predicate.value_mismatch_inverted", pos, actual, expected));
       } else {
-        return TestResult.of(false, Text.translatable("enhanced_commands.property_predicate.value_mismatch", pos, actual, expected));
+        return TestResult.of(false, Component.translatable("enhanced_commands.property_predicate.value_mismatch", pos, actual, expected));
       }
     }
   }

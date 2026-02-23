@@ -5,8 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.Vec3i;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -89,7 +89,7 @@ public sealed interface Vec3iArgument extends ExpressionConvertible {
 
     @Override
     public Vec3i toActualVector(PositionProvider positionProvider) {
-      return direction.apply(positionProvider).getVector().multiply(length);
+      return direction.apply(positionProvider).getUnitVec3i().multiply(length);
     }
 
     @Override
@@ -99,11 +99,11 @@ public sealed interface Vec3iArgument extends ExpressionConvertible {
 
     @Override
     public @NotNull String asString() {
-      return length + " " + direction.asString();
+      return length + " " + direction.getSerializedName();
     }
   }
 
-  enum Type implements StringIdentifiable {
+  enum Type implements StringRepresentable {
     FIXED("fixed", Fixed.CODEC), DIRECTIONAL("directional", Directional.CODEC);
     public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(values());
 
@@ -116,7 +116,7 @@ public sealed interface Vec3iArgument extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
 

@@ -3,8 +3,8 @@ package pers.solid.ecmd.argument;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.argument.RotationArgumentType;
-import net.minecraft.command.argument.Vec3ArgumentType;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,7 +18,7 @@ public enum EnhancedRotationArgumentType implements ArgumentType<EnhancedRotatio
   @Override
   public EnhancedRotationArgument parse(StringReader reader) throws CommandSyntaxException {
     if (!reader.canRead()) {
-      throw RotationArgumentType.INCOMPLETE_ROTATION_EXCEPTION.createWithContext(reader);
+      throw RotationArgument.ERROR_NOT_COMPLETE.createWithContext(reader);
     } else {
 
       float[] values = new float[2];
@@ -27,7 +27,7 @@ public enum EnhancedRotationArgumentType implements ArgumentType<EnhancedRotatio
 
       for (int i = 0; i < 2; i++) {
         if (!reader.canRead()) {
-          throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+          throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
         }
 
         boolean hasTilde = false;
@@ -36,7 +36,7 @@ public enum EnhancedRotationArgumentType implements ArgumentType<EnhancedRotatio
           hasTilde = true;
           reader.skip();
         } else if (reader.peek() == '^') {
-          throw withCursorEnd(Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
+          throw withCursorEnd(Vec3Argument.ERROR_MIXED_TYPE.createWithContext(reader), reader.getCursor() + 1);
         }
 
         float num;

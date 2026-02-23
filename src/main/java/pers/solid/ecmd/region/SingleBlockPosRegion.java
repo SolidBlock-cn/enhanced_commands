@@ -7,11 +7,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
@@ -50,13 +50,13 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
   }
 
   @Override
-  public @NotNull Box minContainingBox() {
-    return new Box(new BlockPos(pos));
+  public @NotNull AABB minContainingBox() {
+    return new AABB(new BlockPos(pos));
   }
 
   @Override
-  public @NotNull BlockBox minContainingBlockBox() {
-    return BlockBox.create(pos, pos);
+  public @NotNull BoundingBox minContainingBlockBox() {
+    return BoundingBox.fromCorners(pos, pos);
   }
 
   @Override
@@ -73,8 +73,8 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public Text tooltip() {
-      return Text.translatable("enhanced_commands.region.single");
+    public Component tooltip() {
+      return Component.translatable("enhanced_commands.region.single");
     }
 
     @Override

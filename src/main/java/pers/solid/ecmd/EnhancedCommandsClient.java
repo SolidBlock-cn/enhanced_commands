@@ -6,8 +6,8 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.util.profiler.Profiler;
-import net.minecraft.util.profiler.Profilers;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import pers.solid.ecmd.config.CommandsConfig;
 import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.render.DebugRenderLayerCommand;
@@ -18,7 +18,7 @@ public class EnhancedCommandsClient implements ClientModInitializer {
   public void onInitializeClient() {
     // 注册客户端运行任务的事件
     ClientTickEvents.END_CLIENT_TICK.register(EnhancedCommands.id("tick_iterator_task"), client -> {
-      final Profiler profiler = Profilers.get();
+      final ProfilerFiller profiler = Profiler.get();
       profiler.push("enhanced_commands:tick_iterator_task");
       ((ThreadExecutorExtension) client).ec_advanceTasks();
       profiler.pop();

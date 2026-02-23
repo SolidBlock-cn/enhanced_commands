@@ -1,10 +1,10 @@
 package pers.solid.ecmd.argument;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -55,13 +55,13 @@ public class KeywordArgs {
     return getArg(name);
   }
 
-  public BlockPos getBlockPos(@NotNull String name, ServerCommandSource source) {
-    PosArgument argument = getArg(name);
-    return argument.toAbsoluteBlockPos(source);
+  public BlockPos getBlockPos(@NotNull String name, CommandSourceStack source) {
+    Coordinates argument = getArg(name);
+    return argument.getBlockPos(source);
   }
 
-  public Vec3d getPosition(@NotNull String name, ServerCommandSource source) {
-    PosArgument argument = getArg(name);
-    return argument.getPos(source);
+  public Vec3 getPosition(@NotNull String name, CommandSourceStack source) {
+    Coordinates argument = getArg(name);
+    return argument.getPosition(source);
   }
 }

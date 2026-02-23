@@ -6,9 +6,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtSource;
@@ -18,12 +18,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implements ArgumentType<NbtSource<?>> {
-  public static NbtSourceArgumentType nbtSource(CommandRegistryAccess registryAccess) {
+public record NbtSourceArgumentType(CommandBuildContext registryAccess) implements ArgumentType<NbtSource<?>> {
+  public static NbtSourceArgumentType nbtSource(CommandBuildContext registryAccess) {
     return new NbtSourceArgumentType(registryAccess);
   }
 
-  public static NbtSource<?> getNbtSource(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static NbtSource<?> getNbtSource(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
     return ((NbtSource<?>) context.getArgument(name, NbtSource.class));
   }
 
@@ -54,7 +54,7 @@ public record NbtSourceArgumentType(CommandRegistryAccess registryAccess) implem
       nbtSource = NbtDataRegistry.handleSource(s, parseContext);
       if (nbtSource == null) {
         reader.setCursor(cursorBeforeString);
-        return CommandSource.suggestMatching(NbtDataRegistry.streamSourceTypes(), builder);
+        return SharedSuggestionProvider.suggest(NbtDataRegistry.streamSourceTypes(), builder);
       }
     } catch (CommandSyntaxException ignored) {
     }

@@ -3,12 +3,12 @@ package pers.solid.ecmd.predicate.entity;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.EntitySelectorReader;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.predicate.NumberRange;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -30,27 +30,27 @@ public final class EntitySelectors {
   }
 
   /**
-   * 类似于 {@link EntitySelectorReader#read()}，但是允许省略开头的“@e”等变量。
+   * 类似于 {@link EntitySelectorParser#parse()}，但是允许省略开头的“@e”等变量。
    */
-  public static EntitySelector readOmittibleEntitySelector(@NotNull EntitySelectorReader entitySelectorReader) throws CommandSyntaxException {
+  public static EntitySelector readOmittibleEntitySelector(@NotNull EntitySelectorParser entitySelectorReader) throws CommandSyntaxException {
     final var accessor = (EntitySelectorReaderAccessor) entitySelectorReader;
     final StringReader stringReader = entitySelectorReader.getReader();
 
-    entitySelectorReader.setSuggestionProvider((suggestionsBuilder, suggestionsBuilderConsumer) -> {
+    entitySelectorReader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> {
       suggestionsBuilderConsumer.accept(suggestionsBuilder);
       suggestionsBuilder.suggest("[");
       return suggestionsBuilder.buildFuture();
     });
     if (stringReader.canRead() && stringReader.peek() == '[') {
       stringReader.skip();
-      entitySelectorReader.setIncludesNonPlayers(true);
-      entitySelectorReader.setLimit(Integer.MAX_VALUE);
-      accessor.setUsesAt(true);
-      accessor.callReadArguments();
-      ((EntitySelectorReaderAccessor) entitySelectorReader).callBuildPredicate();
-      return entitySelectorReader.build();
+      entitySelectorReader.setIncludesEntities(true);
+      entitySelectorReader.setMaxResults(Integer.MAX_VALUE);
+      accessor.setUsesSelectors(true);
+      accessor.callParseOptions();
+      ((EntitySelectorReaderAccessor) entitySelectorReader).callFinalizePredicates();
+      return entitySelectorReader.getSelector();
     } else {
-      return entitySelectorReader.read();
+      return entitySelectorReader.parse();
     }
   }
 
@@ -66,21 +66,21 @@ public final class EntitySelectors {
     if (entitySelector.extension$ec().collector != null) {
       entries.add(new CollectorEntityPredicate(entitySelector.extension$ec().collector));
     }
-    if (!accessor.getDistance().isDummy()) {
-      entries.add(new DistanceEntityPredicate(accessor.getDistance(), entitySelector.extension$ec().positionOffsetInfo));
+    if (!accessor.getRange().isAny()) {
+      entries.add(new DistanceEntityPredicate(accessor.getRange(), entitySelector.extension$ec().positionOffsetInfo));
     }
-    if (accessor.getBox() != null) {
-      entries.add(new BoxEntityPredicate(accessor.getBox(), entitySelector.extension$ec().positionOffsetInfo));
+    if (accessor.getAabb() != null) {
+      entries.add(new BoxEntityPredicate(accessor.getAabb(), entitySelector.extension$ec().positionOffsetInfo));
     }
 
-    if (entitySelector.isSenderOnly()) {
+    if (entitySelector.isSelfSelector()) {
       entries.add(SenderOnlyEntityPredicate.INSTANCE);
     }
     if (accessor.getPlayerName() != null) {
       entries.add(new PlayerNameEntityPredicate(accessor.getPlayerName()));
     }
-    if (accessor.getUuid() != null) {
-      entries.add(new UuidEntityPredicateEntry(accessor.getUuid()));
+    if (accessor.getEntityUUID() != null) {
+      entries.add(new UuidEntityPredicateEntry(accessor.getEntityUUID()));
     }
 
     return entries.build();
@@ -99,7 +99,7 @@ public final class EntitySelectors {
    * @see EntitySelectorExtras#getStandardPredicates()
    */
   public static @Unmodifiable List<EntityPredicate> calculateStandardPredicates(EntitySelector entitySelector) {
-    return ((EntitySelectorAccessor) entitySelector).getPredicates()
+    return ((EntitySelectorAccessor) entitySelector).getContextFreePredicates()
         .stream()
         .map(predicate -> {
           if (predicate instanceof EntityPredicate entry) {
@@ -117,40 +117,40 @@ public final class EntitySelectors {
 
   public static String express(EntitySelector entitySelector) {
     final EntitySelectorAccessor accessor = (EntitySelectorAccessor) entitySelector;
-    final boolean includesNonPlayers = entitySelector.includesNonPlayers();
+    final boolean includesNonPlayers = entitySelector.includesEntities();
 
     final EntitySelectorExtras extras = entitySelector.extension$ec();
     final List<EntityPredicate> standardPredicates = extras.getStandardPredicates();
 
     if (accessor.getPlayerName() != null && standardPredicates.isEmpty()) {
       return accessor.getPlayerName();
-    } else if (accessor.getUuid() != null && standardPredicates.isEmpty()) {
-      return accessor.getUuid().toString();
+    } else if (accessor.getEntityUUID() != null && standardPredicates.isEmpty()) {
+      return accessor.getEntityUUID().toString();
     }
 
     final StringJoiner joiner = new StringJoiner(", ", "[", "]").setEmptyValue("");
     boolean requireAlive = false;
     final EntitySelectorCollector collector = extras.collector;
-    final int limit = entitySelector.getLimit();
+    final int limit = entitySelector.getMaxResults();
     boolean hasExplicitLimit = false;
     boolean hasExplicitSorter = false;
     String atVariable = null;
-    final BiConsumer<Vec3d, List<? extends Entity>> sorter = accessor.getSorter();
+    final BiConsumer<Vec3, List<? extends Entity>> sorter = accessor.getOrder();
 
     if (extras.collectorOf != null) {
       joiner.add("of=" + express(extras.collectorOf));
     }
 
-    if (limit < Integer.MAX_VALUE && !(collector != null && EntitySelectorTypeExtras.FORCE_ONE_LIMIT.contains(collector.asString())) && !entitySelector.isSenderOnly()) {
-      if (!EntitySelectorReader.NEAREST.equals(sorter) && !(!includesNonPlayers && EntitySelectorReader.RANDOM.equals(sorter))) {
+    if (limit < Integer.MAX_VALUE && !(collector != null && EntitySelectorTypeExtras.FORCE_ONE_LIMIT.contains(collector.getSerializedName())) && !entitySelector.isSelfSelector()) {
+      if (!EntitySelectorParser.ORDER_NEAREST.equals(sorter) && !(!includesNonPlayers && EntitySelectorParser.ORDER_RANDOM.equals(sorter))) {
         joiner.add("limit=" + limit);
         hasExplicitLimit = true;
       }
     }
-    if (!EntitySelector.ARBITRARY.equals(sorter)) {
-      if (EntitySelectorReader.NEAREST.equals(sorter)) {
+    if (!EntitySelector.ORDER_ARBITRARY.equals(sorter)) {
+      if (EntitySelectorParser.ORDER_NEAREST.equals(sorter)) {
         atVariable = includesNonPlayers ? "n" : "p";
-      } else if (EntitySelectorReader.RANDOM.equals(sorter) && !includesNonPlayers) {
+      } else if (EntitySelectorParser.ORDER_RANDOM.equals(sorter) && !includesNonPlayers) {
         atVariable = "r";
       } else {
         joiner.add("sort=" + CodecUtil.SORTER_MAP.inverse().get(sorter));
@@ -171,7 +171,7 @@ public final class EntitySelectors {
       }
     }
 
-    final Vec3d dxDyDz = extras.dxDyDz;
+    final Vec3 dxDyDz = extras.dxDyDz;
     if (dxDyDz != null) {
       if (dxDyDz.x != 0) {
         joiner.add("dx=" + StringUtil.nf.format(dxDyDz.x));
@@ -184,8 +184,8 @@ public final class EntitySelectors {
       }
     }
 
-    final NumberRange.DoubleRange distance = accessor.getDistance();
-    if (!distance.isDummy()) {
+    final MinMaxBounds.Doubles distance = accessor.getRange();
+    if (!distance.isAny()) {
       joiner.add("distance=" + StringUtil.wrapRange(distance));
     }
 
@@ -202,11 +202,11 @@ public final class EntitySelectors {
     }
 
     if (collector != null) {
-      atVariable = collector.asString();
+      atVariable = collector.getSerializedName();
     } else if (atVariable == null) {
-      if (entitySelector.isSenderOnly()) {
+      if (entitySelector.isSelfSelector()) {
         atVariable = "s";
-      } else if (!includesNonPlayers && accessor.getEntityFilter() == EntityType.PLAYER && !requireAlive && !hasExplicitType) {
+      } else if (!includesNonPlayers && accessor.getType() == EntityType.PLAYER && !requireAlive && !hasExplicitType) {
         atVariable = "a";
       } else {
         atVariable = requireAlive ? "e" : "E";
@@ -236,19 +236,19 @@ public final class EntitySelectors {
     final EntitySelectorExtras e1 = o1.extension$ec();
     final EntitySelectorExtras e2 = o2.extension$ec();
 
-    if (o1.getLimit() != o2.getLimit()
-        || o1.includesNonPlayers() != o2.includesNonPlayers()
-        || o1.isLocalWorldOnly() != o2.isLocalWorldOnly()
+    if (o1.getMaxResults() != o2.getMaxResults()
+        || o1.includesEntities() != o2.includesEntities()
+        || o1.isWorldLimited() != o2.isWorldLimited()
         || !Objects.equals(e1.getStandardPredicates(), e2.getStandardPredicates())
-        || !Objects.equals(a1.getDistance(), a2.getDistance())
+        || !Objects.equals(a1.getRange(), a2.getRange())
         || !Objects.equals(e1.positionOffsetInfo, e2.positionOffsetInfo)
         || !Objects.equals(e1.dxDyDz, e2.dxDyDz)
-        || a1.getSorter() != a2.getSorter()
-        || o1.isSenderOnly() != o2.isSenderOnly()
+        || a1.getOrder() != a2.getOrder()
+        || o1.isSelfSelector() != o2.isSelfSelector()
         || !Objects.equals(a1.getPlayerName(), a2.getPlayerName())
-        || !Objects.equals(a1.getUuid(), a2.getUuid())
-        || !Objects.equals(a1.getEntityFilter(), a2.getEntityFilter())
-        || o1.usesAt() != o2.usesAt()) {
+        || !Objects.equals(a1.getEntityUUID(), a2.getEntityUUID())
+        || !Objects.equals(a1.getType(), a2.getType())
+        || o1.usesSelector() != o2.usesSelector()) {
       return false;
     }
 
@@ -256,8 +256,8 @@ public final class EntitySelectors {
       return false;
     }
 
-    if (!Objects.equals(a1.getBox(), a2.getBox())) {
-      EntitySelectorExtras.LOGGER.warn("Two entity selectors have the same distance, xyz and dxDyDz, but the boxes are different: distance1={}, distance2={}, xyz1={}, xyz2={}, box1={}, box2={}", a1.getDistance(), a2.getDistance(), e1.positionOffsetInfo, e2.positionOffsetInfo, e1.dxDyDz, e2.dxDyDz);
+    if (!Objects.equals(a1.getAabb(), a2.getAabb())) {
+      EntitySelectorExtras.LOGGER.warn("Two entity selectors have the same distance, xyz and dxDyDz, but the boxes are different: distance1={}, distance2={}, xyz1={}, xyz2={}, box1={}, box2={}", a1.getRange(), a2.getRange(), e1.positionOffsetInfo, e2.positionOffsetInfo, e1.dxDyDz, e2.dxDyDz);
       return false;
     }
 
@@ -269,18 +269,18 @@ public final class EntitySelectors {
     final EntitySelectorExtras e = o.extension$ec();
 
     final HashCodeBuilder hashCodeBuilder = new HashCodeBuilder()
-        .append(o.getLimit())
-        .append(o.includesNonPlayers())
-        .append(o.isLocalWorldOnly())
+        .append(o.getMaxResults())
+        .append(o.includesEntities())
+        .append(o.isWorldLimited())
         .append(e.getStandardPredicates())
-        .append(a.getDistance())
+        .append(a.getRange())
         .append(e.positionOffsetInfo)
         .append(e.dxDyDz)
-        .append(a.getSorter())
-        .append(o.isSenderOnly())
+        .append(a.getOrder())
+        .append(o.isSelfSelector())
         .append(a.getPlayerName())
-        .append(a.getUuid())
-        .append(a.getEntityFilter());
+        .append(a.getEntityUUID())
+        .append(a.getType());
 
     hashCodeBuilder.append(e.collector);
 

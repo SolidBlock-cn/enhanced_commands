@@ -7,8 +7,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,8 +98,8 @@ public record ListOpsNbtFunction(@NotNull List<NbtFunction> valueReplacements, @
   }
 
   @Override
-  public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
-    final NbtList targetList = nbtElement instanceof final NbtList nbtList ? nbtList : new NbtList();
+  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+    final ListTag targetList = nbtElement instanceof final ListTag nbtList ? nbtList : new ListTag();
     if (!valueReplacements.isEmpty()) {
       targetList.clear();
       try {
@@ -117,7 +117,7 @@ public record ListOpsNbtFunction(@NotNull List<NbtFunction> valueReplacements, @
           index += targetList.size();
         }
         try {
-          targetList.setElement(index, function.apply(targetList.get(index), context));
+          targetList.setTag(index, function.apply(targetList.get(index), context));
         } catch (UnsupportedOperationException | IndexOutOfBoundsException ignored) {
         }
       }

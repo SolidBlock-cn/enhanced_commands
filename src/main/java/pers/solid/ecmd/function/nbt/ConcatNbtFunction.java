@@ -7,34 +7,34 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.text.Text;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public sealed interface ConcatNbtFunction extends NbtFunction {
-  DynamicCommandExceptionType CONCAT_ELEMENT_INVALID = new DynamicCommandExceptionType(t -> Text.translatable("enhanced_commands.nbt_function.concat.concat_element_invalid", t));
-  DynamicCommandExceptionType CONCAT_NOT_LIST = new DynamicCommandExceptionType(t -> Text.translatable("enhanced_commands.nbt_function.concat.concat_not_list", t));
+  DynamicCommandExceptionType CONCAT_ELEMENT_INVALID = new DynamicCommandExceptionType(t -> Component.translatable("enhanced_commands.nbt_function.concat.concat_element_invalid", t));
+  DynamicCommandExceptionType CONCAT_NOT_LIST = new DynamicCommandExceptionType(t -> Component.translatable("enhanced_commands.nbt_function.concat.concat_not_list", t));
   MapCodec<ConcatNbtFunction> CODEC = Codec.BOOL.dispatchMap("flatten", ConcatNbtFunction::flatten, flatten -> flatten ? Flattened.CODEC : Direct.CODEC);
 
-  private static String nbtToString(NbtElement nbtElement) throws CommandSyntaxException {
-    if (nbtElement instanceof NbtString nbtString) {
-      return nbtString.asString();
-    } else if (nbtElement instanceof AbstractNbtNumber number) {
-      return number.numberValue().toString();
+  private static String nbtToString(Tag nbtElement) throws CommandSyntaxException {
+    if (nbtElement instanceof StringTag nbtString) {
+      return nbtString.getAsString();
+    } else if (nbtElement instanceof NumericTag number) {
+      return number.getAsNumber().toString();
     } else {
-      throw CONCAT_ELEMENT_INVALID.create(nbtElement.getNbtType().getCommandFeedbackName());
+      throw CONCAT_ELEMENT_INVALID.create(nbtElement.getType().getPrettyName());
     }
   }
 
@@ -42,7 +42,7 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
 
   boolean flatten();
 
-  default String delimiterString(NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  default String delimiterString(Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (delimiter().isPresent()) {
       return nbtToString(delimiter().get().apply(nbtElement, context));
     } else {
@@ -83,12 +83,12 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
 
     @Override
-    public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
+    public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
       final StringJoiner joiner = new StringJoiner(delimiterString(nbtElement, context));
       for (NbtFunction element : elements) {
         joiner.add(nbtToString(element.apply(nbtElement, context)));
       }
-      return NbtString.of(joiner.toString());
+      return StringTag.valueOf(joiner.toString());
     }
   }
 
@@ -109,9 +109,9 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
 
     @Override
-    public @NotNull NbtElement apply(@Nullable NbtElement nbtElement, ExecutionContext context) throws CommandSyntaxException {
-      final NbtElement applied = element.apply(nbtElement, context);
-      if (applied instanceof NbtList nbtList) {
+    public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+      final Tag applied = element.apply(nbtElement, context);
+      if (applied instanceof ListTag nbtList) {
         final String delimiterString;
         if (delimiter.isPresent()) {
           delimiterString = nbtToString(delimiter.get().apply(nbtElement, context));
@@ -119,12 +119,12 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
           delimiterString = "";
         }
         final StringJoiner joiner = new StringJoiner(delimiterString);
-        for (NbtElement element : nbtList) {
+        for (Tag element : nbtList) {
           joiner.add(nbtToString(element));
         }
-        return NbtString.of(joiner.toString());
+        return StringTag.valueOf(joiner.toString());
       } else {
-        throw CONCAT_NOT_LIST.create(applied.getNbtType().getCommandFeedbackName());
+        throw CONCAT_NOT_LIST.create(applied.getType().getPrettyName());
       }
     }
   }

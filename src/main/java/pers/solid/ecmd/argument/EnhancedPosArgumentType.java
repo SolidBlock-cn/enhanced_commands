@@ -12,24 +12,25 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientCommandSource;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.command.argument.Vec3ArgumentType;
-import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.StringIdentifiable;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
@@ -44,19 +45,19 @@ import java.util.concurrent.CompletableFuture;
 import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 
 /**
- * Similar to {@link net.minecraft.command.argument.BlockPosArgumentType} and {@link Vec3ArgumentType}, with some slight modifications.
+ * Similar to {@link net.minecraft.commands.arguments.coordinates.BlockPosArgument} and {@link Vec3Argument}, with some slight modifications.
  *
  * @param numberType   The behavior of the argument type when accepting different coordinates.
  * @param intAlignType
- * @see PosArgument
- * @see net.minecraft.command.argument.BlockPosArgumentType
- * @see Vec3ArgumentType
+ * @see Coordinates
+ * @see net.minecraft.commands.arguments.coordinates.BlockPosArgument
+ * @see Vec3Argument
  */
-public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<EnhancedPosArgument>, ArgumentSerializer.ArgumentTypeProperties<EnhancedPosArgumentType> {
+public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<EnhancedPosArgument>, ArgumentTypeInfo.Template<EnhancedPosArgumentType> {
   public static final EnhancedPosArgument CURRENT_POS = EnhancedPosArgument.DefaultPos.doubleBased(0, 0, 0, true, true, true);
   public static final EnhancedPosArgument CURRENT_BLOCK_POS_CENTER = EnhancedPosArgument.DefaultPos.intBased(0, 0, 0, true, true, true, IntAlignType.CENTERED);
 
-  public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.argument.pos.local_coordinates_not_allowed"));
+  public static final SimpleCommandExceptionType LOOKING_DIRECTION_NOT_ALLOWED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.pos.local_coordinates_not_allowed"));
 
   public static EnhancedPosArgumentType blockPos() {
     return new EnhancedPosArgumentType(NumberType.INT_ONLY, IntAlignType.UNCHANGED);
@@ -73,56 +74,56 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   /**
    * 获取方块坐标，且不检查是否在加载的区块内以及坐标是否有效。
    */
-  public static BlockPos getBlockPos(CommandContext<ServerCommandSource> context, String name) {
-    return getPosArgument(context, name).toAbsoluteBlockPos(context.getSource());
+  public static BlockPos getBlockPos(CommandContext<CommandSourceStack> context, String name) {
+    return getPosArgument(context, name).getBlockPos(context.getSource());
   }
 
   /**
    * 获取方块坐标，并检查是否在已加载的区块内，不会检查坐标是否在高度限制内。
    */
-  public static BlockPos getLoadedBlockPos(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return checkChunkLoaded(context.getSource().getWorld(), getBlockPos(context, name));
+  public static BlockPos getLoadedBlockPos(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
+    return checkChunkLoaded(context.getSource().getLevel(), getBlockPos(context, name));
   }
 
   /**
    * 获取方块坐标，并检查方块坐标是否可用于放置方块，不会检查坐标是否在已加载的区块内。
    */
-  public static BlockPos getBuildableBlockPos(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
-    return checkBuildLimit(context.getSource().getWorld(), getBlockPos(context, name));
+  public static BlockPos getBuildableBlockPos(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
+    return checkBuildLimit(context.getSource().getLevel(), getBlockPos(context, name));
   }
 
   /**
    * 获取方块坐标，并检查方块坐标是否在已加载的区块内且在建筑的范围限制内。
    *
-   * @see net.minecraft.command.argument.BlockPosArgumentType#getLoadedBlockPos(CommandContext, ServerWorld, String)
+   * @see net.minecraft.commands.arguments.coordinates.BlockPosArgument#getLoadedBlockPos(CommandContext, ServerLevel, String)
    */
-  public static BlockPos getLoadedBuildableBlockPos(CommandContext<ServerCommandSource> context, String name) throws CommandSyntaxException {
+  public static BlockPos getLoadedBuildableBlockPos(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
     final BlockPos blockPos = getBlockPos(context, name);
-    final ServerWorld world = context.getSource().getWorld();
+    final ServerLevel world = context.getSource().getLevel();
     checkChunkLoaded(world, blockPos);
     checkBuildLimit(world, blockPos);
     return blockPos;
   }
 
 
-  public static Vec3d getPos(CommandContext<ServerCommandSource> context, String name) {
-    return context.getArgument(name, PosArgument.class).getPos(context.getSource());
+  public static Vec3 getPos(CommandContext<CommandSourceStack> context, String name) {
+    return context.getArgument(name, Coordinates.class).getPosition(context.getSource());
   }
 
-  public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.unloaded", pos));
-  public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.out_of_build_limit", pos));
-  public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Text.translatable("enhanced_commands.argument.pos.out_of_bounds", pos));
-  public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Text.translatable("enhanced_commands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
+  public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.unloaded", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.out_of_build_limit", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.out_of_bounds", pos));
+  public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Component.translatable("enhanced_commands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
 
-  public static <T extends BlockPos> T checkChunkLoaded(ServerWorld world, T blockPos) throws CommandSyntaxException {
-    if (!world.isChunkLoaded(blockPos)) {
+  public static <T extends BlockPos> T checkChunkLoaded(ServerLevel world, T blockPos) throws CommandSyntaxException {
+    if (!world.hasChunkAt(blockPos)) {
       throw UNLOADED_EXCEPTION.create(TextUtil.wrapVector(blockPos));
     }
     return blockPos;
   }
 
-  public static <T extends BlockPos> T checkBuildLimit(ServerWorld world, T blockPos) throws CommandSyntaxException {
-    if (!world.isInBuildLimit(blockPos)) {
+  public static <T extends BlockPos> T checkBuildLimit(ServerLevel world, T blockPos) throws CommandSyntaxException {
+    if (!world.isInWorldBounds(blockPos)) {
       if (!isValidHorizontally(blockPos)) {
         throw OUT_OF_HORIZONTAL_BOUNDS.create(TextUtil.wrapVector(blockPos), -30000000, 30000000);
       } else {
@@ -143,7 +144,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   @Override
   public EnhancedPosArgument parse(StringReader reader) throws CommandSyntaxException {
     if (!reader.canRead()) {
-      throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+      throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
     }
 
     // try to read a looking pos
@@ -151,12 +152,12 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
       double[] values = new double[3];
       for (int i = 0; i < 3; i++) {
         if (!reader.canRead()) {
-          throw withCursorEnd(Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
+          throw withCursorEnd(Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader), reader.getCursor() + 1);
         }
         if (reader.peek() == '^') {
           reader.skip();
         } else {
-          throw withCursorEnd(Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
+          throw withCursorEnd(Vec3Argument.ERROR_MIXED_TYPE.createWithContext(reader), reader.getCursor() + 1);
         }
         final double num;
         if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
@@ -180,7 +181,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
       boolean isDoublePos = numberType.doubleOnly();
       for (int i = 0; i < 3; i++) {
         if (!reader.canRead()) {
-          throw Vec3ArgumentType.INCOMPLETE_EXCEPTION.createWithContext(reader);
+          throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
         }
 
         // whether the coordinate has a tilde. It will be used to parse, instead of identifying the type of coordinate — relative-only argument types can have implicit relative coordinates without a tilde.
@@ -192,7 +193,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
           hasTilde = true;
           reader.skip();
         } else if (reader.peek() == '^') {
-          throw withCursorEnd(Vec3ArgumentType.MIXED_COORDINATE_EXCEPTION.createWithContext(reader), reader.getCursor() + 1);
+          throw withCursorEnd(Vec3Argument.ERROR_MIXED_TYPE.createWithContext(reader), reader.getCursor() + 1);
         }
 
         if (numberType.intOnly()) {
@@ -243,13 +244,13 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 
-    @Nullable Vec3d crossHairPos = null;
+    @Nullable Vec3 crossHairPos = null;
     @Nullable Vec3i crossHairBlockPos = null;
-    if (context.getSource() instanceof ClientCommandSource clientCommandSource) {
-      final MinecraftClient client = ((FabricClientCommandSource) clientCommandSource).getClient();
-      if (client.crosshairTarget != null && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
-        crossHairPos = client.crosshairTarget.getPos();
-        if (client.crosshairTarget instanceof BlockHitResult blockHitResult) {
+    if (context.getSource() instanceof ClientSuggestionProvider clientCommandSource) {
+      final Minecraft client = ((FabricClientCommandSource) clientCommandSource).getClient();
+      if (client.hitResult != null && client.hitResult.getType() == HitResult.Type.BLOCK) {
+        crossHairPos = client.hitResult.getLocation();
+        if (client.hitResult instanceof BlockHitResult blockHitResult) {
           crossHairBlockPos = blockHitResult.getBlockPos();
         }
       }
@@ -259,7 +260,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     final StringReader reader = new StringReader(builder.getInput());
     reader.setCursor(builder.getStart());
     if (!reader.canRead()) {
-      builder.suggest("^^^", Text.translatable("enhanced_commands.argument.pos.local_coordinate"));
+      builder.suggest("^^^", Component.translatable("enhanced_commands.argument.pos.local_coordinate"));
     }
     if (reader.canRead() && reader.peek() == '^') {
       int i;
@@ -279,7 +280,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
         reader.skipWhitespace();
       }
       if (i < 3) {
-        builder.suggest("^".repeat(3 - i), Text.translatable("enhanced_commands.argument.pos.local_coordinate.remaining"));
+        builder.suggest("^".repeat(3 - i), Component.translatable("enhanced_commands.argument.pos.local_coordinate.remaining"));
       }
     } else {
       int i;
@@ -306,14 +307,14 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
         }
       }
       if (i < 3) {
-        builder.suggest("~".repeat(3 - i), i == 0 ? Text.translatable("enhanced_commands.argument.pos.relative_coordinate") : Text.translatable("enhanced_commands.argument.pos.relative_coordinate.remaining"));
+        builder.suggest("~".repeat(3 - i), i == 0 ? Component.translatable("enhanced_commands.argument.pos.relative_coordinate") : Component.translatable("enhanced_commands.argument.pos.relative_coordinate.remaining"));
         if (i == 0 || reader.canRead(-1) && Character.isWhitespace(reader.peek(-1))) {
           // 确保在建议数字时，前面必须已经是一个空格，或者还没有参数。
           if (crossHairBlockPos != null && !numberType.doubleOnly()) {
             switch (i) {
-              case 0 -> builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int"));
-              case 1 -> builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
-              case 2 -> builder.suggest(crossHairBlockPos.getZ(), Text.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
+              case 0 -> builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int"));
+              case 1 -> builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
+              case 2 -> builder.suggest(crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
             }
           }
           if (crossHairPos != null && !numberType.intOnly()) {
@@ -321,9 +322,9 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
             nf.setGroupingUsed(false);
             nf.setMaximumFractionDigits(Integer.MAX_VALUE);
             switch (i) {
-              case 0 -> builder.suggest(nf.format(crossHairPos.getX()) + " " + nf.format(crossHairPos.getY()) + " " + nf.format(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double"));
-              case 1 -> builder.suggest(nf.format(crossHairPos.getY()) + " " + nf.format(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
-              case 2 -> builder.suggest(nf.format(crossHairPos.getZ()), Text.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+              case 0 -> builder.suggest(nf.format(crossHairPos.x()) + " " + nf.format(crossHairPos.y()) + " " + nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double"));
+              case 1 -> builder.suggest(nf.format(crossHairPos.y()) + " " + nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+              case 2 -> builder.suggest(nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
             }
           }
         }
@@ -344,40 +345,40 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   }
 
   @Override
-  public EnhancedPosArgumentType createType(CommandRegistryAccess registryAccess) {
+  public EnhancedPosArgumentType instantiate(CommandBuildContext registryAccess) {
     return this;
   }
 
   @Override
-  public ArgumentSerializer<EnhancedPosArgumentType, EnhancedPosArgumentType> getSerializer() {
+  public ArgumentTypeInfo<EnhancedPosArgumentType, EnhancedPosArgumentType> type() {
     return Serializer.INSTANCE;
   }
 
-  public static class Serializer implements ArgumentSerializer<EnhancedPosArgumentType, EnhancedPosArgumentType> {
+  public static class Serializer implements ArgumentTypeInfo<EnhancedPosArgumentType, EnhancedPosArgumentType> {
     public static final Serializer INSTANCE = new Serializer();
 
     private Serializer() {
     }
 
     @Override
-    public void writePacket(EnhancedPosArgumentType properties, PacketByteBuf buf) {
-      buf.writeEnumConstant(properties.numberType);
-      buf.writeEnumConstant(properties.intAlignType);
+    public void serializeToNetwork(EnhancedPosArgumentType properties, FriendlyByteBuf buf) {
+      buf.writeEnum(properties.numberType);
+      buf.writeEnum(properties.intAlignType);
     }
 
     @Override
-    public EnhancedPosArgumentType fromPacket(PacketByteBuf buf) {
-      return new EnhancedPosArgumentType(buf.readEnumConstant(NumberType.class), buf.readEnumConstant(IntAlignType.class));
+    public EnhancedPosArgumentType deserializeFromNetwork(FriendlyByteBuf buf) {
+      return new EnhancedPosArgumentType(buf.readEnum(NumberType.class), buf.readEnum(IntAlignType.class));
     }
 
     @Override
-    public void writeJson(EnhancedPosArgumentType properties, JsonObject json) {
+    public void serializeToJson(EnhancedPosArgumentType properties, JsonObject json) {
       json.addProperty("numberType", properties.numberType.ordinal());
       json.addProperty("intAlignType", properties.intAlignType.ordinal());
     }
 
     @Override
-    public EnhancedPosArgumentType getArgumentTypeProperties(EnhancedPosArgumentType argumentType) {
+    public @NotNull EnhancedPosArgumentType unpack(EnhancedPosArgumentType argumentType) {
       return argumentType;
     }
   }
@@ -419,7 +420,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   /**
    * 指定了整数坐标（没有小数部分）如何对齐到精确坐标（浮点数坐标）。浮点数（包括数值上等于整数但指定了小数部分的数）不会受到影响。
    */
-  public enum IntAlignType implements StringIdentifiable {
+  public enum IntAlignType implements StringRepresentable {
 
     /**
      * 不改变值，即整数坐标会被解析成数值相等的浮点坐标。例如：(1, 2, 3) -> (1.0, 2.0, 3.0)。
@@ -468,12 +469,12 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
       return name;
     }
 
-    public Vec3d mayAdjustToCenter(Vec3i vec3i) {
-      return new Vec3d(mayAdjustToCenter(vec3i.getX(), 0), mayAdjustToCenter(vec3i.getY(), 1), mayAdjustToCenter(vec3i.getZ(), 2));
+    public Vec3 mayAdjustToCenter(Vec3i vec3i) {
+      return new Vec3(mayAdjustToCenter(vec3i.getX(), 0), mayAdjustToCenter(vec3i.getY(), 1), mayAdjustToCenter(vec3i.getZ(), 2));
     }
   }
 }

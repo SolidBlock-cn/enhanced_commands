@@ -4,17 +4,17 @@ import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricDynamicRegistryProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.noise.DoublePerlinNoiseSampler;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.levelgen.synth.NormalNoise;
+import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.function.block.*;
 import pers.solid.ecmd.function.property.AllOriginalPropertyNameFunctions;
@@ -39,12 +39,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
-  public BlockFunctionDataGeneration(FabricDataOutput output, CompletableFuture<RegistryWrapper.WrapperLookup> registriesFuture) {
+  public BlockFunctionDataGeneration(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
     super(output, registriesFuture);
   }
 
-  protected static RegistryKey<BlockFunction> of(String value) {
-    return RegistryKey.of(BlockFunction.REGISTRY_KEY, EnhancedCommands.id(value));
+  protected static ResourceKey<BlockFunction> of(String value) {
+    return ResourceKey.create(BlockFunction.REGISTRY_KEY, EnhancedCommands.id(value));
   }
 
   protected static WeightedList.Uniform<BlockFunction> uniformSimple(Block... blocks) {
@@ -52,19 +52,19 @@ public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
   }
 
   @Override
-  protected void configure(RegistryWrapper.WrapperLookup registries, Entries entries) {
+  protected void configure(HolderLookup.Provider registries, Entries entries) {
     entries.add(of("typical_checkerboard"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE)));
-    entries.add(of("typical_checkerboard_large"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), new Vec3d(4, 4, 4), Checkerboard.UNIT, Checkerboard.UNIT));
-    entries.add(of("typical_checkerboard_strip"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), Checkerboard.UNIT, new Vec3d(0.25f, 0.25f, 0.25f), Vec3d.ZERO));
+    entries.add(of("typical_checkerboard_large"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), new Vec3(4, 4, 4), Checkerboard.UNIT, Checkerboard.UNIT));
+    entries.add(of("typical_checkerboard_strip"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), Checkerboard.UNIT, new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
     entries.add(of("rainbow_checkerboard"), new CheckerboardBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE)));
-    entries.add(of("rainbow_checkerboard_large"), new CheckerboardBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), Checkerboard.UNIT, new Vec3d(1 / 3f, 1 / 3f, 1 / 3f), Vec3d.ZERO));
-    entries.add(of("typical_noise"), new NoiseBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), OptionalLong.empty(), new DoublePerlinNoiseSampler.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), Noise.UNIT, Vec3d.ZERO));
-    entries.add(of("typical_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), OptionalLong.empty(), new DoublePerlinNoiseSampler.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3d(0.25f, 0.25f, 0.25f), Vec3d.ZERO));
-    entries.add(of("rainbow_noise"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new DoublePerlinNoiseSampler.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3d(0.25f, 0.25f, 0.25f), Vec3d.ZERO));
-    entries.add(of("rainbow_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new DoublePerlinNoiseSampler.NoiseParameters(-2, Noise.DEFAULT_AMPLITUDES), new Vec3d(0.125f, 0.125f, 0.125f), Vec3d.ZERO));
+    entries.add(of("rainbow_checkerboard_large"), new CheckerboardBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), Checkerboard.UNIT, new Vec3(1 / 3f, 1 / 3f, 1 / 3f), Vec3.ZERO));
+    entries.add(of("typical_noise"), new NoiseBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), Noise.UNIT, Vec3.ZERO));
+    entries.add(of("typical_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
+    entries.add(of("rainbow_noise"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
+    entries.add(of("rainbow_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-2, Noise.DEFAULT_AMPLITUDES), new Vec3(0.125f, 0.125f, 0.125f), Vec3.ZERO));
 
     final var natualizeIgnore = new TagBlockPredicate(ModBlockTags.NATUALIZE_IGNORE);
-    final RegistryWrapper.Impl<Block> wrapper = registries.getOrThrow(RegistryKeys.BLOCK);
+    final HolderLookup.RegistryLookup<Block> wrapper = registries.lookupOrThrow(Registries.BLOCK);
     entries.add(of("naturalize_vegetation"), new ConditionsBlockFunction(
         new ConditionalBlockFunction(
             new TagBlockPredicate(ModBlockTags.NETHER_FUNGUS),
@@ -171,23 +171,23 @@ public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
                     new SimpleBlockFunction(Blocks.AIR),
                     EmptyBlockFunction.INSTANCE
                 ),
-                    Vec3d.ZERO,
-                    new Vec3d(1, 0, 0),
-                    Vec3d.ZERO
+                    Vec3.ZERO,
+                    new Vec3(1, 0, 0),
+                    Vec3.ZERO
                 )),
-                Vec3d.ZERO,
-                new Vec3d(0, 1, 0),
-                Vec3d.ZERO
+                Vec3.ZERO,
+                new Vec3(0, 1, 0),
+                Vec3.ZERO
             )),
-        Vec3d.ZERO,
-        new Vec3d(0, 0, 1),
-        Vec3d.ZERO
+        Vec3.ZERO,
+        new Vec3(0, 0, 1),
+        Vec3.ZERO
     ));
     entries.add(of("any_dried_block"), new DryBlockFunction(RandomBlockFunction.RANDOM_SEED));
     entries.add(of("white_gray_stone_checker"), new CheckerboardBlockFunction(new WeightedList.Uniform<>(
         new ReferenceBlockFunction(of("white_colors")),
         new ReferenceBlockFunction(of("gray_colors"))
-    ), Vec3d.ZERO, new Vec3d(3, 3, 3), Vec3d.ZERO));
+    ), Vec3.ZERO, new Vec3(3, 3, 3), Vec3.ZERO));
     entries.add(of("crimsonize"), new PropertiesNbtCombinationBlockFunction(
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(new TagBlockPredicate(ModBlockTags.OVERLAID_DIRT),
@@ -201,7 +201,7 @@ public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
                 new SimpleBlockFunction(Blocks.CRIMSON_FUNGUS)
             ),
             new ConditionalBlockFunction(
-                new AnyBlockPredicate(new SimpleBlockPredicate(Blocks.SHORT_GRASS), new SimpleBlockPredicate(Blocks.FERN), new SimpleBlockPredicate(Blocks.TALL_GRASS, List.of(new ComparisonPropertyPredicate<>(Properties.DOUBLE_BLOCK_HALF, Comparator.EQ, DoubleBlockHalf.LOWER)))),
+                new AnyBlockPredicate(new SimpleBlockPredicate(Blocks.SHORT_GRASS), new SimpleBlockPredicate(Blocks.FERN), new SimpleBlockPredicate(Blocks.TALL_GRASS, List.of(new ComparisonPropertyPredicate<>(BlockStateProperties.DOUBLE_BLOCK_HALF, Comparator.EQ, DoubleBlockHalf.LOWER)))),
                 new SimpleBlockFunction(Blocks.CRIMSON_ROOTS)
             ),
             new ConditionalBlockFunction(
@@ -234,7 +234,7 @@ public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
                 new SimpleBlockFunction(Blocks.WARPED_FUNGUS)
             ),
             new ConditionalBlockFunction(
-                new AnyBlockPredicate(new SimpleBlockPredicate(Blocks.SHORT_GRASS), new SimpleBlockPredicate(Blocks.FERN), new SimpleBlockPredicate(Blocks.TALL_GRASS, List.of(new ComparisonPropertyPredicate<>(Properties.DOUBLE_BLOCK_HALF, Comparator.EQ, DoubleBlockHalf.LOWER)))),
+                new AnyBlockPredicate(new SimpleBlockPredicate(Blocks.SHORT_GRASS), new SimpleBlockPredicate(Blocks.FERN), new SimpleBlockPredicate(Blocks.TALL_GRASS, List.of(new ComparisonPropertyPredicate<>(BlockStateProperties.DOUBLE_BLOCK_HALF, Comparator.EQ, DoubleBlockHalf.LOWER)))),
                 new SimpleBlockFunction(Blocks.WARPED_ROOTS)
             ),
             new ConditionalBlockFunction(

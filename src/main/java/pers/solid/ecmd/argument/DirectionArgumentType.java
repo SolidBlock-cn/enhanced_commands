@@ -3,15 +3,15 @@ package pers.solid.ecmd.argument;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.argument.EnumArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.math.Direction;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.StringRepresentableArgument;
+import net.minecraft.core.Direction;
 import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-public class DirectionArgumentType extends EnumArgumentType<DirectionArgument> {
+public class DirectionArgumentType extends StringRepresentableArgument<DirectionArgument> {
   public DirectionArgumentType() {
     super(DirectionArgument.CODEC, DirectionArgument::values);
   }
@@ -20,7 +20,7 @@ public class DirectionArgumentType extends EnumArgumentType<DirectionArgument> {
     return new DirectionArgumentType();
   }
 
-  public static Direction getDirection(CommandContext<ServerCommandSource> context, String name) {
+  public static Direction getDirection(CommandContext<CommandSourceStack> context, String name) {
     return context.getArgument(name, DirectionArgument.class).apply(context.getSource());
   }
 

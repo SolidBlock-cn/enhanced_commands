@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
@@ -27,7 +27,7 @@ public record AllRandomPropertyNameFunction(@NotNull Set<String> except) impleme
   }
 
   @Override
-  public BlockState getModifiedState(BlockState origState, BlockState blockState, Random random) {
+  public BlockState getModifiedState(BlockState origState, BlockState blockState, RandomSource random) {
     if (except.isEmpty()) {
       return StateUtil.getBlockWithRandomProperties(blockState.getBlock(), random);
     } else {

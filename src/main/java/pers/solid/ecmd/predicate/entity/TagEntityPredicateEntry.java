@@ -3,9 +3,9 @@ package pers.solid.ecmd.predicate.entity;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -22,29 +22,29 @@ public record TagEntityPredicateEntry(@NotNull String tag, boolean inverted) imp
   @Override
   public boolean test(@NotNull Entity entity) {
     if (tag.isEmpty()) {
-      return entity.getCommandTags().isEmpty() != inverted;
+      return entity.getTags().isEmpty() != inverted;
     } else {
-      return entity.getCommandTags().contains(tag) != inverted;
+      return entity.getTags().contains(tag) != inverted;
     }
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Text displayName) {
-    final Set<String> commandTags = entity.getCommandTags();
+  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+    final Set<String> commandTags = entity.getTags();
     if (tag.isEmpty()) {
       // 检测实体是否没有任何标签
       if (commandTags.isEmpty()) {
-        return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.tag.empty", displayName));
+        return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.tag.empty", displayName));
       } else {
-        return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.tag.any", displayName));
+        return TestResult.of(inverted, Component.translatable("enhanced_commands.entity_predicate.tag.any", displayName));
       }
     } else {
       // 检测实体是否拥有指定的标签
-      final MutableText tagNameText = Text.literal(tag).styled(Styles.EXPECTED);
+      final MutableComponent tagNameText = Component.literal(tag).withStyle(Styles.EXPECTED);
       if (commandTags.contains(tag)) {
-        return TestResult.of(!inverted, Text.translatable("enhanced_commands.entity_predicate.tag.contains", displayName, tagNameText));
+        return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.tag.contains", displayName, tagNameText));
       } else {
-        return TestResult.of(inverted, Text.translatable("enhanced_commands.entity_predicate.tag.not_contains", displayName, tagNameText));
+        return TestResult.of(inverted, Component.translatable("enhanced_commands.entity_predicate.tag.not_contains", displayName, tagNameText));
       }
     }
   }

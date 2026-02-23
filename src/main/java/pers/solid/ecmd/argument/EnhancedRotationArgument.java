@@ -2,15 +2,15 @@ package pers.solid.ecmd.argument;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.command.argument.PosArgument;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.PositionProvider;
 
-public record EnhancedRotationArgument(float x, float y, boolean xRelative, boolean yRelative) implements PosArgument, ExpressionConvertible {
+public record EnhancedRotationArgument(float x, float y, boolean xRelative, boolean yRelative) implements Coordinates, ExpressionConvertible {
   public static final Codec<EnhancedRotationArgument> CODEC = RecordCodecBuilder.create(i -> i.group(
       Codec.FLOAT.fieldOf("x").forGetter(EnhancedRotationArgument::x),
       Codec.FLOAT.fieldOf("y").forGetter(EnhancedRotationArgument::y),
@@ -18,18 +18,18 @@ public record EnhancedRotationArgument(float x, float y, boolean xRelative, bool
       Codec.BOOL.optionalFieldOf("y_relative", false).forGetter(EnhancedRotationArgument::yRelative)
   ).apply(i, EnhancedRotationArgument::new));
 
-  public Vec2f toAbsoluteRotation(PositionProvider positionProvider) {
-    final Vec2f rotation$ec = positionProvider.getRotation$ec();
-    return new Vec2f(xRelative ? rotation$ec.x + x : x, yRelative ? rotation$ec.y : y);
+  public Vec2 toAbsoluteRotation(PositionProvider positionProvider) {
+    final Vec2 rotation$ec = positionProvider.getRotation$ec();
+    return new Vec2(xRelative ? rotation$ec.x + x : x, yRelative ? rotation$ec.y : y);
   }
 
   @Override
-  public Vec3d getPos(ServerCommandSource source) {
+  public Vec3 getPosition(CommandSourceStack source) {
     return source.getPosition();
   }
 
   @Override
-  public Vec2f getRotation(ServerCommandSource source) {
+  public Vec2 getRotation(CommandSourceStack source) {
     return this.toAbsoluteRotation(source);
   }
 

@@ -10,24 +10,29 @@ import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.*;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -59,8 +64,8 @@ import java.util.stream.Stream;
 
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static pers.solid.ecmd.argument.DirectionArgumentType.direction;
 import static pers.solid.ecmd.argument.DirectionArgumentType.getDirection;
 import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
@@ -69,14 +74,14 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 public enum StackCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  public static final SimpleCommandExceptionType UNLOADED_SOURCE = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.stack.rejected_source", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
-  public static final SimpleCommandExceptionType UNLOADED_TARGET = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.stack.rejected_target", "unloaded=" + UnloadedPosBehavior.FORCE.asString()));
+  public static final SimpleCommandExceptionType UNLOADED_SOURCE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.rejected_source", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
+  public static final SimpleCommandExceptionType UNLOADED_TARGET = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.rejected_target", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
 
   @Override
-  public void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     final KeywordArgsArgumentType keywordArgsForVector = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess)
         // 是否一并对实体进行堆叠
-        .addOptionalArg("affect_entities", EntityArgumentType.entities(), null)
+        .addOptionalArg("affect_entities", EntityArgument.entities(), null)
         // 是否将活动区域设置为堆叠后的区域
         .addOptionalArg("select", BoolArgumentType.bool(), false)
         // 只堆叠符合指定的谓词的方块
@@ -119,42 +124,42 @@ public enum StackCommand implements CommandRegistrationCallback {
     );
   }
 
-  public static int executeStackInDirection(Direction direction, int stackAmount, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static int executeStackInDirection(Direction direction, int stackAmount, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return executeStackInDirection(RegionArgumentType.getRegion(context, "region"), direction, stackAmount, keywordArgs, context);
   }
 
-  public static final SimpleCommandExceptionType UNSUPPORTED_BOX = new SimpleCommandExceptionType(Text.translatable("enhanced_commands.commands.stack.unsupported_box"));
+  public static final SimpleCommandExceptionType UNSUPPORTED_BOX = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.unsupported_box"));
 
-  public static int executeStackInDirection(Region region, Direction direction, int stackAmount, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final BlockBox blockBox = region.minContainingBlockBox();
+  public static int executeStackInDirection(Region region, Direction direction, int stackAmount, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final BoundingBox blockBox = region.minContainingBlockBox();
     final int offsetAmount;
     if (blockBox == null) {
       throw UNSUPPORTED_BOX.create();
     } else if (!keywordArgs.getBoolean("absolute")) {
       final Direction.Axis axis = direction.getAxis();
-      offsetAmount = axis.choose(blockBox.getMaxX(), blockBox.getMaxY(), blockBox.getMaxZ()) - axis.choose(blockBox.getMinX(), blockBox.getMinY(), blockBox.getMinZ()) + 1 + keywordArgs.getInt("gap");
+      offsetAmount = axis.choose(blockBox.maxX(), blockBox.maxY(), blockBox.maxZ()) - axis.choose(blockBox.minX(), blockBox.minY(), blockBox.minZ()) + 1 + keywordArgs.getInt("gap");
     } else {
       offsetAmount = keywordArgs.getInt("gap");
     }
-    return executeStack(region, direction.getVector().multiply(offsetAmount), stackAmount, keywordArgs, context);
+    return executeStack(region, direction.getUnitVec3i().multiply(offsetAmount), stackAmount, keywordArgs, context);
   }
 
-  public static int executeStack(Vec3i relativeVec, int stackAmount, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+  public static int executeStack(Vec3i relativeVec, int stackAmount, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     return executeStack(RegionArgumentType.getRegion(context, "region"), relativeVec, stackAmount, keywordArgs, context);
   }
 
-  public static int executeStack(Region region, Vec3i relativeVec, int stackAmount, KeywordArgs keywordArgs, CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-    final ServerCommandSource source = context.getSource();
-    final ServerWorld world = source.getWorld();
+  public static int executeStack(Region region, Vec3i relativeVec, int stackAmount, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
+    final ServerLevel world = source.getLevel();
     final Vec3i multiplied = relativeVec.multiply(stackAmount);
     final Region targetRegion = region.moved(multiplied);
     final boolean transformsRegion = keywordArgs.getBoolean("select");
-    final ServerPlayerEntity player = source.getPlayer();
+    final ServerPlayer player = source.getPlayer();
 
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
-      final BlockBox blockBox = region.minContainingBlockBox();
-      final BlockBox blockBox2 = targetRegion.minContainingBlockBox();
+      final BoundingBox blockBox = region.minContainingBlockBox();
+      final BoundingBox blockBox2 = targetRegion.minContainingBlockBox();
       if (blockBox != null && !LoadUtil.isPosLoaded(world, blockBox)) {
         throw UNLOADED_SOURCE.create();
       }
@@ -166,15 +171,15 @@ public enum StackCommand implements CommandRegistrationCallback {
     final ExecutionContext executionContext = new ExecutionContext(world.getRandom(), source, seed);
 
     final Long2ReferenceMap<BlockState> sourceStates = new Long2ReferenceLinkedOpenHashMap<>();
-    final Long2ReferenceMap<NbtCompound> sourceBlockEntities = new Long2ReferenceLinkedOpenHashMap<>();
-    final ObjectList<Triple<Vec3d, EntityType<?>, NbtCompound>> sourceEntities = new ObjectArrayList<>();
+    final Long2ReferenceMap<CompoundTag> sourceBlockEntities = new Long2ReferenceLinkedOpenHashMap<>();
+    final ObjectList<Triple<Vec3, EntityType<?>, CompoundTag>> sourceEntities = new ObjectArrayList<>();
     final MutableBoolean hasUnloadedPos = new MutableBoolean();
 
     final BlockPredicate affectOnly = keywordArgs.getArg("affect_only");
     final BlockPredicate transformOnly = keywordArgs.getArg("transform_only");
 
 
-    final MutableText taskName = Text.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount));
+    final MutableComponent taskName = Component.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount));
     final int flags = FillReplaceCommand.getFlags(keywordArgs);
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final @Nullable BlockPlacementHistory history = keywordArgs.getBoolean("undoable") ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;
@@ -183,15 +188,15 @@ public enum StackCommand implements CommandRegistrationCallback {
     Iterable<@Nullable BlockPos> posIterable;
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       posIterable = UnloadedPosException.catching(Iterables.transform(region, blockPos -> {
-        if (!world.isChunkLoaded(blockPos)) {
+        if (!world.hasChunkAt(blockPos)) {
           hasUnloadedPos.setTrue();
-          throw new UnloadedPosException(blockPos.toImmutable());
+          throw new UnloadedPosException(blockPos.immutable());
         }
         return blockPos;
       }));
     } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       posIterable = new BatchedFilterIterable<>(region, 16, blockPos -> {
-        final boolean chunkLoaded = world.isChunkLoaded(blockPos);
+        final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) hasUnloadedPos.setTrue();
         return chunkLoaded;
       });
@@ -200,11 +205,11 @@ public enum StackCommand implements CommandRegistrationCallback {
     }
     final Iterable<Void> collectSourceBlocks = Iterables.transform(posIterable, blockPos -> {
       if (blockPos == null) return null;
-      final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+      final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
       if (transformOnly == null || transformOnly.test(cachedBlockPosition, executionContext)) {
-        sourceStates.put(blockPos.asLong(), cachedBlockPosition.getBlockState());
-        if (cachedBlockPosition.getBlockEntity() != null) {
-          sourceBlockEntities.put(blockPos.asLong(), cachedBlockPosition.getBlockEntity().createNbt(world.getRegistryManager()));
+        sourceStates.put(blockPos.asLong(), cachedBlockPosition.getState());
+        if (cachedBlockPosition.getEntity() != null) {
+          sourceBlockEntities.put(blockPos.asLong(), cachedBlockPosition.getEntity().saveWithoutMetadata(world.registryAccess()));
         }
       }
       return null;
@@ -214,9 +219,9 @@ public enum StackCommand implements CommandRegistrationCallback {
     final EntitySelector affectEntities = keywordArgs.getArg("affect_entities");
     final Iterable<Void> collectSourceEntities;
     if (affectEntities != null) {
-      final List<? extends @NotNull Entity> entities = affectEntities.getEntities(source).stream().filter(entity -> region.contains(entity.getPos())).toList();
+      final List<? extends @NotNull Entity> entities = affectEntities.findEntities(source).stream().filter(entity -> region.contains(entity.position())).toList();
       collectSourceEntities = Iterables.transform(entities, entity -> {
-        sourceEntities.add(new ImmutableTriple<>(entity.getPos(), entity.getType(), entity.writeNbt(new NbtCompound())));
+        sourceEntities.add(new ImmutableTriple<>(entity.position(), entity.getType(), entity.saveWithoutId(new CompoundTag())));
         return null;
       });
     } else {
@@ -228,8 +233,8 @@ public enum StackCommand implements CommandRegistrationCallback {
     // 此操作过程复制的实体数量。
     MutableInt entitiesAffected = new MutableInt();
 
-    final BlockPos.Mutable stackedRelativePos = new BlockPos.Mutable();
-    final BlockPos.Mutable posToPlace = new BlockPos.Mutable();
+    final BlockPos.MutableBlockPos stackedRelativePos = new BlockPos.MutableBlockPos();
+    final BlockPos.MutableBlockPos posToPlace = new BlockPos.MutableBlockPos();
 
     final Long2ReferenceMap<BlockState> oldStates = new Long2ReferenceLinkedOpenHashMap<>();
 
@@ -248,7 +253,7 @@ public enum StackCommand implements CommandRegistrationCallback {
 
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           posPairStream = posPairStream.takeWhile(pair -> {
-            if (!world.isChunkLoaded(posToPlace.set(pair.firstLong()))) {
+            if (!world.hasChunkAt(posToPlace.set(pair.firstLong()))) {
               hasUnloadedPos.setTrue();
               return false;
             }
@@ -257,7 +262,7 @@ public enum StackCommand implements CommandRegistrationCallback {
         }
         if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
           posPairStream = posPairStream.filter(pair -> {
-            final boolean chunkLoaded = world.isChunkLoaded(posToPlace.set(pair.firstLong()));
+            final boolean chunkLoaded = world.hasChunkAt(posToPlace.set(pair.firstLong()));
             if (!chunkLoaded) hasUnloadedPos.setTrue();
             return chunkLoaded;
           });
@@ -266,9 +271,9 @@ public enum StackCommand implements CommandRegistrationCallback {
         return posPairStream.map(pair -> {
           posToPlace.set(pair.firstLong());
 
-          final CachedBlockPosition cachedBlockPosition = new CachedBlockPosition(world, posToPlace, false);
+          final BlockInWorld cachedBlockPosition = new BlockInWorld(world, posToPlace, false);
           if (affectOnly == null || affectOnly.test(cachedBlockPosition, executionContext)) {
-            oldStates.put(posToPlace.asLong(), cachedBlockPosition.getBlockState());
+            oldStates.put(posToPlace.asLong(), cachedBlockPosition.getState());
             stackedToSourceOnThisStack.put(posToPlace.asLong(), pair.secondLong());
           }
           return (Void) null;
@@ -284,7 +289,7 @@ public enum StackCommand implements CommandRegistrationCallback {
         if (history != null) {
           history.recordBlockAndEntity(world, posToPlace, oldStates.get(entry.getLongKey()), newState);
         }
-        if (oldEntity != null && !oldEntity.supports(newState)) {
+        if (oldEntity != null && !oldEntity.isValidBlockState(newState)) {
           world.removeBlockEntity(posToPlace);
         }
 
@@ -292,9 +297,9 @@ public enum StackCommand implements CommandRegistrationCallback {
 
         final BlockEntity newEntity = world.getBlockEntity(posToPlace);
         if (newEntity != null) {
-          final NbtCompound nbtCompound = sourceBlockEntities.get(entry.getLongValue());
+          final CompoundTag nbtCompound = sourceBlockEntities.get(entry.getLongValue());
           if (nbtCompound != null) {
-            newEntity.read(nbtCompound, world.getRegistryManager());
+            newEntity.loadWithComponents(nbtCompound, world.registryAccess());
             modified = true;
           }
         }
@@ -307,16 +312,16 @@ public enum StackCommand implements CommandRegistrationCallback {
       }
 
       Iterable<Void> stackEntitiesOnThisStack = Iterables.transform(sourceEntities, triple -> {
-        final Vec3d vec3d = triple.getLeft().add(stackedRelativePos.getX(), stackedRelativePos.getY(), stackedRelativePos.getZ());
+        final Vec3 vec3d = triple.getLeft().add(stackedRelativePos.getX(), stackedRelativePos.getY(), stackedRelativePos.getZ());
         final EntityType<?> entityType = triple.getMiddle();
-        final NbtCompound nbt = triple.getRight();
+        final CompoundTag nbt = triple.getRight();
 
-        final Entity newEntity = entityType.create(world, SpawnReason.COMMAND);
+        final Entity newEntity = entityType.create(world, EntitySpawnReason.COMMAND);
         if (newEntity != null) {
-          newEntity.readNbt(nbt);
-          newEntity.setPosition(vec3d);
-          newEntity.setUuid(MathHelper.randomUuid(world.getRandom()));
-          world.spawnEntity(newEntity);
+          newEntity.load(nbt);
+          newEntity.setPos(vec3d);
+          newEntity.setUUID(Mth.createInsecureUUID(world.getRandom()));
+          world.addFreshEntity(newEntity);
           entitiesAffected.increment();
         }
         return null;
@@ -331,15 +336,15 @@ public enum StackCommand implements CommandRegistrationCallback {
     final Iterable<Void> finalClaim = IterateUtils.singletonPeekingIterable(() -> {
       if (hasUnloadedPos.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.broken").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.broken").withStyle(Styles.ACTUAL), false);
         } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-          source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.skipped").styled(Styles.ACTUAL), false);
+          source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.skipped").withStyle(Styles.ACTUAL), false);
         }
       }
       if (affectEntities != null) {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.stack.complete_including_entities", blocksAffected, entitiesAffected), true);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.stack.complete_including_entities", blocksAffected, entitiesAffected), true);
       } else {
-        source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
       }
       if (transformsRegion && player != null) {
         final RegionSelection activeRegion = player.getActiveRegion$ec();
@@ -370,7 +375,7 @@ public enum StackCommand implements CommandRegistrationCallback {
       if (history != null) {
         history.task = task;
       }
-      source.sendFeedback$ecBridge(() -> Text.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).formatted(Formatting.YELLOW), true);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
       try {
