@@ -30,9 +30,9 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
-    final BlockInWorld cachedBlockPosition = new BlockInWorld(world, pos, false);
+    final BlockInWorld blockInWorld = new BlockInWorld(world, pos, false);
     for (ConditionalBlockFunction function : conditions) {
-      if (function.condition().test(cachedBlockPosition, context)) {
+      if (function.condition().test(blockInWorld, context)) {
         return function.functionIfTrue().getModifiedState(blockState, origState, world, pos, blockEntityData, context);
       }
     }

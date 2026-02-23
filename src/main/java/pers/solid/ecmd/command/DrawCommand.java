@@ -49,15 +49,15 @@ public enum DrawCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builder()
-        .addShared(KeywordArgsCommon.FILLING, registryAccess)
+        .addShared(KeywordArgsCommon.FILLING, commandBuildContext)
         .addOptionalArg("interval", DoubleArgumentType.doubleArg(0d), 0d)
         .addOptionalArg("thickness", DoubleArgumentType.doubleArg(0d, 64d), 0d)
         .build();
     dispatcher.register(literalR2("draw")
-        .then(argument("curve", CurveArgumentType.curve(registryAccess))
-            .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+        .then(argument("curve", CurveArgumentType.curve(commandBuildContext))
+            .then(argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
                 .executes(context -> setBlocksWithDefaultKeywordArgs(CurveArgumentType.getCurve(context, "curve"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource()))
                 .then(argument("kwargs", keywordArgs)
                     .executes(context -> {
@@ -111,13 +111,13 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       posIterable = new BatchedFilterIterable<>(posIterable, 16, blockPos -> {
-        final boolean chunkLoaded = world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       posIterable = Iterables.transform(posIterable, blockPos -> {
-        final boolean chunkLoaded = world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloaded.setTrue();
           throw new UnloadedPosException(blockPos);
@@ -143,9 +143,9 @@ public enum DrawCommand implements CommandRegistrationCallback {
     } else {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
         if (blockPos == null) return null;
-        final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-        if (cachedBlockPosition.getState() != null && predicate.test(cachedBlockPosition, context)) {
-          oldStates.put(blockPos.asLong(), cachedBlockPosition.getState());
+        final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+        if (blockInWorld.getState() != null && predicate.test(blockInWorld, context)) {
+          oldStates.put(blockPos.asLong(), blockInWorld.getState());
         }
         return (Void) null;
       });

@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.mixins.accessor.HungerManagerAccessor;
+import pers.solid.ecmd.mixins.accessor.FoodDataAccessor;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
@@ -22,7 +22,7 @@ public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolea
 
   @Override
   public boolean test(@NotNull Entity entity) {
-    return entity instanceof final Player player && exhaustion.test(((HungerManagerAccessor) player.getFoodData()).getExhaustionLevel()) != inverted;
+    return entity instanceof final Player player && exhaustion.test(((FoodDataAccessor) player.getFoodData()).getExhaustionLevel()) != inverted;
   }
 
   @Override
@@ -30,7 +30,7 @@ public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolea
     if (!(entity instanceof final Player player)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
-      return EntityPredicateEntry.testFloat(player, ((HungerManagerAccessor) player.getFoodData()).getExhaustionLevel(), exhaustion, CRITERION_NAME, displayName, inverted);
+      return EntityPredicateEntry.testFloat(player, ((FoodDataAccessor) player.getFoodData()).getExhaustionLevel(), exhaustion, CRITERION_NAME, displayName, inverted);
     }
   }
 

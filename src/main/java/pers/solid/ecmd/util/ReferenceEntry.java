@@ -74,7 +74,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final int cursorBeforeId = reader.getCursor();
       parseContext.setSuggestion((context, builder) -> {
         if (context.getSource() instanceof CommandSourceStack) {
-          return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(parseContext.registryAccess().lookupOrThrow(registryKey).listElementIds().map(ResourceKey::location), builder.createOffset(cursorBeforeId));
+          return DefaultNamespace.ENHANCED_COMMANDS.suggestIdentifiers(parseContext.commandBuildContext().lookupOrThrow(registryKey).listElementIds().map(ResourceKey::location), builder.createOffset(cursorBeforeId));
         } else if (context.getSource() instanceof SharedSuggestionProvider commandSource) {
           return commandSource.customSuggestion(context);
         } else {
@@ -86,7 +86,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final ResourceLocation id = DefaultNamespace.ENHANCED_COMMANDS.fromStringReader(reader);
       final int cursorAfterId = reader.getCursor();
       return getResultByEntrySupplier(() -> {
-        final HolderGetter.Provider registryLookup = parseContext.registryAccess();
+        final HolderGetter.Provider registryLookup = parseContext.commandBuildContext();
         final ResourceKey<E> entryKey = ResourceKey.create(registryKey, id);
         final Optional<? extends HolderGetter<E>> registryEntryLookup = registryLookup.lookup(registryKey);
         if (registryEntryLookup.isEmpty()) {

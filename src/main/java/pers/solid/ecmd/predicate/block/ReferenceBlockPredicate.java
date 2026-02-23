@@ -19,14 +19,14 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
   public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(BlockPredicate.REGISTRY_KEY, ReferenceBlockPredicate::new);
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
     try {
-      final LevelReader world = cachedBlockPosition.getLevel();
+      final LevelReader world = blockInWorld.getLevel();
       if (!(world instanceof ServerLevel serverWorld)) {
         return false;
       }
       final BlockPredicate value = value(serverWorld.getServer().reloadableRegistries().lookup());
-      return value.test(cachedBlockPosition, context);
+      return value.test(blockInWorld, executionContext);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
     }

@@ -34,8 +34,8 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
 
   @Override
   public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
-    final BlockInWorld cachedBlockPosition = new BlockInWorld(world, pos, false);
-    if (condition.test(cachedBlockPosition, context)) {
+    final BlockInWorld blockInWorld = new BlockInWorld(world, pos, false);
+    if (condition.test(blockInWorld, context)) {
       return functionIfTrue.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
     } else {
       return functionIfFalse.getModifiedState(blockState, origState, world, pos, blockEntityData, context);

@@ -5,12 +5,12 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.mixins.mixin.ServerPlayerEntityMixin;
+import pers.solid.ecmd.mixins.mixin.ServerPlayerMixin;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
 
 /**
- * 此接口将通过 {@link ServerPlayerEntityMixin} 使 {@link ServerPlayer} 实现此接口。
+ * 此接口将通过 {@link ServerPlayerMixin} 使 {@link ServerPlayer} 实现此接口。
  */
 public interface ServerPlayerEntityExtension extends PlayerEntityExtension {
   /**

@@ -16,7 +16,7 @@ import net.minecraft.network.chat.contents.TranslatableFormatException;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixins.accessor.TranslatableTextContentAccessor;
+import pers.solid.ecmd.mixins.accessor.TranslatableContentsAccessor;
 import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Arrays;
@@ -36,7 +36,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
       instance -> instance.group(
               Codec.STRING.fieldOf("translate").forGetter(TranslatableContents::getKey),
               Codec.STRING.lenientOptionalFieldOf("fallback").forGetter(content -> Optional.ofNullable(content.getFallback())),
-              TranslatableTextContentAccessor.getARG_CODEC().listOf().optionalFieldOf("with").forGetter(content -> TranslatableTextContentAccessor.callAdjustArgs(content.getArgs()))
+              TranslatableContentsAccessor.getARG_CODEC().listOf().optionalFieldOf("with").forGetter(content -> TranslatableContentsAccessor.callAdjustArgs(content.getArgs()))
           )
           .apply(instance, EnhancedTranslatableTextContent::create));
 
@@ -45,7 +45,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
   }
 
   private static EnhancedTranslatableTextContent create(String key, Optional<String> fallback, Optional<List<Object>> args) {
-    return new EnhancedTranslatableTextContent(key, fallback.orElse(null), TranslatableTextContentAccessor.callAdjustArgs(args));
+    return new EnhancedTranslatableTextContent(key, fallback.orElse(null), TranslatableContentsAccessor.callAdjustArgs(args));
   }
 
   private void decompose() {

@@ -46,9 +46,9 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, registryAccess)
-        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
+    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, commandBuildContext)
+        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(commandBuildContext), null)
         .addOptionalArg("immediately", BoolArgumentType.bool(), false)
         .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)
         .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgumentType(), UnloadedPosBehavior.REJECT)
@@ -60,7 +60,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
         dispatcher,
         ModCommands.literalR2("convertblocks"),
         ModCommands.literalR2("/convertblocks"),
-        Commands.argument("region", RegionArgumentType.region(registryAccess))
+        Commands.argument("region", RegionArgumentType.region(commandBuildContext))
             .then(Commands.literal("falling_block")
                 .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, keywordArgs.defaultArgs(), context))
                 .then(Commands.argument("keyword_args", keywordArgs)
@@ -142,8 +142,8 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
       LongList posThatMatch = new LongArrayList();
       final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
       Iterator<Void> testPosIterator = stream.<Void>map(blockPos -> {
-            final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, true);
-            if (predicate.test(cachedBlockPosition, executionContext)) {
+            final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, true);
+            if (predicate.test(blockInWorld, executionContext)) {
               posThatMatch.add(blockPos.asLong());
             }
             return null;

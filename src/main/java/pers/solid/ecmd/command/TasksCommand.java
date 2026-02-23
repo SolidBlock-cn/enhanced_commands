@@ -28,7 +28,7 @@ public enum TasksCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final SuggestionProvider<CommandSourceStack> taskUuidSuggestion = (context, builder) -> {
       final Map<UUID, IteratorTask<?>> uuidToTasks = ((ThreadExecutorExtension) context.getSource().getServer()).getUUIDToIteratorTasks$ec();
       return SharedSuggestionProvider.suggest(uuidToTasks.keySet().stream().map(UUID::toString), builder);

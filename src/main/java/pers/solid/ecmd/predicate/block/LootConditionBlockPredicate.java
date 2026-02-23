@@ -34,11 +34,11 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
   public static final MapCodec<LootConditionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(LootItemCondition.CODEC.fieldOf("condition").forGetter(LootConditionBlockPredicate::entry)).apply(i, LootConditionBlockPredicate::new));
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
     final LootItemCondition lootCondition = entry.value();
-    final LevelReader world = cachedBlockPosition.getLevel();
+    final LevelReader world = blockInWorld.getLevel();
     if (!(world instanceof final ServerLevel serverWorld)) return false;
-    return lootCondition.test(LootBridge.createContextForBlock(cachedBlockPosition, serverWorld, context.getSeed(this)));
+    return lootCondition.test(LootBridge.createContextForBlock(blockInWorld, serverWorld, executionContext.getSeed(this)));
   }
 
   @Override
@@ -89,7 +89,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
     @Override
     public LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
-        final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.registryAccess().get(ResourceKey.create(Registries.PREDICATE, id));
+        final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.commandBuildContext().get(ResourceKey.create(Registries.PREDICATE, id));
         if (lootCondition.isEmpty()) {
           parseContext.reader().setCursor(cursorBeforeId);
           throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);

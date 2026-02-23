@@ -39,8 +39,8 @@ public enum RotateCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
+    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
         .addOptionalArg("interpolate", BoolArgumentType.bool(), false)
         .addOptionalArg("pivot", blockPos(), CURRENT_POS)
         .build();
@@ -49,7 +49,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
         dispatcher,
         literalR2("rotate"),
         literalR2("/rotate"),
-        argument("region", RegionArgumentType.region(registryAccess))
+        argument("region", RegionArgumentType.region(commandBuildContext))
             .then(argument("rotation", AngleArgumentType.angle(false))
                 .executes(context -> executeRotate(null, keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)

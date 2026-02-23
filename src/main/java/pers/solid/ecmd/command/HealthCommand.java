@@ -45,7 +45,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("health")
         .executes(context -> executeGetHealth(context, Collections.singleton(context.getSource().getEntityOrException()), null, 1))
         .then(literal("get")
@@ -57,7 +57,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
                     .then(argument("scale", floatArg())
                         .executes(context -> executeGetHealth(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), getFloat(context, "scale"))))
                     .then(literal("store")
-                        .then(argument("target", nbtTarget(registryAccess))
+                        .then(argument("target", nbtTarget(commandBuildContext))
                             .then(argument("path", nbtPath())
                                 .executes(context -> executeGetHealth(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), 1, getNbtTarget(context, "target"), getPath(context, "path")))))))))
         .then(literal("set")
@@ -89,7 +89,7 @@ public enum HealthCommand implements CommandRegistrationCallback {
                         .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getSourceEntityHealth(context, ConcentrationType.AVERAGE)))
                         .then(argument("source_concentration_type", concentrationType())
                             .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getSourceEntityHealth(context, getConcentrationType(context, "source_concentration_type")))))))
-                    .then(argument("source", nbtSource(registryAccess))
+                    .then(argument("source", nbtSource(commandBuildContext))
                         .then(argument("path", nbtPath())
                             .executes(context -> executeSetHealthFromSource(context, getPath(context, "path"), NbtConcentrationType.FIRST))
                             .then(argument("concentration_type", nbtConcentrationType())

@@ -36,15 +36,15 @@ public enum MoveCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
+    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
         .build();
 
     ModCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("move"),
         literalR2("/move"),
-        argument("region", RegionArgumentType.region(registryAccess))
+        argument("region", RegionArgumentType.region(commandBuildContext))
             .then(argument("offset", integer())
                 .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "offset"), keywordArgs.defaultArgs(), context))
                 .then(argument("direction", DirectionArgumentType.direction())

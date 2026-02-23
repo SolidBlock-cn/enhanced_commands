@@ -4,6 +4,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.mixins.impl.CommandSourceStackExtensionImpl;
 import pers.solid.ecmd.util.PositionProvider;
 
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.function.Supplier;
 /**
  * 此接口将注入至 {@link CommandSourceStack}。
  *
- * @see pers.solid.ecmd.mixins.impl.ServerCommandSourceExtensionImpl
+ * @see CommandSourceStackExtensionImpl
  */
 public interface ServerCommandSourceExtension extends PositionProvider {
   /**

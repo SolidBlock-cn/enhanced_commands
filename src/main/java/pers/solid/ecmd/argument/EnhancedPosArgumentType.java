@@ -345,7 +345,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   }
 
   @Override
-  public EnhancedPosArgumentType instantiate(CommandBuildContext registryAccess) {
+  public EnhancedPosArgumentType instantiate(CommandBuildContext commandBuildContext) {
     return this;
   }
 

@@ -22,10 +22,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
+public record SimpleBlockFunction(@NotNull Block block, @NotNull List<PropertyFunction<?>> properties) implements BlockFunction {
   public static final MapCodec<SimpleBlockFunction> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
 
-  public SimpleBlockFunction(Block block) {
+  public SimpleBlockFunction(@NotNull Block block) {
     this(block, Collections.emptyList());
   }
 

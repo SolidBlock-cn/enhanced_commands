@@ -27,13 +27,13 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    return pattern.matcher(BuiltInRegistries.BLOCK.getKey(cachedBlockPosition.getState().getBlock()).toString()).find();
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    return pattern.matcher(BuiltInRegistries.BLOCK.getKey(blockInWorld.getState().getBlock()).toString()).find();
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final String id = BuiltInRegistries.BLOCK.getKey(cachedBlockPosition.getState().getBlock()).toString();
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final String id = BuiltInRegistries.BLOCK.getKey(blockInWorld.getState().getBlock()).toString();
     final boolean matches = pattern.matcher(id).find();
     return TestResult.of(matches, Component.translatable("enhanced_commands.block_predicate.id_contain." + (matches ? "pass" : "fail"), Component.literal(pattern.toString()).withStyle(Styles.EXPECTED), Component.literal(id).withStyle(Styles.ACTUAL)));
   }

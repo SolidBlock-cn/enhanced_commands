@@ -73,8 +73,8 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
 public enum TestArgCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockFunctionProperties(T argumentBuilder, CommandBuildContext registryAccess) {
-    return argumentBuilder.then(argument("block_function", BlockFunctionArgumentType.blockFunction(registryAccess))
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockFunctionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+    return argumentBuilder.then(argument("block_function", BlockFunctionArgumentType.blockFunction(commandBuildContext))
         .executes(context -> executeStringShow(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString))
         .then(literal("string")
             .executes(context -> executeStringShow(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString)))
@@ -83,7 +83,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString, s -> BlockFunction.parse(new ParseContext<>(registryAccess, s, false, true)))))
+            .executes(context -> executeStringTest(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString, s -> BlockFunction.parse(new ParseContext<>(commandBuildContext, s, false, true)))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")
@@ -91,8 +91,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockPredicateProperties(T argumentBuilder, CommandBuildContext registryAccess) {
-    return argumentBuilder.then(argument("block_predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockPredicateProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+    return argumentBuilder.then(argument("block_predicate", BlockPredicateArgumentType.blockPredicate(commandBuildContext))
         .executes(context -> executeStringShow(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString))
         .then(literal("string")
             .executes(context -> executeStringShow(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString)))
@@ -101,7 +101,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString, s -> BlockPredicate.parse(new ParseContext<>(registryAccess, s, false, true)))))
+            .executes(context -> executeStringTest(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString, s -> BlockPredicate.parse(new ParseContext<>(commandBuildContext, s, false, true)))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")
@@ -109,8 +109,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addEntityPredicateProperties(T argumentBuilder, CommandBuildContext registryAccess) {
-    return argumentBuilder.then(argument("entity_predicate", entityPredicate(registryAccess))
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addEntityPredicateProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+    return argumentBuilder.then(argument("entity_predicate", entityPredicate(commandBuildContext))
         .executes(context -> executeStringShow(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString))
         .then(literal("string")
             .executes(context -> executeStringShow(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString)))
@@ -119,7 +119,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString, s -> EntityPredicateArgumentType.entityPredicate(registryAccess).parse(new StringReader(s)))))
+            .executes(context -> executeStringTest(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString, s -> EntityPredicateArgumentType.entityPredicate(commandBuildContext).parse(new StringReader(s)))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")
@@ -127,7 +127,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtProperties(T argumentBuilder, CommandBuildContext registryAccess) {
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
     return argumentBuilder.then(argument("nbt", NbtTagArgument.nbtTag())
         .executes(context -> {
           context.getSource().sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(getNbtTag(context, "nbt")), false);
@@ -154,9 +154,9 @@ public enum TestArgCommand implements CommandRegistrationCallback {
               final String s = TextUtil.toSpacedStringNbt(nbtElement);
               final CommandSourceStack source = context.getSource();
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.nbt_to_string", Component.literal(s).withStyle(Styles.RESULT)), false);
-              final NbtPredicate reparsedPredicate = NbtPredicate.parse(new ParseContext<>(registryAccess, s, false, true), false, false);
+              final NbtPredicate reparsedPredicate = NbtPredicate.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false);
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Component.literal(reparsedPredicate.asString(false)).withStyle(Styles.RESULT)), false);
-              final NbtFunction reparsedFunction = NbtFunction.parse(new ParseContext<>(registryAccess, s, false, true), false, false);
+              final NbtFunction reparsedFunction = NbtFunction.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false);
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Component.literal(reparsedFunction.asString()).withStyle(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
@@ -202,8 +202,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtPredicateProperties(T argumentBuilder, CommandBuildContext registryAccess) {
-    return argumentBuilder.then(argument("nbt_predicate", NbtPredicateArgumentType.element(registryAccess))
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtPredicateProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+    return argumentBuilder.then(argument("nbt_predicate", NbtPredicateArgumentType.element(commandBuildContext))
         .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString))
         .then(literal("match")
             .then(argument("nbt_to_test", NbtTagArgument.nbtTag())
@@ -217,7 +217,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("string")
             .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> NbtPredicate.parse(new ParseContext<>(registryAccess, s, false, true), false, false))))
+            .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> NbtPredicate.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false))))
         .then(literal("nbt")
             .executes(context -> executeCodecShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, NbtOps.INSTANCE)))
         .then(literal("json")
@@ -229,8 +229,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtFunctionProperties(T argumentBuilder, CommandBuildContext registryAccess) {
-    return argumentBuilder.then(argument("nbt_function", NbtFunctionArgumentType.element(registryAccess))
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtFunctionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+    return argumentBuilder.then(argument("nbt_function", NbtFunctionArgumentType.element(commandBuildContext))
         .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString))
         .then(literal("apply")
             .executes(context -> {
@@ -252,7 +252,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("string")
             .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString, s -> NbtFunction.parse(new ParseContext<>(registryAccess, s, false, true), false, true))))
+            .executes(context -> executeStringTest(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString, s -> NbtFunction.parse(new ParseContext<>(commandBuildContext, s, false, true), false, true))))
         .then(literal("nbt")
             .executes(context -> executeCodecShow(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, NbtOps.INSTANCE)))
         .then(literal("json")
@@ -312,8 +312,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     return argumentBuilder;
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addRegionProperties(T argumentBuilder, CommandBuildContext registryAccess) {
-    return argumentBuilder.then(argument("region", RegionArgumentType.region(registryAccess))
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addRegionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+    return argumentBuilder.then(argument("region", RegionArgumentType.region(commandBuildContext))
         .executes(context -> executeStringShow(context, getRegion(context, "region"), Region::asString))
         .then(literal("string")
             .executes(context -> executeStringShow(context, getRegion(context, "region"), Region::asString)))
@@ -322,7 +322,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(new ParseContext<>(registryAccess, s, false, true)).toAbsoluteRegion(context.getSource()))))
+            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionArgument.parse(new ParseContext<>(commandBuildContext, s, false, true)).toAbsoluteRegion(context.getSource()))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")
@@ -372,8 +372,8 @@ public enum TestArgCommand implements CommandRegistrationCallback {
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addCurveProperties(T argumentBuilder, CommandBuildContext registryAccess) {
-    return argumentBuilder.then(argument("curve", CurveArgumentType.curve(registryAccess))
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addCurveProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+    return argumentBuilder.then(argument("curve", CurveArgumentType.curve(commandBuildContext))
         .executes(context -> executeStringShow(context, getCurve(context, "curve"), Curve::asString))
         .then(literal("string")
             .executes(context -> executeStringShow(context, getCurve(context, "curve"), Curve::asString)))
@@ -382,7 +382,7 @@ public enum TestArgCommand implements CommandRegistrationCallback {
         .then(literal("json")
             .executes(context -> executeCodecShow(context, getCurve(context, "curve"), Curve.CODEC, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getCurve(context, "curve"), Curve::asString, s -> CurveArgument.parse(new ParseContext<>(registryAccess, s, false, true)).toAbsoluteRegion(context.getSource()))))
+            .executes(context -> executeStringTest(context, getCurve(context, "curve"), Curve::asString, s -> CurveArgument.parse(new ParseContext<>(commandBuildContext, s, false, true)).toAbsoluteRegion(context.getSource()))))
         .then(literal("nbt_test")
             .executes(context -> executeCodecTest(context, getCurve(context, "curve"), Curve.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")
@@ -449,18 +449,18 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("testarg")
-        .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
-        .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
-        .then(addCurveProperties(literal("curve"), registryAccess))
-        .then(addEntityPredicateProperties(literal("entity_predicate"), registryAccess))
-        .then(addNbtProperties(literal("nbt"), registryAccess))
+        .then(addBlockFunctionProperties(literal("block_function"), commandBuildContext))
+        .then(addBlockPredicateProperties(literal("block_predicate"), commandBuildContext))
+        .then(addCurveProperties(literal("curve"), commandBuildContext))
+        .then(addEntityPredicateProperties(literal("entity_predicate"), commandBuildContext))
+        .then(addNbtProperties(literal("nbt"), commandBuildContext))
         .then(addNbtCompoundProperties(literal("nbt_compound")))
-        .then(addNbtPredicateProperties(literal("nbt_predicate"), registryAccess))
-        .then(addNbtFunctionProperties(literal("nbt_function"), registryAccess))
+        .then(addNbtPredicateProperties(literal("nbt_predicate"), commandBuildContext))
+        .then(addNbtFunctionProperties(literal("nbt_function"), commandBuildContext))
         .then(addPosProperties(literal("pos")))
-        .then(addRegionProperties(literal("region"), registryAccess))
+        .then(addRegionProperties(literal("region"), commandBuildContext))
     );
   }
 }

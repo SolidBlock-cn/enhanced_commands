@@ -28,12 +28,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, HolderLookup<T> registryWrapper, ResourceKey<? extends Registry<T>> registryRef) implements ArgumentType<Holder.Reference<T>> {
-  public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull String omittedNamespace, @NotNull CommandBuildContext registryAccess, @NotNull ResourceKey<? extends Registry<T>> registryRef) {
-    return new OmittedRegistryEntryArgumentType<>(omittedNamespace, registryAccess.lookupOrThrow(registryRef), registryRef);
+  public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull String omittedNamespace, @NotNull CommandBuildContext commandBuildContext, @NotNull ResourceKey<? extends Registry<T>> registryRef) {
+    return new OmittedRegistryEntryArgumentType<>(omittedNamespace, commandBuildContext.lookupOrThrow(registryRef), registryRef);
   }
 
-  public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull CommandBuildContext registryAccess, @NotNull ResourceKey<? extends Registry<T>> registryRef) {
-    return omittedRegistryEntry(EnhancedCommands.MOD_ID, registryAccess, registryRef);
+  public static <T> OmittedRegistryEntryArgumentType<T> omittedRegistryEntry(@NotNull CommandBuildContext commandBuildContext, @NotNull ResourceKey<? extends Registry<T>> registryRef) {
+    return omittedRegistryEntry(EnhancedCommands.MOD_ID, commandBuildContext, registryRef);
   }
 
   // getRegistryEntry 方法请直接使用 RegistryEntryArgumentType 中的
@@ -106,8 +106,8 @@ public record OmittedRegistryEntryArgumentType<T>(String omittedNamespace, Holde
     public record Properties<T>(String omittedNamespace, ResourceKey<? extends Registry<T>> registryRef) implements Template<OmittedRegistryEntryArgumentType<T>> {
 
       @Override
-      public @NotNull OmittedRegistryEntryArgumentType<T> instantiate(CommandBuildContext registryAccess) {
-        return omittedRegistryEntry(omittedNamespace, registryAccess, this.registryRef);
+      public @NotNull OmittedRegistryEntryArgumentType<T> instantiate(CommandBuildContext commandBuildContext) {
+        return omittedRegistryEntry(omittedNamespace, commandBuildContext, this.registryRef);
       }
 
       @SuppressWarnings("unchecked")

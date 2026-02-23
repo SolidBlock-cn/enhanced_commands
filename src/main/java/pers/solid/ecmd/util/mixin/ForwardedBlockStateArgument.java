@@ -23,7 +23,7 @@ public class ForwardedBlockStateArgument extends BlockInput {
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition) {
+  public boolean test(BlockInWorld blockInWorld) {
     return true;
   }
 

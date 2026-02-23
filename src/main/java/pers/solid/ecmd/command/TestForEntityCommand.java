@@ -29,11 +29,11 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
   INSTANCE;
 
   @Override
-  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     testForBuilder.then(Commands.literal("entity")
         .then(Commands.argument("entities", EntityArgument.entities())
             .executes(context -> executeShowEntities(EntityArgument.getOptionalEntities(context, "entities"), context))
-            .then(Commands.argument("predicate", EntityPredicateArgumentType.entityPredicate(registryAccess))
+            .then(Commands.argument("predicate", EntityPredicateArgumentType.entityPredicate(commandBuildContext))
                 .executes(context -> executeTestPredicate(EntityArgument.getOptionalEntities(context, "entities"), EntityPredicateArgumentType.getEntityPredicate(context, "predicate"), context)))));
   }
 

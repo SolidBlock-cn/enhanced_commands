@@ -35,8 +35,8 @@ import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.mixins.mixin.CommandManagerMixin;
-import pers.solid.ecmd.mixins.mixin.WorldChunkMixin;
+import pers.solid.ecmd.mixins.mixin.CommandsMixin;
+import pers.solid.ecmd.mixins.mixin.LevelChunkMixin;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
@@ -64,7 +64,7 @@ public final class MixinShared {
   /**
    * 如果此值为 {@code true}，那么会抑制 {@link net.minecraft.world.level.chunk.LevelChunk#setBlockState(BlockPos, BlockState, boolean)} 对 {@link BlockState#onPlace(Level, BlockPos, BlockState, boolean)} 的调用。通常来说，这是一个临时的设置，在调用前修改此值，调用后立即复原，以免对其他模组产生影响。
    *
-   * @see WorldChunkMixin#wrappedOnBlockAdded(BlockState, Level, BlockPos, BlockState, boolean)
+   * @see LevelChunkMixin#wrappedOnBlockAdded(BlockState, Level, BlockPos, BlockState, boolean)
    */
   public static boolean suppressOnBlockAdded = false;
 
@@ -72,7 +72,7 @@ public final class MixinShared {
    * 如果此值为 {@code true}，那么会抑制 {@link net.minecraft.world.level.chunk.LevelChunk#setBlockState(BlockPos, BlockState, boolean)} 对 {@link BlockState#onRemove(Level, BlockPos, BlockState, boolean)} 的调用。通常来说，这是一个临时的设置，在调用前修改此值，调用后立即复原，以免对其他模组产生影响。
    */
   public static boolean suppressOnStateReplaced = false;
-  private static Reference<CommandBuildContext> commandRegistryAccessReference;
+  private static Reference<CommandBuildContext> commandBuildContextReference;
 
   private MixinShared() {
   }
@@ -99,32 +99,32 @@ public final class MixinShared {
   }
 
   /**
-   * 在注册命令时调用此方法，以设置 {@link #commandRegistryAccessReference} 的值，注意它是个弱引用，通过来说在服务器关闭或者离开世界之前都不应该清除。
+   * 在注册命令时调用此方法，以设置 {@link #commandBuildContextReference} 的值，注意它是个弱引用，通过来说在服务器关闭或者离开世界之前都不应该清除。
    *
-   * @see CommandManagerMixin
+   * @see CommandsMixin
    * @see Commands#Commands
    */
-  public static void setWeakCommandRegistryAccess(CommandBuildContext commandRegistryAccess) {
-    commandRegistryAccessReference = new WeakReference<>(commandRegistryAccess);
+  public static void setWeakCommandBuildContext(CommandBuildContext commandRegistryAccess) {
+    commandBuildContextReference = new WeakReference<>(commandRegistryAccess);
   }
 
   /**
    * 对于自身不会在 {@link CommandBuildContext} 的参数类型，调用此方法，以获取当前注册命令时所使用的 {@link CommandBuildContext}。如果没有注册命令，或者已经被清除，则返回备用值并发出警告。
    */
-  public static CommandBuildContext getCommandRegistryAccess() {
-    if (commandRegistryAccessReference != null) {
-      final CommandBuildContext commandRegistryAccess = commandRegistryAccessReference.get();
+  public static CommandBuildContext getCommandBuildContext() {
+    if (commandBuildContextReference != null) {
+      final CommandBuildContext commandRegistryAccess = commandBuildContextReference.get();
       if (commandRegistryAccess != null) {
         return commandRegistryAccess;
       }
     }
-    if (commandRegistryAccessReference == null) {
+    if (commandBuildContextReference == null) {
       EnhancedCommands.LOGGER.warn("Enhanced Commands mod: There is no CommandRegistryAccess object stored, which should not have happened. Is it called before commands are registered?");
     } else {
       EnhancedCommands.LOGGER.warn("Enhanced Commands mod: The CommandRegistryAccess object seems removed as garbage, which should not have happened. Is is called after the server closes or player leaves sourceWorld?");
     }
     final CommandBuildContext backup = Commands.createValidationContext(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY));
-    commandRegistryAccessReference = new SoftReference<>(backup);
+    commandBuildContextReference = new SoftReference<>(backup);
     return backup;
   }
 

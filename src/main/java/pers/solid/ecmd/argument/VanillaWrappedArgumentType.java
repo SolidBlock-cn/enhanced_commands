@@ -88,8 +88,8 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
   public record Properties<T, F extends ArgumentType<T>, FP extends ArgumentTypeInfo.Template<F>>(FP forwardProperties) implements ArgumentTypeInfo.Template<VanillaWrappedArgumentType<T, F>> {
 
     @Override
-    public @NotNull VanillaWrappedArgumentType<T, F> instantiate(CommandBuildContext registryAccess) {
-      return new VanillaWrappedArgumentType<>(forwardProperties.instantiate(registryAccess));
+    public @NotNull VanillaWrappedArgumentType<T, F> instantiate(CommandBuildContext commandBuildContext) {
+      return new VanillaWrappedArgumentType<>(forwardProperties.instantiate(commandBuildContext));
     }
 
     @SuppressWarnings("unchecked")

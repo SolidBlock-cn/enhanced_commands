@@ -31,18 +31,18 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockPredicate entry = getEntry(predicates, cachedBlockPosition.getPos());
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockPredicate entry = getEntry(predicates, blockInWorld.getPos());
     if (entry == null) return false;
-    return entry.test(cachedBlockPosition, context);
+    return entry.test(blockInWorld, executionContext);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockPredicate entry = getEntry(predicates, cachedBlockPosition.getPos());
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockPredicate entry = getEntry(predicates, blockInWorld.getPos());
     if (entry == null) return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.checkerboard.fail_no_checkerboard"));
-    final TestResult testResult = entry.testAndDescribe(cachedBlockPosition, context);
-    final MutableComponent wrapVector = TextUtil.wrapVector(cachedBlockPosition.getPos());
+    final TestResult testResult = entry.testAndDescribe(blockInWorld, executionContext);
+    final MutableComponent wrapVector = TextUtil.wrapVector(blockInWorld.getPos());
     return testResult.successes() ? TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.checkerboard.pass", wrapVector), Collections.singletonList(testResult)) : TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.checkerboard.fail", wrapVector), Collections.singletonList(testResult));
   }
 

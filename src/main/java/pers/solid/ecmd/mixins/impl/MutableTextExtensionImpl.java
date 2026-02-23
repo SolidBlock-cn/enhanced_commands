@@ -8,7 +8,7 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import pers.solid.ecmd.mixins.accessor.MutableTextAccessor;
+import pers.solid.ecmd.mixins.accessor.MutableComponentAccessor;
 import pers.solid.ecmd.mixins.ext.MutableTextExtension;
 import pers.solid.ecmd.util.EnhancedTranslatableTextContent;
 
@@ -34,7 +34,7 @@ public abstract class MutableTextExtensionImpl implements MutableTextExtension {
   public MutableComponent enhanced$$() {
     if (contents instanceof TranslatableContents translatableTextContent) {
       final EnhancedTranslatableTextContent enhancedContent = new EnhancedTranslatableTextContent(translatableTextContent.getKey(), translatableTextContent.getFallback(), translatableTextContent.getArgs());
-      return MutableTextAccessor.createMutableText(enhancedContent, siblings, style);
+      return MutableComponentAccessor.createMutableText(enhancedContent, siblings, style);
     } else {
       return MutableTextExtension.super.enhanced$$();
     }

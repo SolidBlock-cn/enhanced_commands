@@ -34,7 +34,7 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixins.accessor.JsonReaderUtilsAccessor;
+import pers.solid.ecmd.mixins.accessor.ParserUtilsAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
@@ -291,7 +291,7 @@ public final class ParsingUtil {
    * 通过反射的方式，从 {@link JsonReader} 中读取位置信息。
    */
   public static int getPos(@NotNull JsonReader jsonReader) {
-    return JsonReaderUtilsAccessor.invokeGetPos(jsonReader) - 1;
+    return ParserUtilsAccessor.invokeGetPos(jsonReader) - 1;
   }
 
   public static <A, E extends Throwable> A parseNbt(StringReader reader, FailableFunction<Tag, A, E> readFunction) throws E, CommandSyntaxException {

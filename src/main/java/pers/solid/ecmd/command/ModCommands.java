@@ -35,51 +35,51 @@ public enum ModCommands implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     if (CommandsConfig.current.enableDebugCommands) {
-      DebugDeOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-      DebugIgnoreBoundaryCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-      DebugOpCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-      DebugPermissionLevelCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+      DebugDeOpCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+      DebugIgnoreBoundaryCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+      DebugOpCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+      DebugPermissionLevelCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     }
 
-    ActiveRegionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    AirCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    ConvertBlockCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    ConvertBlocksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    DrawCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    EnhancedCommandsConfigCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    FillReplaceCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    FireCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    FoodCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    GameModeAliasCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    HealthCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    HistoryCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    ActiveRegionCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    AirCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    ConvertBlockCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    ConvertBlocksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    DrawCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    EnhancedCommandsConfigCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    FillReplaceCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    FireCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    FoodCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    GameModeAliasCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    HealthCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    HistoryCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     if (CommandsConfig.current.enableMirrorCommand) {
-      MirrorCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+      MirrorCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     }
-    MoonCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    MoonCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     if (CommandsConfig.current.enableMoveCommand) {
-      MoveCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+      MoveCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     }
-    NbtCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    OutlineCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    PileCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    PostProcessCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    RandCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    RegionSelectionCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    RotateCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    SeparatedExecuteCommand.register(dispatcher, registryAccess);
+    NbtCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    OutlineCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    PileCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    PostProcessCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    RandCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    RegionSelectionCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    RotateCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    SeparatedExecuteCommand.register(dispatcher, commandBuildContext);
     if (CommandsConfig.current.enableStackCommand) {
-      StackCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+      StackCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     }
-    TameCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    TasksCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    TestArgCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    TestForCommands.INSTANCE.register(dispatcher, registryAccess, environment);
-    TpRelCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    UndoCommand.INSTANCE.register(dispatcher, registryAccess, environment);
-    EnhancedWeatherCommand.INSTANCE.register(dispatcher, registryAccess, environment);
+    TameCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    TasksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    TestArgCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    TestForCommands.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    TpRelCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    UndoCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    EnhancedWeatherCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
   }
 
   public static <S> LiteralCommandNode<S> registerWithArgumentModification(CommandDispatcher<S> dispatcher, LiteralArgumentBuilder<S> directBuilder, LiteralArgumentBuilder<S> indirectBuilder, CommandNode<S> then, RedirectModifier<S> redirectModifier) {

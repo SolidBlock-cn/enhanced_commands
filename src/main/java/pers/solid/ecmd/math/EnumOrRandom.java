@@ -54,7 +54,7 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringRepresentable> ex
     } else {
       final int cursorBeforeParse = reader.getCursor();
       final String s = reader.readUnquotedString();
-      Optional<E> optional = codec instanceof EnumCodec<E> codec1 ? Optional.ofNullable(codec1.byName(s)) : codec.parse(JsonOps.INSTANCE, new JsonPrimitive(s)).result();
+      Optional<E> optional = codec instanceof @SuppressWarnings("deprecation")EnumCodec<E> codec1 ? Optional.ofNullable(codec1.byName(s)) : codec.parse(JsonOps.INSTANCE, new JsonPrimitive(s)).result();
       return of(optional.orElseThrow(() -> {
         reader.setCursor(cursorBeforeParse);
         return INVALID_ENUM_EXCEPTION.createWithContext(reader, s);

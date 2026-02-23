@@ -121,8 +121,8 @@ public class KeywordArgsArgumentSerializer implements ArgumentTypeInfo<KeywordAr
     }
 
     @Override
-    public @NotNull KeywordArgsArgumentType instantiate(CommandBuildContext registryAccess) {
-      final ImmutableMap<@NotNull String, ArgumentType<?>> arguments1 = ImmutableMap.copyOf(Maps.transformValues(arguments, s -> s.instantiate(registryAccess)));
+    public @NotNull KeywordArgsArgumentType instantiate(CommandBuildContext commandBuildContext) {
+      final ImmutableMap<@NotNull String, ArgumentType<?>> arguments1 = ImmutableMap.copyOf(Maps.transformValues(arguments, s -> s.instantiate(commandBuildContext)));
       if (shared.isEmpty()) {
         return new KeywordArgsArgumentType(arguments1, requiredArguments, ImmutableMap.of(), shared, ImmutableSet.of());
       } else {
@@ -134,7 +134,7 @@ public class KeywordArgsArgumentSerializer implements ArgumentTypeInfo<KeywordAr
             ImmutableSet.builder()
         );
         for (ResourceLocation identifier : shared) {
-          builder.addShared(KeywordArgsCommon.getByIdOrThrow(identifier), registryAccess);
+          builder.addShared(KeywordArgsCommon.getByIdOrThrow(identifier), commandBuildContext);
         }
         return builder.build();
       }

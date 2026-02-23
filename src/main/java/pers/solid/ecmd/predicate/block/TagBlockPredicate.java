@@ -44,8 +44,8 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockState blockState = cachedBlockPosition.getState();
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockState blockState = blockInWorld.getState();
     final boolean inTag = blockState.is(tag);
     if (!inTag) {
       return false;
@@ -58,24 +58,24 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockState blockState = cachedBlockPosition.getState();
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockState blockState = blockInWorld.getState();
     final boolean inTag = blockState.is(tag);
     boolean successes = true;
     ImmutableList.Builder<Component> messages = new ImmutableList.Builder<>();
     if (!inTag) {
       successes = false;
-      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getPos()), blockState.getBlock().getName().withStyle(Styles.ACTUAL), Component.literal("#" + tag.location().toString()).withStyle(Styles.EXPECTED)).withStyle(Styles.FALSE));
+      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.ACTUAL), Component.literal("#" + tag.location().toString()).withStyle(Styles.EXPECTED)).withStyle(Styles.FALSE));
     }
     for (PropertyNamePredicate propertyNamePredicate : properties) {
-      final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, cachedBlockPosition.getPos());
+      final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, blockInWorld.getPos());
       messages.addAll(testResult.descriptions());
       if (!testResult.successes()) {
         successes = false;
       }
     }
     if (successes) {
-      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(cachedBlockPosition.getPos()), blockState.getBlock().getName().withStyle(Styles.TARGET), Component.literal("#" + tag.location().toString()).withStyle(Styles.EXPECTED)).withStyle(Styles.TRUE));
+      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.TARGET), Component.literal("#" + tag.location().toString()).withStyle(Styles.EXPECTED)).withStyle(Styles.TRUE));
     }
     return new TestResult(successes, messages.build());
   }

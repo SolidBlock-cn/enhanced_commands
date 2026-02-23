@@ -35,8 +35,8 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
     return new Builder(new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableSet.Builder<>());
   }
 
-  public static Builder builderFromShared(@NotNull Function<CommandBuildContext, KeywordArgsArgumentType> source, CommandBuildContext registryAccess) {
-    return builder().addShared(source, registryAccess);
+  public static Builder builderFromShared(@NotNull Function<CommandBuildContext, KeywordArgsArgumentType> source, CommandBuildContext commandBuildContext) {
+    return builder().addShared(source, commandBuildContext);
   }
 
   public static KeywordArgs getKeywordArgs(CommandContext<?> context, String name) {
@@ -160,9 +160,9 @@ public record KeywordArgsArgumentType(@Unmodifiable Map<@NotNull String, Argumen
       return this;
     }
 
-    public Builder addShared(Function<CommandBuildContext, KeywordArgsArgumentType> source, CommandBuildContext registryAccess) {
+    public Builder addShared(Function<CommandBuildContext, KeywordArgsArgumentType> source, CommandBuildContext commandBuildContext) {
       shared.add(KeywordArgsCommon.getIdOrThrow(source));
-      final KeywordArgsArgumentType apply = source.apply(registryAccess);
+      final KeywordArgsArgumentType apply = source.apply(commandBuildContext);
       arguments.putAll(apply.arguments);
       argumentsFromShared.addAll(apply.arguments.keySet());
       requiredArguments.addAll(apply.requiredArguments);

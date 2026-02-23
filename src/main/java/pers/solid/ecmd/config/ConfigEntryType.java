@@ -63,10 +63,10 @@ public interface ConfigEntryType<T> {
   /**
    * 该配置类型对应的 {@link ArgumentType}，用于在命令中解析参数。
    */
-  @NotNull ArgumentType<T> getArgumentType(CommandBuildContext registryAccess);
+  @NotNull ArgumentType<T> getArgumentType(CommandBuildContext commandBuildContext);
 
   /**
-   * 创建一个简单的 {@link ConfigEntryType}，其中 {@link ArgumentType} 为恒定值，不受 {@code registryAccess} 的影响。
+   * 创建一个简单的 {@link ConfigEntryType}，其中 {@link ArgumentType} 为恒定值，不受 {@code commandBuildContext} 的影响。
    */
   static <T> ConfigEntryType<T> of(Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> packetCodec, Function<T, Component> displayFunction, ArgumentType<T> argumentType) {
     return new Simple<>(codec, packetCodec, displayFunction, (n) -> argumentType);
@@ -86,8 +86,8 @@ public interface ConfigEntryType<T> {
     }
 
     @Override
-    public @NotNull ArgumentType<T> getArgumentType(CommandBuildContext registryAccess) {
-      return argumentTypeProvider.apply(registryAccess);
+    public @NotNull ArgumentType<T> getArgumentType(CommandBuildContext commandBuildContext) {
+      return argumentTypeProvider.apply(commandBuildContext);
     }
   }
 }

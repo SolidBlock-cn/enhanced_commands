@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.math.ConcentrationType;
-import pers.solid.ecmd.mixins.accessor.HungerManagerAccessor;
+import pers.solid.ecmd.mixins.accessor.FoodDataAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -58,7 +58,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
       final FoodData hungerManager = player.getFoodData();
       final int foodLevel = hungerManager.getFoodLevel();
       final float saturationLevel = hungerManager.getSaturationLevel();
-      final float exhaustion = ((HungerManagerAccessor) hungerManager).getExhaustionLevel();
+      final float exhaustion = ((FoodDataAccessor) hungerManager).getExhaustionLevel();
       context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.food.get.single", TextUtil.styled(player.getDisplayName(), Styles.TARGET), TextUtil.literal(foodLevel).withStyle(Styles.RESULT), TextUtil.literal(saturationLevel).withStyle(Styles.RESULT), TextUtil.literal(exhaustion).withStyle(Styles.RESULT)), false);
     } else {
       final IntList foodLevels = new IntArrayList(size);
@@ -122,7 +122,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
   public static int executeSetExhaustion(CommandContext<CommandSourceStack> context, Collection<? extends Player> players, float value) {
     final int size = players.size();
     for (Player player : players) {
-      ((HungerManagerAccessor) player.getFoodData()).setExhaustionLevel(value);
+      ((FoodDataAccessor) player.getFoodData()).setExhaustionLevel(value);
     }
     if (size == 1) {
       context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.food.set_exhaustion.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET), TextUtil.literal(value).withStyle(Styles.RESULT)), true);
@@ -138,7 +138,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
       final FoodData hungerManager = player.getFoodData();
       hungerManager.setFoodLevel(20);
       hungerManager.setSaturation(20);
-      ((HungerManagerAccessor) hungerManager).setExhaustionLevel(0);
+      ((FoodDataAccessor) hungerManager).setExhaustionLevel(0);
     }
     if (size == 1) {
       context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.food.add_to_max.single", TextUtil.styled(players.iterator().next().getDisplayName(), Styles.TARGET)), true);
@@ -221,7 +221,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("food")
         .executes(context -> executeGetAll(context, Collections.singleton(context.getSource().getPlayerOrException()), null))
         .then(literal("get")
@@ -254,7 +254,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
                         .executes(context -> executeAdd(context, getPlayers(context, "players"), getInteger(context, "food"), getFloat(context, "saturation_modifier")))))
                 .then(literal("item")
                     .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))
-                    .then(argument("item", item(registryAccess))
+                    .then(argument("item", item(commandBuildContext))
                         .executes(context -> executeAddFromFood(context, getPlayers(context, "players"), getItem(context, "item").createItemStack(1, false)))))
                 .then(literal("from")
                     .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))

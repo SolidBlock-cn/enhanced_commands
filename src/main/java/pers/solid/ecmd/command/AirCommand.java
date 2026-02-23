@@ -45,7 +45,7 @@ public enum AirCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("air")
         .then(literal("get")
             .executes(context -> executeGetAir(context, Collections.singleton(context.getSource().getEntityOrException()), null))
@@ -54,7 +54,7 @@ public enum AirCommand implements CommandRegistrationCallback {
                 .then(argument("concentration_type", concentrationType())
                     .executes(context -> executeGetAir(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type")))
                     .then(literal("store")
-                        .then(argument("target", nbtTarget(registryAccess))
+                        .then(argument("target", nbtTarget(commandBuildContext))
                             .then(argument("path", nbtPath())
                                 .executes(context -> {
                                   final NbtTarget<?> target = getNbtTarget(context, "target");
@@ -87,7 +87,7 @@ public enum AirCommand implements CommandRegistrationCallback {
                         .executes(context -> executeSetAir(context, getEntities(context, "entities"), getSourceEntityAir(context, ConcentrationType.AVERAGE)))
                         .then(argument("source_concentration_type", concentrationType())
                             .executes(context -> executeSetAir(context, getEntities(context, "entities"), getSourceEntityAir(context, getConcentrationType(context, "source_concentration_type")))))))
-                    .then(argument("source", nbtSource(registryAccess))
+                    .then(argument("source", nbtSource(commandBuildContext))
                         .then(argument("path", nbtPath())
                             .executes(context -> executeSetAirFromSource(context, getPath(context, "path"), NbtConcentrationType.FIRST))
                             .then(argument("concentration_type", nbtConcentrationType())

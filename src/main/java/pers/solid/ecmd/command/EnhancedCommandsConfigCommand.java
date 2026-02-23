@@ -182,7 +182,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
 
     final T parse;
     try {
-      parse = entry.type.getArgumentType(value.registryAccess()).parse(stringReader, context.getSource());
+      parse = entry.type.getArgumentType(value.commandBuildContext()).parse(stringReader, context.getSource());
     } catch (CommandSyntaxException e) {
       throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), e.getInput(), e.getCursor(), ((CommandSyntaxExceptionExtension) e).getCursorEnd$ec());
     }

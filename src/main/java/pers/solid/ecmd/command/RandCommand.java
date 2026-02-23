@@ -56,7 +56,7 @@ public enum RandCommand implements CommandRegistrationCallback {
   public static final Dynamic2CommandExceptionType MIN_MAX_WRONG = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("enhanced_commands.commands.rand.min_max_wrong", a, b));
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(appendStoreArguments(literal("rand")
         .executes(context -> executeRandFloat(context, 0, 1))
         .then(literal("int")
@@ -76,11 +76,11 @@ public enum RandCommand implements CommandRegistrationCallback {
         .then(literal("boolean")
             .executes(RandCommand::executeRandBoolean)
             .then(literalR2("store")
-                .then(argument("target", nbtTarget(registryAccess))
+                .then(argument("target", nbtTarget(commandBuildContext))
                     .then(argument("path", nbtPath())
                         .executes(context -> executeRandBoolean(context, consumerOf(context))))))
             .then(argument("probability", floatArg(0, 1))
-                .executes(context -> executeRandBoolean(context, getFloat(context, "probability"))))), registryAccess));
+                .executes(context -> executeRandBoolean(context, getFloat(context, "probability"))))), commandBuildContext));
   }
 
   private static int executeRandBoolean(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -145,21 +145,21 @@ public enum RandCommand implements CommandRegistrationCallback {
     return value;
   }
 
-  private static <A extends ArgumentBuilder<CommandSourceStack, ?>> A appendStoreArguments(A argumentBuilder, CommandBuildContext registryAccess) {
+  private static <A extends ArgumentBuilder<CommandSourceStack, ?>> A appendStoreArguments(A argumentBuilder, CommandBuildContext commandBuildContext) {
     for (CommandNode<CommandSourceStack> node : argumentBuilder.getArguments()) {
-      appendStoreArguments(node, registryAccess);
+      appendStoreArguments(node, commandBuildContext);
     }
     return argumentBuilder;
   }
 
-  private static <N extends CommandNode<CommandSourceStack>> N appendStoreArguments(N node, CommandBuildContext registryAccess) {
+  private static <N extends CommandNode<CommandSourceStack>> N appendStoreArguments(N node, CommandBuildContext commandBuildContext) {
     for (CommandNode<CommandSourceStack> child : node.getChildren()) {
-      appendStoreArguments(child, registryAccess);
+      appendStoreArguments(child, commandBuildContext);
     }
     final Command<CommandSourceStack> command = node.getCommand();
     if (command != null) {
       node.addChild(literal("store")
-          .then(argument("target", nbtTarget(registryAccess))
+          .then(argument("target", nbtTarget(commandBuildContext))
               .then(argument("path", nbtPath())
                   .executes(command))).build());
     }

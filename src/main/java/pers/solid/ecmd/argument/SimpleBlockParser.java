@@ -65,7 +65,7 @@ public abstract class SimpleBlockParser<S> {
 
   public void parseBlockId() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    final HolderLookup.RegistryLookup<Block> registryWrapper = parseContext.registryAccess().lookupOrThrow(Registries.BLOCK);
+    final HolderLookup.RegistryLookup<Block> registryWrapper = parseContext.commandBuildContext().lookupOrThrow(Registries.BLOCK);
     if (reader.canRead() && reader.peek() == '@') {
       reader.skip();
       int cursorBeforeParsing = reader.getCursor();
@@ -224,7 +224,7 @@ public abstract class SimpleBlockParser<S> {
   public void parseBlockTagId() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorBeforeHash = reader.getCursor();
-    final HolderLookup.RegistryLookup<Block> registryWrapper = parseContext.registryAccess().lookupOrThrow(Registries.BLOCK);
+    final HolderLookup.RegistryLookup<Block> registryWrapper = parseContext.commandBuildContext().lookupOrThrow(Registries.BLOCK);
     if (reader.canRead() && reader.peek() == '#') {
       reader.skip();
 

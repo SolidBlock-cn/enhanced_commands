@@ -13,7 +13,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
-import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -33,7 +33,7 @@ public final class EntitySelectors {
    * 类似于 {@link EntitySelectorParser#parse()}，但是允许省略开头的“@e”等变量。
    */
   public static EntitySelector readOmittibleEntitySelector(@NotNull EntitySelectorParser entitySelectorReader) throws CommandSyntaxException {
-    final var accessor = (EntitySelectorReaderAccessor) entitySelectorReader;
+    final var accessor = (EntitySelectorParserAccessor) entitySelectorReader;
     final StringReader stringReader = entitySelectorReader.getReader();
 
     entitySelectorReader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> {
@@ -47,7 +47,7 @@ public final class EntitySelectors {
       entitySelectorReader.setMaxResults(Integer.MAX_VALUE);
       accessor.setUsesSelectors(true);
       accessor.callParseOptions();
-      ((EntitySelectorReaderAccessor) entitySelectorReader).callFinalizePredicates();
+      ((EntitySelectorParserAccessor) entitySelectorReader).callFinalizePredicates();
       return entitySelectorReader.getSelector();
     } else {
       return entitySelectorReader.parse();
@@ -55,7 +55,7 @@ public final class EntitySelectors {
   }
 
   /**
-   * <p>将实体选择器对象中未存储于 {@link EntitySelector#predicates} 中的一些属性转换为相应的 {@link SpecialEntityPredicate}，从而实现序列化。
+   * <p>将实体选择器对象中未存储于 {@link EntitySelector#contextFreePredicates} 中的一些属性转换为相应的 {@link SpecialEntityPredicate}，从而实现序列化。
    *
    * @see EntitySelectorExtras#getSpecialEntries()
    */
@@ -87,7 +87,7 @@ public final class EntitySelectors {
   }
 
   /**
-   * <p>将 {@link EntitySelector#predicates} 列表转换为可被本模组直接序列化的 {@link EntityPredicate} 对象。当列表中的 {@code Predicate<Entity>} 符合以下条件之一时，会被本模组读取：
+   * <p>将 {@link EntitySelector#contextFreePredicates} 列表转换为可被本模组直接序列化的 {@link EntityPredicate} 对象。当列表中的 {@code Predicate<Entity>} 符合以下条件之一时，会被本模组读取：
    * <ul>
    *   <li>直接继承了 {@link EntityPredicate}。</li>
    *   <li>继承了 {@link StaticEntityPredicateWrapper}。</li>

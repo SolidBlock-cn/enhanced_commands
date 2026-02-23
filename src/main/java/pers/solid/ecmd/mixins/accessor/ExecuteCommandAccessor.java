@@ -59,7 +59,7 @@ public interface ExecuteCommandAccessor {
       CommandNode<CommandSourceStack> root,
       LiteralArgumentBuilder<CommandSourceStack> argumentBuilder,
       boolean positive,
-      CommandBuildContext registryAccess
+      CommandBuildContext commandBuildContext
   ) {
     throw new UnsupportedOperationException();
   }

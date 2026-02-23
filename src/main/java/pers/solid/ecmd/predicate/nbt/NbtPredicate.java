@@ -18,8 +18,8 @@ import java.util.function.Predicate;
 public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull Tag> {
   Codec<NbtPredicate> CODEC = NbtPredicateType.REGISTRY.byNameCodec().dispatch(NbtPredicate::getType, NbtPredicateType::getCodec);
 
-  static @NotNull NbtPredicate parse(CommandBuildContext registryAccess, String s, CommandSourceStack source) throws CommandSyntaxException {
-    return new NbtPredicateParser<>(new ParseContext<>(registryAccess, new StringReader(s), false, true)).parsePredicate(false, false);
+  static @NotNull NbtPredicate parse(CommandBuildContext commandBuildContext, String s, CommandSourceStack source) throws CommandSyntaxException {
+    return new NbtPredicateParser<>(new ParseContext<>(commandBuildContext, new StringReader(s), false, true)).parsePredicate(false, false);
   }
 
   static <S> NbtPredicate parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {

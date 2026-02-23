@@ -78,14 +78,14 @@ public enum StackCommand implements CommandRegistrationCallback {
   public static final SimpleCommandExceptionType UNLOADED_TARGET = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.rejected_target", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgsForVector = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess)
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
+    final KeywordArgsArgumentType keywordArgsForVector = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext)
         // 是否一并对实体进行堆叠
         .addOptionalArg("affect_entities", EntityArgument.entities(), null)
         // 是否将活动区域设置为堆叠后的区域
         .addOptionalArg("select", BoolArgumentType.bool(), false)
         // 只堆叠符合指定的谓词的方块
-        .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
+        .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(commandBuildContext), null)
         .build();
     final KeywordArgsArgumentType keywordArgsForDirections = KeywordArgsArgumentType.builder().addAll(keywordArgsForVector)
         // 表示不通过检测区域的边界大小来推断偏移值。
@@ -98,7 +98,7 @@ public enum StackCommand implements CommandRegistrationCallback {
         dispatcher,
         literalR2("stack"),
         literalR2("/stack"),
-        argument("region", RegionArgumentType.region(registryAccess))
+        argument("region", RegionArgumentType.region(commandBuildContext))
             .then(argument("direction", direction())
                 .executes(context -> executeStackInDirection(getDirection(context, "direction"), 1, keywordArgsForDirections.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgsForDirections)
@@ -188,7 +188,8 @@ public enum StackCommand implements CommandRegistrationCallback {
     Iterable<@Nullable BlockPos> posIterable;
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       posIterable = UnloadedPosException.catching(Iterables.transform(region, blockPos -> {
-        if (!world.hasChunkAt(blockPos)) {
+        @SuppressWarnings("deprecation") final boolean b = world.hasChunkAt(blockPos);
+        if (!b) {
           hasUnloadedPos.setTrue();
           throw new UnloadedPosException(blockPos.immutable());
         }
@@ -196,7 +197,7 @@ public enum StackCommand implements CommandRegistrationCallback {
       }));
     } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       posIterable = new BatchedFilterIterable<>(region, 16, blockPos -> {
-        final boolean chunkLoaded = world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) hasUnloadedPos.setTrue();
         return chunkLoaded;
       });
@@ -205,11 +206,11 @@ public enum StackCommand implements CommandRegistrationCallback {
     }
     final Iterable<Void> collectSourceBlocks = Iterables.transform(posIterable, blockPos -> {
       if (blockPos == null) return null;
-      final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-      if (transformOnly == null || transformOnly.test(cachedBlockPosition, executionContext)) {
-        sourceStates.put(blockPos.asLong(), cachedBlockPosition.getState());
-        if (cachedBlockPosition.getEntity() != null) {
-          sourceBlockEntities.put(blockPos.asLong(), cachedBlockPosition.getEntity().saveWithoutMetadata(world.registryAccess()));
+      final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+      if (transformOnly == null || transformOnly.test(blockInWorld, executionContext)) {
+        sourceStates.put(blockPos.asLong(), blockInWorld.getState());
+        if (blockInWorld.getEntity() != null) {
+          sourceBlockEntities.put(blockPos.asLong(), blockInWorld.getEntity().saveWithoutMetadata(world.registryAccess()));
         }
       }
       return null;
@@ -253,7 +254,8 @@ public enum StackCommand implements CommandRegistrationCallback {
 
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           posPairStream = posPairStream.takeWhile(pair -> {
-            if (!world.hasChunkAt(posToPlace.set(pair.firstLong()))) {
+            @SuppressWarnings("deprecation") final boolean hasChunk = world.hasChunkAt(posToPlace.set(pair.firstLong()));
+            if (!hasChunk) {
               hasUnloadedPos.setTrue();
               return false;
             }
@@ -262,7 +264,7 @@ public enum StackCommand implements CommandRegistrationCallback {
         }
         if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
           posPairStream = posPairStream.filter(pair -> {
-            final boolean chunkLoaded = world.hasChunkAt(posToPlace.set(pair.firstLong()));
+            @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(posToPlace.set(pair.firstLong()));
             if (!chunkLoaded) hasUnloadedPos.setTrue();
             return chunkLoaded;
           });
@@ -271,9 +273,9 @@ public enum StackCommand implements CommandRegistrationCallback {
         return posPairStream.map(pair -> {
           posToPlace.set(pair.firstLong());
 
-          final BlockInWorld cachedBlockPosition = new BlockInWorld(world, posToPlace, false);
-          if (affectOnly == null || affectOnly.test(cachedBlockPosition, executionContext)) {
-            oldStates.put(posToPlace.asLong(), cachedBlockPosition.getState());
+          final BlockInWorld blockInWorld = new BlockInWorld(world, posToPlace, false);
+          if (affectOnly == null || affectOnly.test(blockInWorld, executionContext)) {
+            oldStates.put(posToPlace.asLong(), blockInWorld.getState());
             stackedToSourceOnThisStack.put(posToPlace.asLong(), pair.secondLong());
           }
           return (Void) null;

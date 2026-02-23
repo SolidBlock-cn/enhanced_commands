@@ -69,7 +69,7 @@ public final class KeywordArgsCommon {
     return Preconditions.checkNotNull(getById(identifier), "unknown keyword args type: %s", identifier);
   }
 
-  public static final Function<CommandBuildContext, KeywordArgsArgumentType> CONVERT_BLOCKS = register("convert_blocks", registryAccess -> KeywordArgsArgumentType.builder()
+  public static final Function<CommandBuildContext, KeywordArgsArgumentType> CONVERT_BLOCKS = register("convert_blocks", commandBuildContext -> KeywordArgsArgumentType.builder()
       .addOptionalArg("skip_light_update", BoolArgumentType.bool(), false)
       .addOptionalArg("notify_listeners", BoolArgumentType.bool(), true)
       .addOptionalArg("notify_neighbors", BoolArgumentType.bool(), false)
@@ -77,12 +77,12 @@ public final class KeywordArgsCommon {
       .addOptionalArg("suppress_initial_check", BoolArgumentType.bool(), false)
       .addOptionalArg("suppress_replaced_check", BoolArgumentType.bool(), false)
       .addOptionalArg("force", BoolArgumentType.bool(), false)
-      .addOptionalArg("nbt", NbtFunctionArgumentType.compound(registryAccess), null)
+      .addOptionalArg("nbt", NbtFunctionArgumentType.compound(commandBuildContext), null)
       .addOptionalArg("affect_fluid", BoolArgumentType.bool(), false)
       .addOptionalArg("seed", LongArgumentType.longArg(), null)
       .build());
-  public static final Function<CommandBuildContext, KeywordArgsArgumentType> FILLING = register("filling", registryAccess -> KeywordArgsArgumentType.builder()
-      .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null)
+  public static final Function<CommandBuildContext, KeywordArgsArgumentType> FILLING = register("filling", commandBuildContext -> KeywordArgsArgumentType.builder()
+      .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(commandBuildContext), null)
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
       .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)
       .addOptionalArg("skip_light_update", BoolArgumentType.bool(), false)
@@ -97,11 +97,11 @@ public final class KeywordArgsCommon {
       .addOptionalArg("undoable", BoolArgumentType.bool(), true)
       .addOptionalArg("seed", LongArgumentType.longArg(), null)
       .build());
-  public static final Function<CommandBuildContext, KeywordArgsArgumentType> BLOCK_TRANSFORMATION = register("block_transformation", registryAccess -> KeywordArgsArgumentType.builderFromShared(FILLING, registryAccess)
-      .addOptionalArg("affect_entities", EntityPredicateArgumentType.entityPredicate(registryAccess), null)
+  public static final Function<CommandBuildContext, KeywordArgsArgumentType> BLOCK_TRANSFORMATION = register("block_transformation", commandBuildContext -> KeywordArgsArgumentType.builderFromShared(FILLING, commandBuildContext)
+      .addOptionalArg("affect_entities", EntityPredicateArgumentType.entityPredicate(commandBuildContext), null)
       .addOptionalArg("keep_remaining", BoolArgumentType.bool(), false)
       .addOptionalArg("keep_state", BoolArgumentType.bool(), false)
-      .addOptionalArg("remaining", BlockFunctionArgumentType.blockFunction(registryAccess), BlockTransformationTask.DEFAULT_REMAINING_FUNCTION)
+      .addOptionalArg("remaining", BlockFunctionArgumentType.blockFunction(commandBuildContext), BlockTransformationTask.DEFAULT_REMAINING_FUNCTION)
       .addOptionalArg("select", BoolArgumentType.bool(), false)
-      .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(registryAccess), null).build());
+      .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(commandBuildContext), null).build());
 }

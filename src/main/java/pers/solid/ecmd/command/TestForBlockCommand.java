@@ -40,11 +40,11 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
   public static final DynamicCommandExceptionType TEST_FOR_BLOCK_NOT_LOADED = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.commands.testfor.block.not_loaded", o));
   public static final DynamicCommandExceptionType TEST_FOR_BLOCK_PREDICATE_NOT_LOADED = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.commands.testfor.block.not_loaded_for_predicate", o));
 
-  private static LiteralArgumentBuilder<CommandSourceStack> addBlockCommandProperties(LiteralArgumentBuilder<CommandSourceStack> argumentBuilder, CommandBuildContext registryAccess) {
+  private static LiteralArgumentBuilder<CommandSourceStack> addBlockCommandProperties(LiteralArgumentBuilder<CommandSourceStack> argumentBuilder, CommandBuildContext commandBuildContext) {
     return argumentBuilder
         .then(Commands.argument("pos", EnhancedPosArgumentType.blockPos())
             .executes(TestForBlockCommand::executeTestForBlock)
-            .then(Commands.argument("predicate", new BlockPredicateArgumentType(registryAccess))
+            .then(Commands.argument("predicate", new BlockPredicateArgumentType(commandBuildContext))
                 .executes(context -> executeTestForBlockPredicate(context, false, null))
                 .then(Commands.argument("keyword_args", BLOCK_KEYWORD_ARGS)
                     .executes(context -> executeTestForBlockPredicate(context, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"))))));
@@ -55,7 +55,8 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     // 会检查区块已加载，不过不是在这里，而是在下面。
     final CommandSourceStack source = context.getSource();
     final ServerLevel world = source.getLevel();
-    if (!world.hasChunkAt(blockPos)) {
+    @SuppressWarnings("deprecation") final boolean hasChunk = world.hasChunkAt(blockPos);
+    if (!hasChunk) {
       throw TEST_FOR_BLOCK_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final BlockState blockState = world.getBlockState(blockPos);
@@ -85,11 +86,11 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
 
     // 检查方块的代码在后面
-    final BlockInWorld cachedBlockPosition = new BlockInWorld(source.getLevel(), blockPos, forceLoad);
-    if (cachedBlockPosition.getState() == null) {
+    final BlockInWorld blockInWorld = new BlockInWorld(source.getLevel(), blockPos, forceLoad);
+    if (blockInWorld.getState() == null) {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
-    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(cachedBlockPosition, new ExecutionContext(source.getLevel().getRandom(), PositionProvider.of(blockPos.getCenter(), Vec2.ZERO, null, EntityAnchorArgument.Anchor.FEET), seed));
+    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(blockInWorld, new ExecutionContext(source.getLevel().getRandom(), PositionProvider.of(blockPos.getCenter(), Vec2.ZERO, null, EntityAnchorArgument.Anchor.FEET), seed));
     testResult.sendMessage(source);
     return BooleanUtils.toInteger(testResult.successes());
   }
@@ -101,7 +102,7 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
   }
 
   @Override
-  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
-    testForBuilder.then(addBlockCommandProperties(Commands.literal("block"), registryAccess));
+  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
+    testForBuilder.then(addBlockCommandProperties(Commands.literal("block"), commandBuildContext));
   }
 }

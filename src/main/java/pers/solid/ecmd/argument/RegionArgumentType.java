@@ -17,11 +17,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record RegionArgumentType(CommandBuildContext registryAccess) implements ArgumentType<RegionArgument<?>> {
+public record RegionArgumentType(CommandBuildContext commandBuildContext) implements ArgumentType<RegionArgument<?>> {
   private static final List<String> EXAMPLES = List.of("cuboid(1 1 1, 2 2 2)", "sphere(3)", "cyl(3, 2)", "outline(cuboid(~~~, ~~~5))");
 
-  public static RegionArgumentType region(CommandBuildContext registryAccess) {
-    return new RegionArgumentType(registryAccess);
+  public static RegionArgumentType region(CommandBuildContext commandBuildContext) {
+    return new RegionArgumentType(commandBuildContext);
   }
 
   public static RegionArgument<?> getRegionArgument(CommandContext<CommandSourceStack> context, String name) {
@@ -51,14 +51,14 @@ public record RegionArgumentType(CommandBuildContext registryAccess) implements 
 
   @Override
   public RegionArgument<?> parse(StringReader reader) throws CommandSyntaxException {
-    return RegionArgument.parse(new ParseContext<>(registryAccess, reader, false, false));
+    return RegionArgument.parse(new ParseContext<>(commandBuildContext, reader, false, false));
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, stringReader, true, false);
+    final ParseContext<S> parseContext = new ParseContext<>(commandBuildContext, stringReader, true, false);
     try {
       RegionArgument.parse(parseContext);
     } catch (CommandSyntaxException ignore) {

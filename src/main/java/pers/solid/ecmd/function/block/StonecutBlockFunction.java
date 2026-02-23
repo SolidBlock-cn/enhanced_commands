@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.mixins.accessor.SingleStackRecipeAccessor;
+import pers.solid.ecmd.mixins.accessor.SingleItemRecipeAccessor;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.StateUtil;
@@ -46,7 +46,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     }
     final List<SelectableRecipe.SingleInputEntry<StonecutterRecipe>> entries = allMatches.entries();
     final SelectableRecipe.SingleInputEntry<StonecutterRecipe> entry = entries.get(context.random.nextInt(allMatches.size()));
-    final Optional<ItemStack> resultStack = entry.recipe().recipe().map(recipeEntry -> ((SingleStackRecipeAccessor) recipeEntry.value()).callResult());
+    final Optional<ItemStack> resultStack = entry.recipe().recipe().map(recipeEntry -> ((SingleItemRecipeAccessor) recipeEntry.value()).callResult());
     if (resultStack.isPresent() && resultStack.get().getItem() instanceof BlockItem blockItem) {
       BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), context.random);
       for (Property<?> property : result.getProperties()) {

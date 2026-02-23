@@ -17,8 +17,8 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixins.accessor.DefaultPosArgumentAccessor;
-import pers.solid.ecmd.mixins.accessor.LookingPosArgumentAccessor;
+import pers.solid.ecmd.mixins.accessor.LocalCoordinatesAccessor;
+import pers.solid.ecmd.mixins.accessor.WorldCoordinatesAccessor;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.StringUtil;
@@ -55,7 +55,7 @@ public interface EnhancedPosArgument extends Coordinates, ExpressionConvertible 
 
   static String asString(Coordinates posArgument) {
     if (posArgument instanceof WorldCoordinates defaultPosArgument) {
-      final DefaultPosArgumentAccessor a = (DefaultPosArgumentAccessor) defaultPosArgument;
+      final WorldCoordinatesAccessor a = (WorldCoordinatesAccessor) defaultPosArgument;
       final WorldCoordinate x = a.getX();
       final WorldCoordinate y = a.getY();
       final WorldCoordinate z = a.getZ();
@@ -69,8 +69,8 @@ public interface EnhancedPosArgument extends Coordinates, ExpressionConvertible 
       sb.append(StringUtil.nf.format(z.get(0)));
       return sb.toString();
     } else if (posArgument instanceof LocalCoordinates lookingPosArgument) {
-      final LookingPosArgumentAccessor a = (LookingPosArgumentAccessor) lookingPosArgument;
-      return "^" + StringUtil.nf.format(a.getX()) + " ^" + StringUtil.nf.format(a.getY()) + " ^" + StringUtil.nf.format(a.getZ());
+      final LocalCoordinatesAccessor a = (LocalCoordinatesAccessor) lookingPosArgument;
+      return "^" + StringUtil.nf.format(a.getLeft()) + " ^" + StringUtil.nf.format(a.getUp()) + " ^" + StringUtil.nf.format(a.getForwards());
     } else if (posArgument instanceof EnhancedPosArgument enhancedPosArgument) {
       return enhancedPosArgument.asString();
     } else {

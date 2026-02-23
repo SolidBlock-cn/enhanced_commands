@@ -18,11 +18,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record EntityPredicateArgumentType(CommandBuildContext registryAccess) implements ArgumentType<EntityPredicate> {
+public record EntityPredicateArgumentType(CommandBuildContext commandBuildContext) implements ArgumentType<EntityPredicate> {
   private static final List<String> EXAMPLES = List.of("@a", "SolidBlock", "0123", "@r", "@e[distance=..5]", "[m=c]", "[gamemode=creative]");
 
-  public static EntityPredicateArgumentType entityPredicate(CommandBuildContext registryAccess) {
-    return new EntityPredicateArgumentType(registryAccess);
+  public static EntityPredicateArgumentType entityPredicate(CommandBuildContext commandBuildContext) {
+    return new EntityPredicateArgumentType(commandBuildContext);
   }
 
   public static EntityPredicate getEntityPredicate(CommandContext<CommandSourceStack> context, String name) {

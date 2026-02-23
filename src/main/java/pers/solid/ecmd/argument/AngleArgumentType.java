@@ -76,7 +76,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   }
 
   @Override
-  public @NotNull AngleArgumentType instantiate(CommandBuildContext registryAccess) {
+  public @NotNull AngleArgumentType instantiate(CommandBuildContext commandBuildContext) {
     return this;
   }
 

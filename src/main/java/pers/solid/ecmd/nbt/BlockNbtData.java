@@ -71,8 +71,8 @@ public record BlockNbtData(RegionArgument<?> region, BlockPredicate blockPredica
               // 在有方块谓词的情况下，在已有实体的情况下对谓词进行测试。
               final BlockEntity blockEntity = world.getBlockEntity(blockPos);
               if (blockEntity != null) {
-                final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, false);
-                if (blockPredicate.test(cachedBlockPosition, context)) {
+                final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, false);
+                if (blockPredicate.test(blockInWorld, context)) {
                   consumer.accept(blockEntity);
                 }
               }

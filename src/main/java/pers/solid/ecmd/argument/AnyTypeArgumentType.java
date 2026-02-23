@@ -16,17 +16,17 @@ import java.util.List;
  */
 public class AnyTypeArgumentType implements ArgumentType<AnyTypeArgumentType.Pair> {
   private static final List<String> EXAMPLES = List.of("world phrase", "$", "@s");
-  private final CommandBuildContext registryAccess;
+  private final CommandBuildContext commandBuildContext;
 
-  public AnyTypeArgumentType(CommandBuildContext registryAccess) {
-    this.registryAccess = registryAccess;
+  public AnyTypeArgumentType(CommandBuildContext commandBuildContext) {
+    this.commandBuildContext = commandBuildContext;
   }
 
   @Override
   public Pair parse(StringReader stringReader) throws CommandSyntaxException {
     var remaining = stringReader.getRemaining();
     stringReader.setCursor(stringReader.getTotalLength());
-    return new Pair(registryAccess, remaining);
+    return new Pair(commandBuildContext, remaining);
   }
 
   public static Pair getPair(CommandContext<?> context, String name) {
@@ -42,5 +42,5 @@ public class AnyTypeArgumentType implements ArgumentType<AnyTypeArgumentType.Pai
     return EXAMPLES;
   }
 
-  public record Pair(CommandBuildContext registryAccess, String string) {}
+  public record Pair(CommandBuildContext commandBuildContext, String string) {}
 }

@@ -15,6 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.mixins.mixin.CommandsMixin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +72,7 @@ public final class ModCommandExceptionTypes {
    * 将命令异常的消息增加一行，以显示原始的命令输入以及出错位置，就像原版游戏在遇到命令解析异常时那样。其处理方法综合了原版的做法以及本模组对原版做法的 mixin。
    *
    * @see Commands#finishParsing
-   * @see pers.solid.ecmd.mixins.mixin.CommandManagerMixin#modifiedGetErrorMessage(String, CommandSyntaxException, int)
+   * @see CommandsMixin#modifiedGetErrorMessage(String, CommandSyntaxException, int)
    */
   private static Component toErrorShowingInput(Component message, String input, int cursor, int cursorEnd) {
     if (input != null && cursor >= 0) {

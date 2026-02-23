@@ -222,14 +222,14 @@ public class BlockTransformationTask {
 
       storeTransformed = Iterables.transform(oldPosIterable, oldPos -> {
         if (oldPos == null) return null;
-        final BlockInWorld cachedBlockPosition = new BlockInWorld(world, oldPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-        if ((transformsOnly == null || transformsOnly.test(cachedBlockPosition, executionContext)) && cachedBlockPosition.getState() != null) {
-          final BlockState blockState = cachedBlockPosition.getState();
+        final BlockInWorld blockInWorld = new BlockInWorld(world, oldPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+        if ((transformsOnly == null || transformsOnly.test(blockInWorld, executionContext)) && blockInWorld.getState() != null) {
+          final BlockState blockState = blockInWorld.getState();
           posTransformedOut.put(oldPos.asLong(), blockState);
           final BlockPos transformedBlockPos = mutable.set(blockPosTransformer.apply(oldPos));
           transformedStates.put(transformedBlockPos.asLong(), blockStateTransformer.apply(blockState));
-          if (cachedBlockPosition.getEntity() != null) {
-            nbts.put(transformedBlockPos.asLong(), cachedBlockPosition.getEntity().saveWithoutMetadata(world.registryAccess()));
+          if (blockInWorld.getEntity() != null) {
+            nbts.put(transformedBlockPos.asLong(), blockInWorld.getEntity().saveWithoutMetadata(world.registryAccess()));
           }
 
           return null;

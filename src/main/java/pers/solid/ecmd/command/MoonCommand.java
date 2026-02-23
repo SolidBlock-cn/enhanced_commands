@@ -26,7 +26,7 @@ public enum MoonCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final LiteralCommandNode<CommandSourceStack> moonNode = dispatcher.register(literal("moon")
         .executes(MoonCommand::executeGetPhase)
         .then(literal("get")
@@ -38,8 +38,8 @@ public enum MoonCommand implements CommandRegistrationCallback {
             .executes(context -> executeRotatePhase(context, 1))
             .then(argument("steps", IntegerArgumentType.integer())
                 .executes(context -> executeRotatePhase(context, IntegerArgumentType.getInteger(context, "steps")))))
-        .then(addConditionArguments(dispatcher.getRoot(), literal("if"), true, registryAccess))
-        .then(addConditionArguments(dispatcher.getRoot(), literal("unless"), false, registryAccess)));
+        .then(addConditionArguments(dispatcher.getRoot(), literal("if"), true, commandBuildContext))
+        .then(addConditionArguments(dispatcher.getRoot(), literal("unless"), false, commandBuildContext)));
 
     dispatcher.register(literal("jadeplate").redirect(moonNode));
   }

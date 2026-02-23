@@ -34,7 +34,7 @@ public enum FireCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final KeywordArgsArgumentType setFireKeywords = KeywordArgsArgumentType.builder().addOptionalArg("influenced_by_enchant", BoolArgumentType.bool(), false).build();
     final KeywordArgsArgumentType extinguishKeywords = KeywordArgsArgumentType.builder().addOptionalArg("sound", BoolArgumentType.bool(), false).build();
 

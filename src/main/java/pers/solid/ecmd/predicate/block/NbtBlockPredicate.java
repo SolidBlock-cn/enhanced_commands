@@ -29,17 +29,17 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockEntity blockEntity = cachedBlockPosition.getEntity();
-    return blockEntity != null && nbtPredicate.test(blockEntity.saveWithoutMetadata(cachedBlockPosition.getLevel().registryAccess()));
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockEntity blockEntity = blockInWorld.getEntity();
+    return blockEntity != null && nbtPredicate.test(blockEntity.saveWithoutMetadata(blockInWorld.getLevel().registryAccess()));
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockEntity blockEntity = cachedBlockPosition.getEntity();
-    final MutableComponent nameText = cachedBlockPosition.getState().getBlock().getName();
-    final MutableComponent posText = TextUtil.wrapVector(cachedBlockPosition.getPos());
-    final RegistryAccess registryManager = cachedBlockPosition.getLevel().registryAccess();
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockEntity blockEntity = blockInWorld.getEntity();
+    final MutableComponent nameText = blockInWorld.getState().getBlock().getName();
+    final MutableComponent posText = TextUtil.wrapVector(blockInWorld.getPos());
+    final RegistryAccess registryManager = blockInWorld.getLevel().registryAccess();
     if (blockEntity == null) {
       return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.nbt.not_block_entity", nameText, posText));
     } else if (nbtPredicate.test(blockEntity.saveWithoutMetadata(registryManager))) {

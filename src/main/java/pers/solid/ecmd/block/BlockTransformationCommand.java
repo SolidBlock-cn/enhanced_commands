@@ -41,8 +41,8 @@ import pers.solid.ecmd.util.iterator.IterateUtils;
 import java.util.function.Function;
 
 public interface BlockTransformationCommand {
-  static KeywordArgsArgumentType.Builder createKeywordArgs(CommandBuildContext registryAccess) {
-    return KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.BLOCK_TRANSFORMATION, registryAccess);
+  static KeywordArgsArgumentType.Builder createKeywordArgs(CommandBuildContext commandBuildContext) {
+    return KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.BLOCK_TRANSFORMATION, commandBuildContext);
   }
 
   Vec3i transformBlockPos(Vec3i original);

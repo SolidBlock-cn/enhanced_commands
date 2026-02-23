@@ -24,10 +24,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
+public record SimpleBlockPredicate(@NotNull Block block, @NotNull List<PropertyPredicate<?>> properties) implements BlockPredicate {
   public static final MapCodec<SimpleBlockPredicate> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
 
-  public SimpleBlockPredicate(Block block) {
+  public SimpleBlockPredicate(@NotNull Block block) {
     this(block, Collections.emptyList());
   }
 
@@ -39,22 +39,22 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    if (!cachedBlockPosition.getState().is(block))
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    if (!blockInWorld.getState().is(block))
       return false;
     for (PropertyPredicate<?> propertyPredicate : properties) {
-      if (!propertyPredicate.test(cachedBlockPosition.getState()))
+      if (!propertyPredicate.test(blockInWorld.getState()))
         return false;
     }
     return true;
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
     boolean matches = true;
-    final BlockState blockState = cachedBlockPosition.getState();
+    final BlockState blockState = blockInWorld.getState();
     final List<Component> messages = new ArrayList<>();
-    final BlockPos blockPos = cachedBlockPosition.getPos();
+    final BlockPos blockPos = blockInWorld.getPos();
     final MutableComponent posText = TextUtil.wrapVector(blockPos);
     final MutableComponent actualText = blockState.getBlock().getName().withStyle(Styles.ACTUAL);
     if (!blockState.is(block)) {

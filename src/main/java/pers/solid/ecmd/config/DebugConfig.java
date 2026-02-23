@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import pers.solid.ecmd.mixins.mixin.*;
 
 /**
  * 本模组中用于调试的一些配置项。
@@ -14,18 +15,18 @@ public class DebugConfig implements Cloneable {
   /**
    * 忽略世界界限。
    *
-   * @see pers.solid.ecmd.mixins.mixin.PlayerEntityMixin#noClampPos(Player, double, double, double)
-   * @see pers.solid.ecmd.mixins.mixin.ServerPlayNetworkHandlerMixin#noClampHorizontal(double, CallbackInfoReturnable)
-   * @see pers.solid.ecmd.mixins.mixin.ServerPlayNetworkHandlerMixin#noClampVertical(double, CallbackInfoReturnable)
-   * @see pers.solid.ecmd.mixins.mixin.WorldMixin#forceValidHorizontally(BlockPos, CallbackInfoReturnable)
-   * @see pers.solid.ecmd.mixins.mixin.WorldMixin#forceValidVertically(int, CallbackInfoReturnable)
+   * @see PlayerMixin#noClampPos(Player, double, double, double)
+   * @see ServerGamePacketListenerImplMixin#noClampHorizontal(double, CallbackInfoReturnable)
+   * @see ServerGamePacketListenerImplMixin#noClampVertical(double, CallbackInfoReturnable)
+   * @see LevelMixin#forceValidHorizontally(BlockPos, CallbackInfoReturnable)
+   * @see LevelMixin#forceValidVertically(int, CallbackInfoReturnable)
    * @see pers.solid.ecmd.mixins.mixin.EntityMixin#noClampWhenUpdating(double, double, double, Operation)
    */
   public boolean ignoreBoundary = false;
   /**
    * 忽视世界边界。
    *
-   * @see pers.solid.ecmd.mixins.mixin.InGameHudMixin#skipBorderWarning(double)
+   * @see GuiMixin#skipBorderWarning(double)
    * @see pers.solid.ecmd.mixins.mixin.WorldBorderMixin
    */
   public boolean ignoreBorder = false;
@@ -40,8 +41,8 @@ public class DebugConfig implements Cloneable {
   /**
    * 即使玩家处于较低的地方，仍正常渲染天空，包括下方的天空和雾。
    *
-   * @see pers.solid.ecmd.mixins.mixin.WorldRendererMixin#neverSkyDark
-   * @see pers.solid.ecmd.mixins.mixin.BackgroundRendererMixin#noDarkFogColor
+   * @see LevelRendererMixin#neverSkyDark
+   * @see FogRendererMixin#noDarkFogColor
    */
   public boolean noDarkSky = false;
 

@@ -3,11 +3,11 @@ package pers.solid.ecmd.mixins.ext;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixins.mixin.PlayerEntityMixin;
+import pers.solid.ecmd.mixins.mixin.PlayerMixin;
 import pers.solid.ecmd.regionselection.RegionSelection;
 
 /**
- * 此接口将通过 {@link PlayerEntityMixin} 使 {@link Player} 实现此接口。
+ * 此接口将通过 {@link PlayerMixin} 使 {@link Player} 实现此接口。
  */
 public interface PlayerEntityExtension {
   /**

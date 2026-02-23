@@ -37,21 +37,21 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    return blockPredicate.test(new BlockInWorld(cachedBlockPosition.getLevel(), cachedBlockPosition.getPos().above(offset), false), context);
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    return blockPredicate.test(new BlockInWorld(blockInWorld.getLevel(), blockInWorld.getPos().above(offset), false), executionContext);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
     final MutableComponent description;
-    final BlockInWorld offsetPosition = new BlockInWorld(cachedBlockPosition.getLevel(), cachedBlockPosition.getPos().above(offset), false);
-    final TestResult attachment = blockPredicate.testAndDescribe(offsetPosition, context);
+    final BlockInWorld offsetPosition = new BlockInWorld(blockInWorld.getLevel(), blockInWorld.getPos().above(offset), false);
+    final TestResult attachment = blockPredicate.testAndDescribe(offsetPosition, executionContext);
     final boolean successes = attachment.successes();
     final String string = successes ? "pass" : "fail";
     if (offset > 0) {
-      description = Component.translatable("enhanced_commands.block_predicate.horizontal_offset.above_" + string, offset, TextUtil.wrapVector(cachedBlockPosition.getPos()));
+      description = Component.translatable("enhanced_commands.block_predicate.horizontal_offset.above_" + string, offset, TextUtil.wrapVector(blockInWorld.getPos()));
     } else {
-      description = Component.translatable("enhanced_commands.block_predicate.horizontal_offset.below_" + string, -offset, TextUtil.wrapVector(cachedBlockPosition.getPos()));
+      description = Component.translatable("enhanced_commands.block_predicate.horizontal_offset.below_" + string, -offset, TextUtil.wrapVector(blockInWorld.getPos()));
     }
     return TestResult.of(successes, description, List.of(attachment));
   }

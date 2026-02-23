@@ -38,8 +38,8 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockState blockState = cachedBlockPosition.getState();
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockState blockState = blockInWorld.getState();
     for (PropertyNamePredicate propertyNamePredicate : predicates) {
       if (!propertyNamePredicate.test(blockState))
         return false;
@@ -48,11 +48,11 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockState blockState = cachedBlockPosition.getState();
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockState blockState = blockInWorld.getState();
     boolean successes = true;
     List<TestResult> attachments = new ArrayList<>();
-    final BlockPos blockPos = cachedBlockPosition.getPos();
+    final BlockPos blockPos = blockInWorld.getPos();
     for (PropertyNamePredicate propertyNamePredicate : predicates) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, blockPos);
       attachments.add(testResult);

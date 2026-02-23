@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.config.EntitySelectorConfig;
 import pers.solid.ecmd.config.GeneralParsingConfig;
-import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.entity.*;
@@ -197,7 +197,7 @@ public abstract class EntitySelectorOptionsMixin {
   @WrapWithCondition(method = "method_9980", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;setLevel(Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;)V"))
   private static boolean applyNegativeLevel(EntitySelectorParser instance, MinMaxBounds.Ints levelRange, @Share("inverted") LocalBooleanRef ref) {
     if (ref.get()) {
-      instance.addPredicate(new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), true));
+      instance.addPredicate$ec(new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), true));
       return false;
     } else {
       return true;
@@ -316,7 +316,7 @@ public abstract class EntitySelectorOptionsMixin {
     }
     final CommandContext<?> context = reader.extension$ec().context;
     if (context != null) {
-      final var suggestionProvider = ((EntitySelectorReaderAccessor) reader).getSuggestions();
+      final var suggestionProvider = ((EntitySelectorParserAccessor) reader).getSuggestions();
       reader.setSuggestions((builder, suggestionsBuilderConsumer) -> suggestionProvider.apply(builder.createOffset(cursorBeforeType), suggestionsBuilderConsumer).thenCombine(builder.suggest(",").suggest("]").buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions));
       final StringReader stringReader = reader.getReader();
       if (!stringReader.canRead()) {
@@ -633,12 +633,12 @@ public abstract class EntitySelectorOptionsMixin {
   private static void modifyPredicateSuggestion(EntitySelectorParser reader, CallbackInfo ci) throws CommandSyntaxException {
     // 如果 reader 后面没有内容，那么提前抛出异常，这是为了避免在输入了不完整的 id 时，由于进行了后面的解析，导致建议的内容被覆盖。
     if (!reader.getReader().canRead() && reader.extension$ec().context != null) {
-      final var prev = ((EntitySelectorReaderAccessor) reader).getSuggestions();
+      final var prev = ((EntitySelectorParserAccessor) reader).getSuggestions();
       reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> {
         final CompletableFuture<Suggestions> prevResult = prev.apply(suggestionsBuilder, suggestionsBuilderConsumer);
         return prevResult.thenCompose(suggestions -> {
           if (suggestions.isEmpty()) {
-            return ((EntitySelectorReaderAccessor) reader).callSuggestOptionsNextOrClose(suggestionsBuilder, suggestionsBuilderConsumer);
+            return ((EntitySelectorParserAccessor) reader).callSuggestOptionsNextOrClose(suggestionsBuilder, suggestionsBuilderConsumer);
           } else {
             return CompletableFuture.completedFuture(suggestions);
           }
