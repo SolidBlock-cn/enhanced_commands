@@ -30,6 +30,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
@@ -124,9 +125,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
 
   public static <T extends BlockPos> T checkBuildLimit(ServerLevel world, T blockPos) throws CommandSyntaxException {
     if (!world.isInWorldBounds(blockPos)) {
-      if (world.isOutsideBuildHeight(blockPos)) {
-        throw OUT_OF_HEIGHT_LIMIT.create(TextUtil.wrapVector(blockPos), world.getMinBuildHeight(), world.getMaxBuildHeight());
-      } else if (!isValidHorizontally(blockPos)) {
+      if (!isValidHorizontally(blockPos)) {
         throw OUT_OF_HORIZONTAL_BOUNDS.create(TextUtil.wrapVector(blockPos), -30000000, 30000000);
       } else {
         throw OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapVector(blockPos));
@@ -347,12 +346,12 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
   }
 
   @Override
-  public EnhancedPosArgumentType instantiate(CommandBuildContext registryAccess) {
+  public @NotNull EnhancedPosArgumentType instantiate(CommandBuildContext commandBuildContext) {
     return this;
   }
 
   @Override
-  public ArgumentTypeInfo<EnhancedPosArgumentType, EnhancedPosArgumentType> type() {
+  public @NotNull ArgumentTypeInfo<EnhancedPosArgumentType, EnhancedPosArgumentType> type() {
     return Serializer.INSTANCE;
   }
 
@@ -369,7 +368,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     }
 
     @Override
-    public EnhancedPosArgumentType deserializeFromNetwork(FriendlyByteBuf buf) {
+    public @NotNull EnhancedPosArgumentType deserializeFromNetwork(FriendlyByteBuf buf) {
       return new EnhancedPosArgumentType(buf.readEnum(NumberType.class), buf.readEnum(IntAlignType.class));
     }
 
@@ -380,7 +379,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     }
 
     @Override
-    public EnhancedPosArgumentType unpack(EnhancedPosArgumentType argumentType) {
+    public @NotNull EnhancedPosArgumentType unpack(EnhancedPosArgumentType argumentType) {
       return argumentType;
     }
   }
@@ -471,7 +470,7 @@ public record EnhancedPosArgumentType(NumberType numberType, IntAlignType intAli
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return name;
     }
 

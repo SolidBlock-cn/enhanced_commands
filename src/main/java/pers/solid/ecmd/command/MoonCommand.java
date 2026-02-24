@@ -26,7 +26,7 @@ public enum MoonCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final LiteralCommandNode<CommandSourceStack> moonNode = dispatcher.register(literal("moon")
         .executes(MoonCommand::executeGetPhase)
         .then(literal("get")

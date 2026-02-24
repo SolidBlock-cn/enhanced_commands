@@ -172,7 +172,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
   }
 
   @Override
-  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     testForBuilder.then(addBlockInfoCommandProperties(Commands.literal("blockinfo")));
   }
 }

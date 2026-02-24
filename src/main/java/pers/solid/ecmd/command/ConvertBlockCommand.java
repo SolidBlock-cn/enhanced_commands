@@ -43,8 +43,8 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
 
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, registryAccess).build();
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
+    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, commandBuildContext).build();
 
     final Function<BlockPos, Component> fallingBlockFeedback = blockPos -> Component.translatable("enhanced_commands.commands.convertblock.falling_block.complete", TextUtil.wrapVector(blockPos));
     final Function<BlockPos, Component> blockDisplayFeedback = blockPos -> Component.translatable("enhanced_commands.commands.convertblock.block_display.complete", TextUtil.wrapVector(blockPos));

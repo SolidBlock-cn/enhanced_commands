@@ -3,7 +3,7 @@ package pers.solid.ecmd.mixins.ext;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Contract;
-import pers.solid.ecmd.mixins.mixin.EntitySelectorReaderMixin;
+import pers.solid.ecmd.mixins.mixin.EntitySelectorParserMixin;
 import pers.solid.ecmd.predicate.entity.EntityPredicateEntry;
 import pers.solid.ecmd.predicate.entity.EntitySelectorReaderExtras;
 import pers.solid.ecmd.predicate.entity.StaticEntityPredicate;
@@ -11,7 +11,7 @@ import pers.solid.ecmd.predicate.entity.StaticEntityPredicate;
 import java.util.function.Predicate;
 
 /**
- * 此接口通过 {@link EntitySelectorReaderMixin} 使得 {@link EntitySelectorParser} 实现。
+ * 此接口通过 {@link EntitySelectorParserMixin} 使得 {@link EntitySelectorParser} 实现。
  */
 public interface EntitySelectorReaderExtension {
   /**

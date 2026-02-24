@@ -71,7 +71,7 @@ public enum HistoryCommand implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("history")
         .executes(context -> executeList(context.getSource()))
         .then(literal("clear")

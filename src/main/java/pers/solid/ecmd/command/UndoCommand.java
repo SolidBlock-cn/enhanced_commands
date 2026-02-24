@@ -78,7 +78,7 @@ public enum UndoCommand implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final LiteralArgumentBuilder<CommandSourceStack> historyLiteral = literalR2("history");
     final Command<CommandSourceStack> undoExecution, redoExecution;
     final LiteralCommandNode<CommandSourceStack> undoNode = literalR2("undo")

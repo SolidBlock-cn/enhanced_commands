@@ -1,11 +1,12 @@
 package pers.solid.ecmd.mixins.ext;
 
 import net.minecraft.network.chat.MutableComponent;
+import pers.solid.ecmd.mixins.impl.MutableComponentExtensionImpl;
 
 /**
  * 此命令用于扩展 {@link net.minecraft.network.chat.MutableComponent}。
  *
- * @see pers.solid.ecmd.mixins.impl.MutableTextExtensionImpl
+ * @see MutableComponentExtensionImpl
  */
 public interface MutableTextExtension {
   default MutableComponent enhanced$$() {

@@ -119,11 +119,11 @@ public interface BlockPredicate extends ExpressionConvertible {
     throw CANNOT_PARSE.createWithContext(reader);
   }
 
-  boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context);
+  boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext);
 
-  default TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final boolean test = test(cachedBlockPosition, context);
-    return successOrFail(test, cachedBlockPosition.getPos());
+  default TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final boolean test = test(blockInWorld, executionContext);
+    return successOrFail(test, blockInWorld.getPos());
   }
 
   @NotNull

@@ -24,13 +24,13 @@ public class ForwardingBlockPredicateArgument implements BlockPredicateArgument.
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition) {
+  public boolean test(BlockInWorld blockInWorld) {
     if (modBlockPredicate != null) {
       if (source == null) {
         EnhancedCommands.LOGGER.warn("Enhanced Commands: Invoking ForwardedBlockPredicateArgument.test without source specified! This may cause potential issues. It is usually called when invoking vanilla BlockPredicateArgumentType.getBlockPredicate.");
-        source = ((ServerLevel) cachedBlockPosition.getLevel()).getServer().createCommandSourceStack();
+        source = ((ServerLevel) blockInWorld.getLevel()).getServer().createCommandSourceStack();
       }
-      return modBlockPredicate.test(cachedBlockPosition, new ExecutionContext(source, null));
+      return modBlockPredicate.test(blockInWorld, new ExecutionContext(source, null));
     }
     return false;
   }

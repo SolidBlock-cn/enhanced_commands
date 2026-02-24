@@ -18,9 +18,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record NbtSourceArgumentType(CommandBuildContext registryAccess) implements ArgumentType<NbtSource<?>> {
-  public static NbtSourceArgumentType nbtSource(CommandBuildContext registryAccess) {
-    return new NbtSourceArgumentType(registryAccess);
+public record NbtSourceArgumentType(CommandBuildContext commandBuildContext) implements ArgumentType<NbtSource<?>> {
+  public static NbtSourceArgumentType nbtSource(CommandBuildContext commandBuildContext) {
+    return new NbtSourceArgumentType(commandBuildContext);
   }
 
   public static NbtSource<?> getNbtSource(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
@@ -31,7 +31,7 @@ public record NbtSourceArgumentType(CommandBuildContext registryAccess) implemen
   public NbtSource<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtSource<?> nbtSource = NbtDataRegistry.handleSource(s, new ParseContext<>(registryAccess, reader, false, true));
+    final NbtSource<?> nbtSource = NbtDataRegistry.handleSource(s, new ParseContext<>(commandBuildContext, reader, false, true));
     if (nbtSource == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -49,7 +49,7 @@ public record NbtSourceArgumentType(CommandBuildContext registryAccess) implemen
     final String s = reader.readUnquotedString();
     final int cursorAfterString = reader.getCursor();
     final NbtSource<?> nbtSource;
-    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, reader, true, true);
+    final ParseContext<S> parseContext = new ParseContext<>(commandBuildContext, reader, true, true);
     try {
       nbtSource = NbtDataRegistry.handleSource(s, parseContext);
       if (nbtSource == null) {

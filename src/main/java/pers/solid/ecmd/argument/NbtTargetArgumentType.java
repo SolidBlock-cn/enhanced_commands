@@ -22,9 +22,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public record NbtTargetArgumentType(CommandBuildContext registryAccess) implements ArgumentType<NbtTarget<?>> {
-  public static NbtTargetArgumentType nbtTarget(CommandBuildContext registryAccess) {
-    return new NbtTargetArgumentType(registryAccess);
+public record NbtTargetArgumentType(CommandBuildContext commandBuildContext) implements ArgumentType<NbtTarget<?>> {
+  public static NbtTargetArgumentType nbtTarget(CommandBuildContext commandBuildContext) {
+    return new NbtTargetArgumentType(commandBuildContext);
   }
 
   public static NbtTarget<?> getNbtTarget(CommandContext<CommandSourceStack> context, String name, @Nullable BlockPredicate blockPredicate) throws CommandSyntaxException {
@@ -43,7 +43,7 @@ public record NbtTargetArgumentType(CommandBuildContext registryAccess) implemen
   public NbtTarget<?> parse(StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
-    final NbtTarget<?> nbtTargetArgument = NbtDataRegistry.handleTarget(s, new ParseContext<>(registryAccess, reader, false, true));
+    final NbtTarget<?> nbtTargetArgument = NbtDataRegistry.handleTarget(s, new ParseContext<>(commandBuildContext, reader, false, true));
     if (nbtTargetArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
@@ -60,7 +60,7 @@ public record NbtTargetArgumentType(CommandBuildContext registryAccess) implemen
     final int cursorBeforeString = reader.getCursor();
     final String s = reader.readUnquotedString();
     final NbtTarget<?> nbtTargetArgument;
-    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, reader, true, true);
+    final ParseContext<S> parseContext = new ParseContext<>(commandBuildContext, reader, true, true);
     try {
       nbtTargetArgument = NbtDataRegistry.handleTarget(s, parseContext);
       if (nbtTargetArgument == null) {

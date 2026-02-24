@@ -30,16 +30,16 @@ public record AnyBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    return predicates.stream().anyMatch(blockPredicate -> blockPredicate.test(cachedBlockPosition, context));
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    return predicates.stream().anyMatch(blockPredicate -> blockPredicate.test(blockInWorld, executionContext));
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
     final ImmutableList.Builder<TestResult> results = new ImmutableList.Builder<>();
     int successes = 0;
     for (BlockPredicate blockPredicate : predicates) {
-      TestResult testResult = blockPredicate.testAndDescribe(cachedBlockPosition, context);
+      TestResult testResult = blockPredicate.testAndDescribe(blockInWorld, executionContext);
       results.add(testResult);
       if (testResult.successes())
         successes++;

@@ -34,16 +34,16 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3.atLowerCornerOf(cachedBlockPosition.getPos())).test(cachedBlockPosition, context);
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    return sample(seed().orElseGet(() -> executionContext.getSeed(this)), list, Vec3.atLowerCornerOf(blockInWorld.getPos())).test(blockInWorld, executionContext);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockPos blockPos = cachedBlockPosition.getPos();
-    final long actualSeed = seed().orElseGet(() -> context.getSeed(this));
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockPos blockPos = blockInWorld.getPos();
+    final long actualSeed = seed().orElseGet(() -> executionContext.getSeed(this));
     final double sampleValue = getSampleValue(actualSeed, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-    final TestResult testResult = list.getClampedElement(sampleValue).testAndDescribe(cachedBlockPosition, context);
+    final TestResult testResult = list.getClampedElement(sampleValue).testAndDescribe(blockInWorld, executionContext);
     return TestResult.of(testResult.successes(), Component.translatable("enhanced_commands.block_predicate.noise.result", TextUtil.wrapVector(blockPos).withStyle(Styles.TARGET), TextUtil.literal(actualSeed).withStyle(Styles.TARGET), TextUtil.literal(sampleValue).withStyle(Styles.RESULT)), List.of(testResult));
   }
 

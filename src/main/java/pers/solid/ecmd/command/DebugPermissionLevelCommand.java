@@ -15,7 +15,7 @@ public enum DebugPermissionLevelCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(Commands.literal("debug:permissionlevel")
         .executes(context -> {
           final CommandSourceStack source = context.getSource();

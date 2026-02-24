@@ -5,20 +5,20 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "BlockDisplayEntityAccessor",
-    "CachedBlockPositionAccessor",
+    "BlockInWorldAccessor",
     "CommandContextAccessor",
-    "DefaultPosArgumentAccessor",
     "EntityAnchorAccessor",
     "EntitySelectorAccessor",
-    "EntitySelectorReaderAccessor",
+    "EntitySelectorParserAccessor",
     "ExecuteCommandAccessor",
     "FallingBlockEntityAccessor",
-    "JsonReaderUtilsAccessor",
-    "LookingPosArgumentAccessor",
-    "MutableTextAccessor",
+    "LocalCoordinatesAccessor",
+    "MutableComponentAccessor",
+    "ParserUtilsAccessor",
     "ServerCommandSourceAccessor",
     "ServerWorldAccessor",
-    "TranslatableTextContentAccessor"
+    "TranslatableContentsAccessor",
+    "WorldCoordinatesAccessor"
   ],
   "client": [
   ],

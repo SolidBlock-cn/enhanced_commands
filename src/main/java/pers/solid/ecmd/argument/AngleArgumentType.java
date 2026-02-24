@@ -76,12 +76,12 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
   }
 
   @Override
-  public AngleArgumentType instantiate(CommandBuildContext registryAccess) {
+  public @NotNull AngleArgumentType instantiate(CommandBuildContext commandBuildContext) {
     return this;
   }
 
   @Override
-  public Serializer type() {
+  public @NotNull Serializer type() {
     return Serializer.INSTANCE;
   }
 
@@ -107,7 +107,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
     }
 
     @Override
-    public AngleArgumentType deserializeFromNetwork(FriendlyByteBuf buf) {
+    public @NotNull AngleArgumentType deserializeFromNetwork(FriendlyByteBuf buf) {
       final boolean returnRadians = buf.readBoolean();
       byte b = buf.readByte();
       double d = ArgumentUtils.numberHasMin(b) ? buf.readDouble() : Double.NEGATIVE_INFINITY;
@@ -128,7 +128,7 @@ public record AngleArgumentType(boolean returnRadians, double min, double max) i
     }
 
     @Override
-    public AngleArgumentType unpack(AngleArgumentType argumentType) {
+    public @NotNull AngleArgumentType unpack(AngleArgumentType argumentType) {
       return argumentType;
     }
   }

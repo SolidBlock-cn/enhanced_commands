@@ -33,15 +33,15 @@ public enum MirrorCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(registryAccess)
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
+    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
         .addOptionalArg("pivot", EnhancedPosArgumentType.blockPos(), EnhancedPosArgumentType.CURRENT_POS)
         .build();
     ModCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("mirror"),
         literalR2("/mirror"),
-        argument("region", RegionArgumentType.region(registryAccess))
+        argument("region", RegionArgumentType.region(commandBuildContext))
             .then(argument("axis", SimpleEnumArgumentType.axis(false))
                 .executes(context -> executeMirror(SimpleEnumArgumentType.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)

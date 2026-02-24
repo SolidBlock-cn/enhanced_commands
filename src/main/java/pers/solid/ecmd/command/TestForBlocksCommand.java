@@ -51,10 +51,10 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       .build();
 
   @Override
-  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     testForBuilder.then(literal("blocks")
-        .then(argument("region", region(registryAccess))
-            .then(argument("block_predicate", blockPredicate(registryAccess))
+        .then(argument("region", region(commandBuildContext))
+            .then(argument("block_predicate", blockPredicate(commandBuildContext))
                 .executes(context -> executeTestForBlocks(context, TestType.ANY, KEYWORD_ARGS.defaultArgs()))
                 .then(argument("test_type", new SimpleEnumArgumentType<>(CommandEnumType.TEST_TYPE))
                     .executes(context -> executeTestForBlocks(context, KEYWORD_ARGS.defaultArgs()))
@@ -97,8 +97,8 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     MutableBoolean shouldBreak = new MutableBoolean();
 
     final Iterable<Void> calculation = Iterables.transform(region.stream().takeWhile(i -> !shouldBreak.booleanValue())::iterator, blockPos -> {
-      final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-      if (cachedBlockPosition.getState() == null) {
+      final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+      if (blockInWorld.getState() == null) {
         if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
           blocksSkipped.increment();
           return null;
@@ -109,16 +109,16 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         }
       }
       blocksCounted.increment();
-      final boolean test = blockPredicate.test(cachedBlockPosition, new ExecutionContext(world.getRandom(), source, seed));
+      final boolean test = blockPredicate.test(blockInWorld, new ExecutionContext(world.getRandom(), source, seed));
       if (test) blocksMatched.increment();
 
       if (testType == TestType.ANY && test) {
-        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.any.true", TextUtil.wrapVector(blockPos.immutable()), cachedBlockPosition.getState().getBlock().getName()).withStyle(Styles.TRUE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.any.true", TextUtil.wrapVector(blockPos.immutable()), blockInWorld.getState().getBlock().getName()).withStyle(Styles.TRUE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
         returnValue.setValue(0);
         shouldBreak.setTrue();
         return null;
       } else if (testType == TestType.ALL && !test) {
-        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.all.false", TextUtil.wrapVector(blockPos.immutable()), cachedBlockPosition.getState().getBlock().getName()).withStyle(Styles.FALSE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.all.false", TextUtil.wrapVector(blockPos.immutable()), blockInWorld.getState().getBlock().getName()).withStyle(Styles.FALSE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
         returnValue.setValue(1);
         shouldBreak.setTrue();
         return null;

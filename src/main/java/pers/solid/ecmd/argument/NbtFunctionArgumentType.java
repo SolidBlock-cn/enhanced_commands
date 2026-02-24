@@ -18,14 +18,14 @@ import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record NbtFunctionArgumentType(boolean onlyCompounds, CommandBuildContext registryAccess) implements ArgumentType<NbtFunction> {
+public record NbtFunctionArgumentType(boolean onlyCompounds, CommandBuildContext commandBuildContext) implements ArgumentType<NbtFunction> {
 
-  public static NbtFunctionArgumentType compound(CommandBuildContext registryAccess) {
-    return new NbtFunctionArgumentType(true, registryAccess);
+  public static NbtFunctionArgumentType compound(CommandBuildContext commandBuildContext) {
+    return new NbtFunctionArgumentType(true, commandBuildContext);
   }
 
-  public static NbtFunctionArgumentType element(CommandBuildContext registryAccess) {
-    return new NbtFunctionArgumentType(false, registryAccess);
+  public static NbtFunctionArgumentType element(CommandBuildContext commandBuildContext) {
+    return new NbtFunctionArgumentType(false, commandBuildContext);
   }
 
   public static NbtFunction getNbtFunction(CommandContext<CommandSourceStack> context, String name) {
@@ -38,7 +38,7 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandBuildContext
 
   @Override
   public NbtFunction parse(StringReader reader) throws CommandSyntaxException {
-    final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader, false, false);
+    final ParseContext<Object> parseContext = new ParseContext<>(commandBuildContext, reader, false, false);
     final NbtFunctionParser<?> parser = new NbtFunctionParser<>(parseContext);
     return onlyCompounds ? parser.parsePreferringCompound(false, false) : parser.parseFunction(false, false);
   }
@@ -47,7 +47,7 @@ public record NbtFunctionArgumentType(boolean onlyCompounds, CommandBuildContext
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, stringReader, false, false);
+    final ParseContext<S> parseContext = new ParseContext<>(commandBuildContext, stringReader, false, false);
     final NbtFunctionParser<S> parser = new NbtFunctionParser<>(parseContext);
     try {
       if (onlyCompounds) {

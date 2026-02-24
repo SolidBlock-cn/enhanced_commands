@@ -12,6 +12,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.mixin.ArgumentTypeExtension;
 
 import java.util.Collection;
@@ -60,7 +61,7 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
 
     @SuppressWarnings("unchecked")
     @Override
-    public Properties<T, F, FP> deserializeFromNetwork(FriendlyByteBuf buf) {
+    public @NotNull Properties<T, F, FP> deserializeFromNetwork(FriendlyByteBuf buf) {
       final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) BuiltInRegistries.COMMAND_ARGUMENT_TYPE.get(buf.readResourceLocation());
       final FP forwardProperties = forwardSerializer.deserializeFromNetwork(buf);
       return new Properties<>(forwardProperties);
@@ -78,7 +79,7 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
 
     @SuppressWarnings({"unchecked", "UnstableApiUsage"})
     @Override
-    public Properties<T, F, FP> unpack(VanillaWrappedArgumentType<T, F> argumentType) {
+    public @NotNull Properties<T, F, FP> unpack(VanillaWrappedArgumentType<T, F> argumentType) {
       final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) ArgumentTypesAccessor.fabric_getClassMap().get(argumentType.forward.getClass());
       return new Properties<>(forwardSerializer.unpack(argumentType.forward));
     }
@@ -87,13 +88,13 @@ public record VanillaWrappedArgumentType<T, F extends ArgumentType<T>>(F forward
   public record Properties<T, F extends ArgumentType<T>, FP extends ArgumentTypeInfo.Template<F>>(FP forwardProperties) implements ArgumentTypeInfo.Template<VanillaWrappedArgumentType<T, F>> {
 
     @Override
-    public VanillaWrappedArgumentType<T, F> instantiate(CommandBuildContext registryAccess) {
-      return new VanillaWrappedArgumentType<>(forwardProperties.instantiate(registryAccess));
+    public @NotNull VanillaWrappedArgumentType<T, F> instantiate(CommandBuildContext commandBuildContext) {
+      return new VanillaWrappedArgumentType<>(forwardProperties.instantiate(commandBuildContext));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Serializer<T, F, FP> type() {
+    public @NotNull Serializer<T, F, FP> type() {
       return (Serializer<T, F, FP>) Serializer.INSTANCE;
     }
   }

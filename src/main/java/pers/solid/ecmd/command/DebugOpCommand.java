@@ -22,7 +22,7 @@ public enum DebugOpCommand implements CommandRegistrationCallback {
   private static final SimpleCommandExceptionType ALREADY_OPPED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.op.failed"));
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(
         Commands.literal("debug:op")
             .executes(context -> op(context.getSource(), Collections.singleton(context.getSource().getPlayerOrException().getGameProfile())))

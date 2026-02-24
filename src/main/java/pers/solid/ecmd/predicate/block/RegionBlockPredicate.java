@@ -25,15 +25,15 @@ public record RegionBlockPredicate(RegionArgument<?> region) implements BlockPre
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    return Region.getCached(region, context.positionProvider).contains(cachedBlockPosition.getPos());
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    return Region.getCached(region, executionContext.positionProvider).contains(blockInWorld.getPos());
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final BlockPos blockPos = cachedBlockPosition.getPos();
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final BlockPos blockPos = blockInWorld.getPos();
     final boolean contains;
-    contains = region.toAbsoluteRegion(context.positionProvider).contains(blockPos);
+    contains = region.toAbsoluteRegion(executionContext.positionProvider).contains(blockPos);
     return TestResult.of(contains, Component.translatable("enhanced_commands.block_predicate.region." + (contains ? "pass" : "fail"), TextUtil.wrapVector(blockPos), TextUtil.literal(region).withStyle(Styles.ACTUAL)));
   }
 

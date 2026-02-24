@@ -47,7 +47,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.parse.ParseContext;
@@ -251,8 +251,8 @@ public class EntitySelectorOptionsExtension {
     }, reader -> reader.getDistance().isAny() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Component.translatable("enhanced_commands.argument.entity.options.rm"));
 
     putOption("region", reader -> {
-      final CommandBuildContext registryAccess = MixinShared.getCommandRegistryAccess();
-      final ParseContext<Object> parseContext = new ParseContext<>(registryAccess, reader.getReader(), false, true);
+      final CommandBuildContext commandBuildContext = MixinShared.getCommandRegistryAccess();
+      final ParseContext<Object> parseContext = new ParseContext<>(commandBuildContext, reader.getReader(), false, true);
       //noinspection unchecked
       reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
       final RegionArgument<?> regionArgument = RegionArgument.parse(parseContext);
@@ -687,7 +687,7 @@ public class EntitySelectorOptionsExtension {
 
         if (reader.isTag()) {
           TagKey<EntityType<?>> tagKey = TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.read(reader.getReader()));
-          final var suggestionProvider = ((EntitySelectorReaderAccessor) reader).getSuggestions();
+          final var suggestionProvider = ((EntitySelectorParserAccessor) reader).getSuggestions();
           reader.setSuggestions((builder, suggestionsBuilderConsumer) -> suggestionProvider.apply(builder.createOffset(cursorBeforeNext), suggestionsBuilderConsumer).thenCombine(builder.suggest(",").suggest("]").buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions));
           if (!stringReader.canRead()) {
             throw EntitySelectorParser.ERROR_EXPECTED_END_OF_OPTIONS.create();

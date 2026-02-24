@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
-import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -109,7 +109,7 @@ public final class EntitySelectorTypeExtras {
     map.put(FURTHEST_NON_PLAYER, excludesPlayersConsumer);
     map.put(RANDOM_NON_PLAYER, excludesPlayersConsumer);
     map.put(RANDOM_NON_PLAYER2, excludesPlayersConsumer);
-    map.put(ALL_INCLUDING_DEAD, reader -> ((EntitySelectorReaderAccessor) reader).getPredicates().clear());
+    map.put(ALL_INCLUDING_DEAD, reader -> ((EntitySelectorParserAccessor) reader).getPredicates().clear());
 
     // 关于 @pets 选择器，考虑到需要与 of 属性搭配，在 mixin 中特殊处理。
   });

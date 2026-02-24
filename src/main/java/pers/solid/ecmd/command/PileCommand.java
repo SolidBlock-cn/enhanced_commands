@@ -25,7 +25,7 @@ public enum PileCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literal("pile")
         .then(argument("targets", entities())
             .executes(PileCommand::executePile)));

@@ -39,6 +39,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,7 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.configs.EntitySelectorParsingConfig;
-import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.entity.*;
@@ -95,7 +96,7 @@ public abstract class EntitySelectorOptionsMixin {
   /**
    * 在抛出 {@link EntitySelectorOptions#ERROR_INAPPLICABLE_OPTION} 前，重置 cursor 为整个 propertyName 的部分。
    */
-  @ModifyArg(method = "get", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;"), to = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_UNKNOWN_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")), index = 0)
+  @ModifyArg(method = "get", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC), to = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_UNKNOWN_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC)), index = 0)
   private static ImmutableStringReader tweakInapplicableException(ImmutableStringReader reader, @Local(argsOnly = true) int restoreCursor, @Local(argsOnly = true) LocalIntRef cursorEnd) {
     cursorEnd.set(reader.getCursor());
     ((StringReader) reader).setCursor(restoreCursor);
@@ -105,7 +106,7 @@ public abstract class EntitySelectorOptionsMixin {
   /**
    * 在抛出 {@link EntitySelectorOptions#ERROR_INAPPLICABLE_OPTION} 前，重置 cursorEnd 为整个 propertyName 的后面。
    */
-  @ModifyExpressionValue(method = "get", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;"), to = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_UNKNOWN_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
+  @ModifyExpressionValue(method = "get", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC), to = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_UNKNOWN_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC)))
   private static CommandSyntaxException tweakInapplicableException2(CommandSyntaxException commandSyntaxException, @Local(argsOnly = true) int cursorEnd) {
     return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorEnd);
   }
@@ -113,7 +114,7 @@ public abstract class EntitySelectorOptionsMixin {
   /**
    * 在产生 {@link EntitySelectorOptions#ERROR_INAPPLICABLE_OPTION} 前，先检查有无此模组中定义的特殊的错误消息，如果有且非 {@code null}，则抛出这个。
    */
-  @Inject(method = "get", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;"))
+  @Inject(method = "get", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC))
   private static void throwBetterInapplicableException(EntitySelectorParser reader, String option, int restoreCursor, CallbackInfoReturnable<EntitySelectorOptions.Modifier> cir) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.detailedInapplicableEntitySelectorOption) return;
     var f = EntitySelectorOptionsExtension.INAPPLICABLE_REASONS.get(option);
@@ -135,7 +136,7 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @ModifyExpressionValue(method = "get", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_UNKNOWN_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
+  @ModifyExpressionValue(method = "get", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_UNKNOWN_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC)))
   private static CommandSyntaxException tweakUnknownOptionException(CommandSyntaxException commandSyntaxException, @Local(argsOnly = true) String option) {
     return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, option);
   }
@@ -265,7 +266,7 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @Inject(method = "method_9948", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;"))
+  @Inject(method = "method_9948", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC))
   private static void tweakInapplicableGameModeException(EntitySelectorParser reader, CallbackInfo ci) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.detailedInapplicableEntitySelectorOption) return;
     final StringReader stringReader = reader.getReader();
@@ -273,7 +274,7 @@ public abstract class EntitySelectorOptionsMixin {
     throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "gamemode"), reader.extension$ec().cursorAfterOptionName);
   }
 
-  @ModifyExpressionValue(method = "method_9948", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", ordinal = 0, remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_GAME_MODE_INVALID:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
+  @ModifyExpressionValue(method = "method_9948", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", ordinal = 0, remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_GAME_MODE_INVALID:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC)))
   private static CommandSyntaxException tweakInvalidModeException(CommandSyntaxException commandSyntaxException, @Local String string) {
     return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, string);
   }
@@ -298,7 +299,7 @@ public abstract class EntitySelectorOptionsMixin {
     return new StaticEntityPredicateWrapper(predicate, new TeamEntityPredicateEntry(expectedTeamName, inverted));
   }
 
-  @Inject(method = "method_9973", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;"))
+  @Inject(method = "method_9973", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC))
   private static void tweakInapplicableTypeException(EntitySelectorParser reader, CallbackInfo ci) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
     stringReader.setCursor(reader.extension$ec().cursorBeforeOptionName);
@@ -315,7 +316,7 @@ public abstract class EntitySelectorOptionsMixin {
     }
     final CommandContext<?> context = reader.extension$ec().context;
     if (context != null) {
-      final var suggestionProvider = ((EntitySelectorReaderAccessor) reader).getSuggestions();
+      final var suggestionProvider = ((EntitySelectorParserAccessor) reader).getSuggestions();
       reader.setSuggestions((builder, suggestionsBuilderConsumer) -> suggestionProvider.apply(builder.createOffset(cursorBeforeType), suggestionsBuilderConsumer).thenCombine(builder.suggest(",").suggest("]").buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions));
       final StringReader stringReader = reader.getReader();
       if (!stringReader.canRead()) {
@@ -346,7 +347,7 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/core/registries/BuiltInRegistries;ENTITY_TYPE:Lnet/minecraft/core/DefaultedRegistry;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+  @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/core/registries/BuiltInRegistries;ENTITY_TYPE:Lnet/minecraft/core/DefaultedRegistry;", opcode = Opcodes.GETSTATIC)), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   private static void acceptMultipleTypesOnTag(EntitySelectorParser reader, CallbackInfo ci, int cursorBeforeNegation, boolean inverted, ResourceLocation identifier, EntityType<?> entityType) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.CURRENT.allowMultipleTypes) {
       return;
@@ -357,12 +358,12 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @ModifyArg(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;isTag()Z"), to = @At(value = "FIELD", target = "Lnet/minecraft/core/registries/BuiltInRegistries;ENTITY_TYPE:Lnet/minecraft/core/DefaultedRegistry;")))
+  @ModifyArg(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;isTag()Z"), to = @At(value = "FIELD", target = "Lnet/minecraft/core/registries/BuiltInRegistries;ENTITY_TYPE:Lnet/minecraft/core/DefaultedRegistry;", opcode = Opcodes.GETSTATIC)))
   private static Predicate<Entity> addEntityTypeTagInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local TagKey<EntityType<?>> tagKey) {
     return new StaticEntityPredicateWrapper(predicate, new TypeTagEntityPredicateEntry(tagKey, inverted));
   }
 
-  @ModifyArg(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/core/registries/BuiltInRegistries;ENTITY_TYPE:Lnet/minecraft/core/DefaultedRegistry;")))
+  @ModifyArg(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/core/registries/BuiltInRegistries;ENTITY_TYPE:Lnet/minecraft/core/DefaultedRegistry;", opcode = Opcodes.GETSTATIC)))
   private static Predicate<Entity> addEntityTypeInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local EntityType<?> expectedType) {
     return new StaticEntityPredicateWrapper(predicate, new TypeEntityPredicateEntry(expectedType, inverted));
   }
@@ -632,12 +633,12 @@ public abstract class EntitySelectorOptionsMixin {
   private static void modifyPredicateSuggestion(EntitySelectorParser reader, CallbackInfo ci) throws CommandSyntaxException {
     // 如果 reader 后面没有内容，那么提前抛出异常，这是为了避免在输入了不完整的 id 时，由于进行了后面的解析，导致建议的内容被覆盖。
     if (!reader.getReader().canRead() && reader.extension$ec().context != null) {
-      final var prev = ((EntitySelectorReaderAccessor) reader).getSuggestions();
+      final var prev = ((EntitySelectorParserAccessor) reader).getSuggestions();
       reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> {
         final CompletableFuture<Suggestions> prevResult = prev.apply(suggestionsBuilder, suggestionsBuilderConsumer);
         return prevResult.thenCompose(suggestions -> {
           if (suggestions.isEmpty()) {
-            return ((EntitySelectorReaderAccessor) reader).callSuggestOptionsNextOrClose(suggestionsBuilder, suggestionsBuilderConsumer);
+            return ((EntitySelectorParserAccessor) reader).callSuggestOptionsNextOrClose(suggestionsBuilder, suggestionsBuilderConsumer);
           } else {
             return CompletableFuture.completedFuture(suggestions);
           }

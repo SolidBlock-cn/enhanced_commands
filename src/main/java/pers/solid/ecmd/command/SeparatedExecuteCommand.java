@@ -67,7 +67,7 @@ public final class SeparatedExecuteCommand {
     consumer2.onResult(successful, returnValue);
   };
 
-  public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess) {
+  public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext) {
     RootCommandNode<CommandSourceStack> literalCommandNode = dispatcher.getRoot();
     dispatcher.register(literal("execute")
         .redirect(dispatcher.getRoot()));
@@ -107,7 +107,7 @@ public final class SeparatedExecuteCommand {
           return list;
         })));
     dispatcher.register(literalR2("inregion")
-        .then(argument("region", RegionArgumentType.region(registryAccess))
+        .then(argument("region", RegionArgumentType.region(commandBuildContext))
             .fork(literalCommandNode, context -> {
               final Region region = RegionArgumentType.getRegion(context, "region");
               final CommandSourceStack source = context.getSource();
@@ -223,9 +223,9 @@ public final class SeparatedExecuteCommand {
     return ExecuteCommandAccessor.callStoreData(source, object, path, nbtSetter, requestResult);
   }
 
-  private static LiteralArgumentBuilder<CommandSourceStack> addConditionArguments(CommandNode<CommandSourceStack> root, LiteralArgumentBuilder<CommandSourceStack> argumentBuilder, boolean positive, CommandBuildContext registryAccess) {
-    ExecuteCommandAccessor.callAddConditionals(root, argumentBuilder, positive, registryAccess);
-    return addExtraConditionArguments(root, argumentBuilder, positive, registryAccess);
+  private static LiteralArgumentBuilder<CommandSourceStack> addConditionArguments(CommandNode<CommandSourceStack> root, LiteralArgumentBuilder<CommandSourceStack> argumentBuilder, boolean positive, CommandBuildContext commandBuildContext) {
+    ExecuteCommandAccessor.callAddConditionals(root, argumentBuilder, positive, commandBuildContext);
+    return addExtraConditionArguments(root, argumentBuilder, positive, commandBuildContext);
   }
 
   private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockInfoArguments(CommandNode<CommandSourceStack> root, T argumentBuilder, boolean positive) {
@@ -281,7 +281,7 @@ public final class SeparatedExecuteCommand {
   }
 
 
-  public static <T extends ArgumentBuilder<CommandSourceStack, T>> T addExtraConditionArguments(CommandNode<CommandSourceStack> root, T argumentBuilder, boolean positive, CommandBuildContext registryAccess) {
+  public static <T extends ArgumentBuilder<CommandSourceStack, T>> T addExtraConditionArguments(CommandNode<CommandSourceStack> root, T argumentBuilder, boolean positive, CommandBuildContext commandBuildContext) {
     return argumentBuilder
         .then(literal("blockinfo")
             .then(addBlockInfoArguments(root, argument("pos", EnhancedPosArgumentType.blockPos()), positive)))

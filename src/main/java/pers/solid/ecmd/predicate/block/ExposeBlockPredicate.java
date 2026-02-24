@@ -42,9 +42,9 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
     for (Direction direction : directions) {
-      var offsetCachedBlockPosition = new BlockInWorld(cachedBlockPosition.getLevel(), cachedBlockPosition.getPos().relative(direction), false);
+      var offsetCachedBlockPosition = new BlockInWorld(blockInWorld.getLevel(), blockInWorld.getPos().relative(direction), false);
       if (exposureType.test(offsetCachedBlockPosition, direction))
         return true;
     }
@@ -52,11 +52,11 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
     List<TestResult> testResults = new ArrayList<>();
     boolean result = false;
     for (Direction direction : directions) {
-      var offsetCachedBlockPosition = new BlockInWorld(cachedBlockPosition.getLevel(), cachedBlockPosition.getPos().relative(direction), false);
+      var offsetCachedBlockPosition = new BlockInWorld(blockInWorld.getLevel(), blockInWorld.getPos().relative(direction), false);
       final boolean test = exposureType.test(offsetCachedBlockPosition, direction);
       testResults.add(TestResult.of(test, Component.translatable("enhanced_commands.block_predicate.expose.side." + (test ? "pass" : "fail"), TextUtil.wrapDirection(direction))));
       if (test) {

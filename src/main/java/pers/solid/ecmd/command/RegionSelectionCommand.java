@@ -34,7 +34,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final Command<CommandSourceStack> executesWithoutParam = context -> {
       final ServerPlayer player = context.getSource().getPlayerOrException();
       player.addItem(WandEvent.createWandStack());
@@ -53,7 +53,7 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
             .then(argument("pos", EnhancedPosArgumentType.posPreferringCenteredInt())
                 .executes(context -> executeSetPoint(EnhancedPosArgumentType.getPos(context, "pos"), context, 2))))
         .then(literal("type")
-            .then(argument("type", omittedRegistryEntry(registryAccess, RegionSelectionType.REGISTRY_KEY))
+            .then(argument("type", omittedRegistryEntry(commandBuildContext, RegionSelectionType.REGISTRY_KEY))
                 .executes(context -> {
                   final ServerPlayer player = context.getSource().getPlayerOrException();
                   final Holder.Reference<RegionSelectionType> registryEntry = ResourceArgument.getResource(context, "type", RegionSelectionType.REGISTRY_KEY);

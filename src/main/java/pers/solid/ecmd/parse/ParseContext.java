@@ -31,14 +31,14 @@ import java.util.function.Function;
  * <p>命令解析时的环境，包括解析时所使用的 {@code StringReader}、存储建议的列表以及解析时的一些选项，可用于在解析的同时提供建议，相当于一次性完成 {@link ArgumentType#parse(StringReader)} 和 {@link ArgumentType#listSuggestions(CommandContext, SuggestionsBuilder)} 的两个工作，但需要注意的是，对于 {@link ArgumentType} 而言，这个解析过程仍会运行两遍，一遍用于解析结果，一遍用于提供建议。为了更灵活地控制建议提供过程，此类允许一次性提供多个建议。解析过程结束时（包括抛出 {@link CommandSyntaxException} 时），{@link #reader} 所在的 {@link StringReader#cursor cursor} 就是调用 {@link SuggestionProvider} 的 {offset} 的初始位置，而这是位置也正是 {@link CommandSyntaxException} 的 cursor 位置。
  * <p>此类通常用作解析内容的函数的参数，存储其解析时的一些选项，如是否仅提供建议而非实际解析、是否允许分散的内容等。
  *
- * @param <S>             其 commandSource 的类型。
- * @param registryAccess  常用于命令中，用于从注册表中获取一些信息，常见于方块、物品、实体等的 ID 解析过程中。
- * @param reader          {@link StringReader} 对象，会直接用于解析。在提供建议时，也会基于此对象的 {@link StringReader#string string} 和 {@link StringReader#cursor cursor} 来提供建议。
- * @param suggestions     存储解析过程中所需要提供的建议。解析的过程不提供具体的建议，只指定如何提供建议（{@link SuggestionProvider}）。可以提供多种不同的建议。
- * @param suggestionsOnly 解析过程中是否仅提供建议，而非实际进行解析。如果为 {@code true}，那么一些不影响后续解析过程的操作可以不进行。
- * @param allowSparse     对于特定类型的语法，是否允许各部分用空格隔开。一般来说，直接用作命令参数、外面没有括号时，是 {@code false}。如果是在括号（或有明显其他割开定界符的环境）内解析，则为 {@code true}。在解析内容时，如果设置到在括号等语法内解析另一个对象，则通常来说此字段应该是 {@code true}。例如，在直接作为命令参数时，方块函数 {@code a|b} 不能写成 {@code a | b}，但是在被括号括起来的情况下，添加空格则完全没有问题，例如 {@code (a|b)} 和 {@code (a | b)} 都正确。
+ * @param <S>                 其 commandSource 的类型。
+ * @param commandBuildContext 常用于命令中，用于从注册表中获取一些信息，常见于方块、物品、实体等的 ID 解析过程中。
+ * @param reader              {@link StringReader} 对象，会直接用于解析。在提供建议时，也会基于此对象的 {@link StringReader#string string} 和 {@link StringReader#cursor cursor} 来提供建议。
+ * @param suggestions         存储解析过程中所需要提供的建议。解析的过程不提供具体的建议，只指定如何提供建议（{@link SuggestionProvider}）。可以提供多种不同的建议。
+ * @param suggestionsOnly     解析过程中是否仅提供建议，而非实际进行解析。如果为 {@code true}，那么一些不影响后续解析过程的操作可以不进行。
+ * @param allowSparse         对于特定类型的语法，是否允许各部分用空格隔开。一般来说，直接用作命令参数、外面没有括号时，是 {@code false}。如果是在括号（或有明显其他割开定界符的环境）内解析，则为 {@code true}。在解析内容时，如果设置到在括号等语法内解析另一个对象，则通常来说此字段应该是 {@code true}。例如，在直接作为命令参数时，方块函数 {@code a|b} 不能写成 {@code a | b}，但是在被括号括起来的情况下，添加空格则完全没有问题，例如 {@code (a|b)} 和 {@code (a | b)} 都正确。
  */
-public record ParseContext<S>(CommandBuildContext registryAccess, StringReader reader, List<SuggestionProvider<S>> suggestions, boolean suggestionsOnly, boolean allowSparse) {
+public record ParseContext<S>(CommandBuildContext commandBuildContext, StringReader reader, List<SuggestionProvider<S>> suggestions, boolean suggestionsOnly, boolean allowSparse) {
   public ParseContext(String string) {
     this(new StringReader(string));
   }
@@ -47,12 +47,12 @@ public record ParseContext<S>(CommandBuildContext registryAccess, StringReader r
     this(null, reader, false, false);
   }
 
-  public ParseContext(CommandBuildContext registryAccess, String string, boolean suggestionsOnly, boolean allowSparse) {
-    this(registryAccess, new StringReader(string), suggestionsOnly, allowSparse);
+  public ParseContext(CommandBuildContext commandBuildContext, String string, boolean suggestionsOnly, boolean allowSparse) {
+    this(commandBuildContext, new StringReader(string), suggestionsOnly, allowSparse);
   }
 
-  public ParseContext(CommandBuildContext registryAccess, StringReader reader, boolean suggestionsOnly, boolean allowSparse) {
-    this(registryAccess, reader, new ArrayList<>(), suggestionsOnly, allowSparse);
+  public ParseContext(CommandBuildContext commandBuildContext, StringReader reader, boolean suggestionsOnly, boolean allowSparse) {
+    this(commandBuildContext, reader, new ArrayList<>(), suggestionsOnly, allowSparse);
   }
 
   /**
@@ -105,14 +105,14 @@ public record ParseContext<S>(CommandBuildContext registryAccess, StringReader r
     if (this.suggestionsOnly == suggestionsOnly) {
       return this;
     }
-    return new ParseContext<>(registryAccess, reader, suggestions, suggestionsOnly, allowSparse);
+    return new ParseContext<>(commandBuildContext, reader, suggestions, suggestionsOnly, allowSparse);
   }
 
   public ParseContext<S> withAllowSparse(boolean allowSparse) {
     if (this.allowSparse == allowSparse) {
       return this;
     }
-    return new ParseContext<>(registryAccess, reader, suggestions, suggestionsOnly, allowSparse);
+    return new ParseContext<>(commandBuildContext, reader, suggestions, suggestionsOnly, allowSparse);
   }
 
   public void setSuggestion(SuggestionProvider<S> suggestion) {

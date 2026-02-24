@@ -141,7 +141,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final LiteralCommandNode<CommandSourceStack> literalCommandNode = dispatcher.register(literalR2("activeregion")
         .then(literal("get")
             .executes(ActiveRegionCommand::executeGet))

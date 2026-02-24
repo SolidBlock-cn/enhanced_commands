@@ -27,9 +27,9 @@ public enum OutlineCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType kwArgsType = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess)
-        .addOptionalArg("inner", BlockFunctionArgumentType.blockFunction(registryAccess), null)
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
+    final KeywordArgsArgumentType kwArgsType = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext)
+        .addOptionalArg("inner", BlockFunctionArgumentType.blockFunction(commandBuildContext), null)
         .build();
 
     final ArgumentCommandNode<CommandSourceStack, ?> outlineTypeArgumentNode;
@@ -37,8 +37,8 @@ public enum OutlineCommand implements CommandRegistrationCallback {
         dispatcher,
         literalR2("outline"),
         literalR2("/outline"),
-        Commands.argument("region", RegionArgumentType.region(registryAccess))
-            .then(Commands.argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+        Commands.argument("region", RegionArgumentType.region(commandBuildContext))
+            .then(Commands.argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
                 .executes(context -> executeWithDefaultKeywordArgs(context, OutlineType.OUTLINE))
                 .then(outlineTypeArgumentNode = Commands.argument("outline_type", SimpleEnumArgumentType.simpleEnum(CommandEnumType.OUTLINE_TYPE))
                     .executes(context -> executeWithDefaultKeywordArgs(context, context.getArgument("outline_type", OutlineType.class)))
@@ -47,8 +47,8 @@ public enum OutlineCommand implements CommandRegistrationCallback {
     ModCommands.registerWithRegionArgumentModification(
         dispatcher, literalR2("wall"),
         literalR2("/wall"),
-        Commands.argument("region", RegionArgumentType.region(registryAccess)).then(
-            Commands.argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+        Commands.argument("region", RegionArgumentType.region(commandBuildContext)).then(
+            Commands.argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
                 .executes(context -> executeWithDefaultKeywordArgs(context, OutlineType.WALL))
                 .forward(outlineTypeArgumentNode, context -> {
                   final CommandSourceStack source = context.getSource();

@@ -71,8 +71,8 @@ public record BlockNbtData(RegionArgument<?> region, BlockPredicate blockPredica
               // 在有方块谓词的情况下，在已有实体的情况下对谓词进行测试。
               final BlockEntity blockEntity = world.getBlockEntity(blockPos);
               if (blockEntity != null) {
-                final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, false);
-                if (blockPredicate.test(cachedBlockPosition, context)) {
+                final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, false);
+                if (blockPredicate.test(blockInWorld, context)) {
                   consumer.accept(blockEntity);
                 }
               }
@@ -113,7 +113,7 @@ public record BlockNbtData(RegionArgument<?> region, BlockPredicate blockPredica
   }
 
   @Override
-  public int executeQuery(CommandSourceStack source, NbtPathArgument.@Nullable NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, RandomSource random) throws CommandSyntaxException {
+  public int executeQuery(CommandSourceStack source, @Nullable NbtPathArgument.NbtPath path, double scale, NbtConcentrationType nbtConcentrationType, RandomSource random) throws CommandSyntaxException {
     final Map<BlockEntity, Tag> nbts = getNbtsInPath(source, path);
     if (nbts.size() == 1 && nbtConcentrationType != NbtConcentrationType.LIST) {
       final var soleEntry = nbts.entrySet().iterator().next();

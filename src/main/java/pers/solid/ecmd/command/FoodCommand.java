@@ -219,7 +219,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("food")
         .executes(context -> executeGetAll(context, Collections.singleton(context.getSource().getPlayerOrException()), null))
         .then(literal("get")
@@ -252,7 +252,7 @@ public enum FoodCommand implements CommandRegistrationCallback {
                         .executes(context -> executeAdd(context, getPlayers(context, "players"), getInteger(context, "food"), getFloat(context, "saturation_modifier")))))
                 .then(literal("item")
                     .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))
-                    .then(argument("item", item(registryAccess))
+                    .then(argument("item", item(commandBuildContext))
                         .executes(context -> executeAddFromFood(context, getPlayers(context, "players"), getItem(context, "item").createItemStack(1, false)))))
                 .then(literal("from")
                     .executes(context -> executeAddFromSlot(context, getPlayers(context, "players"), -1))

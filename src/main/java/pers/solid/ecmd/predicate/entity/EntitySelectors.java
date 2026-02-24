@@ -13,7 +13,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
-import pers.solid.ecmd.mixins.accessor.EntitySelectorReaderAccessor;
+import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -33,7 +33,7 @@ public final class EntitySelectors {
    * 类似于 {@link EntitySelectorParser#parse()}，但是允许省略开头的“@e”等变量。
    */
   public static EntitySelector readOmittibleEntitySelector(@NotNull EntitySelectorParser entitySelectorReader) throws CommandSyntaxException {
-    final var accessor = (EntitySelectorReaderAccessor) entitySelectorReader;
+    final var accessor = (EntitySelectorParserAccessor) entitySelectorReader;
     final StringReader stringReader = entitySelectorReader.getReader();
 
     entitySelectorReader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> {
@@ -47,7 +47,7 @@ public final class EntitySelectors {
       entitySelectorReader.setMaxResults(Integer.MAX_VALUE);
       accessor.setUsesSelectors(true);
       accessor.callParseOptions();
-      ((EntitySelectorReaderAccessor) entitySelectorReader).callFinalizePredicates();
+      ((EntitySelectorParserAccessor) entitySelectorReader).callFinalizePredicates();
       return entitySelectorReader.getSelector();
     } else {
       return entitySelectorReader.parse();

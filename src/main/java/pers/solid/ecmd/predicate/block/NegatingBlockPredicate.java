@@ -28,13 +28,13 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   }
 
   @Override
-  public boolean test(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    return !predicate.test(cachedBlockPosition, context);
+  public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    return !predicate.test(blockInWorld, executionContext);
   }
 
   @Override
-  public TestResult testAndDescribe(BlockInWorld cachedBlockPosition, ExecutionContext context) {
-    final TestResult testResult = predicate.testAndDescribe(cachedBlockPosition, context);
+  public TestResult testAndDescribe(BlockInWorld blockInWorld, ExecutionContext executionContext) {
+    final TestResult testResult = predicate.testAndDescribe(blockInWorld, executionContext);
     if (testResult.successes()) {
       return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.negation.fail"), List.of(testResult));
     } else {

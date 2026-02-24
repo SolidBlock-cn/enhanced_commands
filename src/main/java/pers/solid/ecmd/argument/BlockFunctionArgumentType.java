@@ -13,9 +13,9 @@ import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
 
-public record BlockFunctionArgumentType(CommandBuildContext registryAccess) implements ArgumentType<BlockFunction> {
-  public static BlockFunctionArgumentType blockFunction(CommandBuildContext registryAccess) {
-    return new BlockFunctionArgumentType(registryAccess);
+public record BlockFunctionArgumentType(CommandBuildContext commandBuildContext) implements ArgumentType<BlockFunction> {
+  public static BlockFunctionArgumentType blockFunction(CommandBuildContext commandBuildContext) {
+    return new BlockFunctionArgumentType(commandBuildContext);
   }
 
   public static BlockFunction getBlockFunction(CommandContext<CommandSourceStack> context, String name) {
@@ -24,14 +24,14 @@ public record BlockFunctionArgumentType(CommandBuildContext registryAccess) impl
 
   @Override
   public BlockFunction parse(StringReader reader) throws CommandSyntaxException {
-    return BlockFunction.parse(new ParseContext<>(registryAccess, reader, false, false));
+    return BlockFunction.parse(new ParseContext<>(commandBuildContext, reader, false, false));
   }
 
   @Override
   public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
-    final ParseContext<S> parseContext = new ParseContext<>(registryAccess, stringReader, true, false);
+    final ParseContext<S> parseContext = new ParseContext<>(commandBuildContext, stringReader, true, false);
     try {
       BlockFunction.parse(parseContext);
     } catch (CommandSyntaxException ignore) {

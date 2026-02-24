@@ -58,11 +58,11 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final int REGION_SIZE_LIMIT = 16777215;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     LiteralArgumentBuilder<CommandSourceStack> directBuilder = literalR2("setblocks");
     LiteralArgumentBuilder<CommandSourceStack> indirectBuilder = literalR2("/setblocks");
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess).build();
-    final LiteralCommandNode<CommandSourceStack> setBlocksNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(registryAccess)).then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext).build();
+    final LiteralCommandNode<CommandSourceStack> setBlocksNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(commandBuildContext)).then(argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
         .executes(context -> execute(context, null))
         .then(argument("keyword_args", keywordArgs)
             .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build()).build());
@@ -73,9 +73,9 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     ModCommands.registerWithRegionArgumentModification(dispatcher,
         literalR2("replace"),
         literalR2("/replace"),
-        argument("region", region(registryAccess))
-            .then(argument("predicate", BlockPredicateArgumentType.blockPredicate(registryAccess))
-                .then(argument("block", BlockFunctionArgumentType.blockFunction(registryAccess))
+        argument("region", region(commandBuildContext))
+            .then(argument("predicate", BlockPredicateArgumentType.blockPredicate(commandBuildContext))
+                .then(argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
                     .executes(context -> {
                       final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "predicate");
                       return execute(context, blockPredicate);
@@ -164,9 +164,9 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
       });
     } else {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
-        final BlockInWorld cachedBlockPosition = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-        if (cachedBlockPosition.getState() != null && predicate.test(cachedBlockPosition, context)) {
-          oldStates.put(blockPos.asLong(), cachedBlockPosition.getState());
+        final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+        if (blockInWorld.getState() != null && predicate.test(blockInWorld, context)) {
+          oldStates.put(blockPos.asLong(), blockInWorld.getState());
         }
         return null;
       });

@@ -23,11 +23,11 @@ public enum PostProcessCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     LiteralArgumentBuilder<CommandSourceStack> directBuilder = literalR2("postprocess");
     LiteralArgumentBuilder<CommandSourceStack> indirectBuilder = literalR2("/postprocess");
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, registryAccess).build();
-    ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(registryAccess))
+    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext).build();
+    ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(commandBuildContext))
         .executes(this::executeWithDefaultKeywordArgs)
         .then(argument("keyword_args", keywordArgs)
             .executes(context -> execute(context, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build());

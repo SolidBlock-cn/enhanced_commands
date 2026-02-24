@@ -10,6 +10,7 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,7 +35,7 @@ public abstract class EntitySelectorMixin implements EntitySelectorExtension {
   /**
    * 特定类型的实体选择器（如 {@code passengers}）应该以特殊的方式，从世界收集实体列表。
    */
-  @Inject(method = "findEntities(Lnet/minecraft/commands/CommandSourceStack;)Ljava/util/List;", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/EntitySelector;currentEntity:Z"), cancellable = true)
+  @Inject(method = "findEntities(Lnet/minecraft/commands/CommandSourceStack;)Ljava/util/List;", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/EntitySelector;currentEntity:Z", opcode = Opcodes.GETFIELD), cancellable = true)
   private void modifiedEntityCollector(CommandSourceStack source, CallbackInfoReturnable<List<? extends Entity>> cir, @Local Vec3 vec3d, @Local AABB box) throws CommandSyntaxException {
     final EntitySelectorCollector collector = extension$ec().collector;
     if (collector != null) {
@@ -50,7 +51,7 @@ public abstract class EntitySelectorMixin implements EntitySelectorExtension {
   /**
    * 特定类型的实体选择器（如 {@code passengers}）应该以特殊的方式，从世界收集玩家列表。
    */
-  @Inject(method = "findPlayers", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/EntitySelector;currentEntity:Z"), cancellable = true)
+  @Inject(method = "findPlayers", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/EntitySelector;currentEntity:Z", opcode = Opcodes.GETFIELD), cancellable = true)
   private void modifiedPlayerCollector(CommandSourceStack source, CallbackInfoReturnable<List<ServerPlayer>> cir, @Local Predicate<Entity> actualPredicate) throws CommandSyntaxException {
     final EntitySelectorCollector collector = extension$ec().collector;
     if (collector != null) {

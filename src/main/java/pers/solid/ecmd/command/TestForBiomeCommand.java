@@ -39,12 +39,12 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
   public static final DynamicCommandExceptionType TEST_FOR_BIOME_PREDICATE_NOT_LOADED = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.commands.testfor.biome.not_loaded_for_predicate", o));
 
   @Override
-  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     testForBuilder.then(literal("biome")
         .executes(context -> executeTestForBiome(context, BlockPos.containing(context.getSource().getPosition())))
         .then(argument("pos", EnhancedPosArgumentType.blockPos())
             .executes(context -> executeTestForBiome(context, EnhancedPosArgumentType.getBlockPos(context, "pos")))
-            .then(argument("biome", resourceOrTag(registryAccess, Registries.BIOME))
+            .then(argument("biome", resourceOrTag(commandBuildContext, Registries.BIOME))
                 .executes(context -> executeTestForBiomePredicate(context, false))
                 .then(argument("keyword_args", BIOME_KEYWORD_ARGS)
                     .executes(context -> executeTestForBiomePredicate(context, getKeywordArgs(context, "keyword_args").getBoolean("force_load")))))));

@@ -19,7 +19,7 @@ public enum EnhancedWeatherCommand implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literal("weather")
         .executes(context -> executeQuery(context.getSource(), (byte) 0))
         .then(literal("query")

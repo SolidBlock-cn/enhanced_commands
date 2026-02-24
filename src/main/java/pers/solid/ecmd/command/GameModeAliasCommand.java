@@ -59,7 +59,7 @@ public enum GameModeAliasCommand implements CommandRegistrationCallback {
   }
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     register(dispatcher, "gmc", GameType.CREATIVE);
     register(dispatcher, "gms", GameType.SURVIVAL);
     register(dispatcher, "gma", GameType.ADVENTURE);

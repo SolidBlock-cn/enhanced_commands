@@ -21,7 +21,7 @@ public enum DebugDeOpCommand implements CommandRegistrationCallback {
   private static final SimpleCommandExceptionType ALREADY_DEOPPED_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.deop.failed"));
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(
         Commands.literal("debug:deop")
             .executes(context -> deop(context.getSource(), Collections.singleton(context.getSource().getPlayerOrException().getGameProfile())))

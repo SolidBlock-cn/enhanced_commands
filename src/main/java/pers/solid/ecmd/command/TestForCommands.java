@@ -11,18 +11,18 @@ public enum TestForCommands implements CommandRegistrationCallback {
   INSTANCE;
 
   @Override
-  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
+  public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final LiteralArgumentBuilder<CommandSourceStack> literal = ModCommands.literalR2("testfor");
-    TestForBiomeCommand.INSTANCE.addArguments(literal, registryAccess, environment);
-    TestForBlockCommand.INSTANCE.addArguments(literal, registryAccess, environment);
-    TestForBlocksCommand.INSTANCE.addArguments(literal, registryAccess, environment);
-    TestForBlockInfoCommand.INSTANCE.addArguments(literal, registryAccess, environment);
-    TestForBlocksCommand.INSTANCE.addArguments(literal, registryAccess, environment);
-    TestForEntityCommand.INSTANCE.addArguments(literal, registryAccess, environment);
+    TestForBiomeCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);
+    TestForBlockCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);
+    TestForBlocksCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);
+    TestForBlockInfoCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);
+    TestForBlocksCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);
+    TestForEntityCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);
     dispatcher.register(literal);
   }
 
   public interface Entry {
-    void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext registryAccess, Commands.CommandSelection environment);
+    void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext commandBuildContext, Commands.CommandSelection environment);
   }
 }
