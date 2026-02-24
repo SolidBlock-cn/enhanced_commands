@@ -16,7 +16,7 @@ public abstract class NbtPathArgumentMixin {
    */
   @ModifyExpressionValue(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/NbtPathArgument$NbtPath;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false), slice = @Slice(to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;peek()C", remap = false)))
   private boolean stopReadingMoreChars(boolean original, @Local(argsOnly = true) StringReader reader) {
-    if (original && GeneralParsingConfig.CURRENT.improvedNbtPathParsing) {
+    if (original && GeneralParsingConfig.current.improvedNbtPathParsing) {
       final char peek = reader.peek();
       if (peek == ',' || peek == ';' || peek == ')' || peek == ']' || peek == '}') {
         return false;

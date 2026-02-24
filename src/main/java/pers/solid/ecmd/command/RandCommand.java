@@ -80,7 +80,7 @@ public enum RandCommand implements CommandRegistrationCallback {
                     .then(argument("path", nbtPath())
                         .executes(context -> executeRandBoolean(context, consumerOf(context))))))
             .then(argument("probability", floatArg(0, 1))
-                .executes(context -> executeRandBoolean(context, getFloat(context, "probability"))))), registryAccess));
+                .executes(context -> executeRandBoolean(context, getFloat(context, "probability"))))), commandBuildContext));
   }
 
   private static int executeRandBoolean(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

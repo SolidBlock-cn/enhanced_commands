@@ -15,6 +15,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
@@ -266,9 +267,9 @@ public enum FoodCommand implements CommandRegistrationCallback {
                     .executes(context -> executeTick(context, getPlayers(context, "players"), getInteger(context, "times")))))));
   }
 
-  private int executeTick(CommandContext<CommandSourceStack> context, Collection<? extends Player> players, int times) {
+  private int executeTick(CommandContext<CommandSourceStack> context, Collection<? extends ServerPlayer> players, int times) {
     int updated = 0;
-    for (Player player : players) {
+    for (ServerPlayer player : players) {
       for (int i = 0; i < times; i++) {
         player.getFoodData().tick(player);
         updated++;

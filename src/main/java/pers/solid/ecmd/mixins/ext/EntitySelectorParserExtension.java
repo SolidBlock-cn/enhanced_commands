@@ -22,16 +22,16 @@ public interface EntitySelectorParserExtension {
     throw new UnsupportedOperationException();
   }
 
-  default void addPredicate(EntityPredicateEntry predicateEntry) {
+  default void addPredicate$ec(EntityPredicateEntry predicateEntry) {
     extension$ec().addPredicate(predicateEntry);
   }
 
   /**
-   * 既满足原版的 {@link EntitySelectorParser#addPredicate(Predicate)}，又满足 {@link #addPredicate(EntityPredicateEntry)} 时，优先添加至原版的相关字段中，即添加至 {@link EntitySelectorParser#predicates}。
+   * 既满足原版的 {@link EntitySelectorParser#addPredicate(Predicate)}，又满足 {@link #addPredicate$ec(EntityPredicateEntry)} 时，优先添加至原版的相关字段中，即添加至 {@link EntitySelectorParser#predicates}。
    *
    * @see StaticEntityPredicate
    */
-  default <T extends Predicate<Entity> & EntityPredicateEntry> void addPredicate(T predicateEntry) {
-    ((EntitySelectorParser) this).addPredicate(((Predicate<Entity>) predicateEntry));
+  default <T extends Predicate<Entity> & EntityPredicateEntry> void addPredicate$ec(T predicateEntry) {
+    ((EntitySelectorParser) this).addPredicate(predicateEntry);
   }
 }

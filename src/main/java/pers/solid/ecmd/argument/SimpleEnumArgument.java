@@ -102,8 +102,7 @@ public final class SimpleEnumArgument<E extends Enum<E>> implements ArgumentType
   }
 
   public static final class Info<E extends Enum<E>> implements ArgumentTypeInfo<SimpleEnumArgument<E>, SimpleEnumArgument<E>> {
-    @SuppressWarnings("rawtypes")
-    public static final Info INSTANCE = new Info<>();
+    public static final Info<?> INSTANCE = new Info<>();
 
     @Override
     public void serializeToNetwork(SimpleEnumArgument<E> properties, FriendlyByteBuf buf) {

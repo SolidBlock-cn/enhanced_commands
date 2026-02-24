@@ -12,6 +12,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Arrays;
@@ -39,6 +40,7 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringRepresentable> ex
   /**
    * @see net.minecraft.commands.arguments.StringRepresentableArgument#parse(StringReader)
    */
+  @SuppressWarnings("deprecation")
   static <E extends Enum<E> & StringRepresentable> EnumOrRandom<E> parseAndSuggest(E[] values, Codec<E> codec, ParseContext<?> parseContext) throws CommandSyntaxException {
     parseContext.addSuggestion((context, suggestionsBuilder) -> {
       if (suggestionsBuilder.getRemaining().isEmpty()) {
@@ -72,7 +74,7 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringRepresentable> ex
   record Instance<E extends Enum<E> & StringRepresentable>(E value) implements EnumOrRandom<E> {
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return value.getSerializedName();
     }
 
@@ -84,7 +86,7 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringRepresentable> ex
 
   record RandomValue<E extends Enum<E> & StringRepresentable>(E[] values, String name) implements EnumOrRandom<E> {
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return name;
     }
 

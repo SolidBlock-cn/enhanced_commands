@@ -36,7 +36,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    if (CommandsConfig.CURRENT.enableDebugCommands) {
+    if (CommandsConfig.current.enableDebugCommands) {
       DebugDeOpCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
       DebugIgnoreBoundaryCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
       DebugOpCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
@@ -48,15 +48,20 @@ public enum ModCommands implements CommandRegistrationCallback {
     ConvertBlockCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     ConvertBlocksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     DrawCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    EnhancedCommandsConfigCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     FillReplaceCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     FireCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     FoodCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     HealthCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     HistoryCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    MirrorCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    if (CommandsConfig.current.enableMirrorCommand) {
+      MirrorCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    }
     MoonCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    MoveCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    if (CommandsConfig.current.enableMoveCommand) {
+      MoveCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    }
     NbtCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     OutlineCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     PileCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
@@ -65,7 +70,9 @@ public enum ModCommands implements CommandRegistrationCallback {
     RegionSelectionCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     RotateCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     SeparatedExecuteCommand.register(dispatcher, commandBuildContext);
-    StackCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    if (CommandsConfig.current.enableStackCommand) {
+      StackCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    }
     TameCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     TasksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     TestArgCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);

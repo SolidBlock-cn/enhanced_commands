@@ -18,9 +18,9 @@ import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.*;
 

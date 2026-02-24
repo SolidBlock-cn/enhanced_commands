@@ -41,10 +41,9 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.exception.CommandRuntimeException;
-import pers.solid.ecmd.extensions.HistoryHolder;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
 import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionselection.RegionSelection;
@@ -54,6 +53,7 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.Collections;
@@ -187,7 +187,8 @@ public enum StackCommand implements CommandRegistrationCallback {
     Iterable<@Nullable BlockPos> posIterable;
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       posIterable = UnloadedPosException.catching(Iterables.transform(region, blockPos -> {
-        if (!world.hasChunkAt(blockPos)) {
+        @SuppressWarnings("deprecation") final boolean b = world.hasChunkAt(blockPos);
+        if (!b) {
           hasUnloadedPos.setTrue();
           throw new UnloadedPosException(blockPos.immutable());
         }
@@ -195,7 +196,7 @@ public enum StackCommand implements CommandRegistrationCallback {
       }));
     } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       posIterable = new BatchedFilterIterable<>(region, 16, blockPos -> {
-        final boolean chunkLoaded = world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) hasUnloadedPos.setTrue();
         return chunkLoaded;
       });
@@ -252,7 +253,8 @@ public enum StackCommand implements CommandRegistrationCallback {
 
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           posPairStream = posPairStream.takeWhile(pair -> {
-            if (!world.hasChunkAt(posToPlace.set(pair.firstLong()))) {
+            @SuppressWarnings("deprecation") final boolean hasChunk = world.hasChunkAt(posToPlace.set(pair.firstLong()));
+            if (!hasChunk) {
               hasUnloadedPos.setTrue();
               return false;
             }
@@ -261,7 +263,7 @@ public enum StackCommand implements CommandRegistrationCallback {
         }
         if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
           posPairStream = posPairStream.filter(pair -> {
-            final boolean chunkLoaded = world.hasChunkAt(posToPlace.set(pair.firstLong()));
+            @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(posToPlace.set(pair.firstLong()));
             if (!chunkLoaded) hasUnloadedPos.setTrue();
             return chunkLoaded;
           });

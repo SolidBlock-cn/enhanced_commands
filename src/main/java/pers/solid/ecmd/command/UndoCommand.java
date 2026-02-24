@@ -17,10 +17,10 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgument;
-import pers.solid.ecmd.extensions.HistoryHolder;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
 import pers.solid.ecmd.history.History;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.Deque;
 

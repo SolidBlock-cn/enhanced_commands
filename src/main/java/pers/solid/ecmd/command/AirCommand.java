@@ -13,6 +13,7 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.Nullable;
@@ -165,8 +166,9 @@ public enum AirCommand implements CommandRegistrationCallback {
         entity.setAirSupply(entity.getAirSupply() + value);
       }
       context.getSource().sendFeedback$ecBridge(() -> {
-        Object[] args = new Object[]{TextUtil.literal(size).withStyle(Styles.TARGET), TextUtil.literal(value).withStyle(Styles.TARGET)};
-        return Component.translatable("enhanced_commands.commands.air.add.multiple", args).enhanced$$();
+        final MutableComponent target = TextUtil.literal(size).withStyle(Styles.TARGET);
+        final MutableComponent by = TextUtil.literal(value).withStyle(Styles.TARGET);
+        return Component.translatable("enhanced_commands.commands.air.add.multiple", target, by).enhanced$$();
       }, true);
       return size;
     }
@@ -203,8 +205,9 @@ public enum AirCommand implements CommandRegistrationCallback {
         entity.setAirSupply(entity.getAirSupply() - value);
       }
       context.getSource().sendFeedback$ecBridge(() -> {
-        Object[] args = new Object[]{TextUtil.literal(size).withStyle(Styles.TARGET), TextUtil.literal(value).withStyle(Styles.TARGET)};
-        return Component.translatable("enhanced_commands.commands.air.remove.multiple", args).enhanced$$();
+        final MutableComponent target = TextUtil.literal(size).withStyle(Styles.TARGET);
+        final MutableComponent by = TextUtil.literal(value).withStyle(Styles.TARGET);
+        return Component.translatable("enhanced_commands.commands.air.remove.multiple", target, by).enhanced$$();
       }, true);
       return size;
     }

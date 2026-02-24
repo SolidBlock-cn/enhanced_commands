@@ -24,10 +24,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
+public record SimpleBlockPredicate(@NotNull Block block, @NotNull List<PropertyPredicate<?>> properties) implements BlockPredicate {
   public static final MapCodec<SimpleBlockPredicate> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
 
-  public SimpleBlockPredicate(Block block) {
+  public SimpleBlockPredicate(@NotNull Block block) {
     this(block, Collections.emptyList());
   }
 

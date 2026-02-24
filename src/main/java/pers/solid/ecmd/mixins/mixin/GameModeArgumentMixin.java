@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
@@ -33,7 +34,7 @@ public abstract class GameModeArgumentMixin {
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/world/level/GameType;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameType;byName(Ljava/lang/String;Lnet/minecraft/world/level/GameType;)Lnet/minecraft/world/level/GameType;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   public void injectedParse(StringReader stringReader, CallbackInfoReturnable<GameType> cir, String string) {
-    if (MixinShared.EXTENDED_GAME_MODE_NAMES.containsKey(string)) {
+    if (GeneralParsingConfig.current.acceptGameModeAlias && MixinShared.EXTENDED_GAME_MODE_NAMES.containsKey(string)) {
       cir.setReturnValue(MixinShared.EXTENDED_GAME_MODE_NAMES.get(string));
     }
   }
@@ -50,6 +51,10 @@ public abstract class GameModeArgumentMixin {
 
   @ModifyArg(method = "listSuggestions", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/SharedSuggestionProvider;suggest(Ljava/util/stream/Stream;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;"))
   public Stream<String> modifiedListSuggestions(Stream<String> candidates) {
-    return Stream.concat(candidates, MixinShared.EXTENDED_GAME_MODE_NAMES.keySet().stream());
+    if (GeneralParsingConfig.current.acceptGameModeAlias) {
+      return Stream.concat(candidates, MixinShared.EXTENDED_GAME_MODE_NAMES.keySet().stream());
+    } else {
+      return candidates;
+    }
   }
 }

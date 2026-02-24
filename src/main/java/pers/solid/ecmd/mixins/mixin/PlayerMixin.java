@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.solid.ecmd.ModTrackedData;
-import pers.solid.ecmd.command.DebugIgnoreBoundaryCommand;
+import pers.solid.ecmd.config.DebugConfig;
 import pers.solid.ecmd.mixins.ext.PlayerExtension;
 import pers.solid.ecmd.regionselection.RegionSelection;
 
@@ -22,11 +22,11 @@ public abstract class PlayerMixin implements PlayerExtension {
   /**
    * 当 ignoreBoundary 设置为 true 时，允许玩家传送到世界界限以外，也就是不要执行 setPosition。
    *
-   * @see DebugIgnoreBoundaryCommand#ignoreBoundary
+   * @see DebugConfig#ignoreBoundary
    */
   @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setPos(DDD)V"))
   private boolean noClampPos(Player instance, double x, double y, double z) {
-    return !DebugIgnoreBoundaryCommand.ignoreBoundary;
+    return !DebugConfig.current.ignoreBoundary;
   }
 
   /**

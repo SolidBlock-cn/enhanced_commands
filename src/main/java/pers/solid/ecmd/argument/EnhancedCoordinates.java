@@ -70,7 +70,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
       return sb.toString();
     } else if (posArgument instanceof LocalCoordinates lookingPosArgument) {
       final LocalCoordinatesAccessor a = (LocalCoordinatesAccessor) lookingPosArgument;
-      return "^" + StringUtil.nf.format(a.getX()) + " ^" + StringUtil.nf.format(a.getY()) + " ^" + StringUtil.nf.format(a.getZ());
+      return "^" + StringUtil.nf.format(a.getLeft()) + " ^" + StringUtil.nf.format(a.getUp()) + " ^" + StringUtil.nf.format(a.getForwards());
     } else if (posArgument instanceof EnhancedCoordinates enhancedCoordinates) {
       return enhancedCoordinates.asString();
     } else {
@@ -86,8 +86,8 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
   Vec3 toAbsolutePos(PositionProvider positionProvider);
 
   @Override
-  default Vec3 getPosition(CommandSourceStack source) {
-    return toAbsolutePos((PositionProvider) source);
+  default @NotNull Vec3 getPosition(CommandSourceStack source) {
+    return toAbsolutePos(source);
   }
 
   default BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
@@ -97,8 +97,8 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
   Vec2 toAbsoluteRotation(PositionProvider positionProvider);
 
   @Override
-  default Vec2 getRotation(CommandSourceStack source) {
-    return toAbsoluteRotation((PositionProvider) source);
+  default @NotNull Vec2 getRotation(CommandSourceStack source) {
+    return toAbsoluteRotation(source);
   }
 
   enum Type implements StringRepresentable {
@@ -115,7 +115,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return this.name;
     }
   }

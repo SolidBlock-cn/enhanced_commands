@@ -1,5 +1,6 @@
 package pers.solid.ecmd.region;
 
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -25,10 +26,10 @@ import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius, @Range(from = 0, to = Long.MAX_VALUE) double height, Vec3 center) implements Region {
   public static final SimpleCommandExceptionType MUST_EXPAND_VERTICALLY = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.region.exception.cylinder_must_expand_vertically"));
@@ -46,7 +47,17 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
 
   @Override
   public @NotNull Iterator<BlockPos> iterator() {
-    return stream().iterator();
+    final Iterable<@NotNull BlockPos> oneHeightRound = Iterables.filter(BlockPos.betweenClosed(Mth.ceil(center.x - radius - 0.5), 0, Mth.ceil(center.z - radius - 0.5), Mth.floor(center.x + radius - 0.5), 0, Mth.floor(center.z + radius - 0.5)), blockPos -> {
+      final Vec3 centerPos = blockPos.getCenter();
+      return Vector2d.distance(centerPos.x, centerPos.z, center.x, center.z) <= radius;
+    });// a one-height cuboid that contains a round
+    final int bottomHeight = getBottomHeight();
+    final int topHeight = getTopHeight();
+    if (bottomHeight > topHeight) {
+      // 这种情况一般不应该发生
+      return Collections.emptyIterator();
+    }
+    return Iterables.concat(Iterables.transform(oneHeightRound, blockPos -> BlockPos.betweenClosed(blockPos.getX(), bottomHeight, blockPos.getZ(), blockPos.getX(), topHeight, blockPos.getZ()))).iterator();
   }
 
   public int getBottomHeight() {
@@ -56,23 +67,6 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   public int getTopHeight() {
     // round(center.y + height/2) - 1, round down 0.5
     return Mth.ceil(center.y + height / 2 - 1.5);
-  }
-
-  @Override
-  public Stream<@NotNull BlockPos> stream() {
-    final Stream<BlockPos> oneHeightRound = BlockPos.betweenClosedStream(Mth.ceil(center.x - radius - 0.5), 0, Mth.ceil(center.z - radius - 0.5), Mth.floor(center.x + radius - 0.5), 0, Mth.floor(center.z + radius - 0.5)) // a one-height cuboid that contains a round
-        .filter(blockPos -> {
-          final Vec3 centerPos = blockPos.getCenter();
-          return Vector2d.distance(centerPos.x, centerPos.z, center.x, center.z) <= radius;
-        });
-    final int bottomHeight = getBottomHeight();
-    final int topHeight = getTopHeight();
-    if (bottomHeight > topHeight) {
-      // 这种情况一般不应该发生
-      return Stream.empty();
-    }
-    return oneHeightRound
-        .flatMap(blockPos -> BlockPos.betweenClosedStream(blockPos.getX(), bottomHeight, blockPos.getZ(), blockPos.getX(), topHeight, blockPos.getZ()));
   }
 
   @Override

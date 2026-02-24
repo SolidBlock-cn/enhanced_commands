@@ -58,7 +58,7 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return name;
     }
 

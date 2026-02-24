@@ -10,7 +10,6 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
-import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.commands.TeleportCommand;
@@ -26,6 +25,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.argument.RotationProvider;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.*;
@@ -47,7 +47,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                     Collections.singleton(context.getSource().getEntityOrException()),
                     context.getSource().getLevel(),
                     EnhancedPosArgument.getPosArgument(context, "location"),
-                    WorldCoordinates.current(),
+                    new RotationProvider(0, 0, false, false),
                     null
                 )
             )

@@ -97,11 +97,11 @@ public final class EntitySelectorTypeExtras {
   public static final Map<String, Consumer<EntitySelectorParser>> EXTRA_READER_ATTRIBUTES = Util.make(new HashMap<>(), map -> {
     map.put(NO_ENTITY, entitySelectorReader -> {
       entitySelectorReader.setMaxResults(0);
-      entitySelectorReader.addPredicate(EmptyEntityPredicateEntry.INSTANCE);
+      entitySelectorReader.addPredicate$ec(EmptyEntityPredicateEntry.INSTANCE);
     });
     final Consumer<EntitySelectorParser> excludesPlayersConsumer = reader -> {
       reader.setTypeLimitedInversely();
-      reader.addPredicate(new TypeEntityPredicateEntry(EntityType.PLAYER, true));
+      reader.addPredicate$ec(new TypeEntityPredicateEntry(EntityType.PLAYER, true));
     };
     map.put(NEAREST_NON_PLAYER, excludesPlayersConsumer);
     map.put(NEAREST_NON_PLAYER2, excludesPlayersConsumer);

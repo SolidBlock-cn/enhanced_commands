@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.config.EntitySelectorConfig;
+import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -197,7 +198,7 @@ public abstract class EntitySelectorOptionsMixin {
   @WrapWithCondition(method = "method_9980", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;setLevel(Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;)V"))
   private static boolean applyNegativeLevel(EntitySelectorParser instance, MinMaxBounds.Ints levelRange, @Share("inverted") LocalBooleanRef ref) {
     if (ref.get()) {
-      instance.addPredicate(new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), true));
+      instance.addPredicate$ec(new LevelEntityPredicateEntry(BridgeIntRange.fromVanilla(levelRange), true));
       return false;
     } else {
       return true;
@@ -251,7 +252,7 @@ public abstract class EntitySelectorOptionsMixin {
    */
   @Inject(method = "method_9946", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameType;values()[Lnet/minecraft/world/level/GameType;"))
   private static void suggestMoreGamemodes(EntitySelectorParser entitySelectorReader, SuggestionsBuilder builder, Consumer<SuggestionsBuilder> consumer, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local(ordinal = 0) String stringxx, @Local(ordinal = 0) boolean blx, @Local(ordinal = 1) boolean bl2) {
-    if (!EntitySelectorConfig.current.acceptGameModeAlias) {
+    if (!GeneralParsingConfig.current.acceptGameModeAlias) {
       return;
     }
     for (String name : MixinShared.EXTENDED_GAME_MODE_NAMES.keySet()) {
@@ -457,13 +458,13 @@ public abstract class EntitySelectorOptionsMixin {
     }
   }
 
-  @WrapWithCondition(method = "method_9975", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;fromReader(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;")))
-  private static boolean prepareScoreNegations(Map<String, MinMaxBounds.Ints> map, Object key, Object value, @Share("inverted") LocalBooleanRef localBooleanRef, @Share("invertedScores") LocalRef<List<ScoresEntityPredicateEntry.Entry>> invertedScores) {
+  @WrapOperation(method = "method_9975", at = @At(value = "INVOKE", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;fromReader(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;")))
+  private static Object prepareScoreNegations(Map<String, MinMaxBounds.Ints> map, Object key, Object value, Operation<Object> original, @Share("inverted") LocalBooleanRef localBooleanRef, @Share("invertedScores") LocalRef<List<ScoresEntityPredicateEntry.Entry>> invertedScores) {
     if (localBooleanRef.get()) {
       invertedScores.get().add(new ScoresEntityPredicateEntry.Entry((String) key, (MinMaxBounds.Ints) value, true));
-      return false;
+      return null;
     } else {
-      return true;
+      return original.call(map, key, value);
     }
   }
 

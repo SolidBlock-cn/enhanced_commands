@@ -158,7 +158,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return s;
     }
   }

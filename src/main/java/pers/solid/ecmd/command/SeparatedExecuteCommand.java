@@ -74,8 +74,8 @@ public final class SeparatedExecuteCommand {
     dispatcher.register(literalR2("run")
         .redirect(dispatcher.getRoot()));
 
-    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("if"), true, registryAccess));
-    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("unless"), false, registryAccess));
+    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("if"), true, commandBuildContext));
+    dispatcher.register(addConditionArguments(literalCommandNode, literalR2("unless"), false, commandBuildContext));
     dispatcher.register(literalR2("as")
         .then(argument("targets", EntityArgument.entities()).fork(literalCommandNode, context -> {
           List<CommandSourceStack> list = Lists.newArrayList();

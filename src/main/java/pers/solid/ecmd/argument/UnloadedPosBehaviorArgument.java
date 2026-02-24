@@ -4,6 +4,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.arguments.StringRepresentableArgument;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 
@@ -16,7 +17,7 @@ public class UnloadedPosBehaviorArgument extends StringRepresentableArgument<Unl
   }
 
   @Override
-  public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+  public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     return ParsingUtil.suggestMatchingEnumWithTooltip(UnloadedPosBehavior.VALUES, UnloadedPosBehavior::getDescription, builder);
   }
 }

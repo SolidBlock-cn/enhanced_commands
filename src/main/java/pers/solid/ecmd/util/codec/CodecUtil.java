@@ -108,7 +108,7 @@ public final class CodecUtil {
     biMap.put("nearest", EntitySelectorParser.ORDER_NEAREST);
   });
   /**
-   * 用于序列化实体选择器中的 {@link EntitySelector#sorter}，即实体选择器中的 {@code sort} 参数。
+   * 用于序列化实体选择器中的 {@link EntitySelector#order}，即实体选择器中的 {@code sort} 参数。
    */
   public static final Codec<BiConsumer<Vec3, List<? extends Entity>>> SORTER = Codec.STRING.flatXmap(string -> SORTER_MAP.containsKey(string) ? DataResult.success(SORTER_MAP.get(string)) : DataResult.error(() -> "unknown sorter: " + string + ", which may be provided by other mods and cannot be recognized by Enhanced Commands mod")
       , biConsumer -> SORTER_MAP.inverse().containsKey(biConsumer) ? DataResult.success(SORTER_MAP.inverse().get(biConsumer)) : DataResult.error(() -> "Unknown sorter which may be provided or modified by other mods and cannot be recognized by Enhanced Commands mod"));

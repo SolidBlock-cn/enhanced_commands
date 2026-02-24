@@ -38,7 +38,7 @@ public enum MirrorProvider implements StringRepresentable, Function<@NotNull Com
   }
 
   @Override
-  public String getSerializedName() {
+  public @NotNull String getSerializedName() {
     return name;
   }
 }

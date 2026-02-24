@@ -10,6 +10,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
@@ -68,7 +69,7 @@ public class BlockPredicateDataGeneration extends FabricDynamicRegistryProvider 
   }
 
   @Override
-  public String getName() {
+  public @NotNull String getName() {
     return "Block Predicate";
   }
 }

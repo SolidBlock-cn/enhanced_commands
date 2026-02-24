@@ -24,13 +24,13 @@ public record RotationProvider(float x, float y, boolean xRelative, boolean yRel
   }
 
   @Override
-  public Vec3 getPosition(CommandSourceStack source) {
+  public @NotNull Vec3 getPosition(CommandSourceStack source) {
     return source.getPosition();
   }
 
   @Override
-  public Vec2 getRotation(CommandSourceStack source) {
-    return this.getRotation(source);
+  public @NotNull Vec2 getRotation(CommandSourceStack source) {
+    return this.toAbsoluteRotation(source);
   }
 
   @Override

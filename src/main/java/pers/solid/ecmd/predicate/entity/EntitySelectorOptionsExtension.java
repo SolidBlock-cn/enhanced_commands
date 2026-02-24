@@ -251,13 +251,13 @@ public class EntitySelectorOptionsExtension {
     }, reader -> reader.getDistance().isAny() || reader.extension$ec().implicitDistance && reader.getDistance().max().isPresent(), Component.translatable("enhanced_commands.argument.entity.options.rm"));
 
     putOption("region", reader -> {
-      final CommandBuildContext commandBuildContext = MixinShared.getCommandRegistryAccess();
+      final CommandBuildContext commandBuildContext = MixinShared.getCommandBuildContext();
       final ParseContext<Object> parseContext = new ParseContext<>(commandBuildContext, reader.getReader(), false, true);
-      //noinspection unchecked
-      reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
+      @SuppressWarnings("unchecked") final CommandContext<Object> context = (CommandContext<Object>) reader.extension$ec().context;
+      reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions(context, suggestionsBuilder));
       final RegionProvider<?> regionProvider = RegionProvider.parse(parseContext);
 
-      reader.addPredicate(new RegionEntityPredicateEntry(regionProvider));
+      reader.addPredicate$ec(new RegionEntityPredicateEntry(regionProvider));
     }, Predicates.alwaysTrue(), Component.translatable("enhanced_commands.entity_predicate.region.option_name"));
 
     putOption("alternatives", reader -> {
@@ -322,7 +322,7 @@ public class EntitySelectorOptionsExtension {
       }
 
       final ImmutableList<EntityPredicate> build = entityPredicates.build();
-      reader.addPredicate(new AlternativesEntityPredicateEntry(build, inverted));
+      reader.addPredicate$ec(new AlternativesEntityPredicateEntry(build, inverted));
     }, Predicates.alwaysTrue(), Component.translatable("enhanced_commands.argument.entity.options.alternatives"));
 
     putOption("health", reader -> {
@@ -334,12 +334,12 @@ public class EntitySelectorOptionsExtension {
       final String unquotedString = stringReader.readUnquotedString();
       if ("max".equals(unquotedString)) {
         reader.setSuggestions(EntitySelectorParser.SUGGEST_NOTHING);
-        reader.addPredicate(new HealthMaxEntityPredicateEntry(inverted));
+        reader.addPredicate$ec(new HealthMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
         final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
         reader.setSuggestions(EntitySelectorParser.SUGGEST_NOTHING);
-        reader.addPredicate(new HealthEntityPredicateEntry(floatRange, inverted));
+        reader.addPredicate$ec(new HealthEntityPredicateEntry(floatRange, inverted));
       }
       markParamAsUsed(reader, "health", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "health"), Component.translatable("enhanced_commands.entity_predicate.health.option_name"));
@@ -353,12 +353,12 @@ public class EntitySelectorOptionsExtension {
       final String unquotedString = stringReader.readUnquotedString();
       if ("max".equals(unquotedString)) {
         reader.setSuggestions(EntitySelectorParser.SUGGEST_NOTHING);
-        reader.addPredicate(new AirMaxEntityPredicateEntry(inverted));
+        reader.addPredicate$ec(new AirMaxEntityPredicateEntry(inverted));
       } else {
         stringReader.setCursor(cursorBefore);
         final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
         reader.setSuggestions(EntitySelectorParser.SUGGEST_NOTHING);
-        reader.addPredicate(new AirEntityPredicateEntry(intRange, inverted));
+        reader.addPredicate$ec(new AirEntityPredicateEntry(intRange, inverted));
       }
       markParamAsUsed(reader, "air", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "air"), Component.translatable("enhanced_commands.entity_predicate.air.option_name"));
@@ -369,7 +369,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "food", inverted);
       final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
       reader.setIncludesEntities(false);
-      reader.addPredicate(new FoodEntityPredicateEntry(intRange, inverted));
+      reader.addPredicate$ec(new FoodEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "food", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "food"), Component.translatable("enhanced_commands.entity_predicate.food.option_name"));
     markRequiringUniqueNoMixture("food");
@@ -379,7 +379,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "saturation", inverted);
       final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
       reader.setIncludesEntities(false);
-      reader.addPredicate(new SaturationEntityPredicateEntry(floatRange, inverted));
+      reader.addPredicate$ec(new SaturationEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "saturation", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "saturation"), Component.translatable("enhanced_commands.entity_predicate.saturation.option_name"));
     markRequiringUniqueNoMixture("saturation");
@@ -389,7 +389,7 @@ public class EntitySelectorOptionsExtension {
       checkNoInversionMix(reader, "exhaustion", inverted);
       final BridgeFloatRange floatRange = BridgeFloatRange.parse(stringReader);
       reader.setIncludesEntities(false);
-      reader.addPredicate(new ExhaustionEntityPredicateEntry(floatRange, inverted));
+      reader.addPredicate$ec(new ExhaustionEntityPredicateEntry(floatRange, inverted));
       markParamAsUsed(reader, "exhaustion", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "exhaustion"), Component.translatable("enhanced_commands.entity_predicate.exhaustion.option_name"));
     markRequiringUniqueNoMixture("exhaustion");
@@ -398,7 +398,7 @@ public class EntitySelectorOptionsExtension {
       final boolean inverted = reader.shouldInvertValue();
       checkNoInversionMix(reader, "fire", inverted);
       final BridgeIntRange intRange = BridgeIntRange.parse(stringReader);
-      reader.addPredicate(new FireEntityPredicateEntry(intRange, inverted));
+      reader.addPredicate$ec(new FireEntityPredicateEntry(intRange, inverted));
       markParamAsUsed(reader, "fire", inverted);
     }, reader -> isNeverPositivelyUsed(reader, "fire"), Component.translatable("enhanced_commands.entity_predicate.fire.option_name"));
     markRequiringUniqueNoMixture("fire");
@@ -411,7 +411,7 @@ public class EntitySelectorOptionsExtension {
       final String s = reader.getReader().readUnquotedString();
       final Pose entityPose = PoseEntityPredicateEntry.ENTITY_POSE_NAMES.inverse().get(s);
       if (entityPose != null) {
-        reader.addPredicate(new PoseEntityPredicateEntry(entityPose, inverted));
+        reader.addPredicate$ec(new PoseEntityPredicateEntry(entityPose, inverted));
         markParamAsUsed(reader, "pose", inverted);
       } else {
         final int cursorAfter = reader.getReader().getCursor();
@@ -435,6 +435,7 @@ public class EntitySelectorOptionsExtension {
       final StringReader stringReader = reader.getReader();
       stringReader.skipWhitespace();
       final ParseContext<Object> parseContext = new ParseContext<>(stringReader);
+      @SuppressWarnings("unchecked") final CommandContext<Object> context = (CommandContext<Object>) reader.extension$ec().context;
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
@@ -445,8 +446,7 @@ public class EntitySelectorOptionsExtension {
             break;
           }
           parseContext.clearSuggestion();
-          //noinspection unchecked
-          reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
+          reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions(context, suggestionsBuilder));
           final EnhancedCoordinates posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgument.blockPos());
 
           stringReader.skipWhitespace();
@@ -459,9 +459,8 @@ public class EntitySelectorOptionsExtension {
           }
 
           parseContext.clearSuggestion();
-          //noinspection unchecked
-          reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-          final BlockPredicate blockPredicate = BlockPredicate.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
+          reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions(context, suggestionsBuilder));
+          final BlockPredicate blockPredicate = BlockPredicate.parse(new ParseContext<>(MixinShared.getCommandBuildContext(), parseContext.reader(), parseContext.suggestions(), false, true));
 
           list.add(new com.mojang.datafixers.util.Pair<>(posArgument, blockPredicate));
           stringReader.skipWhitespace();
@@ -478,13 +477,12 @@ public class EntitySelectorOptionsExtension {
           }
         }
 
-        reader.addPredicate(new BlockPredicatesEntityPredicateEntry(list));
+        reader.addPredicate$ec(new BlockPredicatesEntityPredicateEntry(list));
       } else {
         parseContext.clearSuggestion();
-        //noinspection unchecked
-        reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions((CommandContext<Object>) reader.extension$ec().context, suggestionsBuilder));
-        final BlockPredicate parse = BlockPredicate.parse(new ParseContext<>(MixinShared.getCommandRegistryAccess(), parseContext.reader(), parseContext.suggestions(), false, true));
-        reader.addPredicate(new BlockPredicateEntityPredicateEntry(parse));
+        reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions(context, suggestionsBuilder));
+        final BlockPredicate parse = BlockPredicate.parse(new ParseContext<>(MixinShared.getCommandBuildContext(), parseContext.reader(), parseContext.suggestions(), false, true));
+        reader.addPredicate$ec(new BlockPredicateEntityPredicateEntry(parse));
       }
     }, Predicates.alwaysTrue(), Component.translatable("enhanced_commands.entity_predicate.block"));
 
@@ -492,8 +490,8 @@ public class EntitySelectorOptionsExtension {
     putOption("effect", reader -> {
       final StringReader stringReader = reader.getReader();
       stringReader.skipWhitespace();
-      final HolderLookup<MobEffect> wrapper = MixinShared.getCommandRegistryAccess().lookupOrThrow(Registries.MOB_EFFECT);
-      final var type = ResourceArgument.resource(MixinShared.getCommandRegistryAccess(), Registries.MOB_EFFECT);
+      final HolderLookup<MobEffect> wrapper = MixinShared.getCommandBuildContext().lookupOrThrow(Registries.MOB_EFFECT);
+      final var type = ResourceArgument.resource(MixinShared.getCommandBuildContext(), Registries.MOB_EFFECT);
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
@@ -538,13 +536,13 @@ public class EntitySelectorOptionsExtension {
         }
         final EffectsEntityPredicateEntry entry = new EffectsEntityPredicateEntry(effects.build());
 
-        reader.addPredicate(entry);
+        reader.addPredicate$ec(entry);
       } else {
         final boolean inverted = reader.shouldInvertValue();
         reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> SharedSuggestionProvider.suggestResource(wrapper.listElements(), suggestionsBuilder, ref -> ref.key().location(), ref -> ref.value().getDisplayName()));
         final Holder.Reference<MobEffect> value = type.parse(stringReader);
 
-        reader.addPredicate(new EffectEntityPredicateEntry(value, inverted));
+        reader.addPredicate$ec(new EffectEntityPredicateEntry(value, inverted));
       }
     }, reader -> isNeverPositivelyUsed(reader, "effect"), Component.translatable("enhanced_commands.entity_predicate.effect"));
 
@@ -557,11 +555,11 @@ public class EntitySelectorOptionsExtension {
         final char peek = stringReader.peek();
         if (peek == ']' || peek == ',' || peek == ';') {
           // 在 'owner=' 或 'owner=!' 后没有接任何值时，使用 null 值
-          reader.addPredicate(new OwnerEntityPredicateEntry(null, inverted));
+          reader.addPredicate$ec(new OwnerEntityPredicateEntry(null, inverted));
         } else {
           final EntitySelectorParser newReader = new EntitySelectorParser(reader.getReader(), true);
           reader.setSuggestions(newReader::fillSuggestions);
-          reader.addPredicate(new OwnerEntityPredicateEntry(EntityPredicate.parse(newReader), inverted));
+          reader.addPredicate$ec(new OwnerEntityPredicateEntry(EntityPredicate.parse(newReader), inverted));
         }
       }
     }, reader -> !EntitySelectorTypeExtras.PETS.equals(reader.extension$ec().atVariable), Component.translatable("enhanced_commands.entity_predicate.owner"));
@@ -586,7 +584,7 @@ public class EntitySelectorOptionsExtension {
 
       final EntitySelectorParser newReader = new EntitySelectorParser(reader.getReader(), true);
       reader.setSuggestions(newReader::fillSuggestions);
-      reader.addPredicate(new SubPredicateEntityPredicateEntry(EntityPredicate.parse(newReader), inverted));
+      reader.addPredicate$ec(new SubPredicateEntityPredicateEntry(EntityPredicate.parse(newReader), inverted));
     }, Predicates.alwaysTrue(), Component.translatable("enhanced_commands.entity_predicate.sub_predicate"));
     INCOMPLETE_SUGGESTIONS.add("is");
     putOption("not", reader -> {
@@ -594,7 +592,7 @@ public class EntitySelectorOptionsExtension {
 
       final EntitySelectorParser newReader = new EntitySelectorParser(reader.getReader(), true);
       reader.setSuggestions(newReader::fillSuggestions);
-      reader.addPredicate(new SubPredicateEntityPredicateEntry(EntityPredicate.parse(newReader), !inverted));
+      reader.addPredicate$ec(new SubPredicateEntityPredicateEntry(EntityPredicate.parse(newReader), !inverted));
     }, Predicates.alwaysTrue(), Component.translatable("enhanced_commands.entity_predicate.sub_predicate.inverted"));
     INCOMPLETE_SUGGESTIONS.add("not");
   }
@@ -604,6 +602,7 @@ public class EntitySelectorOptionsExtension {
     return (suggestionsBuilder, suggestionsBuilderConsumer) -> original.apply(suggestionsBuilder, suggestionsBuilderConsumer).thenCombine(next.apply(suggestionsBuilder, suggestionsBuilderConsumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   private static void putOption(String id, EntitySelectorOptions.Modifier handler, Predicate<EntitySelectorParser> condition, Component description) {
     EntitySelectorOptionsAccessor.callPutOption(id, handler, condition, description);
   }
@@ -614,7 +613,7 @@ public class EntitySelectorOptionsExtension {
       final boolean inverted = reader.shouldInvertValue();
       reader.setSuggestions(BOOLEAN_SUGGEST);
       final boolean expected = inverted != reader.getReader().readBoolean();
-      reader.addPredicate(new SimpleBooleanEntityPredicateEntry(type, expected));
+      reader.addPredicate$ec(new SimpleBooleanEntityPredicateEntry(type, expected));
       // 对于布尔值，使用否定的直接替换其效果，仍视为未被取反的谓词
       markParamAsUsed(reader, id, false);
     }, reader -> isNeverPositivelyUsed(reader, id), Component.translatable(type.baseTranslationKey));
@@ -718,7 +717,7 @@ public class EntitySelectorOptionsExtension {
         // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
       }
 
-      reader.addPredicate(new TypesEntityPredicateEntry(values, inverted));
+      reader.addPredicate$ec(new TypesEntityPredicateEntry(values, inverted));
       return true;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
@@ -771,7 +770,7 @@ public class EntitySelectorOptionsExtension {
         // 由于有明确的定界符，因此此处的 skipWhitespace 是安全的。
       }
 
-      reader.addPredicate(new GameModeEntityPredicateEntry.Multiple(parsedGameModes, inverted));
+      reader.addPredicate$ec(new GameModeEntityPredicateEntry.Multiple(parsedGameModes, inverted));
       return false;
     } else {
       stringReader.setCursor(cursorBeforeWhite);
@@ -869,7 +868,7 @@ public class EntitySelectorOptionsExtension {
     if (stringReader.canRead() && stringReader.peek() == '{') {
       reader.setSuggestions(EntitySelectorParser.SUGGEST_NOTHING);
       final LootItemCondition lootCondition = ParsingUtil.parseNbt(stringReader, LootItemCondition.DIRECT_CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
-      reader.addPredicate(new LootTablePredicateEntityPredicateEntry(new Holder.Direct<>(lootCondition), inverted));
+      reader.addPredicate$ec(new LootTablePredicateEntityPredicateEntry(new Holder.Direct<>(lootCondition), inverted));
       return true;
     }
     return false;

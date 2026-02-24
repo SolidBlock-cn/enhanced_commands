@@ -5,8 +5,8 @@ import net.minecraft.util.thread.BlockableEventLoop;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.Map;
 import java.util.Queue;

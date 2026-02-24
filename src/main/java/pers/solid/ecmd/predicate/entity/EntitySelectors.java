@@ -55,7 +55,7 @@ public final class EntitySelectors {
   }
 
   /**
-   * <p>将实体选择器对象中未存储于 {@link EntitySelector#predicates} 中的一些属性转换为相应的 {@link SpecialEntityPredicate}，从而实现序列化。
+   * <p>将实体选择器对象中未存储于 {@link EntitySelector#contextFreePredicates} 中的一些属性转换为相应的 {@link SpecialEntityPredicate}，从而实现序列化。
    *
    * @see EntitySelectorExtras#getSpecialEntries()
    */
@@ -87,7 +87,7 @@ public final class EntitySelectors {
   }
 
   /**
-   * <p>将 {@link EntitySelector#predicates} 列表转换为可被本模组直接序列化的 {@link EntityPredicate} 对象。当列表中的 {@code Predicate<Entity>} 符合以下条件之一时，会被本模组读取：
+   * <p>将 {@link EntitySelector#contextFreePredicates} 列表转换为可被本模组直接序列化的 {@link EntityPredicate} 对象。当列表中的 {@code Predicate<Entity>} 符合以下条件之一时，会被本模组读取：
    * <ul>
    *   <li>直接继承了 {@link EntityPredicate}。</li>
    *   <li>继承了 {@link StaticEntityPredicateWrapper}。</li>

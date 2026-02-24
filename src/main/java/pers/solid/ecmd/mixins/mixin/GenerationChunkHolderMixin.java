@@ -5,4 +5,5 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(GenerationChunkHolder.class)
 public abstract class GenerationChunkHolderMixin {
+  // todo ignoreChessboardDistance
 }

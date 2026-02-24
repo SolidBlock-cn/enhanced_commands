@@ -17,7 +17,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -156,7 +155,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
           newYaw = entity.getYRot() - (float) rotation;
         }
         if (entity instanceof ServerPlayer serverPlayerEntity) {
-          serverPlayerEntity.connection.teleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getXRot(), RelativeMovement.ALL);
+          serverPlayerEntity.connection.teleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getXRot());
         } else {
           entity.setYRot(newYaw);
         }
@@ -176,7 +175,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
           newYaw = entity.getYRot() + (float) rotation;
         }
         if (entity instanceof ServerPlayer serverPlayerEntity) {
-          serverPlayerEntity.connection.teleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getXRot(), RelativeMovement.ALL);
+          serverPlayerEntity.connection.teleport(entity.getX(), entity.getY(), entity.getZ(), newYaw, entity.getXRot());
         } else {
           entity.setYRot(newYaw);
         }

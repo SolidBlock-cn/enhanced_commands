@@ -1,4 +1,4 @@
-package pers.solid.ecmd.extensions;
+package pers.solid.ecmd.mixins.ext;
 
 import com.google.common.collect.Iterables;
 import net.minecraft.network.chat.Component;
@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.Iterator;
 import java.util.Map;

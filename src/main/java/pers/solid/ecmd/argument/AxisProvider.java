@@ -57,7 +57,7 @@ public enum AxisProvider implements StringRepresentable, Function<@NotNull Posit
   }
 
   @Override
-  public String getSerializedName() {
+  public @NotNull String getSerializedName() {
     return name;
   }
 

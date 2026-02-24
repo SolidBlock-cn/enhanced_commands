@@ -18,8 +18,8 @@ import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgument;
-import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.history.History;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 

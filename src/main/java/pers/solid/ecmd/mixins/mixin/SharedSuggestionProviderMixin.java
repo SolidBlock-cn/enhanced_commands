@@ -48,7 +48,7 @@ public interface SharedSuggestionProviderMixin {
    */
   @Unique
   private static <T> Consumer<T> getModifiedConsumer(Function<T, ResourceLocation> identifierFunction, Consumer<T> action, String remaining, BiConsumer<ResourceLocation, T> modifiedSuggestion) {
-    if (GeneralParsingConfig.CURRENT.suggestionEmitDefaultNamespace) {
+    if (GeneralParsingConfig.current.suggestionEmitDefaultNamespace) {
       if (remaining.indexOf(':') == -1) {
         return t -> {
           final ResourceLocation identifier = identifierFunction.apply(t);
@@ -69,6 +69,6 @@ public interface SharedSuggestionProviderMixin {
    */
   @ModifyExpressionValue(method = "filterResources(Ljava/lang/Iterable;Ljava/lang/String;Ljava/util/function/Function;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Ljava/lang/String;equals(Ljava/lang/Object;)Z"))
   private static boolean suggestNonDefaultNamespacedIds(boolean original) {
-    return original || GeneralParsingConfig.CURRENT.suggestNonDefaultNamespacedIds;
+    return original || GeneralParsingConfig.current.suggestNonDefaultNamespacedIds;
   }
 }

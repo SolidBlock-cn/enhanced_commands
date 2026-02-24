@@ -38,10 +38,10 @@ import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.curve.CurveProvider;
-import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
@@ -451,16 +451,16 @@ public enum TestArgCommand implements CommandRegistrationCallback {
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("testarg")
-        .then(addBlockFunctionProperties(literal("block_function"), registryAccess))
-        .then(addBlockPredicateProperties(literal("block_predicate"), registryAccess))
-        .then(addCurveProperties(literal("curve"), registryAccess))
-        .then(addEntityPredicateProperties(literal("entity_predicate"), registryAccess))
-        .then(addNbtProperties(literal("nbt"), registryAccess))
+        .then(addBlockFunctionProperties(literal("block_function"), commandBuildContext))
+        .then(addBlockPredicateProperties(literal("block_predicate"), commandBuildContext))
+        .then(addCurveProperties(literal("curve"), commandBuildContext))
+        .then(addEntityPredicateProperties(literal("entity_predicate"), commandBuildContext))
+        .then(addNbtProperties(literal("nbt"), commandBuildContext))
         .then(addNbtCompoundProperties(literal("nbt_compound")))
-        .then(addNbtPredicateProperties(literal("nbt_predicate"), registryAccess))
-        .then(addNbtFunctionProperties(literal("nbt_function"), registryAccess))
+        .then(addNbtPredicateProperties(literal("nbt_predicate"), commandBuildContext))
+        .then(addNbtFunctionProperties(literal("nbt_function"), commandBuildContext))
         .then(addPosProperties(literal("pos")))
-        .then(addRegionProperties(literal("region"), registryAccess))
+        .then(addRegionProperties(literal("region"), commandBuildContext))
     );
   }
 }

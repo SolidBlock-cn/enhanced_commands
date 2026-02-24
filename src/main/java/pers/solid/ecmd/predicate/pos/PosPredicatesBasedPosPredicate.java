@@ -39,7 +39,7 @@ public interface PosPredicatesBasedPosPredicate<T extends PosPredicatesBasedPosP
 
   @Override
   @NotNull
-  default PosPredicate mirrored(Direction.@NotNull Axis axis, @NotNull Vec3 pivot) {
+  default PosPredicate mirrored(@NotNull Direction.Axis axis, @NotNull Vec3 pivot) {
     return newPosPredicateWithTransformation(r -> (R) r.mirrored(axis, pivot));
   }
 

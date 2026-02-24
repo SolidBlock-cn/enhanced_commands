@@ -6,6 +6,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.StringRepresentableArgument;
 import net.minecraft.core.Direction;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Arrays;
@@ -25,7 +26,7 @@ public class DirectionArgument extends StringRepresentableArgument<DirectionProv
   }
 
   @Override
-  public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+  public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
     return ParsingUtil.suggestMatchingEnumWithTooltip(Arrays.asList(DirectionProvider.values()), DirectionProvider::getDisplayName, builder);
   }
 }

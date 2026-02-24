@@ -222,20 +222,20 @@ public record ParseContext<S>(CommandBuildContext commandBuildContext, StringRea
     return buildSuggestions(suggestions, context, builder);
   }
 
-  public <T> @NotNull T parseAndSuggestValues(Iterable<@Nullable T> iterable, Function<@NotNull T, String> suggestions, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
+  public <T> @NotNull T parseAndSuggestValues(Iterable<@NotNull T> iterable, Function<@NotNull T, String> suggestions, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     setSuggestion((context, builder) -> SharedSuggestionProvider.suggest(iterable, builder, suggestions, tooltip));
     return ParsingUtil.parseValues(this.reader, valueGetter);
   }
 
-  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(Iterable<T> iterable, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(Iterable<@NotNull T> iterable, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     return parseAndSuggestValues(iterable, StringRepresentable::getSerializedName, tooltip, valueGetter);
   }
 
-  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(Iterable<T> iterable, Function<@NotNull T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(Iterable<@NotNull T> iterable, Function<@NotNull T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
     return parseAndSuggestEnums(iterable, tooltip, codec::byId);
   }
 
-  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(T[] iterable, Function<@NotNull T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(@NotNull T[] iterable, Function<@NotNull T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
     return parseAndSuggestEnums(Arrays.asList(iterable), tooltip, codec);
   }
 

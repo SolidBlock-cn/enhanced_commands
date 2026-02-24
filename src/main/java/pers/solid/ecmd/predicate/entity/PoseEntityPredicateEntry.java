@@ -19,7 +19,7 @@ import java.util.Optional;
 public record PoseEntityPredicateEntry(@NotNull Pose expected, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final ImmutableBiMap<Pose, String> ENTITY_POSE_NAMES = ImmutableBiMap.<Pose, String>builder()
       .put(Pose.STANDING, "standing")
-      .put(Pose.FALL_FLYING, "fall_flying")
+      .put(Pose.FALL_FLYING, "gliding")
       .put(Pose.SLEEPING, "sleeping")
       .put(Pose.SWIMMING, "swimming")
       .put(Pose.SPIN_ATTACK, "spin_attack")

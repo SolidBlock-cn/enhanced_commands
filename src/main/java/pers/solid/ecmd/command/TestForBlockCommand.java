@@ -55,7 +55,8 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
     // 会检查区块已加载，不过不是在这里，而是在下面。
     final CommandSourceStack source = context.getSource();
     final ServerLevel world = source.getLevel();
-    if (!world.hasChunkAt(blockPos)) {
+    @SuppressWarnings("deprecation") final boolean hasChunk = world.hasChunkAt(blockPos);
+    if (!hasChunk) {
       throw TEST_FOR_BLOCK_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final BlockState blockState = world.getBlockState(blockPos);
@@ -102,6 +103,6 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
 
   @Override
   public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    testForBuilder.then(addBlockCommandProperties(Commands.literal("block"), registryAccess));
+    testForBuilder.then(addBlockCommandProperties(Commands.literal("block"), commandBuildContext));
   }
 }

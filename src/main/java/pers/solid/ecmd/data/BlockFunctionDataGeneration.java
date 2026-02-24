@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.function.block.*;
 import pers.solid.ecmd.function.property.AllOriginalPropertyNameFunctions;
@@ -280,7 +281,7 @@ public class BlockFunctionDataGeneration extends FabricDynamicRegistryProvider {
   }
 
   @Override
-  public String getName() {
+  public @NotNull String getName() {
     return "Block Functions";
   }
 }

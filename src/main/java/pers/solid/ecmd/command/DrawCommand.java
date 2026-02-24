@@ -25,19 +25,20 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
+import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.curve.Curve;
-import pers.solid.ecmd.extensions.HistoryHolder;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.SphereRegion;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.stream.LongStream;
 
@@ -80,8 +81,9 @@ public enum DrawCommand implements CommandRegistrationCallback {
     if (!Double.isFinite(estimatedIterationAmount)) {
       throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownCommand().create();
     }
-    if (!bypassLimit && estimatedIterationAmount > FillReplaceCommand.REGION_SIZE_LIMIT) {
-      throw FillReplaceCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, FillReplaceCommand.REGION_SIZE_LIMIT);
+    final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
+    if (!bypassLimit && estimatedIterationAmount > regionSizeLimit) {
+      throw FillReplaceCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, regionSizeLimit);
     }
 
     final ServerLevel world = source.getLevel();
@@ -109,13 +111,13 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       posIterable = new BatchedFilterIterable<>(posIterable, 16, blockPos -> {
-        final boolean chunkLoaded = world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       posIterable = Iterables.transform(posIterable, blockPos -> {
-        final boolean chunkLoaded = world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloaded.setTrue();
           throw new UnloadedPosException(blockPos);

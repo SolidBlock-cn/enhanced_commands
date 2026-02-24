@@ -1,13 +1,21 @@
 package pers.solid.ecmd.util;
 
+import com.google.common.base.Preconditions;
 import com.mojang.brigadier.exceptions.*;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
+import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.mixins.mixin.CommandsMixin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +50,63 @@ public final class ModCommandExceptionTypes {
   public static final DynamicCommandExceptionType UNKNOWN_STATUS_EFFECT = new DynamicCommandExceptionType(id -> Component.translatable("enhanced_commands.parsing.unknown_registry_entry.effect", id));
   public static final DynamicCommandExceptionType UNKNOWN_BIOME = new DynamicCommandExceptionType(id -> Component.translatable("enhanced_commands.parsing.unknown_registry_entry.biome", id));
   public static final SimpleCommandExceptionType CONTAINS_UPPER_CASE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.id.contains_upper_case"));
+
+  /**
+   * <p>用于在命令抛出异常时，像命令解析时异常一样，显示命令的原文本内容。这个 {@code cursorEnd} 对应的是 {@link  CommandSyntaxExceptionExtension#getCursorEnd$ec()} 中的 {@code cursorEnd}，如果未指定，则为 -1，不应是 null。
+   * <p>对此方法调用 {@link Dynamic4CommandExceptionType#create create} 时，4个参数分别是：<code>{@link Component}, {@link String}, int, int</code>。
+   * <p>示例：
+   * <pre>{@code
+   * final CommandSyntaxException commandSyntaxException = XXXX.createWithContext(stringReader, ...);
+   * throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), commandSyntaxException.getInput(), commandSyntaxException.getCursor(), cursorEnd);
+   * }</pre>
+   */
+  public static final Dynamic4CommandExceptionType EXCEPTION_SHOWING_TEXT = new Dynamic4CommandExceptionType((message, input, cursor, cursorEnd) -> {
+    Preconditions.checkArgument(message instanceof Component, "message not Text");
+    Preconditions.checkArgument(input == null || input instanceof String, "input not string");
+    Preconditions.checkArgument(cursor instanceof Integer, "cursor not Integer");
+    Preconditions.checkArgument(cursorEnd instanceof Integer, "cursorEnd not Integer");
+    return toErrorShowingInput((Component) message, (String) input, (int) cursor, (int) cursorEnd);
+  });
+
+  /**
+   * 将命令异常的消息增加一行，以显示原始的命令输入以及出错位置，就像原版游戏在遇到命令解析异常时那样。其处理方法综合了原版的做法以及本模组对原版做法的 mixin。
+   *
+   * @see Commands#finishParsing
+   * @see CommandsMixin#modifiedGetErrorMessage(String, CommandSyntaxException, int)
+   */
+  private static Component toErrorShowingInput(Component message, String input, int cursor, int cursorEnd) {
+    if (input != null && cursor >= 0) {
+      int i = Math.min(input.length(), cursor);
+      MutableComponent mutableText = Component.empty().withStyle(ChatFormatting.GRAY).withStyle((style) -> style.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + input)));
+      if (i > 10) {
+        mutableText.append(CommonComponents.ELLIPSIS);
+      }
+
+      mutableText.append(input.substring(Math.max(0, i - 10), i));
+      if (i < input.length()) {
+        if (cursorEnd >= i) {
+          mutableText.append(Component.literal("»").withStyle(ChatFormatting.DARK_RED));
+        }
+        cursorEnd = Math.min(input.length(), cursorEnd);
+        String redString = input.substring(i);
+        if (cursorEnd >= i) {
+          redString = redString.substring(0, cursorEnd - i);
+        }
+        Component text = Component.literal(redString).withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE);
+        mutableText.append(text);
+      }
+      if (cursorEnd >= i) {
+        mutableText.append(Component.literal("«").withStyle(ChatFormatting.DARK_RED));
+        mutableText.append(Component.literal(input.substring(cursorEnd, Math.min(cursorEnd + 10, input.length()))));
+      }
+
+      mutableText.append(Component.translatable("command.context.here").withStyle(ChatFormatting.RED, ChatFormatting.ITALIC));
+
+      return CommonComponents.joinLines(message, mutableText);
+    } else {
+      return message;
+    }
+  }
 
   public static final Map<ResourceKey<? extends Registry<?>>, DynamicCommandExceptionType> REGISTRY_ENTRY_EXCEPTION_TYPES = Util.make(new HashMap<>(), map -> {
     map.put(Registries.BLOCK, BlockStateParser.ERROR_UNKNOWN_BLOCK);

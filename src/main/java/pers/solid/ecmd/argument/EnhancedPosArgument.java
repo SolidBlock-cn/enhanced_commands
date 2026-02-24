@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -45,12 +46,12 @@ import java.util.concurrent.CompletableFuture;
 import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 
 /**
- * Similar to {@link net.minecraft.commands.arguments.coordinates.BlockPosArgument} and {@link Vec3Argument}, with some slight modifications.
+ * Similar to {@link BlockPosArgument} and {@link Vec3Argument}, with some slight modifications.
  *
  * @param numberType   The behavior of the argument type when accepting different coordinates.
  * @param intAlignType
  * @see Coordinates
- * @see net.minecraft.commands.arguments.coordinates.BlockPosArgument
+ * @see BlockPosArgument
  * @see Vec3Argument
  */
 public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<EnhancedCoordinates>, ArgumentTypeInfo.Template<EnhancedPosArgument> {
@@ -95,7 +96,7 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
   /**
    * 获取方块坐标，并检查方块坐标是否在已加载的区块内且在建筑的范围限制内。
    *
-   * @see net.minecraft.commands.arguments.coordinates.BlockPosArgument#getLoadedBlockPos(CommandContext, ServerLevel, String)
+   * @see BlockPosArgument#getLoadedBlockPos(CommandContext, ServerLevel, String)
    */
   public static BlockPos getLoadedBuildableBlockPos(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
     final BlockPos blockPos = getBlockPos(context, name);
@@ -113,11 +114,11 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
   public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.unloaded", pos));
   public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.out_of_build_limit", pos));
   public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.out_of_bounds", pos));
-  public static final Dynamic3CommandExceptionType OUT_OF_HEIGHT_LIMIT = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Component.translatable("enhanced_commands.argument.pos.out_of_height_limit", pos, lowest, highest));
   public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Component.translatable("enhanced_commands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
 
   public static <T extends BlockPos> T checkChunkLoaded(ServerLevel world, T blockPos) throws CommandSyntaxException {
-    if (!world.hasChunkAt(blockPos)) {
+    @SuppressWarnings("deprecation") final boolean hasChunk = world.hasChunkAt(blockPos);
+    if (!hasChunk) {
       throw UNLOADED_EXCEPTION.create(TextUtil.wrapVector(blockPos));
     }
     return blockPos;
@@ -352,13 +353,13 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
 
   @Override
   public @NotNull ArgumentTypeInfo<EnhancedPosArgument, EnhancedPosArgument> type() {
-    return Serializer.INSTANCE;
+    return Info.INSTANCE;
   }
 
-  public static class Serializer implements ArgumentTypeInfo<EnhancedPosArgument, EnhancedPosArgument> {
-    public static final Serializer INSTANCE = new Serializer();
+  public static class Info implements ArgumentTypeInfo<EnhancedPosArgument, EnhancedPosArgument> {
+    public static final Info INSTANCE = new Info();
 
-    private Serializer() {
+    private Info() {
     }
 
     @Override

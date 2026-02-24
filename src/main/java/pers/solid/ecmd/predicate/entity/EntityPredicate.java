@@ -95,14 +95,6 @@ public interface EntityPredicate extends ExpressionConvertible {
     return simplifiedBySelector(EntitySelectors.readOmittibleEntitySelector(entitySelectorReader));
   }
 
-  /**
-   * 测试实体是否符合条件。
-   *
-   * @param entity 被测试的实体
-   * @return 如果实体满足条件，则为 {@code true}
-   */
-  boolean test(@NotNull Entity entity, @NotNull ExecutionContext context);
-
   static TestResult successResult(@NotNull Entity entity) {
     return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
@@ -114,6 +106,14 @@ public interface EntityPredicate extends ExpressionConvertible {
   static TestResult successOrFail(boolean successes, @NotNull Entity entity) {
     return successes ? successResult(entity) : failResult(entity);
   }
+
+  /**
+   * 测试实体是否符合条件。
+   *
+   * @param entity 被测试的实体
+   * @return 如果实体满足条件，则为 {@code true}
+   */
+  boolean test(@NotNull Entity entity, @NotNull ExecutionContext context);
 
   /**
    * 测试实体并返回描述信息。调用时请使用此类，但覆盖时请覆盖 {@link #testAndDescribe(Entity, ExecutionContext, Component)}。

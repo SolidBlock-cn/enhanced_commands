@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.command.DebugIgnoreBoundaryCommand;
+import pers.solid.ecmd.config.DebugConfig;
 
 @Mixin(WorldBorder.class)
 public abstract class WorldBorderMixin {
@@ -18,7 +18,7 @@ public abstract class WorldBorderMixin {
    */
   @Inject(method = "isWithinBounds(DDD)Z", at = @At("HEAD"), cancellable = true)
   private void forceContainPos(double x, double z, double margin, CallbackInfoReturnable<Boolean> cir) {
-    if (DebugIgnoreBoundaryCommand.ignoreBorder) {
+    if (DebugConfig.current.ignoreBorder) {
       cir.setReturnValue(true);
     }
   }
@@ -28,14 +28,14 @@ public abstract class WorldBorderMixin {
    */
   @Inject(method = "clampToBounds(DDD)Lnet/minecraft/core/BlockPos;", at = @At("HEAD"), cancellable = true)
   private void nullClamp(double x, double y, double z, CallbackInfoReturnable<BlockPos> cir) {
-    if (DebugIgnoreBoundaryCommand.ignoreBorder) {
+    if (DebugConfig.current.ignoreBorder) {
       cir.setReturnValue(BlockPos.containing(x, y, z));
     }
   }
 
   @Inject(method = "isInsideCloseToBorder", at = @At("HEAD"), cancellable = true)
   private void neverCollide(Entity entity, AABB box, CallbackInfoReturnable<Boolean> cir) {
-    if (DebugIgnoreBoundaryCommand.ignoreBorder) {
+    if (DebugConfig.current.ignoreBorder) {
       cir.setReturnValue(false);
     }
   }

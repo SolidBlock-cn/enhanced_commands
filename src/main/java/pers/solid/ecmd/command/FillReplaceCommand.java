@@ -28,12 +28,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
-import pers.solid.ecmd.extensions.HistoryHolder;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
+import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.predicate.block.AllBlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
@@ -41,6 +41,7 @@ import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.List;
 
@@ -55,7 +56,6 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public static final int SUPPRESS_REPLACED_CHECK_FLAG = 4;
 
   public static final Dynamic2CommandExceptionType REGION_TOO_LARGE = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("enhanced_commands.commands.setblocks.region_too_large", a, b));
-  public static final int REGION_SIZE_LIMIT = 16777215;
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
@@ -115,8 +115,9 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   }
 
   public static int setBlocksInRegion(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
-    if (!bypassLimit && region.numberOfBlocksAffected() > REGION_SIZE_LIMIT) {
-      throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), REGION_SIZE_LIMIT);
+    final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
+    if (!bypassLimit && region.numberOfBlocksAffected() > regionSizeLimit) {
+      throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
     }
     final ServerLevel world = source.getLevel();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
@@ -132,13 +133,13 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
 
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       posIterable = new BatchedFilterIterable<>(region, 16, blockPos -> {
-        final boolean chunkLoaded = world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) hasUnloaded.setTrue();
         return chunkLoaded;
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       posIterable = Iterables.transform(region, blockPos -> {
-        final boolean chunkLoaded = world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloaded.setTrue();
           throw new UnloadedPosException(blockPos);

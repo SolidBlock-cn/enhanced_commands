@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
@@ -24,7 +25,7 @@ public abstract class IdentifierMixin {
 
   @ModifyExpressionValue(method = "readGreedy", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;isAllowedInResourceLocation(C)Z"))
   private static boolean recognizeMoreChars(boolean original, @Local(argsOnly = true) StringReader reader) {
-    return original || isUpperCase(reader.peek());
+    return original || (GeneralParsingConfig.current.improvedIdParsing && isUpperCase(reader.peek()));
   }
 
   @Inject(method = {"read(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/resources/ResourceLocation;", "readNonEmpty"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;readGreedy(Lcom/mojang/brigadier/StringReader;)Ljava/lang/String;", shift = At.Shift.AFTER))
@@ -34,6 +35,10 @@ public abstract class IdentifierMixin {
 
   @ModifyExpressionValue(method = {"read(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/resources/ResourceLocation;", "readNonEmpty"}, at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static CommandSyntaxException tweakCommandException(CommandSyntaxException commandSyntaxException, @Share("cursorAfterString") LocalIntRef cursorAfterString, @Local(argsOnly = true) StringReader reader) {
+    if (!GeneralParsingConfig.current.detailedIdentifierException) {
+      // 当前配置未启用时，直接返回原版的。
+      return commandSyntaxException;
+    }
     final String input = reader.getString();
     for (int i = reader.getCursor(); i < cursorAfterString.get(); i++) {
       final char c = input.charAt(i);

@@ -104,6 +104,7 @@ public record OmittedRegistryEntryArgument<T>(String omittedNamespace, HolderLoo
     }
 
     public record Template<T>(String omittedNamespace, ResourceKey<? extends Registry<T>> registryRef) implements ArgumentTypeInfo.Template<OmittedRegistryEntryArgument<T>> {
+
       @Override
       public @NotNull OmittedRegistryEntryArgument<T> instantiate(CommandBuildContext commandBuildContext) {
         return omittedRegistryEntry(omittedNamespace, commandBuildContext, this.registryRef);

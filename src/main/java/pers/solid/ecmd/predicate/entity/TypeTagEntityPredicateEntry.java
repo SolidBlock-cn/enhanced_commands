@@ -51,6 +51,6 @@ public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tag, boolean inv
 
   @Override
   public String toOptionEntry() {
-    return "type=" + (inverted ? "!" : "") + "#" + tag.location().toString();
+    return "type=" + (inverted ? "!" : "") + "#" + tag.location();
   }
 }

@@ -7,11 +7,11 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(LocalCoordinates.class)
 public interface LocalCoordinatesAccessor {
   @Accessor
-  double getX();
+  double getLeft();
 
   @Accessor
-  double getY();
+  double getUp();
 
   @Accessor
-  double getZ();
+  double getForwards();
 }

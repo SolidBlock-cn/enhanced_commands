@@ -7,6 +7,7 @@
     "BlockDisplayEntityAccessor",
     "BlockInWorldAccessor",
     "CommandContextAccessor",
+    "CommandSourceStackAccessor",
     "EntityAnchorAccessor",
     "EntitySelectorAccessor",
     "EntitySelectorParserAccessor",
@@ -15,8 +16,7 @@
     "LocalCoordinatesAccessor",
     "MutableComponentAccessor",
     "ParserUtilsAccessor",
-    "ServerCommandSourceAccessor",
-    "ServerWorldAccessor",
+    "ServerLevelAccessor",
     "TranslatableContentsAccessor",
     "WorldCoordinatesAccessor"
   ],
