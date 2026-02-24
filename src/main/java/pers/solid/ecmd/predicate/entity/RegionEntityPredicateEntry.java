@@ -7,13 +7,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
-public record RegionEntityPredicateEntry(@NotNull RegionArgument<?> region) implements EntityPredicateEntry {
+public record RegionEntityPredicateEntry(@NotNull RegionProvider<?> region) implements EntityPredicateEntry {
   public static final MapCodec<RegionEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      RegionArgument.CODEC.fieldOf("region").forGetter(RegionEntityPredicateEntry::region)
+      RegionProvider.CODEC.fieldOf("region").forGetter(RegionEntityPredicateEntry::region)
   ).apply(i, RegionEntityPredicateEntry::new));
 
   @Override

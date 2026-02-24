@@ -17,8 +17,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.DirectionArgumentType;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.DirectionArgument;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.lambda.ToFloatTriFunction;
@@ -31,7 +31,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
 
   private static LiteralArgumentBuilder<CommandSourceStack> addBlockInfoCommandProperties(LiteralArgumentBuilder<CommandSourceStack> argumentBuilder) {
     return argumentBuilder
-        .then(Commands.argument("pos", EnhancedPosArgumentType.blockPos())
+        .then(Commands.argument("pos", EnhancedPosArgument.blockPos())
             .then(Commands.literal("hardness")
                 .executes(context -> executeGetHardness(context, 1))
                 .then(Commands.argument("scale", FloatArgumentType.floatArg())
@@ -39,10 +39,10 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
             .then(Commands.literal("luminance")
                 .executes(TestForBlockInfoCommand::executeGetLuminance))
             .then(Commands.literal("strong_redstone_power")
-                .then(Commands.argument("direction", DirectionArgumentType.direction())
+                .then(Commands.argument("direction", DirectionArgument.direction())
                     .executes(TestForBlockInfoCommand::executeGetStrongRedstonePower)))
             .then(Commands.literal("weak_redstone_power")
-                .then(Commands.argument("direction", DirectionArgumentType.direction())
+                .then(Commands.argument("direction", DirectionArgument.direction())
                     .executes(TestForBlockInfoCommand::executeGetWeakRedstonePower)))
             .then(Commands.literal("light")
                 .executes(context -> executeGetLight(context, null)))
@@ -68,7 +68,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
 
   private static int getIntBlockInfo(CommandContext<CommandSourceStack> context, String translationKey, ToIntTriFunction<BlockState, ServerLevel, BlockPos> function) throws CommandSyntaxException {
     final CommandSourceStack source = context.getSource();
-    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
     final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
     final int value = function.applyAsInt(blockState, world, pos);
@@ -78,10 +78,10 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
 
   private static int getIntBlockInfoWithDirection(CommandContext<CommandSourceStack> context, String translationKey, ToIntQuadFunction<BlockState, ServerLevel, BlockPos, Direction> function) throws CommandSyntaxException {
     final CommandSourceStack source = context.getSource();
-    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
     final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
-    final Direction direction = DirectionArgumentType.getDirection(context, "direction");
+    final Direction direction = DirectionArgument.getDirection(context, "direction");
     final int value = function.applyAsInt(blockState, world, pos, direction);
     source.sendFeedback$ecBridge(() -> Component.translatable(translationKey, blockState.getBlock().getName().withStyle(Styles.TARGET), TextUtil.wrapVector(pos), Component.literal(String.valueOf(value)).withStyle(Styles.ACTUAL), TextUtil.wrapDirection(direction).withStyle(Styles.TARGET)), false);
     return value;
@@ -89,7 +89,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
 
   private static float getFloatBlockInfo(CommandContext<CommandSourceStack> context, String translationKey, ToFloatTriFunction<BlockState, ServerLevel, BlockPos> function) throws CommandSyntaxException {
     final CommandSourceStack source = context.getSource();
-    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
     final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
     final float value = function.applyAsFloat(blockState, world, pos);
@@ -99,7 +99,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
 
   private static boolean getBooleanBlockInfo(CommandContext<CommandSourceStack> context, String translationKeyWhenFalse, String translationKeyWhenTrue, TriPredicate<BlockState, ServerLevel, BlockPos> predicate) throws CommandSyntaxException {
     final CommandSourceStack source = context.getSource();
-    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
     final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
     final boolean value = predicate.test(blockState, world, pos);
@@ -142,7 +142,7 @@ public enum TestForBlockInfoCommand implements TestForCommands.Entry {
 
   private static int executeGetModelOffset(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     final CommandSourceStack source = context.getSource();
-    final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+    final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
     final ServerLevel world = source.getLevel();
     final BlockState blockState = world.getBlockState(pos);
     final Vec3 modelOffset = blockState.getOffset(pos);

@@ -4,11 +4,11 @@
   "package": "pers.solid.ecmd.mixins.impl",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "CommandSourceStackExtensionImpl",
+    "CommandSourceStackStackExtensionImpl",
     "CommandSyntaxExceptionExtensionImpl",
     "EntitySelectorExtensionImpl",
     "EntitySelectorParserExtensionImpl",
-    "MutableTextExtensionImpl",
+    "MutableComponentExtensionImpl",
     "ReloadableServerRegistriesMixin"
   ],
   "client": [

@@ -3,8 +3,8 @@ package pers.solid.ecmd.mixins.mixin;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
-import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.history.History;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

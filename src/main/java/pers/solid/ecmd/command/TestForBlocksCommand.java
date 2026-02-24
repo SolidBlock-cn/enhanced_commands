@@ -21,10 +21,11 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.config.BlockOperationConfig;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.*;
@@ -38,16 +39,16 @@ import java.util.List;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.argument.BlockPredicateArgumentType.blockPredicate;
-import static pers.solid.ecmd.argument.BlockPredicateArgumentType.getBlockPredicate;
-import static pers.solid.ecmd.argument.RegionArgumentType.region;
+import static pers.solid.ecmd.argument.BlockPredicateArgument.blockPredicate;
+import static pers.solid.ecmd.argument.BlockPredicateArgument.getBlockPredicate;
+import static pers.solid.ecmd.argument.RegionArgument.region;
 
 public enum TestForBlocksCommand implements TestForCommands.Entry {
   INSTANCE;
-  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
+  public static final KeywordArgsArgument KEYWORD_ARGS = KeywordArgsArgument.builder()
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
       .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)
-      .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgumentType(), UnloadedPosBehavior.REJECT)
+      .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgument(), UnloadedPosBehavior.REJECT)
       .addOptionalArg("seed", LongArgumentType.longArg(), null)
       .build();
 
@@ -57,18 +58,18 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         .then(argument("region", region(commandBuildContext))
             .then(argument("block_predicate", blockPredicate(commandBuildContext))
                 .executes(context -> executeTestForBlocks(context, TestType.ANY, KEYWORD_ARGS.defaultArgs()))
-                .then(argument("test_type", new SimpleEnumArgumentType<>(CommandEnumType.TEST_TYPE))
+                .then(argument("test_type", new SimpleEnumArgument<>(CommandEnumType.TEST_TYPE))
                     .executes(context -> executeTestForBlocks(context, KEYWORD_ARGS.defaultArgs()))
                     .then(argument("keyword_args", KEYWORD_ARGS)
                         .executes(TestForBlocksCommand::executeTestForBlocks))))));
   }
 
   private static int executeTestForBlocks(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    return executeTestForBlocks(context, SimpleEnumArgumentType.getEnumValue(context, "test_type"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"));
+    return executeTestForBlocks(context, SimpleEnumArgument.getEnumValue(context, "test_type"), KeywordArgsArgument.getKeywordArgs(context, "keyword_args"));
   }
 
   private static int executeTestForBlocks(CommandContext<CommandSourceStack> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
-    return executeTestForBlocks(context, SimpleEnumArgumentType.getEnumValue(context, "test_type"), keywordArgs);
+    return executeTestForBlocks(context, SimpleEnumArgument.getEnumValue(context, "test_type"), keywordArgs);
   }
 
   private static int executeTestForBlocks(CommandContext<CommandSourceStack> context, TestType testType, KeywordArgs keywordArgs) throws CommandSyntaxException {
@@ -76,7 +77,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     final boolean immediately = keywordArgs.getBoolean("immediately");
     final boolean bypassLimit = keywordArgs.getBoolean("bypass_limit");
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
-    final Region region = RegionArgumentType.getRegion(context, "region");
+    final Region region = RegionArgument.getRegion(context, "region");
     final @Nullable Long seed = keywordArgs.getArg("seed");
 
     final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
@@ -177,7 +178,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       final Component taskName = Component.translatable("enhanced_commands.commands.testfor.blocks.task_name", region.asString());
-      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(mainIterable.iterator(), 32768, 3));
+      ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(mainIterable.iterator(), 32768, 3));
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.large_region", Long.toString(region.numberOfBlocksAffected())).enhanced$$().withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
@@ -218,7 +219,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return name;
     }
   }

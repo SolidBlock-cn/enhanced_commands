@@ -113,7 +113,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<? extends OutlineRegionArgument> parser() {
+    public FunctionLikeParser.SequentialParams<? extends OutlineRegionProvider> parser() {
       return new Parser();
     }
 
@@ -123,18 +123,18 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public @NotNull MapCodec<? extends OutlineRegionArgument> getArgumentCodec() {
-      return OutlineRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends OutlineRegionProvider> getArgumentCodec() {
+      return OutlineRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<OutlineRegionArgument> {
+  public static final class Parser implements FunctionLikeParser.SequentialParams<OutlineRegionProvider> {
     private OutlineType outlineType = OutlineType.OUTLINE;
-    private RegionArgument<?> regionArgument;
+    private RegionProvider<?> regionProvider;
 
     @Override
-    public OutlineRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new OutlineRegionArgument(outlineType, regionArgument);
+    public OutlineRegionProvider getParseResult(ParseContext<?> parseContext) {
+      return new OutlineRegionProvider(outlineType, regionProvider);
     }
 
     @Override
@@ -142,7 +142,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
       if (paramIndex == 1) {
         outlineType = parseContext.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
       } else if (paramIndex == 0) {
-        regionArgument = RegionArgument.parse(parseContext);
+        regionProvider = RegionProvider.parse(parseContext);
       }
     }
 

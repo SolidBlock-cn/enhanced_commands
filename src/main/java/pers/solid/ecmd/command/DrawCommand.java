@@ -27,18 +27,18 @@ import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.curve.Curve;
-import pers.solid.ecmd.extensions.HistoryHolder;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.SphereRegion;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.stream.LongStream;
 
@@ -50,19 +50,19 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builder()
+    final KeywordArgsArgument keywordArgs = KeywordArgsArgument.builder()
         .addShared(KeywordArgsCommon.FILLING, commandBuildContext)
         .addOptionalArg("interval", DoubleArgumentType.doubleArg(0d), 0d)
         .addOptionalArg("thickness", DoubleArgumentType.doubleArg(0d, 64d), 0d)
         .build();
     dispatcher.register(literalR2("draw")
-        .then(argument("curve", CurveArgumentType.curve(commandBuildContext))
-            .then(argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
-                .executes(context -> setBlocksWithDefaultKeywordArgs(CurveArgumentType.getCurve(context, "curve"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource()))
+        .then(argument("curve", CurveArgument.curve(commandBuildContext))
+            .then(argument("block", BlockFunctionArgument.blockFunction(commandBuildContext))
+                .executes(context -> setBlocksWithDefaultKeywordArgs(CurveArgument.getCurve(context, "curve"), BlockFunctionArgument.getBlockFunction(context, "block"), context.getSource()))
                 .then(argument("kwargs", keywordArgs)
                     .executes(context -> {
-                      final KeywordArgs kwargs = KeywordArgsArgumentType.getKeywordArgs(context, "kwargs");
-                      return setBlocksFromKeywordArgs(CurveArgumentType.getCurve(context, "curve"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), kwargs);
+                      final KeywordArgs kwargs = KeywordArgsArgument.getKeywordArgs(context, "kwargs");
+                      return setBlocksFromKeywordArgs(CurveArgument.getCurve(context, "curve"), BlockFunctionArgument.getBlockFunction(context, "block"), context.getSource(), kwargs);
                     })))));
   }
 
@@ -178,7 +178,7 @@ public enum DrawCommand implements CommandRegistrationCallback {
 
     if (!immediately && estimatedIterationAmount > 16384) {
       // The region is too large. Send a server task.
-      final IteratorTask<Void> task = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
+      final IteratorTask<Void> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
           IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1),
           IterateUtils.batchAndSkip(setBlocks, 32768, 15),
           finalClaim

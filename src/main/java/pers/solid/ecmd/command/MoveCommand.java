@@ -28,8 +28,8 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.argument.DirectionArgumentType.getDirection;
-import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
+import static pers.solid.ecmd.argument.DirectionArgument.getDirection;
+import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum MoveCommand implements CommandRegistrationCallback {
@@ -37,22 +37,22 @@ public enum MoveCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
+    final KeywordArgsArgument keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
         .build();
 
     ModCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("move"),
         literalR2("/move"),
-        argument("region", RegionArgumentType.region(commandBuildContext))
+        argument("region", RegionArgument.region(commandBuildContext))
             .then(argument("offset", integer())
-                .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "offset"), keywordArgs.defaultArgs(), context))
-                .then(argument("direction", DirectionArgumentType.direction())
+                .executes(context -> executeMoveFromDirection(DirectionProvider.FRONT.apply(context.getSource()), getInteger(context, "offset"), keywordArgs.defaultArgs(), context))
+                .then(argument("direction", DirectionArgument.direction())
                     .executes(context -> executeMoveFromDirection(getDirection(context, "direction"), getInteger(context, "offset"), keywordArgs.defaultArgs(), context))
                     .then(argument("keyword_args", keywordArgs)
                         .executes(context -> executeMoveFromDirection(getDirection(context, "direction"), getInteger(context, "offset"), getKeywordArgs(context, "keyword_args"), context))))
                 .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "offset"), getKeywordArgs(context, "keyword_args"), context))))
+                    .executes(context -> executeMoveFromDirection(DirectionProvider.FRONT.apply(context.getSource()), getInteger(context, "offset"), getKeywordArgs(context, "keyword_args"), context))))
             .then(literal("vector")
                 .then(argument("x", integer())
                     .then(argument("y", integer())
@@ -60,13 +60,13 @@ public enum MoveCommand implements CommandRegistrationCallback {
                             .executes(context -> executeMoveFromVectorArgs(keywordArgs.defaultArgs(), context))
                             .then(argument("keyword_args", keywordArgs)
                                 .executes(context -> executeMoveFromVectorArgs(getKeywordArgs(context, "keyword_args"), context)))))))
-            .then(argument("direction", DirectionArgumentType.direction())
+            .then(argument("direction", DirectionArgument.direction())
                 .executes(context -> executeMove(Either.left(ObjectIntPair.of(getDirection(context, "direction"), 1)), keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)
                     .executes(context -> executeMove(Either.left(ObjectIntPair.of(getDirection(context, "direction"), 1)), getKeywordArgs(context, "keyword_args"), context))))
             .then(argument("keyword_args", keywordArgs)
-                .executes(context -> executeMoveFromDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, getKeywordArgs(context, "keyword_args"), context)))
-            .executes(context -> executeMove(Either.left(ObjectIntPair.of(DirectionArgument.FRONT.apply(context.getSource()), 1)), keywordArgs.defaultArgs(), context))
+                .executes(context -> executeMoveFromDirection(DirectionProvider.FRONT.apply(context.getSource()), 1, getKeywordArgs(context, "keyword_args"), context)))
+            .executes(context -> executeMove(Either.left(ObjectIntPair.of(DirectionProvider.FRONT.apply(context.getSource()), 1)), keywordArgs.defaultArgs(), context))
     );
   }
 
@@ -129,6 +129,6 @@ public enum MoveCommand implements CommandRegistrationCallback {
       }
     };
 
-    return blockTransformationCommand.execute(RegionArgumentType.getRegion(context, "region"), keywordArgs, context);
+    return blockTransformationCommand.execute(RegionArgument.getRegion(context, "region"), keywordArgs, context);
   }
 }

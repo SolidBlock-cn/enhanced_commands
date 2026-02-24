@@ -19,7 +19,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.AnyTypeArgumentType;
+import pers.solid.ecmd.argument.AnyTypeArgument;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigEntry;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
@@ -175,7 +175,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
 
   private static <C, T> int setValueForEntry(CommandContext<CommandSourceStack> context, ConfigEntry<C, T> entry) throws CommandSyntaxException {
     final String input = context.getInput();
-    final AnyTypeArgumentType.Pair value = AnyTypeArgumentType.getPair(context, "value");
+    final AnyTypeArgument.Pair value = AnyTypeArgument.getPair(context, "value");
     final StringRange range = ((CommandContextAccessor<?>) context).getArguments().get("value").getRange();
     final StringReader stringReader = new StringReader(input);
     stringReader.setCursor(range.getStart());
@@ -273,7 +273,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
                   }
                 })
                 .executes(EnhancedCommandsConfigCommand::executeGetEntry)
-                .then(argument("value", new AnyTypeArgumentType(commandRegistryAccess))
+                .then(argument("value", new AnyTypeArgument(commandRegistryAccess))
                     .suggests((commandContext, suggestionsBuilder) -> {
                       final ConfigCategory<?> configCategory = getCategoryFromContext(commandContext);
                       if (configCategory == null) {

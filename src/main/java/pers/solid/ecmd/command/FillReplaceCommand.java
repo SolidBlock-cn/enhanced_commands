@@ -29,12 +29,11 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.config.BlockOperationConfig;
-import pers.solid.ecmd.extensions.HistoryHolder;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.predicate.block.AllBlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
@@ -42,11 +41,12 @@ import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.List;
 
 import static net.minecraft.commands.Commands.argument;
-import static pers.solid.ecmd.argument.RegionArgumentType.region;
+import static pers.solid.ecmd.argument.RegionArgument.region;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum FillReplaceCommand implements CommandRegistrationCallback {
@@ -61,11 +61,11 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     LiteralArgumentBuilder<CommandSourceStack> directBuilder = literalR2("setblocks");
     LiteralArgumentBuilder<CommandSourceStack> indirectBuilder = literalR2("/setblocks");
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext).build();
-    final LiteralCommandNode<CommandSourceStack> setBlocksNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(commandBuildContext)).then(argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
+    final KeywordArgsArgument keywordArgs = KeywordArgsArgument.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext).build();
+    final LiteralCommandNode<CommandSourceStack> setBlocksNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(commandBuildContext)).then(argument("block", BlockFunctionArgument.blockFunction(commandBuildContext))
         .executes(context -> execute(context, null))
         .then(argument("keyword_args", keywordArgs)
-            .executes(context -> execute(context, null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build()).build());
+            .executes(context -> execute(context, null, KeywordArgsArgument.getKeywordArgs(context, "keyword_args")))).build()).build());
 
     dispatcher.register(literalR2("/s").forward(setBlocksNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
     dispatcher.register(literalR2("s").redirect(setBlocksNode));
@@ -74,16 +74,16 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
         literalR2("replace"),
         literalR2("/replace"),
         argument("region", region(commandBuildContext))
-            .then(argument("predicate", BlockPredicateArgumentType.blockPredicate(commandBuildContext))
-                .then(argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
+            .then(argument("predicate", BlockPredicateArgument.blockPredicate(commandBuildContext))
+                .then(argument("block", BlockFunctionArgument.blockFunction(commandBuildContext))
                     .executes(context -> {
-                      final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "predicate");
+                      final BlockPredicate blockPredicate = BlockPredicateArgument.getBlockPredicate(context, "predicate");
                       return execute(context, blockPredicate);
                     })
                     .then(argument("keyword_args", keywordArgs)
                         .executes(context -> {
-                          final BlockPredicate blockPredicate = BlockPredicateArgumentType.getBlockPredicate(context, "predicate");
-                          return execute(context, blockPredicate, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"));
+                          final BlockPredicate blockPredicate = BlockPredicateArgument.getBlockPredicate(context, "predicate");
+                          return execute(context, blockPredicate, KeywordArgsArgument.getKeywordArgs(context, "keyword_args"));
                         })))));
   }
 
@@ -91,7 +91,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
    * Execute the command with the default parameters.
    */
   private static int execute(CommandContext<CommandSourceStack> context, @Nullable BlockPredicate predicate) throws CommandSyntaxException {
-    return setBlocksWithDefaultKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate);
+    return setBlocksWithDefaultKeywordArgs(RegionArgument.getRegion(context, "region"), BlockFunctionArgument.getBlockFunction(context, "block"), context.getSource(), predicate);
   }
 
   /**
@@ -101,7 +101,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     if (kwArgs.supportsArg("affect_only") && kwArgs.getArg("affect_only") instanceof BlockPredicate blockPredicate) {
       predicate = predicate == null ? blockPredicate : new AllBlockPredicate(List.of(blockPredicate, predicate));
     }
-    return setBlocksFromKeywordArgs(RegionArgumentType.getRegion(context, "region"), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), predicate, kwArgs);
+    return setBlocksFromKeywordArgs(RegionArgument.getRegion(context, "region"), BlockFunctionArgument.getBlockFunction(context, "block"), context.getSource(), predicate, kwArgs);
   }
 
   public static final SimpleCommandExceptionType UNLOADED_POS = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.setblocks.rejected", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
@@ -198,7 +198,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallback {
     }
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
-      final IteratorTask<Void> task = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
+      final IteratorTask<Void> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
           IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1),
           IterateUtils.batchAndSkip(setBlocks, 32768, 15),
           finalClaim

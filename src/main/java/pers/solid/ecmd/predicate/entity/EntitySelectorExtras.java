@@ -31,14 +31,14 @@ public class EntitySelectorExtras {
   public CommandSourceStack source;
 
   /**
-   * 以可序列化的形式记录 {@link EntitySelector#positionOffset}，因为该字段类型为 {@link Function}，无法序列化其数据，因此需要在 {@link EntitySelectorParser#getSelector()} 中手动存储其序列化数据。
+   * 以可序列化的形式记录 {@link EntitySelector#position}，因为该字段类型为 {@link Function}，无法序列化其数据，因此需要在 {@link EntitySelectorParser#getSelector()} 中手动存储其序列化数据。
    *
    * @see EntitySelectorParserMixin#recordMoreInfoAtBuild(EntitySelector)
    */
   public @NotNull PositionOffsetInfo positionOffsetInfo = PositionOffsetInfo.NO_OP;
 
   /**
-   * 以可序列化的形式记录 {@link EntitySelectorParser#dx}、{@link EntitySelectorParser#dy}、{@link EntitySelectorParser#dz}，因为这些数据并不会存储在 {@link EntitySelector} 中。
+   * 以可序列化的形式记录 {@link EntitySelectorParser#deltaX}、{@link EntitySelectorParser#deltaY}、{@link EntitySelectorParser#deltaZ}，因为这些数据并不会存储在 {@link EntitySelector} 中。
    */
   public @Nullable Vec3 dxDyDz = null;
 

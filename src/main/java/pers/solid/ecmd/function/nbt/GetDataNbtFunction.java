@@ -9,8 +9,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.NbtSourceArgumentType;
-import pers.solid.ecmd.argument.SimpleEnumArgumentType;
+import pers.solid.ecmd.argument.NbtSourceArgument;
+import pers.solid.ecmd.argument.SimpleEnumArgument;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -68,9 +68,9 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
-        case 0 -> nbtSource = parseContext.parseAndSuggestArgument(NbtSourceArgumentType.nbtSource(parseContext.commandBuildContext()));
+        case 0 -> nbtSource = parseContext.parseAndSuggestArgument(NbtSourceArgument.nbtSource(parseContext.commandBuildContext()));
         case 1 -> nbtPath = parseContext.parseAndSuggestArgument(NbtPathArgument.nbtPath());
-        case 2 -> nbtConcentrationType = parseContext.parseAndSuggestArgument(SimpleEnumArgumentType.nbtConcentrationType());
+        case 2 -> nbtConcentrationType = parseContext.parseAndSuggestArgument(SimpleEnumArgument.nbtConcentrationType());
       }
     }
 

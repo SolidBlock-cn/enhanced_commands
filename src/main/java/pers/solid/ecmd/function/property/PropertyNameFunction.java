@@ -60,7 +60,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return name;
     }
   }

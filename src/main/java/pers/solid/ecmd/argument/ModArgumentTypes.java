@@ -12,39 +12,39 @@ import pers.solid.ecmd.EnhancedCommands;
  */
 public class ModArgumentTypes {
   public static void init() {
-    register("angle", AngleArgumentType.class, AngleArgumentType.Serializer.INSTANCE);
-    register("any", AnyTypeArgumentType.class, SingletonArgumentInfo.contextAware(AnyTypeArgumentType::new));
-    register("block_predicate", BlockPredicateArgumentType.class, SingletonArgumentInfo.contextAware(BlockPredicateArgumentType::new));
-    register("block_function", BlockFunctionArgumentType.class, SingletonArgumentInfo.contextAware(BlockFunctionArgumentType::new));
-    register("curve", CurveArgumentType.class, SingletonArgumentInfo.contextAware(CurveArgumentType::new));
-    register("direction", DirectionArgumentType.class, SingletonArgumentInfo.contextFree(DirectionArgumentType::direction));
-    register("entity_predicate", EntityPredicateArgumentType.class, SingletonArgumentInfo.contextAware(EntityPredicateArgumentType::new));
-    register("nbt_function", NbtFunctionArgumentType.class, NbtFunctionArgumentType.Serializer.INSTANCE);
-    register("nbt_predicate", NbtPredicateArgumentType.class, NbtPredicateArgumentType.Serializer.INSTANCE);
-    register("nbt_source", NbtSourceArgumentType.class, SingletonArgumentInfo.contextAware(NbtSourceArgumentType::new));
-    register("nbt_target", NbtTargetArgumentType.class, SingletonArgumentInfo.contextAware(NbtTargetArgumentType::new));
-    register("keyword_args", KeywordArgsArgumentType.class, KeywordArgsArgumentSerializer.INSTANCE);
-    registerTrustingType("omitted_registry_entry", OmittedRegistryEntryArgumentType.class, OmittedRegistryEntryArgumentType.Serializer.INSTANCE);
-    register("pos", EnhancedPosArgumentType.class, EnhancedPosArgumentType.Serializer.INSTANCE);
-    register("regex", RegexArgumentType.class, SingletonArgumentInfo.contextFree(Suppliers.ofInstance(RegexArgumentType.REGEX)));
-    register("region", RegionArgumentType.class, SingletonArgumentInfo.contextAware(RegionArgumentType::new));
-    register("rotation", EnhancedRotationArgumentType.class, SingletonArgumentInfo.contextFree(Suppliers.ofInstance(EnhancedRotationArgumentType.INSTANCE)));
-    register("simple_enum", SimpleEnumArgumentType.class, SimpleEnumArgumentType.Serializer.INSTANCE);
-    register("string_enum", StringEnumArgumentType.class, StringEnumArgumentType.Serializer.INSTANCE);
-    register("unloaded_pos_behavior", UnloadedPosBehaviorArgumentType.class, SingletonArgumentInfo.contextFree(UnloadedPosBehaviorArgumentType::new));
-    registerTrustingType("vanilla_wrapped", VanillaWrappedArgumentType.class, VanillaWrappedArgumentType.Serializer.INSTANCE);
+    register("angle", AngleArgument.class, AngleArgument.Info.INSTANCE);
+    register("any", AnyTypeArgument.class, SingletonArgumentInfo.contextAware(AnyTypeArgument::new));
+    register("block_predicate", BlockPredicateArgument.class, SingletonArgumentInfo.contextAware(BlockPredicateArgument::new));
+    register("block_function", BlockFunctionArgument.class, SingletonArgumentInfo.contextAware(BlockFunctionArgument::new));
+    register("curve", CurveArgument.class, SingletonArgumentInfo.contextAware(CurveArgument::new));
+    register("direction", DirectionArgument.class, SingletonArgumentInfo.contextFree(DirectionArgument::direction));
+    register("entity_predicate", EntityPredicateArgument.class, SingletonArgumentInfo.contextAware(EntityPredicateArgument::new));
+    register("nbt_function", NbtFunctionArgument.class, NbtFunctionArgument.Info.INSTANCE);
+    register("nbt_predicate", NbtPredicateArgument.class, NbtPredicateArgument.Info.INSTANCE);
+    register("nbt_source", NbtSourceArgument.class, SingletonArgumentInfo.contextAware(NbtSourceArgument::new));
+    register("nbt_target", NbtTargetArgument.class, SingletonArgumentInfo.contextAware(NbtTargetArgument::new));
+    register("keyword_args", KeywordArgsArgument.class, KeywordArgsArgumentTypeInfo.INSTANCE);
+    registerTrustingType("omitted_registry_entry", OmittedRegistryEntryArgument.class, OmittedRegistryEntryArgument.Info.INSTANCE);
+    register("pos", EnhancedPosArgument.class, EnhancedPosArgument.Info.INSTANCE);
+    register("regex", RegexArgument.class, SingletonArgumentInfo.contextFree(Suppliers.ofInstance(RegexArgument.REGEX)));
+    register("region", RegionArgument.class, SingletonArgumentInfo.contextAware(RegionArgument::new));
+    register("rotation", EnhancedRotationArgument.class, SingletonArgumentInfo.contextFree(Suppliers.ofInstance(EnhancedRotationArgument.INSTANCE)));
+    registerTrustingType("simple_enum", SimpleEnumArgument.class, SimpleEnumArgument.Info.INSTANCE);
+    register("string_enum", StringEnumArgument.class, StringEnumArgument.Info.INSTANCE);
+    register("unloaded_pos_behavior", UnloadedPosBehaviorArgument.class, SingletonArgumentInfo.contextFree(UnloadedPosBehaviorArgument::new));
+    registerTrustingType("vanilla_wrapped", VanillaWrappedArgument.class, VanillaWrappedArgument.Info.INSTANCE);
   }
 
   private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void register(
-      String name, Class<? extends A> clazz, ArgumentTypeInfo<A, T> serializer) {
-    ArgumentTypeRegistry.registerArgumentType(EnhancedCommands.id(name), clazz, serializer);
+      String name, Class<? extends A> clazz, ArgumentTypeInfo<A, T> info) {
+    ArgumentTypeRegistry.registerArgumentType(EnhancedCommands.id(name), clazz, info);
   }
 
 
   @SuppressWarnings("unchecked")
   private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void registerTrustingType(
       // 此方法用于需要使用特殊泛型的方法，和 register 类似，但是为了在特殊情况下编译通过。
-      String name, Class<?> clazz, ArgumentTypeInfo<A, T> serializer) {
-    ArgumentTypeRegistry.registerArgumentType(EnhancedCommands.id(name), (Class<? extends A>) clazz, serializer);
+      String name, Class<?> clazz, ArgumentTypeInfo<A, T> info) {
+    ArgumentTypeRegistry.registerArgumentType(EnhancedCommands.id(name), (Class<? extends A>) clazz, info);
   }
 }

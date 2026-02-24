@@ -9,7 +9,7 @@ import pers.solid.ecmd.config.DebugConfig;
 @Mixin(GenerationChunkHolder.class)
 public abstract class GenerationChunkHolderMixin {
   @ModifyExpressionValue(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/ChunkPos;getChessboardDistance(Lnet/minecraft/world/level/ChunkPos;)I"))
-  private int ignoreChebyshevDistance(int original) {
+  private int ignoreChessboardDistance(int original) {
     if (DebugConfig.current.ignoreBoundary) {
       return 0;
     }

@@ -1,16 +1,17 @@
 package pers.solid.ecmd.util.enums;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.SkyRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.LevelTimeAccess;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 /**
- * 月相，对应当前月亮的显示方式，与 {@link LevelRenderer#MOON_PHASES} 以及 {@link LevelTimeAccess#getMoonPhase()} 的返回值对应。
+ * 月相，对应当前月亮的显示方式，与 {@link SkyRenderer#MOON_LOCATION} 以及 {@link LevelTimeAccess#getMoonPhase()} 的返回值对应。
  */
 public enum MoonPhase implements StringRepresentable {
   FULL_MOON("full_moon"),
@@ -40,7 +41,7 @@ public enum MoonPhase implements StringRepresentable {
   }
 
   @Override
-  public String getSerializedName() {
+  public @NotNull String getSerializedName() {
     return name;
   }
 }

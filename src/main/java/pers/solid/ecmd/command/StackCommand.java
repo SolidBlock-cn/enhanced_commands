@@ -42,10 +42,9 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.exception.CommandRuntimeException;
-import pers.solid.ecmd.extensions.HistoryHolder;
-import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.history.BlockPlacementHistory;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionselection.RegionSelection;
@@ -55,6 +54,7 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.Collections;
@@ -66,9 +66,9 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.argument.DirectionArgumentType.direction;
-import static pers.solid.ecmd.argument.DirectionArgumentType.getDirection;
-import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
+import static pers.solid.ecmd.argument.DirectionArgument.direction;
+import static pers.solid.ecmd.argument.DirectionArgument.getDirection;
+import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum StackCommand implements CommandRegistrationCallback {
@@ -79,15 +79,15 @@ public enum StackCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgsForVector = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext)
+    final KeywordArgsArgument keywordArgsForVector = KeywordArgsArgument.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext)
         // 是否一并对实体进行堆叠
         .addOptionalArg("affect_entities", EntityArgument.entities(), null)
         // 是否将活动区域设置为堆叠后的区域
         .addOptionalArg("select", BoolArgumentType.bool(), false)
         // 只堆叠符合指定的谓词的方块
-        .addOptionalArg("transform_only", BlockPredicateArgumentType.blockPredicate(commandBuildContext), null)
+        .addOptionalArg("transform_only", BlockPredicateArgument.blockPredicate(commandBuildContext), null)
         .build();
-    final KeywordArgsArgumentType keywordArgsForDirections = KeywordArgsArgumentType.builder().addAll(keywordArgsForVector)
+    final KeywordArgsArgument keywordArgsForDirections = KeywordArgsArgument.builder().addAll(keywordArgsForVector)
         // 表示不通过检测区域的边界大小来推断偏移值。
         .addOptionalArg("absolute", BoolArgumentType.bool(), false)
         // 每次向该方向堆叠之前的间隔。默认为 0，可以是负数。
@@ -98,18 +98,18 @@ public enum StackCommand implements CommandRegistrationCallback {
         dispatcher,
         literalR2("stack"),
         literalR2("/stack"),
-        argument("region", RegionArgumentType.region(commandBuildContext))
+        argument("region", RegionArgument.region(commandBuildContext))
             .then(argument("direction", direction())
                 .executes(context -> executeStackInDirection(getDirection(context, "direction"), 1, keywordArgsForDirections.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgsForDirections)
                     .executes(context -> executeStackInDirection(getDirection(context, "direction"), 1, getKeywordArgs(context, "keyword_args"), context))))
             .then(argument("keyword_args", keywordArgsForDirections)
-                .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, getKeywordArgs(context, "keyword_args"), context)))
+                .executes(context -> executeStackInDirection(DirectionProvider.FRONT.apply(context.getSource()), 1, getKeywordArgs(context, "keyword_args"), context)))
             .then(argument("amount", integer())
-                .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "amount"), keywordArgsForDirections.defaultArgs(), context))
+                .executes(context -> executeStackInDirection(DirectionProvider.FRONT.apply(context.getSource()), getInteger(context, "amount"), keywordArgsForDirections.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgsForDirections)
-                    .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context)))
-                .then(argument("direction", DirectionArgumentType.direction())
+                    .executes(context -> executeStackInDirection(DirectionProvider.FRONT.apply(context.getSource()), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context)))
+                .then(argument("direction", DirectionArgument.direction())
                     .executes(context -> executeStackInDirection(getDirection(context, "direction"), getInteger(context, "amount"), keywordArgsForDirections.defaultArgs(), context))
                     .then(argument("keyword_args", keywordArgsForDirections)
                         .executes(context -> executeStackInDirection(getDirection(context, "direction"), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context))))
@@ -120,12 +120,12 @@ public enum StackCommand implements CommandRegistrationCallback {
                                 .executes(context -> executeStack(new Vec3i(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z")), getInteger(context, "amount"), keywordArgsForVector.defaultArgs(), context))
                                 .then(argument("keyword_args", keywordArgsForVector)
                                     .executes(context -> executeStack(new Vec3i(getInteger(context, "x"), getInteger(context, "y"), getInteger(context, "z")), getInteger(context, "amount"), getKeywordArgs(context, "keyword_args"), context))))))))
-            .executes(context -> executeStackInDirection(DirectionArgument.FRONT.apply(context.getSource()), 1, keywordArgsForDirections.defaultArgs(), context))
+            .executes(context -> executeStackInDirection(DirectionProvider.FRONT.apply(context.getSource()), 1, keywordArgsForDirections.defaultArgs(), context))
     );
   }
 
   public static int executeStackInDirection(Direction direction, int stackAmount, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    return executeStackInDirection(RegionArgumentType.getRegion(context, "region"), direction, stackAmount, keywordArgs, context);
+    return executeStackInDirection(RegionArgument.getRegion(context, "region"), direction, stackAmount, keywordArgs, context);
   }
 
   public static final SimpleCommandExceptionType UNSUPPORTED_BOX = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.unsupported_box"));
@@ -145,7 +145,7 @@ public enum StackCommand implements CommandRegistrationCallback {
   }
 
   public static int executeStack(Vec3i relativeVec, int stackAmount, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    return executeStack(RegionArgumentType.getRegion(context, "region"), relativeVec, stackAmount, keywordArgs, context);
+    return executeStack(RegionArgument.getRegion(context, "region"), relativeVec, stackAmount, keywordArgs, context);
   }
 
   public static int executeStack(Region region, Vec3i relativeVec, int stackAmount, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -368,7 +368,7 @@ public enum StackCommand implements CommandRegistrationCallback {
     }
     if (useTasks) {
       // The region is too large. Send a server task.
-      final IteratorTask<?> task = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
+      final IteratorTask<?> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
           IterateUtils.batchAndSkip(collectSourceBlocks, 16384, 3),
           IterateUtils.batchAndSkip(collectSourceEntities, 16384, 3),
           executeStack,

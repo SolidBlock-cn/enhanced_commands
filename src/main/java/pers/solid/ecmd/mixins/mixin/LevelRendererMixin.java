@@ -18,7 +18,7 @@ public abstract class LevelRendererMixin {
    * @see DebugConfig#noDarkSky
    */
   @Inject(method = "shouldRenderDarkDisc", at = @At("HEAD"), cancellable = true)
-  private void neverSkyDark(float tickDelta, CallbackInfoReturnable<Boolean> cir) {
+  private void neverRenderDarkDisc(float tickDelta, CallbackInfoReturnable<Boolean> cir) {
     if (DebugConfig.current.noDarkSky) {
       cir.cancel();
     }

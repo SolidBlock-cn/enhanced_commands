@@ -1,61 +1,63 @@
 package pers.solid.ecmd.argument;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.coordinates.Coordinates;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.PositionProvider;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 
-public record EnhancedRotationArgument(float x, float y, boolean xRelative, boolean yRelative) implements Coordinates, ExpressionConvertible {
-  public static final Codec<EnhancedRotationArgument> CODEC = RecordCodecBuilder.create(i -> i.group(
-      Codec.FLOAT.fieldOf("x").forGetter(EnhancedRotationArgument::x),
-      Codec.FLOAT.fieldOf("y").forGetter(EnhancedRotationArgument::y),
-      Codec.BOOL.optionalFieldOf("x_relative", false).forGetter(EnhancedRotationArgument::xRelative),
-      Codec.BOOL.optionalFieldOf("y_relative", false).forGetter(EnhancedRotationArgument::yRelative)
-  ).apply(i, EnhancedRotationArgument::new));
+import java.util.Arrays;
+import java.util.Collection;
 
-  public Vec2 toAbsoluteRotation(PositionProvider positionProvider) {
-    final Vec2 rotation$ec = positionProvider.getRotation$ec();
-    return new Vec2(xRelative ? rotation$ec.x + x : x, yRelative ? rotation$ec.y : y);
+import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
+
+public enum EnhancedRotationArgument implements ArgumentType<RotationProvider> {
+  INSTANCE;
+  private static final Collection<String> EXAMPLES = Arrays.asList("0 0", "~~", "~-5~5");
+
+  @Override
+  public RotationProvider parse(StringReader reader) throws CommandSyntaxException {
+    if (!reader.canRead()) {
+      throw RotationArgument.ERROR_NOT_COMPLETE.createWithContext(reader);
+    } else {
+
+      float[] values = new float[2];
+      boolean[] isRelatives = new boolean[2];
+      Arrays.fill(isRelatives, false);
+
+      for (int i = 0; i < 2; i++) {
+        if (!reader.canRead()) {
+          throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
+        }
+
+        boolean hasTilde = false;
+        if (reader.peek() == '~') {
+          isRelatives[i] = true;
+          hasTilde = true;
+          reader.skip();
+        } else if (reader.peek() == '^') {
+          throw withCursorEnd(Vec3Argument.ERROR_MIXED_TYPE.createWithContext(reader), reader.getCursor() + 1);
+        }
+
+        float num;
+        if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
+          num = reader.readFloat();
+        } else {
+          num = 0;
+        }
+        values[i] = num;
+
+        if (i < 1) {
+          reader.skipWhitespace();
+        }
+      }
+
+      return new RotationProvider(values[1], values[0], isRelatives[0], isRelatives[1]);
+    }
   }
 
   @Override
-  public Vec3 getPosition(CommandSourceStack source) {
-    return source.getPosition();
-  }
-
-  @Override
-  public Vec2 getRotation(CommandSourceStack source) {
-    return this.toAbsoluteRotation(source);
-  }
-
-  @Override
-  public boolean isXRelative() {
-    return xRelative;
-  }
-
-  @Override
-  public boolean isYRelative() {
-    return yRelative;
-  }
-
-  @Override
-  public boolean isZRelative() {
-    return true;
-  }
-
-  @Override
-  public @NotNull String asString() {
-    final StringBuilder sb = new StringBuilder();
-    if (xRelative) sb.append('~');
-    if (!xRelative || x != 0) sb.append(x);
-    sb.append(' ');
-    if (yRelative) sb.append('~');
-    if (!yRelative || y != 0) sb.append(y);
-    return sb.toString();
+  public Collection<String> getExamples() {
+    return EXAMPLES;
   }
 }

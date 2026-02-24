@@ -19,8 +19,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.extensions.IteratorTask;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.UUID;

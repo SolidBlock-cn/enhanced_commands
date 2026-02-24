@@ -13,7 +13,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import pers.solid.ecmd.argument.SimpleEnumArgumentType;
+import pers.solid.ecmd.argument.SimpleEnumArgument;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.enums.CommandEnumType;
@@ -32,7 +32,7 @@ public enum MoonCommand implements CommandRegistrationCallback {
         .then(literal("get")
             .executes(MoonCommand::executeGetPhase))
         .then(literal("set")
-            .then(argument("moon_phase", SimpleEnumArgumentType.simpleEnum(CommandEnumType.MOON_PHASE))
+            .then(argument("moon_phase", SimpleEnumArgument.simpleEnum(CommandEnumType.MOON_PHASE))
                 .executes(MoonCommand::executeSetPhase)))
         .then(literal("rotate")
             .executes(context -> executeRotatePhase(context, 1))
@@ -77,7 +77,7 @@ public enum MoonCommand implements CommandRegistrationCallback {
   private static <X extends ArgumentBuilder<CommandSourceStack, X>> X addConditionArguments(CommandNode<CommandSourceStack> root, X argumentBuilder, boolean positive, CommandBuildContext commandRegistryAccess) {
     return argumentBuilder
         .then(literal("phase")
-            .then(ModCommands.addConditionLogic(root, argument("moon_phase", SimpleEnumArgumentType.simpleEnum(CommandEnumType.MOON_PHASE)), positive, context -> context.getSource().getLevel().getMoonPhase() == context.getArgument("moon_phase", MoonPhase.class).ordinal())))
+            .then(ModCommands.addConditionLogic(root, argument("moon_phase", SimpleEnumArgument.simpleEnum(CommandEnumType.MOON_PHASE)), positive, context -> context.getSource().getLevel().getMoonPhase() == context.getArgument("moon_phase", MoonPhase.class).ordinal())))
         .then(literal("size")
             .then(ModCommands.addConditionLogic(root, argument("size", RangeArgument.floatRange()), positive, context -> RangeArgument.Floats.getRange(context, "size").matches(context.getSource().getLevel().getMoonBrightness()))));
   }

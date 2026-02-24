@@ -64,7 +64,7 @@ public final class MixinShared {
   /**
    * 如果此值为 {@code true}，那么会抑制 {@link net.minecraft.world.level.chunk.LevelChunk#setBlockState(BlockPos, BlockState, boolean)} 对 {@link BlockState#onPlace(Level, BlockPos, BlockState, boolean)} 的调用。通常来说，这是一个临时的设置，在调用前修改此值，调用后立即复原，以免对其他模组产生影响。
    *
-   * @see LevelChunkMixin#wrappedOnBlockAdded(BlockState, Level, BlockPos, BlockState, boolean)
+   * @see LevelChunkMixin#wrappedOnPlace(BlockState, Level, BlockPos, BlockState, boolean)
    */
   public static boolean suppressOnBlockAdded = false;
 

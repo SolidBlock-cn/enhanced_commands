@@ -123,7 +123,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return name;
     }
 

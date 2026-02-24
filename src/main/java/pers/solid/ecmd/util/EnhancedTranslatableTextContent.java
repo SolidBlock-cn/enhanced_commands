@@ -203,7 +203,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
   }
 
   @Override
-  public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> visitor, Style style) {
+  public <T> @NotNull Optional<T> visit(FormattedText.StyledContentConsumer<T> visitor, Style style) {
     this.decompose();
 
     for (FormattedText stringVisitable : this.translations) {
@@ -217,7 +217,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
   }
 
   @Override
-  public <T> Optional<T> visit(FormattedText.ContentConsumer<T> visitor) {
+  public <T> @NotNull Optional<T> visit(FormattedText.ContentConsumer<T> visitor) {
     this.decompose();
 
     for (FormattedText stringVisitable : this.translations) {
@@ -231,7 +231,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
   }
 
   @Override
-  public MutableComponent resolve(@Nullable CommandSourceStack source, @Nullable Entity sender, int depth) throws CommandSyntaxException {
+  public @NotNull MutableComponent resolve(@Nullable CommandSourceStack source, @Nullable Entity sender, int depth) throws CommandSyntaxException {
     final Object[] args = getArgs();
     final Object[] parsedObjects = new Object[args.length];
 
@@ -247,7 +247,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
     return MutableComponent.create(new EnhancedTranslatableTextContent(getKey(), getFallback(), parsedObjects));
   }
 
-  public String toString() {
+  public @NotNull String toString() {
     return "enhanced_translation{key='"
         + this.getKey()
         + "'"

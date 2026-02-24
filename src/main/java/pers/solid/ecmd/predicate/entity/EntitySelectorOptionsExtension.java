@@ -46,15 +46,15 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
@@ -256,9 +256,9 @@ public class EntitySelectorOptionsExtension {
       final ParseContext<Object> parseContext = new ParseContext<>(commandBuildContext, reader.getReader(), false, true);
       @SuppressWarnings("unchecked") final CommandContext<Object> context = (CommandContext<Object>) reader.extension$ec().context;
       reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions(context, suggestionsBuilder));
-      final RegionArgument<?> regionArgument = RegionArgument.parse(parseContext);
+      final RegionProvider<?> regionProvider = RegionProvider.parse(parseContext);
 
-      reader.addPredicate$ec(new RegionEntityPredicateEntry(regionArgument));
+      reader.addPredicate$ec(new RegionEntityPredicateEntry(regionProvider));
     }, Predicates.alwaysTrue(), Component.translatable("enhanced_commands.entity_predicate.region.option_name"));
 
     putOption("alternatives", reader -> {
@@ -440,7 +440,7 @@ public class EntitySelectorOptionsExtension {
       if (stringReader.canRead() && stringReader.peek() == '{') {
         stringReader.skip();
         stringReader.skipWhitespace();
-        final List<com.mojang.datafixers.util.Pair<EnhancedPosArgument, BlockPredicate>> list = new ArrayList<>();
+        final List<com.mojang.datafixers.util.Pair<EnhancedCoordinates, BlockPredicate>> list = new ArrayList<>();
         while (true) {
           if (stringReader.canRead() && stringReader.peek() == '}') {
             stringReader.skip();
@@ -448,7 +448,7 @@ public class EntitySelectorOptionsExtension {
           }
           parseContext.clearSuggestion();
           reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> parseContext.buildSuggestions(context, suggestionsBuilder));
-          final EnhancedPosArgument posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgumentType.blockPos());
+          final EnhancedCoordinates posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgument.blockPos());
 
           stringReader.skipWhitespace();
           if (stringReader.canRead() && stringReader.peek() == '=') {

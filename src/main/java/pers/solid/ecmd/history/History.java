@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.extensions.IteratorTask;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 public interface History {
   @Contract(pure = true)

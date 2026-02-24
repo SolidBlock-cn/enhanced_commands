@@ -81,7 +81,7 @@ public enum EntitySelectorCollector implements StringRepresentable {
   }
 
   @Override
-  public String getSerializedName() {
+  public @NotNull String getSerializedName() {
     return name;
   }
 

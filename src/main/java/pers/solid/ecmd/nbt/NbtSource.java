@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -144,7 +145,7 @@ public interface NbtSource<T> extends ExpressionConvertible {
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return name;
     }
   }

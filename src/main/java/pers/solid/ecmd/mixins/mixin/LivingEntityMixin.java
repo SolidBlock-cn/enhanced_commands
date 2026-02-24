@@ -17,7 +17,7 @@ public abstract class LivingEntityMixin {
    * @see DebugConfig#immuneToVoid
    */
   @Inject(method = "onBelowWorld", at = @At("HEAD"), cancellable = true)
-  private void ignoreVoidTick(CallbackInfo ci) {
+  private void ignoreBelowWorld(CallbackInfo ci) {
     final int immuneToVoid = DebugConfig.current.immuneToVoid;
     switch (immuneToVoid) {
       case 1 -> {

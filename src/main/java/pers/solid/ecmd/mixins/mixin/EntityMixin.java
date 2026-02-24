@@ -27,7 +27,7 @@ public abstract class EntityMixin {
   }
 
   @Inject(method = "onBelowWorld", at = @At("HEAD"), cancellable = true)
-  private void ignoreVoidTick(CallbackInfo ci) {
+  private void ignoreBelowWorld(CallbackInfo ci) {
     if (DebugConfig.current.immuneToVoid == 4) {
       ci.cancel();
     }

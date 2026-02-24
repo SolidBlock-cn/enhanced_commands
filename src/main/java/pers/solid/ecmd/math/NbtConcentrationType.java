@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Iterator;
@@ -197,7 +198,7 @@ public enum NbtConcentrationType implements StringRepresentable {
   }
 
   @Override
-  public String getSerializedName() {
+  public @NotNull String getSerializedName() {
     return name;
   }
 

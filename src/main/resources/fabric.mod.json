@@ -33,16 +33,16 @@
   "depends": {
     "fabricloader": "*",
     "fabric-api": "*",
-    "minecraft": "~1.21.1"
+    "minecraft": "1.21.4"
   },
 
   "custom": {
     "loom:injected_interfaces": {
       "net/minecraft/class_5250": [
-        "pers/solid/ecmd/mixins/ext/MutableTextExtension"
+        "pers/solid/ecmd/mixins/ext/MutableComponentExtension"
       ],
       "net/minecraft/class_2168": [
-        "pers/solid/ecmd/mixins/ext/ServerCommandSourceExtension"
+        "pers/solid/ecmd/mixins/ext/CommandSourceStackExtension"
       ],
       "com/mojang/brigadier/exceptions/CommandSyntaxException": [
         "pers/solid/ecmd/mixins/ext/CommandSyntaxExceptionExtension"
@@ -51,13 +51,13 @@
         "pers/solid/ecmd/mixins/ext/EntitySelectorExtension"
       ],
       "net/minecraft/class_2303": [
-        "pers/solid/ecmd/mixins/ext/EntitySelectorReaderExtension"
+        "pers/solid/ecmd/mixins/ext/EntitySelectorParserExtension"
       ],
       "net/minecraft/class_1657": [
-        "pers/solid/ecmd/mixins/ext/PlayerEntityExtension"
+        "pers/solid/ecmd/mixins/ext/PlayerExtension"
       ],
       "net/minecraft/class_3222": [
-        "pers/solid/ecmd/mixins/ext/ServerPlayerEntityExtension"
+        "pers/solid/ecmd/mixins/ext/ServerPlayerExtension"
       ]
     }
   }

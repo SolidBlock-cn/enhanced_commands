@@ -19,6 +19,5 @@ public final class ModTrackedData {
 
   public static void init() {
     EntityDataSerializers.registerSerializer(REGION_SELECTION);
-    ;
   }
 }

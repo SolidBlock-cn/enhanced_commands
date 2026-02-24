@@ -23,11 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.config.BlockOperationConfig;
-import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.function.block.SimpleBlockFunction;
 import pers.solid.ecmd.history.BlockTransformationHistory;
+import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -180,7 +180,7 @@ public class BlockTransformationTask {
   public Iterable<@Nullable BlockPos> modifyIterableForUnloadedPos(Iterable<@Nullable BlockPos> iterable) {
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
       return new BatchedFilterIterable<>(iterable, 16, blockPos -> {
-        final boolean chunkLoaded = blockPos != null && world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = blockPos != null && world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloadedPos = true;
         }
@@ -188,7 +188,7 @@ public class BlockTransformationTask {
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       return Iterables.transform(iterable, blockPos -> {
-        final boolean chunkLoaded = blockPos != null && world.hasChunkAt(blockPos);
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = blockPos != null && world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloadedPos = true;
           throw new UnloadedPosException(blockPos);

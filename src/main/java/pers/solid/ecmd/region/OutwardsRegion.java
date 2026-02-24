@@ -12,8 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.GeoUtil;
@@ -82,7 +82,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<OutwardsRegionArgument> parser() {
+    public FunctionLikeParser.SequentialParams<OutwardsRegionProvider> parser() {
       return new Parser();
     }
 
@@ -92,27 +92,27 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionArgument<OutwardsRegion>> getArgumentCodec() {
-      return OutwardsRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends RegionProvider<OutwardsRegion>> getArgumentCodec() {
+      return OutwardsRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<OutwardsRegionArgument> {
-    private EnhancedPosArgument center = EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER;
+  public static final class Parser implements FunctionLikeParser.SequentialParams<OutwardsRegionProvider> {
+    private EnhancedCoordinates center = EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER;
     private int x, y, z;
     private int dimensionNumber = 0;
 
     @Override
-    public OutwardsRegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public OutwardsRegionProvider getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       final int paramY = dimensionNumber < 2 ? x : y;
       final int paramZ = dimensionNumber < 3 ? x : z;
-      return new OutwardsRegionArgument(center, x, paramY, paramZ);
+      return new OutwardsRegionProvider(center, x, paramY, paramZ);
     }
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 1) {
-        ArgumentType<EnhancedPosArgument> argumentType = EnhancedPosArgumentType.blockPos();
+        ArgumentType<EnhancedCoordinates> argumentType = EnhancedPosArgument.blockPos();
         center = parseContext.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 0) {
         final StringReader reader = parseContext.reader();

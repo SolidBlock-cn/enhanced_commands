@@ -37,9 +37,9 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   @Override
   public @NotNull String asString() {
     if (properties.isEmpty()) {
-      return "#" + tag.location().toString();
+      return "#" + tag.location();
     } else {
-      return "#" + tag.location().toString() + "[" + properties.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + "]";
+      return "#" + tag.location() + "[" + properties.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + "]";
     }
   }
 
@@ -65,7 +65,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
     ImmutableList.Builder<Component> messages = new ImmutableList.Builder<>();
     if (!inTag) {
       successes = false;
-      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.ACTUAL), Component.literal("#" + tag.location().toString()).withStyle(Styles.EXPECTED)).withStyle(Styles.FALSE));
+      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.ACTUAL), Component.literal("#" + tag.location()).withStyle(Styles.EXPECTED)).withStyle(Styles.FALSE));
     }
     for (PropertyNamePredicate propertyNamePredicate : properties) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, blockInWorld.getPos());
@@ -75,7 +75,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
       }
     }
     if (successes) {
-      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.TARGET), Component.literal("#" + tag.location().toString()).withStyle(Styles.EXPECTED)).withStyle(Styles.TRUE));
+      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.TARGET), Component.literal("#" + tag.location()).withStyle(Styles.EXPECTED)).withStyle(Styles.TRUE));
     }
     return new TestResult(successes, messages.build());
   }

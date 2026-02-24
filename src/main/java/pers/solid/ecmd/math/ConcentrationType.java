@@ -16,6 +16,7 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Iterator;
@@ -313,7 +314,7 @@ public enum ConcentrationType implements StringRepresentable {
   }
 
   @Override
-  public String getSerializedName() {
+  public @NotNull String getSerializedName() {
     return name;
   }
 

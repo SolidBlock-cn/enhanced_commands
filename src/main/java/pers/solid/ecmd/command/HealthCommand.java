@@ -34,11 +34,11 @@ import static net.minecraft.commands.arguments.EntityArgument.entities;
 import static net.minecraft.commands.arguments.EntityArgument.getEntities;
 import static net.minecraft.commands.arguments.NbtPathArgument.getPath;
 import static net.minecraft.commands.arguments.NbtPathArgument.nbtPath;
-import static pers.solid.ecmd.argument.NbtSourceArgumentType.getNbtSource;
-import static pers.solid.ecmd.argument.NbtSourceArgumentType.nbtSource;
-import static pers.solid.ecmd.argument.NbtTargetArgumentType.getNbtTarget;
-import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
-import static pers.solid.ecmd.argument.SimpleEnumArgumentType.*;
+import static pers.solid.ecmd.argument.NbtSourceArgument.getNbtSource;
+import static pers.solid.ecmd.argument.NbtSourceArgument.nbtSource;
+import static pers.solid.ecmd.argument.NbtTargetArgument.getNbtTarget;
+import static pers.solid.ecmd.argument.NbtTargetArgument.nbtTarget;
+import static pers.solid.ecmd.argument.SimpleEnumArgument.*;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum HealthCommand implements CommandRegistrationCallback {

@@ -4,7 +4,7 @@
   "package": "pers.solid.ecmd.mixins.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "BlockableEventLookupMixin",
+    "BlockableEventLoopMixin",
     "BlockPosArgumentMixin",
     "BlockPredicateArgumentMixin",
     "BlockStateArgumentMixin",

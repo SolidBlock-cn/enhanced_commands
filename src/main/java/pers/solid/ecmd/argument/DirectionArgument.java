@@ -1,74 +1,32 @@
 package pers.solid.ecmd.argument;
 
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.StringRepresentableArgument;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.util.PositionProvider;
-import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
+import pers.solid.ecmd.parse.ParsingUtil;
 
-import java.util.function.Function;
+import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
-public enum DirectionArgument implements StringRepresentable, Function<@NotNull PositionProvider, @NotNull Direction> {
-  DOWN(Direction.DOWN),
-  UP(Direction.UP),
-  NORTH(Direction.NORTH),
-  SOUTH(Direction.SOUTH),
-  WEST(Direction.WEST),
-  EAST(Direction.EAST),
-  FRONT("front", positionProvider -> {
-    final Vec2 rotation = positionProvider.getRotation$ec();
-    if (rotation.x > 60) {
-      return Direction.DOWN;
-    } else if (rotation.x < -60) {
-      return Direction.UP;
-    } else {
-      return Direction.fromYRot(rotation.y);
-    }
-  }),
-  BACK("back", FRONT.function.andThen(Direction::getOpposite)),
-  FRONT_HORIZONTAL("front_horizontal", positionProvider -> Direction.fromYRot(positionProvider.getRotation$ec().y)),
-  BACK_HORIZONTAL("back_horizontal", FRONT_HORIZONTAL.function.andThen(Direction::getOpposite)),
-  FRONT_VERTICAL("front_vertical", positionProvider -> positionProvider.getRotation$ec().x > 0 ? Direction.UP : Direction.DOWN),
-  BACK_VERTICAL("back_vertical", positionProvider -> positionProvider.getRotation$ec().x > 0 ? Direction.DOWN : Direction.UP),
-  LEFT("left", FRONT_HORIZONTAL.function.andThen(Direction::getCounterClockWise)),
-  RIGHT("right", FRONT_HORIZONTAL.function.andThen(Direction::getClockWise)),
-  RANDOM("random", positionProvider -> Direction.getRandom(positionProvider.getWorld$ec().getRandom())),
-  RANDOM_HORIZONTAL("random_horizontal", positionProvider -> Direction.Plane.HORIZONTAL.getRandomDirection(positionProvider.getWorld$ec().getRandom())),
-  RANDOM_VERTICAL("random_vertical", positionProvider -> Direction.Plane.VERTICAL.getRandomDirection(positionProvider.getWorld$ec().getRandom()));
-
-  public static final StringIdentifiableCodec<DirectionArgument> CODEC = StringIdentifiableCodec.create(DirectionArgument.values());
-  private final String name;
-  private final Function<PositionProvider, Direction> function;
-
-  DirectionArgument(@NotNull Direction direction) {
-    this.name = direction.getSerializedName();
-    this.function = positionProvider -> direction;
+public class DirectionArgument extends StringRepresentableArgument<DirectionProvider> {
+  public DirectionArgument() {
+    super(DirectionProvider.CODEC, DirectionProvider::values);
   }
 
-  DirectionArgument(String name, Function<PositionProvider, Direction> function) {
-    this.name = name;
-    this.function = function;
+  public static DirectionArgument direction() {
+    return new DirectionArgument();
+  }
+
+  public static Direction getDirection(CommandContext<CommandSourceStack> context, String name) {
+    return context.getArgument(name, DirectionProvider.class).apply(context.getSource());
   }
 
   @Override
-  public @NotNull Direction apply(@NotNull PositionProvider positionProvider) {
-    return function.apply(positionProvider);
-  }
-
-  public @NotNull Direction apply(@NotNull CommandSourceStack source) {
-    return function.apply(source);
-  }
-
-  @Override
-  public String getSerializedName() {
-    return name;
-  }
-
-  public MutableComponent getDisplayName() {
-    return Component.translatable("enhanced_commands.direction." + name);
+  public <S> @NotNull CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+    return ParsingUtil.suggestMatchingEnumWithTooltip(Arrays.asList(DirectionProvider.values()), DirectionProvider::getDisplayName, builder);
   }
 }

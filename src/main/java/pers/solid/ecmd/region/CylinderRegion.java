@@ -18,8 +18,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.Unmodifiable;
 import org.joml.Vector2d;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
@@ -159,19 +159,19 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionArgument<CylinderRegion>> getArgumentCodec() {
-      return CylinderRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends RegionProvider<CylinderRegion>> getArgumentCodec() {
+      return CylinderRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.MixedParams<CylinderRegionArgument> {
+  public static final class Parser implements FunctionLikeParser.MixedParams<CylinderRegionProvider> {
     private @Nullable Double radius = null;
     private @Nullable Double height = null;
-    private @Nullable EnhancedPosArgument center = null;
+    private @Nullable EnhancedCoordinates center = null;
 
     @Override
-    public CylinderRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new CylinderRegionArgument(radius == null ? 1 : radius, height == null ? 1 : height, center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : center);
+    public CylinderRegionProvider getParseResult(ParseContext<?> parseContext) {
+      return new CylinderRegionProvider(radius == null ? 1 : radius, height == null ? 1 : height, center == null ? EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER : center);
     }
 
     @Override
@@ -201,7 +201,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
         if (center != null) {
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
         }
-        final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
+        final EnhancedPosArgument type = EnhancedPosArgument.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(type);
       }
     }

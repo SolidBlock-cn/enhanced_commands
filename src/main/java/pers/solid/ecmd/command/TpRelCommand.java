@@ -24,8 +24,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.EnhancedRotationArgument;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.argument.RotationProvider;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.*;
@@ -38,7 +38,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final EnhancedPosArgumentType posType = new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.PREFER_DOUBLE, EnhancedPosArgumentType.IntAlignType.HORIZONTALLY_CENTERED);
+    final EnhancedPosArgument posType = new EnhancedPosArgument(EnhancedPosArgument.NumberType.PREFER_DOUBLE, EnhancedPosArgument.IntAlignType.HORIZONTALLY_CENTERED);
     dispatcher.register(ModCommands.literalR2("tprel")
         .requires(source -> source.hasPermission(2))
         .then(Commands.argument("location", posType)
@@ -46,8 +46,8 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                     context.getSource(),
                     Collections.singleton(context.getSource().getEntityOrException()),
                     context.getSource().getLevel(),
-                    EnhancedPosArgumentType.getPosArgument(context, "location"),
-                    new EnhancedRotationArgument(0, 0, false, false),
+                    EnhancedPosArgument.getPosArgument(context, "location"),
+                    new RotationProvider(0, 0, false, false),
                     null
                 )
             )
@@ -58,7 +58,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                         context.getSource(),
                         EntityArgument.getEntities(context, "targets"),
                         context.getSource().getLevel(),
-                        EnhancedPosArgumentType.getPosArgument(context, "location"),
+                        EnhancedPosArgument.getPosArgument(context, "location"),
                         null,
                         null
                     )
@@ -68,7 +68,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                             context.getSource(),
                             EntityArgument.getEntities(context, "targets"),
                             context.getSource().getLevel(),
-                            EnhancedPosArgumentType.getPosArgument(context, "location"),
+                            EnhancedPosArgument.getPosArgument(context, "location"),
                             RotationArgument.getRotation(context, "rotation"),
                             null
                         )
@@ -81,7 +81,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                                     context.getSource(),
                                     EntityArgument.getEntities(context, "targets"),
                                     context.getSource().getLevel(),
-                                    EnhancedPosArgumentType.getPosArgument(context, "location"),
+                                    EnhancedPosArgument.getPosArgument(context, "location"),
                                     null,
                                     new LookTarget(EntityArgument.getEntity(context, "facingEntity"), EntityAnchorArgument.Anchor.FEET)
                                 )
@@ -91,7 +91,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                                         context.getSource(),
                                         EntityArgument.getEntities(context, "targets"),
                                         context.getSource().getLevel(),
-                                        EnhancedPosArgumentType.getPosArgument(context, "location"),
+                                        EnhancedPosArgument.getPosArgument(context, "location"),
                                         null,
                                         new LookTarget(
                                             EntityArgument.getEntity(context, "facingEntity"), EntityAnchorArgument.getAnchor(context, "facingAnchor")
@@ -106,9 +106,9 @@ public enum TpRelCommand implements CommandRegistrationCallback {
                                 context.getSource(),
                                 EntityArgument.getEntities(context, "targets"),
                                 context.getSource().getLevel(),
-                                EnhancedPosArgumentType.getPosArgument(context, "location"),
+                                EnhancedPosArgument.getPosArgument(context, "location"),
                                 null,
-                                new LookTarget(EnhancedPosArgumentType.getPosArgument(context, "facingLocation").getPosition(context.getSource()))
+                                new LookTarget(EnhancedPosArgument.getPosArgument(context, "facingLocation").getPosition(context.getSource()))
                             )
                         )
                     )
@@ -194,7 +194,7 @@ public enum TpRelCommand implements CommandRegistrationCallback {
   ) throws CommandSyntaxException {
     BlockPos blockPos = BlockPos.containing(x, y, z);
     if (!Level.isInSpawnableBounds(blockPos)) {
-      throw EnhancedPosArgumentType.OUT_OF_BOUNDS_EXCEPTION.create(TextUtil.wrapVector(blockPos));
+      throw EnhancedPosArgument.OUT_OF_BOUNDS_EXCEPTION.create(TextUtil.wrapVector(blockPos));
     } else {
       float f = Mth.wrapDegrees(yaw);
       float g = Mth.wrapDegrees(pitch);

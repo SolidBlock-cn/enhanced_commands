@@ -16,10 +16,10 @@ import pers.solid.ecmd.config.ConfigCategories;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigManager;
 import pers.solid.ecmd.curve.CurveTypes;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionTypes;
 import pers.solid.ecmd.function.nbt.NbtFunctionTypes;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
@@ -71,7 +71,7 @@ public class EnhancedCommands implements ModInitializer {
     ServerTickEvents.END_SERVER_TICK.register(id("tick_iterator_task"), server -> {
       final ProfilerFiller profiler = Profiler.get();
       profiler.push("enhanced_commands:tick_iterator_task");
-      ((ThreadExecutorExtension) server).ec_advanceTasks();
+      ((BlockableEventLoopExtension) server).ec_advanceTasks();
       profiler.pop();
     });
     ServerLifecycleEvents.AFTER_SAVE.register(id("save_config"), (server, flush, force) -> {

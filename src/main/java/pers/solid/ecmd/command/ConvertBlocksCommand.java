@@ -26,8 +26,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.exception.CommandRuntimeException;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
 import pers.solid.ecmd.region.Region;
@@ -47,11 +47,11 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, commandBuildContext)
-        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(commandBuildContext), null)
+    final KeywordArgsArgument keywordArgs = KeywordArgsArgument.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, commandBuildContext)
+        .addOptionalArg("affect_only", BlockPredicateArgument.blockPredicate(commandBuildContext), null)
         .addOptionalArg("immediately", BoolArgumentType.bool(), false)
         .addOptionalArg("bypass_limit", BoolArgumentType.bool(), false)
-        .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgumentType(), UnloadedPosBehavior.REJECT)
+        .addOptionalArg("unloaded_pos", new UnloadedPosBehaviorArgument(), UnloadedPosBehavior.REJECT)
         .build();
 
     final IntFunction<Component> fallingBlockFeedback = value -> Component.translatable("enhanced_commands.commands.convertblocks.falling_block.complete", value).enhanced$$();
@@ -60,20 +60,20 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
         dispatcher,
         ModCommands.literalR2("convertblocks"),
         ModCommands.literalR2("/convertblocks"),
-        Commands.argument("region", RegionArgumentType.region(commandBuildContext))
+        Commands.argument("region", RegionArgument.region(commandBuildContext))
             .then(Commands.literal("falling_block")
                 .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, keywordArgs.defaultArgs(), context))
                 .then(Commands.argument("keyword_args", keywordArgs)
-                    .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
+                    .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, KeywordArgsArgument.getKeywordArgs(context, "keyword_args"), context))))
             .then(Commands.literal("block_display")
                 .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, keywordArgs.defaultArgs(), context))
                 .then(Commands.argument("keyword_args", keywordArgs)
-                    .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
+                    .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, KeywordArgsArgument.getKeywordArgs(context, "keyword_args"), context))))
     );
   }
 
   public static int executeConvertBlocksToFallingBlock(ConvertBlockCommand.Conversion conversion, IntFunction<Component> feedback, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    final Region region = RegionArgumentType.getRegion(context, "region");
+    final Region region = RegionArgument.getRegion(context, "region");
     final CommandSourceStack source = context.getSource();
     boolean bypassLimit = keywordArgs.getBoolean("bypass_limit");
     UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getArg("unloaded_pos");
@@ -169,7 +169,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallback {
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!keywordArgs.getBoolean("immediately") && region.numberOfBlocksAffected() > 2048) {
-      ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(Component.translatable("enhanced_commands.commands.convertblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
+      ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(Component.translatable("enhanced_commands.commands.convertblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {

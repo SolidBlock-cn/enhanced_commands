@@ -9,7 +9,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import pers.solid.ecmd.config.CommandsConfig;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
 import pers.solid.ecmd.render.DebugRenderLayerCommand;
 
 @Environment(EnvType.CLIENT)
@@ -20,7 +20,7 @@ public class EnhancedCommandsClient implements ClientModInitializer {
     ClientTickEvents.END_CLIENT_TICK.register(EnhancedCommands.id("tick_iterator_task"), client -> {
       final ProfilerFiller profiler = Profiler.get();
       profiler.push("enhanced_commands:tick_iterator_task");
-      ((ThreadExecutorExtension) client).ec_advanceTasks();
+      ((BlockableEventLoopExtension) client).ec_advanceTasks();
       profiler.pop();
     });
 

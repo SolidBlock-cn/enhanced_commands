@@ -34,14 +34,14 @@ public class DebugConfig implements Cloneable {
   /**
    * 免疫虚空伤害。
    *
-   * @see pers.solid.ecmd.mixins.mixin.LivingEntityMixin#ignoreVoidTick
-   * @see pers.solid.ecmd.mixins.mixin.EntityMixin#ignoreVoidTick
+   * @see pers.solid.ecmd.mixins.mixin.LivingEntityMixin#ignoreBelowWorld
+   * @see pers.solid.ecmd.mixins.mixin.EntityMixin#ignoreBelowWorld
    */
   public int immuneToVoid = 0;
   /**
    * 即使玩家处于较低的地方，仍正常渲染天空，包括下方的天空和雾。
    *
-   * @see LevelRendererMixin#neverSkyDark
+   * @see LevelRendererMixin#neverRenderDarkDisc
    * @see FogRendererMixin#noDarkFogColor
    */
   public boolean noDarkSky = false;

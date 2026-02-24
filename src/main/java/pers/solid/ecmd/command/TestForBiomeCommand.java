@@ -20,19 +20,19 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import org.apache.commons.lang3.BooleanUtils;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static net.minecraft.commands.arguments.ResourceOrTagArgument.resourceOrTag;
-import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
+import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
 
 public enum TestForBiomeCommand implements TestForCommands.Entry {
   INSTANCE;
-  public static final KeywordArgsArgumentType BIOME_KEYWORD_ARGS = KeywordArgsArgumentType.builder()
+  public static final KeywordArgsArgument BIOME_KEYWORD_ARGS = KeywordArgsArgument.builder()
       .addOptionalArg("force_load", BoolArgumentType.bool(), false)
       .build();
   public static final DynamicCommandExceptionType TEST_FOR_BIOME_NOT_LOADED = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.commands.testfor.biome.not_loaded", o));
@@ -42,8 +42,8 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
   public void addArguments(LiteralArgumentBuilder<CommandSourceStack> testForBuilder, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     testForBuilder.then(literal("biome")
         .executes(context -> executeTestForBiome(context, BlockPos.containing(context.getSource().getPosition())))
-        .then(argument("pos", EnhancedPosArgumentType.blockPos())
-            .executes(context -> executeTestForBiome(context, EnhancedPosArgumentType.getBlockPos(context, "pos")))
+        .then(argument("pos", EnhancedPosArgument.blockPos())
+            .executes(context -> executeTestForBiome(context, EnhancedPosArgument.getBlockPos(context, "pos")))
             .then(argument("biome", resourceOrTag(commandBuildContext, Registries.BIOME))
                 .executes(context -> executeTestForBiomePredicate(context, false))
                 .then(argument("keyword_args", BIOME_KEYWORD_ARGS)
@@ -64,7 +64,7 @@ public enum TestForBiomeCommand implements TestForCommands.Entry {
 
   private static int executeTestForBiomePredicate(CommandContext<CommandSourceStack> context, boolean forceLoad) throws CommandSyntaxException {
     final CommandSourceStack source = context.getSource();
-    final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
+    final BlockPos blockPos = EnhancedPosArgument.getBlockPos(context, "pos");
     final ServerLevel world = source.getLevel();
     @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
     if (!forceLoad && !chunkLoaded) {

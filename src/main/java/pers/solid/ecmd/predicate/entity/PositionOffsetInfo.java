@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- * 此类对应于 {@link EntitySelector#positionOffset}，但由于该字段为 {@code Function}，无法直接进行序列化和反序列化，因此需要在解析实体选择器时，也就是在 {@link EntitySelectorParser#getSelector()} 中，利用 mixin 将其 x、y、z 存储在字段中。
+ * 此类对应于 {@link EntitySelector#position}，但由于该字段为 {@code Function}，无法直接进行序列化和反序列化，因此需要在解析实体选择器时，也就是在 {@link EntitySelectorParser#getSelector()} 中，利用 mixin 将其 x、y、z 存储在字段中。
  *
  * @param x 对应实体选择器的 x 参数。
  * @param y 对应实体选择器的 y 参数。

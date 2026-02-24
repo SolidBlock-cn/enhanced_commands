@@ -22,9 +22,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.KeywordArgs;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
 import pers.solid.ecmd.mixins.accessor.BlockDisplayEntityAccessor;
@@ -45,20 +45,20 @@ public enum ConvertBlockCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, commandBuildContext).build();
+    final KeywordArgsArgument keywordArgs = KeywordArgsArgument.builderFromShared(KeywordArgsCommon.CONVERT_BLOCKS, commandBuildContext).build();
 
     final Function<BlockPos, Component> fallingBlockFeedback = blockPos -> Component.translatable("enhanced_commands.commands.convertblock.falling_block.complete", TextUtil.wrapVector(blockPos));
     final Function<BlockPos, Component> blockDisplayFeedback = blockPos -> Component.translatable("enhanced_commands.commands.convertblock.block_display.complete", TextUtil.wrapVector(blockPos));
     dispatcher.register(literalR2("convertblock")
-        .then(argument("pos", EnhancedPosArgumentType.blockPos())
+        .then(argument("pos", EnhancedPosArgument.blockPos())
             .then(literal("falling_block")
-                .executes(context -> executeConvert(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), keywordArgs.defaultArgs(), context))
+                .executes(context -> executeConvert(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, EnhancedPosArgument.getLoadedBlockPos(context, "pos"), keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeConvert(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
+                    .executes(context -> executeConvert(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, EnhancedPosArgument.getLoadedBlockPos(context, "pos"), KeywordArgsArgument.getKeywordArgs(context, "keyword_args"), context))))
             .then(literal("block_display")
-                .executes(context -> executeConvert(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), keywordArgs.defaultArgs(), context))
+                .executes(context -> executeConvert(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, EnhancedPosArgument.getLoadedBlockPos(context, "pos"), keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeConvert(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, EnhancedPosArgumentType.getLoadedBlockPos(context, "pos"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))));
+                    .executes(context -> executeConvert(ConvertBlockCommand::convertToBlockDisplay, blockDisplayFeedback, EnhancedPosArgument.getLoadedBlockPos(context, "pos"), KeywordArgsArgument.getKeywordArgs(context, "keyword_args"), context))))));
   }
 
   public static int executeConvert(Conversion conversion, Function<BlockPos, Component> feedback, BlockPos blockPos, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

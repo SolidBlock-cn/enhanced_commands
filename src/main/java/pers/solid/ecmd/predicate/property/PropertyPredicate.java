@@ -50,7 +50,7 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
     }
 
     @Override
-    public String getSerializedName() {
+    public @NotNull String getSerializedName() {
       return name;
     }
 
