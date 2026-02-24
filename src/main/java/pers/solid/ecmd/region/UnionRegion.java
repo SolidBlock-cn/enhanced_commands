@@ -96,7 +96,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<UnionRegionArgument> parser() {
+    public FunctionLikeParser.SequentialParams<UnionRegionProvider> parser() {
       return new Parser();
     }
 
@@ -106,22 +106,22 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionArgument<UnionRegion>> getArgumentCodec() {
-      return UnionRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends RegionProvider<UnionRegion>> getArgumentCodec() {
+      return UnionRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<UnionRegionArgument> {
-    private final List<RegionArgument<?>> regions = new ArrayList<>();
+  public static final class Parser implements FunctionLikeParser.SequentialParams<UnionRegionProvider> {
+    private final List<RegionProvider<?>> regions = new ArrayList<>();
 
     @Override
-    public UnionRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new UnionRegionArgument(regions);
+    public UnionRegionProvider getParseResult(ParseContext<?> parseContext) {
+      return new UnionRegionProvider(regions);
     }
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      regions.add(RegionArgument.parse(parseContext));
+      regions.add(RegionProvider.parse(parseContext));
     }
   }
 }

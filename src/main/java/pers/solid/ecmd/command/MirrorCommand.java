@@ -34,24 +34,24 @@ public enum MirrorCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
-        .addOptionalArg("pivot", EnhancedPosArgumentType.blockPos(), EnhancedPosArgumentType.CURRENT_POS)
+    final KeywordArgsArgument keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
+        .addOptionalArg("pivot", EnhancedPosArgument.blockPos(), EnhancedPosArgument.CURRENT_POS)
         .build();
     ModCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("mirror"),
         literalR2("/mirror"),
-        argument("region", RegionArgumentType.region(commandBuildContext))
-            .then(argument("axis", SimpleEnumArgumentType.axis(false))
-                .executes(context -> executeMirror(SimpleEnumArgumentType.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
+        argument("region", RegionArgument.region(commandBuildContext))
+            .then(argument("axis", SimpleEnumArgument.axis(false))
+                .executes(context -> executeMirror(SimpleEnumArgument.getAxis(context, "axis"), keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeMirror(SimpleEnumArgumentType.getAxis(context, "axis"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
-            .executes(context -> executeMirror(AxisArgument.FRONT_BACK.apply(context.getSource()), keywordArgs.defaultArgs(), context))
+                    .executes(context -> executeMirror(SimpleEnumArgument.getAxis(context, "axis"), KeywordArgsArgument.getKeywordArgs(context, "keyword_args"), context))))
+            .executes(context -> executeMirror(AxisProvider.FRONT_BACK.apply(context.getSource()), keywordArgs.defaultArgs(), context))
     );
   }
 
   public static int executeMirror(Direction.Axis axis, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    return executeMirror(RegionArgumentType.getRegion(context, "region"), axis, keywordArgs, context);
+    return executeMirror(RegionArgument.getRegion(context, "region"), axis, keywordArgs, context);
   }
 
   public static int executeMirror(Region region, Direction.Axis axis, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

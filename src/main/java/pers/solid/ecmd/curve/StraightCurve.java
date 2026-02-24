@@ -12,8 +12,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -136,27 +136,27 @@ public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
     }
 
     @Override
-    public @NotNull MapCodec<? extends CurveArgument<? extends StraightCurve>> getArgumentCodec() {
-      return StraightCurveArgument.CODEC;
+    public @NotNull MapCodec<? extends CurveProvider<? extends StraightCurve>> getArgumentCodec() {
+      return StraightCurveProvider.CODEC;
     }
   }
 
-  protected static final class Parser implements FunctionLikeParser.SequentialParams<CurveArgument<StraightCurve>> {
-    private EnhancedPosArgument from, to;
+  protected static final class Parser implements FunctionLikeParser.SequentialParams<CurveProvider<StraightCurve>> {
+    private EnhancedCoordinates from, to;
     private boolean usingKeyword = false;
 
     @Override
-    public CurveArgument<StraightCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public CurveProvider<StraightCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (from == null || to == null) {
         throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
       }
-      return new StraightCurveArgument(from, to);
+      return new StraightCurveProvider(from, to);
     }
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
-      final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+      final EnhancedPosArgument argumentType = EnhancedPosArgument.posPreferringCenteredInt();
       if (paramIndex == 0) {
         {
           if (reader.canRead() && !SharedSuggestionProvider.matchesSubStr(reader.getRemaining().toLowerCase(), "from")) {
@@ -173,7 +173,7 @@ public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
-      final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+      final EnhancedPosArgument argumentType = EnhancedPosArgument.posPreferringCenteredInt();
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("from", suggestionsBuilder).buildFuture());
       final int cursorBeforeKeyword = reader.getCursor();
       final String unquotedString = reader.readUnquotedString();

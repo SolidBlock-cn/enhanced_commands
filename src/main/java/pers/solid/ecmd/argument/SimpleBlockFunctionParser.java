@@ -143,8 +143,8 @@ public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
       parseContext.setSuggestion((context, suggestionsBuilder) -> {
         final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursorBeforeValue);
         final SuggestionsBuilder offset2 = suggestionsBuilder.createOffset(cursorAfterValue);
-        //noinspection unchecked
-        PROPERTY_FINISHED.getSuggestions((CommandContext<Object>) context, offset2);
+        @SuppressWarnings("unchecked") final CommandContext<Object> cast = (CommandContext<Object>) context;
+        PROPERTY_FINISHED.getSuggestions(cast, offset2);
         return sp.getSuggestions(context, offset).thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
       });
     } else {

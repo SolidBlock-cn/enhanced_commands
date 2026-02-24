@@ -16,8 +16,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
@@ -245,7 +245,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<? extends RegionArgument<? extends BlockCuboidRegion>> parser() {
+    public FunctionLikeParser.SequentialParams<? extends RegionProvider<? extends BlockCuboidRegion>> parser() {
       return new Parser();
     }
 
@@ -255,23 +255,23 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionArgument<? extends BlockCuboidRegion>> getArgumentCodec() {
-      return BlockCuboidRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends RegionProvider<? extends BlockCuboidRegion>> getArgumentCodec() {
+      return BlockCuboidRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<BlockCuboidRegionArgument> {
-    private EnhancedPosArgument from;
-    private EnhancedPosArgument to;
+  public static final class Parser implements FunctionLikeParser.SequentialParams<BlockCuboidRegionProvider> {
+    private EnhancedCoordinates from;
+    private EnhancedCoordinates to;
 
     @Override
-    public BlockCuboidRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new BlockCuboidRegionArgument(from, to == null ? from : to);
+    public BlockCuboidRegionProvider getParseResult(ParseContext<?> parseContext) {
+      return new BlockCuboidRegionProvider(from, to == null ? from : to);
     }
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
+      final EnhancedPosArgument type = EnhancedPosArgument.blockPos();
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         from = parseContext.parseAndSuggestArgument(type);
@@ -292,7 +292,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
 
     @Override
     public int minSequentialParamsCount() {
-      return (to != null || EnhancedPosArgument.isInt(from)) ? 1 : 2;
+      return (to != null || EnhancedCoordinates.isInt(from)) ? 1 : 2;
     }
 
     @Override

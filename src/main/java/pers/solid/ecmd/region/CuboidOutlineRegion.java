@@ -17,8 +17,8 @@ import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -118,7 +118,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<CuboidOutlineRegionArgument> parser() {
+    public FunctionLikeParser.SequentialParams<CuboidOutlineRegionProvider> parser() {
       return new Parser();
     }
 
@@ -128,13 +128,13 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public @NotNull MapCodec<? extends CuboidOutlineRegionArgument> getArgumentCodec() {
-      return CuboidOutlineRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends CuboidOutlineRegionProvider> getArgumentCodec() {
+      return CuboidOutlineRegionProvider.CODEC;
     }
   }
 
-  public static abstract sealed class AbstractParser<R extends RegionArgument<?>> implements FunctionLikeParser.SequentialParams<R> permits Parser, CuboidWallRegion.Parser {
-    protected EnhancedPosArgument fromPos, toPos;
+  public static abstract sealed class AbstractParser<R extends RegionProvider<?>> implements FunctionLikeParser.SequentialParams<R> permits Parser, CuboidWallRegion.Parser {
+    protected EnhancedCoordinates fromPos, toPos;
     protected int thickness = 1;
     protected int cursorBefore = 0, cursorAfter = 0;
 
@@ -152,7 +152,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final EnhancedPosArgumentType type = EnhancedPosArgumentType.blockPos();
+      final EnhancedPosArgument type = EnhancedPosArgument.blockPos();
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         fromPos = parseContext.parseAndSuggestArgument(type);
@@ -180,10 +180,10 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
   }
 
-  public static final class Parser extends AbstractParser<CuboidOutlineRegionArgument> {
+  public static final class Parser extends AbstractParser<CuboidOutlineRegionProvider> {
     @Override
-    public CuboidOutlineRegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return new CuboidOutlineRegionArgument(new BlockCuboidRegionArgument(fromPos, toPos), thickness);
+    public CuboidOutlineRegionProvider getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new CuboidOutlineRegionProvider(new BlockCuboidRegionProvider(fromPos, toPos), thickness);
     }
   }
 }

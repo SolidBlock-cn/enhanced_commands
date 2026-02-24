@@ -17,9 +17,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.joml.AxisAngle4d;
 import org.joml.Vector3d;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.Vec3dArgument;
+import pers.solid.ecmd.argument.Vec3dProvider;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.GeoUtil;
@@ -178,8 +178,8 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
     }
 
     @Override
-    public @NotNull MapCodec<? extends CurveArgument<? extends CircleCurve>> getArgumentCodec() {
-      return CircleCurveArgument.CODEC;
+    public @NotNull MapCodec<? extends CurveProvider<? extends CircleCurve>> getArgumentCodec() {
+      return CircleCurveProvider.CODEC;
     }
   }
 
@@ -196,17 +196,17 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
    * <p>
    * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <pivot>} 的默认值为 {@code 0 1 0}。
    */
-  protected static class Parser implements FunctionLikeParser.MixedParams<CurveArgument<CircleCurve>> {
+  protected static class Parser implements FunctionLikeParser.MixedParams<CurveProvider<CircleCurve>> {
     private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "center", "pivot", "range");
     private @Nullable Double radius;
-    private @Nullable EnhancedPosArgument center;
-    private @Nullable Vec3dArgument axis;
+    private @Nullable EnhancedCoordinates center;
+    private @Nullable Vec3dProvider axis;
     private @Nullable DoubleDoublePair range;
 
     @Override
-    public CurveArgument<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final EnhancedPosArgument center = this.center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : this.center;
-      return new CircleCurveArgument(radius == null ? 1 : radius, center, axis == null ? new Vec3dArgument.Fixed(new Vec3(0, 1, 0)) : axis, range == null ? FULL_MIN : Math.min(range.firstDouble(), range.secondDouble()), range == null ? FULL_MAX : Math.max(range.firstDouble(), range.secondDouble()));
+    public CurveProvider<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final EnhancedCoordinates center = this.center == null ? EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER : this.center;
+      return new CircleCurveProvider(radius == null ? 1 : radius, center, axis == null ? new Vec3dProvider.Fixed(new Vec3(0, 1, 0)) : axis, range == null ? FULL_MIN : Math.min(range.firstDouble(), range.secondDouble()), range == null ? FULL_MAX : Math.max(range.firstDouble(), range.secondDouble()));
     }
 
     private DoubleDoublePair parseAngleRange(ParseContext<?> parseContext) throws CommandSyntaxException {
@@ -248,10 +248,10 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
       switch (paramName) {
         case "radius" -> radius = parseContext.reader().readDouble();
         case "center" -> {
-          EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+          EnhancedPosArgument argumentType = EnhancedPosArgument.posPreferringCenteredInt();
           center = parseContext.parseAndSuggestArgument(argumentType);
         }
-        case "pivot" -> axis = Vec3dArgument.parse(parseContext);
+        case "pivot" -> axis = Vec3dProvider.parse(parseContext);
         case "range" -> range = parseAngleRange(parseContext);
       }
     }
@@ -267,7 +267,7 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
         if (center != null) {
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "center");
         }
-        EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+        EnhancedPosArgument argumentType = EnhancedPosArgument.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(argumentType);
       }
     }

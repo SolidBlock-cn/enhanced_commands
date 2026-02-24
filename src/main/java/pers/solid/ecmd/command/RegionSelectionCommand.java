@@ -16,7 +16,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
 import pers.solid.ecmd.regionselection.WandEvent;
@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.argument.OmittedRegistryEntryArgumentType.omittedRegistryEntry;
+import static pers.solid.ecmd.argument.OmittedRegistryEntryArgument.omittedRegistryEntry;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum RegionSelectionCommand implements CommandRegistrationCallback {
@@ -46,12 +46,12 @@ public enum RegionSelectionCommand implements CommandRegistrationCallback {
         .executes(executesWithoutParam)
         .then(literal("pos1")
             .executes(context -> executeSetPoint(BlockPos.containing(context.getSource().getPosition()).getCenter(), context, 1))
-            .then(argument("pos", EnhancedPosArgumentType.posPreferringCenteredInt())
-                .executes(context -> executeSetPoint(EnhancedPosArgumentType.getPos(context, "pos"), context, 1))))
+            .then(argument("pos", EnhancedPosArgument.posPreferringCenteredInt())
+                .executes(context -> executeSetPoint(EnhancedPosArgument.getPos(context, "pos"), context, 1))))
         .then(literal("pos2")
             .executes(context -> executeSetPoint(BlockPos.containing(context.getSource().getPosition()).getCenter(), context, 2))
-            .then(argument("pos", EnhancedPosArgumentType.posPreferringCenteredInt())
-                .executes(context -> executeSetPoint(EnhancedPosArgumentType.getPos(context, "pos"), context, 2))))
+            .then(argument("pos", EnhancedPosArgument.posPreferringCenteredInt())
+                .executes(context -> executeSetPoint(EnhancedPosArgument.getPos(context, "pos"), context, 2))))
         .then(literal("type")
             .then(argument("type", omittedRegistryEntry(commandBuildContext, RegionSelectionType.REGISTRY_KEY))
                 .executes(context -> {

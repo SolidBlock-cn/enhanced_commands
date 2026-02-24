@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
-import pers.solid.ecmd.configs.RegistryParsingConfig;
+import pers.solid.ecmd.config.RegistryParsingConfig;
 import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.mixins.mixin.CommandsMixin;
 import pers.solid.ecmd.mixins.mixin.LevelChunkMixin;

@@ -16,7 +16,7 @@ import net.minecraft.commands.arguments.TimeArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
@@ -26,8 +26,8 @@ import java.util.Collections;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.argument.SimpleEnumArgumentType.concentrationType;
-import static pers.solid.ecmd.argument.SimpleEnumArgumentType.getConcentrationType;
+import static pers.solid.ecmd.argument.SimpleEnumArgument.concentrationType;
+import static pers.solid.ecmd.argument.SimpleEnumArgument.getConcentrationType;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum FireCommand implements CommandRegistrationCallback {
@@ -35,8 +35,8 @@ public enum FireCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType setFireKeywords = KeywordArgsArgumentType.builder().addOptionalArg("influenced_by_enchant", BoolArgumentType.bool(), false).build();
-    final KeywordArgsArgumentType extinguishKeywords = KeywordArgsArgumentType.builder().addOptionalArg("sound", BoolArgumentType.bool(), false).build();
+    final KeywordArgsArgument setFireKeywords = KeywordArgsArgument.builder().addOptionalArg("influenced_by_enchant", BoolArgumentType.bool(), false).build();
+    final KeywordArgsArgument extinguishKeywords = KeywordArgsArgument.builder().addOptionalArg("sound", BoolArgumentType.bool(), false).build();
 
     dispatcher.register(literalR2("fire")
         .then(literal("get")
@@ -50,13 +50,13 @@ public enum FireCommand implements CommandRegistrationCallback {
                 .then(argument("time", TimeArgument.time())
                     .executes(context -> executeSetFire(context, EntityArgument.getEntities(context, "entities"), IntegerArgumentType.getInteger(context, "time"), false))
                     .then(argument("keyword_args", setFireKeywords)
-                        .executes(context -> executeSetFire(context, EntityArgument.getEntities(context, "entities"), IntegerArgumentType.getInteger(context, "time"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getBoolean("influenced_by_enchant")))))))
+                        .executes(context -> executeSetFire(context, EntityArgument.getEntities(context, "entities"), IntegerArgumentType.getInteger(context, "time"), KeywordArgsArgument.getKeywordArgs(context, "keyword_args").getBoolean("influenced_by_enchant")))))))
         .then(literal("extinguish")
             .executes(context -> executeExtinguishFire(context, Collections.singleton(context.getSource().getEntityOrException()), false))
             .then(argument("entities", EntityArgument.entities())
                 .executes(context -> executeExtinguishFire(context, EntityArgument.getEntities(context, "entities"), false))
                 .then(argument("keyword_args", extinguishKeywords)
-                    .executes(context -> executeExtinguishFire(context, EntityArgument.getEntities(context, "entities"), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args").getBoolean("sound")))))));
+                    .executes(context -> executeExtinguishFire(context, EntityArgument.getEntities(context, "entities"), KeywordArgsArgument.getKeywordArgs(context, "keyword_args").getBoolean("sound")))))));
   }
 
   public static int executeGetFire(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) throws CommandSyntaxException {

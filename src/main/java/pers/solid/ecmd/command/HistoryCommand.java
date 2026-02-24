@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.KeywordArgs;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.history.History;
 import pers.solid.ecmd.util.Styles;
@@ -31,20 +31,20 @@ import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
-import static pers.solid.ecmd.argument.StringEnumArgumentType.stringEnum;
+import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
+import static pers.solid.ecmd.argument.StringEnumArgument.stringEnum;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum HistoryCommand implements CommandRegistrationCallback {
   INSTANCE;
 
-  public static final KeywordArgsArgumentType CLEAR_KEYWORD_ARGS = KeywordArgsArgumentType.builder()
+  public static final KeywordArgsArgument CLEAR_KEYWORD_ARGS = KeywordArgsArgument.builder()
       .addOptionalArg("target", EntityArgument.player(), null)
       .addOptionalArg("target-server", bool(), false)
       .addOptionalArg("type", stringEnum("undo", "redo"), "undo")
       .build();
 
-  public static final KeywordArgsArgumentType LIST_KEYWORD_ARGS = KeywordArgsArgumentType.builder()
+  public static final KeywordArgsArgument LIST_KEYWORD_ARGS = KeywordArgsArgument.builder()
       .addAll(CLEAR_KEYWORD_ARGS)
       .addOptionalArg("from", integer(0), 0)
       .addOptionalArg("limit", integer(0, 50), 7)

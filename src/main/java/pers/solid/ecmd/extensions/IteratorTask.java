@@ -28,7 +28,7 @@ public class IteratorTask<T> extends ForwardingIterator<T> {
   @Override
   public T next() {
     if (!started) {
-      ThreadExecutorExtension.LOGGER.info("Starting iterator task {}", name.getString());
+      BlockableEventLoopExtension.LOGGER.info("Starting iterator task {}", name.getString());
       started = true;
     }
     return super.next();

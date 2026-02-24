@@ -10,10 +10,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 
 public class KeywordArgs {
-  private final KeywordArgsArgumentType type;
+  private final KeywordArgsArgument type;
   private final Map<String, Object> values;
 
-  public KeywordArgs(KeywordArgsArgumentType type, Map<String, Object> values) {
+  public KeywordArgs(KeywordArgsArgument type, Map<String, Object> values) {
     this.type = type;
     this.values = values;
   }

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.solid.ecmd.ModTrackedData;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.history.History;
-import pers.solid.ecmd.mixins.ext.ServerPlayerEntityExtension;
+import pers.solid.ecmd.mixins.ext.ServerPlayerExtension;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
@@ -24,7 +24,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin implements ServerPlayerEntityExtension, HistoryHolder {
+public abstract class ServerPlayerMixin implements ServerPlayerExtension, HistoryHolder {
   @Shadow
   @Final
   public MinecraftServer server;

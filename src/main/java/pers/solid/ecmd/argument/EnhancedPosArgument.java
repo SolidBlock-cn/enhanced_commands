@@ -1,308 +1,481 @@
 package pers.solid.ecmd.argument;
 
-import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.google.gson.JsonObject;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic3CommandExceptionType;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.brigadier.suggestion.Suggestion;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
-import net.minecraft.commands.arguments.coordinates.LocalCoordinates;
-import net.minecraft.commands.arguments.coordinates.WorldCoordinate;
-import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixins.accessor.LocalCoordinatesAccessor;
-import pers.solid.ecmd.mixins.accessor.WorldCoordinatesAccessor;
-import pers.solid.ecmd.util.ExpressionConvertible;
-import pers.solid.ecmd.util.PositionProvider;
-import pers.solid.ecmd.util.StringUtil;
+import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+
+import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
 
 /**
+ * Similar to {@link net.minecraft.commands.arguments.coordinates.BlockPosArgument} and {@link Vec3Argument}, with some slight modifications.
+ *
+ * @param numberType   The behavior of the argument type when accepting different coordinates.
+ * @param intAlignType
  * @see Coordinates
+ * @see net.minecraft.commands.arguments.coordinates.BlockPosArgument
+ * @see Vec3Argument
  */
-public interface EnhancedPosArgument extends Coordinates, ExpressionConvertible {
-  MapCodec<EnhancedPosArgument> MAP_BASED_CODEC = Type.CODEC.dispatchMap(posArgument -> {
-    if (posArgument instanceof WorldCoordinates | posArgument instanceof DefaultPos) {
-      return Type.DEFAULT;
-    } else if (posArgument instanceof LookingPos) {
-      return Type.LOOKING_POS;
-    } else {
-      return Type.UNKNOWN;
-    }
-  }, type ->
-      switch (type) {
-        case DEFAULT -> DefaultPos.CODEC;
-        case LOOKING_POS -> LookingPos.CODEC;
-        default -> UnknownPos.ALWAYS_FAIL;
-      });
-  Codec<DefaultPos> LIST_BASED_CODEC = Codec.DOUBLE.listOf(3, 3).xmap(doubles -> DefaultPos.doubleBased(doubles.get(0), doubles.get(1), doubles.get(2), false, false, false), defaultPos -> List.of(defaultPos.x, defaultPos.y, defaultPos.z));
-  Codec<EnhancedPosArgument> CODEC = Codec.either(MAP_BASED_CODEC.codec(), LIST_BASED_CODEC).xmap(fsEither -> fsEither.map(Function.identity(), Function.identity()), Either::left);
+public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignType) implements ArgumentType<EnhancedCoordinates>, ArgumentTypeInfo.Template<EnhancedPosArgument> {
+  public static final EnhancedCoordinates CURRENT_POS = EnhancedCoordinates.DefaultPos.doubleBased(0, 0, 0, true, true, true);
+  public static final EnhancedCoordinates CURRENT_BLOCK_POS_CENTER = EnhancedCoordinates.DefaultPos.intBased(0, 0, 0, true, true, true, IntAlignType.CENTERED);
 
-  static boolean isInt(Coordinates posArgument) {
-    return posArgument instanceof EnhancedPosArgument enhancedPosArgument && enhancedPosArgument.isInt();
+  public static final SimpleCommandExceptionType LOCAL_COORDINATES_NOT_ALLOWED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.pos.local_coordinates_not_allowed"));
+
+  public static EnhancedPosArgument blockPos() {
+    return new EnhancedPosArgument(NumberType.INT_ONLY, IntAlignType.UNCHANGED);
   }
 
-  static String asString(Coordinates posArgument) {
-    if (posArgument instanceof WorldCoordinates defaultPosArgument) {
-      final WorldCoordinatesAccessor a = (WorldCoordinatesAccessor) defaultPosArgument;
-      final WorldCoordinate x = a.getX();
-      final WorldCoordinate y = a.getY();
-      final WorldCoordinate z = a.getZ();
+  public static EnhancedPosArgument posPreferringCenteredInt() {
+    return new EnhancedPosArgument(NumberType.PREFER_INT, IntAlignType.CENTERED);
+  }
 
-      final StringBuilder sb = new StringBuilder();
-      if (x.isRelative()) sb.append('~');
-      sb.append(StringUtil.nf.format(x.get(0))).append(' ');
-      if (y.isRelative()) sb.append('~');
-      sb.append(StringUtil.nf.format(y.get(0))).append(' ');
-      if (z.isRelative()) sb.append('~');
-      sb.append(StringUtil.nf.format(z.get(0)));
-      return sb.toString();
-    } else if (posArgument instanceof LocalCoordinates lookingPosArgument) {
-      final LocalCoordinatesAccessor a = (LocalCoordinatesAccessor) lookingPosArgument;
-      return "^" + StringUtil.nf.format(a.getX()) + " ^" + StringUtil.nf.format(a.getY()) + " ^" + StringUtil.nf.format(a.getZ());
-    } else if (posArgument instanceof EnhancedPosArgument enhancedPosArgument) {
-      return enhancedPosArgument.asString();
+  public static EnhancedCoordinates getPosArgument(CommandContext<?> context, String name) {
+    return context.getArgument(name, EnhancedCoordinates.class);
+  }
+
+  /**
+   * 获取方块坐标，且不检查是否在加载的区块内以及坐标是否有效。
+   */
+  public static BlockPos getBlockPos(CommandContext<CommandSourceStack> context, String name) {
+    return getPosArgument(context, name).getBlockPos(context.getSource());
+  }
+
+  /**
+   * 获取方块坐标，并检查是否在已加载的区块内，不会检查坐标是否在高度限制内。
+   */
+  public static BlockPos getLoadedBlockPos(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
+    return checkChunkLoaded(context.getSource().getLevel(), getBlockPos(context, name));
+  }
+
+  /**
+   * 获取方块坐标，并检查方块坐标是否可用于放置方块，不会检查坐标是否在已加载的区块内。
+   */
+  public static BlockPos getBuildableBlockPos(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
+    return checkBuildLimit(context.getSource().getLevel(), getBlockPos(context, name));
+  }
+
+  /**
+   * 获取方块坐标，并检查方块坐标是否在已加载的区块内且在建筑的范围限制内。
+   *
+   * @see net.minecraft.commands.arguments.coordinates.BlockPosArgument#getLoadedBlockPos(CommandContext, ServerLevel, String)
+   */
+  public static BlockPos getLoadedBuildableBlockPos(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
+    final BlockPos blockPos = getBlockPos(context, name);
+    final ServerLevel world = context.getSource().getLevel();
+    checkChunkLoaded(world, blockPos);
+    checkBuildLimit(world, blockPos);
+    return blockPos;
+  }
+
+
+  public static Vec3 getPos(CommandContext<CommandSourceStack> context, String name) {
+    return context.getArgument(name, Coordinates.class).getPosition(context.getSource());
+  }
+
+  public static final DynamicCommandExceptionType UNLOADED_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.unloaded", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BUILD_LIMIT_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.out_of_build_limit", pos));
+  public static final DynamicCommandExceptionType OUT_OF_BOUNDS_EXCEPTION = new DynamicCommandExceptionType(pos -> Component.translatable("enhanced_commands.argument.pos.out_of_bounds", pos));
+  public static final Dynamic3CommandExceptionType OUT_OF_HEIGHT_LIMIT = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Component.translatable("enhanced_commands.argument.pos.out_of_height_limit", pos, lowest, highest));
+  public static final Dynamic3CommandExceptionType OUT_OF_HORIZONTAL_BOUNDS = new Dynamic3CommandExceptionType((pos, lowest, highest) -> Component.translatable("enhanced_commands.argument.pos.out_of_horizontal_bounds", pos, lowest, highest));
+
+  public static <T extends BlockPos> T checkChunkLoaded(ServerLevel world, T blockPos) throws CommandSyntaxException {
+    if (!world.hasChunkAt(blockPos)) {
+      throw UNLOADED_EXCEPTION.create(TextUtil.wrapVector(blockPos));
+    }
+    return blockPos;
+  }
+
+  public static <T extends BlockPos> T checkBuildLimit(ServerLevel world, T blockPos) throws CommandSyntaxException {
+    if (!world.isInWorldBounds(blockPos)) {
+      if (!isValidHorizontally(blockPos)) {
+        throw OUT_OF_HORIZONTAL_BOUNDS.create(TextUtil.wrapVector(blockPos), -30000000, 30000000);
+      } else {
+        throw OUT_OF_BUILD_LIMIT_EXCEPTION.create(TextUtil.wrapVector(blockPos));
+      }
+    }
+    return blockPos;
+  }
+
+  private static boolean isValidHorizontally(BlockPos pos) {
+    return pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000;
+  }
+
+  private static boolean isInvalidVertically(int y) {
+    return y < -20000000 || y >= 20000000;
+  }
+
+  @Override
+  public EnhancedCoordinates parse(StringReader reader) throws CommandSyntaxException {
+    if (!reader.canRead()) {
+      throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
+    }
+
+    // try to read a looking pos
+    if (reader.peek() == '^') {
+      double[] values = new double[3];
+      for (int i = 0; i < 3; i++) {
+        if (!reader.canRead()) {
+          throw withCursorEnd(Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader), reader.getCursor() + 1);
+        }
+        if (reader.peek() == '^') {
+          reader.skip();
+        } else {
+          throw withCursorEnd(Vec3Argument.ERROR_MIXED_TYPE.createWithContext(reader), reader.getCursor() + 1);
+        }
+        final double num;
+        if (reader.canRead() && StringReader.isAllowedNumber(reader.peek())) {
+          num = reader.readDouble();
+        } else {
+          num = 0;
+        }
+        values[i] = num;
+        if (i < 2) {
+          reader.skipWhitespace();
+        }
+      }
+      return new EnhancedCoordinates.LookingPos(values[0], values[1], values[2]);
     } else {
-      return "<unsupported>";
+      double[] values = new double[3];
+      boolean[] isRelatives = new boolean[3];
+      Arrays.fill(isRelatives, false);
+      boolean[] omitsNumber = new boolean[3];
+
+      // the initial value, which may be modified later
+      boolean isDoublePos = numberType.doubleOnly();
+      for (int i = 0; i < 3; i++) {
+        if (!reader.canRead()) {
+          throw Vec3Argument.ERROR_NOT_COMPLETE.createWithContext(reader);
+        }
+
+        // whether the coordinate has a tilde. It will be used to parse, instead of identifying the type of coordinate — relative-only argument types can have implicit relative coordinates without a tilde.
+        boolean hasTilde = false;
+        // whether the coordinate is a relative coordinate.
+        boolean isRelative = false;
+        if (reader.peek() == '~') {
+          isRelatives[i] = isRelative = true;
+          hasTilde = true;
+          reader.skip();
+        } else if (reader.peek() == '^') {
+          throw withCursorEnd(Vec3Argument.ERROR_MIXED_TYPE.createWithContext(reader), reader.getCursor() + 1);
+        }
+
+        if (numberType.intOnly()) {
+          if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
+            // 在仅整数模式下，如果是相对坐标，也应该接受小数的相对坐标。
+            values[i] = (isRelative ? reader.readDouble() : reader.readInt()) + (isRelative && intAlignType.shouldAdjustToCenter(i) ? 0.5 : 0);
+          } else {
+            omitsNumber[i] = true;
+            values[i] = 0;
+          }
+        } else {
+          final int cursorBeforeReadDouble = reader.getCursor();
+          double num;
+          if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
+            // if there is a tilde, it may not be performed, in order to avoid exceptions, if there is an empty expected
+            // however, is there is no tilde, the row must be read, resulting exceptions if there is no expected
+            num = reader.readDouble();
+          } else {
+            omitsNumber[i] = true;
+            num = 0;
+          }
+          final String numAsString = reader.getString().substring(cursorBeforeReadDouble, reader.getCursor());
+          if (StringUtils.contains(numAsString, '.')) {
+            isDoublePos = true;
+          } else if (!numberType.preferInt() && !isRelative && intAlignType.shouldAdjustToCenter(i)) {
+            num += 0.5;
+          }
+          values[i] = num;
+        }
+        if (i < 2) {
+          // before the end of iteration
+          reader.skipWhitespace();
+        }
+      }
+
+      // If there omits expected (such as "~ ~ ~"), it should be seen as a double pos.
+      if (omitsNumber[0] && omitsNumber[1] && omitsNumber[2]) {
+        isDoublePos = numberType.doubleOnly() || !numberType.preferInt();
+      }
+      if (isDoublePos) {
+        return EnhancedCoordinates.DefaultPos.doubleBased(values[0], values[1], values[2], isRelatives[0], isRelatives[1], isRelatives[2]);
+      } else {
+        return EnhancedCoordinates.DefaultPos.intBased(values[0], values[1], values[2], isRelatives[0], isRelatives[1], isRelatives[2], intAlignType);
+      }
+    }
+  }
+
+  @Override
+  public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+
+    @Nullable Vec3 crossHairPos = null;
+    @Nullable Vec3i crossHairBlockPos = null;
+    if (context.getSource() instanceof ClientSuggestionProvider clientCommandSource) {
+      final Minecraft client = ((FabricClientCommandSource) clientCommandSource).getClient();
+      if (client.hitResult != null && client.hitResult.getType() == HitResult.Type.BLOCK) {
+        crossHairPos = client.hitResult.getLocation();
+        if (client.hitResult instanceof BlockHitResult blockHitResult) {
+          crossHairBlockPos = blockHitResult.getBlockPos();
+        }
+      }
+    }
+
+    // try to read a looking pos
+    final StringReader reader = new StringReader(builder.getInput());
+    reader.setCursor(builder.getStart());
+    if (!reader.canRead()) {
+      builder.suggest("^^^", Component.translatable("enhanced_commands.argument.pos.local_coordinate"));
+    }
+    if (reader.canRead() && reader.peek() == '^') {
+      int i;
+      for (i = 0; i < 3; i++) {
+        if (!reader.canRead()) {
+          break;
+        }
+        if (reader.peek() == '^') {
+          reader.skip();
+        } else {
+          break;
+        }
+        try {
+          reader.readDouble();
+        } catch (CommandSyntaxException ignored) {
+        }
+        reader.skipWhitespace();
+      }
+      if (i < 3) {
+        builder.suggest("^".repeat(3 - i), Component.translatable("enhanced_commands.argument.pos.local_coordinate.remaining"));
+      }
+    } else {
+      int i;
+      for (i = 0; i < 3; i++) {
+        if (!reader.canRead()) {
+          break;
+        }
+        boolean hasTilde = false;
+        if (reader.peek() == '~') {
+          reader.skip();
+          hasTilde = true;
+        } else if (reader.peek() == '^') {
+          break;
+        }
+
+        try {
+          if (reader.canRead() && StringReader.isAllowedNumber(reader.peek()) || !hasTilde) {
+            reader.readDouble(); // 这里应该是与 readInt 兼容的（当 intOnly 且非相对坐标的情况下）
+          }
+        } catch (CommandSyntaxException ignored) {
+        }
+        if (i < 2) {
+          reader.skipWhitespace();
+        }
+      }
+      if (i < 3) {
+        builder.suggest("~".repeat(3 - i), i == 0 ? Component.translatable("enhanced_commands.argument.pos.relative_coordinate") : Component.translatable("enhanced_commands.argument.pos.relative_coordinate.remaining"));
+        if (i == 0 || reader.canRead(-1) && Character.isWhitespace(reader.peek(-1))) {
+          // 确保在建议数字时，前面必须已经是一个空格，或者还没有参数。
+          if (crossHairBlockPos != null && !numberType.doubleOnly()) {
+            switch (i) {
+              case 0 -> builder.suggest(crossHairBlockPos.getX() + " " + crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int"));
+              case 1 -> builder.suggest(crossHairBlockPos.getY() + " " + crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
+              case 2 -> builder.suggest(crossHairBlockPos.getZ(), Component.translatable("enhanced_commands.argument.pos.crosshair_int.remaining"));
+            }
+          }
+          if (crossHairPos != null && !numberType.intOnly()) {
+            final NumberFormat nf = NumberFormat.getNumberInstance(Locale.ROOT);
+            nf.setGroupingUsed(false);
+            nf.setMaximumFractionDigits(Integer.MAX_VALUE);
+            switch (i) {
+              case 0 -> builder.suggest(nf.format(crossHairPos.x()) + " " + nf.format(crossHairPos.y()) + " " + nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double"));
+              case 1 -> builder.suggest(nf.format(crossHairPos.y()) + " " + nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+              case 2 -> builder.suggest(nf.format(crossHairPos.z()), Component.translatable("enhanced_commands.argument.pos.crosshair_double.remaining"));
+            }
+          }
+        }
+      }
+    }
+    final SuggestionsBuilder builderOffset = builder.createOffset(reader.getCursor());
+    final List<Suggestion> list = builder.build().getList();
+    for (Suggestion suggestion : list) {
+      builderOffset.suggest(suggestion.getText(), suggestion.getTooltip());
+    }
+
+    return builderOffset.buildFuture();
+  }
+
+  @Override
+  public Collection<String> getExamples() {
+    return List.of("~ ~ ~", "^ ^ ^", "1 2 3");
+  }
+
+  @Override
+  public @NotNull EnhancedPosArgument instantiate(CommandBuildContext commandBuildContext) {
+    return this;
+  }
+
+  @Override
+  public @NotNull ArgumentTypeInfo<EnhancedPosArgument, EnhancedPosArgument> type() {
+    return Serializer.INSTANCE;
+  }
+
+  public static class Serializer implements ArgumentTypeInfo<EnhancedPosArgument, EnhancedPosArgument> {
+    public static final Serializer INSTANCE = new Serializer();
+
+    private Serializer() {
+    }
+
+    @Override
+    public void serializeToNetwork(EnhancedPosArgument properties, FriendlyByteBuf buf) {
+      buf.writeEnum(properties.numberType);
+      buf.writeEnum(properties.intAlignType);
+    }
+
+    @Override
+    public @NotNull EnhancedPosArgument deserializeFromNetwork(FriendlyByteBuf buf) {
+      return new EnhancedPosArgument(buf.readEnum(NumberType.class), buf.readEnum(IntAlignType.class));
+    }
+
+    @Override
+    public void serializeToJson(EnhancedPosArgument properties, JsonObject json) {
+      json.addProperty("numberType", properties.numberType.ordinal());
+      json.addProperty("intAlignType", properties.intAlignType.ordinal());
+    }
+
+    @Override
+    public @NotNull EnhancedPosArgument unpack(EnhancedPosArgument argumentType) {
+      return argumentType;
     }
   }
 
   /**
-   * @return Whether the returned position refers to integer of double.
+   * 坐标的数字的解析方式，指定能否解析成整数或双精度浮点数，以及解析的结果应该是整数还是双精度浮点数。
    */
-  boolean isInt();
+  public enum NumberType {
+    /**
+     * Only accepts integer values. Tilde "~ ~ ~" will be interpreted as block pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
+     */
+    INT_ONLY,
+    /**
+     * Accepts both integer and double value. Pure tilde "~ ~ ~" and tilde with integer values (such as "~1 ~2 ~3") will be interpreted as block pos. Tilde with decimals (such as "~ ~ ~0.0") will be interpreted as double pos. Local coordinates ("^ ^ ^") are allowed, with decimal relative values.
+     */
+    PREFER_INT,
+    /**
+     * Accepts both integer and double value. Tilde "~ ~ ~" and local coordinates "^ ^ ^" will be interpreted as double pos.
+     */
+    PREFER_DOUBLE,
+    /**
+     * Accepts double values only. Integer values will be interpreted as doubles.
+     */
+    DOUBLE_ONLY;
 
-  Vec3 toAbsolutePos(PositionProvider positionProvider);
+    public boolean preferInt() {
+      return this == INT_ONLY || this == PREFER_INT;
+    }
 
-  @Override
-  default Vec3 getPosition(CommandSourceStack source) {
-    return toAbsolutePos((PositionProvider) source);
+    public boolean intOnly() {
+      return this == INT_ONLY;
+    }
+
+    public boolean doubleOnly() {
+      return this == DOUBLE_ONLY;
+    }
   }
 
-  default BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
-    return BlockPos.containing(toAbsolutePos(positionProvider));
-  }
+  /**
+   * 指定了整数坐标（没有小数部分）如何对齐到精确坐标（浮点数坐标）。浮点数（包括数值上等于整数但指定了小数部分的数）不会受到影响。
+   */
+  public enum IntAlignType implements StringRepresentable {
 
-  Vec2 toAbsoluteRotation(PositionProvider positionProvider);
+    /**
+     * 不改变值，即整数坐标会被解析成数值相等的浮点坐标。例如：(1, 2, 3) -> (1.0, 2.0, 3.0)。
+     */
+    UNCHANGED("unchanged") {
+      @Override
+      public boolean shouldAdjustToCenter(int index) {
+        return false;
+      }
+    },
+    /**
+     * 仅在水平方向上向坐标对齐，类似于 {@code /teleport} 命令中的参数，例如：(1, 2, 3) -> (1.5, 2.0, 3.5)。
+     */
+    HORIZONTALLY_CENTERED("horizontally_centered") {
+      @Override
+      public boolean shouldAdjustToCenter(int index) {
+        return index != 1;
+      }
+    },
+    /**
+     * 对齐的方块的中心位置，即各整数值均增加 0.5。例如：(1, 2, 3) -> (1.5, 2.5, 3.5)。
+     */
+    CENTERED("centered") {
+      @Override
+      public boolean shouldAdjustToCenter(int index) {
+        return true;
+      }
+    };
 
-  @Override
-  default Vec2 getRotation(CommandSourceStack source) {
-    return toAbsoluteRotation((PositionProvider) source);
-  }
-
-  enum Type implements StringRepresentable {
-    DEFAULT("default"),
-    LOOKING_POS("looking_pos"),
-    UNKNOWN("unknown");
-
-    public static final StringIdentifiableCodec<Type> CODEC = StringIdentifiableCodec.create(values());
-
-    private final String name;
-
-    Type(String name) {
+    IntAlignType(String name) {
       this.name = name;
     }
 
-    @Override
-    public String getSerializedName() {
-      return this.name;
-    }
-  }
+    @Contract(pure = true)
+    public abstract boolean shouldAdjustToCenter(int index);
 
-  abstract class UnknownPos implements EnhancedPosArgument {
+    public static final StringIdentifiableCodec<IntAlignType> CODEC = StringIdentifiableCodec.create(values());
+    private final String name;
 
-    private static final MapCodec<EnhancedPosArgument> ALWAYS_FAIL = Codec.EMPTY.flatXmap(unit -> DataResult.error(() -> "This type of pos argument is not supported"), posArgument -> DataResult.error(() -> "This type of pos argument is not supported"));
-
-    protected final boolean xRelative, yRelative, zRelative;
-
-    protected UnknownPos(boolean xRelative, boolean yRelative, boolean zRelative) {
-      this.xRelative = xRelative;
-      this.yRelative = yRelative;
-      this.zRelative = zRelative;
-    }
-
-    @Override
-    public boolean isXRelative() {
-      return xRelative;
-    }
-
-    @Override
-    public boolean isYRelative() {
-      return yRelative;
-    }
-
-    @Override
-    public boolean isZRelative() {
-      return zRelative;
-    }
-  }
-
-  record DefaultPos(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative, @Nullable EnhancedPosArgumentType.IntAlignType intAlignType) implements EnhancedPosArgument {
-    public static final MapCodec<DefaultPos> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-        Codec.DOUBLE.fieldOf("x").forGetter(DefaultPos::x),
-        Codec.DOUBLE.fieldOf("y").forGetter(DefaultPos::y),
-        Codec.DOUBLE.fieldOf("z").forGetter(DefaultPos::z),
-        Codec.BOOL.optionalFieldOf("x_relative", false).forGetter(DefaultPos::xRelative),
-        Codec.BOOL.optionalFieldOf("y_relative", false).forGetter(DefaultPos::yRelative),
-        Codec.BOOL.optionalFieldOf("z_relative", false).forGetter(DefaultPos::zRelative),
-        EnhancedPosArgumentType.IntAlignType.CODEC.optionalFieldOf("int_align_type").forGetter(defaultPos -> Optional.ofNullable(defaultPos.intAlignType()))
-    ).apply(i, DefaultPos::new));
-
-    private DefaultPos(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative, Optional<EnhancedPosArgumentType.IntAlignType> intAlignType) {
-      this(x, y, z, xRelative, yRelative, zRelative, intAlignType.orElse(null));
-    }
-
-    public static DefaultPos doubleBased(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative) {
-      return new DefaultPos(x, y, z, xRelative, yRelative, zRelative, (EnhancedPosArgumentType.IntAlignType) null);
-    }
-
-    public static DefaultPos intBased(double x, double y, double z, boolean xRelative, boolean yRelative, boolean zRelative, EnhancedPosArgumentType.IntAlignType intAlignType) {
-      return new DefaultPos(x, y, z, xRelative, yRelative, zRelative, intAlignType);
-    }
-
-    @Override
-    public Vec3 toAbsolutePos(PositionProvider positionProvider) {
-      if (!xRelative && !yRelative && !zRelative) {
-        return new Vec3(x, y, z);
+    public double mayAdjustToCenter(int value, int index) {
+      if (shouldAdjustToCenter(index)) {
+        return value + 0.5;
+      } else {
+        return value;
       }
-      final Vec3 position = positionProvider.getPosition$ec();
-      final Vec3 vec3d = new Vec3(xRelative ? position.x + x : x, yRelative ? position.y + y : y, zRelative ? position.z + z : z);
-      if (intAlignType != null) {
-        final BlockPos blockPos = BlockPos.containing(vec3d);
-        return intAlignType.mayAdjustToCenter(blockPos);
-      }
-      return vec3d;
     }
 
     @Override
-    public Vec2 toAbsoluteRotation(PositionProvider positionProvider) {
-      if (!xRelative && !yRelative) {
-        return new Vec2((float) x, (float) y);
-      }
-      final Vec2 rotation = positionProvider.getRotation$ec();
-      return new Vec2((float) (xRelative ? rotation.x + x : x), (float) (yRelative ? rotation.y + y : y));
+    public @NotNull String getSerializedName() {
+      return name;
     }
 
-    @Override
-    public BlockPos toAbsoluteBlockPos(PositionProvider positionProvider) {
-      if (!xRelative && !yRelative && !zRelative) {
-        return BlockPos.containing(x, y, z);
-      }
-      final Vec3 position = positionProvider.getPosition$ec();
-      return BlockPos.containing(xRelative ? Mth.floor(position.x() + x) : x, yRelative ? Mth.floor(position.y() + y) : y, zRelative ? Mth.floor(position.z() + z) : z);
-    }
-
-    @Override
-    public boolean isXRelative() {
-      return xRelative;
-    }
-
-    @Override
-    public boolean isYRelative() {
-      return yRelative;
-    }
-
-    @Override
-    public boolean isZRelative() {
-      return zRelative;
-    }
-
-    @Override
-    public boolean isInt() {
-      return intAlignType != null;
-    }
-
-    @Override
-    public @NotNull String asString() {
-      final StringBuilder sb = new StringBuilder();
-      final boolean isInt = intAlignType != null;
-      if (xRelative) sb.append('~');
-      if (!xRelative || x != 0) sb.append(isInt && !xRelative ? Integer.toString((int) x) : StringUtil.nf.format(x));
-      sb.append(' ');
-      if (yRelative) sb.append('~');
-      if (!yRelative || y != 0) sb.append(isInt && !yRelative ? Integer.toString((int) y) : StringUtil.nf.format(y));
-      sb.append(' ');
-      if (zRelative) sb.append('~');
-      if (!zRelative || z != 0) sb.append(isInt && !zRelative ? Integer.toString((int) z) : StringUtil.nf.format(z));
-      return sb.toString();
-    }
-  }
-
-  /**
-   * @see LocalCoordinates
-   */
-  record LookingPos(double x, double y, double z) implements EnhancedPosArgument {
-    public static final MapCodec<LookingPos> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-        Codec.DOUBLE.fieldOf("x").forGetter(LookingPos::x),
-        Codec.DOUBLE.fieldOf("y").forGetter(LookingPos::y),
-        Codec.DOUBLE.fieldOf("z").forGetter(LookingPos::z)
-    ).apply(i, LookingPos::new));
-
-    @Override
-    public boolean isInt() {
-      return false;
-    }
-
-    @Override
-    public Vec3 toAbsolutePos(PositionProvider positionProvider) {
-      Vec2 vec2f = positionProvider.getRotation$ec();
-      Vec3 vec3d = positionProvider.getPositionAt$ec(positionProvider);
-      float f = Mth.cos((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
-      float g = Mth.sin((vec2f.y + 90.0F) * ((float) Math.PI / 180F));
-      float h = Mth.cos(-vec2f.x * ((float) Math.PI / 180F));
-      float i = Mth.sin(-vec2f.x * ((float) Math.PI / 180F));
-      float j = Mth.cos((-vec2f.x + 90.0F) * ((float) Math.PI / 180F));
-      float k = Mth.sin((-vec2f.x + 90.0F) * ((float) Math.PI / 180F));
-      Vec3 vec3d2 = new Vec3(f * h, i, g * h);
-      Vec3 vec3d3 = new Vec3(f * j, k, g * j);
-      Vec3 vec3d4 = vec3d2.cross(vec3d3).scale(-1.0F);
-      double d = vec3d2.x * this.z + vec3d3.x * this.y + vec3d4.x * this.x;
-      double e = vec3d2.y * this.z + vec3d3.y * this.y + vec3d4.y * this.x;
-      double l = vec3d2.z * this.z + vec3d3.z * this.y + vec3d4.z * this.x;
-      return new Vec3(vec3d.x + d, vec3d.y + e, vec3d.z + l);
-    }
-
-    @Override
-    public Vec2 toAbsoluteRotation(PositionProvider positionProvider) {
-      return null;
-    }
-
-    @Override
-    public boolean isXRelative() {
-      return true;
-    }
-
-    @Override
-    public boolean isYRelative() {
-      return true;
-    }
-
-    @Override
-    public boolean isZRelative() {
-      return true;
-    }
-
-    @Override
-    public @NotNull String asString() {
-      final StringBuilder sb = new StringBuilder();
-      sb.append('^');
-      if (x() != 0) sb.append(StringUtil.nf.format(x()));
-      sb.append(" ^");
-      if (y() != 0) sb.append(StringUtil.nf.format(y()));
-      sb.append(" ^");
-      if (z() != 0) sb.append(StringUtil.nf.format(z()));
-      return sb.toString();
+    public Vec3 mayAdjustToCenter(Vec3i vec3i) {
+      return new Vec3(mayAdjustToCenter(vec3i.getX(), 0), mayAdjustToCenter(vec3i.getY(), 1), mayAdjustToCenter(vec3i.getZ(), 2));
     }
   }
 }

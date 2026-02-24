@@ -9,16 +9,16 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import pers.solid.ecmd.mixins.accessor.MutableComponentAccessor;
-import pers.solid.ecmd.mixins.ext.MutableTextExtension;
+import pers.solid.ecmd.mixins.ext.MutableComponentExtension;
 import pers.solid.ecmd.util.EnhancedTranslatableTextContent;
 
 import java.util.List;
 
 /**
- * 此 mixin 用于让 {@link MutableComponent} 实现 {@link MutableTextExtension}。
+ * 此 mixin 用于让 {@link MutableComponent} 实现 {@link MutableComponentExtension}。
  */
 @Mixin(MutableComponent.class)
-public abstract class MutableComponentExtensionImpl implements MutableTextExtension {
+public abstract class MutableComponentExtensionImpl implements MutableComponentExtension {
   @Shadow
   @Final
   private ComponentContents contents;
@@ -36,7 +36,7 @@ public abstract class MutableComponentExtensionImpl implements MutableTextExtens
       final EnhancedTranslatableTextContent enhancedContent = new EnhancedTranslatableTextContent(translatableTextContent.getKey(), translatableTextContent.getFallback(), translatableTextContent.getArgs());
       return MutableComponentAccessor.createMutableText(enhancedContent, siblings, style);
     } else {
-      return MutableTextExtension.super.enhanced$$();
+      return MutableComponentExtension.super.enhanced$$();
     }
   }
 }

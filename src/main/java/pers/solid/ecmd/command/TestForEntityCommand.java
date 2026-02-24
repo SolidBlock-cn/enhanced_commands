@@ -16,7 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.EntityPredicateArgumentType;
+import pers.solid.ecmd.argument.EntityPredicateArgument;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
@@ -33,8 +33,8 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
     testForBuilder.then(Commands.literal("entity")
         .then(Commands.argument("entities", EntityArgument.entities())
             .executes(context -> executeShowEntities(EntityArgument.getOptionalEntities(context, "entities"), context))
-            .then(Commands.argument("predicate", EntityPredicateArgumentType.entityPredicate(commandBuildContext))
-                .executes(context -> executeTestPredicate(EntityArgument.getOptionalEntities(context, "entities"), EntityPredicateArgumentType.getEntityPredicate(context, "predicate"), context)))));
+            .then(Commands.argument("predicate", EntityPredicateArgument.entityPredicate(commandBuildContext))
+                .executes(context -> executeTestPredicate(EntityArgument.getOptionalEntities(context, "entities"), EntityPredicateArgument.getEntityPredicate(context, "predicate"), context)))));
   }
 
   private int executeTestPredicate(Collection<? extends Entity> entities, EntityPredicate predicate, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

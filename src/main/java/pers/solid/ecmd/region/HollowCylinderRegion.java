@@ -16,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.joml.Vector2d;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
@@ -163,20 +163,20 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionArgument<HollowCylinderRegion>> getArgumentCodec() {
-      return HollowCylinderRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends RegionProvider<HollowCylinderRegion>> getArgumentCodec() {
+      return HollowCylinderRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.MixedParams<HollowCylinderRegionArgument> {
+  public static final class Parser implements FunctionLikeParser.MixedParams<HollowCylinderRegionProvider> {
     private @Nullable Double radius = null;
     private @Nullable Double height = null;
-    private @Nullable EnhancedPosArgument center = null;
+    private @Nullable EnhancedCoordinates center = null;
     private OutlineType type = null;
 
     @Override
-    public HollowCylinderRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new HollowCylinderRegionArgument(type == null ? OutlineType.WALL : type, new CylinderRegionArgument(radius == null ? 1 : radius, height == null ? 1 : 0, center == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : center));
+    public HollowCylinderRegionProvider getParseResult(ParseContext<?> parseContext) {
+      return new HollowCylinderRegionProvider(type == null ? OutlineType.WALL : type, new CylinderRegionProvider(radius == null ? 1 : radius, height == null ? 1 : 0, center == null ? EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER : center));
     }
 
     @Override
@@ -206,7 +206,7 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
         if (center != null) {
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
         }
-        ArgumentType<EnhancedPosArgument> argumentType = EnhancedPosArgumentType.posPreferringCenteredInt();
+        ArgumentType<EnhancedCoordinates> argumentType = EnhancedPosArgument.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 3) {
         if (type != null) {

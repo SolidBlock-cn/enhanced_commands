@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.util.mixin.ArgumentTypeExtension;
 
 import java.util.concurrent.CompletableFuture;
@@ -21,13 +21,13 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(Vec3Argument.class)
 public abstract class Vec3ArgumentMixin implements ArgumentTypeExtension {
   @Unique
-  private EnhancedPosArgumentType modArgumentType;
+  private EnhancedPosArgument modArgumentType;
   @Unique
   private boolean extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
   private void injectedInit(boolean centerIntegers, CallbackInfo ci) {
-    modArgumentType = new EnhancedPosArgumentType(EnhancedPosArgumentType.NumberType.PREFER_DOUBLE, centerIntegers ? EnhancedPosArgumentType.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgumentType.IntAlignType.UNCHANGED);
+    modArgumentType = new EnhancedPosArgument(EnhancedPosArgument.NumberType.PREFER_DOUBLE, centerIntegers ? EnhancedPosArgument.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgument.IntAlignType.UNCHANGED);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/coordinates/Coordinates;", at = @At("HEAD"), cancellable = true)

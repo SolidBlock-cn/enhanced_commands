@@ -10,7 +10,7 @@ import pers.solid.ecmd.api.FlipStateCallback;
 import pers.solid.ecmd.argument.ModArgumentTypes;
 import pers.solid.ecmd.command.ModCommands;
 import pers.solid.ecmd.curve.CurveTypes;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionTypes;
 import pers.solid.ecmd.function.nbt.NbtFunctionTypes;
@@ -61,7 +61,7 @@ public class EnhancedCommands implements ModInitializer {
     // 注册服务器运行任务的事件
     ServerTickEvents.END_SERVER_TICK.register(id("tick_iterator_task"), server -> {
       server.getProfiler().push("enhanced_commands:tick_iterator_task");
-      ((ThreadExecutorExtension) server).ec_advanceTasks();
+      ((BlockableEventLoopExtension) server).ec_advanceTasks();
       server.getProfiler().pop();
     });
 

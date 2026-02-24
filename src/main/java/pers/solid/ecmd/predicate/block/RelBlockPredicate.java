@@ -9,7 +9,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.Vec3iArgument;
+import pers.solid.ecmd.argument.Vec3iProvider;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -18,9 +18,9 @@ import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
 
-public record RelBlockPredicate(@NotNull Vec3iArgument relPos, @NotNull BlockPredicate predicate) implements BlockPredicate {
+public record RelBlockPredicate(@NotNull Vec3iProvider relPos, @NotNull BlockPredicate predicate) implements BlockPredicate {
 
-  public static final MapCodec<RelBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RelBlockPredicate::new, Vec3iArgument.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
+  public static final MapCodec<RelBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RelBlockPredicate::new, Vec3iProvider.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
 
   @Override
   public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
@@ -56,7 +56,7 @@ public record RelBlockPredicate(@NotNull Vec3iArgument relPos, @NotNull BlockPre
   }
 
   public static final class Parser implements FunctionLikeParser.SequentialParams<RelBlockPredicate> {
-    private Vec3iArgument relPos;
+    private Vec3iProvider relPos;
     private BlockPredicate blockPredicate;
 
     @Override
@@ -79,7 +79,7 @@ public record RelBlockPredicate(@NotNull Vec3iArgument relPos, @NotNull BlockPre
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
-        relPos = Vec3iArgument.parse(parseContext);
+        relPos = Vec3iProvider.parse(parseContext);
       } else if (paramIndex == 1) {
         blockPredicate = BlockPredicate.parse(parseContext);
       }

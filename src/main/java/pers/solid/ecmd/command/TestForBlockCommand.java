@@ -22,10 +22,10 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec2;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.argument.BlockPredicateArgumentType;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.BlockPredicateArgument;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.KeywordArgs;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.util.*;
 
 import java.util.Collection;
@@ -33,7 +33,7 @@ import java.util.Collection;
 public enum TestForBlockCommand implements TestForCommands.Entry {
   INSTANCE;
 
-  public static final KeywordArgsArgumentType BLOCK_KEYWORD_ARGS = KeywordArgsArgumentType.builder()
+  public static final KeywordArgsArgument BLOCK_KEYWORD_ARGS = KeywordArgsArgument.builder()
       .addOptionalArg("force_load", BoolArgumentType.bool(), false)
       .addOptionalArg("seed", LongArgumentType.longArg(), null)
       .build();
@@ -42,16 +42,16 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
 
   private static LiteralArgumentBuilder<CommandSourceStack> addBlockCommandProperties(LiteralArgumentBuilder<CommandSourceStack> argumentBuilder, CommandBuildContext commandBuildContext) {
     return argumentBuilder
-        .then(Commands.argument("pos", EnhancedPosArgumentType.blockPos())
+        .then(Commands.argument("pos", EnhancedPosArgument.blockPos())
             .executes(TestForBlockCommand::executeTestForBlock)
-            .then(Commands.argument("predicate", new BlockPredicateArgumentType(commandBuildContext))
+            .then(Commands.argument("predicate", new BlockPredicateArgument(commandBuildContext))
                 .executes(context -> executeTestForBlockPredicate(context, false, null))
                 .then(Commands.argument("keyword_args", BLOCK_KEYWORD_ARGS)
-                    .executes(context -> executeTestForBlockPredicate(context, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"))))));
+                    .executes(context -> executeTestForBlockPredicate(context, KeywordArgsArgument.getKeywordArgs(context, "keyword_args"))))));
   }
 
   private static int executeTestForBlock(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
+    final BlockPos blockPos = EnhancedPosArgument.getBlockPos(context, "pos");
     // 会检查区块已加载，不过不是在这里，而是在下面。
     final CommandSourceStack source = context.getSource();
     final ServerLevel world = source.getLevel();
@@ -82,14 +82,14 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
 
   private static int executeTestForBlockPredicate(CommandContext<CommandSourceStack> context, boolean forceLoad, @Nullable Long seed) throws CommandSyntaxException {
     final CommandSourceStack source = context.getSource();
-    final BlockPos blockPos = EnhancedPosArgumentType.getBlockPos(context, "pos");
+    final BlockPos blockPos = EnhancedPosArgument.getBlockPos(context, "pos");
 
     // 检查方块的代码在后面
     final BlockInWorld blockInWorld = new BlockInWorld(source.getLevel(), blockPos, forceLoad);
     if (blockInWorld.getState() == null) {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
-    final TestResult testResult = BlockPredicateArgumentType.getBlockPredicate(context, "predicate").testAndDescribe(blockInWorld, new ExecutionContext(source.getLevel().getRandom(), PositionProvider.of(blockPos.getCenter(), Vec2.ZERO, null, EntityAnchorArgument.Anchor.FEET), seed));
+    final TestResult testResult = BlockPredicateArgument.getBlockPredicate(context, "predicate").testAndDescribe(blockInWorld, new ExecutionContext(source.getLevel().getRandom(), PositionProvider.of(blockPos.getCenter(), Vec2.ZERO, null, EntityAnchorArgument.Anchor.FEET), seed));
     testResult.sendMessage(source);
     return BooleanUtils.toInteger(testResult.successes());
   }

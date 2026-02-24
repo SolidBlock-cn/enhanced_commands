@@ -14,8 +14,8 @@ import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.ConditionalBlockFunction;
 import pers.solid.ecmd.predicate.block.RegionBlockPredicate;
 import pers.solid.ecmd.region.OutlineRegion;
-import pers.solid.ecmd.region.OutlineRegionArgument;
-import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.region.OutlineRegionProvider;
+import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.enums.OutlineType;
 
@@ -28,8 +28,8 @@ public enum OutlineCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType kwArgsType = KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext)
-        .addOptionalArg("inner", BlockFunctionArgumentType.blockFunction(commandBuildContext), null)
+    final KeywordArgsArgument kwArgsType = KeywordArgsArgument.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext)
+        .addOptionalArg("inner", BlockFunctionArgument.blockFunction(commandBuildContext), null)
         .build();
 
     final ArgumentCommandNode<CommandSourceStack, ?> outlineTypeArgumentNode;
@@ -37,18 +37,18 @@ public enum OutlineCommand implements CommandRegistrationCallback {
         dispatcher,
         literalR2("outline"),
         literalR2("/outline"),
-        Commands.argument("region", RegionArgumentType.region(commandBuildContext))
-            .then(Commands.argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
+        Commands.argument("region", RegionArgument.region(commandBuildContext))
+            .then(Commands.argument("block", BlockFunctionArgument.blockFunction(commandBuildContext))
                 .executes(context -> executeWithDefaultKeywordArgs(context, OutlineType.OUTLINE))
-                .then(outlineTypeArgumentNode = Commands.argument("outline_type", SimpleEnumArgumentType.simpleEnum(CommandEnumType.OUTLINE_TYPE))
+                .then(outlineTypeArgumentNode = Commands.argument("outline_type", SimpleEnumArgument.simpleEnum(CommandEnumType.OUTLINE_TYPE))
                     .executes(context -> executeWithDefaultKeywordArgs(context, context.getArgument("outline_type", OutlineType.class)))
                     .then(Commands.argument("keyword_args", kwArgsType)
-                        .executes(context -> executeFromKeywordArgs(context, context.getArgument("outline_type", OutlineType.class), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args")))).build())));
+                        .executes(context -> executeFromKeywordArgs(context, context.getArgument("outline_type", OutlineType.class), KeywordArgsArgument.getKeywordArgs(context, "keyword_args")))).build())));
     ModCommands.registerWithRegionArgumentModification(
         dispatcher, literalR2("wall"),
         literalR2("/wall"),
-        Commands.argument("region", RegionArgumentType.region(commandBuildContext)).then(
-            Commands.argument("block", BlockFunctionArgumentType.blockFunction(commandBuildContext))
+        Commands.argument("region", RegionArgument.region(commandBuildContext)).then(
+            Commands.argument("block", BlockFunctionArgument.blockFunction(commandBuildContext))
                 .executes(context -> executeWithDefaultKeywordArgs(context, OutlineType.WALL))
                 .forward(outlineTypeArgumentNode, context -> {
                   final CommandSourceStack source = context.getSource();
@@ -58,14 +58,14 @@ public enum OutlineCommand implements CommandRegistrationCallback {
   }
 
   public static int executeWithDefaultKeywordArgs(CommandContext<CommandSourceStack> context, OutlineType outlineType) throws CommandSyntaxException {
-    return FillReplaceCommand.setBlocksWithDefaultKeywordArgs(OutlineRegion.of(RegionArgumentType.getRegion(context, "region"), outlineType), BlockFunctionArgumentType.getBlockFunction(context, "block"), context.getSource(), null);
+    return FillReplaceCommand.setBlocksWithDefaultKeywordArgs(OutlineRegion.of(RegionArgument.getRegion(context, "region"), outlineType), BlockFunctionArgument.getBlockFunction(context, "block"), context.getSource(), null);
   }
 
   public static int executeFromKeywordArgs(CommandContext<CommandSourceStack> context, OutlineType outlineType, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final @Nullable BlockFunction inner = keywordArgs.getArg("inner");
-    final RegionArgument<?> region = RegionArgumentType.getRegionArgument(context, "region");
-    final RegionArgument<?> outlineRegion = new OutlineRegionArgument(outlineType, region);
-    final BlockFunction blockFunction = BlockFunctionArgumentType.getBlockFunction(context, "block");
+    final RegionProvider<?> region = RegionArgument.getRegionArgument(context, "region");
+    final RegionProvider<?> outlineRegion = new OutlineRegionProvider(outlineType, region);
+    final BlockFunction blockFunction = BlockFunctionArgument.getBlockFunction(context, "block");
     if (inner == null) {
       return FillReplaceCommand.setBlocksFromKeywordArgs(outlineRegion.toAbsoluteRegion(context.getSource()), blockFunction, context.getSource(), null, keywordArgs);
     } else {

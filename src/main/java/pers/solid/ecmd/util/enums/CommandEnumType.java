@@ -10,8 +10,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.argument.AxisArgument;
-import pers.solid.ecmd.argument.SimpleEnumArgumentType;
+import pers.solid.ecmd.argument.AxisProvider;
+import pers.solid.ecmd.argument.SimpleEnumArgument;
 import pers.solid.ecmd.command.TestForBlocksCommand;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -20,7 +20,7 @@ import pers.solid.ecmd.util.codec.EnumCodec;
 import java.util.function.Function;
 
 /**
- * 此类用于 {@link SimpleEnumArgumentType}，用于集中记录各类型枚举的值、转化方式以及对应的显示名称，从而无需再为每个枚举类型创建单独的参数类型。
+ * 此类用于 {@link SimpleEnumArgument}，用于集中记录各类型枚举的值、转化方式以及对应的显示名称，从而无需再为每个枚举类型创建单独的参数类型。
  *
  * @param values       枚举可接受的值，通常是 {@code ImmutableList.copyOf(枚举.values())} 的形式，有时也不一定是枚举支持的所有值，可能仅是一部分值
  * @param codec        处理枚举常量与字符串之间转化的类
@@ -33,8 +33,8 @@ public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, 
   public static final ResourceKey<Registry<CommandEnumType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("command_enum_type"));
   public static final Registry<CommandEnumType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
 
-  public static final CommandEnumType<AxisArgument> AXIS = register("axis", new CommandEnumType<>(AxisArgument.VALUES, AxisArgument.CODEC, AxisArgument::getDisplayName));
-  public static final CommandEnumType<AxisArgument> AXIS_EXCLUDING_RANDOM = register("axis_excluding_random", new CommandEnumType<>(AxisArgument.VALUES_EXCEPT_RANDOM, AxisArgument.CODEC, AxisArgument::getDisplayName));
+  public static final CommandEnumType<AxisProvider> AXIS = register("axis", new CommandEnumType<>(AxisProvider.VALUES, AxisProvider.CODEC, AxisProvider::getDisplayName));
+  public static final CommandEnumType<AxisProvider> AXIS_EXCLUDING_RANDOM = register("axis_excluding_random", new CommandEnumType<>(AxisProvider.VALUES_EXCEPT_RANDOM, AxisProvider.CODEC, AxisProvider::getDisplayName));
   public static final CommandEnumType<ConcentrationType> CONCENTRATION_TYPE = register("concentration_type", new CommandEnumType<>(ImmutableList.copyOf(ConcentrationType.values()), ConcentrationType.CODEC, ConcentrationType::getDisplayName));
   public static final CommandEnumType<Direction.Plane> DIRECTION_TYPE = register("direction_type", new CommandEnumType<>(ImmutableList.copyOf(Direction.Plane.values()), new EnumCodec.Simple<>(s -> switch (s) {
     case "vertical" -> Direction.Plane.VERTICAL;

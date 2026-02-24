@@ -124,7 +124,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<CuboidWallRegionArgument> parser() {
+    public FunctionLikeParser.SequentialParams<CuboidWallRegionProvider> parser() {
       return new Parser();
     }
 
@@ -134,15 +134,15 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     }
 
     @Override
-    public @NotNull MapCodec<? extends CuboidWallRegionArgument> getArgumentCodec() {
-      return CuboidWallRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends CuboidWallRegionProvider> getArgumentCodec() {
+      return CuboidWallRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser extends CuboidOutlineRegion.AbstractParser<CuboidWallRegionArgument> {
+  public static final class Parser extends CuboidOutlineRegion.AbstractParser<CuboidWallRegionProvider> {
     @Override
-    public CuboidWallRegionArgument getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return new CuboidWallRegionArgument(new BlockCuboidRegionArgument(fromPos, toPos), thickness);
+    public CuboidWallRegionProvider getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new CuboidWallRegionProvider(new BlockCuboidRegionProvider(fromPos, toPos), thickness);
     }
   }
 }

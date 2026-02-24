@@ -34,7 +34,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static net.minecraft.commands.arguments.NbtPathArgument.nbtPath;
-import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
+import static pers.solid.ecmd.argument.NbtTargetArgument.nbtTarget;
 import static pers.solid.ecmd.command.ModCommands.consumerOf;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 

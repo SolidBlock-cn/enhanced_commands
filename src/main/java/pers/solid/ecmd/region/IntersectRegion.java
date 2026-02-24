@@ -107,7 +107,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<IntersectRegionArgument> parser() {
+    public FunctionLikeParser.SequentialParams<IntersectRegionProvider> parser() {
       return new Parser();
     }
 
@@ -117,22 +117,22 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionArgument<IntersectRegion>> getArgumentCodec() {
-      return IntersectRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends RegionProvider<IntersectRegion>> getArgumentCodec() {
+      return IntersectRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<IntersectRegionArgument> {
-    private final List<RegionArgument<?>> regions = new ArrayList<>();
+  public static final class Parser implements FunctionLikeParser.SequentialParams<IntersectRegionProvider> {
+    private final List<RegionProvider<?>> regions = new ArrayList<>();
 
     @Override
-    public IntersectRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new IntersectRegionArgument(regions);
+    public IntersectRegionProvider getParseResult(ParseContext<?> parseContext) {
+      return new IntersectRegionProvider(regions);
     }
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      regions.add(RegionArgument.parse(parseContext));
+      regions.add(RegionProvider.parse(parseContext));
     }
   }
 }

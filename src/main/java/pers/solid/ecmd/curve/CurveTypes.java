@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 public final class CurveTypes {
-  public static final Map<String, Supplier<FunctionLikeParser<? extends CurveArgument<?>>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctions);
+  public static final Map<String, Supplier<FunctionLikeParser<? extends CurveProvider<?>>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctions);
   public static final Map<String, Component> FUNCTION_NAMES = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctionNames);
-  public static final Parser<CurveArgument<?>> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
-  public static final List<Parser<CurveArgument<?>>> PARSERS = Lists.newArrayList(FUNCTIONS_PARSER);
+  public static final Parser<CurveProvider<?>> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
+  public static final List<Parser<CurveProvider<?>>> PARSERS = Lists.newArrayList(FUNCTIONS_PARSER);
 
 
   public static final StraightCurve.Type STRAIGHT = register("straight", StraightCurve.Type.INSTANCE);
@@ -37,7 +37,7 @@ public final class CurveTypes {
   }
 
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends CurveArgument<?>>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends CurveProvider<?>>>> map) {
     map.put("straight", StraightCurve.Parser::new);
     map.put("circle", CircleCurve.Parser::new);
   }

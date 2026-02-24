@@ -33,7 +33,7 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.ConstantBlockPredicate;
 import pers.solid.ecmd.region.Region;
-import pers.solid.ecmd.region.RegionArgument;
+import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -41,17 +41,17 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public record BlockNbtData(RegionArgument<?> region, BlockPredicate blockPredicate) implements NbtTarget<BlockEntity> {
+public record BlockNbtData(RegionProvider<?> region, BlockPredicate blockPredicate) implements NbtTarget<BlockEntity> {
   public static final MapCodec<BlockNbtData> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      RegionArgument.CODEC.fieldOf("region").forGetter(BlockNbtData::region),
+      RegionProvider.CODEC.fieldOf("region").forGetter(BlockNbtData::region),
       BlockPredicate.CODEC.fieldOf("block").forGetter(BlockNbtData::blockPredicate)
   ).apply(i, BlockNbtData::new));
 
   public static BlockNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-    final RegionArgument<?> regionArgument = RegionArgument.parse(parseContext);
+    final RegionProvider<?> regionProvider = RegionProvider.parse(parseContext);
     parseContext.clearSuggestion();
-    return new BlockNbtData(regionArgument, ConstantBlockPredicate.ALWAYS_TRUE);
+    return new BlockNbtData(regionProvider, ConstantBlockPredicate.ALWAYS_TRUE);
   }
 
   @Override

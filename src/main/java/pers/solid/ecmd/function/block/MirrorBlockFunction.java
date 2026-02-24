@@ -10,12 +10,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.argument.MirrorArgument;
+import pers.solid.ecmd.argument.MirrorProvider;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
-public record MirrorBlockFunction(@NotNull MirrorArgument mirror) implements BlockFunction {
-  public static final MapCodec<MirrorBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(MirrorBlockFunction::new, MirrorArgument.CODEC.fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
+public record MirrorBlockFunction(@NotNull MirrorProvider mirror) implements BlockFunction {
+  public static final MapCodec<MirrorBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(MirrorBlockFunction::new, MirrorProvider.CODEC.fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
 
   @Override
   public @NotNull String asString() {
@@ -42,7 +42,7 @@ public record MirrorBlockFunction(@NotNull MirrorArgument mirror) implements Blo
   }
 
   public static class Parser implements FunctionLikeParser.SequentialParams<MirrorBlockFunction> {
-    private MirrorArgument mirror;
+    private MirrorProvider mirror;
 
     @Override
     public int minSequentialParamsCount() {
@@ -61,7 +61,7 @@ public record MirrorBlockFunction(@NotNull MirrorArgument mirror) implements Blo
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      mirror = parseContext.parseAndSuggestEnums(MirrorArgument.values(), mirrorArgument -> null, MirrorArgument.CODEC);
+      mirror = parseContext.parseAndSuggestEnums(MirrorProvider.values(), mirrorProvider -> null, MirrorProvider.CODEC);
     }
   }
 }

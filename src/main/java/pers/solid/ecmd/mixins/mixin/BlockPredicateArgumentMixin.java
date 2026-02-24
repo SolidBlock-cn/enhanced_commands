@@ -24,13 +24,13 @@ import java.util.function.Predicate;
 @Mixin(BlockPredicateArgument.class)
 public abstract class BlockPredicateArgumentMixin implements ArgumentTypeExtension {
   @Unique
-  private pers.solid.ecmd.argument.BlockPredicateArgumentType modArgumentType;
+  private pers.solid.ecmd.argument.BlockPredicateArgument modArgumentType;
   @Unique
   private boolean extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
   private void injectedInit(CommandBuildContext commandBuildContext, CallbackInfo ci) {
-    this.modArgumentType = new pers.solid.ecmd.argument.BlockPredicateArgumentType(commandBuildContext);
+    this.modArgumentType = new pers.solid.ecmd.argument.BlockPredicateArgument(commandBuildContext);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/blocks/BlockPredicateArgument$Result;", at = @At("HEAD"), cancellable = true)

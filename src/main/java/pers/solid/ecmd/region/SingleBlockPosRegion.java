@@ -13,8 +13,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 
@@ -78,7 +78,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<RegionArgument<SingleBlockPosRegion>> parser() {
+    public FunctionLikeParser.SequentialParams<RegionProvider<SingleBlockPosRegion>> parser() {
       return FunctionParser.INSTANCE;
     }
 
@@ -88,22 +88,22 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionArgument<SingleBlockPosRegion>> getArgumentCodec() {
-      return SingleBlockPosRegionArgument.CODEC;
+    public @NotNull MapCodec<? extends RegionProvider<SingleBlockPosRegion>> getArgumentCodec() {
+      return SingleBlockPosRegionProvider.CODEC;
     }
   }
 
   /**
    * 直接将坐标形式的内容解析为区域，例如 {@code 1 2 3} 等价于 {@code single(1 2 3)}，{@code ~~~} 等价于 {@code single(~~~)}。
    */
-  public enum BareParser implements pers.solid.ecmd.parse.Parser<SingleBlockPosRegionArgument> {
+  public enum BareParser implements pers.solid.ecmd.parse.Parser<SingleBlockPosRegionProvider> {
     INSTANCE;
 
     @Override
-    public SingleBlockPosRegionArgument parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public SingleBlockPosRegionProvider parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       final int cursorBeforeParse = reader.getCursor();
-      final EnhancedPosArgumentType argumentType = EnhancedPosArgumentType.blockPos();
+      final EnhancedPosArgument argumentType = EnhancedPosArgument.blockPos();
       parseContext.addSuggestion((context, builder) -> {
         final SuggestionsBuilder builderOffset = builder.createOffset(cursorBeforeParse);
         return argumentType.listSuggestions(context, builderOffset);
@@ -111,17 +111,17 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
       if (reader.canRead()) {
         final char peek = reader.peek();
         if (StringReader.isAllowedNumber(peek) || peek == '~' || peek == '^') {
-          final EnhancedPosArgument posArgument = argumentType.parse(reader);
-          return new SingleBlockPosRegionArgument(posArgument);
+          final EnhancedCoordinates posArgument = argumentType.parse(reader);
+          return new SingleBlockPosRegionProvider(posArgument);
         }
       }
       return null;
     }
   }
 
-  public enum FunctionParser implements FunctionLikeParser.SequentialParams<RegionArgument<SingleBlockPosRegion>> {
+  public enum FunctionParser implements FunctionLikeParser.SequentialParams<RegionProvider<SingleBlockPosRegion>> {
     INSTANCE;
-    private EnhancedPosArgument posArgument;
+    private EnhancedCoordinates posArgument;
 
     @Override
     public int minSequentialParamsCount() {
@@ -134,15 +134,15 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public RegionArgument<SingleBlockPosRegion> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final EnhancedPosArgument posArgument1 = posArgument;
+    public RegionProvider<SingleBlockPosRegion> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final EnhancedCoordinates posArgument1 = posArgument;
       posArgument = null;
-      return new SingleBlockPosRegionArgument(posArgument1);
+      return new SingleBlockPosRegionProvider(posArgument1);
     }
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      ArgumentType<EnhancedPosArgument> argumentType = EnhancedPosArgumentType.blockPos();
+      ArgumentType<EnhancedCoordinates> argumentType = EnhancedPosArgument.blockPos();
       posArgument = parseContext.parseAndSuggestArgument(argumentType);
     }
   }

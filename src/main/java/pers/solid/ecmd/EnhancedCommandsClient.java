@@ -6,7 +6,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
 import pers.solid.ecmd.render.DebugRenderLayerCommand;
 
 @Environment(EnvType.CLIENT)
@@ -16,7 +16,7 @@ public class EnhancedCommandsClient implements ClientModInitializer {
     // 注册客户端运行任务的事件
     ClientTickEvents.END_CLIENT_TICK.register(EnhancedCommands.id("tick_iterator_task"), client -> {
       client.getProfiler().push("enhanced_commands:tick_iterator_task");
-      ((ThreadExecutorExtension) client).ec_advanceTasks();
+      ((BlockableEventLoopExtension) client).ec_advanceTasks();
       client.getProfiler().pop();
     });
 

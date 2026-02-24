@@ -8,8 +8,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunctionType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -17,8 +17,8 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
-public record PosNbtFunction(EnhancedPosArgument pos) implements NbtFunction {
-  public static final MapCodec<PosNbtFunction> CODEC = EnhancedPosArgument.CODEC.fieldOf("pos").xmap(PosNbtFunction::new, PosNbtFunction::pos);
+public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
+  public static final MapCodec<PosNbtFunction> CODEC = EnhancedCoordinates.CODEC.fieldOf("pos").xmap(PosNbtFunction::new, PosNbtFunction::pos);
 
   @Override
   public @NotNull String asString() {
@@ -47,7 +47,7 @@ public record PosNbtFunction(EnhancedPosArgument pos) implements NbtFunction {
   }
 
   public static class Parser implements FunctionLikeParser<NbtFunction> {
-    private EnhancedPosArgument posArgument;
+    private EnhancedCoordinates posArgument;
 
     @Override
     public NbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
@@ -56,7 +56,7 @@ public record PosNbtFunction(EnhancedPosArgument pos) implements NbtFunction {
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgumentType.posPreferringCenteredInt());
+      posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgument.posPreferringCenteredInt());
     }
   }
 }

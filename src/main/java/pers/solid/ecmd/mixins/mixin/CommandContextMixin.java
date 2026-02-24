@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import pers.solid.ecmd.mixins.ext.ServerCommandSourceExtension;
+import pers.solid.ecmd.mixins.ext.CommandSourceStackExtension;
 
 @Mixin(value = CommandContext.class, remap = false)
 public abstract class CommandContextMixin<S> {
@@ -21,7 +21,7 @@ public abstract class CommandContextMixin<S> {
    */
   @ModifyExpressionValue(method = "getArgument", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"))
   public Object getAddedArgument(Object original, @Local(argsOnly = true) String name) {
-    if (original == null && source instanceof ServerCommandSourceExtension extension) {
+    if (original == null && source instanceof CommandSourceStackExtension extension) {
       final Object get = extension.getExtraArguments$ec().get(name);
       if (get != null) {
         return new ParsedArgument<>(0, 0, get);

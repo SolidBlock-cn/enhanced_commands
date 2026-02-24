@@ -36,8 +36,8 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   ResourceKey<Registry<Region>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region"));
   Codec<Region> CODEC = RegionType.REGISTRY.byNameCodec().dispatch(Region::getType, RegionType::getCodec);
 
-  static Region getCached(RegionArgument<?> regionArgument, PositionProvider positionProvider) {
-    return CacheStorage.cache.getUnchecked(regionArgument).getUnchecked(positionProvider);
+  static Region getCached(RegionProvider<?> regionProvider, PositionProvider positionProvider) {
+    return CacheStorage.cache.getUnchecked(regionProvider).getUnchecked(positionProvider);
   }
 
   /**
@@ -175,6 +175,6 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   }
 
   class CacheStorage {
-    private static final LoadingCache<@NotNull RegionArgument<?>, LoadingCache<@NotNull PositionProvider, Region>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument::toAbsoluteRegion))));
+    private static final LoadingCache<@NotNull RegionProvider<?>, LoadingCache<@NotNull PositionProvider, Region>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(regionArgument::toAbsoluteRegion))));
   }
 }

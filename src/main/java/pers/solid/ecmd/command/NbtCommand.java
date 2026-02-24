@@ -36,14 +36,14 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static net.minecraft.commands.arguments.NbtPathArgument.getPath;
 import static net.minecraft.commands.arguments.NbtPathArgument.nbtPath;
-import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
-import static pers.solid.ecmd.argument.NbtFunctionArgumentType.getNbtFunction;
-import static pers.solid.ecmd.argument.NbtPredicateArgumentType.getNbtPredicate;
-import static pers.solid.ecmd.argument.NbtSourceArgumentType.getNbtSource;
-import static pers.solid.ecmd.argument.NbtSourceArgumentType.nbtSource;
-import static pers.solid.ecmd.argument.NbtTargetArgumentType.getNbtTarget;
-import static pers.solid.ecmd.argument.NbtTargetArgumentType.nbtTarget;
-import static pers.solid.ecmd.argument.SimpleEnumArgumentType.nbtConcentrationType;
+import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
+import static pers.solid.ecmd.argument.NbtFunctionArgument.getNbtFunction;
+import static pers.solid.ecmd.argument.NbtPredicateArgument.getNbtPredicate;
+import static pers.solid.ecmd.argument.NbtSourceArgument.getNbtSource;
+import static pers.solid.ecmd.argument.NbtSourceArgument.nbtSource;
+import static pers.solid.ecmd.argument.NbtTargetArgument.getNbtTarget;
+import static pers.solid.ecmd.argument.NbtTargetArgument.nbtTarget;
+import static pers.solid.ecmd.argument.SimpleEnumArgument.nbtConcentrationType;
 
 public enum NbtCommand implements CommandRegistrationCallback {
   INSTANCE;
@@ -124,7 +124,7 @@ public enum NbtCommand implements CommandRegistrationCallback {
   }
 
   private static int executeRegexReplace(CommandContext<CommandSourceStack> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
-    final Pattern pattern = RegexArgumentType.getRegex(context, "regex");
+    final Pattern pattern = RegexArgument.getRegex(context, "regex");
     final String replacement = StringArgumentType.getString(context, "replacement");
     final RegexReplaceNbtFunction nbtFunction = new RegexReplaceNbtFunction(pattern, replacement, keywordArgs.getBoolean("recursive"), keywordArgs.getBoolean("lenient"), Optional.empty());
     return executeApply(nbtFunction, success -> Component.translatable("enhanced_commands.commands.nbt.regex_replace.success", success), context);
@@ -149,13 +149,13 @@ public enum NbtCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> commandDispatcher, CommandBuildContext commandRegistryAccess, Commands.CommandSelection registrationEnvironment) {
-    final KeywordArgsArgumentType transformKeywordArgs = KeywordArgsArgumentType.builder()
-        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess), null)
+    final KeywordArgsArgument transformKeywordArgs = KeywordArgsArgument.builder()
+        .addOptionalArg("affect_only", BlockPredicateArgument.blockPredicate(commandRegistryAccess), null)
         .addOptionalArg("recursive", BoolArgumentType.bool(), false)
         .addOptionalArg("lenient", BoolArgumentType.bool(), false)
         .build();
-    final KeywordArgsArgumentType substringKeywordArgs = KeywordArgsArgumentType.builder()
-        .addOptionalArg("affect_only", BlockPredicateArgumentType.blockPredicate(commandRegistryAccess), null)
+    final KeywordArgsArgument substringKeywordArgs = KeywordArgsArgument.builder()
+        .addOptionalArg("affect_only", BlockPredicateArgument.blockPredicate(commandRegistryAccess), null)
         .addOptionalArg("lenient", BoolArgumentType.bool(), false)
         .build();
 
@@ -165,7 +165,7 @@ public enum NbtCommand implements CommandRegistrationCallback {
                 .executes(context -> executeGet(getNbtSource(context, "source"), NbtConcentrationType.ALL, context))
                 .then(argument("path", nbtPath())
                     .executes(context -> executeGetInPath(getNbtSource(context, "source"), getPath(context, "path"), NbtConcentrationType.ALL, 1, context))
-                    .then(argument("keyword_args", KeywordArgsArgumentType.builder()
+                    .then(argument("keyword_args", KeywordArgsArgument.builder()
                         .addOptionalArg("scale", doubleArg(), 1d)
                         .addOptionalArg("concentration_type", nbtConcentrationType(), NbtConcentrationType.ALL)
                         .build())
@@ -176,17 +176,17 @@ public enum NbtCommand implements CommandRegistrationCallback {
         .then(literal("set")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("path", nbtPath())
-                    .then(argument("nbt_function", NbtFunctionArgumentType.element(commandRegistryAccess))
+                    .then(argument("nbt_function", NbtFunctionArgument.element(commandRegistryAccess))
                         .executes(context -> executeSet(getNbtTarget(context, "target"), getPath(context, "path"), getNbtFunction(context, "nbt_function"), context))))))
         .then(literal("merge")
             .then(argument("target", nbtTarget(commandRegistryAccess))
-                .then(argument("nbt_function", NbtFunctionArgumentType.compound(commandRegistryAccess))
+                .then(argument("nbt_function", NbtFunctionArgument.compound(commandRegistryAccess))
                     .executes(context -> executeMerge(getNbtTarget(context, "target"), getNbtFunction(context, "nbt_function"), context)))))
         .then(literal("replace")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("path", nbtPath())
-                    .then(argument("nbt_predicate", NbtPredicateArgumentType.element(commandRegistryAccess))
-                        .then(argument("nbt_function", NbtFunctionArgumentType.element(commandRegistryAccess))
+                    .then(argument("nbt_predicate", NbtPredicateArgument.element(commandRegistryAccess))
+                        .then(argument("nbt_function", NbtFunctionArgument.element(commandRegistryAccess))
                             .executes(context -> executeReplace(getNbtTarget(context, "target"), getNbtPredicate(context, "nbt_predicate"), getNbtFunction(context, "nbt_function"), context)))))))
         .then(literal("string_replace")
             .then(argument("target", nbtTarget(commandRegistryAccess))
@@ -199,7 +199,7 @@ public enum NbtCommand implements CommandRegistrationCallback {
         .then(literal("regex_replace")
             .then(argument("target", nbtTarget(commandRegistryAccess))
                 .then(argument("path", nbtPath())
-                    .then(argument("regex", RegexArgumentType.REGEX)
+                    .then(argument("regex", RegexArgument.REGEX)
                         .then(argument("replacement", string())
                             .executes(context -> executeRegexReplace(context, transformKeywordArgs.defaultArgs()))
                             .then(argument("keyword_args", transformKeywordArgs)

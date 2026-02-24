@@ -37,9 +37,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
-import pers.solid.ecmd.argument.DirectionArgumentType;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
-import pers.solid.ecmd.argument.RegionArgumentType;
+import pers.solid.ecmd.argument.DirectionArgument;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.argument.RegionArgument;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.lambda.ToFloatTriFunction;
@@ -107,9 +107,9 @@ public final class SeparatedExecuteCommand {
           return list;
         })));
     dispatcher.register(literalR2("inregion")
-        .then(argument("region", RegionArgumentType.region(commandBuildContext))
+        .then(argument("region", RegionArgument.region(commandBuildContext))
             .fork(literalCommandNode, context -> {
-              final Region region = RegionArgumentType.getRegion(context, "region");
+              final Region region = RegionArgument.getRegion(context, "region");
               final CommandSourceStack source = context.getSource();
               List<CommandSourceStack> list = new ArrayList<>();
               for (BlockPos pos : region) {
@@ -248,7 +248,7 @@ public final class SeparatedExecuteCommand {
 
   private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockFloatInfoConditionalLogic(CommandNode<CommandSourceStack> root, T node, ToFloatTriFunction<BlockState, ServerLevel, BlockPos> function, boolean positive) {
     return node.then(addConditionLogic(root, argument("range", RangeArgument.floatRange()), positive, context -> {
-      final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+      final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
       final ServerLevel world = context.getSource().getLevel();
       return RangeArgument.Floats.getRange(context, "range").matches(function.applyAsFloat(world.getBlockState(pos), world, pos));
     }));
@@ -256,25 +256,25 @@ public final class SeparatedExecuteCommand {
 
   private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockIntInfoConditionalLogic(CommandNode<CommandSourceStack> root, T node, ToIntTriFunction<BlockState, ServerLevel, BlockPos> function, boolean positive) {
     return node.then(addConditionLogic(root, argument("range", RangeArgument.intRange()), positive, context -> {
-      final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+      final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
       final ServerLevel world = context.getSource().getLevel();
       return RangeArgument.Ints.getRange(context, "range").matches(function.applyAsInt(world.getBlockState(pos), world, pos));
     }));
   }
 
   private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockIntInfoConditionalLogicWithDirection(CommandNode<CommandSourceStack> root, T node, ToIntQuadFunction<BlockState, ServerLevel, BlockPos, Direction> function, boolean positive) {
-    return node.then(argument("direction", DirectionArgumentType.direction())
+    return node.then(argument("direction", DirectionArgument.direction())
         .then(addConditionLogic(root, argument("range", RangeArgument.intRange()), positive, context -> {
-          final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+          final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
           final ServerLevel world = context.getSource().getLevel();
-          final Direction direction = DirectionArgumentType.getDirection(context, "direction");
+          final Direction direction = DirectionArgument.getDirection(context, "direction");
           return RangeArgument.Ints.getRange(context, "range").matches(function.applyAsInt(world.getBlockState(pos), world, pos, direction));
         })));
   }
 
   private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockBooleanInfoConditionalLogicWith(CommandNode<CommandSourceStack> root, T node, TriPredicate<BlockState, ServerLevel, BlockPos> function, boolean positive) {
     return addConditionLogic(root, node, positive, context -> {
-      final BlockPos pos = EnhancedPosArgumentType.getLoadedBlockPos(context, "pos");
+      final BlockPos pos = EnhancedPosArgument.getLoadedBlockPos(context, "pos");
       final ServerLevel world = context.getSource().getLevel();
       return function.test(world.getBlockState(pos), world, pos);
     });
@@ -284,7 +284,7 @@ public final class SeparatedExecuteCommand {
   public static <T extends ArgumentBuilder<CommandSourceStack, T>> T addExtraConditionArguments(CommandNode<CommandSourceStack> root, T argumentBuilder, boolean positive, CommandBuildContext commandBuildContext) {
     return argumentBuilder
         .then(literal("blockinfo")
-            .then(addBlockInfoArguments(root, argument("pos", EnhancedPosArgumentType.blockPos()), positive)))
+            .then(addBlockInfoArguments(root, argument("pos", EnhancedPosArgument.blockPos()), positive)))
         .then(literal("rand")
             .then(addConditionLogic(root, argument("probability", FloatArgumentType.floatArg(0, 1)), positive, context -> context.getSource().getLevel().random.nextFloat() < FloatArgumentType.getFloat(context, "probability"))));
   }

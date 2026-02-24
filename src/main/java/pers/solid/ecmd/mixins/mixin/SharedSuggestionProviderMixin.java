@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import pers.solid.ecmd.configs.GeneralParsingConfig;
+import pers.solid.ecmd.config.GeneralParsingConfig;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

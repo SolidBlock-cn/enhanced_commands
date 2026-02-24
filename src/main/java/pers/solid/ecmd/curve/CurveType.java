@@ -14,5 +14,5 @@ public interface CurveType<T extends Curve> {
   @NotNull MapCodec<T> getCodec();
 
   @NotNull
-  MapCodec<? extends CurveArgument<? extends T>> getArgumentCodec();
+  MapCodec<? extends CurveProvider<? extends T>> getArgumentCodec();
 }

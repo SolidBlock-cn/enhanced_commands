@@ -16,16 +16,16 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.KeywordArgs;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
 import pers.solid.ecmd.history.History;
 
 import java.util.Deque;
 
 import static net.minecraft.commands.Commands.argument;
-import static pers.solid.ecmd.argument.KeywordArgsArgumentType.getKeywordArgs;
+import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum UndoCommand implements CommandRegistrationCallback {
@@ -34,7 +34,7 @@ public enum UndoCommand implements CommandRegistrationCallback {
   public static final SimpleCommandExceptionType NO_UNDOABLE_HISTORY = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.undo.no_history"));
   public static final SimpleCommandExceptionType NO_REDOABLE_HISTORY = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.redo.no_history"));
   public static final SimpleCommandExceptionType CONFLICT_ARGUMENT = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.undo.conflict_argument", "target", "target-server"));
-  public static final KeywordArgsArgumentType KEYWORD_ARGS = KeywordArgsArgumentType.builder()
+  public static final KeywordArgsArgument KEYWORD_ARGS = KeywordArgsArgument.builder()
       .addOptionalArg("target", EntityArgument.player(), null)
       .addOptionalArg("target-server", BoolArgumentType.bool(), false)
       .addOptionalArg("immediately", BoolArgumentType.bool(), false)
@@ -68,7 +68,7 @@ public enum UndoCommand implements CommandRegistrationCallback {
     } else {
       final Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable History> reverse = poll.undo(source, immediately, undoable);
       if (reverse.getFirst() != null) {
-        ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(reverse.getFirst());
+        ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(reverse.getFirst());
       }
       if (reverse.getSecond() != null) {
         historyHolder.addRedoableHistory$ec(reverse.getSecond());

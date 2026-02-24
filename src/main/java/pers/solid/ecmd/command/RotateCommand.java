@@ -32,8 +32,8 @@ import pers.solid.ecmd.util.GeoUtil;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.argument.EnhancedPosArgumentType.CURRENT_POS;
-import static pers.solid.ecmd.argument.EnhancedPosArgumentType.blockPos;
+import static pers.solid.ecmd.argument.EnhancedPosArgument.CURRENT_POS;
+import static pers.solid.ecmd.argument.EnhancedPosArgument.blockPos;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum RotateCommand implements CommandRegistrationCallback {
@@ -41,7 +41,7 @@ public enum RotateCommand implements CommandRegistrationCallback {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final KeywordArgsArgumentType keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
+    final KeywordArgsArgument keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
         .addOptionalArg("interpolate", BoolArgumentType.bool(), false)
         .addOptionalArg("pivot", blockPos(), CURRENT_POS)
         .build();
@@ -50,30 +50,30 @@ public enum RotateCommand implements CommandRegistrationCallback {
         dispatcher,
         literalR2("rotate"),
         literalR2("/rotate"),
-        argument("region", RegionArgumentType.region(commandBuildContext))
-            .then(argument("rotation", AngleArgumentType.angle(false))
+        argument("region", RegionArgument.region(commandBuildContext))
+            .then(argument("rotation", AngleArgument.angle(false))
                 .executes(context -> executeRotate(null, keywordArgs.defaultArgs(), context))
                 .then(argument("keyword_args", keywordArgs)
-                    .executes(context -> executeRotate(null, KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context)))
+                    .executes(context -> executeRotate(null, KeywordArgsArgument.getKeywordArgs(context, "keyword_args"), context)))
                 .then(literal("around")
-                    .then(argument("around_direction", DirectionArgumentType.direction())
-                        .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").step()), keywordArgs.defaultArgs(), context))
+                    .then(argument("around_direction", DirectionArgument.direction())
+                        .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgument.getAngle(context, "rotation")), DirectionArgument.getDirection(context, "around_direction").step()), keywordArgs.defaultArgs(), context))
                         .then(argument("keyword_args", keywordArgs)
-                            .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DirectionArgumentType.getDirection(context, "around_direction").step()), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))
+                            .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgument.getAngle(context, "rotation")), DirectionArgument.getDirection(context, "around_direction").step()), KeywordArgsArgument.getKeywordArgs(context, "keyword_args"), context))))
                     .then(literal("vector")
                         .then(argument("x", DoubleArgumentType.doubleArg())
                             .then(argument("y", DoubleArgumentType.doubleArg())
                                 .then(argument("z", DoubleArgumentType.doubleArg())
-                                    .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), keywordArgs.defaultArgs(), context))
+                                    .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgument.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), keywordArgs.defaultArgs(), context))
                                     .then(argument("keyword_args", keywordArgs)
-                                        .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgumentType.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), KeywordArgsArgumentType.getKeywordArgs(context, "keyword_args"), context))))))))));
+                                        .executes(context -> executeRotate(new AxisAngle4d(Math.toRadians(AngleArgument.getAngle(context, "rotation")), DoubleArgumentType.getDouble(context, "x"), DoubleArgumentType.getDouble(context, "y"), DoubleArgumentType.getDouble(context, "z")).normalize(), KeywordArgsArgument.getKeywordArgs(context, "keyword_args"), context))))))))));
   }
 
   public static int executeRotate(@Nullable AxisAngle4d axisAngle4d, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     final double rotation;
     final @Nullable Rotation blockRotation;
     if (axisAngle4d == null) {
-      rotation = Mth.wrapDegrees(AngleArgumentType.getAngle(context, "rotation"));
+      rotation = Mth.wrapDegrees(AngleArgument.getAngle(context, "rotation"));
       if (rotation == 0) {
         blockRotation = Rotation.NONE;
       } else if (rotation == 90) {
@@ -207,6 +207,6 @@ public enum RotateCommand implements CommandRegistrationCallback {
       }
     };
 
-    return blockTransformationCommand.execute(RegionArgumentType.getRegion(context, "region"), keywordArgs, context);
+    return blockTransformationCommand.execute(RegionArgument.getRegion(context, "region"), keywordArgs, context);
   }
 }

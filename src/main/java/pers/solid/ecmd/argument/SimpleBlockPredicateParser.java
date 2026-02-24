@@ -190,8 +190,8 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
       parseContext.addSuggestion((context, suggestionsBuilder) -> {
         final SuggestionsBuilder offset = suggestionsBuilder.createOffset(cursorBeforeValue);
         final SuggestionsBuilder offset2 = suggestionsBuilder.createOffset(cursorAfterValue);
-        //noinspection unchecked
-        PROPERTY_FINISHED.getSuggestions((CommandContext<Object>) context, offset2);
+        @SuppressWarnings("unchecked") final CommandContext<Object> cast = (CommandContext<Object>) context;
+        PROPERTY_FINISHED.getSuggestions(cast, offset2);
         return propertyValueSuggestion.getSuggestions(context, offset).thenCombine(offset2.buildFuture(), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
       });
       if (!usingEqual) break;

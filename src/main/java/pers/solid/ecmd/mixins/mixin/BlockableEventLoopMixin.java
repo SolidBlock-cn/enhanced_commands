@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
 
 import java.util.Map;
 import java.util.Queue;
@@ -14,7 +14,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Mixin(BlockableEventLoop.class)
-public class BlockableEventLoopMixin implements ThreadExecutorExtension {
+public class BlockableEventLoopMixin implements BlockableEventLoopExtension {
   @Unique
   private final Map<UUID, IteratorTask<?>> uuidToTask = new MapMaker().weakValues().makeMap();
   @Unique

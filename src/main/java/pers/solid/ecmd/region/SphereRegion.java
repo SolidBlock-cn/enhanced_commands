@@ -15,8 +15,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
@@ -110,18 +110,18 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
     }
 
     @Override
-    public @NotNull MapCodec<SphereRegionArgument> getArgumentCodec() {
-      return SphereRegionArgument.CODEC;
+    public @NotNull MapCodec<SphereRegionProvider> getArgumentCodec() {
+      return SphereRegionProvider.CODEC;
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.MixedParams<SphereRegionArgument> {
-    private @Nullable EnhancedPosArgument centerPos = null;
+  public static final class Parser implements FunctionLikeParser.MixedParams<SphereRegionProvider> {
+    private @Nullable EnhancedCoordinates centerPos = null;
     private @Nullable Double radius = null;
 
     @Override
-    public SphereRegionArgument getParseResult(ParseContext<?> parseContext) {
-      return new SphereRegionArgument(radius == null ? 0 : radius, centerPos == null ? EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER : centerPos);
+    public SphereRegionProvider getParseResult(ParseContext<?> parseContext) {
+      return new SphereRegionProvider(radius == null ? 0 : radius, centerPos == null ? EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER : centerPos);
     }
 
     @Override
@@ -136,7 +136,7 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
         if (centerPos != null) {
           throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
         }
-        final EnhancedPosArgumentType type = EnhancedPosArgumentType.posPreferringCenteredInt();
+        final EnhancedPosArgument type = EnhancedPosArgument.posPreferringCenteredInt();
         centerPos = parseContext.parseAndSuggestArgument(type);
       }
     }

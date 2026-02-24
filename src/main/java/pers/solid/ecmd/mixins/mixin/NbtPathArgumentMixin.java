@@ -7,7 +7,7 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Slice;
-import pers.solid.ecmd.configs.GeneralParsingConfig;
+import pers.solid.ecmd.config.GeneralParsingConfig;
 
 @Mixin(NbtPathArgument.class)
 public abstract class NbtPathArgumentMixin {

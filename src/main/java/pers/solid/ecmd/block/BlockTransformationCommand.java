@@ -20,12 +20,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import pers.solid.ecmd.argument.KeywordArgs;
-import pers.solid.ecmd.argument.KeywordArgsArgumentType;
+import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.extensions.HistoryHolder;
 import pers.solid.ecmd.extensions.IteratorTask;
-import pers.solid.ecmd.extensions.ThreadExecutorExtension;
+import pers.solid.ecmd.extensions.BlockableEventLoopExtension;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionContext;
 import pers.solid.ecmd.history.BlockTransformationHistory;
@@ -41,8 +41,8 @@ import pers.solid.ecmd.util.iterator.IterateUtils;
 import java.util.function.Function;
 
 public interface BlockTransformationCommand {
-  static KeywordArgsArgumentType.Builder createKeywordArgs(CommandBuildContext commandBuildContext) {
-    return KeywordArgsArgumentType.builderFromShared(KeywordArgsCommon.BLOCK_TRANSFORMATION, commandBuildContext);
+  static KeywordArgsArgument.Builder createKeywordArgs(CommandBuildContext commandBuildContext) {
+    return KeywordArgsArgument.builderFromShared(KeywordArgsCommon.BLOCK_TRANSFORMATION, commandBuildContext);
   }
 
   Vec3i transformBlockPos(Vec3i original);
@@ -123,7 +123,7 @@ public interface BlockTransformationCommand {
     }
     final RegionSelection transformedRegionSelection = oldActiveRegion != null && region.equals(oldActiveRegion.region()) ? oldActiveRegion.transformed(this::transformPos) : null;
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      final IteratorTask<Void> iteratorTask = ((ThreadExecutorExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
+      final IteratorTask<Void> iteratorTask = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
 
         if (transformedRegionSelection != null) {
           history.reverseEntities.add(Triple.of(player, Pair.of(

@@ -20,9 +20,9 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.ModTrackedData;
-import pers.solid.ecmd.argument.AxisArgument;
-import pers.solid.ecmd.argument.DirectionArgument;
-import pers.solid.ecmd.argument.EnhancedPosArgumentType;
+import pers.solid.ecmd.argument.AxisProvider;
+import pers.solid.ecmd.argument.DirectionProvider;
+import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.Styles;
@@ -36,9 +36,9 @@ import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
 import static com.mojang.brigadier.arguments.DoubleArgumentType.getDouble;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.argument.DirectionArgumentType.direction;
-import static pers.solid.ecmd.argument.DirectionArgumentType.getDirection;
-import static pers.solid.ecmd.argument.SimpleEnumArgumentType.*;
+import static pers.solid.ecmd.argument.DirectionArgument.direction;
+import static pers.solid.ecmd.argument.DirectionArgument.getDirection;
+import static pers.solid.ecmd.argument.SimpleEnumArgument.*;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
 public enum ActiveRegionCommand implements CommandRegistrationCallback {
@@ -148,9 +148,9 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
         .then(literal("remove")
             .executes(ActiveRegionCommand::executeRemove))
         .then(literal("move")
-            .executes(context -> executeMoveDirection(1, DirectionArgument.FRONT.apply(context.getSource()), context))
+            .executes(context -> executeMoveDirection(1, DirectionProvider.FRONT.apply(context.getSource()), context))
             .then(argument("amount", doubleArg())
-                .executes(context -> executeMoveDirection(getDouble(context, "amount"), DirectionArgument.FRONT.apply(context.getSource()), context))
+                .executes(context -> executeMoveDirection(getDouble(context, "amount"), DirectionProvider.FRONT.apply(context.getSource()), context))
                 .then(argument("direction", direction())
                     .executes(context -> executeMoveDirection(getDouble(context, "amount"), getDirection(context, "direction"), context))))
             .then(argument("x", doubleArg())
@@ -159,19 +159,19 @@ public enum ActiveRegionCommand implements CommandRegistrationCallback {
                         .executes(ActiveRegionCommand::executeMoveVector)))))
         .then(literal("rotate")
             .then(argument("rotation", TemplateRotationArgument.templateRotation())
-                .executes(context -> executeRotate(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.getPosition(context.getSource()), TemplateRotationArgument.getRotation(context, "rotation"), context))
-                .then(argument("pivot", EnhancedPosArgumentType.posPreferringCenteredInt())
-                    .executes(context -> executeRotate(EnhancedPosArgumentType.getPos(context, "pivot"), TemplateRotationArgument.getRotation(context, "rotation"), context)))))
+                .executes(context -> executeRotate(EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER.getPosition(context.getSource()), TemplateRotationArgument.getRotation(context, "rotation"), context))
+                .then(argument("pivot", EnhancedPosArgument.posPreferringCenteredInt())
+                    .executes(context -> executeRotate(EnhancedPosArgument.getPos(context, "pivot"), TemplateRotationArgument.getRotation(context, "rotation"), context)))))
         .then(literal("mirror")
-            .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.getPosition(context.getSource()), AxisArgument.FRONT_BACK.apply(context.getSource()), context))
+            .executes(context -> executeMirror(EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER.getPosition(context.getSource()), AxisProvider.FRONT_BACK.apply(context.getSource()), context))
             .then(argument("axis", axis(false))
-                .executes(context -> executeMirror(EnhancedPosArgumentType.CURRENT_BLOCK_POS_CENTER.getPosition(context.getSource()), getAxis(context, "axis"), context))
-                .then(argument("pivot", EnhancedPosArgumentType.posPreferringCenteredInt())
-                    .executes(context -> executeMirror(EnhancedPosArgumentType.getPos(context, "pivot"), getAxis(context, "axis"), context)))))
+                .executes(context -> executeMirror(EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER.getPosition(context.getSource()), getAxis(context, "axis"), context))
+                .then(argument("pivot", EnhancedPosArgument.posPreferringCenteredInt())
+                    .executes(context -> executeMirror(EnhancedPosArgument.getPos(context, "pivot"), getAxis(context, "axis"), context)))))
         .then(literal("expand")
-            .executes(context -> executeExpandDirection(1, DirectionArgument.FRONT.apply(context.getSource()), context))
+            .executes(context -> executeExpandDirection(1, DirectionProvider.FRONT.apply(context.getSource()), context))
             .then(argument("offset", doubleArg())
-                .executes(context -> executeExpandDirection(getDouble(context, "offset"), DirectionArgument.FRONT.apply(context.getSource()), context))
+                .executes(context -> executeExpandDirection(getDouble(context, "offset"), DirectionProvider.FRONT.apply(context.getSource()), context))
                 .then(argument("direction", direction())
                     .executes(context -> executeExpandDirection(getDouble(context, "offset"), getDirection(context, "direction"), context)))
                 .then(argument("axis", axis(true))

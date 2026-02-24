@@ -17,11 +17,11 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.function.FailableConsumer;
-import pers.solid.ecmd.argument.NbtTargetArgumentType;
-import pers.solid.ecmd.configs.CommandsConfig;
+import pers.solid.ecmd.argument.NbtTargetArgument;
+import pers.solid.ecmd.config.CommandsConfig;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
 import pers.solid.ecmd.nbt.NbtTarget;
-import pers.solid.ecmd.region.ActiveRegionArgument;
+import pers.solid.ecmd.region.ActiveRegionProvider;
 
 import java.util.Collections;
 import java.util.function.Predicate;
@@ -83,7 +83,7 @@ public enum ModCommands implements CommandRegistrationCallback {
 
   public static final RedirectModifier<CommandSourceStack> REGION_ARGUMENTS_MODIFIER = context -> {
     final CommandSourceStack source = context.getSource();
-    source.addExtraArgument$ec("region", ActiveRegionArgument.INSTANCE);
+    source.addExtraArgument$ec("region", ActiveRegionProvider.INSTANCE);
     return Collections.singleton(source);
   };
 
@@ -92,7 +92,7 @@ public enum ModCommands implements CommandRegistrationCallback {
     if (directCommand != null && indirectBuilder.getCommand() == null) {
       indirectBuilder.executes(context -> {
         final CommandSourceStack source = context.getSource();
-        source.addExtraArgument$ec("region", ActiveRegionArgument.INSTANCE);
+        source.addExtraArgument$ec("region", ActiveRegionProvider.INSTANCE);
         return directCommand.run(context);
       });
     }
@@ -104,7 +104,7 @@ public enum ModCommands implements CommandRegistrationCallback {
   }
 
   public static FailableConsumer<Tag, CommandSyntaxException> consumerOf(CommandContext<CommandSourceStack> context, String targetArgName, String pathArgName) throws CommandSyntaxException {
-    final NbtTarget<?> target = NbtTargetArgumentType.getNbtTarget(context, targetArgName);
+    final NbtTarget<?> target = NbtTargetArgument.getNbtTarget(context, targetArgName);
     final NbtPathArgument.NbtPath path = NbtPathArgument.getPath(context, pathArgName);
     return nbt -> target.setNbtInPath(context.getSource(), path, nbt);
   }
