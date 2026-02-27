@@ -1,0 +1,79 @@
+plugins {
+    id 'com.gradleup.shadow'
+}
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+configurations {
+    common {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+
+    // Files in this configuration will be bundled into your mod using the Shadow plugin.
+    // Don't use the `shadow` configuration from the plugin itself as it's meant for excluding files.
+    shadowBundle {
+        canBeResolved = true
+        canBeConsumed = false
+    }
+}
+
+repositories {
+    // Mod Menu
+    maven { url "https://maven.terraformersmc.com/releases/" }
+}
+
+dependencies {
+    // Fabric Loader
+    modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+    // Fabric API. This is technically optional, but you probably want it anyway.
+    modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+
+    // Mod Menu
+    modImplementation "com.terraformersmc:modmenu:$project.modmenu_version"
+
+    // IMBlocker (Fabric)
+    if (!project.findProperty('imblocker_fabric_version').isEmpty()) {
+        modRuntimeOnly "maven.modrinth:imblocker-original:$project.imblocker_fabric_version"
+    }
+
+    // Better Selection (Fabric)
+    if (!project.findProperty("better_selection_version").isEmpty()) {
+        modRuntimeOnly "maven.modrinth:better-selection:$project.better_selection_version"
+    }
+
+    common(project(path: ':', configuration: 'namedElements')) { transitive = false }
+    shadowBundle project(path: ':', configuration: 'transformProductionFabric')
+}
+
+processResources {
+    inputs.property 'version', project.version
+
+    filesMatching('fabric.mod.json') {
+        expand version: inputs.properties.version
+    }
+}
+
+
+fabricApi {
+    // 启用数据生成
+    configureDataGeneration() {
+        client = true
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadowBundle]
+    archiveClassifier = 'dev-shadow'
+}
+
+remapJar {
+    inputFile.set shadowJar.archiveFile
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "enhanced_commands",
+  "version": "${version}",
+
+  "name": "enhanced_commands",
+  "description": "",
+  "authors": ["SolidBlock"],
+  "contact": {},
+
+  "license": "MIT",
+  "icon": "assets/enhanced_commands/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "pers.solid.ecmd.EnhancedCommandsClient"
+    ],
+    "main": [
+      "pers.solid.ecmd.EnhancedCommands"
+    ],
+    "fabric-datagen": [
+      "pers.solid.ecmd.data.EnhancedCommandsDataGenerator"
+    ]
+  },
+
+  "mixins": [
+    "enhanced_commands.mixins.accessor.json",
+    "enhanced_commands.mixins.impl.json",
+    "enhanced_commands.mixins.mixin.json"
+  ],
+
+  "depends": {
+    "fabricloader": "*",
+    "fabric-api": "*",
+    "minecraft": "1.21.4"
+  },
+
+  "custom": {
+  }
+}
