@@ -1,13 +1,13 @@
 package pers.solid.ecmd.config;
 
-import net.fabricmc.loader.api.FabricLoader;
+import pers.solid.ecmd.EnhancedCommands;
 
 @ConfigEntry.NoDescription
 public class CommandsConfig implements Cloneable {
   public static final CommandsConfig DEFAULT = new CommandsConfig();
   public static CommandsConfig current = DEFAULT;
 
-  public boolean enableDebugCommands = FabricLoader.getInstance().isDevelopmentEnvironment();
+  public boolean enableDebugCommands = EnhancedCommands.isDevelopmentEnvironment();
 
   @ConfigEntry.NoDescription
   public boolean enableMoveCommand = true;

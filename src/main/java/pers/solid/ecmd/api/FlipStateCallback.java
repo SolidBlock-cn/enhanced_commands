@@ -1,13 +1,12 @@
 package pers.solid.ecmd.api;
 
-import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.EnhancedCommands;
 
 /**
  * 本模组对方块状态进行上下的翻转时的事件，用于在 {@link #getMirroredState(BlockState, Direction.Axis)} 中在进行上下翻转时使用。对于水平方向的翻转，请直接使用 {@link BlockState#mirror(Mirror)} 方法。
@@ -84,16 +83,13 @@ public interface FlipStateCallback {
     return intermediate;
   };
 
-  Event<FlipStateCallback> EVENT = EventFactory.createArrayBacked(FlipStateCallback.class, flipStateEvents -> (intermediate, original) -> {
+
+  EventBridge<FlipStateCallback> EVENT = EnhancedCommands.create(FlipStateCallback.class, flipStateEvents -> (intermediate, original) -> {
     for (FlipStateCallback flipStateCallback : flipStateEvents) {
       intermediate = flipStateCallback.getFlippedState(intermediate, original);
     }
     return intermediate;
   });
-
-  static void registerDefaultEvent() {
-    EVENT.register(DEFAULT);
-  }
 
   static BlockState getMirroredState(BlockState blockState, Direction.Axis axis) {
     return switch (axis) {
@@ -101,5 +97,9 @@ public interface FlipStateCallback {
       case Z -> blockState.mirror(Mirror.LEFT_RIGHT);
       case Y -> EVENT.invoker().getFlippedState(blockState);
     };
+  }
+
+  static void registerDefaultEvent() {
+    EVENT.register(FlipStateCallback.DEFAULT);
   }
 }

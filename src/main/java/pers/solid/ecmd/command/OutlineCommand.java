@@ -4,11 +4,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.ConditionalBlockFunction;
@@ -23,7 +23,7 @@ import java.util.Collections;
 
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum OutlineCommand implements CommandRegistrationCallback {
+public enum OutlineCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   @Override

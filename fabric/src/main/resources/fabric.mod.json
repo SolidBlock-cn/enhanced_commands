@@ -14,20 +14,19 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "pers.solid.ecmd.EnhancedCommandsClient"
+      "pers.solid.ecmd.fabric.EnhancedCommandsClientImpl"
     ],
     "main": [
-      "pers.solid.ecmd.EnhancedCommands"
+      "pers.solid.ecmd.fabric.EnhancedCommandsImpl"
     ],
     "fabric-datagen": [
-      "pers.solid.ecmd.data.EnhancedCommandsDataGenerator"
+      "pers.solid.ecmd.data.fabric.EnhancedCommandsDataGenerator"
     ]
   },
 
   "mixins": [
-    "enhanced_commands.mixins.accessor.json",
-    "enhanced_commands.mixins.impl.json",
-    "enhanced_commands.mixins.mixin.json"
+    "enhanced_commands.mixins.json",
+    "enhanced_commands.mixins.fabric.json"
   ],
 
   "depends": {

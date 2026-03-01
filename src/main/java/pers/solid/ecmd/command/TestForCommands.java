@@ -2,12 +2,12 @@ package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 
-public enum TestForCommands implements CommandRegistrationCallback {
+public enum TestForCommands implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   @Override

@@ -5,7 +5,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -17,6 +16,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtTarget;
@@ -42,7 +42,7 @@ import static pers.solid.ecmd.argument.NbtTargetArgument.nbtTarget;
 import static pers.solid.ecmd.argument.SimpleEnumArgument.*;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum AirCommand implements CommandRegistrationCallback {
+public enum AirCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   @Override

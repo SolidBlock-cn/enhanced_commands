@@ -4,9 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import net.minecraft.Util;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class BlockPredicateTypes {
+  private static final RegistryBridge<BlockPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, BlockPredicateType.REGISTRY);
   public static final Map<String, Supplier<FunctionLikeParser<? extends BlockPredicate>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
   public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockPredicateTypes::registerFunctionNames);
   public static final Parser<BlockPredicate> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockPredicate.parse(parseContext.withAllowSparse(true)), parseContext);
@@ -53,7 +54,7 @@ public final class BlockPredicateTypes {
     if (value != SimpleBlockPredicate.Type.SIMPLE_TYPE && value instanceof Parser<?> parser) {
       PARSERS.add((Parser<BlockPredicate>) parser);
     }
-    return Registry.register(BlockPredicateType.REGISTRY, EnhancedCommands.id(name), value);
+    return REGISTRY_BRIDGE.register(name, value);
   }
 
   private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockPredicate>>> map) {
@@ -87,6 +88,6 @@ public final class BlockPredicateTypes {
   }
 
   public static void init() {
-    Preconditions.checkState(BlockPredicateType.REGISTRY.size() != 0);
+    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "BlockPredicateTyp registry is empty!");
   }
 }

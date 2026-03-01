@@ -7,12 +7,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.fabricmc.fabric.mixin.command.ArgumentTypesAccessor;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.mixins.accessor.ArgumentTypeInfosAccessor;
 import pers.solid.ecmd.util.mixin.ArgumentTypeExtension;
 
 import java.util.Collection;
@@ -77,10 +77,10 @@ public record VanillaWrappedArgument<T, F extends ArgumentType<T>>(F forward) im
       json.add("entityPredicate", forward);
     }
 
-    @SuppressWarnings({"unchecked", "UnstableApiUsage"})
+    @SuppressWarnings("unchecked")
     @Override
     public @NotNull VanillaWrappedArgument.Template<T, F, FP> unpack(VanillaWrappedArgument<T, F> argumentType) {
-      final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) ArgumentTypesAccessor.fabric_getClassMap().get(argumentType.forward.getClass());
+      final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) ArgumentTypeInfosAccessor.getBY_CLASS().get(argumentType.forward.getClass());
       return new VanillaWrappedArgument.Template<>(forwardSerializer.unpack(argumentType.forward));
     }
   }

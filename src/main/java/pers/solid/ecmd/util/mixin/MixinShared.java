@@ -34,11 +34,11 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.config.GeneralParsingConfig;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.mixins.mixin.CommandsMixin;
-import pers.solid.ecmd.mixins.mixin.LevelChunkMixin;
+import pers.solid.ecmd.mixins.general.CommandsMixin;
+import pers.solid.ecmd.mixins.general.LevelChunkMixin;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;

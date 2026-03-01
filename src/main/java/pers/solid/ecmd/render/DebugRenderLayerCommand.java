@@ -4,17 +4,17 @@ import com.google.common.collect.ImmutableBiMap;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.network.chat.Component;
+import pers.solid.ecmd.api.ClientCommandRegistrationCallbackBridge;
 
 @Environment(EnvType.CLIENT)
-public enum DebugRenderLayerCommand implements ClientCommandRegistrationCallback {
+public enum DebugRenderLayerCommand implements ClientCommandRegistrationCallbackBridge {
   INSTANCE;
 
   public static final ImmutableBiMap<String, RenderType> LAYERS = ImmutableBiMap.<String, RenderType>builder()
@@ -39,18 +39,19 @@ public enum DebugRenderLayerCommand implements ClientCommandRegistrationCallback
       .build();
 
   @Override
-  public void register(CommandDispatcher<FabricClientCommandSource> commandDispatcher, CommandBuildContext commandRegistryAccess) {
-    final LiteralArgumentBuilder<FabricClientCommandSource> literal = ClientCommandManager.literal("debug:renderlayer");
-    LAYERS.forEach((s, renderLayer) -> literal.then(ClientCommandManager.literal(s).executes(commandContext -> {
+  public <S> void register(CommandDispatcher<S> commandDispatcher, CommandBuildContext commandRegistryAccess) {
+    final LiteralArgumentBuilder<S> literal = LiteralArgumentBuilder.literal("debug:renderlayer");
+    LAYERS.forEach((s, renderLayer) -> literal.then(LiteralArgumentBuilder.<S>literal(s).executes(commandContext -> {
       RegionRendering.regionRenderLayer = renderLayer;
-      commandContext.getSource().sendFeedback(Component.literal("set to " + s));
+
+      Minecraft.getInstance().player.sendSystemMessage(Component.literal("set to " + s));
       return 1;
     })));
 
-    literal.then(ClientCommandManager.literal("debug_line_strip").then(ClientCommandManager.argument("lineWidth", DoubleArgumentType.doubleArg()).executes(commandContext -> {
+    literal.then(LiteralArgumentBuilder.<S>literal("debug_line_strip").then(RequiredArgumentBuilder.<S, Double>argument("lineWidth", DoubleArgumentType.doubleArg()).executes(commandContext -> {
       final double lineWidth = DoubleArgumentType.getDouble(commandContext, "lineWidth");
       RegionRendering.regionRenderLayer = RenderType.debugLineStrip(lineWidth);
-      commandContext.getSource().sendFeedback(Component.literal("set to debug_line_strip lineWidth = " + lineWidth));
+      Minecraft.getInstance().player.sendSystemMessage(Component.literal("set to debug_line_strip lineWidth = " + lineWidth));
       return 1;
     })));
     commandDispatcher.register(literal);

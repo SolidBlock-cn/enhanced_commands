@@ -9,7 +9,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -17,6 +16,7 @@ import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.function.FailableConsumer;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.NbtTargetArgument;
 import pers.solid.ecmd.config.CommandsConfig;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
@@ -26,7 +26,7 @@ import pers.solid.ecmd.region.ActiveRegionProvider;
 import java.util.Collections;
 import java.util.function.Predicate;
 
-public enum ModCommands implements CommandRegistrationCallback {
+public enum ModCommands implements CommandRegistrationCallbackBridge {
   INSTANCE;
   public static final Predicate<CommandSourceStack> REQUIRES_PERMISSION_2 = source -> source.hasPermission(2);
 

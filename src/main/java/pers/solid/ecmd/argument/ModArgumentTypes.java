@@ -2,10 +2,9 @@ package pers.solid.ecmd.argument;
 
 import com.google.common.base.Suppliers;
 import com.mojang.brigadier.arguments.ArgumentType;
-import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import pers.solid.ecmd.EnhancedCommands;
 
 /**
  * @see net.minecraft.commands.synchronization.ArgumentTypeInfos
@@ -35,9 +34,10 @@ public class ModArgumentTypes {
     registerTrustingType("vanilla_wrapped", VanillaWrappedArgument.class, VanillaWrappedArgument.Info.INSTANCE);
   }
 
+  @ExpectPlatform
   private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void register(
-      String name, Class<? extends A> clazz, ArgumentTypeInfo<A, T> info) {
-    ArgumentTypeRegistry.registerArgumentType(EnhancedCommands.id(name), clazz, info);
+      String name, Class<A> clazz, ArgumentTypeInfo<A, T> info) {
+    throw new AssertionError();
   }
 
 
@@ -45,6 +45,6 @@ public class ModArgumentTypes {
   private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void registerTrustingType(
       // 此方法用于需要使用特殊泛型的方法，和 register 类似，但是为了在特殊情况下编译通过。
       String name, Class<?> clazz, ArgumentTypeInfo<A, T> info) {
-    ArgumentTypeRegistry.registerArgumentType(EnhancedCommands.id(name), (Class<? extends A>) clazz, info);
+    register(name, (Class<A>) clazz, info);
   }
 }

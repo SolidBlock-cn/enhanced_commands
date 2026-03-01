@@ -1,7 +1,6 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -10,12 +9,13 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.apache.commons.lang3.BooleanUtils;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.mixins.accessor.ServerLevelAccessor;
 import pers.solid.ecmd.util.Styles;
 
 import static net.minecraft.commands.Commands.literal;
 
-public enum EnhancedWeatherCommand implements CommandRegistrationCallback {
+public enum EnhancedWeatherCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   @Override

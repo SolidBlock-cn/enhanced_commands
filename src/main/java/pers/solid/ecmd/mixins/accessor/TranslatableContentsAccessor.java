@@ -1,6 +1,7 @@
 package pers.solid.ecmd.mixins.accessor;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -11,10 +12,6 @@ import java.util.Optional;
 
 @Mixin(TranslatableContents.class)
 public interface TranslatableContentsAccessor {
-  @Invoker
-  static Optional<List<Object>> callAdjustArgs(Object[] args) {
-    throw new UnsupportedOperationException();
-  }
 
   @Accessor
   static Codec<Object> getARG_CODEC() {
@@ -22,7 +19,10 @@ public interface TranslatableContentsAccessor {
   }
 
   @Invoker
-  static Object[] callAdjustArgs(Optional<List<Object>> args) {
+  FormattedText invokeGetArgument(int index);
+
+  @Invoker("adjustArgs")
+  static Optional<List<Object>> callToOptionalList(Object[] args) {
     throw new UnsupportedOperationException();
   }
 }

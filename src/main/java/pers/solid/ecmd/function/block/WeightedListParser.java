@@ -12,7 +12,7 @@ import pers.solid.ecmd.util.iterator.IterateUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension.withCursorEnd;
 
 public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
   public boolean weighted = false;

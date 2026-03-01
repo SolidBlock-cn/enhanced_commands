@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "pers.solid.ecmd.mixins.fabric",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "EntitySelectorOptionsAccessor"
+  ],
+  "client": [
+    "FabricClientCommandSourceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
