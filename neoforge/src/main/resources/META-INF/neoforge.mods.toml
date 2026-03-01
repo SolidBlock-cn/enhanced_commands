@@ -6,10 +6,10 @@ license = "MIT"
 [[mods]]
 modId = "enhanced_commands"
 version = "${version}"
-displayName = "Enhanced commands"
+displayName = "Enhanced Commands"
 authors = "SolidBlock"
 description = '''
-This is an example description! Tell everyone what your mod is about!
+Enhanced Commands mod.
 '''
 #logoFile = ""
 
