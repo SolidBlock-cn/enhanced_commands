@@ -11,8 +11,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.datafixers.util.Either;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.MobEffectsPredicate;
@@ -48,8 +48,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
-import pers.solid.ecmd.mixins.mixin.EntitySelectorOptionsMixin;
+import pers.solid.ecmd.mixins.general.EntitySelectorOptionsMixin;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
@@ -58,6 +57,7 @@ import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
+import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
@@ -602,9 +602,9 @@ public class EntitySelectorOptionsExtension {
     return (suggestionsBuilder, suggestionsBuilderConsumer) -> original.apply(suggestionsBuilder, suggestionsBuilderConsumer).thenCombine(next.apply(suggestionsBuilder, suggestionsBuilderConsumer), (suggestions, suggestions2) -> suggestions.isEmpty() ? suggestions2 : suggestions);
   }
 
-  @SuppressWarnings("UnstableApiUsage")
+  @ExpectPlatform
   private static void putOption(String id, EntitySelectorOptions.Modifier handler, Predicate<EntitySelectorParser> condition, Component description) {
-    EntitySelectorOptionsAccessor.callPutOption(id, handler, condition, description);
+    throw new AssertionError();
   }
 
 

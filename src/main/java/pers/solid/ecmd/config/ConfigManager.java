@@ -3,11 +3,11 @@ package pers.solid.ecmd.config;
 import com.google.gson.*;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import net.fabricmc.loader.api.FabricLoader;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pers.solid.ecmd.EnhancedCommands;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,7 +25,7 @@ public final class ConfigManager {
   public static final Gson GSON = new GsonBuilder()
       .setPrettyPrinting()
       .create();
-  public static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("enhanced_commands");
+  public static final Path CONFIG_PATH = EnhancedCommands.getConfigDir().resolve("enhanced_commands");
   public static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
 
   public static void loadAllConfigsFromJson() {

@@ -13,7 +13,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -35,13 +34,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableFunction;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.curve.CurveProvider;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
-import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
@@ -50,6 +49,7 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.extension.HistoryHolder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -70,7 +70,7 @@ import static pers.solid.ecmd.argument.NbtPredicateArgument.getNbtPredicate;
 import static pers.solid.ecmd.argument.RegionArgument.getRegion;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum TestArgCommand implements CommandRegistrationCallback {
+public enum TestArgCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockFunctionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {

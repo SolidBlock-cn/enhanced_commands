@@ -6,7 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.ModTrackedData;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.AxisProvider;
 import pers.solid.ecmd.argument.DirectionProvider;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
@@ -41,7 +41,7 @@ import static pers.solid.ecmd.argument.DirectionArgument.getDirection;
 import static pers.solid.ecmd.argument.SimpleEnumArgument.*;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum ActiveRegionCommand implements CommandRegistrationCallback {
+public enum ActiveRegionCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   public static final SimpleCommandExceptionType UNSUPPORTED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.activeregion.unsupported"));

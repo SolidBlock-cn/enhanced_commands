@@ -35,9 +35,9 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.ParserUtilsAccessor;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.List;

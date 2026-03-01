@@ -5,8 +5,8 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
-import pers.solid.ecmd.mixins.ext.ServerPlayerExtension;
 import pers.solid.ecmd.util.PositionProvider;
+import pers.solid.ecmd.util.extension.ServerPlayerExtension;
 
 public enum ActiveRegionProvider implements RegionProvider<Region> {
   INSTANCE;

@@ -1,7 +1,5 @@
 package pers.solid.ecmd.regionselection;
 
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
-import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,10 +7,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
+import pers.solid.ecmd.api.EventBridges;
 
 public final class WandEvent {
   public static void registerEvents() {
-    UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+    EventBridges.INSTANCE.useBlockEvent().register((player, world, hand, hitResult) -> {
       if (!player.isSpectator() && isWand(player.getItemInHand(hand))) {
         if (player instanceof ServerPlayer serverPlayer) {
           final Component text = serverPlayer.getOrResetRegionSelection$ec().clickSecondPoint(hitResult.getBlockPos().getCenter(), player).get();
@@ -23,7 +22,7 @@ public final class WandEvent {
       }
       return InteractionResult.PASS;
     });
-    AttackBlockCallback.EVENT.register((player, world, hand, pos, direction) -> {
+    EventBridges.INSTANCE.attackBlockEvent().register((player, world, hand, pos, direction) -> {
       // 此方法在 ClientPlayerInteractionManager.updateBlockBreakingProgress 中不会调用，
       // 因为 ClientPlayerInteractionManagerMixin 会在此情况下进行阻止，
       // 从而避免点击一下左键却被多次调用的情况。

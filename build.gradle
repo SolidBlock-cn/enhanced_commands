@@ -105,6 +105,9 @@ allprojects {
                 programArg "-username=Solid"
             }
         }
+        runConfigs.configureEach {
+            runDir = project.relativePath(project(':').file('run')).toString()
+        }
     }
 }
 

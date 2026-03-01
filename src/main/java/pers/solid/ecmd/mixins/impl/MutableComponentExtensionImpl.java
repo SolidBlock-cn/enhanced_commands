@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import pers.solid.ecmd.mixins.accessor.MutableComponentAccessor;
-import pers.solid.ecmd.mixins.ext.MutableComponentExtension;
 import pers.solid.ecmd.util.EnhancedTranslatableTextContent;
+import pers.solid.ecmd.util.extension.MutableComponentExtension;
 
 import java.util.List;
 

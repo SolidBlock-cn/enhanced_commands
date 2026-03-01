@@ -8,7 +8,6 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -21,6 +20,7 @@ import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
@@ -51,7 +51,7 @@ import static pers.solid.ecmd.command.ModCommands.literalR2;
  *   <li><code>/rand int <var>max</var></code> - rand int probability between 0 and <var>max</var>.</li>
  *   <li><code>/rand int <var>min</var> <var>max</var></code> - rand int probability between <var>min</var> and <var>max</var>.</li>
  */
-public enum RandCommand implements CommandRegistrationCallback {
+public enum RandCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
   public static final Dynamic2CommandExceptionType MIN_MAX_WRONG = new Dynamic2CommandExceptionType((a, b) -> Component.translatable("enhanced_commands.commands.rand.min_max_wrong", a, b));
 

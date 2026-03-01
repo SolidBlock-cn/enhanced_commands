@@ -4,10 +4,10 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.argument.KeywordArgsCommon;
@@ -19,7 +19,7 @@ import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.argument.RegionArgument.region;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum PostProcessCommand implements CommandRegistrationCallback {
+public enum PostProcessCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   @Override

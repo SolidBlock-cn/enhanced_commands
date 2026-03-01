@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -19,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
@@ -42,7 +42,7 @@ import static pers.solid.ecmd.argument.SimpleEnumArgument.concentrationType;
 import static pers.solid.ecmd.argument.SimpleEnumArgument.getConcentrationType;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum FoodCommand implements CommandRegistrationCallback {
+public enum FoodCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   public static final DynamicCommandExceptionType ADD_FROM_NOT_FOOD = new DynamicCommandExceptionType(stackName -> Component.translatable("enhanced_commands.commands.food.add_from.not_food", stackName));

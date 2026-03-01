@@ -9,7 +9,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -38,12 +37,11 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
-import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
-import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionselection.RegionSelection;
@@ -51,6 +49,8 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
+import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
+import pers.solid.ecmd.util.extension.HistoryHolder;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.iterator.IteratorTask;
@@ -70,7 +70,7 @@ import static pers.solid.ecmd.argument.DirectionArgument.getDirection;
 import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum StackCommand implements CommandRegistrationCallback {
+public enum StackCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   public static final SimpleCommandExceptionType UNLOADED_SOURCE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.rejected_source", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));

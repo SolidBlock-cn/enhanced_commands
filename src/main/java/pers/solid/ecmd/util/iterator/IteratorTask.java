@@ -3,7 +3,7 @@ package pers.solid.ecmd.util.iterator;
 import com.google.common.collect.ForwardingIterator;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
+import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 
 import java.util.Iterator;
 import java.util.UUID;

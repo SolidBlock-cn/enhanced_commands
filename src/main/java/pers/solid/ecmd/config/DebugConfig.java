@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.mixins.mixin.*;
+import pers.solid.ecmd.mixins.general.*;
 
 /**
  * 本模组中用于调试的一些配置项。
@@ -20,22 +20,22 @@ public class DebugConfig implements Cloneable {
    * @see ServerGamePacketListenerImplMixin#noClampVertical(double, CallbackInfoReturnable)
    * @see LevelMixin#forceValidHorizontally(BlockPos, CallbackInfoReturnable)
    * @see LevelMixin#forceValidVertically(int, CallbackInfoReturnable)
-   * @see pers.solid.ecmd.mixins.mixin.EntityMixin#noClampWhenUpdating(double, double, double, Operation)
+   * @see pers.solid.ecmd.mixins.general.EntityMixin#noClampWhenUpdating(double, double, double, Operation)
    */
   public boolean ignoreBoundary = false;
   /**
    * 忽视世界边界。
    *
    * @see GuiMixin#skipBorderWarning(double)
-   * @see pers.solid.ecmd.mixins.mixin.WorldBorderMixin
+   * @see pers.solid.ecmd.mixins.general.WorldBorderMixin
    */
   public boolean ignoreBorder = false;
 
   /**
    * 免疫虚空伤害。
    *
-   * @see pers.solid.ecmd.mixins.mixin.LivingEntityMixin#ignoreBelowWorld
-   * @see pers.solid.ecmd.mixins.mixin.EntityMixin#ignoreBelowWorld
+   * @see pers.solid.ecmd.mixins.general.LivingEntityMixin#ignoreBelowWorld
+   * @see pers.solid.ecmd.mixins.general.EntityMixin#ignoreBelowWorld
    */
   public int immuneToVoid = 0;
   /**

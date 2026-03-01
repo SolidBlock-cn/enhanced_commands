@@ -10,8 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pers.solid.ecmd.mixins.mixin.EntitySelectorParserMixin;
+import pers.solid.ecmd.mixins.general.EntitySelectorParserMixin;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.extension.EntitySelectorExtension;
 
 import java.util.List;
 import java.util.function.Function;
@@ -19,8 +20,8 @@ import java.util.function.Function;
 /**
  * 附加在 {@link EntitySelector} 的额外内容。
  *
- * @see pers.solid.ecmd.mixins.mixin.EntitySelectorMixin
- * @see pers.solid.ecmd.mixins.ext.EntitySelectorExtension
+ * @see pers.solid.ecmd.mixins.general.EntitySelectorMixin
+ * @see EntitySelectorExtension
  */
 public class EntitySelectorExtras {
   public static final Logger LOGGER = LoggerFactory.getLogger(EntitySelectorExtras.class);

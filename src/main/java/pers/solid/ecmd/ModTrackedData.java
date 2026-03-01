@@ -1,5 +1,6 @@
 package pers.solid.ecmd;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializer;
@@ -17,6 +18,7 @@ public final class ModTrackedData {
   private ModTrackedData() {
   }
 
+  @ExpectPlatform
   public static void init() {
     EntityDataSerializers.registerSerializer(REGION_SELECTION);
   }

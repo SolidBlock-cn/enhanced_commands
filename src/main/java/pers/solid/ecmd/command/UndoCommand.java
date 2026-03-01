@@ -8,18 +8,18 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.datafixers.util.Pair;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.history.History;
-import pers.solid.ecmd.mixins.ext.BlockableEventLoopExtension;
-import pers.solid.ecmd.mixins.ext.HistoryHolder;
+import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
+import pers.solid.ecmd.util.extension.HistoryHolder;
 import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.Deque;
@@ -28,7 +28,7 @@ import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum UndoCommand implements CommandRegistrationCallback {
+public enum UndoCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   public static final SimpleCommandExceptionType NO_UNDOABLE_HISTORY = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.undo.no_history"));

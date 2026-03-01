@@ -1,25 +1,25 @@
 {
   "injected_interfaces": {
     "net/minecraft/class_5250": [
-      "pers/solid/ecmd/mixins/ext/MutableComponentExtension"
+      "pers/solid/ecmd/util/extension/MutableComponentExtension"
     ],
     "net/minecraft/class_2168": [
-      "pers/solid/ecmd/mixins/ext/CommandSourceStackExtension"
+      "pers/solid/ecmd/util/extension/CommandSourceStackExtension"
     ],
     "com/mojang/brigadier/exceptions/CommandSyntaxException": [
-      "pers/solid/ecmd/mixins/ext/CommandSyntaxExceptionExtension"
+      "pers/solid/ecmd/util/extension/CommandSyntaxExceptionExtension"
     ],
     "net/minecraft/class_2300": [
-      "pers/solid/ecmd/mixins/ext/EntitySelectorExtension"
+      "pers/solid/ecmd/util/extension/EntitySelectorExtension"
     ],
     "net/minecraft/class_2303": [
-      "pers/solid/ecmd/mixins/ext/EntitySelectorParserExtension"
+      "pers/solid/ecmd/util/extension/EntitySelectorParserExtension"
     ],
     "net/minecraft/class_1657": [
-      "pers/solid/ecmd/mixins/ext/PlayerExtension"
+      "pers/solid/ecmd/util/extension/PlayerExtension"
     ],
     "net/minecraft/class_3222": [
-      "pers/solid/ecmd/mixins/ext/ServerPlayerExtension"
+      "pers/solid/ecmd/util/extension/ServerPlayerExtension"
     ]
   }
 }

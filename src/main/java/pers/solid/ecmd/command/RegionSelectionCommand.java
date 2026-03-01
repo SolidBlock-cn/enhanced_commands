@@ -5,7 +5,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -16,6 +15,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
@@ -30,7 +30,7 @@ import static net.minecraft.commands.Commands.literal;
 import static pers.solid.ecmd.argument.OmittedRegistryEntryArgument.omittedRegistryEntry;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum RegionSelectionCommand implements CommandRegistrationCallback {
+public enum RegionSelectionCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   @Override

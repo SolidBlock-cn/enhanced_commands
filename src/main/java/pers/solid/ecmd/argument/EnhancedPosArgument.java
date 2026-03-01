@@ -11,7 +11,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.CommandBuildContext;
@@ -43,7 +42,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import static pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension.withCursorEnd;
 
 /**
  * Similar to {@link BlockPosArgument} and {@link Vec3Argument}, with some slight modifications.
@@ -249,7 +248,7 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
     @Nullable Vec3 crossHairPos = null;
     @Nullable Vec3i crossHairBlockPos = null;
     if (context.getSource() instanceof ClientSuggestionProvider clientCommandSource) {
-      final Minecraft client = ((FabricClientCommandSource) clientCommandSource).getClient();
+      final Minecraft client = Minecraft.getInstance();
       if (client.hitResult != null && client.hitResult.getType() == HitResult.Type.BLOCK) {
         crossHairPos = client.hitResult.getLocation();
         if (client.hitResult instanceof BlockHitResult blockHitResult) {

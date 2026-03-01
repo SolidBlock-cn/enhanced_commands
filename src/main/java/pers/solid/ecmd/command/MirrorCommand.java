@@ -3,7 +3,6 @@ package pers.solid.ecmd.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.api.FlipStateCallback;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.BlockTransformationCommand;
@@ -29,7 +29,7 @@ import pers.solid.ecmd.util.GeoUtil;
 import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum MirrorCommand implements CommandRegistrationCallback {
+public enum MirrorCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   @Override

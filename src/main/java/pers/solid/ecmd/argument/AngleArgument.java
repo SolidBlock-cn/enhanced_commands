@@ -12,8 +12,8 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.mixins.ext.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.Collection;
 import java.util.List;

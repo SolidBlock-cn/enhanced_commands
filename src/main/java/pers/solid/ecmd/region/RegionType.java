@@ -1,17 +1,17 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.serialization.MapCodec;
-import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 
 public interface RegionType<R extends Region> {
   ResourceKey<Registry<RegionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_type"));
-  Registry<RegionType<?>> REGISTRY = FabricRegistryBuilder.createSimple(REGISTRY_KEY).buildAndRegister();
+  Registry<RegionType<?>> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
 
   /**
    * 该区域类型对应的函数名称，用于解析。如果为 null，则表示此区域不是使用函数表示的。

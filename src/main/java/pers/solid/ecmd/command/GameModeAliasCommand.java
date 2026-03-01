@@ -2,7 +2,6 @@ package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -12,6 +11,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -19,7 +19,7 @@ import java.util.Collections;
 /**
  * @see net.minecraft.server.commands.GameModeCommand
  */
-public enum GameModeAliasCommand implements CommandRegistrationCallback {
+public enum GameModeAliasCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   private static void register(CommandDispatcher<CommandSourceStack> dispatcher, String literalName, GameType gameMode) {

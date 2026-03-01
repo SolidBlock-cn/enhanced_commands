@@ -4,7 +4,6 @@ import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -16,12 +15,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.history.History;
-import pers.solid.ecmd.mixins.ext.HistoryHolder;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.extension.HistoryHolder;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -35,7 +35,7 @@ import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
 import static pers.solid.ecmd.argument.StringEnumArgument.stringEnum;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum HistoryCommand implements CommandRegistrationCallback {
+public enum HistoryCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   public static final KeywordArgsArgument CLEAR_KEYWORD_ARGS = KeywordArgsArgument.builder()

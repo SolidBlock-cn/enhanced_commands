@@ -2,15 +2,17 @@ package pers.solid.ecmd.predicate.entity;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.Registry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.api.RegistryBridge;
 
 import java.util.function.Predicate;
 
 public final class EntityPredicateTypes {
+  private static final RegistryBridge<EntityPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, EntityPredicateType.REGISTRY);
+
   public static final EntityPredicateType<AdvancementsEntityPredicateEntry> ADVANCEMENT = registerSimple("advancements", AdvancementsEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<AirEntityPredicateEntry> AIR = registerSimple("air", AirEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<AirMaxEntityPredicateEntry> AIR_MAX = registerSimple("air_max", AirMaxEntityPredicateEntry.CODEC);
@@ -64,14 +66,14 @@ public final class EntityPredicateTypes {
   }
 
   private static <T extends EntityPredicate> EntityPredicateType<T> registerSimple(String name, @NotNull MapCodec<T> codec) {
-    return Registry.register(EntityPredicateType.REGISTRY, EnhancedCommands.id(name), EntityPredicateType.create(codec));
+    return REGISTRY_BRIDGE.register(name, EntityPredicateType.create(codec));
   }
 
   private static SimpleBooleanEntityPredicateType registerSimpleBoolean(String name, Predicate<Entity> predicate) {
-    return Registry.register(EntityPredicateType.REGISTRY, EnhancedCommands.id(name), SimpleBooleanEntityPredicateType.create(predicate, "enhanced_commands.entity_predicate." + name, name));
+    return REGISTRY_BRIDGE.register(name, SimpleBooleanEntityPredicateType.create(predicate, "enhanced_commands.entity_predicate." + name, name));
   }
 
   public static void init() {
-    Preconditions.checkState(EntityPredicateType.REGISTRY.size() != 0);
+    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "EntityPredicateType registry is empty!");
   }
 }

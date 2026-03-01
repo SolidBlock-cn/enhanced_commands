@@ -9,7 +9,6 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.nbt.Tag;
-import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.commands.ExecuteCommand;
 import net.minecraft.server.commands.data.DataAccessor;
 import net.minecraft.world.scores.Objective;
@@ -28,44 +27,29 @@ public interface ExecuteCommandAccessor {
     throw new AssertionError();
   }
 
+  @Invoker("storeValue")
+  static CommandSourceStack callStoreScoreValue(CommandSourceStack source, Collection<ScoreHolder> targets, Objective objective, boolean requestResult) {
+    throw new AssertionError();
+  }
+
+
   @Invoker
-  static CommandSourceStack callStoreValue(
-      CommandSourceStack source, Collection<ScoreHolder> targets, Objective objective, boolean requestResult
-  ) {
-    throw new UnsupportedOperationException();
+  static CommandSourceStack callStoreData(CommandSourceStack source, DataAccessor object, NbtPathArgument.NbtPath path, IntFunction<Tag> nbtSetter, boolean requestResult) {
+    throw new AssertionError();
   }
 
   @Invoker
-  static CommandSourceStack callStoreValue(CommandSourceStack source, CustomBossEvent bossBar, boolean storeInValue, boolean requestResult) {
-    throw new UnsupportedOperationException();
+  static LiteralArgumentBuilder<CommandSourceStack> callCreateRelationOperations(CommandNode<CommandSourceStack> node, LiteralArgumentBuilder<CommandSourceStack> builder) {
+    throw new AssertionError();
   }
 
   @Invoker
-  static CommandSourceStack callStoreData(
-      CommandSourceStack source, DataAccessor object, NbtPathArgument.NbtPath path, IntFunction<Tag> nbtSetter, boolean requestResult
-  ) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Invoker
-  static LiteralArgumentBuilder<CommandSourceStack> callCreateRelationOperations(
-      CommandNode<CommandSourceStack> node, LiteralArgumentBuilder<CommandSourceStack> builder
-  ) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Invoker
-  static ArgumentBuilder<CommandSourceStack, ?> callAddConditionals(
-      CommandNode<CommandSourceStack> root,
-      LiteralArgumentBuilder<CommandSourceStack> argumentBuilder,
-      boolean positive,
-      CommandBuildContext commandBuildContext
-  ) {
-    throw new UnsupportedOperationException();
+  static ArgumentBuilder<CommandSourceStack, ?> callAddConditionals(CommandNode<CommandSourceStack> root, LiteralArgumentBuilder<CommandSourceStack> argumentBuilder, boolean positive, CommandBuildContext commandBuildContext) {
+    throw new AssertionError();
   }
 
   @Invoker
   static Collection<CommandSourceStack> callExpect(CommandContext<CommandSourceStack> context, boolean positive, boolean value) {
-    throw new UnsupportedOperationException();
+    throw new AssertionError();
   }
 }

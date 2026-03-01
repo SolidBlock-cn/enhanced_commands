@@ -41,6 +41,7 @@ import pers.solid.ecmd.argument.DirectionArgument;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.RegionArgument;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
+import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor2;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.lambda.ToFloatTriFunction;
 import pers.solid.ecmd.util.lambda.ToIntQuadFunction;
@@ -212,11 +213,11 @@ public final class SeparatedExecuteCommand {
   }
 
   private static CommandSourceStack executeStoreScore(CommandSourceStack source, Collection<ScoreHolder> targets, Objective objective, boolean requestResult) {
-    return ExecuteCommandAccessor.callStoreValue(source, targets, objective, requestResult);
+    return ExecuteCommandAccessor.callStoreScoreValue(source, targets, objective, requestResult);
   }
 
   private static CommandSourceStack executeStoreBossbar(CommandSourceStack source, CustomBossEvent bossBar, boolean storeInValue, boolean requestResult) {
-    return ExecuteCommandAccessor.callStoreValue(source, bossBar, storeInValue, requestResult);
+    return ExecuteCommandAccessor2.callStoreBossbarValue(source, bossBar, storeInValue, requestResult);
   }
 
   private static CommandSourceStack executeStoreData(CommandSourceStack source, DataAccessor object, NbtPathArgument.NbtPath path, IntFunction<Tag> nbtSetter, boolean requestResult) {

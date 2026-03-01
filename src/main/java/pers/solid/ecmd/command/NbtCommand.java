@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -14,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.function.nbt.*;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -45,7 +45,7 @@ import static pers.solid.ecmd.argument.NbtTargetArgument.getNbtTarget;
 import static pers.solid.ecmd.argument.NbtTargetArgument.nbtTarget;
 import static pers.solid.ecmd.argument.SimpleEnumArgument.nbtConcentrationType;
 
-public enum NbtCommand implements CommandRegistrationCallback {
+public enum NbtCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   private static int executeGet(NbtSource<?> nbtSource, NbtConcentrationType nbtConcentrationType, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

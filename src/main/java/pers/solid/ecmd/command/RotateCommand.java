@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -24,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.AxisAngle4d;
 import org.joml.Vector3d;
+import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
@@ -35,7 +35,7 @@ import static pers.solid.ecmd.argument.EnhancedPosArgument.CURRENT_POS;
 import static pers.solid.ecmd.argument.EnhancedPosArgument.blockPos;
 import static pers.solid.ecmd.command.ModCommands.literalR2;
 
-public enum RotateCommand implements CommandRegistrationCallback {
+public enum RotateCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
   @Override
