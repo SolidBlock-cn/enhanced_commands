@@ -9,7 +9,7 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.util.EnhancedCommandSyntaxException.withCursorEnd;
 
 public enum EnhancedRotationArgument implements ArgumentType<RotationProvider> {
   INSTANCE;

@@ -21,7 +21,7 @@ import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -174,7 +174,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
         if (thickness <= 0) {
           final int cursorAfterThickness = reader.getCursor();
           reader.setCursor(cursorBeforeInt);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(NON_POSITIVE_THICKNESS.createWithContext(reader, thickness), cursorAfterThickness);
+          throw EnhancedCommandSyntaxException.withCursorEnd(NON_POSITIVE_THICKNESS.createWithContext(reader, thickness), cursorAfterThickness);
         }
       }
     }

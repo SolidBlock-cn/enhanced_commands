@@ -19,14 +19,14 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 @Mixin(Commands.class)
 public abstract class CommandsMixin {
   @Inject(method = "finishParsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;withStyle([Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;")), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void injectedAppendText(ParseResults<CommandSourceStack> parseResults, String command, CommandSourceStack source, CallbackInfoReturnable<ContextChain<CommandSourceStack>> cir, CommandSyntaxException commandSyntaxException, int i, MutableComponent mutableText) {
-    final int cursorEnd = ((CommandSyntaxExceptionExtension) commandSyntaxException).getCursorEnd$ec();
+    final int cursorEnd = EnhancedCommandSyntaxException.getCursorEndOf(commandSyntaxException);
     if (cursorEnd >= i) {
       mutableText.append(Component.literal("»").withStyle(ChatFormatting.DARK_RED));
     }
@@ -35,7 +35,7 @@ public abstract class CommandsMixin {
   @ModifyArg(method = "finishParsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/String;substring(I)Ljava/lang/String;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;withStyle([Lnet/minecraft/ChatFormatting;)Lnet/minecraft/network/chat/MutableComponent;")))
   private static String modifiedGetErrorMessage(String string, @Local CommandSyntaxException commandSyntaxException, @Local int i) {
     if (commandSyntaxException != null) {
-      final int cursorEnd = Math.min(commandSyntaxException.getInput().length(), ((CommandSyntaxExceptionExtension) commandSyntaxException).getCursorEnd$ec());
+      final int cursorEnd = Math.min(commandSyntaxException.getInput().length(), EnhancedCommandSyntaxException.getCursorEndOf(commandSyntaxException));
       if (cursorEnd >= i) {
         return string.substring(0, cursorEnd - i);
       }
@@ -45,7 +45,7 @@ public abstract class CommandsMixin {
 
   @Inject(method = "finishParsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/MutableComponent;append(Lnet/minecraft/network/chat/Component;)Lnet/minecraft/network/chat/MutableComponent;", shift = At.Shift.AFTER), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"), to = @At(value = "INVOKE", target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;")), locals = LocalCapture.CAPTURE_FAILSOFT)
   private static void injectedAppendText(ParseResults<CommandSourceStack> parseResults, String command, CommandSourceStack source, CallbackInfoReturnable<ContextChain<CommandSourceStack>> cir, CommandSyntaxException commandSyntaxException, int i, MutableComponent mutableText, Component text) {
-    final int cursorEnd = ((CommandSyntaxExceptionExtension) commandSyntaxException).getCursorEnd$ec();
+    final int cursorEnd = EnhancedCommandSyntaxException.getCursorEndOf(commandSyntaxException);
     if (cursorEnd >= i) {
       mutableText.append(Component.literal("«").withStyle(ChatFormatting.DARK_RED));
       mutableText.append(Component.literal(commandSyntaxException.getInput().substring(cursorEnd, Math.min(cursorEnd + 10, commandSyntaxException.getInput().length()))));

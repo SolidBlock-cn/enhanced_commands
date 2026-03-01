@@ -1,6 +1,7 @@
 package pers.solid.ecmd.api.fabric;
 
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
@@ -20,7 +21,7 @@ public class RegistryBridgeImpl<T> implements RegistryBridge<T> {
   }
 
   public static <T> Registry<T> buildAndRegisterSimple(ResourceKey<Registry<T>> key) {
-    return FabricRegistryBuilder.createSimple(key).buildAndRegister();
+    return FabricRegistryBuilder.createSimple(key).attribute(RegistryAttribute.SYNCED).buildAndRegister();
   }
 
   public static <T> RegistryBridge<T> create(String namespace, Registry<T> vanillaRegistry) {

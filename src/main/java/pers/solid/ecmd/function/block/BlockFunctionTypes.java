@@ -5,6 +5,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -21,7 +22,8 @@ import java.util.Map;
  * 本模组的所有方块函数类型。每个类型都需要通过 {@link #register} 方法注册。只有注册了类型的方块函数才能正确编码与解码。
  */
 public final class BlockFunctionTypes {
-  private static final RegistryBridge<BlockFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, BlockFunctionType.REGISTRY);
+  @ApiStatus.Internal
+  public static final RegistryBridge<BlockFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, BlockFunctionType.REGISTRY);
   /**
    * 所有方块函数的函数式解析器。键为方块函数的名称，值为对应名称的方块函数解析器的 supplier。
    */

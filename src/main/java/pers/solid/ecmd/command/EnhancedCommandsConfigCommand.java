@@ -18,15 +18,15 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.api.CommandContextHelper;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.AnyTypeArgument;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigEntry;
-import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
@@ -49,7 +49,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     final String categoryName = StringArgumentType.getString(commandContext, "category");
     final ConfigCategory<?> category = ConfigCategory.REGISTRY.get(categoryName);
     if (category == null) {
-      final ParsedArgument<?, ?> parsed = ((CommandContextAccessor<?>) commandContext).getArguments().get("category");
+      final ParsedArgument<?, ?> parsed = CommandContextHelper.getArgumentsOf(commandContext).get("category");
       final String input = commandContext.getInput();
       final StringRange range = parsed.getRange();
       final StringReader stringReader = new StringReader(input);
@@ -70,7 +70,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     final String entryName = StringArgumentType.getString(commandContext, "entry");
     final ConfigEntry<C, ?> entry = category.configEntries.get(entryName);
     if (entry == null) {
-      final ParsedArgument<?, ?> parsed = ((CommandContextAccessor<?>) commandContext).getArguments().get("entry");
+      final ParsedArgument<?, ?> parsed = CommandContextHelper.getArgumentsOf(commandContext).get("entry");
       final String input = commandContext.getInput();
       final StringRange range = parsed.getRange();
       final StringReader stringReader = new StringReader(input);
@@ -176,7 +176,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
   private static <C, T> int setValueForEntry(CommandContext<CommandSourceStack> context, ConfigEntry<C, T> entry) throws CommandSyntaxException {
     final String input = context.getInput();
     final AnyTypeArgument.Pair value = AnyTypeArgument.getPair(context, "value");
-    final StringRange range = ((CommandContextAccessor<?>) context).getArguments().get("value").getRange();
+    final StringRange range = CommandContextHelper.getArgumentsOf(context).get("value").getRange();
     final StringReader stringReader = new StringReader(input);
     stringReader.setCursor(range.getStart());
 
@@ -184,7 +184,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     try {
       parse = entry.type.getArgumentType(value.commandBuildContext()).parse(stringReader, context.getSource());
     } catch (CommandSyntaxException e) {
-      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), e.getInput(), e.getCursor(), ((CommandSyntaxExceptionExtension) e).getCursorEnd$ec());
+      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), e.getInput(), e.getCursor(), EnhancedCommandSyntaxException.getCursorEndOf(e));
     }
     if (stringReader.canRead()) {
       final CommandSyntaxException commandSyntaxException = CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();

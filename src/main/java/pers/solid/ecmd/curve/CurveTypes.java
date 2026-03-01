@@ -5,6 +5,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -16,7 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class CurveTypes {
-  private static final RegistryBridge<CurveType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, CurveType.REGISTRY);
+  @ApiStatus.Internal
+  public static final RegistryBridge<CurveType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, CurveType.REGISTRY);
 
   public static final Map<String, Supplier<FunctionLikeParser<? extends CurveProvider<?>>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctions);
   public static final Map<String, Component> FUNCTION_NAMES = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctionNames);

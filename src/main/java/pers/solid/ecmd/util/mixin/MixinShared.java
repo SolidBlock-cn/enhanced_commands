@@ -37,8 +37,8 @@ import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.general.CommandsMixin;
 import pers.solid.ecmd.mixins.general.LevelChunkMixin;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -159,28 +159,28 @@ public final class MixinShared {
     if (Registries.BLOCK.equals(registryRef)) {
       final Optional<Block> block = BuiltInRegistries.BLOCK.getOptional(identifier);
       if (block.isPresent()) {
-        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, block.get().getName()), cursorAfterId);
+        return EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, block.get().getName()), cursorAfterId);
       }
     } else if (Registries.ITEM.equals(registryRef)) {
       final Optional<Item> item = BuiltInRegistries.ITEM.getOptional(identifier);
       if (item.isPresent()) {
-        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getDescription()), cursorAfterId);
+        return EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getDescription()), cursorAfterId);
       }
     } else if (Registries.ENTITY_TYPE.equals(registryRef)) {
       final Optional<EntityType<?>> entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(identifier);
       if (entityType.isPresent()) {
-        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, entityType.get().getDescription()), cursorAfterId);
+        return EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, entityType.get().getDescription()), cursorAfterId);
       }
     } else if (Registries.BIOME.equals(registryRef)) {
       if (Biomes.CHERRY_GROVE.location().equals(identifier)) {
-        return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BIOME_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, Component.translatable("biome.minecraft.cherry_grove")), cursorAfterId);
+        return EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.BIOME_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, Component.translatable("biome.minecraft.cherry_grove")), cursorAfterId);
       }
     }
 
     if (ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.containsKey(registryRef)) {
-      return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.get(registryRef).createWithContext(stringReader, identifier.toString()), cursorAfterId);
+      return EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.get(registryRef).createWithContext(stringReader, identifier.toString()), cursorAfterId);
     } else {
-      return CommandSyntaxExceptionExtension.withCursorEnd(EnhancedEntryPredicate.NOT_FOUND_EXCEPTION.createWithContext(stringReader, identifier, registryRef.location()), cursorAfterId);
+      return EnhancedCommandSyntaxException.withCursorEnd(EnhancedEntryPredicate.NOT_FOUND_EXCEPTION.createWithContext(stringReader, identifier, registryRef.location()), cursorAfterId);
     }
   }
 }

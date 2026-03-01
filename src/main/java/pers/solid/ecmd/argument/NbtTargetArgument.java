@@ -10,13 +10,13 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
+import pers.solid.ecmd.api.CommandContextHelper;
 import pers.solid.ecmd.nbt.BlockNbtData;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtTarget;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,7 +36,7 @@ public record NbtTargetArgument(CommandBuildContext commandBuildContext) impleme
   }
 
   public static NbtTarget<?> getNbtTarget(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
-    return getNbtTarget(context, name, ((CommandContextAccessor<?>) context).getArguments().containsKey("keyword_args") ? KeywordArgsArgument.getKeywordArgs(context, "keyword_args").getArg("affect_only") : null);
+    return getNbtTarget(context, name, CommandContextHelper.getArgumentsOf(context).containsKey("keyword_args") ? KeywordArgsArgument.getKeywordArgs(context, "keyword_args").getArg("affect_only") : null);
   }
 
   @Override
@@ -47,7 +47,7 @@ public record NbtTargetArgument(CommandBuildContext commandBuildContext) impleme
     if (nbtTargetArgument == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader), cursorAfterString);
+      throw EnhancedCommandSyntaxException.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader), cursorAfterString);
     } else {
       return nbtTargetArgument;
     }

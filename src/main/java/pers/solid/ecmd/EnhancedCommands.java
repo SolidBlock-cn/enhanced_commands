@@ -66,7 +66,7 @@ public class EnhancedCommands {
     RegionSelectionTypes.init();
     ModArgumentTypes.init();
     EntitySelectorOptionsExtension.init();
-    ModTrackedData.init();
+    EnhancedCommandsDataAttachments.init();
 
     // 注册命令
     registerModCommands();

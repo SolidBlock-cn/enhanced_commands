@@ -19,7 +19,7 @@ import pers.solid.ecmd.predicate.property.Comparator;
 
 import java.util.*;
 
-import static pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.util.EnhancedCommandSyntaxException.withCursorEnd;
 
 public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
   public final List<PropertyFunction<?>> propertyFunctions = new ArrayList<>();

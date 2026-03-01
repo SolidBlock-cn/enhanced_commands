@@ -53,11 +53,11 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.RegionProvider;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
@@ -219,11 +219,11 @@ public class EntitySelectorOptionsExtension {
         if (value < original.min().get()) {
           final int cursorAfterValue = stringReader.getCursor();
           stringReader.setCursor(cursorBeforeValue);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(MinMaxBounds.ERROR_SWAPPED.createWithContext(stringReader), cursorAfterValue);
+          throw EnhancedCommandSyntaxException.withCursorEnd(MinMaxBounds.ERROR_SWAPPED.createWithContext(stringReader), cursorAfterValue);
         } else if (value < 0) {
           final int cursorAfterValue = stringReader.getCursor();
           stringReader.setCursor(cursorBeforeValue);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.ERROR_RANGE_NEGATIVE.createWithContext(stringReader), cursorAfterValue);
+          throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptions.ERROR_RANGE_NEGATIVE.createWithContext(stringReader), cursorAfterValue);
         }
         reader.setDistance(MinMaxBounds.Doubles.between(original.min().get(), value));
       }
@@ -240,11 +240,11 @@ public class EntitySelectorOptionsExtension {
         if (value > original.max().get()) {
           final int cursorAfterValue = stringReader.getCursor();
           stringReader.setCursor(cursorBeforeValue);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(MinMaxBounds.ERROR_SWAPPED.createWithContext(stringReader), cursorAfterValue);
+          throw EnhancedCommandSyntaxException.withCursorEnd(MinMaxBounds.ERROR_SWAPPED.createWithContext(stringReader), cursorAfterValue);
         } else if (value < 0) {
           final int cursorAfterValue = stringReader.getCursor();
           stringReader.setCursor(cursorBeforeValue);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.ERROR_RANGE_NEGATIVE.createWithContext(stringReader), cursorAfterValue);
+          throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptions.ERROR_RANGE_NEGATIVE.createWithContext(stringReader), cursorAfterValue);
         }
         reader.setDistance(MinMaxBounds.Doubles.between(value, original.max().get()));
       }
@@ -416,7 +416,7 @@ public class EntitySelectorOptionsExtension {
       } else {
         final int cursorAfter = reader.getReader().getCursor();
         reader.getReader().setCursor(cursorBefore);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader.getReader()), cursorAfter);
+        throw EnhancedCommandSyntaxException.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader.getReader()), cursorAfter);
       }
     }, reader -> isNeverPositivelyUsed(reader, "pose"), Component.translatable("enhanced_commands.entity_predicate.pose"));
     markRequiringUniqueNoMixture("pose");
@@ -509,7 +509,7 @@ public class EntitySelectorOptionsExtension {
           if (usedEffects.contains(effectEntry)) {
             final int cursorAfterEffectId = stringReader.getCursor();
             stringReader.setCursor(cursorBeforeEffectEntry);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, effectEntry.value().getDisplayName()), cursorAfterEffectId);
+            throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, effectEntry.value().getDisplayName()), cursorAfterEffectId);
           }
           reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest("=").buildFuture());
           stringReader.skipWhitespace();
@@ -645,7 +645,7 @@ public class EntitySelectorOptionsExtension {
       if (!inverted) {
         final StringReader stringReader = reader.getReader();
         stringReader.setCursor(extras.cursorBeforeOptionName);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(MIXED_OPTION_INVERSION.createWithContext(stringReader, option), extras.cursorAfterOptionName);
+        throw EnhancedCommandSyntaxException.withCursorEnd(MIXED_OPTION_INVERSION.createWithContext(stringReader, option), extras.cursorAfterOptionName);
       }
     }
   }
@@ -694,7 +694,7 @@ public class EntitySelectorOptionsExtension {
           if (parsedTypeKeys.contains(tagKey)) {
             final int cursorAfterNext = stringReader.getCursor();
             stringReader.setCursor(cursorBeforeNext);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, "#" + tagKey.location()), cursorAfterNext);
+            throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, "#" + tagKey.location()), cursorAfterNext);
           }
           parsedTypeKeys.add(tagKey);
           values.add(Either.right(tagKey));
@@ -703,11 +703,11 @@ public class EntitySelectorOptionsExtension {
           final int cursorAfterNext = stringReader.getCursor();
           EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(identifier).orElseThrow(() -> {
             stringReader.setCursor(cursorBeforeNext);
-            return CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.ERROR_ENTITY_TYPE_INVALID.createWithContext(stringReader, identifier.toString()), cursorAfterNext);
+            return EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptions.ERROR_ENTITY_TYPE_INVALID.createWithContext(stringReader, identifier.toString()), cursorAfterNext);
           });
           if (parsedTypes.contains(entityType)) {
             stringReader.setCursor(cursorBeforeNext);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, entityType.getDescription()), cursorAfterNext);
+            throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, entityType.getDescription()), cursorAfterNext);
           }
           parsedTypes.add(entityType);
           values.add(Either.left(entityType));
@@ -758,10 +758,10 @@ public class EntitySelectorOptionsExtension {
         final int cursorAfterNext = stringReader.getCursor();
         if (next == null) {
           stringReader.setCursor(cursorBeforeNext);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptions.ERROR_GAME_MODE_INVALID.createWithContext(stringReader, nextString), cursorAfterNext);
+          throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptions.ERROR_GAME_MODE_INVALID.createWithContext(stringReader, nextString), cursorAfterNext);
         } else if (parsedGameModes.contains(next)) {
           stringReader.setCursor(cursorBeforeNext);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, nextString), cursorAfterNext);
+          throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, nextString), cursorAfterNext);
         } else {
           parsedGameModes.add(next);
         }

@@ -3,6 +3,7 @@ package pers.solid.ecmd.util.extension;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.EnhancedCommandsDataAttachments;
 import pers.solid.ecmd.mixins.general.PlayerMixin;
 import pers.solid.ecmd.regionselection.RegionSelection;
 
@@ -16,6 +17,9 @@ public interface PlayerExtension {
   @Contract(pure = true)
   @Nullable
   default RegionSelection getActiveRegion$ec() {
+    if (this instanceof Player player) {
+      return EnhancedCommandsDataAttachments.getActiveRegionForPlayer(player);
+    }
     throw new UnsupportedOperationException();
   }
 
@@ -23,6 +27,10 @@ public interface PlayerExtension {
    * 设置玩家的活动区域。由于是 dataTracker 中设置的，因此在服务器设置后将同步进行更新，除非设置前和设置后是同一个对象。
    */
   default void setActiveRegion$ec(@Nullable RegionSelection region) {
+    if (this instanceof Player player) {
+      EnhancedCommandsDataAttachments.setActiveRegionForPlayer(player, region);
+      return;
+    }
     throw new UnsupportedOperationException();
   }
 }

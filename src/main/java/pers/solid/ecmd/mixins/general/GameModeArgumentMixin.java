@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.config.GeneralParsingConfig;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.stream.Stream;
@@ -46,7 +46,7 @@ public abstract class GameModeArgumentMixin {
 
   @ModifyExpressionValue(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/world/level/GameType;", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   public CommandSyntaxException modifiedException(CommandSyntaxException commandSyntaxException, @Share("cursorAfterUnquotedString") LocalIntRef localIntRef) {
-    return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, localIntRef.get());
+    return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, localIntRef.get());
   }
 
   @ModifyArg(method = "listSuggestions", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/SharedSuggestionProvider;suggest(Ljava/util/stream/Stream;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;"))

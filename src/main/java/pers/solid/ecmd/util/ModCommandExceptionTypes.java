@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import pers.solid.ecmd.mixins.general.CommandsMixin;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +51,7 @@ public final class ModCommandExceptionTypes {
   public static final SimpleCommandExceptionType CONTAINS_UPPER_CASE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.id.contains_upper_case"));
 
   /**
-   * <p>用于在命令抛出异常时，像命令解析时异常一样，显示命令的原文本内容。这个 {@code cursorEnd} 对应的是 {@link  CommandSyntaxExceptionExtension#getCursorEnd$ec()} 中的 {@code cursorEnd}，如果未指定，则为 -1，不应是 null。
+   * <p>用于在命令抛出异常时，像命令解析时异常一样，显示命令的原文本内容。这个 {@code cursorEnd} 对应的是 {@link EnhancedCommandSyntaxException#cursorEnd} 中的 {@code cursorEnd}，如果未指定，则为 -1，不应是 null。
    * <p>对此方法调用 {@link Dynamic4CommandExceptionType#create create} 时，4个参数分别是：<code>{@link Component}, {@link String}, int, int</code>。
    * <p>示例：
    * <pre>{@code

@@ -12,7 +12,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.nbt.NbtSource;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +35,7 @@ public record NbtSourceArgument(CommandBuildContext commandBuildContext) impleme
     if (nbtSource == null) {
       final int cursorAfterString = reader.getCursor();
       reader.setCursor(cursorBeforeString);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader), cursorAfterString);
+      throw EnhancedCommandSyntaxException.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader), cursorAfterString);
     } else {
       return nbtSource;
     }

@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.parse.ParsingUtil;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.HashSet;
@@ -121,7 +121,7 @@ public abstract class ResourceOrTagArgumentMixin<T> {
       final int cursorAfterId = stringReader.getCursor();
       stringReader.setCursor(cursorBeforeId);
       final CommandSyntaxException commandSyntaxException = exceptionSupplier.get();
-      return CommandSyntaxExceptionExtension.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), stringReader.getString(), stringReader.getCursor()), cursorAfterId);
+      return EnhancedCommandSyntaxException.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), stringReader.getString(), stringReader.getCursor()), cursorAfterId);
     };
   }
 

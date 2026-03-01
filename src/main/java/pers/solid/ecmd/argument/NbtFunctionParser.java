@@ -20,7 +20,7 @@ import pers.solid.ecmd.function.nbt.*;
 import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -116,7 +116,7 @@ public class NbtFunctionParser<S> {
         entries.put(key, parseFunction(true, false));
       } else {
         if (reader.canRead() && (reader.peek() == ':' || reader.peek() == '=')) {
-          throw CommandSyntaxExceptionExtension.withCursorEnd(SIGN_UNEXPECTED_WHEN_REMOVING_KEY.createWithContext(reader), reader.getCursor() + 1);
+          throw EnhancedCommandSyntaxException.withCursorEnd(SIGN_UNEXPECTED_WHEN_REMOVING_KEY.createWithContext(reader), reader.getCursor() + 1);
         }
         entries.put(key, null);
       }
@@ -187,7 +187,7 @@ public class NbtFunctionParser<S> {
         if (reader.canRead(3) && reader.peek() == '.' && reader.peek(1) == '.' && reader.peek(2) == '.') {
           // 解析到了省略号的情况
           if (hasFoundEclipse) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(DUPLICATE_ECLIPSE.createWithContext(reader), reader.getCursor() + 3);
+            throw EnhancedCommandSyntaxException.withCursorEnd(DUPLICATE_ECLIPSE.createWithContext(reader), reader.getCursor() + 3);
           }
           reader.setCursor(reader.getCursor() + 3);
           parseContext.clearSuggestion();
@@ -284,9 +284,9 @@ public class NbtFunctionParser<S> {
           }
         } else if (reader.canRead() && reader.peek() == ';') {
           if (hasFoundSemicolon) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(DUPLICATE_SEMICOLON.createWithContext(reader), reader.getCursor() + 1);
+            throw EnhancedCommandSyntaxException.withCursorEnd(DUPLICATE_SEMICOLON.createWithContext(reader), reader.getCursor() + 1);
           } else if (currentlyAppendingList == rightPartList) {
-            throw CommandSyntaxExceptionExtension.withCursorEnd(UNEXPECTED_SEMICOLON_AFTER_ECLIPSE.createWithContext(reader), reader.getCursor() + 1);
+            throw EnhancedCommandSyntaxException.withCursorEnd(UNEXPECTED_SEMICOLON_AFTER_ECLIPSE.createWithContext(reader), reader.getCursor() + 1);
           } else {
             rightPartList = new ArrayList<>();
             currentlyAppendingList = rightPartList;

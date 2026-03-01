@@ -52,8 +52,8 @@ import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.entity.*;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
@@ -109,7 +109,7 @@ public abstract class EntitySelectorOptionsMixin {
    */
   @ModifyExpressionValue(method = "get", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC), to = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_UNKNOWN_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC)))
   private static CommandSyntaxException tweakInapplicableException2(CommandSyntaxException commandSyntaxException, @Local(argsOnly = true) int cursorEnd) {
-    return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorEnd);
+    return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorEnd);
   }
 
   /**
@@ -129,7 +129,7 @@ public abstract class EntitySelectorOptionsMixin {
       final int cursorAfterName = stringReader.getCursor();
       final @Nullable var c = f.getReason(reader, option, restoreCursor);
       if (c != null) {
-        throw CommandSyntaxExceptionExtension.withCursorEnd(c, cursorAfterName);
+        throw EnhancedCommandSyntaxException.withCursorEnd(c, cursorAfterName);
       } else {
         // 为了保持稳定性，需要还原此更改。
         stringReader.setCursor(cursorAfterName);
@@ -139,7 +139,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @ModifyExpressionValue(method = "get", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_UNKNOWN_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC)))
   private static CommandSyntaxException tweakUnknownOptionException(CommandSyntaxException commandSyntaxException, @Local(argsOnly = true) String option) {
-    return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, option);
+    return EnhancedCommandSyntaxException.addCursorEnd(commandSyntaxException, option);
   }
 
   @Inject(method = "method_9982", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
@@ -147,7 +147,7 @@ public abstract class EntitySelectorOptionsMixin {
     if (!EntitySelectorConfig.current.detailedInapplicableEntitySelectorOption) return;
     final StringReader stringReader = reader.getReader();
     stringReader.setCursor(reader.extension$ec().cursorBeforeOptionName);
-    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "propertyName"), reader.extension$ec().cursorAfterOptionName);
+    throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "propertyName"), reader.extension$ec().cursorAfterOptionName);
   }
 
   @ModifyArg(method = "method_9982", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"))
@@ -165,7 +165,7 @@ public abstract class EntitySelectorOptionsMixin {
    */
   @ModifyExpressionValue(method = "method_9981", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static CommandSyntaxException tweakNegativeDistanceException2(CommandSyntaxException commandSyntaxException, @Share("cursorAfterParse") LocalIntRef cursorAfterParse) {
-    return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
+    return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
   }
 
   @Inject(method = "method_9980", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;setCursor(I)V", remap = false))
@@ -175,7 +175,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @ModifyExpressionValue(method = "method_9980", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static CommandSyntaxException tweakNegativeLevelException2(CommandSyntaxException commandSyntaxException, @Share("cursorAfterParse") LocalIntRef cursorAfterParse) {
-    return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
+    return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
   }
 
   @Inject(method = "method_9980", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;fromReader(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;"))
@@ -191,7 +191,7 @@ public abstract class EntitySelectorOptionsMixin {
       // 此前使用过 leve=!xxx，但此处没有使用否定
       // 此时会报错
       stringReader.setCursor(extras.cursorBeforeOptionName);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "level"), extras.cursorAfterOptionName);
+      throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "level"), extras.cursorAfterOptionName);
     }
   }
 
@@ -212,7 +212,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @ModifyExpressionValue(method = "method_9969", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static CommandSyntaxException tweakSmallLimitException2(CommandSyntaxException commandSyntaxException, @Share("cursorAfterParse") LocalIntRef cursorAfterParse) {
-    return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
+    return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
   }
 
   /**
@@ -228,7 +228,7 @@ public abstract class EntitySelectorOptionsMixin {
       if (reader.isSorted()) {
         final int cursorAfterInt = reader.getReader().getCursor();
         reader.getReader().setCursor(cursor);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.INVALID_NEGATIVE_LIMIT_WITH_SORTER.createWithContext(reader.getReader()), cursorAfterInt);
+        throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptionsExtension.INVALID_NEGATIVE_LIMIT_WITH_SORTER.createWithContext(reader.getReader()), cursorAfterInt);
       }
       readInt.set(-readInt.get());
       reader.setOrder(EntitySelectorParser.ORDER_FURTHEST);
@@ -244,7 +244,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @ModifyExpressionValue(method = "method_9953", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static CommandSyntaxException tweakIrreversibleSortException2(CommandSyntaxException commandSyntaxException, @Share("cursorAfterParse") LocalIntRef cursorAfterParse) {
-    return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
+    return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterParse.get());
   }
 
   /**
@@ -272,12 +272,12 @@ public abstract class EntitySelectorOptionsMixin {
     if (!EntitySelectorConfig.current.detailedInapplicableEntitySelectorOption) return;
     final StringReader stringReader = reader.getReader();
     stringReader.setCursor(reader.extension$ec().cursorBeforeOptionName);
-    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "gamemode"), reader.extension$ec().cursorAfterOptionName);
+    throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "gamemode"), reader.extension$ec().cursorAfterOptionName);
   }
 
   @ModifyExpressionValue(method = "method_9948", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", ordinal = 0, remap = false), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_GAME_MODE_INVALID:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC)))
   private static CommandSyntaxException tweakInvalidModeException(CommandSyntaxException commandSyntaxException, @Local String string) {
-    return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, string);
+    return EnhancedCommandSyntaxException.addCursorEnd(commandSyntaxException, string);
   }
 
   @WrapWithCondition(method = "method_9948", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"))
@@ -304,7 +304,7 @@ public abstract class EntitySelectorOptionsMixin {
   private static void tweakInapplicableTypeException(EntitySelectorParser reader, CallbackInfo ci) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
     stringReader.setCursor(reader.extension$ec().cursorBeforeOptionName);
-    throw CommandSyntaxExceptionExtension.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "type"), reader.extension$ec().cursorAfterOptionName);
+    throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "type"), reader.extension$ec().cursorAfterOptionName);
   }
 
   /**
@@ -376,7 +376,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @ModifyExpressionValue(method = "method_17961", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static CommandSyntaxException tweakInvalidTypeException2(CommandSyntaxException commandSyntaxException, @Share("cursorAfterType") LocalIntRef cursorAfterType) {
-    return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorAfterType.get());
+    return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterType.get());
   }
 
 
