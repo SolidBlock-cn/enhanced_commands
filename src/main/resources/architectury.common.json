@@ -6,9 +6,6 @@
     "net/minecraft/class_2168": [
       "pers/solid/ecmd/util/extension/CommandSourceStackExtension"
     ],
-    "com/mojang/brigadier/exceptions/CommandSyntaxException": [
-      "pers/solid/ecmd/util/extension/CommandSyntaxExceptionExtension"
-    ],
     "net/minecraft/class_2300": [
       "pers/solid/ecmd/util/extension/EntitySelectorExtension"
     ],

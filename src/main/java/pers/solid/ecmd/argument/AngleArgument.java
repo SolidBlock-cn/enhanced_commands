@@ -13,7 +13,7 @@ import net.minecraft.commands.synchronization.ArgumentUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,11 +39,11 @@ public record AngleArgument(boolean returnRadians, double min, double max) imple
     final int cursorAfterAngle = reader.getCursor();
     if (result < min) {
       reader.setCursor(cursorBeforeAngle);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, result, min + (returnRadians ? "rad" : "deg")), cursorAfterAngle);
+      throw EnhancedCommandSyntaxException.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().createWithContext(reader, result, min + (returnRadians ? "rad" : "deg")), cursorAfterAngle);
     }
     if (result > max) {
       reader.setCursor(cursorBeforeAngle);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooHigh().createWithContext(reader, result, max + (returnRadians ? "rad" : "deg")), cursorAfterAngle);
+      throw EnhancedCommandSyntaxException.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooHigh().createWithContext(reader, result, max + (returnRadians ? "rad" : "deg")), cursorAfterAngle);
     }
     return result;
   }

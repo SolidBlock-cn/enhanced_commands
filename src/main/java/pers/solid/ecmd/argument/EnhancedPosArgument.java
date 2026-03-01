@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import static pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension.withCursorEnd;
+import static pers.solid.ecmd.util.EnhancedCommandSyntaxException.withCursorEnd;
 
 /**
  * Similar to {@link BlockPosArgument} and {@link Vec3Argument}, with some slight modifications.

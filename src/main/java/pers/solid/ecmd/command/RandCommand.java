@@ -20,8 +20,8 @@ import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.function.FailableConsumer;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.api.CommandContextHelper;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
-import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -166,9 +166,8 @@ public enum RandCommand implements CommandRegistrationCallbackBridge {
     return node;
   }
 
-  @SuppressWarnings("unchecked")
   private static @Nullable FailableConsumer<Tag, CommandSyntaxException> optionalNbtConsumer(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    final Map<String, ParsedArgument<CommandSourceStack, ?>> arguments = ((CommandContextAccessor<CommandSourceStack>) context).getArguments();
+    final Map<String, ParsedArgument<CommandSourceStack, ?>> arguments = CommandContextHelper.getArgumentsOf(context);
     if (arguments.containsKey("target") && arguments.containsKey("path")) {
       return consumerOf(context);
     } else {

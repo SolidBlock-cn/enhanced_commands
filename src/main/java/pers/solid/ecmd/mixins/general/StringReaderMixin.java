@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Slice;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 @Mixin(value = StringReader.class, remap = false)
 public abstract class StringReaderMixin {
@@ -31,7 +31,7 @@ public abstract class StringReaderMixin {
     readUnquotedString();
     final int cursorAfterUnquotedString = cursor;
     if (cursorAfterUnquotedString > initialCursor) {
-      CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, cursorAfterUnquotedString);
+      EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterUnquotedString);
       cursor = initialCursor;
     }
     return commandSyntaxException;
@@ -44,7 +44,7 @@ public abstract class StringReaderMixin {
 
   @ModifyExpressionValue(remap = false, method = "readInt", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/Integer;parseInt(Ljava/lang/String;)I")))
   public CommandSyntaxException modifiedReadInvalidInt(CommandSyntaxException commandSyntaxException, @Local(name = "number") String number) {
-    return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, number);
+    return EnhancedCommandSyntaxException.addCursorEnd(commandSyntaxException, number);
   }
 
   @ModifyExpressionValue(remap = false, method = "readLong", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(to = @At(value = "INVOKE", target = "Ljava/lang/Long;parseLong(Ljava/lang/String;)J")))
@@ -54,7 +54,7 @@ public abstract class StringReaderMixin {
 
   @ModifyExpressionValue(remap = false, method = "readLong", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/Long;parseLong(Ljava/lang/String;)J")))
   public CommandSyntaxException modifiedReadInvalidLong(CommandSyntaxException commandSyntaxException, @Local(name = "number") String number) {
-    return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, number);
+    return EnhancedCommandSyntaxException.addCursorEnd(commandSyntaxException, number);
   }
 
 
@@ -65,7 +65,7 @@ public abstract class StringReaderMixin {
 
   @ModifyExpressionValue(remap = false, method = "readDouble", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/Double;parseDouble(Ljava/lang/String;)D")))
   public CommandSyntaxException modifiedReadInvalidDouble(CommandSyntaxException commandSyntaxException, @Local(name = "number") String number) {
-    return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, number);
+    return EnhancedCommandSyntaxException.addCursorEnd(commandSyntaxException, number);
   }
 
   @ModifyExpressionValue(remap = false, method = "readFloat", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(to = @At(value = "INVOKE", target = "Ljava/lang/Float;parseFloat(Ljava/lang/String;)F")))
@@ -75,16 +75,16 @@ public abstract class StringReaderMixin {
 
   @ModifyExpressionValue(remap = false, method = "readFloat", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/Float;parseFloat(Ljava/lang/String;)F")))
   public CommandSyntaxException modifiedReadInvalidFloat(CommandSyntaxException commandSyntaxException, @Local(name = "number") String number) {
-    return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, number);
+    return EnhancedCommandSyntaxException.addCursorEnd(commandSyntaxException, number);
   }
 
   @ModifyExpressionValue(remap = false, method = "readStringUntil", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/BuiltInExceptionProvider;readerInvalidEscape()Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
   public CommandSyntaxException modifiedReadStringUntil(CommandSyntaxException commandSyntaxException) {
-    return CommandSyntaxExceptionExtension.addCursorEnd(commandSyntaxException, 1);
+    return EnhancedCommandSyntaxException.addCursorEnd(commandSyntaxException, 1);
   }
 
   @ModifyExpressionValue(remap = false, method = "readBoolean", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/BuiltInExceptionProvider;readerInvalidBool()Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;")))
   public CommandSyntaxException modifiedReadBoolean(CommandSyntaxException commandSyntaxException, @Local(name = "start") int start, @Local(name = "value") String value) {
-    return CommandSyntaxExceptionExtension.withCursorEnd(commandSyntaxException, start + value.length());
+    return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, start + value.length());
   }
 }

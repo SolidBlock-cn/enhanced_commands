@@ -19,8 +19,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
@@ -172,14 +172,14 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
           final int cursorAfterId = reader.getCursor();
           if (duplicateTagIds.contains(tagId)) {
             reader.setCursor(cursorBeforeId);
-            throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, tagId), cursorAfterId);
+            throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, tagId), cursorAfterId);
           } else {
             duplicateTagIds.add(tagId);
           }
           TagKey<T> tagKey = TagKey.create(registryRef, tagId);
           HolderSet.Named<T> named = registryWrapper
               .get(tagKey)
-              .orElseThrow(() -> CommandSyntaxExceptionExtension.withCursorEnd(NOT_FOUND_EXCEPTION.createWithContext(reader, tagId, registryRef.location()), cursorAfterId));
+              .orElseThrow(() -> EnhancedCommandSyntaxException.withCursorEnd(NOT_FOUND_EXCEPTION.createWithContext(reader, tagId, registryRef.location()), cursorAfterId));
           values.add(new TagBased<>(named));
         } catch (CommandSyntaxException var6) {
           reader.setCursor(cursorBeforeId);
@@ -190,7 +190,7 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
         final int cursorAfterId = reader.getCursor();
         if (duplicateEntryIds.contains(entryId)) {
           reader.setCursor(cursorBeforeId);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, entryId), cursorAfterId);
+          throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, entryId), cursorAfterId);
         } else {
           duplicateEntryIds.add(entryId);
         }

@@ -17,9 +17,9 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -166,7 +166,7 @@ public record ParseContext<S>(CommandBuildContext commandBuildContext, StringRea
       this.reader.readUnquotedString();
       final CommandSyntaxException exception = CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedDouble().createWithContext(reader);
       if (this.reader.getCursor() > cursorBeforeDouble) {
-        throw CommandSyntaxExceptionExtension.withCursorEnd(exception, this.reader.getCursor());
+        throw EnhancedCommandSyntaxException.withCursorEnd(exception, this.reader.getCursor());
       } else {
         throw exception;
       }
@@ -177,7 +177,7 @@ public record ParseContext<S>(CommandBuildContext commandBuildContext, StringRea
     } catch (NumberFormatException e) {
       final int cursorAfterNumber = reader.getCursor();
       this.reader.setCursor(cursorBeforeDouble);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidDouble().createWithContext(reader, substring), cursorAfterNumber);
+      throw EnhancedCommandSyntaxException.withCursorEnd(CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidDouble().createWithContext(reader, substring), cursorAfterNumber);
     }
     setSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(List.of("deg", "rad", "turn"), suggestionsBuilder));
     final int cursorBeforeUnit = reader.getCursor();
@@ -209,7 +209,7 @@ public record ParseContext<S>(CommandBuildContext commandBuildContext, StringRea
     } else {
       final int cursorAfterUnit = reader.getCursor();
       reader.setCursor(cursorBeforeUnit);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.ANGLE_UNIT_UNKNOWN.createWithContext(reader, unit), cursorAfterUnit);
+      throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.ANGLE_UNIT_UNKNOWN.createWithContext(reader, unit), cursorAfterUnit);
     }
   }
 

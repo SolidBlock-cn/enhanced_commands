@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.RegistryBridge;
@@ -11,7 +12,8 @@ import pers.solid.ecmd.api.RegistryBridge;
 import java.util.function.Predicate;
 
 public final class EntityPredicateTypes {
-  private static final RegistryBridge<EntityPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, EntityPredicateType.REGISTRY);
+  @ApiStatus.Internal
+  public static final RegistryBridge<EntityPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, EntityPredicateType.REGISTRY);
 
   public static final EntityPredicateType<AdvancementsEntityPredicateEntry> ADVANCEMENT = registerSimple("advancements", AdvancementsEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<AirEntityPredicateEntry> AIR = registerSimple("air", AirEntityPredicateEntry.CODEC);

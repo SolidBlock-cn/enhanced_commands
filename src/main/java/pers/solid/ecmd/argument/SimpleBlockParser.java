@@ -27,8 +27,8 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.property.Comparator;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -74,7 +74,7 @@ public abstract class SimpleBlockParser<S> {
       block = BuiltInRegistries.BLOCK.getOptional(blockId).orElseThrow(() -> {
         final int cursorAfterParsing = reader.getCursor();
         reader.setCursor(cursorBeforeParsing);
-        return CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, blockId.toString()), cursorAfterParsing);
+        return EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, blockId.toString()), cursorAfterParsing);
       });
     } else {
       int cursorBeforeParsing = reader.getCursor();
@@ -88,9 +88,9 @@ public abstract class SimpleBlockParser<S> {
         reader.setCursor(cursorBeforeParsing);
         if (BuiltInRegistries.BLOCK.containsKey(blockId)) {
           final Block block1 = BuiltInRegistries.BLOCK.getValue(blockId);
-          return CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(reader, blockId, block1.getName()), cursorAfterParsing);
+          return EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(reader, blockId, block1.getName()), cursorAfterParsing);
         } else {
-          return CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, blockId.toString()), cursorAfterParsing);
+          return EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, blockId.toString()), cursorAfterParsing);
         }
       }).value();
     }
@@ -187,14 +187,14 @@ public abstract class SimpleBlockParser<S> {
     if (propertyName.isEmpty()) {
       final int cursorAfterReadString = reader.getCursor();
       reader.setCursor(cursorBeforeReadString);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, this.blockId.toString(), propertyName), cursorAfterReadString);
+      throw EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, this.blockId.toString(), propertyName), cursorAfterReadString);
     }
     final StateDefinition<Block, BlockState> stateManager = block.getStateDefinition();
     Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) {
       final int cursorAfterReadString = reader.getCursor();
       reader.setCursor(cursorBeforeReadString);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_PROPERTY.createWithContext(reader, blockId, propertyName), cursorAfterReadString);
+      throw EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_PROPERTY.createWithContext(reader, blockId, propertyName), cursorAfterReadString);
     }
     parseContext.clearSuggestion();
     return property;

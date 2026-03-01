@@ -31,7 +31,7 @@ public class RegistryBridgeImpl<T> implements RegistryBridge<T> {
   }
 
   public static <T> Registry<T> buildAndRegisterSimple(ResourceKey<Registry<T>> key) {
-    return new RegistryBuilder<>(key).create();
+    return new RegistryBuilder<>(key).sync(true).create();
   }
 
   @Override

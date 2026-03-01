@@ -21,36 +21,36 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(Vec3Argument.class)
 public abstract class Vec3ArgumentMixin implements ArgumentTypeExtension {
   @Unique
-  private EnhancedPosArgument modArgumentType;
+  private EnhancedPosArgument enhanced_commands$modArgumentType;
   @Unique
-  private boolean extension = true;
+  private boolean enhanced_commands$extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
   private void injectedInit(boolean centerIntegers, CallbackInfo ci) {
-    modArgumentType = new EnhancedPosArgument(EnhancedPosArgument.NumberType.PREFER_DOUBLE, centerIntegers ? EnhancedPosArgument.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgument.IntAlignType.UNCHANGED);
+    enhanced_commands$modArgumentType = new EnhancedPosArgument(EnhancedPosArgument.NumberType.PREFER_DOUBLE, centerIntegers ? EnhancedPosArgument.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgument.IntAlignType.UNCHANGED);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/coordinates/Coordinates;", at = @At("HEAD"), cancellable = true)
   private void injectedParse(StringReader stringReader, CallbackInfoReturnable<Coordinates> cir) throws CommandSyntaxException {
-    if (modArgumentType != null && extension) {
-      cir.setReturnValue(modArgumentType.parse(stringReader));
+    if (enhanced_commands$modArgumentType != null && enhanced_commands$extension) {
+      cir.setReturnValue(enhanced_commands$modArgumentType.parse(stringReader));
     }
   }
 
   @Inject(method = "listSuggestions", at = @At("HEAD"), cancellable = true)
   private <S> void injectedListSuggestions(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
-    if (modArgumentType != null && extension) {
-      cir.setReturnValue(modArgumentType.listSuggestions(context, builder));
+    if (enhanced_commands$modArgumentType != null && enhanced_commands$extension) {
+      cir.setReturnValue(enhanced_commands$modArgumentType.listSuggestions(context, builder));
     }
   }
 
   @Override
   public boolean enhanced_hasExtension() {
-    return extension;
+    return enhanced_commands$extension;
   }
 
   @Override
   public void enhanced_setExtension(boolean extension) {
-    this.extension = extension;
+    this.enhanced_commands$extension = extension;
   }
 }

@@ -24,4 +24,5 @@ public class EnhancedCommandsClientImpl implements ClientModInitializer {
   public void onInitializeClient() {
     EnhancedCommandsClient.init();
   }
+
 }

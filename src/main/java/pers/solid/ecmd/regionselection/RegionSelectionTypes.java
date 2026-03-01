@@ -2,13 +2,15 @@ package pers.solid.ecmd.regionselection;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.MapCodec;
+import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.RegistryBridge;
 
 import java.util.function.Supplier;
 
 public final class RegionSelectionTypes {
-  private static final RegistryBridge<RegionSelectionType> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, RegionSelectionType.REGISTRY);
+  @ApiStatus.Internal
+  public static final RegistryBridge<RegionSelectionType> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, RegionSelectionType.REGISTRY);
 
   public static final RegionSelectionType CUBOID = register(BlockCuboidRegionSelection::new, BlockCuboidRegionSelection.CODEC, "cuboid");
   public static final RegionSelectionType EXTENSION = register(ExtensionCuboidRegionSelection::new, ExtensionCuboidRegionSelection.CODEC, "extension");

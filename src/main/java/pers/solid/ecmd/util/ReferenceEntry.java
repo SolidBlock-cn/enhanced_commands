@@ -17,7 +17,6 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -96,7 +95,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
         final Optional<Holder.Reference<E>> entry = registryEntryLookup.get().get(entryKey);
         if (entry.isEmpty()) {
           reader.setCursor(cursorBeforeId);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(createExceptionForUnknownId(reader, id.toString()), cursorAfterId);
+          throw EnhancedCommandSyntaxException.withCursorEnd(createExceptionForUnknownId(reader, id.toString()), cursorAfterId);
         }
         return entry.get().key();
       });

@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.function.Supplier;
 
@@ -36,7 +36,7 @@ public abstract class StringRepresentableArgumentMixin<T extends Enum<T> & Strin
       final int cursorAfterUnquotedString = stringReader.getCursor();
       final int cursorBeforeUnquotedString = localIntRef.get();
       stringReader.setCursor(cursorBeforeUnquotedString);
-      return CommandSyntaxExceptionExtension.withCursorEnd(ERROR_INVALID_VALUE.createWithContext(stringReader, string), cursorAfterUnquotedString);
+      return EnhancedCommandSyntaxException.withCursorEnd(ERROR_INVALID_VALUE.createWithContext(stringReader, string), cursorAfterUnquotedString);
     };
   }
 }

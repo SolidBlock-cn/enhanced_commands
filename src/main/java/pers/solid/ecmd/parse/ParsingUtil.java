@@ -35,9 +35,9 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.ParserUtilsAccessor;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -196,7 +196,7 @@ public final class ParsingUtil {
     final T value = valueGetter.apply(name);
     if (value == null) {
       reader.setCursor(cursorBeforeRead);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(UNKNOWN_VALUE.createWithContext(reader, name), cursorAfterRead);
+      throw EnhancedCommandSyntaxException.withCursorEnd(UNKNOWN_VALUE.createWithContext(reader, name), cursorAfterRead);
     } else {
       return value;
     }

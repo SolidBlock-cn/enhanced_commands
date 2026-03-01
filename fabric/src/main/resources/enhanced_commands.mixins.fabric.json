@@ -4,6 +4,7 @@
   "package": "pers.solid.ecmd.mixins.fabric",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "CommandContextAccessor",
     "EntitySelectorOptionsAccessor"
   ],
   "client": [

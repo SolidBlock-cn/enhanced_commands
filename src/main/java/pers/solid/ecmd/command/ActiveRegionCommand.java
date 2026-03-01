@@ -18,18 +18,18 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.function.FailableFunction;
-import pers.solid.ecmd.ModTrackedData;
+import pers.solid.ecmd.EnhancedCommandsDataAttachments;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.AxisProvider;
 import pers.solid.ecmd.argument.DirectionProvider;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg;
@@ -49,7 +49,12 @@ public enum ActiveRegionCommand implements CommandRegistrationCallbackBridge {
 
   public static int executeGet(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     final ServerPlayer player = context.getSource().getPlayerOrException();
-    final Region region = player.getActiveRegionOrThrow$ec().region();
+    final Region region;
+    try {
+      region = player.getActiveRegionOrThrow$ec().region();
+    } catch (CommandRuntimeException e) {
+      throw new CommandSyntaxException(null, e.rawMessage);
+    }
     if (region == null) {
       context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.activeregion.get_none", TextUtil.styled(player.getDisplayName(), Styles.TARGET)), false);
       return 0;
@@ -135,7 +140,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallbackBridge {
     final RegionSelection operatedRegion = invokeOperationOrThrow(regionOperation, player.getActiveRegion$ec());
 
     // 注意：当玩家有 regionBuilder 时，会自动生成 region，且理论上 regionBuilder 和 region 进行的操作应当是一致的。
-    player.getEntityData().set(ModTrackedData.PLAYER_REGION_SELECTION, Optional.ofNullable(operatedRegion), true);
+    EnhancedCommandsDataAttachments.setActiveRegionForPlayer(player, operatedRegion);
     source.sendFeedback$ecBridge(() -> messageSingle.apply(player, operatedRegion), true);
     return 1;
   }

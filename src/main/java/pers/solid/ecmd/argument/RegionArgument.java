@@ -8,7 +8,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
-import pers.solid.ecmd.mixins.accessor.CommandContextAccessor;
+import pers.solid.ecmd.api.CommandContextHelper;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionProvider;
@@ -33,7 +33,7 @@ public record RegionArgument(CommandBuildContext commandBuildContext) implements
    */
   public static Region getRegion(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
     try {
-      if (!((CommandContextAccessor<?>) context).getArguments().containsKey(name)) {
+      if (!(CommandContextHelper.getArgumentsOf(context).containsKey(name))) {
         final RegionProvider<?> sourceArg = context.getSource().getExtraArgument$ec("region", RegionProvider.class);
         if (sourceArg != null) {
           return sourceArg.toAbsoluteRegion(context.getSource());

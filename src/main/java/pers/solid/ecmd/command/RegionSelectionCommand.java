@@ -76,7 +76,6 @@ public enum RegionSelectionCommand implements CommandRegistrationCallbackBridge 
       case 2 -> regionSelection.clickSecondPoint(pos, player);
       default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
     };
-    player.syncActiveRegion$ec();
     source.sendFeedback$ecBridge(textSupplier, true);
     return 1;
   }

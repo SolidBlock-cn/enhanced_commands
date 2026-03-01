@@ -7,7 +7,6 @@
     "accessor.ArgumentTypeInfosAccessor",
     "accessor.BlockDisplayEntityAccessor",
     "accessor.BlockInWorldAccessor",
-    "accessor.CommandContextAccessor",
     "accessor.CommandSourceStackAccessor",
     "accessor.EntityAnchorAccessor",
     "accessor.EntitySelectorAccessor",
@@ -28,7 +27,6 @@
     "general.BlockStateArgumentMixin",
     "general.CommandContextMixin",
     "general.CommandsMixin",
-    "general.CommandSyntaxExceptionMixin",
     "general.EntityArgumentMixin",
     "general.EntityMixin",
     "general.EntitySelectorMixin",
@@ -40,6 +38,7 @@
     "general.IdentifierMixin",
     "general.LevelChunkMixin",
     "general.LevelMixin",
+    "general.LivingEntityMixin",
     "general.LocateCommandMixin",
     "general.MinecraftServerMixin",
     "general.NbtPathArgumentMixin",
@@ -55,7 +54,6 @@
     "general.Vec3ArgumentMixin",
     "general.WorldBorderMixin",
     "impl.CommandSourceStackExtensionImpl",
-    "impl.CommandSyntaxExceptionExtensionImpl",
     "impl.EntitySelectorExtensionImpl",
     "impl.EntitySelectorParserExtensionImpl",
     "impl.MutableComponentExtensionImpl",
@@ -69,5 +67,8 @@
   ],
   "injectors": {
     "defaultRequire": 1
+  },
+  "mixinextras": {
+    "minVersion": "0.5.0"
   }
 }

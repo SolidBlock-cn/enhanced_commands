@@ -22,10 +22,10 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.bridge.LootBridge;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -92,7 +92,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
         final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.commandBuildContext().get(ResourceKey.create(Registries.PREDICATE, id));
         if (lootCondition.isEmpty()) {
           parseContext.reader().setCursor(cursorBeforeId);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);
+          throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);
         }
         return new LootConditionBlockPredicate(lootCondition.get());
       } else if (anonymous != null) {

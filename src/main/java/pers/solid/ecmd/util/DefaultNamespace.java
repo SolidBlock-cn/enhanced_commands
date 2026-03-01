@@ -10,7 +10,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -89,10 +88,10 @@ public class DefaultNamespace {
       for (int i = reader.getCursor(); i < cursorAfterId; i++) {
         final char c = string.charAt(i);
         if (c >= 'A' && c <= 'Z') {
-          throw CommandSyntaxExceptionExtension.withCursorEnd(ModCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterId);
+          throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterId);
         }
       }
-      throw CommandSyntaxExceptionExtension.withCursorEnd(ResourceLocation.ERROR_INVALID.createWithContext(reader), cursorAfterId);
+      throw EnhancedCommandSyntaxException.withCursorEnd(ResourceLocation.ERROR_INVALID.createWithContext(reader), cursorAfterId);
     }
   }
 

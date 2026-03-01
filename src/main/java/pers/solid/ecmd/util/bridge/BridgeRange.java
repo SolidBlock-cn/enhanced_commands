@@ -11,9 +11,9 @@ import net.minecraft.util.StringRepresentable;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
-import pers.solid.ecmd.util.extension.CommandSyntaxExceptionExtension;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -34,7 +34,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
     }
   }
 
-  static <T, E1 extends Throwable, E2 extends CommandSyntaxException> @Nullable T parseNumber(StringReader reader, FailableFunction<String, T, E1> numberConverter, BiFunction<StringReader, String, E2> exceptionSupplier) throws E1, E2 {
+  static <T, E1 extends Throwable> @Nullable T parseNumber(StringReader reader, FailableFunction<String, T, E1> numberConverter, BiFunction<StringReader, String, CommandSyntaxException> exceptionSupplier) throws E1, CommandSyntaxException {
     int cursorBeforeNumber = reader.getCursor();
 
     while (reader.canRead() && BridgeRange.isNextCharValid(reader)) {
@@ -50,12 +50,12 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
       return numberConverter.apply(string);
     } catch (NumberFormatException ignore) {
       reader.setCursor(cursorBeforeNumber);
-      throw CommandSyntaxExceptionExtension.withCursorEnd(exceptionSupplier.apply(reader, string), cursorAfterNumber);
+      throw EnhancedCommandSyntaxException.withCursorEnd(exceptionSupplier.apply(reader, string), cursorAfterNumber);
     }
   }
 
 
-  static <T extends Comparable<T>, E1 extends Throwable, E2 extends CommandSyntaxException, R extends BridgeRange<T>> R parse(StringReader reader, FailableFunction<String, T, E1> numberConverter, BiFunction<StringReader, String, E2> exceptionSupplier, BiFunction<@Nullable T, @Nullable T, @NotNull R> function) throws CommandSyntaxException, E1 {
+  static <T extends Comparable<T>, E1 extends Throwable, R extends BridgeRange<T>> R parse(StringReader reader, FailableFunction<String, T, E1> numberConverter, BiFunction<StringReader, String, CommandSyntaxException> exceptionSupplier, BiFunction<@Nullable T, @Nullable T, @NotNull R> function) throws CommandSyntaxException, E1 {
     if (!reader.canRead()) {
       throw MinMaxBounds.ERROR_EMPTY.createWithContext(reader);
     } else {
@@ -71,7 +71,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
         cursorAfterRange = reader.getCursor();
         if (min == null && max == null) {
           reader.setCursor(cursorBeforeRange);
-          throw CommandSyntaxExceptionExtension.withCursorEnd(MinMaxBounds.ERROR_EMPTY.createWithContext(reader), cursorAfterRange);
+          throw EnhancedCommandSyntaxException.withCursorEnd(MinMaxBounds.ERROR_EMPTY.createWithContext(reader), cursorAfterRange);
         }
       } else {
         max = min;
@@ -79,10 +79,10 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
 
       if (min == null && max == null) {
         reader.setCursor(cursorBeforeRange);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(MinMaxBounds.ERROR_EMPTY.createWithContext(reader), cursorAfterRange);
+        throw EnhancedCommandSyntaxException.withCursorEnd(MinMaxBounds.ERROR_EMPTY.createWithContext(reader), cursorAfterRange);
       } else if (min != null && max != null && min.compareTo(max) > 0) {
         reader.setCursor(cursorBeforeRange);
-        throw CommandSyntaxExceptionExtension.withCursorEnd(MinMaxBounds.ERROR_SWAPPED.createWithContext(reader), cursorAfterRange);
+        throw EnhancedCommandSyntaxException.withCursorEnd(MinMaxBounds.ERROR_SWAPPED.createWithContext(reader), cursorAfterRange);
       } else {
         return function.apply(min, max);
       }
