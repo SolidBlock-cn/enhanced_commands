@@ -16,9 +16,11 @@ import pers.solid.ecmd.api.RegistryBridge;
 @MethodsReturnNonnullByDefault
 public class RegistryBridgeImpl<T> implements RegistryBridge<T> {
   public final DeferredRegister<T> deferredRegister;
+  public final Registry<T> registry;
 
   public RegistryBridgeImpl(String namespace, Registry<T> registry) {
     this.deferredRegister = DeferredRegister.create(registry, namespace);
+    this.registry = registry;
   }
 
   public static <T> RegistryBridge<T> create(String namespace, Registry<T> vanillaRegistry) {
@@ -38,5 +40,15 @@ public class RegistryBridgeImpl<T> implements RegistryBridge<T> {
   public <R extends T> R register(String name, R value) {
     deferredRegister.register(name, Suppliers.ofInstance(value));
     return value;
+  }
+
+  @Override
+  public Registry<?> registry() {
+    return registry;
+  }
+
+  @Override
+  public ResourceKey<? extends Registry<T>> key() {
+    return deferredRegister.getRegistryKey();
   }
 }

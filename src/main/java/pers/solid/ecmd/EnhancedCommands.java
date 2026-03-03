@@ -1,6 +1,5 @@
 package pers.solid.ecmd;
 
-import com.google.common.eventbus.EventBus;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -37,7 +36,6 @@ import java.util.function.Function;
 public class EnhancedCommands {
   public static final String MOD_ID = "enhanced_commands";
   public static final Logger LOGGER = LoggerFactory.getLogger(EnhancedCommands.class);
-  public static final EventBus EVENT_BUS = new EventBus();
 
   private static final ResourceLocation EXAMPLE_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "");
 
@@ -47,23 +45,23 @@ public class EnhancedCommands {
 
   private static boolean initialized = false;
 
-  public static void init() {
+  public static void init(InitializeContext context) {
     if (initialized) {
       throw new IllegalStateException("Enhanced Commands: Cannot initialize twice");
     }
     ConfigCategories.init();
     ConfigManager.loadAllConfigsFromJson();
 
-    BlockPredicateTypes.init();
-    BlockFunctionTypes.init();
-    CommandEnumType.init();
-    CurveTypes.init();
-    EntityPredicateTypes.init();
+    BlockPredicateTypes.init(context);
+    BlockFunctionTypes.init(context);
+    CommandEnumType.init(context);
+    CurveTypes.init(context);
+    EntityPredicateTypes.init(context);
     NbtDataRegistry.init();
-    NbtFunctionTypes.init();
-    NbtPredicateTypes.init();
-    RegionTypes.init();
-    RegionSelectionTypes.init();
+    NbtFunctionTypes.init(context);
+    NbtPredicateTypes.init(context);
+    RegionTypes.init(context);
+    RegionSelectionTypes.init(context);
     ModArgumentTypes.init();
     EntitySelectorOptionsExtension.init();
     EnhancedCommandsDataAttachments.init();

@@ -1,6 +1,5 @@
 package pers.solid.ecmd.util.enums;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.Message;
@@ -8,10 +7,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.argument.AxisProvider;
 import pers.solid.ecmd.argument.SimpleEnumArgument;
@@ -35,8 +34,7 @@ public record CommandEnumType<E extends Enum<E>>(@NotNull ImmutableCollection<E>
   public static final Component VERTICAL_TEXT = Component.translatable("enhanced_commands.direction_type.vertical");
   public static final ResourceKey<Registry<CommandEnumType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("command_enum_type"));
   public static final Registry<CommandEnumType<?>> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
-  @ApiStatus.Internal
-  public static final RegistryBridge<CommandEnumType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, CommandEnumType.REGISTRY);
+  private static final RegistryBridge<CommandEnumType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, CommandEnumType.REGISTRY);
 
   public static final CommandEnumType<AxisProvider> AXIS = register("axis", new CommandEnumType<>(AxisProvider.VALUES, AxisProvider.CODEC, AxisProvider::getDisplayName));
   public static final CommandEnumType<AxisProvider> AXIS_EXCLUDING_RANDOM = register("axis_excluding_random", new CommandEnumType<>(AxisProvider.VALUES_EXCEPT_RANDOM, AxisProvider.CODEC, AxisProvider::getDisplayName));
@@ -61,7 +59,7 @@ public record CommandEnumType<E extends Enum<E>>(@NotNull ImmutableCollection<E>
     return REGISTRY_BRIDGE.register(name, commandEnumType);
   }
 
-  public static void init() {
-    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "CommandEnumType registry is empty!");
+  public static void init(InitializeContext context) {
+    context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }

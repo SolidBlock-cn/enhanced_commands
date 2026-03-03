@@ -44,6 +44,6 @@ public class EnhancedCommandsImpl implements ModInitializer {
 
   @Override
   public void onInitialize() {
-    EnhancedCommands.init();
+    EnhancedCommands.init(new InitializeContextImpl());
   }
 }

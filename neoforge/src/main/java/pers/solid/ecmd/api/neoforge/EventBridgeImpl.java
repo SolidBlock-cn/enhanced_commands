@@ -55,6 +55,5 @@ public interface EventBridgeImpl<T> extends EventBridge<T> {
     public T invoker() {
       return transformerBack.apply(NeoForge.EVENT_BUS::post);
     }
-
   }
 }

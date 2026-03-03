@@ -22,4 +22,8 @@ public interface RegistryBridge<T> {
   boolean isEmpty();
 
   <R extends T> R register(String name, R value);
+
+  Registry<?> registry();
+
+  ResourceKey<? extends Registry<T>> key();
 }

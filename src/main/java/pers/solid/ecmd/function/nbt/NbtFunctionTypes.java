@@ -1,11 +1,10 @@
 package pers.solid.ecmd.function.nbt;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.nbt.PosNbtFunction;
 import pers.solid.ecmd.parse.FunctionLikeParser;
@@ -15,8 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class NbtFunctionTypes {
-  @ApiStatus.Internal
-  public static final RegistryBridge<NbtFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtFunctionType.REGISTRY);
+  private static final RegistryBridge<NbtFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtFunctionType.REGISTRY);
 
   public static final Map<String, Supplier<FunctionLikeParser<? extends NbtFunction>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtFunctionTypes::registerFunctions);
   public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtFunctionTypes::registerFunctionNames);
@@ -42,8 +40,8 @@ public final class NbtFunctionTypes {
     return REGISTRY_BRIDGE.register(name, value);
   }
 
-  public static void init() {
-    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "NbtFunctionType registry is empty!");
+  public static void init(InitializeContext context) {
+    context.validateAndRegister(REGISTRY_BRIDGE);
   }
 
 

@@ -36,7 +36,6 @@ public abstract class LevelRendererMixin {
   /**
    * 如果启用了 {@link DebugConfig#noDarkSky}，则不会在低处将天空渲染为深色。
    *
-   * @return
    * @see DebugConfig#noDarkSky
    */
   @Definition(id = "d", local = @Local(type = double.class))

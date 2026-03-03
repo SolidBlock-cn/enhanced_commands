@@ -1,19 +1,17 @@
 package pers.solid.ecmd.predicate.entity;
 
-import com.google.common.base.Preconditions;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 
 import java.util.function.Predicate;
 
 public final class EntityPredicateTypes {
-  @ApiStatus.Internal
-  public static final RegistryBridge<EntityPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, EntityPredicateType.REGISTRY);
+  private static final RegistryBridge<EntityPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, EntityPredicateType.REGISTRY);
 
   public static final EntityPredicateType<AdvancementsEntityPredicateEntry> ADVANCEMENT = registerSimple("advancements", AdvancementsEntityPredicateEntry.CODEC);
   public static final EntityPredicateType<AirEntityPredicateEntry> AIR = registerSimple("air", AirEntityPredicateEntry.CODEC);
@@ -75,7 +73,7 @@ public final class EntityPredicateTypes {
     return REGISTRY_BRIDGE.register(name, SimpleBooleanEntityPredicateType.create(predicate, "enhanced_commands.entity_predicate." + name, name));
   }
 
-  public static void init() {
-    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "EntityPredicateType registry is empty!");
+  public static void init(InitializeContext context) {
+    context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }

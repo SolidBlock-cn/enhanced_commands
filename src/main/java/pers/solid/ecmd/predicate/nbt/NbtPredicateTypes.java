@@ -1,11 +1,10 @@
 package pers.solid.ecmd.predicate.nbt;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 
@@ -14,8 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class NbtPredicateTypes {
-  @ApiStatus.Internal
-  public static final RegistryBridge<NbtPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtPredicateType.REGISTRY);
+  private static final RegistryBridge<NbtPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtPredicateType.REGISTRY);
 
   public static final Map<String, Supplier<FunctionLikeParser<? extends NbtPredicate>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtPredicateTypes::registerPredicates);
   public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtPredicateTypes::registerFunctionNames);
@@ -35,8 +33,8 @@ public class NbtPredicateTypes {
     return REGISTRY_BRIDGE.register(name, value);
   }
 
-  public static void init() {
-    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "NbtPredicateType registry is empty!");
+  public static void init(InitializeContext context) {
+    context.validateAndRegister(REGISTRY_BRIDGE);
   }
 
 
