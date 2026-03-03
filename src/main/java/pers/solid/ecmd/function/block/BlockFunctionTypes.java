@@ -82,6 +82,7 @@ public final class BlockFunctionTypes {
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(BlockFunctionType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 
