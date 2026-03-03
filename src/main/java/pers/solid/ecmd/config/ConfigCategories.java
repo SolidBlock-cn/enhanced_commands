@@ -30,6 +30,6 @@ public final class ConfigCategories {
   }
 
   public static void init() {
-    Validate.notEmpty(ConfigCategory.REGISTRY, "Enhanced Commands mod: Config category registry is empty");
+    Validate.notEmpty(ConfigCategory.REGISTRY, "Config category registry of Enhanced Commands mod is empty!");
   }
 }

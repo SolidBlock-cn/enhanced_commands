@@ -35,16 +35,14 @@ public class ModArgumentTypes {
   }
 
   @ExpectPlatform
-  private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void register(
-      String name, Class<A> clazz, ArgumentTypeInfo<A, T> info) {
+  private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void register(String name, Class<A> clazz, ArgumentTypeInfo<A, T> info) {
     throw new AssertionError();
   }
 
 
   @SuppressWarnings("unchecked")
-  private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void registerTrustingType(
-      // 此方法用于需要使用特殊泛型的方法，和 register 类似，但是为了在特殊情况下编译通过。
-      String name, Class<?> clazz, ArgumentTypeInfo<A, T> info) {
+  private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void registerTrustingType(String name, Class<?> clazz, ArgumentTypeInfo<A, T> info) {
+    // 此方法用于需要使用特殊泛型的方法，和 register 类似，但是为了在特殊情况下编译通过。
     register(name, (Class<A>) clazz, info);
   }
 }

@@ -1,12 +1,11 @@
 package pers.solid.ecmd.curve;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.FunctionsParser;
@@ -17,8 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class CurveTypes {
-  @ApiStatus.Internal
-  public static final RegistryBridge<CurveType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, CurveType.REGISTRY);
+  private static final RegistryBridge<CurveType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, CurveType.REGISTRY);
 
   public static final Map<String, Supplier<FunctionLikeParser<? extends CurveProvider<?>>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctions);
   public static final Map<String, Component> FUNCTION_NAMES = Util.make(new LinkedHashMap<>(), CurveTypes::registerFunctionNames);
@@ -36,8 +34,8 @@ public final class CurveTypes {
     return REGISTRY_BRIDGE.register(name, curveType);
   }
 
-  public static void init() {
-    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "CurveType registry is empty");
+  public static void init(InitializeContext context) {
+    context.validateAndRegister(REGISTRY_BRIDGE);
   }
 
 

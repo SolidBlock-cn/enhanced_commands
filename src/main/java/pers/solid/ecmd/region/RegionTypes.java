@@ -1,9 +1,8 @@
 package pers.solid.ecmd.region;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
@@ -13,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class RegionTypes {
-  @ApiStatus.Internal
-  public static final RegistryBridge<RegionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, RegionType.REGISTRY);
+  private static final RegistryBridge<RegionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, RegionType.REGISTRY);
 
   public static final Map<String, RegionType<?>> FUNCTIONS = new LinkedHashMap<>();
   public static final List<Parser<? extends RegionProvider<?>>> PARSERS = Lists.newArrayList(SingleBlockPosRegion.BareParser.INSTANCE, new FunctionsParser<>(FUNCTIONS.keySet(), s -> {
@@ -54,7 +52,7 @@ public final class RegionTypes {
     return REGISTRY_BRIDGE.register(name, value);
   }
 
-  public static void init() {
-    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "RegionType registry is empty!");
+  public static void init(InitializeContext context) {
+    context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }

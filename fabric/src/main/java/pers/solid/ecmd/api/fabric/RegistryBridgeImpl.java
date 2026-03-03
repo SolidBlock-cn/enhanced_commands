@@ -37,4 +37,14 @@ public class RegistryBridgeImpl<T> implements RegistryBridge<T> {
   public <R extends T> R register(String name, R value) {
     return Registry.register(registry, EnhancedCommands.id(name), value);
   }
+
+  @Override
+  public Registry<?> registry() {
+    return registry;
+  }
+
+  @Override
+  public ResourceKey<? extends Registry<T>> key() {
+    return registry.key();
+  }
 }

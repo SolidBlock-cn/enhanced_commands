@@ -655,8 +655,8 @@ public class EntitySelectorOptionsExtension {
     registerInapplicableReasons();
     registerOptionAliases();
     registerModOptions();
-    Validate.notEmpty(INAPPLICABLE_REASONS);
-    Validate.notEmpty(OPTION_NAME_ALIASES);
+    Validate.notEmpty(INAPPLICABLE_REASONS, "Registry of inapplicable reasons of Enhanced Commands mod is empty");
+    Validate.notEmpty(OPTION_NAME_ALIASES, "Registry of option name aliases of Enhanced Commands mod is empty!");
   }
 
   /**

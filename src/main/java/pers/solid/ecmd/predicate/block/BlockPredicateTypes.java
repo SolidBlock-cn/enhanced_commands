@@ -1,12 +1,11 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.FunctionsParser;
@@ -19,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class BlockPredicateTypes {
-  @ApiStatus.Internal
-  public static final RegistryBridge<BlockPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, BlockPredicateType.REGISTRY);
+  private static final RegistryBridge<BlockPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, BlockPredicateType.REGISTRY);
   public static final Map<String, Supplier<FunctionLikeParser<? extends BlockPredicate>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
   public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockPredicateTypes::registerFunctionNames);
   public static final Parser<BlockPredicate> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockPredicate.parse(parseContext.withAllowSparse(true)), parseContext);
@@ -89,7 +87,7 @@ public final class BlockPredicateTypes {
     map.put("same", Component.translatable("enhanced_commands.block_predicate.bi_predicate_same"));
   }
 
-  public static void init() {
-    Preconditions.checkState(!REGISTRY_BRIDGE.isEmpty(), "BlockPredicateTyp registry is empty!");
+  public static void init(InitializeContext context) {
+    context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }
