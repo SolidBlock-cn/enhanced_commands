@@ -53,6 +53,7 @@ public final class RegionTypes {
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(RegionType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }

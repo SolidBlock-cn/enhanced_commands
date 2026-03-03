@@ -41,6 +41,7 @@ public final class NbtFunctionTypes {
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(NbtFunctionType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 

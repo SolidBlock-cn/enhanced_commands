@@ -35,6 +35,7 @@ public final class CurveTypes {
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(CurveType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 

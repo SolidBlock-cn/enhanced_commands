@@ -22,6 +22,7 @@ public final class RegionSelectionTypes {
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(RegionSelectionType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }

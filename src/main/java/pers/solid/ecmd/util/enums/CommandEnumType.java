@@ -60,6 +60,7 @@ public record CommandEnumType<E extends Enum<E>>(@NotNull ImmutableCollection<E>
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(CommandEnumType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }

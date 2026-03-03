@@ -88,6 +88,7 @@ public final class BlockPredicateTypes {
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(BlockPredicateType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }

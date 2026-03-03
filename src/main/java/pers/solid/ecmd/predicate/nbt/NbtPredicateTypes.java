@@ -34,6 +34,7 @@ public class NbtPredicateTypes {
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(NbtPredicateType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 

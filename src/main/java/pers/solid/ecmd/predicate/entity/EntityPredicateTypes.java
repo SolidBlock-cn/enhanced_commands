@@ -74,6 +74,7 @@ public final class EntityPredicateTypes {
   }
 
   public static void init(InitializeContext context) {
+    context.registerRegistry(EntityPredicateType.REGISTRY);
     context.validateAndRegister(REGISTRY_BRIDGE);
   }
 }
