@@ -39,8 +39,9 @@ public abstract class LevelRendererMixin {
 
 
   @SuppressWarnings({"UnresolvedMixinReference", "MixinAnnotationTarget"})
-  @Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/debug/DebugRenderer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/culling/Frustum;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;DDD)V", ordinal = 0))
+  @Inject(method = "lambda$addMainPass$2", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/debug/DebugRenderer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/culling/Frustum;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;DDD)V", ordinal = 0), require = 0)
   private void injectedBeforeDebugRender(FogParameters fogParameters, DeltaTracker deltaTracker, Camera camera, ProfilerFiller profilerFiller, Matrix4f matrix4f, Matrix4f matrix4f2, ResourceHandle<RenderTarget> resourceHandle, ResourceHandle<RenderTarget> resourceHandle2, ResourceHandle<RenderTarget> resourceHandle3, ResourceHandle<RenderTarget> resourceHandle4, Frustum frustum, boolean b, ResourceHandle<RenderTarget> resourceHandle5, CallbackInfo ci, @Local PoseStack poseStack, @Local(ordinal = 0) MultiBufferSource.BufferSource bufferSource) {
+    // this mixin only applies to NeoForge
     EventBridges.INSTANCE.hookBeforeDebugRender((LevelRenderer) (Object) this, deltaTracker, camera, ci, poseStack, frustum, bufferSource, profilerFiller);
   }
 }
