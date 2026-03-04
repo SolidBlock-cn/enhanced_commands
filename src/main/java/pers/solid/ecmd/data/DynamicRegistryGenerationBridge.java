@@ -15,6 +15,6 @@ public interface DynamicRegistryGenerationBridge<T> {
 
     <S> HolderGetter<S> lookupOrThrow(ResourceKey<? extends Registry<? extends S>> registryKey);
 
-    <S> Optional<HolderLookup.RegistryLookup<S>> registryLookup(ResourceKey<? extends Registry<? extends S>> registryKey);
+    <S> Optional<? extends HolderLookup.RegistryLookup<S>> registryLookup(ResourceKey<? extends Registry<? extends S>> registryKey);
   }
 }

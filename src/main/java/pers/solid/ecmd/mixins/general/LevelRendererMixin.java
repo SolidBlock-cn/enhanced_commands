@@ -50,8 +50,9 @@ public abstract class LevelRendererMixin {
     return original;
   }
 
-  @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/debug/DebugRenderer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;DDD)V"))
+  @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/debug/DebugRenderer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;DDD)V"), require = 0)
   private void injectedBeforeDebugRender(DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f frustumMatrix, Matrix4f projectionMatrix, CallbackInfo ci, @Local PoseStack poseStack, @Local Frustum frustum, @Local MultiBufferSource.BufferSource bufferSource, @Local ProfilerFiller profilerFiller) {
+    // this mixin only applies to NeoForge
     EventBridges.INSTANCE.hookBeforeDebugRender((LevelRenderer) (Object) this, deltaTracker, renderBlockOutline, camera, gameRenderer, lightTexture, frustumMatrix, projectionMatrix, ci, poseStack, frustum, bufferSource, profilerFiller, level);
   }
 }

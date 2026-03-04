@@ -26,7 +26,7 @@ public interface DynamicRegistryGenerationBridgeImpl<T> extends DynamicRegistryG
     }
 
     @Override
-    public <S> Optional<HolderLookup.RegistryLookup<S>> registryLookup(ResourceKey<? extends Registry<? extends S>> registryKey) {
+    public <S> Optional<? extends HolderLookup.RegistryLookup<S>> registryLookup(ResourceKey<? extends Registry<? extends S>> registryKey) {
       return bootstrap.registryLookup(registryKey);
     }
   }
