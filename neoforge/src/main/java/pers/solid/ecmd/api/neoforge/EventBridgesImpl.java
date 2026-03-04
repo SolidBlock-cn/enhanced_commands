@@ -4,17 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionResult;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.solid.ecmd.api.EventBridge;
 import pers.solid.ecmd.api.EventBridges;
@@ -54,8 +50,8 @@ public enum EventBridgesImpl implements EventBridges {
   }
 
   @Override
-  public void hookBeforeDebugRender(LevelRenderer levelRenderer, DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightTexture lightTexture, Matrix4f frustumMatrix, Matrix4f projectionMatrix, CallbackInfo ci, PoseStack poseStack, Frustum frustum, MultiBufferSource.BufferSource multiBufferSource, ProfilerFiller profilerFiller, ClientLevel level) {
-    final BeforeDebugRenderEvent event = new BeforeDebugRenderEvent(levelRenderer, deltaTracker, poseStack, camera, frustum, gameRenderer, lightTexture, projectionMatrix, frustumMatrix, multiBufferSource, profilerFiller, level);
+  public void hookBeforeDebugRender(LevelRenderer levelRenderer, DeltaTracker deltaTracker, Camera camera, CallbackInfo ci, PoseStack poseStack, Frustum frustum, MultiBufferSource.BufferSource multiBufferSource, ProfilerFiller profilerFiller) {
+    final BeforeDebugRenderEvent event = new BeforeDebugRenderEvent(levelRenderer, deltaTracker, poseStack, camera, frustum, multiBufferSource, profilerFiller);
     NeoForge.EVENT_BUS.post(event);
   }
 }

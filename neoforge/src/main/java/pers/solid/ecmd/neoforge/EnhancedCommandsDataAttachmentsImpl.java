@@ -11,7 +11,7 @@ import pers.solid.ecmd.regionselection.RegionSelection;
 
 public class EnhancedCommandsDataAttachmentsImpl {
   public static final DeferredRegister<AttachmentType<?>> DEFERRED_REGISTER = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, EnhancedCommands.MOD_ID);
-  public static final AttachmentType<RegionSelection> REGION_SELECTION = AttachmentType.<RegionSelection>builder(() -> null).serialize(RegionSelection.CODEC).sync(RegionSelection.PACKET_CODEC).build();
+  public static final AttachmentType<RegionSelection> REGION_SELECTION = AttachmentType.<RegionSelection>builder(() -> null).serialize(RegionSelection.CODEC).build();  // todo sync?
 
   public static void init() {
     DEFERRED_REGISTER.register("region_selection", Suppliers.ofInstance(REGION_SELECTION));

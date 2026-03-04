@@ -44,14 +44,14 @@ public enum DebugRenderLayerCommand implements ClientCommandRegistrationCallback
     LAYERS.forEach((s, renderLayer) -> literal.then(LiteralArgumentBuilder.<S>literal(s).executes(commandContext -> {
       RegionRendering.regionRenderLayer = renderLayer;
 
-      Minecraft.getInstance().player.sendSystemMessage(Component.literal("set to " + s));
+      Minecraft.getInstance().gui.getChat().addMessage(Component.literal("set to " + s));
       return 1;
     })));
 
     literal.then(LiteralArgumentBuilder.<S>literal("debug_line_strip").then(RequiredArgumentBuilder.<S, Double>argument("lineWidth", DoubleArgumentType.doubleArg()).executes(commandContext -> {
       final double lineWidth = DoubleArgumentType.getDouble(commandContext, "lineWidth");
       RegionRendering.regionRenderLayer = RenderType.debugLineStrip(lineWidth);
-      Minecraft.getInstance().player.sendSystemMessage(Component.literal("set to debug_line_strip lineWidth = " + lineWidth));
+      Minecraft.getInstance().gui.getChat().addMessage(Component.literal("set to debug_line_strip lineWidth = " + lineWidth));
       return 1;
     })));
     commandDispatcher.register(literal);
