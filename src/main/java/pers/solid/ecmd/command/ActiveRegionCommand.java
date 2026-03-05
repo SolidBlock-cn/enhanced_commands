@@ -18,7 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.function.FailableFunction;
-import pers.solid.ecmd.EnhancedCommandsDataAttachments;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.AxisProvider;
 import pers.solid.ecmd.argument.DirectionProvider;
@@ -140,7 +139,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallbackBridge {
     final RegionSelection operatedRegion = invokeOperationOrThrow(regionOperation, player.getActiveRegion$ec());
 
     // 注意：当玩家有 regionBuilder 时，会自动生成 region，且理论上 regionBuilder 和 region 进行的操作应当是一致的。
-    EnhancedCommandsDataAttachments.setActiveRegionForPlayer(player, operatedRegion);
+    player.setActiveRegion$ec(operatedRegion);
     source.sendFeedback$ecBridge(() -> messageSingle.apply(player, operatedRegion), true);
     return 1;
   }

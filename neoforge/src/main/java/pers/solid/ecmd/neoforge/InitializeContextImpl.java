@@ -8,7 +8,7 @@ import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.api.neoforge.RegistryBridgeImpl;
 
 public class InitializeContextImpl implements InitializeContext {
-  private final IEventBus modEventBus;
+  public final IEventBus modEventBus;
 
   public InitializeContextImpl(IEventBus modEventBus) {
     this.modEventBus = modEventBus;

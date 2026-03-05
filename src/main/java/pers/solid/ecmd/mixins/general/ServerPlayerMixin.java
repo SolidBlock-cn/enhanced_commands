@@ -30,6 +30,7 @@ public abstract class ServerPlayerMixin implements ServerPlayerExtension, Histor
   @Unique
   private RegionSelectionType ec$regionSelectionType = RegionSelectionTypes.CUBOID;
 
+
   @Inject(method = "restoreFrom", at = @At("TAIL"))
   public void injectedCopyFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
     // 玩家重生时，需保留这些信息。
