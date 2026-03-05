@@ -35,28 +35,28 @@ public abstract class PlayerMixin implements PlayerExtension {
    */
   @Inject(method = "defineSynchedData", at = @At("TAIL"))
   private void initModDataTracker(SynchedEntityData.Builder builder, CallbackInfo ci) {
-    builder.define(EnhancedCommandsTrackedData.PLAYER_REGION_SELECTION, Optional.empty());
+    builder.define(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID, Optional.empty());
   }
 
   @Override
   public @Nullable RegionSelection getActiveRegion$ec() {
-    return ((Entity) (Object) this).getEntityData().get(EnhancedCommandsTrackedData.PLAYER_REGION_SELECTION).orElse(null);
+    return ((Entity) (Object) this).getEntityData().get(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID).orElse(null);
   }
 
   @Override
   public void setActiveRegion$ec(@Nullable RegionSelection region) {
-    ((Entity) (Object) this).getEntityData().set(EnhancedCommandsTrackedData.PLAYER_REGION_SELECTION, Optional.ofNullable(region), true);
+    ((Entity) (Object) this).getEntityData().set(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID, Optional.ofNullable(region), true);
   }
 
   @Override
   public void syncActiveRegion$ec() {
     final SynchedEntityData dataTracker = ((Player) (Object) this).getEntityData();
-    dataTracker.set(EnhancedCommandsTrackedData.PLAYER_REGION_SELECTION, dataTracker.get(EnhancedCommandsTrackedData.PLAYER_REGION_SELECTION), true);
+    dataTracker.set(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID, dataTracker.get(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID), true);
   }
 
   @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-  private void readModDataFromNbt(CompoundTag nbt, CallbackInfo ci) {
-    final Tag value = nbt.get("active_region_ec");
+  private void readModSaveData(CompoundTag tag, CallbackInfo ci) {
+    final Tag value = tag.get("enhanced_commands:active_region");
     if (value != null) {
       setActiveRegion$ec(RegionSelection.fromNbt(value));
     } else {
@@ -65,12 +65,12 @@ public abstract class PlayerMixin implements PlayerExtension {
   }
 
   @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
-  private void writeModDataToNbt(CompoundTag nbt, CallbackInfo ci) {
+  private void writeModSaveData(CompoundTag tag, CallbackInfo ci) {
     final RegionSelection activeRegion = getActiveRegion$ec();
     if (activeRegion != null) {
-      nbt.put("active_region_ec", activeRegion.createNbt());
+      tag.put("enhanced_commands:active_region", activeRegion.createNbt());
     } else {
-      nbt.remove("active_region_ec");
+      tag.remove("enhanced_commands:active_region");
     }
   }
 }

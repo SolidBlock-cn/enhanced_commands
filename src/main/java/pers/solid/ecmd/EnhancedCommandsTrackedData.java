@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public final class EnhancedCommandsTrackedData {
   public static final EntityDataSerializer<Optional<RegionSelection>> REGION_SELECTION = EntityDataSerializer.forValueType(ByteBufCodecs.optional(RegionSelection.PACKET_CODEC));
-  public static final EntityDataAccessor<Optional<RegionSelection>> PLAYER_REGION_SELECTION = SynchedEntityData.defineId(Player.class, REGION_SELECTION);
+  public static final EntityDataAccessor<Optional<RegionSelection>> DATA_ACTIVE_REGION_ID = SynchedEntityData.defineId(Player.class, REGION_SELECTION);
 
   private EnhancedCommandsTrackedData() {
   }
