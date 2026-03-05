@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.UnaryOperator;
 
+import static pers.solid.ecmd.util.StringUtil.nf;
+
 /**
  * 和{@linkplain Component 文本组件}有关的实用方法。
  */
@@ -79,14 +81,14 @@ public final class TextUtil {
    * 将方块坐标表示为文本组件。
    */
   public static MutableComponent wrapVector(Vec3i blockPos) {
-    return Component.translatable("enhanced_commands.position", blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    return Component.translatable("enhanced_commands.position", nf.format(blockPos.getX()), nf.format(blockPos.getY()), nf.format(blockPos.getZ()));
   }
 
   /**
    * 将坐标表示为文本组件，以用于命令输出。
    */
   public static MutableComponent wrapVector(Position position) {
-    return Component.translatable("enhanced_commands.position", position.x(), position.y(), position.z());
+    return Component.translatable("enhanced_commands.position", nf.format(position.x()), nf.format(position.y()), nf.format(position.z()));
   }
 
   /**
