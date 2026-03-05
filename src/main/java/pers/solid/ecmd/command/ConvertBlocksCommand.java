@@ -56,10 +56,10 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
 
     final IntFunction<Component> fallingBlockFeedback = value -> Component.translatable("enhanced_commands.commands.convertblocks.falling_block.complete", value).enhanced$$();
     final IntFunction<Component> blockDisplayFeedback = value -> Component.translatable("enhanced_commands.commands.convertblocks.block_display.complete", value).enhanced$$();
-    ModCommands.registerWithRegionArgumentModification(
+    EnhancedCommandsCommands.registerWithRegionArgumentModification(
         dispatcher,
-        ModCommands.literalR2("convertblocks"),
-        ModCommands.literalR2("/convertblocks"),
+        EnhancedCommandsCommands.literalR2("convertblocks"),
+        EnhancedCommandsCommands.literalR2("/convertblocks"),
         Commands.argument("region", RegionArgument.region(commandBuildContext))
             .then(Commands.literal("falling_block")
                 .executes(context -> executeConvertBlocksToFallingBlock(ConvertBlockCommand::convertToFallingBlock, fallingBlockFeedback, keywordArgs.defaultArgs(), context))

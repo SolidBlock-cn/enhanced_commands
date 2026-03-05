@@ -36,7 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.ParserUtilsAccessor;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.ArrayList;
@@ -273,7 +273,7 @@ public final class ParsingUtil {
       return Pattern.compile(readRegexString(stringReader));
     } catch (PatternSyntaxException e) {
       stringReader.setCursor(cursorAtRegexBegin);
-      throw ModCommandExceptionTypes.INVALID_REGEX.createWithContext(stringReader, e.getMessage().replace(StringUtils.CR, StringUtils.EMPTY));
+      throw EnhancedCommandsCommandExceptionTypes.INVALID_REGEX.createWithContext(stringReader, e.getMessage().replace(StringUtils.CR, StringUtils.EMPTY));
     }
   }
 
@@ -282,7 +282,7 @@ public final class ParsingUtil {
    */
   public static void expectAndSkipWhitespace(StringReader reader) throws CommandSyntaxException {
     if (!reader.canRead() || !Character.isWhitespace(reader.peek())) {
-      throw ModCommandExceptionTypes.EXPECTED_WHITESPACE.createWithContext(reader);
+      throw EnhancedCommandsCommandExceptionTypes.EXPECTED_WHITESPACE.createWithContext(reader);
     }
     reader.skipWhitespace();
   }

@@ -8,7 +8,7 @@ import net.minecraft.Optionull;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +47,7 @@ public class FunctionsParser<T> implements Parser<T> {
       } else {
         final int cursorAfterFunctionName = reader.getCursor();
         reader.setCursor(cursorOnStart);
-        throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_FUNCTION.createWithContext(reader, unquotedString), cursorAfterFunctionName);
+        throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.UNKNOWN_FUNCTION.createWithContext(reader, unquotedString), cursorAfterFunctionName);
       }
     } else {
       return null;

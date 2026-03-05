@@ -122,10 +122,10 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
                 stringReader.skipWhitespace();
                 stringReader.expect(')');
               } else {
-                throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.create(',', ')');
+                throw EnhancedCommandsCommandExceptionTypes.EXPECTED_2_SYMBOLS.create(',', ')');
               }
             } else {
-              throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.create(',', ')');
+              throw EnhancedCommandsCommandExceptionTypes.EXPECTED_2_SYMBOLS.create(',', ')');
             }
 
             final @NotNull String pluralTranslation;

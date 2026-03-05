@@ -54,7 +54,7 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
@@ -318,7 +318,7 @@ public class EntitySelectorOptionsExtension {
             return suggestionsBuilder.suggest(",").suggest("]").buildFuture();
           }
         });
-        throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "]");
+        throw EnhancedCommandsCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "]");
       }
 
       final ImmutableList<EntityPredicate> build = entityPredicates.build();
@@ -473,7 +473,7 @@ public class EntitySelectorOptionsExtension {
             stringReader.skip();
             break;
           } else {
-            throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "}");
+            throw EnhancedCommandsCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "}");
           }
         }
 
@@ -509,7 +509,7 @@ public class EntitySelectorOptionsExtension {
           if (usedEffects.contains(effectEntry)) {
             final int cursorAfterEffectId = stringReader.getCursor();
             stringReader.setCursor(cursorBeforeEffectEntry);
-            throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, effectEntry.value().getDisplayName()), cursorAfterEffectId);
+            throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, effectEntry.value().getDisplayName()), cursorAfterEffectId);
           }
           reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> suggestionsBuilder.suggest("=").buildFuture());
           stringReader.skipWhitespace();
@@ -531,7 +531,7 @@ public class EntitySelectorOptionsExtension {
             stringReader.skip();
             break;
           } else {
-            throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "}");
+            throw EnhancedCommandsCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(stringReader, ",", "}");
           }
         }
         final EffectsEntityPredicateEntry entry = new EffectsEntityPredicateEntry(effects.build());
@@ -694,7 +694,7 @@ public class EntitySelectorOptionsExtension {
           if (parsedTypeKeys.contains(tagKey)) {
             final int cursorAfterNext = stringReader.getCursor();
             stringReader.setCursor(cursorBeforeNext);
-            throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, "#" + tagKey.location()), cursorAfterNext);
+            throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, "#" + tagKey.location()), cursorAfterNext);
           }
           parsedTypeKeys.add(tagKey);
           values.add(Either.right(tagKey));
@@ -707,7 +707,7 @@ public class EntitySelectorOptionsExtension {
           });
           if (parsedTypes.contains(entityType)) {
             stringReader.setCursor(cursorBeforeNext);
-            throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, entityType.getDescription()), cursorAfterNext);
+            throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, entityType.getDescription()), cursorAfterNext);
           }
           parsedTypes.add(entityType);
           values.add(Either.left(entityType));
@@ -761,7 +761,7 @@ public class EntitySelectorOptionsExtension {
           throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptions.ERROR_GAME_MODE_INVALID.createWithContext(stringReader, nextString), cursorAfterNext);
         } else if (parsedGameModes.contains(next)) {
           stringReader.setCursor(cursorBeforeNext);
-          throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, nextString), cursorAfterNext);
+          throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(stringReader, nextString), cursorAfterNext);
         } else {
           parsedGameModes.add(next);
         }
@@ -867,7 +867,7 @@ public class EntitySelectorOptionsExtension {
     });
     if (stringReader.canRead() && stringReader.peek() == '{') {
       reader.setSuggestions(EntitySelectorParser.SUGGEST_NOTHING);
-      final LootItemCondition lootCondition = ParsingUtil.parseNbt(stringReader, LootItemCondition.DIRECT_CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
+      final LootItemCondition lootCondition = ParsingUtil.parseNbt(stringReader, LootItemCondition.DIRECT_CODEC, EnhancedCommandsCommandExceptionTypes.INVALID_LOOT_TABLE::create);
       reader.addPredicate$ec(new LootTablePredicateEntityPredicateEntry(new Holder.Direct<>(lootCondition), inverted));
       return true;
     }

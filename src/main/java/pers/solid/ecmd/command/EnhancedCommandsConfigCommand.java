@@ -24,7 +24,7 @@ import pers.solid.ecmd.argument.AnyTypeArgument;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigEntry;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -55,7 +55,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
       final StringReader stringReader = new StringReader(input);
       stringReader.setCursor(range.getStart());
       final CommandSyntaxException commandSyntaxException = UNKNOWN_CATEGORY.createWithContext(stringReader, categoryName);
-      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), commandSyntaxException.getInput(), commandSyntaxException.getCursor(), range.getEnd());
+      throw EnhancedCommandsCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), commandSyntaxException.getInput(), commandSyntaxException.getCursor(), range.getEnd());
     } else {
       return category;
     }
@@ -76,7 +76,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
       final StringReader stringReader = new StringReader(input);
       stringReader.setCursor(range.getStart());
       final CommandSyntaxException commandSyntaxException = UNKNOWN_ENTRY.createWithContext(stringReader, entryName, category.name);
-      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), commandSyntaxException.getInput(), commandSyntaxException.getCursor(), range.getEnd());
+      throw EnhancedCommandsCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), commandSyntaxException.getInput(), commandSyntaxException.getCursor(), range.getEnd());
     } else {
       return entry;
     }
@@ -184,16 +184,16 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     try {
       parse = entry.type.getArgumentType(value.commandBuildContext()).parse(stringReader, context.getSource());
     } catch (CommandSyntaxException e) {
-      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), e.getInput(), e.getCursor(), EnhancedCommandSyntaxException.getCursorEndOf(e));
+      throw EnhancedCommandsCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), e.getInput(), e.getCursor(), EnhancedCommandSyntaxException.getCursorEndOf(e));
     }
     if (stringReader.canRead()) {
       final CommandSyntaxException commandSyntaxException = CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create();
-      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), input, stringReader.getCursor(), -1);
+      throw EnhancedCommandsCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(commandSyntaxException.getRawMessage(), input, stringReader.getCursor(), -1);
     }
     try {
       entry.setCurrent(parse);
     } catch (CommandSyntaxException e) {
-      throw ModCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), input, range.getStart(), range.getEnd());
+      throw EnhancedCommandsCommandExceptionTypes.EXCEPTION_SHOWING_TEXT.create(e.getRawMessage(), input, range.getStart(), range.getEnd());
     }
     context.getSource().sendFeedback$ecBridge(() -> {
       final MutableComponent text = Component.translatable("enhanced_commands.commands.config.set.success", getClickableEntryName(entry), entry.type.displayValue(parse, Styles.RESULT));

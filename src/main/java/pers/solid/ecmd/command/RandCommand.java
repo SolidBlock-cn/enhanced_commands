@@ -35,8 +35,8 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static net.minecraft.commands.arguments.NbtPathArgument.nbtPath;
 import static pers.solid.ecmd.argument.NbtTargetArgument.nbtTarget;
-import static pers.solid.ecmd.command.ModCommands.consumerOf;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.consumerOf;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 /**
  * <p>The command used to generate random valueNames. Some usages:</p>

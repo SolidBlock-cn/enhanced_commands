@@ -88,7 +88,7 @@ public class DefaultNamespace {
       for (int i = reader.getCursor(); i < cursorAfterId; i++) {
         final char c = string.charAt(i);
         if (c >= 'A' && c <= 'Z') {
-          throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterId);
+          throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterId);
         }
       }
       throw EnhancedCommandSyntaxException.withCursorEnd(ResourceLocation.ERROR_INVALID.createWithContext(reader), cursorAfterId);

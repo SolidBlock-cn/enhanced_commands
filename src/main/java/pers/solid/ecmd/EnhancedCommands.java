@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.api.EventBridge;
 import pers.solid.ecmd.api.FlipStateCallback;
-import pers.solid.ecmd.argument.ModArgumentTypes;
+import pers.solid.ecmd.argument.EnhancedCommandsArgumentTypes;
 import pers.solid.ecmd.config.ConfigCategories;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigManager;
@@ -62,7 +62,7 @@ public class EnhancedCommands {
     NbtPredicateTypes.init(context);
     RegionTypes.init(context);
     RegionSelectionTypes.init(context);
-    ModArgumentTypes.init();
+    EnhancedCommandsArgumentTypes.init();
     EntitySelectorOptionsExtension.init();
     EnhancedCommandsDataAttachments.init();
     EnhancedCommandsTrackedData.init(context);

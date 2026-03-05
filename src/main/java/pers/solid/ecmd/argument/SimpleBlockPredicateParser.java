@@ -18,7 +18,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.property.*;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -97,7 +97,7 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
         throw EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_INVALID_VALUE.createWithContext(reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
       } else if (values.contains(parse.get())) {
         reader.setCursor(cursorBeforeParseValue);
-        throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, valueName), cursorAfterParseValue);
+        throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, valueName), cursorAfterParseValue);
       } else {
         values.add(parse.get());
         parseContext.clearSuggestion();
@@ -183,7 +183,7 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
       final int cursorAfterValue = reader.getCursor();
       if (values.contains(valueName)) {
         reader.setCursor(cursorBeforeValue);
-        throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, valueName), cursorAfterValue);
+        throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, valueName), cursorAfterValue);
       }
       values.add(valueName);
 

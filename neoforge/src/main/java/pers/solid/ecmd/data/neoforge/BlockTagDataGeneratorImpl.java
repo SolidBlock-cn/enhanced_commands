@@ -16,7 +16,7 @@ import pers.solid.ecmd.EnhancedCommands;
 
 import java.util.concurrent.CompletableFuture;
 
-import static pers.solid.ecmd.tag.ModBlockTags.*;
+import static pers.solid.ecmd.tag.EnhancedCommandsBlockTags.*;
 
 @EventBusSubscriber(modid = EnhancedCommands.MOD_ID)
 public class BlockTagDataGeneratorImpl extends BlockTagsProvider {

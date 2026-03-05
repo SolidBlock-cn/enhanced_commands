@@ -6,7 +6,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
 import java.util.Collection;
 
@@ -53,11 +53,11 @@ public interface NamedParamListParser {
   default void checkParamNameValidity(String paramName, StringReader stringReader, int cursorBefore, int cursorAfter) throws CommandSyntaxException {
     if (!supportedParams().contains(paramName)) {
       stringReader.setCursor(cursorBefore);
-      throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(stringReader, paramName), cursorAfter);
+      throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(stringReader, paramName), cursorAfter);
     }
     if (isDuplicateParamName(paramName)) {
       stringReader.setCursor(cursorBefore);
-      throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(stringReader, paramName), cursorAfter);
+      throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(stringReader, paramName), cursorAfter);
     }
   }
 

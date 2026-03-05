@@ -19,8 +19,8 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 import java.util.Collection;
 
@@ -38,7 +38,7 @@ public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Singl
     if (nbtElement instanceof CompoundTag nbtCompound) {
       return new MutableObject<>(nbtCompound);
     } else {
-      throw ModCommandExceptionTypes.CANNOT_PARSE.create("not compound");
+      throw EnhancedCommandsCommandExceptionTypes.CANNOT_PARSE.create("not compound");
     }
   }
 

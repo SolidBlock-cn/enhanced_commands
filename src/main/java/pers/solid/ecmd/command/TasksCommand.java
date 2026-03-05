@@ -33,7 +33,7 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
       final Map<UUID, IteratorTask<?>> uuidToTasks = ((BlockableEventLoopExtension) context.getSource().getServer()).getUUIDToIteratorTasks$ec();
       return SharedSuggestionProvider.suggest(uuidToTasks.keySet().stream().map(UUID::toString), builder);
     };
-    dispatcher.register(ModCommands.literalR2("tasks")
+    dispatcher.register(EnhancedCommandsCommands.literalR2("tasks")
         .executes(context -> executeListTasks(context.getSource().getServer(), context, 10))
         .then(Commands.literal("count")
             .executes(context -> executeCountTasks(context.getSource().getServer(), context)))

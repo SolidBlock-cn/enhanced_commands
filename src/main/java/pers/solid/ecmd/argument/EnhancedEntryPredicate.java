@@ -20,7 +20,7 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
@@ -172,7 +172,7 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
           final int cursorAfterId = reader.getCursor();
           if (duplicateTagIds.contains(tagId)) {
             reader.setCursor(cursorBeforeId);
-            throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, tagId), cursorAfterId);
+            throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, tagId), cursorAfterId);
           } else {
             duplicateTagIds.add(tagId);
           }
@@ -190,7 +190,7 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
         final int cursorAfterId = reader.getCursor();
         if (duplicateEntryIds.contains(entryId)) {
           reader.setCursor(cursorBeforeId);
-          throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, entryId), cursorAfterId);
+          throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.DUPLICATE_VALUE.createWithContext(reader, entryId), cursorAfterId);
         } else {
           duplicateEntryIds.add(entryId);
         }

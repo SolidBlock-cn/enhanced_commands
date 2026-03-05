@@ -36,7 +36,7 @@ import java.util.function.Function;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum ConvertBlockCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;

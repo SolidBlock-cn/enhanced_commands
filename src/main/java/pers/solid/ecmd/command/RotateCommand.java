@@ -33,7 +33,7 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static pers.solid.ecmd.argument.EnhancedPosArgument.CURRENT_POS;
 import static pers.solid.ecmd.argument.EnhancedPosArgument.blockPos;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum RotateCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
@@ -45,7 +45,7 @@ public enum RotateCommand implements CommandRegistrationCallbackBridge {
         .addOptionalArg("pivot", blockPos(), CURRENT_POS)
         .build();
 
-    ModCommands.registerWithRegionArgumentModification(
+    EnhancedCommandsCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("rotate"),
         literalR2("/rotate"),

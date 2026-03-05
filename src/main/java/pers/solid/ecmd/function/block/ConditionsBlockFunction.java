@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,7 +135,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
             break;
           }
         } else {
-          throw ModCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(reader, ",", ";");
+          throw EnhancedCommandsCommandExceptionTypes.EXPECTED_2_SYMBOLS.createWithContext(reader, ",", ";");
         }
       }
     }

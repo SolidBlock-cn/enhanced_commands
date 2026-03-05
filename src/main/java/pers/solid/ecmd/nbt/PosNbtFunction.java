@@ -14,8 +14,8 @@ import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunctionType;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 
 public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
   public static final MapCodec<PosNbtFunction> CODEC = EnhancedCoordinates.CODEC.fieldOf("pos").xmap(PosNbtFunction::new, PosNbtFunction::pos);
@@ -34,7 +34,7 @@ public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
   public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     final Vec3 pos = this.pos.toAbsolutePos(context.positionProvider);
     final DataResult<Tag> result = Vec3.CODEC.encodeStart(NbtOps.INSTANCE, pos);
-    return result.getOrThrow(ModCommandExceptionTypes.CANNOT_PARSE::create);
+    return result.getOrThrow(EnhancedCommandsCommandExceptionTypes.CANNOT_PARSE::create);
   }
 
   public enum Type implements NbtFunctionType<PosNbtFunction> {

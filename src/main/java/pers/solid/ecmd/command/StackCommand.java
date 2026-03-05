@@ -68,7 +68,7 @@ import static net.minecraft.commands.Commands.literal;
 import static pers.solid.ecmd.argument.DirectionArgument.direction;
 import static pers.solid.ecmd.argument.DirectionArgument.getDirection;
 import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum StackCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
@@ -93,7 +93,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
         .addOptionalArg("gap", integer(), 0)
         .build();
 
-    ModCommands.registerWithRegionArgumentModification(
+    EnhancedCommandsCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("stack"),
         literalR2("/stack"),
