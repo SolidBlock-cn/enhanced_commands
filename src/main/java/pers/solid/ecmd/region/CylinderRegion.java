@@ -22,7 +22,7 @@ import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Collection;
@@ -179,7 +179,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         if (radius != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "radius");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "radius");
         }
         final int cursorBeforeReadDouble = reader.getCursor();
         radius = reader.readDouble();
@@ -189,7 +189,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
         }
       } else if (paramIndex == 1) {
         if (height != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "height");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "height");
         }
         final int cursorBeforeReadDouble = reader.getCursor();
         height = reader.readDouble();
@@ -199,7 +199,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
         }
       } else if (paramIndex == 2) {
         if (center != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
         }
         final EnhancedPosArgument type = EnhancedPosArgument.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(type);

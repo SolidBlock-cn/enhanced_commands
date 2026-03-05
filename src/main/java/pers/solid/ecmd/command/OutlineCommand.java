@@ -21,7 +21,7 @@ import pers.solid.ecmd.util.enums.OutlineType;
 
 import java.util.Collections;
 
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum OutlineCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
@@ -33,7 +33,7 @@ public enum OutlineCommand implements CommandRegistrationCallbackBridge {
         .build();
 
     final ArgumentCommandNode<CommandSourceStack, ?> outlineTypeArgumentNode;
-    ModCommands.registerWithRegionArgumentModification(
+    EnhancedCommandsCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("outline"),
         literalR2("/outline"),
@@ -44,7 +44,7 @@ public enum OutlineCommand implements CommandRegistrationCallbackBridge {
                     .executes(context -> executeWithDefaultKeywordArgs(context, context.getArgument("outline_type", OutlineType.class)))
                     .then(Commands.argument("keyword_args", kwArgsType)
                         .executes(context -> executeFromKeywordArgs(context, context.getArgument("outline_type", OutlineType.class), KeywordArgsArgument.getKeywordArgs(context, "keyword_args")))).build())));
-    ModCommands.registerWithRegionArgumentModification(
+    EnhancedCommandsCommands.registerWithRegionArgumentModification(
         dispatcher, literalR2("wall"),
         literalR2("/wall"),
         Commands.argument("region", RegionArgument.region(commandBuildContext)).then(

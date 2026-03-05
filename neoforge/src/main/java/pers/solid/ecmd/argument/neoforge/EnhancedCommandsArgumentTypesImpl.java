@@ -7,7 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import pers.solid.ecmd.EnhancedCommands;
 
-public class ModArgumentTypesImpl {
+public class EnhancedCommandsArgumentTypesImpl {
   public static final DeferredRegister<ArgumentTypeInfo<?, ?>> DEFERRED_REGISTER = DeferredRegister.create(BuiltInRegistries.COMMAND_ARGUMENT_TYPE, EnhancedCommands.MOD_ID);
 
   public static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void register(String name, Class<A> clazz, ArgumentTypeInfo<A, T> info) {

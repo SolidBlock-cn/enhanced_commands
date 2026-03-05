@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.EventBridge;
 import pers.solid.ecmd.api.fabric.EventBridgeImpl;
-import pers.solid.ecmd.command.ModCommands;
+import pers.solid.ecmd.command.EnhancedCommandsCommands;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 public class EnhancedCommandsImpl implements ModInitializer {
   public static void registerModCommands() {
-    CommandRegistrationCallback.EVENT.register(ModCommands.INSTANCE::register);
+    CommandRegistrationCallback.EVENT.register(EnhancedCommandsCommands.INSTANCE::register);
   }
 
   public static boolean isDevelopmentEnvironment() {

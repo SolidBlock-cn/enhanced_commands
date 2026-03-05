@@ -29,3 +29,6 @@ side = "BOTH"
 
 [[mixins]]
 config = "enhanced_commands.mixins.json"
+
+[[mixins]]
+config = "enhanced_commands.mixins.neoforge.json"

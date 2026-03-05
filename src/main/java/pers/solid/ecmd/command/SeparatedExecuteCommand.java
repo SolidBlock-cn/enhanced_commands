@@ -56,7 +56,7 @@ import java.util.function.IntFunction;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 /**
  * @see net.minecraft.server.commands.ExecuteCommand

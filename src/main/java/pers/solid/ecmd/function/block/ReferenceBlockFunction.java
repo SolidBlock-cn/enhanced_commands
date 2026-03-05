@@ -14,7 +14,7 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 
 public record ReferenceBlockFunction(ResourceKey<BlockFunction> id) implements BlockFunction, ReferenceEntry<ReferenceBlockFunction, BlockFunction> {
@@ -68,7 +68,7 @@ public record ReferenceBlockFunction(ResourceKey<BlockFunction> id) implements B
 
     @Override
     protected CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-      return ModCommandExceptionTypes.UNKNOWN_BLOCK_FUNCTION_ID.createWithContext(reader, identifier);
+      return EnhancedCommandsCommandExceptionTypes.UNKNOWN_BLOCK_FUNCTION_ID.createWithContext(reader, identifier);
     }
   }
 }

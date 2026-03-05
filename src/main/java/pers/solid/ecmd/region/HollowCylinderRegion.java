@@ -20,7 +20,7 @@ import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 import pers.solid.ecmd.util.enums.OutlineType;
 
@@ -178,7 +178,7 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         if (radius != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "radius");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "radius");
         }
         final int cursorBeforeReadDouble = reader.getCursor();
         radius = reader.readDouble();
@@ -188,7 +188,7 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
         }
       } else if (paramIndex == 1) {
         if (height != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "height");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "height");
         }
         final int cursorBeforeReadDouble = reader.getCursor();
         height = reader.readDouble();
@@ -198,13 +198,13 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
         }
       } else if (paramIndex == 2) {
         if (center != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
         }
         ArgumentType<EnhancedCoordinates> argumentType = EnhancedPosArgument.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(argumentType);
       } else if (paramIndex == 3) {
         if (type != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "type");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "type");
         }
         type = parseContext.parseAndSuggestEnums(OutlineType.values(), OutlineType::getDisplayName, OutlineType.CODEC);
       }

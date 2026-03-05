@@ -47,7 +47,7 @@ import java.util.List;
 
 import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.argument.RegionArgument.region;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
@@ -62,15 +62,15 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
     LiteralArgumentBuilder<CommandSourceStack> directBuilder = literalR2("setblocks");
     LiteralArgumentBuilder<CommandSourceStack> indirectBuilder = literalR2("/setblocks");
     final KeywordArgsArgument keywordArgs = KeywordArgsArgument.builderFromShared(KeywordArgsCommon.FILLING, commandBuildContext).build();
-    final LiteralCommandNode<CommandSourceStack> setBlocksNode = ModCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(commandBuildContext)).then(argument("block", BlockFunctionArgument.blockFunction(commandBuildContext))
+    final LiteralCommandNode<CommandSourceStack> setBlocksNode = EnhancedCommandsCommands.registerWithRegionArgumentModification(dispatcher, directBuilder, indirectBuilder, argument("region", region(commandBuildContext)).then(argument("block", BlockFunctionArgument.blockFunction(commandBuildContext))
         .executes(context -> execute(context, null))
         .then(argument("keyword_args", keywordArgs)
             .executes(context -> execute(context, null, KeywordArgsArgument.getKeywordArgs(context, "keyword_args")))).build()).build());
 
-    dispatcher.register(literalR2("/s").forward(setBlocksNode.getChild("region"), ModCommands.REGION_ARGUMENTS_MODIFIER, false));
+    dispatcher.register(literalR2("/s").forward(setBlocksNode.getChild("region"), EnhancedCommandsCommands.REGION_ARGUMENTS_MODIFIER, false));
     dispatcher.register(literalR2("s").redirect(setBlocksNode));
 
-    ModCommands.registerWithRegionArgumentModification(dispatcher,
+    EnhancedCommandsCommands.registerWithRegionArgumentModification(dispatcher,
         literalR2("replace"),
         literalR2("/replace"),
         argument("region", region(commandBuildContext))

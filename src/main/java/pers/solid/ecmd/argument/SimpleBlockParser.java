@@ -28,7 +28,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -88,7 +88,7 @@ public abstract class SimpleBlockParser<S> {
         reader.setCursor(cursorBeforeParsing);
         if (BuiltInRegistries.BLOCK.containsKey(blockId)) {
           final Block block1 = BuiltInRegistries.BLOCK.getValue(blockId);
-          return EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(reader, blockId, block1.getName()), cursorAfterParsing);
+          return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(reader, blockId, block1.getName()), cursorAfterParsing);
         } else {
           return EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_UNKNOWN_BLOCK.createWithContext(reader, blockId.toString()), cursorAfterParsing);
         }

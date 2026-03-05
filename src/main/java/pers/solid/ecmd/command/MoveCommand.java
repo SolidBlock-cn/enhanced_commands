@@ -30,7 +30,7 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static pers.solid.ecmd.argument.DirectionArgument.getDirection;
 import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum MoveCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
@@ -40,7 +40,7 @@ public enum MoveCommand implements CommandRegistrationCallbackBridge {
     final KeywordArgsArgument keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
         .build();
 
-    ModCommands.registerWithRegionArgumentModification(
+    EnhancedCommandsCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("move"),
         literalR2("/move"),

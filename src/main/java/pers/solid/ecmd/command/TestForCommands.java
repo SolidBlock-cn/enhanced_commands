@@ -12,7 +12,7 @@ public enum TestForCommands implements CommandRegistrationCallbackBridge {
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
-    final LiteralArgumentBuilder<CommandSourceStack> literal = ModCommands.literalR2("testfor");
+    final LiteralArgumentBuilder<CommandSourceStack> literal = EnhancedCommandsCommands.literalR2("testfor");
     TestForBiomeCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);
     TestForBlockCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);
     TestForBlocksCommand.INSTANCE.addArguments(literal, commandBuildContext, environment);

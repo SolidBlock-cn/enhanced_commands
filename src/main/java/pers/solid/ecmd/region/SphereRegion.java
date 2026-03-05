@@ -19,7 +19,7 @@ import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Collection;
@@ -129,12 +129,12 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
         if (radius != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "radius");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "radius");
         }
         radius = reader.readDouble();
       } else if (paramIndex == 1) {
         if (centerPos != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(reader, "center");
         }
         final EnhancedPosArgument type = EnhancedPosArgument.posPreferringCenteredInt();
         centerPos = parseContext.parseAndSuggestArgument(type);

@@ -26,7 +26,7 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.GeoUtil;
 
 import static net.minecraft.commands.Commands.argument;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum MirrorCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
@@ -36,7 +36,7 @@ public enum MirrorCommand implements CommandRegistrationCallbackBridge {
     final KeywordArgsArgument keywordArgs = BlockTransformationCommand.createKeywordArgs(commandBuildContext)
         .addOptionalArg("pivot", EnhancedPosArgument.blockPos(), EnhancedPosArgument.CURRENT_POS)
         .build();
-    ModCommands.registerWithRegionArgumentModification(
+    EnhancedCommandsCommands.registerWithRegionArgumentModification(
         dispatcher,
         literalR2("mirror"),
         literalR2("/mirror"),

@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.ArrayList;
@@ -195,7 +195,7 @@ public record ParseContext<S>(CommandBuildContext commandBuildContext, StringRea
         return 0;
       } else {
         reader.setCursor(cursorBeforeUnit);
-        throw ModCommandExceptionTypes.ANGLE_UNIT_EXPECTED.createWithContext(reader, substring);
+        throw EnhancedCommandsCommandExceptionTypes.ANGLE_UNIT_EXPECTED.createWithContext(reader, substring);
       }
     } else if ("deg".equals(unit)) {
       clearSuggestion();
@@ -209,7 +209,7 @@ public record ParseContext<S>(CommandBuildContext commandBuildContext, StringRea
     } else {
       final int cursorAfterUnit = reader.getCursor();
       reader.setCursor(cursorBeforeUnit);
-      throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.ANGLE_UNIT_UNKNOWN.createWithContext(reader, unit), cursorAfterUnit);
+      throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.ANGLE_UNIT_UNKNOWN.createWithContext(reader, unit), cursorAfterUnit);
     }
   }
 

@@ -23,8 +23,8 @@ import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.bridge.LootBridge;
 
 import java.util.Optional;
@@ -92,7 +92,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
         final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.commandBuildContext().get(ResourceKey.create(Registries.PREDICATE, id));
         if (lootCondition.isEmpty()) {
           parseContext.reader().setCursor(cursorBeforeId);
-          throw EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);
+          throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);
         }
         return new LootConditionBlockPredicate(lootCondition.get());
       } else if (anonymous != null) {
@@ -111,7 +111,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
         final char peek = reader.peek();
         if (peek == '{' || peek == '[' || StringReader.isQuotedStringStart(peek)) {
           parseContext.clearSuggestion();
-          this.anonymous = ParsingUtil.parseNbt(reader, LootItemCondition.DIRECT_CODEC, ModCommandExceptionTypes.INVALID_LOOT_TABLE::create);
+          this.anonymous = ParsingUtil.parseNbt(reader, LootItemCondition.DIRECT_CODEC, EnhancedCommandsCommandExceptionTypes.INVALID_LOOT_TABLE::create);
           return;
         }
       }

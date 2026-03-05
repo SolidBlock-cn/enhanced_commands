@@ -41,7 +41,7 @@ import static net.minecraft.commands.arguments.item.ItemArgument.getItem;
 import static net.minecraft.commands.arguments.item.ItemArgument.item;
 import static pers.solid.ecmd.argument.SimpleEnumArgument.concentrationType;
 import static pers.solid.ecmd.argument.SimpleEnumArgument.getConcentrationType;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum FoodCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;

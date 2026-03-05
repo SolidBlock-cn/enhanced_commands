@@ -12,8 +12,8 @@ import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collection;
@@ -64,7 +64,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
             if (lenient) {
               return e;
             } else {
-              throw ModCommandExceptionTypes.INVALID_REGEX.create(ex.getMessage());
+              throw EnhancedCommandsCommandExceptionTypes.INVALID_REGEX.create(ex.getMessage());
             }
           }
         }
@@ -79,7 +79,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
         if (lenient) {
           return nbtElement;
         } else {
-          throw ModCommandExceptionTypes.INVALID_REGEX.create(ex.getMessage());
+          throw EnhancedCommandsCommandExceptionTypes.INVALID_REGEX.create(ex.getMessage());
         }
       }
     } else if (lenient && nbtElement != null) {

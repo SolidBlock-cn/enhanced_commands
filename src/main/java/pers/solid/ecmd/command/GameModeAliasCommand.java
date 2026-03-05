@@ -24,7 +24,7 @@ public enum GameModeAliasCommand implements CommandRegistrationCallbackBridge {
 
   private static void register(CommandDispatcher<CommandSourceStack> dispatcher, String literalName, GameType gameMode) {
     dispatcher.register(Commands.literal(literalName)
-        .requires(ModCommands.REQUIRES_PERMISSION_2)
+        .requires(EnhancedCommandsCommands.REQUIRES_PERMISSION_2)
         .executes(context -> execute(context, Collections.singleton(context.getSource().getPlayerOrException()), gameMode))
         .then(Commands.argument("target", EntityArgument.players())
             .executes(context -> execute(context, EntityArgument.getPlayers(context, "target"), gameMode))));

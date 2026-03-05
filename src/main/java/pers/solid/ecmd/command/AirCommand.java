@@ -40,7 +40,7 @@ import static pers.solid.ecmd.argument.NbtSourceArgument.nbtSource;
 import static pers.solid.ecmd.argument.NbtTargetArgument.getNbtTarget;
 import static pers.solid.ecmd.argument.NbtTargetArgument.nbtTarget;
 import static pers.solid.ecmd.argument.SimpleEnumArgument.*;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum AirCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;

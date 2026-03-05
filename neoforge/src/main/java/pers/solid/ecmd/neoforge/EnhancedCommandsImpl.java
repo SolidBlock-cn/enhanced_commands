@@ -13,8 +13,8 @@ import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.EventBridge;
 import pers.solid.ecmd.api.neoforge.EventBridgeImpl;
-import pers.solid.ecmd.argument.neoforge.ModArgumentTypesImpl;
-import pers.solid.ecmd.command.ModCommands;
+import pers.solid.ecmd.argument.neoforge.EnhancedCommandsArgumentTypesImpl;
+import pers.solid.ecmd.command.EnhancedCommandsCommands;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -26,12 +26,12 @@ public class EnhancedCommandsImpl {
     EnhancedCommands.init(new InitializeContextImpl(eventBus));
 
     EnhancedCommandsDataAttachmentsImpl.DEFERRED_REGISTER.register(eventBus);
-    ModArgumentTypesImpl.DEFERRED_REGISTER.register(eventBus);
+    EnhancedCommandsArgumentTypesImpl.DEFERRED_REGISTER.register(eventBus);
   }
 
   @ApiStatus.Internal
   public static void registerModCommands() {
-    NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, event -> ModCommands.INSTANCE.register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
+    NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, event -> EnhancedCommandsCommands.INSTANCE.register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
   }
 
   @ApiStatus.Internal

@@ -22,8 +22,8 @@ import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.Vec3dProvider;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.GeoUtil;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Collection;
@@ -260,12 +260,12 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       if (paramIndex == 0) {
         if (radius != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "radius");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "radius");
         }
         radius = parseContext.reader().readDouble();
       } else if (paramIndex == 1) {
         if (center != null) {
-          throw ModCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "center");
+          throw EnhancedCommandsCommandExceptionTypes.DUPLICATE_KEYWORD.createWithContext(parseContext.reader(), "center");
         }
         EnhancedPosArgument argumentType = EnhancedPosArgument.posPreferringCenteredInt();
         center = parseContext.parseAndSuggestArgument(argumentType);

@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.concurrent.CompletableFuture;
 
-import static pers.solid.ecmd.tag.ModBlockTags.*;
+import static pers.solid.ecmd.tag.EnhancedCommandsBlockTags.*;
 
 public class BlockTagDataGeneratorImpl extends FabricTagProvider.BlockTagProvider {
   public BlockTagDataGeneratorImpl(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {

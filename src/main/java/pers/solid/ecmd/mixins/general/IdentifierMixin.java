@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
 @Mixin(ResourceLocation.class)
 public abstract class IdentifierMixin {
@@ -43,7 +43,7 @@ public abstract class IdentifierMixin {
     for (int i = reader.getCursor(); i < cursorAfterString.get(); i++) {
       final char c = input.charAt(i);
       if (isUpperCase(c)) {
-        return EnhancedCommandSyntaxException.withCursorEnd(ModCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterString.get());
+        return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterString.get());
       }
     }
     return EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterString.get());

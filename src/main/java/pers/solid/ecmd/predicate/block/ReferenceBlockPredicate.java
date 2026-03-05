@@ -11,8 +11,8 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.ModCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 
 public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
@@ -66,7 +66,7 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
 
     @Override
     protected CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-      return ModCommandExceptionTypes.UNKNOWN_BLOCK_PREDICATE_ID.createWithContext(reader, identifier);
+      return EnhancedCommandsCommandExceptionTypes.UNKNOWN_BLOCK_PREDICATE_ID.createWithContext(reader, identifier);
     }
   }
 }

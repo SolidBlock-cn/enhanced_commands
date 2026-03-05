@@ -28,7 +28,7 @@ import pers.solid.ecmd.predicate.block.SimpleBlockPredicate;
 import pers.solid.ecmd.predicate.block.TagBlockPredicate;
 import pers.solid.ecmd.predicate.property.Comparator;
 import pers.solid.ecmd.predicate.property.ComparisonPropertyPredicate;
-import pers.solid.ecmd.tag.ModBlockTags;
+import pers.solid.ecmd.tag.EnhancedCommandsBlockTags;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,31 +57,31 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     context.add(of("rainbow_noise"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
     context.add(of("rainbow_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-2, Noise.DEFAULT_AMPLITUDES), new Vec3(0.125f, 0.125f, 0.125f), Vec3.ZERO));
 
-    final var natualizeIgnore = new TagBlockPredicate(ModBlockTags.NATUALIZE_IGNORE);
+    final var natualizeIgnore = new TagBlockPredicate(EnhancedCommandsBlockTags.NATUALIZE_IGNORE);
     final HolderLookup.RegistryLookup<Block> wrapper = context.registryLookup(Registries.BLOCK).orElseThrow();
     context.add(of("naturalize_vegetation"), new ConditionsBlockFunction(
         new ConditionalBlockFunction(
-            new TagBlockPredicate(ModBlockTags.NETHER_FUNGUS),
+            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_FUNGUS),
             new TagBlockFunction(wrapper.getOrThrow(BlockTags.SMALL_FLOWERS))
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(ModBlockTags.NETHER_ROOTS),
+            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_ROOTS),
             new SimpleBlockFunction(Blocks.SHORT_GRASS)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(ModBlockTags.NETHER_NATURAL_STEM),
+            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_NATURAL_STEM),
             new SimpleBlockFunction(Blocks.OAK_LOG)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(ModBlockTags.NETHER_NATURAL_HYPHAE),
+            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_NATURAL_HYPHAE),
             new SimpleBlockFunction(Blocks.OAK_WOOD)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(ModBlockTags.NETHER_STRIPPED_STEM),
+            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_STRIPPED_STEM),
             new SimpleBlockFunction(Blocks.STRIPPED_OAK_LOG)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(ModBlockTags.NETHER_STRIPPED_HYPHAE),
+            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_STRIPPED_HYPHAE),
             new SimpleBlockFunction(Blocks.STRIPPED_OAK_WOOD)
         ),
         new ConditionalBlockFunction(
@@ -89,7 +89,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
             new SimpleBlockFunction(Blocks.OAK_LEAVES, List.of(new SimplePropertyFunction<>(LeavesBlock.PERSISTENT, false, false)))
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(ModBlockTags.NETHER_VINES),
+            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_VINES),
             new SimpleBlockFunction(Blocks.VINE)
         )));
     final ConditionalBlockFunction dirtOverlayCondition = new ConditionalBlockFunction(
@@ -180,7 +180,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     ), Vec3.ZERO, new Vec3(3, 3, 3), Vec3.ZERO));
     context.add(of("crimsonize"), new PropertiesNbtCombinationBlockFunction(
         new ConditionsBlockFunction(
-            new ConditionalBlockFunction(new TagBlockPredicate(ModBlockTags.OVERLAID_DIRT),
+            new ConditionalBlockFunction(new TagBlockPredicate(EnhancedCommandsBlockTags.OVERLAID_DIRT),
                 new SimpleBlockFunction(Blocks.CRIMSON_NYLIUM)),
             new ConditionalBlockFunction(
                 new TagBlockPredicate(BlockTags.DIRT),
@@ -213,7 +213,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     ));
     context.add(of("warpize"), new PropertiesNbtCombinationBlockFunction(
         new ConditionsBlockFunction(
-            new ConditionalBlockFunction(new TagBlockPredicate(ModBlockTags.OVERLAID_DIRT),
+            new ConditionalBlockFunction(new TagBlockPredicate(EnhancedCommandsBlockTags.OVERLAID_DIRT),
                 new SimpleBlockFunction(Blocks.WARPED_NYLIUM)),
             new ConditionalBlockFunction(
                 new TagBlockPredicate(BlockTags.DIRT),
@@ -248,16 +248,16 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     context.add(of("powder_to_concrete"), new IdReplaceBlockFunction(Pattern.compile("_concrete_powder$"), "_concrete"));
 
 
-    context.add(of("red_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.RED_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("orange_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.ORANGE_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("yellow_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.YELLOW_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("green_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.GREEN_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("light_blue_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.LIGHT_BLUE_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("blue_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.BLUE_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("pink_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.PINK_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("black_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.BLACK_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("gray_colors"), new PropertiesNbtCombinationBlockFunction(new PickBlockFunction(new WeightedList.Weighted<>(ObjectDoublePair.of(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.GRAY_COLORS)), 0.75), ObjectDoublePair.of(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.DEAD_CORAL_BLOCK)), 0.25))), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
-    context.add(of("white_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(ModBlockTags.WHITE_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("red_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.RED_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("orange_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.ORANGE_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("yellow_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.YELLOW_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("green_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.GREEN_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("light_blue_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.LIGHT_BLUE_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("blue_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.BLUE_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("pink_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.PINK_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("black_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.BLACK_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("gray_colors"), new PropertiesNbtCombinationBlockFunction(new PickBlockFunction(new WeightedList.Weighted<>(ObjectDoublePair.of(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.GRAY_COLORS)), 0.75), ObjectDoublePair.of(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.DEAD_CORAL_BLOCK)), 0.25))), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
+    context.add(of("white_colors"), new PropertiesNbtCombinationBlockFunction(new TagBlockFunction(wrapper.getOrThrow(EnhancedCommandsBlockTags.WHITE_COLORS)), new PropertyNamesBlockFunction(new AllRandomPropertyNameFunction()), null));
     context.add(of("slightly_worn_stone_bricks"), new PickBlockFunction(new WeightedList.Weighted<>(ObjectDoublePair.of(new SimpleBlockFunction(Blocks.STONE_BRICKS), 0.8), ObjectDoublePair.of(new SimpleBlockFunction(Blocks.CRACKED_STONE_BRICKS), 0.1), ObjectDoublePair.of(new SimpleBlockFunction(Blocks.MOSSY_STONE_BRICKS), 0.1))));
     context.add(of("slightly_worn_nether_bricks"), new PickBlockFunction(new WeightedList.Weighted<>(ObjectDoublePair.of(new SimpleBlockFunction(Blocks.NETHER_BRICKS), 0.8), ObjectDoublePair.of(new SimpleBlockFunction(Blocks.CRACKED_NETHER_BRICKS), 0.2))));
     context.add(of("slightly_worn_deepslate_bricks"), new PickBlockFunction(new WeightedList.Weighted<>(ObjectDoublePair.of(new SimpleBlockFunction(Blocks.DEEPSLATE_BRICKS), 0.8), ObjectDoublePair.of(new SimpleBlockFunction(Blocks.CRACKED_DEEPSLATE_BRICKS), 0.2))));

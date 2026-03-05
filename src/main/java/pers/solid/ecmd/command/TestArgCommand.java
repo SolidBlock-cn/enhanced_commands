@@ -68,7 +68,7 @@ import static pers.solid.ecmd.argument.EntityPredicateArgument.getEntityPredicat
 import static pers.solid.ecmd.argument.NbtFunctionArgument.getNbtFunction;
 import static pers.solid.ecmd.argument.NbtPredicateArgument.getNbtPredicate;
 import static pers.solid.ecmd.argument.RegionArgument.getRegion;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum TestArgCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;

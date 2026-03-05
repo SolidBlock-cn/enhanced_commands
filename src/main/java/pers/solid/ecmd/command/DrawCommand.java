@@ -43,7 +43,7 @@ import pers.solid.ecmd.util.iterator.IteratorTask;
 import java.util.stream.LongStream;
 
 import static net.minecraft.commands.Commands.argument;
-import static pers.solid.ecmd.command.ModCommands.literalR2;
+import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum DrawCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
