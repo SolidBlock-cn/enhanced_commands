@@ -2,9 +2,9 @@ package pers.solid.ecmd;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.api.EventBridge;
@@ -67,6 +67,7 @@ public class EnhancedCommands {
     ModArgumentTypes.init();
     EntitySelectorOptionsExtension.init();
     EnhancedCommandsDataAttachments.init();
+    EnhancedCommandsTrackedData.init(context);
 
     // 注册命令
     registerModCommands();
