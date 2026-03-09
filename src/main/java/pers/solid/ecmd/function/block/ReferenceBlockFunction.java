@@ -21,13 +21,13 @@ public record ReferenceBlockFunction(ResourceKey<BlockFunction> id) implements B
   public static final MapCodec<ReferenceBlockFunction> CODEC = ReferenceEntry.createCodec(BlockFunction.REGISTRY_KEY, ReferenceBlockFunction::new);
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     try {
-      if (!(world instanceof ServerLevel serverWorld)) {
+      if (!(level instanceof ServerLevel serverWorld)) {
         return blockState;
       }
       final BlockFunction value = value(serverWorld.getServer().reloadableRegistries().lookup());
-      return value.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+      return value.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);
     }

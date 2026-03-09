@@ -17,12 +17,19 @@ import pers.solid.ecmd.config.ConfigManager;
 import pers.solid.ecmd.curve.CurveTypes;
 import pers.solid.ecmd.function.block.BlockFunction;
 import pers.solid.ecmd.function.block.BlockFunctionTypes;
+import pers.solid.ecmd.function.item.ItemFunction;
+import pers.solid.ecmd.function.item.ItemFunctionTypes;
+import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunctionTypes;
 import pers.solid.ecmd.nbt.NbtDataRegistry;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.block.BlockPredicateTypes;
+import pers.solid.ecmd.predicate.entity.EntityPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicateTypes;
 import pers.solid.ecmd.predicate.entity.EntitySelectorOptionsExtension;
+import pers.solid.ecmd.predicate.item.ItemPredicate;
+import pers.solid.ecmd.predicate.item.ItemPredicateTypes;
+import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicateTypes;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
@@ -53,11 +60,13 @@ public class EnhancedCommands {
     ConfigCategories.init();
     ConfigManager.loadAllConfigsFromJson();
 
-    BlockPredicateTypes.init(context);
     BlockFunctionTypes.init(context);
+    BlockPredicateTypes.init(context);
     CommandEnumType.init(context);
     CurveTypes.init(context);
     EntityPredicateTypes.init(context);
+    ItemFunctionTypes.init(context);
+    ItemPredicateTypes.init(context);
     NbtDataRegistry.init();
     NbtFunctionTypes.init(context);
     NbtPredicateTypes.init(context);
@@ -91,6 +100,11 @@ public class EnhancedCommands {
   private static void registerReloadableRegistries(InitializeContext context) {
     EnhancedServerReloadableRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(EntityPredicate.REGISTRY_KEY, EntityPredicate.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(ItemFunction.REGISTRY_KEY, ItemFunction.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(ItemPredicate.REGISTRY_KEY, ItemPredicate.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(NbtFunction.REGISTRY_KEY, NbtFunction.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(NbtPredicate.REGISTRY_KEY, NbtPredicate.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(Region.REGISTRY_KEY, Region.CODEC, false, context);
   }
 
@@ -137,5 +151,4 @@ public class EnhancedCommands {
   public static Path getConfigDir() {
     throw new AssertionError();
   }
-
 }

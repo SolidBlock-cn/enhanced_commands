@@ -34,12 +34,12 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
    * @see Block#updateFromNeighbourShapes(BlockState, LevelAccessor, BlockPos)
    */
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
     for (Direction direction : directions) {
       mutable.setWithOffset(pos, direction);
-      blockState = blockState.updateShape(world, world, pos, direction, mutable, world.getBlockState(mutable), context.random);
+      blockState = blockState.updateShape(level, level, pos, direction, mutable, level.getBlockState(mutable), context.random);
     }
 
     return blockState;

@@ -59,8 +59,8 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
-    final Block[] blocks = getBlocks(world);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    final Block[] blocks = getBlocks(level);
     final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(pos);
     if (blocks.length == 0) {
       return blockState;

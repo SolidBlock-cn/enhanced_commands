@@ -34,9 +34,9 @@ public record CheckerboardBlockFunction(@NotNull WeightedList<BlockFunction> fun
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final BlockFunction entry = getEntry(functions, pos);
-    return entry == null ? blockState : entry.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+    return entry == null ? blockState : entry.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
   }
 
   @Override

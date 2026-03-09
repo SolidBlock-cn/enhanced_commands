@@ -173,7 +173,7 @@ public final class CodecUtil {
    * <p>反序列化过程中，当读取到字符串值时，按照 {@code stringBased} 读取，如果读取出错，则正常抛出错误。其他情况下按照 {@code mapBased} 读取。
    * <p>序列化时，根据 {@code function} 进行转化，如果能转化（即结果不为 {@code null}），则按 {@code stringBased} 进行序列化，否则按照 {@code mapBased} 进行序列化。
    */
-  public static <A, B extends A> Codec<A> combined(Codec<B> stringBased, Codec<A> mapBased, Function<A, @Nullable B> function) {
+  public static <A, B extends A> Codec<A> combined(Codec<@NotNull B> stringBased, Codec<@NotNull A> mapBased, Function<A, @Nullable B> function) {
     return new Codec<>() {
       @Override
       public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> ops, T input) {

@@ -34,13 +34,13 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
-    blockState = function.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    blockState = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     final Item item = blockState.getBlock().asItem();
     if (item == Items.AIR) {
       return blockState;
     }
-    final SelectableRecipe.SingleInputSet<StonecutterRecipe> allMatches = world.recipeAccess().stonecutterRecipes().selectByInput(item.getDefaultInstance());
+    final SelectableRecipe.SingleInputSet<StonecutterRecipe> allMatches = level.recipeAccess().stonecutterRecipes().selectByInput(item.getDefaultInstance());
     if (allMatches.isEmpty()) {
       return blockState;
     }

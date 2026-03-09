@@ -19,7 +19,7 @@ public interface RegionProvider<R extends Region> extends ExpressionConvertible 
   static RegionProvider<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
-    for (Parser<? extends RegionProvider<?>> argumentParser : RegionTypes.PARSERS) {
+    for (Parser<? extends RegionProvider<?>> argumentParser : RegionParsing.PARSERS) {
       reader.setCursor(cursorOnStart);
       final RegionProvider<?> parse = argumentParser.parse(parseContext.withAllowSparse(true));
       if (parse != null) {

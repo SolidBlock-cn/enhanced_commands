@@ -31,7 +31,7 @@ public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements Bloc
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     try {
       final Tag applied = nbtFunction.apply(blockEntityData.getValue(), context);
       if (applied instanceof CompoundTag nbtCompound) {

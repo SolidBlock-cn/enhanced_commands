@@ -9,7 +9,7 @@ import pers.solid.ecmd.api.RegistryBridge;
 
 public interface BlockPredicateType<T extends BlockPredicate> {
   ResourceKey<Registry<BlockPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_predicate_type"));
-  Registry<BlockPredicateType<?>> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
+  Registry<BlockPredicateType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
   @NotNull
   MapCodec<T> getCodec();

@@ -1,27 +1,12 @@
 package pers.solid.ecmd.region;
 
-import com.google.common.collect.Lists;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public final class RegionTypes {
   private static final RegistryBridge<RegionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, RegionType.REGISTRY);
-
-  public static final Map<String, RegionType<?>> FUNCTIONS = new LinkedHashMap<>();
-  public static final List<Parser<? extends RegionProvider<?>>> PARSERS = Lists.newArrayList(SingleBlockPosRegion.BareParser.INSTANCE, new FunctionsParser<>(FUNCTIONS.keySet(), s -> {
-    final RegionType<?> regionType = FUNCTIONS.get(s);
-    return regionType == null ? null : regionType.parser();
-  }, s -> {
-    final RegionType<?> regionType = FUNCTIONS.get(s);
-    return regionType == null ? null : regionType.tooltip();
-  }));
 
   public static final SingleBlockPosRegion.Type SINGLE = register("single", SingleBlockPosRegion.Type.INSTANCE);
   public static final BlockCuboidRegion.Type CUBOID = register("cuboid", BlockCuboidRegion.Type.CUBOID_TYPE);
@@ -44,16 +29,16 @@ public final class RegionTypes {
   private static <T extends RegionType<?>> T register(String name, T value) {
     final String functionName = value.functionName();
     if (functionName != null) {
-      FUNCTIONS.put(functionName, value);
+      RegionParsing.FUNCTIONS.put(functionName, value);
     }
     if (value instanceof Parser<?>) {
-      PARSERS.add((Parser<? extends RegionProvider<?>>) value);
+      RegionParsing.PARSERS.add((Parser<? extends RegionProvider<?>>) value);
     }
     return REGISTRY_BRIDGE.register(name, value);
   }
 
   public static void init(InitializeContext context) {
-    context.registerRegistry(RegionType.REGISTRY);
-    context.validateAndRegister(REGISTRY_BRIDGE);
+    RegistryBridge.registerToRootRegistry(RegionType.REGISTRY, context);
+    REGISTRY_BRIDGE.validateAndRegisterContents(context);
   }
 }

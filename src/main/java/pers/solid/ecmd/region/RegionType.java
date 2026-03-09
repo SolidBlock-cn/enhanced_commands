@@ -11,7 +11,7 @@ import pers.solid.ecmd.parse.FunctionLikeParser;
 
 public interface RegionType<R extends Region> {
   ResourceKey<Registry<RegionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_type"));
-  Registry<RegionType<?>> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
+  Registry<RegionType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
   /**
    * 该区域类型对应的函数名称，用于解析。如果为 null，则表示此区域不是使用函数表示的。

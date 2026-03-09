@@ -378,7 +378,7 @@ public class NbtFunctionParser<S> {
     }
 
     final int cursorBeforeFunctionName = reader.getCursor();
-    final FunctionsParser<NbtFunction> functionsParser = new FunctionsParser<>(NbtFunctionTypes.FUNCTIONS, NbtFunctionTypes.FUNCTION_NAMES);
+    final FunctionsParser<NbtFunction> functionsParser = new FunctionsParser<>(NbtFunctionParsing.FUNCTIONS, NbtFunctionParsing.FUNCTION_NAMES);
     final NbtFunction functionGrammar = functionsParser.parse(parseContext);
     if (functionGrammar != null) {
       return functionGrammar;
@@ -428,7 +428,7 @@ public class NbtFunctionParser<S> {
     }
 
     final int cursorBeforeFunctionName = reader.getCursor();
-    final FunctionsParser<NbtFunction> functionsParser = new FunctionsParser<>(NbtFunctionTypes.FUNCTIONS, NbtFunctionTypes.FUNCTION_NAMES);
+    final FunctionsParser<NbtFunction> functionsParser = new FunctionsParser<>(NbtFunctionParsing.FUNCTIONS, NbtFunctionParsing.FUNCTION_NAMES);
     final NbtFunction functionGrammar = functionsParser.parse(parseContext);
     if (functionGrammar != null) {
       return functionGrammar;

@@ -33,7 +33,7 @@ public record CommandEnumType<E extends Enum<E>>(@NotNull ImmutableCollection<E>
   public static final Component HORIZONTAL_TEXT = Component.translatable("enhanced_commands.direction_type.horizontal");
   public static final Component VERTICAL_TEXT = Component.translatable("enhanced_commands.direction_type.vertical");
   public static final ResourceKey<Registry<CommandEnumType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("command_enum_type"));
-  public static final Registry<CommandEnumType<?>> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
+  public static final Registry<CommandEnumType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
   private static final RegistryBridge<CommandEnumType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, CommandEnumType.REGISTRY);
 
   public static final CommandEnumType<AxisProvider> AXIS = register("axis", new CommandEnumType<>(AxisProvider.VALUES, AxisProvider.CODEC, AxisProvider::getDisplayName));
@@ -60,7 +60,7 @@ public record CommandEnumType<E extends Enum<E>>(@NotNull ImmutableCollection<E>
   }
 
   public static void init(InitializeContext context) {
-    context.registerRegistry(CommandEnumType.REGISTRY);
-    context.validateAndRegister(REGISTRY_BRIDGE);
+    RegistryBridge.registerToRootRegistry(CommandEnumType.REGISTRY, context);
+    REGISTRY_BRIDGE.validateAndRegisterContents(context);
   }
 }
