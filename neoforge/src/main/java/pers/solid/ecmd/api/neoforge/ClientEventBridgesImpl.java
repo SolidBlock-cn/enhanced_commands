@@ -10,6 +10,9 @@ import pers.solid.ecmd.api.EventBridge;
 
 import java.util.function.Consumer;
 
+/**
+ * {@link ClientEventBridges} 在 NeoForge 中的实现。
+ */
 @OnlyIn(Dist.CLIENT)
 @MethodsReturnNonnullByDefault
 public enum ClientEventBridgesImpl implements ClientEventBridges {
