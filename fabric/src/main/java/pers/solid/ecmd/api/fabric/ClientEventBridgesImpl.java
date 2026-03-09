@@ -10,12 +10,15 @@ import pers.solid.ecmd.api.EventBridge;
 
 import java.util.function.Consumer;
 
+/**
+ * 模组中的客户端专用的 {@link ClientEventBridges} 在 Fabric 中的实现。
+ */
 @Environment(EnvType.CLIENT)
 @MethodsReturnNonnullByDefault
 public enum ClientEventBridgesImpl implements ClientEventBridges {
   INSTANCE;
 
-  public static final EventBridgeImpl<Consumer<Minecraft>, ClientTickEvents.EndTick> END_CLIENT_TICK = new EventBridgeImpl<>(ClientTickEvents.END_CLIENT_TICK, minecraftConsumer -> minecraftConsumer::accept, endTick -> endTick::onEndTick);
+  public static final EventBridgeImpl<Consumer<Minecraft>> END_CLIENT_TICK = new EventBridgeImpl.FromFabricEvent<>(ClientTickEvents.END_CLIENT_TICK, minecraftConsumer -> minecraftConsumer::accept, endTick -> endTick::onEndTick);
 
 
   public static ClientEventBridges getInstance() {

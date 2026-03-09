@@ -2,22 +2,18 @@ package pers.solid.ecmd.fabric;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.api.EventBridge;
-import pers.solid.ecmd.api.fabric.EventBridgeImpl;
 import pers.solid.ecmd.command.EnhancedCommandsCommands;
 import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
 import pers.solid.ecmd.registry.EnhancedServerReloadableRegistries;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class EnhancedCommandsImpl implements ModInitializer {
   public static void registerModCommands() {
@@ -41,9 +37,6 @@ public class EnhancedCommandsImpl implements ModInitializer {
     ServerLifecycleEvents.AFTER_SAVE.register(EnhancedCommands.id("save_config"), (server, flush, force) -> runnable.run());
   }
 
-  public static <T> EventBridge<T> create(Class<? super T> type, Function<T[], T> invokerFactory) {
-    return new EventBridgeImpl<>(EventFactory.createArrayBacked(type, invokerFactory), Function.identity(), Function.identity());
-  }
 
   @Override
   public void onInitialize() {

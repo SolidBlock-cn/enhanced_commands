@@ -14,8 +14,6 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import org.jetbrains.annotations.ApiStatus;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.api.EventBridge;
-import pers.solid.ecmd.api.neoforge.EventBridgeImpl;
 import pers.solid.ecmd.argument.neoforge.EnhancedCommandsArgumentTypesImpl;
 import pers.solid.ecmd.command.EnhancedCommandsCommands;
 import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
@@ -23,7 +21,6 @@ import pers.solid.ecmd.registry.EnhancedServerReloadableRegistries;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 @EventBusSubscriber(modid = EnhancedCommands.MOD_ID)
 @Mod(EnhancedCommands.MOD_ID)
@@ -58,10 +55,6 @@ public class EnhancedCommandsImpl {
     return FMLPaths.CONFIGDIR.get();
   }
 
-  public static <T> EventBridge<T> create(Class<? super T> type, Function<T[], T> invokerFactory) {
-    // todo 考虑未来改用 EventBus
-    return new EventBridgeImpl.Simple<>(type, invokerFactory);
-  }
 
   @SubscribeEvent
   private static void registerDatapackRegistries(DataPackRegistryEvent.NewRegistry event) {

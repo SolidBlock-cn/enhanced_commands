@@ -5,7 +5,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pers.solid.ecmd.api.EventBridge;
 import pers.solid.ecmd.api.FlipStateCallback;
 import pers.solid.ecmd.argument.EnhancedCommandsArgumentTypes;
 import pers.solid.ecmd.config.ConfigCategories;
@@ -31,7 +30,6 @@ import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class EnhancedCommands {
   public static final String MOD_ID = "enhanced_commands";
@@ -136,8 +134,4 @@ public class EnhancedCommands {
     throw new AssertionError();
   }
 
-  @ExpectPlatform
-  public static <T> EventBridge<T> create(Class<? super T> type, Function<T[], T> invokerFactory) {
-    throw new AssertionError();
-  }
 }
