@@ -86,7 +86,7 @@ public class DefaultNamespace {
     } catch (ResourceLocationException var4) {
       reader.setCursor(cursorBeforeId);
       for (int i = reader.getCursor(); i < cursorAfterId; i++) {
-        final char c = string.charAt(i);
+        final char c = reader.getString().charAt(i);
         if (c >= 'A' && c <= 'Z') {
           throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterId);
         }
