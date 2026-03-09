@@ -4,12 +4,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
@@ -18,22 +15,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static pers.solid.ecmd.tag.EnhancedCommandsBlockTags.*;
 
-@EventBusSubscriber(modid = EnhancedCommands.MOD_ID)
 public class BlockTagDataGeneratorImpl extends BlockTagsProvider {
-  public BlockTagDataGeneratorImpl(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, String modId, @Nullable ExistingFileHelper existingFileHelper) {
-    super(output, lookupProvider, modId, existingFileHelper);
-  }
-
-  @SubscribeEvent
-  public static void gatherData(GatherDataEvent event) {
-    PackOutput output = event.getGenerator().getPackOutput();
-    CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
-    ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
-
-    event.getGenerator().addProvider(
-        event.includeServer(),
-        new BlockTagDataGeneratorImpl(output, lookupProvider, EnhancedCommands.MOD_ID, existingFileHelper)
-    );
+  public BlockTagDataGeneratorImpl(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, @Nullable ExistingFileHelper existingFileHelper) {
+    super(output, lookupProvider, EnhancedCommands.MOD_ID, existingFileHelper);
   }
 
   @Override

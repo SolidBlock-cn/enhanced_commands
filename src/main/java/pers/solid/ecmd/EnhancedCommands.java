@@ -25,7 +25,7 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.regionselection.WandEvent;
-import pers.solid.ecmd.registry.EnhancedReloadableRegistries;
+import pers.solid.ecmd.registry.EnhancedServerReloadableRegistries;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 
@@ -75,12 +75,22 @@ public class EnhancedCommands {
     registerAdvanceTasks();
     registerSaveConfig();
 
-    // 资源包
-    EnhancedReloadableRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC);
-    EnhancedReloadableRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC);
-    EnhancedReloadableRegistries.register(Region.REGISTRY_KEY, Region.CODEC);
+    registerReloadableRegistries();
 
     initialized = true;
+  }
+
+  /**
+   * 注册此模组中的可重新加载的注册表，其加载方式类似于战利品表。
+   * <p>
+   * 注意：这些注册表会像其他不可重新加载的动态注册表那样，作为动态注册表注册到 Fabric API 或 NeoForge 的 API 中，但是实际加载时会被特别排除。
+   *
+   * @see pers.solid.ecmd.mixins.general.RegistryDataLoaderMixin
+   */
+  private static void registerReloadableRegistries() {
+    EnhancedServerReloadableRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC);
+    EnhancedServerReloadableRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC);
+    EnhancedServerReloadableRegistries.register(Region.REGISTRY_KEY, Region.CODEC);
   }
 
   @ExpectPlatform

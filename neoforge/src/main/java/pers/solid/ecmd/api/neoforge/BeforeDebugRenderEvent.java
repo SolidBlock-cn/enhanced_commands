@@ -10,9 +10,12 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.Event;
 import org.joml.Matrix4f;
 
+@OnlyIn(Dist.CLIENT)
 public class BeforeDebugRenderEvent extends Event {
   public final LevelRenderer levelRenderer;
   public final DeltaTracker deltaTracker;

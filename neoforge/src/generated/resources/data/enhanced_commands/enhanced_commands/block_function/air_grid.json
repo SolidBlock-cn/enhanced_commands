@@ -1,0 +1,45 @@
+{
+  "type": "enhanced_commands:checkerboard",
+  "predicates": {
+    "elements": [
+      "minecraft:air",
+      {
+        "type": "enhanced_commands:checkerboard",
+        "predicates": {
+          "elements": [
+            "minecraft:air",
+            {
+              "type": "enhanced_commands:checkerboard",
+              "predicates": {
+                "elements": [
+                  "minecraft:air",
+                  {
+                    "type": "enhanced_commands:empty"
+                  }
+                ],
+                "weighted": false
+              },
+              "scale": [
+                1.0,
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "weighted": false
+        },
+        "scale": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    ],
+    "weighted": false
+  },
+  "scale": [
+    0.0,
+    0.0,
+    1.0
+  ]
+}

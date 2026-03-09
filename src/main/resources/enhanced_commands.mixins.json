@@ -43,6 +43,7 @@
     "general.MinecraftServerMixin",
     "general.NbtPathArgumentMixin",
     "general.PlayerMixin",
+    "general.RegistryDataLoaderMixin",
     "general.ResourceArgumentMixin",
     "general.ResourceOrTagArgumentMixin",
     "general.ServerGamePacketListenerImplMixin",

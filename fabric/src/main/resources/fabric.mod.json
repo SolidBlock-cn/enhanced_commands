@@ -20,7 +20,7 @@
       "pers.solid.ecmd.fabric.EnhancedCommandsImpl"
     ],
     "fabric-datagen": [
-      "pers.solid.ecmd.data.fabric.EnhancedCommandsDataGenerator"
+      "pers.solid.ecmd.data.fabric.EnhancedCommandsDataGenerationImpl"
     ]
   },
 

@@ -1,0 +1,13 @@
+{
+  "type": "enhanced_commands:properties_nbt_combination",
+  "base": {
+    "type": "enhanced_commands:tag",
+    "tag": "#enhanced_commands:light_blue_colors"
+  },
+  "properties": [
+    {
+      "type": "all_random",
+      "except": []
+    }
+  ]
+}

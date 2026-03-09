@@ -1,0 +1,73 @@
+{
+  "type": "enhanced_commands:conditions",
+  "conditions": [
+    {
+      "condition": {
+        "type": "enhanced_commands:tag",
+        "tag": "enhanced_commands:natualize_ignore"
+      },
+      "then": {
+        "type": "enhanced_commands:empty"
+      }
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:horizontal_offset",
+        "block_predicate": {
+          "type": "enhanced_commands:tag",
+          "tag": "enhanced_commands:natualize_ignore"
+        },
+        "offset": 2
+      },
+      "then": "minecraft:sand"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:any",
+        "predicates": [
+          {
+            "type": "enhanced_commands:horizontal_offset",
+            "block_predicate": {
+              "type": "enhanced_commands:tag",
+              "tag": "enhanced_commands:natualize_ignore"
+            },
+            "offset": 3
+          },
+          {
+            "type": "enhanced_commands:horizontal_offset",
+            "block_predicate": {
+              "type": "enhanced_commands:tag",
+              "tag": "enhanced_commands:natualize_ignore"
+            },
+            "offset": 4
+          },
+          {
+            "type": "enhanced_commands:horizontal_offset",
+            "block_predicate": {
+              "type": "enhanced_commands:tag",
+              "tag": "enhanced_commands:natualize_ignore"
+            },
+            "offset": 5
+          }
+        ]
+      },
+      "then": "minecraft:sandstone"
+    },
+    {
+      "condition": {
+        "type": "enhanced_commands:any",
+        "predicates": [
+          {
+            "type": "enhanced_commands:tag",
+            "tag": "c:ores"
+          },
+          "minecraft:stone"
+        ]
+      },
+      "else": "minecraft:stone",
+      "then": {
+        "type": "enhanced_commands:empty"
+      }
+    }
+  ]
+}

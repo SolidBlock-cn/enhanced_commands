@@ -1,0 +1,20 @@
+{
+  "type": "enhanced_commands:checkerboard",
+  "floor": [
+    4.0,
+    4.0,
+    4.0
+  ],
+  "offset": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "predicates": {
+    "elements": [
+      "minecraft:white_concrete",
+      "minecraft:black_concrete"
+    ],
+    "weighted": false
+  }
+}
