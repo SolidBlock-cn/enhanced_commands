@@ -1,0 +1,21 @@
+{
+  "type": "enhanced_commands:checkerboard",
+  "predicates": {
+    "elements": [
+      {
+        "type": "enhanced_commands:reference",
+        "id": "enhanced_commands:white_colors"
+      },
+      {
+        "type": "enhanced_commands:reference",
+        "id": "enhanced_commands:gray_colors"
+      }
+    ],
+    "weighted": false
+  },
+  "scale": [
+    3.0,
+    3.0,
+    3.0
+  ]
+}

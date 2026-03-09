@@ -1,0 +1,77 @@
+{
+  "type": "enhanced_commands:properties_nbt_combination",
+  "base": {
+    "type": "enhanced_commands:conditions",
+    "conditions": [
+      {
+        "condition": {
+          "type": "enhanced_commands:tag",
+          "tag": "enhanced_commands:overlaid_dirt"
+        },
+        "then": "minecraft:crimson_nylium"
+      },
+      {
+        "condition": {
+          "type": "enhanced_commands:tag",
+          "tag": "minecraft:dirt"
+        },
+        "then": "minecraft:netherrack"
+      },
+      {
+        "condition": {
+          "type": "enhanced_commands:tag",
+          "tag": "minecraft:flowers"
+        },
+        "then": "minecraft:crimson_fungus"
+      },
+      {
+        "condition": {
+          "type": "enhanced_commands:any",
+          "predicates": [
+            "minecraft:short_grass",
+            "minecraft:fern",
+            {
+              "type": "enhanced_commands:simple",
+              "block": "minecraft:tall_grass",
+              "properties": [
+                {
+                  "type": "comparison",
+                  "comparator": "=",
+                  "property": "half",
+                  "value": "lower"
+                }
+              ]
+            }
+          ]
+        },
+        "then": "minecraft:crimson_roots"
+      },
+      {
+        "condition": {
+          "type": "enhanced_commands:tag",
+          "tag": "minecraft:overworld_natural_logs"
+        },
+        "then": "minecraft:crimson_stem"
+      },
+      {
+        "condition": {
+          "type": "enhanced_commands:tag",
+          "tag": "minecraft:leaves"
+        },
+        "then": "minecraft:nether_wart_block"
+      },
+      {
+        "condition": {
+          "type": "enhanced_commands:tag",
+          "tag": "minecraft:sand"
+        },
+        "then": "minecraft:soul_sand"
+      }
+    ]
+  },
+  "properties": [
+    {
+      "type": "all_original"
+    }
+  ]
+}

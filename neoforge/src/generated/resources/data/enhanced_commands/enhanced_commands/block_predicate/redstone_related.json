@@ -1,0 +1,4 @@
+{
+  "type": "enhanced_commands:id_contain",
+  "pattern": "redstone"
+}

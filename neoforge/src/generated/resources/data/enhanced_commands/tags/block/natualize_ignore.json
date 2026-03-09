@@ -1,0 +1,14 @@
+{
+  "values": [
+    "#minecraft:replaceable",
+    "#minecraft:leaves",
+    "#minecraft:wart_blocks",
+    "#minecraft:logs",
+    "#c:buds",
+    "#c:villager_job_sites",
+    "minecraft:glowstone",
+    "minecraft:cobweb",
+    "minecraft:shroomlight",
+    "minecraft:bone_block"
+  ]
+}

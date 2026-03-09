@@ -1,0 +1,26 @@
+{
+  "type": "enhanced_commands:noise",
+  "list": {
+    "elements": [
+      {
+        "type": "enhanced_commands:constant"
+      },
+      {
+        "type": "enhanced_commands:constant",
+        "value": false
+      }
+    ],
+    "weighted": false
+  },
+  "parameters": {
+    "amplitudes": [
+      1.0
+    ],
+    "firstOctave": -1
+  },
+  "scale": [
+    0.2,
+    0.2,
+    0.2
+  ]
+}

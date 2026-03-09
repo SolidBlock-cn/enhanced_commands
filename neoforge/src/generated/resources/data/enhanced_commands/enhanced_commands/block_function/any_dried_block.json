@@ -1,0 +1,6 @@
+{
+  "type": "enhanced_commands:dry",
+  "function": {
+    "type": "enhanced_commands:random"
+  }
+}

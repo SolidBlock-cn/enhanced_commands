@@ -1,0 +1,29 @@
+{
+  "type": "enhanced_commands:noise",
+  "list": {
+    "elements": [
+      "minecraft:red_concrete",
+      "minecraft:orange_concrete",
+      "minecraft:yellow_concrete",
+      "minecraft:lime_concrete",
+      "minecraft:green_concrete",
+      "minecraft:cyan_concrete",
+      "minecraft:light_blue_concrete",
+      "minecraft:blue_concrete",
+      "minecraft:purple_concrete",
+      "minecraft:magenta_concrete"
+    ],
+    "weighted": false
+  },
+  "parameters": {
+    "amplitudes": [
+      1.0
+    ],
+    "firstOctave": -1
+  },
+  "scale": [
+    0.25,
+    0.25,
+    0.25
+  ]
+}
