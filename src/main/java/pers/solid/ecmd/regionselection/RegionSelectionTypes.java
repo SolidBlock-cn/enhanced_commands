@@ -2,7 +2,7 @@ package pers.solid.ecmd.regionselection;
 
 import com.mojang.serialization.MapCodec;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.InitializeContext;
+import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 
 import java.util.function.Supplier;

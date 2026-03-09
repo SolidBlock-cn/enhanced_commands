@@ -9,7 +9,7 @@ import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import pers.solid.ecmd.registry.EnhancedServerReloadableRegistries;
+import pers.solid.ecmd.api.EnhancedServerReloadableRegistries;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;

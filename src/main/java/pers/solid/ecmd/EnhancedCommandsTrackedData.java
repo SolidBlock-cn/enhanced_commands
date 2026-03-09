@@ -7,6 +7,7 @@ import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.player.Player;
+import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.regionselection.RegionSelection;
 
 import java.util.Optional;

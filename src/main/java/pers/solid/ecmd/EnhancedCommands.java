@@ -5,7 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pers.solid.ecmd.api.EnhancedServerReloadableRegistries;
 import pers.solid.ecmd.api.FlipStateCallback;
+import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.argument.EnhancedCommandsArgumentTypes;
 import pers.solid.ecmd.config.ConfigCategories;
 import pers.solid.ecmd.config.ConfigCategory;
@@ -24,7 +26,6 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.regionselection.WandEvent;
-import pers.solid.ecmd.registry.EnhancedServerReloadableRegistries;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 
@@ -73,7 +74,7 @@ public class EnhancedCommands {
     registerAdvanceTasks();
     registerSaveConfig();
 
-    registerReloadableRegistries();
+    registerReloadableRegistries(context);
 
     initialized = true;
   }
@@ -85,10 +86,10 @@ public class EnhancedCommands {
    *
    * @see pers.solid.ecmd.mixins.general.RegistryDataLoaderMixin
    */
-  private static void registerReloadableRegistries() {
-    EnhancedServerReloadableRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC);
-    EnhancedServerReloadableRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC);
-    EnhancedServerReloadableRegistries.register(Region.REGISTRY_KEY, Region.CODEC);
+  private static void registerReloadableRegistries(InitializeContext context) {
+    EnhancedServerReloadableRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(Region.REGISTRY_KEY, Region.CODEC, false, context);
   }
 
   @ExpectPlatform

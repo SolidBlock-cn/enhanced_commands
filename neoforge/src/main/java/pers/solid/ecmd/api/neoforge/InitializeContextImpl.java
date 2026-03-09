@@ -1,11 +1,10 @@
-package pers.solid.ecmd.neoforge;
+package pers.solid.ecmd.api.neoforge;
 
 import net.minecraft.core.Registry;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
-import pers.solid.ecmd.InitializeContext;
+import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.api.neoforge.RegistryBridgeImpl;
 
 public class InitializeContextImpl implements InitializeContext {
   public final IEventBus modEventBus;
