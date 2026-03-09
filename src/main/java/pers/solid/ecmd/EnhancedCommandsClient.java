@@ -3,9 +3,9 @@ package pers.solid.ecmd;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import pers.solid.ecmd.api.ClientEventBridges;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
+import pers.solid.ecmd.api.ClientEventBridges;
 import pers.solid.ecmd.config.CommandsConfig;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 

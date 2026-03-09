@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.InitializeContext;
+import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 import pers.solid.ecmd.parse.FunctionsParser;

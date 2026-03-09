@@ -47,17 +47,17 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
 
   @Override
   default void configureBridge(ContextBridge<BlockFunction> context) {
-    context.add(of("typical_checkerboard"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE)));
-    context.add(of("typical_checkerboard_large"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), new Vec3(4, 4, 4), Checkerboard.UNIT, Checkerboard.UNIT));
-    context.add(of("typical_checkerboard_strip"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), Checkerboard.UNIT, new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
+    context.add(of("black_white_checkerboard"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE)));
+    context.add(of("black_white_checkerboard_large"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), new Vec3(4, 4, 4), Checkerboard.UNIT, Checkerboard.UNIT));
+    context.add(of("black_white_checkerboard_strip"), new CheckerboardBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), Checkerboard.UNIT, new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
     context.add(of("rainbow_checkerboard"), new CheckerboardBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE)));
     context.add(of("rainbow_checkerboard_large"), new CheckerboardBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), Checkerboard.UNIT, new Vec3(1 / 3f, 1 / 3f, 1 / 3f), Vec3.ZERO));
-    context.add(of("typical_noise"), new NoiseBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), Noise.UNIT, Vec3.ZERO));
-    context.add(of("typical_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
+    context.add(of("black_white_noise"), new NoiseBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), Noise.UNIT, Vec3.ZERO));
+    context.add(of("black_white_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.WHITE_CONCRETE, Blocks.BLACK_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
     context.add(of("rainbow_noise"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
     context.add(of("rainbow_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-2, Noise.DEFAULT_AMPLITUDES), new Vec3(0.125f, 0.125f, 0.125f), Vec3.ZERO));
 
-    final var natualizeIgnore = new TagBlockPredicate(EnhancedCommandsBlockTags.NATUALIZE_IGNORE);
+    final var naturalizeIgnore = new TagBlockPredicate(EnhancedCommandsBlockTags.NATUALIZE_IGNORE);
     final HolderLookup.RegistryLookup<Block> wrapper = context.registryLookup(Registries.BLOCK).orElseThrow();
     context.add(of("naturalize_vegetation"), new ConditionsBlockFunction(
         new ConditionalBlockFunction(
@@ -94,18 +94,18 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
         )));
     final ConditionalBlockFunction dirtOverlayCondition = new ConditionalBlockFunction(
         new AnyBlockPredicate(
-            new HorizontalOffsetBlockPredicate(2, natualizeIgnore),
-            new HorizontalOffsetBlockPredicate(3, natualizeIgnore),
-            new HorizontalOffsetBlockPredicate(4, natualizeIgnore)),
+            new HorizontalOffsetBlockPredicate(2, naturalizeIgnore),
+            new HorizontalOffsetBlockPredicate(3, naturalizeIgnore),
+            new HorizontalOffsetBlockPredicate(4, naturalizeIgnore)),
         new SimpleBlockFunction(Blocks.DIRT));
     context.add(of("overworld_plains"), new OverlayBlockFunction(new ReferenceBlockFunction(of("naturalize_vegetation")),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
-                natualizeIgnore,
+                naturalizeIgnore,
                 EmptyBlockFunction.INSTANCE
             ),
             new ConditionalBlockFunction(
-                new HorizontalOffsetBlockPredicate(1, natualizeIgnore),
+                new HorizontalOffsetBlockPredicate(1, naturalizeIgnore),
                 new SimpleBlockFunction(Blocks.GRASS_BLOCK)),
             dirtOverlayCondition,
             new ConditionalBlockFunction(
@@ -117,11 +117,11 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     context.add(of("overworld_mushroom"), new OverlayBlockFunction(new ReferenceBlockFunction(of("naturalize_vegetation")),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
-                natualizeIgnore,
+                naturalizeIgnore,
                 EmptyBlockFunction.INSTANCE
             ),
             new ConditionalBlockFunction(
-                new HorizontalOffsetBlockPredicate(1, natualizeIgnore),
+                new HorizontalOffsetBlockPredicate(1, naturalizeIgnore),
                 new SimpleBlockFunction(Blocks.MYCELIUM)),
             dirtOverlayCondition,
             new ConditionalBlockFunction(
@@ -133,17 +133,17 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     context.add(of("overworld_desert"),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
-                natualizeIgnore,
+                naturalizeIgnore,
                 EmptyBlockFunction.INSTANCE
             ),
             new ConditionalBlockFunction(
-                new HorizontalOffsetBlockPredicate(2, natualizeIgnore),
+                new HorizontalOffsetBlockPredicate(2, naturalizeIgnore),
                 new SimpleBlockFunction(Blocks.SAND)),
             new ConditionalBlockFunction(
                 new AnyBlockPredicate(
-                    new HorizontalOffsetBlockPredicate(3, natualizeIgnore),
-                    new HorizontalOffsetBlockPredicate(4, natualizeIgnore),
-                    new HorizontalOffsetBlockPredicate(5, natualizeIgnore)),
+                    new HorizontalOffsetBlockPredicate(3, naturalizeIgnore),
+                    new HorizontalOffsetBlockPredicate(4, naturalizeIgnore),
+                    new HorizontalOffsetBlockPredicate(5, naturalizeIgnore)),
                 new SimpleBlockFunction(Blocks.SANDSTONE)),
             new ConditionalBlockFunction(
                 new AnyBlockPredicate(new TagBlockPredicate(oresConventionalTag()), new SimpleBlockPredicate(Blocks.STONE)),
@@ -173,19 +173,21 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
         new Vec3(0, 0, 1),
         Vec3.ZERO
     ));
-    context.add(of("any_dried_block"), new DryBlockFunction(RandomBlockFunction.RANDOM_SEED));
-    context.add(of("white_gray_stone_checker"), new CheckerboardBlockFunction(new WeightedList.Uniform<>(
-        new ReferenceBlockFunction(of("white_colors")),
-        new ReferenceBlockFunction(of("gray_colors"))
-    ), Vec3.ZERO, new Vec3(3, 3, 3), Vec3.ZERO));
+    context.add(of("random_dried_block"), new DryBlockFunction(RandomBlockFunction.RANDOM_SEED));
+
+    final ConditionalBlockFunction replaceDirtWithNetherrack = new ConditionalBlockFunction(
+        new TagBlockPredicate(BlockTags.DIRT),
+        new SimpleBlockFunction(Blocks.NETHERRACK)
+    );
+    final ConditionalBlockFunction replaceSandWithSoulSand = new ConditionalBlockFunction(
+        new TagBlockPredicate(BlockTags.SAND),
+        new SimpleBlockFunction(Blocks.SOUL_SAND)
+    );
     context.add(of("crimsonize"), new PropertiesNbtCombinationBlockFunction(
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(new TagBlockPredicate(EnhancedCommandsBlockTags.OVERLAID_DIRT),
                 new SimpleBlockFunction(Blocks.CRIMSON_NYLIUM)),
-            new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.DIRT),
-                new SimpleBlockFunction(Blocks.NETHERRACK)
-            ),
+            replaceDirtWithNetherrack,
             new ConditionalBlockFunction(
                 new TagBlockPredicate(BlockTags.FLOWERS),
                 new SimpleBlockFunction(Blocks.CRIMSON_FUNGUS)
@@ -203,10 +205,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.NETHER_WART_BLOCK),
                 EmptyBlockFunction.INSTANCE
             ),
-            new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.SAND),
-                new SimpleBlockFunction(Blocks.SOUL_SAND)
-            )
+            replaceSandWithSoulSand
         ),
         new PropertyNamesBlockFunction(Collections.singletonList(new AllOriginalPropertyNameFunctions())),
         null
@@ -215,10 +214,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(new TagBlockPredicate(EnhancedCommandsBlockTags.OVERLAID_DIRT),
                 new SimpleBlockFunction(Blocks.WARPED_NYLIUM)),
-            new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.DIRT),
-                new SimpleBlockFunction(Blocks.NETHERRACK)
-            ),
+            replaceDirtWithNetherrack,
             new ConditionalBlockFunction(
                 new TagBlockPredicate(BlockTags.FLOWERS),
                 new SimpleBlockFunction(Blocks.WARPED_FUNGUS)
@@ -236,10 +232,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.WARPED_WART_BLOCK),
                 EmptyBlockFunction.INSTANCE
             ),
-            new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.SAND),
-                new SimpleBlockFunction(Blocks.SOUL_SAND)
-            )
+            replaceSandWithSoulSand
         ),
         new PropertyNamesBlockFunction(Collections.singletonList(new AllOriginalPropertyNameFunctions())),
         null

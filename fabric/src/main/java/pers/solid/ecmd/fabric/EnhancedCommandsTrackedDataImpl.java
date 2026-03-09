@@ -2,7 +2,7 @@ package pers.solid.ecmd.fabric;
 
 import net.minecraft.network.syncher.EntityDataSerializers;
 import pers.solid.ecmd.EnhancedCommandsTrackedData;
-import pers.solid.ecmd.InitializeContext;
+import pers.solid.ecmd.api.InitializeContext;
 
 public class EnhancedCommandsTrackedDataImpl {
   public static void init(InitializeContext context) {

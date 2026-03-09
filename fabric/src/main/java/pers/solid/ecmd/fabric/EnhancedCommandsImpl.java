@@ -4,13 +4,11 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.api.fabric.InitializeContextImpl;
 import pers.solid.ecmd.command.EnhancedCommandsCommands;
-import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
-import pers.solid.ecmd.registry.EnhancedServerReloadableRegistries;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -41,14 +39,5 @@ public class EnhancedCommandsImpl implements ModInitializer {
   @Override
   public void onInitialize() {
     EnhancedCommands.init(new InitializeContextImpl());
-
-    EnhancedServerReloadableRegistries.getRegistry().values().forEach(EnhancedCommandsImpl::registerAsFabricDynamicRegistry);
-  }
-
-  /**
-   * 注册到 Fabric API 的动态注册表中，以用于数据生成相关功能。
-   */
-  private static <T> void registerAsFabricDynamicRegistry(EnhancedDynamicRegistryInfo<T> info) {
-    DynamicRegistries.register(info.registryKey(), info.codec());
   }
 }

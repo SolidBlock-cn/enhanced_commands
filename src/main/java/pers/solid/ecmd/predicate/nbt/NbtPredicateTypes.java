@@ -4,7 +4,7 @@ import com.google.common.base.Supplier;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.InitializeContext;
+import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 

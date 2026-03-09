@@ -1,7 +1,7 @@
-package pers.solid.ecmd.fabric;
+package pers.solid.ecmd.api.fabric;
 
 import net.minecraft.core.Registry;
-import pers.solid.ecmd.InitializeContext;
+import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 
 public class InitializeContextImpl implements InitializeContext {

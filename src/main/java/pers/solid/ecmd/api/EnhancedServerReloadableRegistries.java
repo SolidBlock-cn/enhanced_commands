@@ -1,4 +1,4 @@
-package pers.solid.ecmd.registry;
+package pers.solid.ecmd.api;
 
 import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
@@ -12,7 +12,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,6 +30,7 @@ import java.util.stream.Stream;
  * <p>这些注册表也可以通过 Fabric API 或 NeoForge 提供的 API 注册为不可重载动态注册表（类似于原版的地物配置、维度类型等），但这只是为了便于数据生成，实际在加载模组时，只要是通过此类注册为可重载注册表的注册表，均不会通过常规的不可重载动态注册表加载流程加载。
  */
 public class EnhancedServerReloadableRegistries {
+  @ApiStatus.Internal
   private static final Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> REGISTRY = new HashMap<>();
   private static final @UnmodifiableView Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> REGISTRY_VIEW = Collections.unmodifiableMap(REGISTRY);
 
@@ -34,10 +38,18 @@ public class EnhancedServerReloadableRegistries {
     return REGISTRY_VIEW;
   }
 
+  /**
+   * 用于 mixin。
+   */
+  @ApiStatus.Internal
   public static Stream<CompletableFuture<WritableRegistry<?>>> getEnhancedMutableRegistries(RegistryOps<JsonElement> ops, ResourceManager resourceManager, Executor prepareExecutor) {
     return REGISTRY.values().stream().map(info -> enhancedScheduleRegistryReload(info, ops, resourceManager, prepareExecutor));
   }
 
+  /**
+   * 用于 mixin。
+   */
+  @ApiStatus.Internal
   public static <T> CompletableFuture<WritableRegistry<?>> enhancedScheduleRegistryReload(EnhancedDynamicRegistryInfo<T> info, RegistryOps<JsonElement> ops, ResourceManager resourceManager, Executor prepareExecutor) {
     final ResourceKey<Registry<T>> registryKey = info.registryKey();
     final Codec<T> codec = info.codec();
@@ -50,7 +62,18 @@ public class EnhancedServerReloadableRegistries {
     }, prepareExecutor);
   }
 
-  public static <T> void register(ResourceKey<Registry<T>> registryKey, Codec<T> codec) {
+  /**
+   * 仅在此类中注册可重载注册表，不在 Fabric API 或 NeoForge 中注册动态注册表。
+   */
+  public static <T> void registerWithoutDynamicRegistry(@NotNull ResourceKey<Registry<T>> registryKey, @NotNull Codec<T> codec) {
     REGISTRY.put(registryKey, new EnhancedDynamicRegistryInfo<>(registryKey, codec));
+  }
+
+  /**
+   * 注册可重载注册表的同时，在 Fabric API 或 NeoForge 中注册动态注册表，从而能够像常规的动态注册表那样进行数据生成。经过本模组处理，不会实际经过常规动态注册表流程加载，不会造成注册表冲突。
+   */
+  public static <T> void register(@NotNull ResourceKey<Registry<T>> registryKey, @NotNull Codec<T> codec, boolean sync, @NotNull InitializeContext context) {
+    registerWithoutDynamicRegistry(registryKey, codec);
+    RegistryBridge.registerDynamicRegistry(registryKey, codec, sync, context);
   }
 }

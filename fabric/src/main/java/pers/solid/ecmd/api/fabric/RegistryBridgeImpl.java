@@ -1,12 +1,16 @@
 package pers.solid.ecmd.api.fabric;
 
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 
 @FieldsAreNonnullByDefault
@@ -26,6 +30,14 @@ public class RegistryBridgeImpl<T> implements RegistryBridge<T> {
 
   public static <T> RegistryBridge<T> create(String namespace, Registry<T> vanillaRegistry) {
     return new RegistryBridgeImpl<>(namespace, vanillaRegistry);
+  }
+
+  public static <T> void registerDynamicRegistry(@NotNull ResourceKey<Registry<T>> resourceKey, @NotNull Codec<T> codec, boolean sync, @NotNull InitializeContext context) {
+    if (sync) {
+      DynamicRegistries.registerSynced(resourceKey, codec);
+    } else {
+      DynamicRegistries.register(resourceKey, codec);
+    }
   }
 
   @Override
