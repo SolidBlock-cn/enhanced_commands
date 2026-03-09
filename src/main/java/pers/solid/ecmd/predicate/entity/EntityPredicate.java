@@ -5,11 +5,14 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
 import pers.solid.ecmd.util.*;
 
@@ -26,6 +29,7 @@ import java.util.function.Predicate;
  */
 public interface EntityPredicate extends ExpressionConvertible {
   Codec<EntityPredicate> CODEC = EntityPredicateType.REGISTRY.byNameCodec().dispatch(EntityPredicate::getType, EntityPredicateType::codec);
+  ResourceKey<Registry<EntityPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("entity_predicate"));
 
   /**
    * 根据实体选择器，返回对应的实体谓词。如果实体选择器只指定了一个谓词，则返回此谓词（也就是将其简化为单个谓词），否则直接返回 {@link SelectorEntityPredicate}。这一功能目前仍不稳定，特别是如果有模组为实体选择器直接添加新的功能，可能会出现问题，但如果其他模组仅为实体选择器添加谓词，通常只会导致这些谓词无法正常序列化，但不会错误简化为单个的谓词。

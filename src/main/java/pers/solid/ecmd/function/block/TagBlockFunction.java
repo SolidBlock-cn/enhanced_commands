@@ -45,13 +45,13 @@ public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<Prop
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final RandomSource random = context.getSplitter(this).at(pos);
     final Optional<Holder<Block>> randomTag = tag.getRandomElement(random);
     if (randomTag.isEmpty()) return blockState;
     BlockState state = randomTag.get().value().defaultBlockState();
     for (PropertyNameFunction propertyNameFunction : properties) {
-      state = propertyNameFunction.getModifiedState(origState, state, random);
+      state = propertyNameFunction.getModifiedState(originalState, state, random);
     }
     return state;
   }

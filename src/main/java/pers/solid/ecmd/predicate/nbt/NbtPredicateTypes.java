@@ -1,22 +1,16 @@
 package pers.solid.ecmd.predicate.nbt;
 
 import com.google.common.base.Supplier;
-import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class NbtPredicateTypes {
   private static final RegistryBridge<NbtPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtPredicateType.REGISTRY);
-
-  public static final Map<String, Supplier<FunctionLikeParser<? extends NbtPredicate>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), NbtPredicateTypes::registerPredicates);
-  public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), NbtPredicateTypes::registerFunctionNames);
 
   // 基本的 NBT 谓词
   public static final NbtPredicateType<ComparisonNbtPredicate> COMPARISON = register("comparison", ComparisonNbtPredicate.Type.COMPARISON_TYPE);
@@ -34,12 +28,14 @@ public class NbtPredicateTypes {
   }
 
   public static void init(InitializeContext context) {
-    context.registerRegistry(NbtPredicateType.REGISTRY);
-    context.validateAndRegister(REGISTRY_BRIDGE);
+    RegistryBridge.registerToRootRegistry(NbtPredicateType.REGISTRY, context);
+    REGISTRY_BRIDGE.validateAndRegisterContents(context);
+    registerFunctions(NbtPredicateParsing.FUNCTIONS);
+    registerFunctionNames(NbtPredicateParsing.FUNCTION_NAMES);
   }
 
 
-  private static void registerPredicates(Map<String, Supplier<FunctionLikeParser<? extends NbtPredicate>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends NbtPredicate>>> map) {
 
   }
 

@@ -9,7 +9,7 @@ import pers.solid.ecmd.api.RegistryBridge;
 public interface NbtPredicateType<T extends NbtPredicate> {
 
   ResourceKey<Registry<NbtPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate_type"));
-  Registry<NbtPredicateType<?>> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
+  Registry<NbtPredicateType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
   MapCodec<T> getCodec();
 }

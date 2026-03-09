@@ -13,7 +13,7 @@ public enum EmptyBlockFunction implements BlockFunction, BlockFunctionType<Empty
   public static final MapCodec<EmptyBlockFunction> CODEC = MapCodec.unit(INSTANCE);
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     return blockState;
   }
 

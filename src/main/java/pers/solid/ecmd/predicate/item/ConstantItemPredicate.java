@@ -1,0 +1,69 @@
+package pers.solid.ecmd.predicate.item;
+
+import com.mojang.brigadier.StringReader;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.ExecutionContext;
+
+public enum ConstantItemPredicate implements ItemPredicate {
+  ALWAYS_TRUE(true),
+  ALWAYS_FALSE(false);
+  private final boolean value;
+
+  public static final MapCodec<ConstantItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.BOOL.optionalFieldOf("value", true).forGetter(ConstantItemPredicate::value)).apply(i, ConstantItemPredicate::of));
+
+  ConstantItemPredicate(boolean value) {
+    this.value = value;
+  }
+
+  public boolean value() {
+    return value;
+  }
+
+  public static ConstantItemPredicate of(boolean value) {
+    return value ? ALWAYS_TRUE : ALWAYS_FALSE;
+  }
+
+  @Override
+  public @NotNull String asString() {
+    return value ? "*" : "!*";
+  }
+
+  @Override
+  public boolean test(ItemPredicate itemPredicate, ExecutionContext executionContext) {
+    return value;
+  }
+
+  @Override
+  public @NotNull ConstantItemPredicate.Type getType() {
+    return ItemPredicateTypes.CONSTANT;
+  }
+
+  public enum Type implements ItemPredicateType<ConstantItemPredicate>, Parser<ConstantItemPredicate> {
+    CONSTANT_TYPE;
+
+    @Override
+    public @NotNull MapCodec<ConstantItemPredicate> getCodec() {
+      return CODEC;
+    }
+
+    @Override
+    public ConstantItemPredicate parse(ParseContext<?> parseContext) {
+      parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Component.translatable("enhanced_commands.block_predicate.constant"), suggestionsBuilder).buildFuture());
+      final StringReader reader = parseContext.reader();
+      if (reader.canRead() && reader.peek() == '*') {
+        reader.skip();
+        parseContext.clearSuggestion();
+        return ALWAYS_TRUE;
+      } else {
+        return null;
+      }
+    }
+  }
+}

@@ -33,8 +33,8 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
-    return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3.atLowerCornerOf(pos)).getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3.atLowerCornerOf(pos)).getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
   }
 
   @Override

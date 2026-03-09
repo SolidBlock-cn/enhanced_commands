@@ -34,17 +34,17 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
-    blockState = function.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    blockState = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     final Item item = blockState.getBlock().asItem();
     if (item == Items.AIR) {
       return blockState;
     }
-    final List<RecipeHolder<StonecutterRecipe>> allMatches = world.getRecipeManager().getRecipesFor(RecipeType.STONECUTTING, new SingleRecipeInput(item.getDefaultInstance()), world);
+    final List<RecipeHolder<StonecutterRecipe>> allMatches = level.getRecipeManager().getRecipesFor(RecipeType.STONECUTTING, new SingleRecipeInput(item.getDefaultInstance()), level);
     if (allMatches.isEmpty()) {
       return blockState;
     }
-    final ItemStack output = allMatches.get(context.random.nextInt(allMatches.size())).value().getResultItem(world.registryAccess());
+    final ItemStack output = allMatches.get(context.random.nextInt(allMatches.size())).value().getResultItem(level.registryAccess());
     if (output.getItem() instanceof BlockItem blockItem) {
       BlockState result = StateUtil.getBlockWithRandomProperties(blockItem.getBlock(), context.random);
       for (Property<?> property : result.getProperties()) {

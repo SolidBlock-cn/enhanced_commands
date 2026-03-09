@@ -9,7 +9,7 @@ import pers.solid.ecmd.api.RegistryBridge;
 
 public interface CurveType<T extends Curve> {
   ResourceKey<Registry<CurveType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("curve_type"));
-  Registry<CurveType<?>> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
+  Registry<CurveType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
   @NotNull MapCodec<T> getCodec();
 

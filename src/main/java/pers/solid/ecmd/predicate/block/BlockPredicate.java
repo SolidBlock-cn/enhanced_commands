@@ -6,6 +6,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,8 +33,8 @@ import java.util.Collections;
 import java.util.List;
 
 public interface BlockPredicate extends ExpressionConvertible {
-  Codec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.byNameCodec().dispatch(BlockPredicate::getType, BlockPredicateType::getCodec);
-  Codec<BlockPredicate> CODEC = CodecUtil.combined(BuiltInRegistries.BLOCK.byNameCodec().xmap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), SimpleBlockPredicate::block), MAP_CODEC, blockPredicate -> blockPredicate instanceof SimpleBlockPredicate s && s.properties().isEmpty() ? s : null);
+  MapCodec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.byNameCodec().dispatchMap(BlockPredicate::getType, BlockPredicateType::getCodec);
+  Codec<BlockPredicate> CODEC = CodecUtil.combined(BuiltInRegistries.BLOCK.byNameCodec().xmap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), SimpleBlockPredicate::block), MAP_CODEC.codec(), blockPredicate -> blockPredicate instanceof SimpleBlockPredicate s && s.properties().isEmpty() ? s : null);
   ResourceKey<Registry<BlockPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_predicate"));
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
@@ -108,7 +109,7 @@ public interface BlockPredicate extends ExpressionConvertible {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
     // 刻意将 simple 调整到最后面
-    for (Parser<BlockPredicate> argumentParser : Iterables.concat(BlockPredicateTypes.PARSERS, Collections.singleton(SimpleBlockPredicate.Type.SIMPLE_TYPE))) {
+    for (Parser<BlockPredicate> argumentParser : Iterables.concat(BlockPredicateParsing.PARSERS, Collections.singleton(SimpleBlockPredicate.Type.SIMPLE_TYPE))) {
       reader.setCursor(cursorOnStart);
       final BlockPredicate parse = argumentParser.parse(parseContext);
       if (parse != null) {

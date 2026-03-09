@@ -32,15 +32,15 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final CompoundTag valueBeforeModify = blockEntityData.getValue();
-    final BlockState newState = function.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
-    final BlockInWorld blockInWorld = new BlockInWorld(world, pos, false);
+    final BlockState newState = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
+    final BlockInWorld blockInWorld = new BlockInWorld(level, pos, false);
     if (predicate.test(blockInWorld, context)) {
       return newState;
     } else {
       blockEntityData.setValue(valueBeforeModify);
-      return elseFunction.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+      return elseFunction.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     }
   }
 

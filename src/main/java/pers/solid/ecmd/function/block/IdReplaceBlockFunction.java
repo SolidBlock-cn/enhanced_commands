@@ -55,13 +55,13 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block block = blockState.getBlock();
     final String old = BuiltInRegistries.BLOCK.getKey(block).toString();
     final String replaced = pattern.matcher(old).replaceAll(replacement);
     final ResourceLocation identifier = ResourceLocation.tryParse(replaced);
     if (identifier == null) return blockState;
-    return world.registryAccess().registryOrThrow(Registries.BLOCK).getOptional(identifier).filter(block1 -> block1.isEnabled(world.enabledFeatures())).map(Block::defaultBlockState).orElse(blockState);
+    return level.registryAccess().registryOrThrow(Registries.BLOCK).getOptional(identifier).filter(block1 -> block1.isEnabled(level.enabledFeatures())).map(Block::defaultBlockState).orElse(blockState);
   }
 
   @Override

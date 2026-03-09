@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 
 public interface RegionSelectionType {
   ResourceKey<Registry<RegionSelectionType>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_selection_type"));
-  Registry<RegionSelectionType> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
+  Registry<RegionSelectionType> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
   Codec<RegionSelectionType> CODEC = REGISTRY.byNameCodec();
   StreamCodec<RegistryFriendlyByteBuf, RegionSelectionType> PACKET_CODEC = ByteBufCodecs.registry(REGISTRY_KEY);
 

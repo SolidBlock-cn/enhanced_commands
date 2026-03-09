@@ -2,12 +2,15 @@ package pers.solid.ecmd.function.nbt;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.NbtFunctionParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
@@ -24,6 +27,7 @@ import java.util.function.Predicate;
  */
 public interface NbtFunction extends ExpressionConvertible {
   Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.byNameCodec().dispatch(NbtFunction::getType, NbtFunctionType::getCodec);
+  ResourceKey<Registry<NbtFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_function"));
 
   /**
    * 对 NBT 函数在 NBT 元素上进行递归应用。如果该 NBT 元素是列表、复合标签等，则它的元素也会被应用，除非该列表或者复合标签自身即被应用。

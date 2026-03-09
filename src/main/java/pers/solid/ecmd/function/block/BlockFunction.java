@@ -16,7 +16,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -123,7 +122,7 @@ public interface BlockFunction extends ExpressionConvertible {
     final int cursorOnStart = reader.getCursor();
 
     // 强制将 simple 调整到最后再去使用
-    for (Parser<BlockFunction> argumentParser : Iterables.concat(BlockFunctionTypes.PARSERS, Collections.singleton(SimpleBlockFunction.Type.SIMPLE_TYPE))) {
+    for (Parser<BlockFunction> argumentParser : Iterables.concat(BlockFunctionParsing.PARSERS, Collections.singleton(SimpleBlockFunction.Type.SIMPLE_TYPE))) {
       reader.setCursor(cursorOnStart);
       final BlockFunction parse = argumentParser.parse(parseContext);
       if (parse != null) {
@@ -170,27 +169,20 @@ public interface BlockFunction extends ExpressionConvertible {
    * 对已有的方块状态进行修改。如果此方块函数不修改方块状态，应该返回 blockState 参数。
    *
    * @param blockState      当前的一系列修改过程中所使用的方块状态。当不同的多个方块函数依次使用时，方块函数的返回值会用于这个参数。
-   * @param origState       在整个修改过程之前，所使用的方块状态。当不同的多个方块函数依次使用时，此参数均不改变。
-   * @param world           当前所在的世界。
+   * @param originalState   在整个修改过程之前，所使用的方块状态。当不同的多个方块函数依次使用时，此参数均不改变。
+   * @param level           当前所在的世界。
    * @param pos             正在修改的方块所在的坐标。
    * @param blockEntityData 此参数用于在修改方块的过程中一并修改方块实体。在完成对方块状态的修改后，才会将这个数据并入到方块实体中。
    * @param context         正在修改的方块修改时的 flags。
    * @return 修改后的方块状态。
    */
   @NotNull
-  BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context);
+  BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context);
 
   @NotNull
   BlockFunctionType<?> getType();
 
   default boolean isEmpty() {
     return this == EmptyBlockFunction.INSTANCE;
-  }
-
-  /**
-   * 取消该对象的缓存状态。例如，对于 {@link NoiseBlockFunction} 而言，调用一次该方法将会使其重新生成采样器，其种子可能随机生成。
-   */
-  default BlockFunction getRefreshed(RandomSource random) {
-    return this;
   }
 }

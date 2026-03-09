@@ -5,9 +5,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.NbtPredicateParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -17,6 +20,7 @@ import java.util.function.Predicate;
 
 public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull Tag> {
   Codec<NbtPredicate> CODEC = NbtPredicateType.REGISTRY.byNameCodec().dispatch(NbtPredicate::getType, NbtPredicateType::getCodec);
+  ResourceKey<Registry<NbtPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate"));
 
   static @NotNull NbtPredicate parse(CommandBuildContext commandBuildContext, String s, CommandSourceStack source) throws CommandSyntaxException {
     return new NbtPredicateParser<>(new ParseContext<>(commandBuildContext, new StringReader(s), false, true)).parsePredicate(false, false);

@@ -34,10 +34,10 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final RandomSource random = context.getSplitter(this).at(pos);
     for (PropertyNameFunction propertyNameFunction : functions) {
-      blockState = propertyNameFunction.getModifiedState(origState, blockState, random);
+      blockState = propertyNameFunction.getModifiedState(originalState, blockState, random);
     }
     return blockState;
   }

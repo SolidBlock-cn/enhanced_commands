@@ -1,29 +1,17 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.google.common.base.Supplier;
-import com.google.common.collect.Lists;
-import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionLikeParser;
-import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
-import pers.solid.ecmd.parse.ParsingUtil;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public final class BlockPredicateTypes {
   private static final RegistryBridge<BlockPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, BlockPredicateType.REGISTRY);
-  public static final Map<String, Supplier<FunctionLikeParser<? extends BlockPredicate>>> FUNCTIONS = Util.make(new LinkedHashMap<>(), BlockPredicateTypes::registerFunctions);
-  public static final Map<String, Component> FUNCTION_NAMES = Util.make(new HashMap<>(), BlockPredicateTypes::registerFunctionNames);
-  public static final Parser<BlockPredicate> PARENTHESES_PARSER = (parseContext) -> ParsingUtil.parseParentheses(() -> BlockPredicate.parse(parseContext.withAllowSparse(true)), parseContext);
-  public static final Parser<BlockPredicate> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
-  public static final List<Parser<BlockPredicate>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
 
   public static final SimpleBlockPredicate.Type SIMPLE = register("simple", SimpleBlockPredicate.Type.SIMPLE_TYPE);
   public static final NegatingBlockPredicate.Type NEGATING = register("negating", NegatingBlockPredicate.Type.NEGATING_TYPE);
@@ -52,7 +40,7 @@ public final class BlockPredicateTypes {
   @SuppressWarnings("unchecked")
   private static <T extends BlockPredicateType<?>> T register(String name, T value) {
     if (value != SimpleBlockPredicate.Type.SIMPLE_TYPE && value instanceof Parser<?> parser) {
-      PARSERS.add((Parser<BlockPredicate>) parser);
+      BlockPredicateParsing.PARSERS.add((Parser<BlockPredicate>) parser);
     }
     return REGISTRY_BRIDGE.register(name, value);
   }
@@ -88,7 +76,9 @@ public final class BlockPredicateTypes {
   }
 
   public static void init(InitializeContext context) {
-    context.registerRegistry(BlockPredicateType.REGISTRY);
-    context.validateAndRegister(REGISTRY_BRIDGE);
+    RegistryBridge.registerToRootRegistry(BlockPredicateType.REGISTRY, context);
+    REGISTRY_BRIDGE.validateAndRegisterContents(context);
+    registerFunctions(BlockPredicateParsing.FUNCTIONS);
+    registerFunctionNames(BlockPredicateParsing.FUNCTION_NAMES);
   }
 }

@@ -33,9 +33,9 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     for (BlockFunction blockFunction : functions) {
-      blockState = blockFunction.getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+      blockState = blockFunction.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     }
     return blockState;
   }

@@ -29,17 +29,17 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState origState, Level world, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
-    final BlockInWorld blockInWorld = new BlockInWorld(world, pos, false);
+  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+    final BlockInWorld blockInWorld = new BlockInWorld(level, pos, false);
     for (ConditionalBlockFunction function : conditions) {
       if (function.condition().test(blockInWorld, context)) {
-        return function.functionIfTrue().getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+        return function.functionIfTrue().getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
       }
     }
     if (!conditions.isEmpty()) {
-      return conditions.getLast().getModifiedState(blockState, origState, world, pos, blockEntityData, context);
+      return conditions.getLast().getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     } else {
-      return origState;
+      return originalState;
     }
   }
 

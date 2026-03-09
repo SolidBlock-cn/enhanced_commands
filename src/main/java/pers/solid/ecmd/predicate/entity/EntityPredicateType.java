@@ -9,7 +9,7 @@ import pers.solid.ecmd.api.RegistryBridge;
 
 public interface EntityPredicateType<T extends EntityPredicate> {
   ResourceKey<Registry<EntityPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("entity_predicate_entry_type"));
-  Registry<EntityPredicateType<?>> REGISTRY = RegistryBridge.buildAndRegisterSimple(REGISTRY_KEY);
+  Registry<EntityPredicateType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
   @NotNull
   MapCodec<T> codec();
