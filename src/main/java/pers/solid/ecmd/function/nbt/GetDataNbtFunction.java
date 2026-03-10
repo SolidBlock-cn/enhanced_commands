@@ -13,7 +13,7 @@ import pers.solid.ecmd.argument.NbtSourceArgument;
 import pers.solid.ecmd.argument.SimpleEnumArgument;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.NbtSource;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 
@@ -50,7 +50,7 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<GetDataNbtFunction> {
+  public static class Parser implements FunctionContentParser.SequentialParams<GetDataNbtFunction> {
     private NbtSource<?> nbtSource;
     private @Nullable NbtPathArgument.NbtPath nbtPath;
     private NbtConcentrationType nbtConcentrationType = NbtConcentrationType.ALL;

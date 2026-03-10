@@ -7,6 +7,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.Optionull;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
@@ -16,16 +18,16 @@ import java.util.function.Function;
 
 public class FunctionsParser<T> implements Parser<T> {
   private final Set<String> functions;
-  private final Function<String, FunctionLikeParser<? extends T>> parserFactory;
-  private final Function<String, Component> tooltipProvider;
+  private final Function<@NotNull String, @Nullable FunctionContentParser<? extends T>> parserFactory;
+  private final Function<@NotNull String, @Nullable Component> tooltipProvider;
 
-  public FunctionsParser(Set<String> functions, Function<String, FunctionLikeParser<? extends T>> parserFactory, Function<String, Component> tooltipProvider) {
+  public FunctionsParser(Set<String> functions, Function<String, @Nullable FunctionContentParser<? extends T>> parserFactory, Function<String, @Nullable Component> tooltipProvider) {
     this.functions = functions;
     this.parserFactory = parserFactory;
     this.tooltipProvider = tooltipProvider;
   }
 
-  public FunctionsParser(Map<String, Supplier<FunctionLikeParser<? extends T>>> functions, Map<String, Component> functionNames) {
+  public FunctionsParser(Map<String, Supplier<FunctionContentParser<? extends T>>> functions, Map<String, Component> functionNames) {
     this.functions = functions.keySet();
     this.parserFactory = s -> Optionull.map(functions.get(s), Supplier::get);
     this.tooltipProvider = Functions.forMap(functionNames, null);
@@ -34,23 +36,44 @@ public class FunctionsParser<T> implements Parser<T> {
   @Override
   public T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    final int cursorOnStart = reader.getCursor();
-    parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(functions, suggestionsBuilder.createOffset(cursorOnStart), s -> s + "(", tooltipProvider::apply));
+    final int cursorBeforeFunctionName = reader.getCursor();
+    parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(functions, suggestionsBuilder.createOffset(cursorBeforeFunctionName), s -> s + "(", tooltipProvider::apply));
     final String unquotedString = reader.readUnquotedString();
     if (!unquotedString.isEmpty() && reader.canRead() && reader.peek() == '(') {
-      final FunctionLikeParser<? extends T> functionParamsParser = parserFactory.apply(unquotedString);
-      if (functionParamsParser != null) {
-        functionParamsParser.setFunctionName(unquotedString);
-        functionParamsParser.setCursorBeforeFunctionName(cursorOnStart);
-        reader.skip();
-        return functionParamsParser.parseAfterLeftParenthesis(parseContext);
+      final int cursorAfterFunctionName = reader.getCursor();
+      final FunctionContentParser<? extends T> functionContentParser = parserFactory.apply(unquotedString);
+      if (functionContentParser != null) {
+        functionContentParser.onBeforeParentheses(unquotedString, cursorBeforeFunctionName, cursorAfterFunctionName);
+        return parseParenthesis(functionContentParser, parseContext);
       } else {
-        final int cursorAfterFunctionName = reader.getCursor();
-        reader.setCursor(cursorOnStart);
+        reader.setCursor(cursorBeforeFunctionName);
         throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.UNKNOWN_FUNCTION.createWithContext(reader, unquotedString), cursorAfterFunctionName);
       }
     } else {
       return null;
     }
+  }
+
+  public T parseParenthesis(FunctionContentParser<? extends T> parser, ParseContext<?> parseContext) throws CommandSyntaxException {
+    final StringReader reader = parseContext.reader();
+    if (!(reader.canRead() && reader.peek() == '(')) {
+      return null;
+    }
+    reader.skip();
+    parser.parseWithinParenthesis(parseContext.withAllowSparse(true));
+    reader.skipWhitespace();
+    parseContext.addSuggestion((context, builder) -> {
+      if (builder.getRemaining().isEmpty()) {
+        builder.suggest(")");
+      }
+      return builder.buildFuture();
+    });
+    if (reader.canRead() && reader.peek() == ')') {
+      reader.skip();
+      parser.onAfterParentheses(reader.getCursor());
+      parseContext.clearSuggestion();
+      return parser.getParseResult(parseContext);
+    }
+    throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, ')');
   }
 }

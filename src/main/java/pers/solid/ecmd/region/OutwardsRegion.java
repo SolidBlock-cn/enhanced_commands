@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.GeoUtil;
 
@@ -82,7 +82,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<OutwardsRegionProvider> parser() {
+    public FunctionContentParser.SequentialParams<OutwardsRegionProvider> parser() {
       return new Parser();
     }
 
@@ -97,7 +97,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<OutwardsRegionProvider> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<OutwardsRegionProvider> {
     private EnhancedCoordinates center = EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER;
     private int x, y, z;
     private int dimensionNumber = 0;

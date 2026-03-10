@@ -10,7 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.ArrayList;
@@ -54,7 +54,7 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<OverlayBlockFunction> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<OverlayBlockFunction> {
     private final List<BlockFunction> blockFunctions = new ArrayList<>();
 
     @Override

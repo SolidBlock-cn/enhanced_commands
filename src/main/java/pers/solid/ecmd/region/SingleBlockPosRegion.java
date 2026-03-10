@@ -15,7 +15,7 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
@@ -78,7 +78,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<RegionProvider<SingleBlockPosRegion>> parser() {
+    public FunctionContentParser.SequentialParams<RegionProvider<SingleBlockPosRegion>> parser() {
       return FunctionParser.INSTANCE;
     }
 
@@ -119,7 +119,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
   }
 
-  public enum FunctionParser implements FunctionLikeParser.SequentialParams<RegionProvider<SingleBlockPosRegion>> {
+  public enum FunctionParser implements FunctionContentParser.SequentialParams<RegionProvider<SingleBlockPosRegion>> {
     INSTANCE;
     private EnhancedCoordinates posArgument;
 

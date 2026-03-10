@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.Parser;
 
 import java.util.Map;
@@ -45,7 +45,7 @@ public final class BlockPredicateTypes {
     return REGISTRY_BRIDGE.register(name, value);
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockPredicate>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends BlockPredicate>>> map) {
     map.put("all", AllBlockPredicate.Parser::new);
     map.put("any", AnyBlockPredicate.Parser::new);
     map.put("checkerboard", CheckerboardBlockPredicate.Parser::new);

@@ -11,7 +11,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<UnionRegionProvider> parser() {
+    public FunctionContentParser.SequentialParams<UnionRegionProvider> parser() {
       return new Parser();
     }
 
@@ -111,7 +111,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<UnionRegionProvider> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<UnionRegionProvider> {
     private final List<RegionProvider<?>> regions = new ArrayList<>();
 
     @Override

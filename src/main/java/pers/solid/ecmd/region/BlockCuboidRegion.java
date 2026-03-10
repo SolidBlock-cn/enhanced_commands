@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
@@ -245,7 +245,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<? extends RegionProvider<? extends BlockCuboidRegion>> parser() {
+    public FunctionContentParser.SequentialParams<? extends RegionProvider<? extends BlockCuboidRegion>> parser() {
       return new Parser();
     }
 
@@ -260,7 +260,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<BlockCuboidRegionProvider> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<BlockCuboidRegionProvider> {
     private EnhancedCoordinates from;
     private EnhancedCoordinates to;
 

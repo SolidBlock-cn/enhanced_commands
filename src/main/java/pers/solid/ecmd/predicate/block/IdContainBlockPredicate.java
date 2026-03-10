@@ -8,7 +8,7 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -67,7 +67,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<IdContainBlockPredicate> {
+  public static class Parser implements FunctionContentParser.SequentialParams<IdContainBlockPredicate> {
     private Pattern pattern;
 
     @Override

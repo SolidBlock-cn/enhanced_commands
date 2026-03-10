@@ -14,7 +14,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.StringUtil;
@@ -141,7 +141,7 @@ public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
     }
   }
 
-  protected static final class Parser implements FunctionLikeParser.SequentialParams<CurveProvider<StraightCurve>> {
+  protected static final class Parser implements FunctionContentParser.SequentialParams<CurveProvider<StraightCurve>> {
     private EnhancedCoordinates from, to;
     private boolean usingKeyword = false;
 

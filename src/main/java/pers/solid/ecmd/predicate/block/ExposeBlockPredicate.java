@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -143,7 +143,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<ExposeBlockPredicate> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<ExposeBlockPredicate> {
     private final Set<@NotNull Direction> directions = new TreeSet<>();
     private ExposureType exposureType;
 

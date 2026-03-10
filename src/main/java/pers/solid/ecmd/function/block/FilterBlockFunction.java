@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 
@@ -58,7 +58,7 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<FilterBlockFunction> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<FilterBlockFunction> {
     private BlockPredicate blockPredicate;
     private BlockFunction blockFunction;
     private @Nullable BlockFunction elseFunction;

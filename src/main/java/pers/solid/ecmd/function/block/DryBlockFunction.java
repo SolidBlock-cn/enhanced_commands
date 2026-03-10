@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 /**
@@ -51,7 +51,7 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<DryBlockFunction> {
+  public static class Parser implements FunctionContentParser.SequentialParams<DryBlockFunction> {
     BlockFunction blockFunction = null;
 
     @Override

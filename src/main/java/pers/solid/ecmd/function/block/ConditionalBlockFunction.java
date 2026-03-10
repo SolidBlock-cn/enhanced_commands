@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 
@@ -56,7 +56,7 @@ public record ConditionalBlockFunction(@NotNull BlockPredicate condition, @NotNu
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<ConditionalBlockFunction> {
+  public static class Parser implements FunctionContentParser.SequentialParams<ConditionalBlockFunction> {
     private BlockPredicate condition;
     private BlockFunction valueIfTrue, valueIfFalse;
 

@@ -12,7 +12,7 @@ import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.function.nbt.NbtFunctionType;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -46,7 +46,7 @@ public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
     }
   }
 
-  public static class Parser implements FunctionLikeParser<NbtFunction> {
+  public static class Parser implements FunctionContentParser<NbtFunction> {
     private EnhancedCoordinates posArgument;
 
     @Override

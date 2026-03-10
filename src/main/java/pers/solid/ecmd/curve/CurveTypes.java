@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 
 import java.util.Map;
 
@@ -31,7 +31,7 @@ public final class CurveTypes {
   }
 
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends CurveProvider<?>>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends CurveProvider<?>>>> map) {
     map.put("straight", StraightCurve.Parser::new);
     map.put("circle", CircleCurve.Parser::new);
   }

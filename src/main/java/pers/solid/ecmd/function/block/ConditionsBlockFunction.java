@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
@@ -62,7 +62,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
     }
   }
 
-  public static class Parser implements FunctionLikeParser<ConditionsBlockFunction> {
+  public static class Parser implements FunctionContentParser<ConditionsBlockFunction> {
     private final List<ConditionalBlockFunction> functions = new ArrayList<>();
 
     @Override
@@ -77,11 +77,11 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
 
       parseContext.addSuggestion((context, suggestionsBuilder) -> {
         if (suggestionsBuilder.getRemaining().isEmpty()) {
-          suggestionsBuilder.suggest(rightParString());
+          suggestionsBuilder.suggest(")");
         }
         return suggestionsBuilder.buildFuture();
       });
-      if (reader.canRead() && reader.peek() == rightPar()) {
+      if (reader.canRead() && reader.peek() == ')') {
         return;
       }
       while (true) {

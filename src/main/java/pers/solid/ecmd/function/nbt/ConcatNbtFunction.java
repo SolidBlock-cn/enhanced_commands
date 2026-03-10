@@ -15,7 +15,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -129,7 +129,7 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
   }
 
-  class Parser implements FunctionLikeParser<ConcatNbtFunction>, NamedParamListParser {
+  class Parser implements FunctionContentParser<ConcatNbtFunction>, NamedParamListParser {
     private static final Set<String> SUPPORTED_PARAMS = Set.of("delimiter");
     private final List<NbtFunction> nbtFunctions = new ArrayList<>();
     private boolean flatten;
@@ -164,13 +164,13 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
           reader.skipWhitespace();
 
           parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder
-              .suggest(separatorString()).buildFuture());
+              .suggest(",").buildFuture());
           if (!reader.canRead()) {
             break;
           }
           reader.skipWhitespace();
           final char peek = reader.peek();
-          if (peek == separator()) {
+          if (peek == ',') {
             reader.skip();
             reader.skipWhitespace();
           } else {

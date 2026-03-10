@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.joml.Vector2d;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
@@ -164,7 +164,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.MixedParams<CylinderRegionProvider> {
+  public static final class Parser implements FunctionContentParser.MixedParams<CylinderRegionProvider> {
     private @Nullable Double radius = null;
     private @Nullable Double height = null;
     private @Nullable EnhancedCoordinates center = null;

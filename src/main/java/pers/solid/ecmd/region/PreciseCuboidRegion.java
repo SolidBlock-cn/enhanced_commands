@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collections;
@@ -167,7 +167,7 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<? extends RegionProvider<? extends PreciseCuboidRegion>> parser() {
+    public FunctionContentParser.SequentialParams<? extends RegionProvider<? extends PreciseCuboidRegion>> parser() {
       return new PreciseCuboidRegion.Parser();
     }
 
@@ -182,7 +182,7 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<PreciseCuboidRegionProvider> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<PreciseCuboidRegionProvider> {
     private EnhancedCoordinates from;
     private EnhancedCoordinates to;
 

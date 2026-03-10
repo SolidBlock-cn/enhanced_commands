@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
@@ -118,7 +118,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<CuboidOutlineRegionProvider> parser() {
+    public FunctionContentParser.SequentialParams<CuboidOutlineRegionProvider> parser() {
       return new Parser();
     }
 
@@ -133,21 +133,19 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
   }
 
-  public static abstract sealed class AbstractParser<R extends RegionProvider<?>> implements FunctionLikeParser.SequentialParams<R> permits Parser, CuboidWallRegion.Parser {
+  public static abstract sealed class AbstractParser<R extends RegionProvider<?>> implements FunctionContentParser.SequentialParams<R> permits Parser, CuboidWallRegion.Parser {
     protected EnhancedCoordinates fromPos, toPos;
     protected int thickness = 1;
-    protected int cursorBefore = 0, cursorAfter = 0;
+    protected int cursorBeforeFunctionName = 0, cursorAfterParenthesis = 0;
 
     @Override
-    public void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
-      this.cursorBefore = cursorBeforeFunctionName;
+    public void onBeforeParentheses(String functionName, int cursorBeforeFunctionName, int cursorAfterFunctionName) {
+      this.cursorBeforeFunctionName = cursorBeforeFunctionName;
     }
 
     @Override
-    public R parseAfterLeftParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final R parsed = SequentialParams.super.parseAfterLeftParenthesis(parseContext);
-      cursorAfter = parseContext.reader().getCursor();
-      return parsed;
+    public void onAfterParentheses(int cursorAfterParentheses) {
+      this.cursorAfterParenthesis = cursorAfterParentheses;
     }
 
     @Override
