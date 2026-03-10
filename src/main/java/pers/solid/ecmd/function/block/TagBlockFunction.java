@@ -1,12 +1,15 @@
 package pers.solid.ecmd.function.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
@@ -28,6 +31,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<PropertyNameFunction> properties) implements BlockFunction {
+  public static final Codec<TagBlockFunction> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.BLOCK).flatXmap(blockTagKey -> BuiltInRegistries.BLOCK.getTag(blockTagKey).map(holders -> DataResult.success((HolderSet<Block>) holders)).orElseGet(() -> DataResult.error(() -> "unknown tag: " + blockTagKey.location())), holders -> holders.unwrapKey().map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag"))).flatComapMap(TagBlockFunction::new, tagBlockFunction -> tagBlockFunction.properties.isEmpty() ? DataResult.success(tagBlockFunction.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
+
   public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
 
   public TagBlockFunction(@NotNull HolderSet<Block> tag) {

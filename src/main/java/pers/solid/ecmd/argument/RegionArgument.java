@@ -24,7 +24,7 @@ public record RegionArgument(CommandBuildContext commandBuildContext) implements
     return new RegionArgument(commandBuildContext);
   }
 
-  public static RegionProvider<?> getRegionArgument(CommandContext<CommandSourceStack> context, String name) {
+  public static RegionProvider<?> getRegionProvider(CommandContext<CommandSourceStack> context, String name) {
     return context.getArgument(name, RegionProvider.class);
   }
 

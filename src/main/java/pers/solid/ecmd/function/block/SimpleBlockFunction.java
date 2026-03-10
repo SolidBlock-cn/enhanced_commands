@@ -1,6 +1,9 @@
 package pers.solid.ecmd.function.block;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
@@ -23,6 +26,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockFunction(@NotNull Block block, @NotNull List<PropertyFunction<?>> properties) implements BlockFunction {
+  public static final Codec<SimpleBlockFunction> STRING_BASED_CODEC = BuiltInRegistries.BLOCK.byNameCodec().flatComapMap(block -> new SimpleBlockFunction(block, ImmutableList.of()), simpleBlockFunction -> simpleBlockFunction.properties.isEmpty() ? DataResult.success(simpleBlockFunction.block) : DataResult.error(() -> "cannot serialize function with properties to strings"));
+
   public static final MapCodec<SimpleBlockFunction> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
 
   public SimpleBlockFunction(@NotNull Block block) {

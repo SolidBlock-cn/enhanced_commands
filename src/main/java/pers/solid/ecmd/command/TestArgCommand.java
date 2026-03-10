@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -22,6 +23,7 @@ import net.minecraft.commands.arguments.NbtTagArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -33,17 +35,20 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.function.FailableBiFunction;
 import org.apache.commons.lang3.function.FailableFunction;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.curve.CurveProvider;
 import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.function.item.ItemFunction;
 import pers.solid.ecmd.function.nbt.NbtFunction;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.predicate.entity.EntityPredicate;
+import pers.solid.ecmd.predicate.item.ItemPredicate;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionProvider;
@@ -59,12 +64,7 @@ import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static net.minecraft.commands.arguments.CompoundTagArgument.getCompoundTag;
 import static net.minecraft.commands.arguments.NbtTagArgument.getNbtTag;
-import static pers.solid.ecmd.argument.BlockFunctionArgument.getBlockFunction;
-import static pers.solid.ecmd.argument.BlockPredicateArgument.getBlockPredicate;
-import static pers.solid.ecmd.argument.CurveArgument.getCurve;
 import static pers.solid.ecmd.argument.EnhancedPosArgument.getPosArgument;
-import static pers.solid.ecmd.argument.EntityPredicateArgument.entityPredicate;
-import static pers.solid.ecmd.argument.EntityPredicateArgument.getEntityPredicate;
 import static pers.solid.ecmd.argument.NbtFunctionArgument.getNbtFunction;
 import static pers.solid.ecmd.argument.NbtPredicateArgument.getNbtPredicate;
 import static pers.solid.ecmd.argument.RegionArgument.getRegion;
@@ -73,58 +73,26 @@ import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 public enum TestArgCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockFunctionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
-    return argumentBuilder.then(argument("block_function", BlockFunctionArgument.blockFunction(commandBuildContext))
-        .executes(context -> executeStringShow(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString))
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>, E> T addValueProperties(T argumentBuilder, CommandBuildContext commandBuildContext, String argumentName, ArgumentType<?> argumentType, FailableBiFunction<ParseContext<?>, CommandContext<CommandSourceStack>, E, CommandSyntaxException> argumentParser, FailableBiFunction<CommandContext<CommandSourceStack>, String, E, CommandSyntaxException> argumentValueGetter, FailableFunction<E, String, CommandSyntaxException> toString, Codec<E> codec) {
+    return argumentBuilder.then(argument(argumentName, argumentType)
+        .executes(context -> executeStringShow(context, argumentValueGetter.apply(context, argumentName), toString))
         .then(literal("string")
-            .executes(context -> executeStringShow(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString)))
+            .executes(context -> executeStringShow(context, argumentValueGetter.apply(context, argumentName), toString)))
         .then(literal("nbt")
-            .executes(context -> executeCodecShow(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, NbtOps.INSTANCE)))
+            .executes(context -> executeCodecShow(context, argumentValueGetter.apply(context, argumentName), codec, NbtOps.INSTANCE)))
         .then(literal("json")
-            .executes(context -> executeCodecShow(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, JsonOps.INSTANCE)))
+            .executes(context -> executeCodecShow(context, argumentValueGetter.apply(context, argumentName), codec, JsonOps.INSTANCE)))
         .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getBlockFunction(context, "block_function"), ExpressionConvertible::asString, s -> BlockFunction.parse(new ParseContext<>(commandBuildContext, s, false, true)))))
+            .executes(context -> executeStringTest(context, argumentValueGetter.apply(context, argumentName), toString, s -> argumentParser.apply(new ParseContext<>(commandBuildContext, s, false, true), context))))
         .then(literal("nbt_test")
-            .executes(context -> executeCodecTest(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, NbtOps.INSTANCE)))
+            .executes(context -> executeCodecTest(context, argumentValueGetter.apply(context, argumentName), codec, NbtOps.INSTANCE)))
         .then(literal("json_test")
-            .executes(context -> executeCodecTest(context, getBlockFunction(context, "block_function"), BlockFunction.CODEC, JsonOps.INSTANCE)))
+            .executes(context -> executeCodecTest(context, argumentValueGetter.apply(context, argumentName), codec, JsonOps.INSTANCE)))
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addBlockPredicateProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
-    return argumentBuilder.then(argument("block_predicate", BlockPredicateArgument.blockPredicate(commandBuildContext))
-        .executes(context -> executeStringShow(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString))
-        .then(literal("string")
-            .executes(context -> executeStringShow(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString)))
-        .then(literal("nbt")
-            .executes(context -> executeCodecShow(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json")
-            .executes(context -> executeCodecShow(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, JsonOps.INSTANCE)))
-        .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getBlockPredicate(context, "block_predicate"), ExpressionConvertible::asString, s -> BlockPredicate.parse(new ParseContext<>(commandBuildContext, s, false, true)))))
-        .then(literal("nbt_test")
-            .executes(context -> executeCodecTest(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json_test")
-            .executes(context -> executeCodecTest(context, getBlockPredicate(context, "block_predicate"), BlockPredicate.CODEC, JsonOps.INSTANCE)))
-    );
-  }
-
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addEntityPredicateProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
-    return argumentBuilder.then(argument("entity_predicate", entityPredicate(commandBuildContext))
-        .executes(context -> executeStringShow(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString))
-        .then(literal("string")
-            .executes(context -> executeStringShow(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString)))
-        .then(literal("nbt")
-            .executes(context -> executeCodecShow(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json")
-            .executes(context -> executeCodecShow(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, JsonOps.INSTANCE)))
-        .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getEntityPredicate(context, "entity_predicate"), ExpressionConvertible::asString, s -> EntityPredicateArgument.entityPredicate(commandBuildContext).parse(new StringReader(s)))))
-        .then(literal("nbt_test")
-            .executes(context -> executeCodecTest(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json_test")
-            .executes(context -> executeCodecTest(context, getEntityPredicate(context, "entity_predicate"), EntityPredicate.CODEC, JsonOps.INSTANCE)))
-    );
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>, A extends ArgumentType<E>, E> T addValueProperties(T argumentBuilder, CommandBuildContext commandBuildContext, String argumentName, A argumentType, FailableFunction<ParseContext<?>, E, CommandSyntaxException> argumentParser, FailableBiFunction<CommandContext<CommandSourceStack>, String, E, CommandSyntaxException> argumentValueGetter, FailableFunction<E, String, CommandSyntaxException> toString, Codec<E> codec) {
+    return addValueProperties(argumentBuilder, commandBuildContext, argumentName, argumentType, (parseContext, commandContext) -> argumentParser.apply(parseContext), argumentValueGetter, toString, codec);
   }
 
   private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
@@ -171,15 +139,19 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
                 .executes(context -> executeConvertShow(context, BlockPredicate.CODEC)))
             .then(literal("entity_predicate")
                 .executes(context -> executeConvertShow(context, EntityPredicate.CODEC)))
+            .then(literal("item_function")
+                .executes(context -> executeConvertShow(context, ItemFunction.CODEC)))
+            .then(literal("item_predicate")
+                .executes(context -> executeConvertShow(context, ItemPredicate.CODEC)))
             .then(literal("nbt_function")
                 .executes(context -> executeConvertShow(context, NbtFunction.CODEC)))
             .then(literal("nbt_predicate")
                 .executes(context -> executeConvertShow(context, NbtPredicate.CODEC)))
-            .then(literal("pos_argument")
+            .then(literal("coordinates")
                 .executes(context -> executeConvertShow(context, EnhancedCoordinates.CODEC)))
             .then(literal("region")
                 .executes(context -> executeConvertShow(context, Region.CODEC)))
-            .then(literal("region_argument")
+            .then(literal("region_provider")
                 .executes(context -> executeConvertShow(context, RegionProvider.CODEC)))
         )
         .then(literal("nbt")
@@ -202,9 +174,8 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtPredicateProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addExtraNbtPredicateProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
     return argumentBuilder.then(argument("nbt_predicate", NbtPredicateArgument.element(commandBuildContext))
-        .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString))
         .then(literal("match")
             .then(argument("nbt_to_test", NbtTagArgument.nbtTag())
                 .executes(context -> {
@@ -214,24 +185,11 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
                   context.getSource().sendFeedback$ecBridge(() -> Component.literal(Boolean.toString(test)), false);
                   return BooleanUtils.toInteger(test);
                 })))
-        .then(literal("string")
-            .executes(context -> executeStringShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString)))
-        .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate::asString, s -> NbtPredicate.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false))))
-        .then(literal("nbt")
-            .executes(context -> executeCodecShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json")
-            .executes(context -> executeCodecShow(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, JsonOps.INSTANCE)))
-        .then(literal("nbt_test")
-            .executes(context -> executeCodecTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json_test")
-            .executes(context -> executeCodecTest(context, getNbtPredicate(context, "nbt_predicate"), NbtPredicate.CODEC, JsonOps.INSTANCE)))
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addNbtFunctionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addExtraNbtFunctionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
     return argumentBuilder.then(argument("nbt_function", NbtFunctionArgument.element(commandBuildContext))
-        .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString))
         .then(literal("apply")
             .executes(context -> {
               final NbtFunction nbtFunction = getNbtFunction(context, "nbt_function");
@@ -249,18 +207,6 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
                   source.sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(apply), false);
                   return 1;
                 })))
-        .then(literal("string")
-            .executes(context -> executeStringShow(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString)))
-        .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getNbtFunction(context, "nbt_function"), NbtFunction::asString, s -> NbtFunction.parse(new ParseContext<>(commandBuildContext, s, false, true), false, true))))
-        .then(literal("nbt")
-            .executes(context -> executeCodecShow(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json")
-            .executes(context -> executeCodecShow(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, JsonOps.INSTANCE)))
-        .then(literal("nbt_test")
-            .executes(context -> executeCodecTest(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json_test")
-            .executes(context -> executeCodecTest(context, getNbtFunction(context, "nbt_function"), NbtFunction.CODEC, JsonOps.INSTANCE)))
     );
   }
 
@@ -312,21 +258,8 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
     return argumentBuilder;
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addRegionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addExtraRegionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
     return argumentBuilder.then(argument("region", RegionArgument.region(commandBuildContext))
-        .executes(context -> executeStringShow(context, getRegion(context, "region"), Region::asString))
-        .then(literal("string")
-            .executes(context -> executeStringShow(context, getRegion(context, "region"), Region::asString)))
-        .then(literal("nbt")
-            .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json")
-            .executes(context -> executeCodecShow(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
-        .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getRegion(context, "region"), Region::asString, s -> RegionProvider.parse(new ParseContext<>(commandBuildContext, s, false, true)).toAbsoluteRegion(context.getSource()))))
-        .then(literal("nbt_test")
-            .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json_test")
-            .executes(context -> executeCodecTest(context, getRegion(context, "region"), Region.CODEC, JsonOps.INSTANCE)))
         .then(literal("illustrate")
             .executes(context -> {
               final Region region = getRegion(context, "region");
@@ -372,24 +305,6 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
     );
   }
 
-  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addCurveProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
-    return argumentBuilder.then(argument("curve", CurveArgument.curve(commandBuildContext))
-        .executes(context -> executeStringShow(context, getCurve(context, "curve"), Curve::asString))
-        .then(literal("string")
-            .executes(context -> executeStringShow(context, getCurve(context, "curve"), Curve::asString)))
-        .then(literal("nbt")
-            .executes(context -> executeCodecShow(context, getCurve(context, "curve"), Curve.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json")
-            .executes(context -> executeCodecShow(context, getCurve(context, "curve"), Curve.CODEC, JsonOps.INSTANCE)))
-        .then(literal("string_test")
-            .executes(context -> executeStringTest(context, getCurve(context, "curve"), Curve::asString, s -> CurveProvider.parse(new ParseContext<>(commandBuildContext, s, false, true)).toAbsoluteRegion(context.getSource()))))
-        .then(literal("nbt_test")
-            .executes(context -> executeCodecTest(context, getCurve(context, "curve"), Curve.CODEC, NbtOps.INSTANCE)))
-        .then(literal("json_test")
-            .executes(context -> executeCodecTest(context, getCurve(context, "curve"), Curve.CODEC, JsonOps.INSTANCE)))
-    );
-  }
-
   private static <A> int executeConvertShow(Tag nbtElement, Codec<A> codec, Consumer<A> resultConsumer, HolderLookup.Provider registryLookup) throws CommandSyntaxException {
     final DataResult<Pair<A, Tag>> decode = codec.decode(registryLookup.createSerializationContext(NbtOps.INSTANCE), nbtElement);
     final A result = decode.getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
@@ -418,23 +333,13 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
 
   private static <A, T> int executeCodecShow(CommandContext<CommandSourceStack> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
     ops = context.getSource().registryAccess().createSerializationContext(ops);
-    final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
-    if (code instanceof Tag nbt) {
-      context.getSource().sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(nbt), false);
-    } else {
-      context.getSource().sendFeedback$ecBridge(() -> Component.literal(code.toString()).withStyle(Styles.RESULT), false);
-    }
+    executeCodecShowInternal(context, fetchedArg, codec, ops);
     return 1;
   }
 
   private static <A, T> int executeCodecTest(CommandContext<CommandSourceStack> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
     ops = context.getSource().registryAccess().createSerializationContext(ops);
-    final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
-    if (code instanceof Tag nbt) {
-      context.getSource().sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(nbt), false);
-    } else {
-      context.getSource().sendFeedback$ecBridge(() -> Component.literal(code.toString()).withStyle(Styles.RESULT), false);
-    }
+    final T code = executeCodecShowInternal(context, fetchedArg, codec, ops);
     try {
       final A second = codec.decode(ops, code).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
       if (second instanceof Tag nbt) {
@@ -448,19 +353,94 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
     }
   }
 
+  private static <A, T> T executeCodecShowInternal(CommandContext<CommandSourceStack> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
+    final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
+    if (code instanceof Tag nbt) {
+      context.getSource().sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(nbt), false);
+    } else {
+      context.getSource().sendFeedback$ecBridge(() -> Component.literal(code.toString()).withStyle(Styles.RESULT), false);
+    }
+    return code;
+  }
+
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("testarg")
-        .then(addBlockFunctionProperties(literal("block_function"), commandBuildContext))
-        .then(addBlockPredicateProperties(literal("block_predicate"), commandBuildContext))
-        .then(addCurveProperties(literal("curve"), commandBuildContext))
-        .then(addEntityPredicateProperties(literal("entity_predicate"), commandBuildContext))
+        .then(addValueProperties(
+            literal("block_function"),
+            commandBuildContext,
+            "block_function",
+            BlockFunctionArgument.blockFunction(commandBuildContext),
+            BlockFunction::parse,
+            BlockFunctionArgument::getBlockFunction,
+            ExpressionConvertible::asString,
+            BlockFunction.CODEC))
+        .then(addValueProperties(
+            literal("block_predicate"),
+            commandBuildContext,
+            "block_predicate",
+            BlockPredicateArgument.blockPredicate(commandBuildContext),
+            BlockPredicate::parse,
+            BlockPredicateArgument::getBlockPredicate,
+            ExpressionConvertible::asString,
+            BlockPredicate.CODEC))
+        .then(addValueProperties(
+            literal("curve"),
+            commandBuildContext,
+            "curve",
+            CurveArgument.curve(commandBuildContext),
+            (parseContext, commandContext) -> CurveProvider.parse(parseContext).toAbsoluteRegion(commandContext.getSource()),
+            CurveArgument::getCurve,
+            ExpressionConvertible::asString,
+            Curve.CODEC))
+        .then(addValueProperties(
+            literal("entity_predicate"),
+            commandBuildContext,
+            "entity_predicate",
+            EntityPredicateArgument.entityPredicate(commandBuildContext),
+            parseContext -> EntityPredicate.parse(new EntitySelectorParser(parseContext.reader(), true)),
+            EntityPredicateArgument::getEntityPredicate,
+            ExpressionConvertible::asString,
+            EntityPredicate.CODEC))
+        .then(addValueProperties(
+            literal("item_predicate"),
+            commandBuildContext,
+            "item_predicate",
+            ItemPredicateArgument.itemPredicate(commandBuildContext),
+            parseContext -> ItemPredicateArgument.itemPredicate(commandBuildContext).parse(parseContext.reader()),
+            ItemPredicateArgument::getItemPredicate,
+            ExpressionConvertible::asString,
+            ItemPredicate.CODEC))
         .then(addNbtProperties(literal("nbt"), commandBuildContext))
         .then(addNbtCompoundProperties(literal("nbt_compound")))
-        .then(addNbtPredicateProperties(literal("nbt_predicate"), commandBuildContext))
-        .then(addNbtFunctionProperties(literal("nbt_function"), commandBuildContext))
+        .then(addValueProperties(
+            addExtraNbtPredicateProperties(literal("nbt_predicate"), commandBuildContext),
+            commandBuildContext,
+            "nbt_predicate",
+            NbtPredicateArgument.element(commandBuildContext),
+            parseContext -> NbtPredicate.parse(parseContext, false, false),
+            NbtPredicateArgument::getNbtPredicate,
+            NbtPredicate::asString,
+            NbtPredicate.CODEC))
+        .then(addValueProperties(
+            addExtraNbtFunctionProperties(literal("nbt_function"), commandBuildContext),
+            commandBuildContext,
+            "nbt_function",
+            NbtFunctionArgument.element(commandBuildContext),
+            parseContext -> NbtFunction.parse(parseContext, false, false),
+            NbtFunctionArgument::getNbtFunction,
+            NbtFunction::asString,
+            NbtFunction.CODEC))
         .then(addPosProperties(literal("pos")))
-        .then(addRegionProperties(literal("region"), commandBuildContext))
+        .then(addValueProperties(
+            addExtraRegionProperties(literal("region"), commandBuildContext),
+            commandBuildContext,
+            "region",
+            RegionArgument.region(commandBuildContext),
+            (parseContext, commandContext) -> RegionProvider.parse(parseContext).toAbsoluteRegion(commandContext.getSource()),
+            RegionArgument::getRegion,
+            Region::asString,
+            Region.CODEC))
     );
   }
 }

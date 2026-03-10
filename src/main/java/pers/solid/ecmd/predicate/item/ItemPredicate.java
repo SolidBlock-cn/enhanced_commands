@@ -1,20 +1,54 @@
 package pers.solid.ecmd.predicate.item;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.codec.CodecUtil;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public interface ItemPredicate extends ExpressionConvertible {
   MapCodec<ItemPredicate> MAP_CODEC = ItemPredicateType.REGISTRY.byNameCodec().dispatchMap(ItemPredicate::getType, ItemPredicateType::getCodec);
-  Codec<ItemPredicate> CODEC = MAP_CODEC.codec();
+  Codec<ItemPredicate> CODEC = CodecUtil.combined(CodecUtil.combinedIdAndTag(SimpleItemPredicate.STRING_BASED_CODEC, TagItemPredicate.STRING_BASED_CODEC), MAP_CODEC.codec(), predicate -> predicate instanceof TagItemPredicate simpleTag && simpleTag.items().unwrapKey().isPresent() ? Either.right(simpleTag) : predicate instanceof SimpleItemPredicate simpleItem ? Either.left(simpleItem) : null, either -> either.map(Function.identity(), Function.identity()));
+
   ResourceKey<Registry<ItemPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("item_predicate"));
 
-  boolean test(ItemPredicate itemPredicate, ExecutionContext executionContext);
+  static Predicate<ItemStack> vanillaWrapper(Predicate<ItemStack> vanilla, ItemPredicate modded) {
+    return new VanillaWrapper(modded, vanilla);
+  }
+
+  static ItemPredicate convertOrUnknown(Predicate<ItemStack> forward) {
+    if (forward instanceof VanillaWrapper itemPredicateEntry) {
+      return itemPredicateEntry.modded;
+    } else {
+      return new UnknownItemPredicate(forward);
+    }
+  }
+
+  boolean test(ItemStack stack, ExecutionContext executionContext);
 
   @NotNull ItemPredicateType<?> getType();
+
+  class VanillaWrapper implements Predicate<ItemStack> {
+    private final ItemPredicate modded;
+    private final Predicate<ItemStack> vanilla;
+
+    public VanillaWrapper(ItemPredicate modded, Predicate<ItemStack> vanilla) {
+      this.modded = modded;
+      this.vanilla = vanilla;
+    }
+
+    @Override
+    public boolean test(ItemStack itemStack) {
+      return vanilla.test(itemStack);
+    }
+  }
 }

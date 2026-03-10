@@ -5,16 +5,14 @@ import com.google.common.collect.Iterables;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -42,6 +40,7 @@ import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockInput} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
@@ -49,8 +48,11 @@ import java.util.List;
 public interface BlockFunction extends ExpressionConvertible {
   ResourceKey<Registry<BlockFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_function"));
   MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.byNameCodec().dispatchMap(BlockFunction::getType, BlockFunctionType::getCodec);
-  Codec<BlockFunction> CODEC = CodecUtil.combined(BuiltInRegistries.BLOCK.byNameCodec().xmap(block -> new SimpleBlockFunction(block, ImmutableList.of()), SimpleBlockFunction::block), MAP_CODEC.codec(), blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? s : null);
-  Codec<Holder<BlockFunction>> ENTRY_CODEC = RegistryFileCodec.create(REGISTRY_KEY, CODEC);
+  Codec<BlockFunction> CODEC = CodecUtil.combined(
+      CodecUtil.combinedIdAndTag(SimpleBlockFunction.STRING_BASED_CODEC, TagBlockFunction.STRING_BASED_CODEC),
+      MAP_CODEC.codec(),
+      blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? Either.left(s) : blockFunction instanceof TagBlockFunction t && t.properties().isEmpty() ? Either.right(t) : null,
+      either -> either.map(Function.identity(), Function.identity()));
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_function.cannot_parse"));
   Component OVERLAY_TOOLTIP = Component.translatable("enhanced_commands.block_function.overlay.symbol_tooltip");
