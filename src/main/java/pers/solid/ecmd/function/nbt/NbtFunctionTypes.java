@@ -6,7 +6,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.nbt.PosNbtFunction;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 
 import java.util.Map;
 
@@ -41,7 +41,7 @@ public final class NbtFunctionTypes {
   }
 
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends NbtFunction>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends NbtFunction>>> map) {
     map.put("concat", ConcatNbtFunction.Parser::new);
     map.put("from", GetDataNbtFunction.Parser::new);
     map.put("pos", PosNbtFunction.Parser::new);

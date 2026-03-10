@@ -15,7 +15,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.math.WeightedList;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -72,7 +72,7 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
   }
 
 
-  public static class Parser implements FunctionLikeParser<BlockFunction>, NamedParamListParser {
+  public static class Parser implements FunctionContentParser<BlockFunction>, NamedParamListParser {
     private WeightedList<BlockFunction> weightedList;
     private OptionalLong seed = OptionalLong.empty();
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");

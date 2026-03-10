@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.Vec3iProvider;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -55,7 +55,7 @@ public record RelBlockPredicate(@NotNull Vec3iProvider relPos, @NotNull BlockPre
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<RelBlockPredicate> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<RelBlockPredicate> {
     private Vec3iProvider relPos;
     private BlockPredicate blockPredicate;
 

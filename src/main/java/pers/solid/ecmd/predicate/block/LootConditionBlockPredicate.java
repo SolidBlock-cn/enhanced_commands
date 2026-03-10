@@ -19,7 +19,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
@@ -61,7 +61,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<LootConditionBlockPredicate> {
+  public static class Parser implements FunctionContentParser.SequentialParams<LootConditionBlockPredicate> {
     protected ResourceLocation id;
     protected LootItemCondition anonymous;
     protected int cursorBeforeId, cursorAfterId;

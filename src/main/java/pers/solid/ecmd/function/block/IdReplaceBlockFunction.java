@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -78,7 +78,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<IdReplaceBlockFunction> {
+  public static class Parser implements FunctionContentParser.SequentialParams<IdReplaceBlockFunction> {
     private Pattern pattern;
     private String replacement;
 

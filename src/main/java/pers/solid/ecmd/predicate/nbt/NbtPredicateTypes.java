@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 
 import java.util.Map;
 
@@ -35,7 +35,7 @@ public class NbtPredicateTypes {
   }
 
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends NbtPredicate>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends NbtPredicate>>> map) {
 
   }
 

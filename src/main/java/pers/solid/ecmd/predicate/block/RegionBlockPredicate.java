@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionProvider;
@@ -51,7 +51,7 @@ public record RegionBlockPredicate(RegionProvider<?> region) implements BlockPre
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<RegionBlockPredicate> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<RegionBlockPredicate> {
     private RegionProvider<?> regionProvider;
 
     @Override

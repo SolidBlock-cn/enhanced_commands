@@ -7,7 +7,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.function.block.WeightedListParser;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -64,7 +64,7 @@ public interface Checkerboard<T> {
     return sb;
   }
 
-  abstract class CheckerboardParser<T> implements FunctionLikeParser<T>, NamedParamListParser {
+  abstract class CheckerboardParser<T> implements FunctionContentParser<T>, NamedParamListParser {
     protected final Set<String> SUPPORTED_PARAMS = Set.of("scale", "floor", "offset");
     public final WeightedListParser<T> weightedListParser = WeightedListParser.of(this::parseElement);
     protected Vec3 scale = null;
@@ -76,11 +76,6 @@ public interface Checkerboard<T> {
     @Override
     public @Unmodifiable Collection<String> supportedParams() {
       return SUPPORTED_PARAMS;
-    }
-
-    @Override
-    public void setCursorBeforeFunctionName(int cursorBeforeFunctionName) {
-      this.cursorBeforeFunctionName = cursorBeforeFunctionName;
     }
 
     @Override
@@ -105,7 +100,7 @@ public interface Checkerboard<T> {
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       parseEntryList(parseContext);
-      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
+      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(")").suggest(";").buildFuture());
       // 等待关键字的部分
 
       // 解析坐标轴尺寸的部分

@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.accessor.SingleItemRecipeAccessor;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.StateUtil;
 
@@ -82,7 +82,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<StonecutBlockFunction> {
+  public static class Parser implements FunctionContentParser.SequentialParams<StonecutBlockFunction> {
     private BlockFunction blockFunction = null;
 
     @Override

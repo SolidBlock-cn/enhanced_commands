@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.EnumOrRandom;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 public record RotateBlockFunction(@NotNull EnumOrRandom<Rotation> rotation) implements BlockFunction {
@@ -41,7 +41,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<Rotation> rotation) impl
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<RotateBlockFunction> {
+  public static class Parser implements FunctionContentParser.SequentialParams<RotateBlockFunction> {
     private EnumOrRandom<Rotation> rotation;
 
     @Override

@@ -18,7 +18,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.util.StateUtil;
@@ -121,7 +121,7 @@ public final class RandomBlockFunction implements BlockFunction {
     }
   }
 
-  public static class RandFuncParser implements FunctionLikeParser.NamedParams<RandomBlockFunction> {
+  public static class RandFuncParser implements FunctionContentParser.NamedParams<RandomBlockFunction> {
     protected OptionalLong seed = OptionalLong.empty();
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 

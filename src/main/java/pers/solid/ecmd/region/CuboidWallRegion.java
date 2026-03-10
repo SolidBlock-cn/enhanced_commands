@@ -13,7 +13,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
@@ -124,7 +124,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<CuboidWallRegionProvider> parser() {
+    public FunctionContentParser.SequentialParams<CuboidWallRegionProvider> parser() {
       return new Parser();
     }
 

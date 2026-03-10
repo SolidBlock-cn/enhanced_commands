@@ -20,7 +20,7 @@ import org.joml.Vector3d;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.argument.Vec3dProvider;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.GeoUtil;
@@ -196,7 +196,7 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
    * <p>
    * 其中：{@code <range>} 的默认值为 {@code 0turn..1turn}，{@code <pivot>} 的默认值为 {@code 0 1 0}。
    */
-  protected static class Parser implements FunctionLikeParser.MixedParams<CurveProvider<CircleCurve>> {
+  protected static class Parser implements FunctionContentParser.MixedParams<CurveProvider<CircleCurve>> {
     private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "center", "pivot", "range");
     private @Nullable Double radius;
     private @Nullable EnhancedCoordinates center;

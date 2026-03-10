@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 
@@ -64,7 +64,7 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<PostProcessBlockFunction> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<PostProcessBlockFunction> {
     private final Set<@NotNull Direction> directions = new TreeSet<>();
 
     @Override

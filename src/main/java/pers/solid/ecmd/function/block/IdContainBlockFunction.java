@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -104,7 +104,7 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   }
 
-  public static class Parser implements FunctionLikeParser.MixedParams<IdContainBlockFunction> {
+  public static class Parser implements FunctionContentParser.MixedParams<IdContainBlockFunction> {
     private static final Set<String> SUPPORTED_PARAM_NAMES = ImmutableSet.of("seed");
     private Pattern pattern;
     private OptionalLong seed = OptionalLong.empty();

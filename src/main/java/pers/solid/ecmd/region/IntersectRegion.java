@@ -11,7 +11,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.ArrayList;
@@ -107,7 +107,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<IntersectRegionProvider> parser() {
+    public FunctionContentParser.SequentialParams<IntersectRegionProvider> parser() {
       return new Parser();
     }
 
@@ -122,7 +122,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<IntersectRegionProvider> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<IntersectRegionProvider> {
     private final List<RegionProvider<?>> regions = new ArrayList<>();
 
     @Override

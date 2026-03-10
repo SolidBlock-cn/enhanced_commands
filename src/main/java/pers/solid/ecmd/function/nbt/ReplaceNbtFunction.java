@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.predicate.nbt.NbtPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -44,7 +44,7 @@ public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFu
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<ReplaceNbtFunction> {
+  public static class Parser implements FunctionContentParser.SequentialParams<ReplaceNbtFunction> {
     private NbtPredicate nbtPredicate;
     private NbtFunction nbtFunction;
 

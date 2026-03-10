@@ -5,7 +5,7 @@ import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.Parser;
 
 import java.util.Map;
@@ -62,7 +62,7 @@ public final class BlockFunctionTypes {
     registerFunctionNames(BlockFunctionParsing.FUNCTION_NAMES);
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionLikeParser<? extends BlockFunction>>> map) {
+  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends BlockFunction>>> map) {
     map.put("pick", PickBlockFunction.Parser::new);
     map.put("dry", DryBlockFunction.Parser::new);
     map.put("overlay", OverlayBlockFunction.Parser::new);

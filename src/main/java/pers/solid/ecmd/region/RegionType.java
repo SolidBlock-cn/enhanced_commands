@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 
 public interface RegionType<R extends Region> {
   ResourceKey<Registry<RegionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_type"));
@@ -30,7 +30,7 @@ public interface RegionType<R extends Region> {
   /**
    * 在解析完函数名称并确定为此函数之后，解析相应的函数名称后的内容。如果返回 null，则跳过此解析。注意：只有当函数名称匹配时，此方法才会被调用。
    */
-  default FunctionLikeParser<? extends RegionProvider<? extends R>> parser() {
+  default FunctionContentParser<? extends RegionProvider<? extends R>> parser() {
     return null;
   }
 

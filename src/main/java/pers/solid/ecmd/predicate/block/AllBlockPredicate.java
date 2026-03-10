@@ -8,7 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -62,7 +62,7 @@ public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
     }
   }
 
-  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionLikeParser.SequentialParams<AllBlockPredicate> {
+  public record Parser(List<BlockPredicate> blockPredicates) implements FunctionContentParser.SequentialParams<AllBlockPredicate> {
     public Parser() {
       this(new ArrayList<>());
     }

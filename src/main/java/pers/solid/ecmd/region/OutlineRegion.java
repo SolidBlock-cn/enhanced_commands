@@ -10,7 +10,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.enums.OutlineType;
 
@@ -113,7 +113,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public FunctionLikeParser.SequentialParams<? extends OutlineRegionProvider> parser() {
+    public FunctionContentParser.SequentialParams<? extends OutlineRegionProvider> parser() {
       return new Parser();
     }
 
@@ -128,7 +128,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.SequentialParams<OutlineRegionProvider> {
+  public static final class Parser implements FunctionContentParser.SequentialParams<OutlineRegionProvider> {
     private OutlineType outlineType = OutlineType.OUTLINE;
     private RegionProvider<?> regionProvider;
 

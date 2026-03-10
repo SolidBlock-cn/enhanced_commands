@@ -9,7 +9,7 @@ import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
@@ -120,7 +120,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
     }
   }
 
-  public static class Parser implements FunctionLikeParser.MixedParams<RegexReplaceNbtFunction> {
+  public static class Parser implements FunctionContentParser.MixedParams<RegexReplaceNbtFunction> {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
     private Pattern regex;
     private String replacement;

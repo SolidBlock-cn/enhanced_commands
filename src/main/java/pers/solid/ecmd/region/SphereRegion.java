@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.StringUtil;
@@ -115,7 +115,7 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
     }
   }
 
-  public static final class Parser implements FunctionLikeParser.MixedParams<SphereRegionProvider> {
+  public static final class Parser implements FunctionContentParser.MixedParams<SphereRegionProvider> {
     private @Nullable EnhancedCoordinates centerPos = null;
     private @Nullable Double radius = null;
 

@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -84,7 +84,7 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
     }
   }
 
-  public static class Parser implements FunctionLikeParser.MixedParams<StringReplaceNbtFunction> {
+  public static class Parser implements FunctionContentParser.MixedParams<StringReplaceNbtFunction> {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
     private String target, replacement;
     private Boolean recursive, lenient;

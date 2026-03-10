@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.MirrorProvider;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 public record MirrorBlockFunction(@NotNull MirrorProvider mirror) implements BlockFunction {
@@ -41,7 +41,7 @@ public record MirrorBlockFunction(@NotNull MirrorProvider mirror) implements Blo
     }
   }
 
-  public static class Parser implements FunctionLikeParser.SequentialParams<MirrorBlockFunction> {
+  public static class Parser implements FunctionContentParser.SequentialParams<MirrorBlockFunction> {
     private MirrorProvider mirror;
 
     @Override

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.function.block.WeightedListParser;
-import pers.solid.ecmd.parse.FunctionLikeParser;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -105,7 +105,7 @@ public interface Noise {
     return sample(seed, weightedList, pos.x, pos.y, pos.z);
   }
 
-  abstract class Parser<T> implements FunctionLikeParser<T>, NamedParamListParser {
+  abstract class Parser<T> implements FunctionContentParser<T>, NamedParamListParser {
     protected OptionalLong seed = OptionalLong.empty();
     protected Integer firstOctave;
     protected DoubleList amplitudes;
@@ -125,7 +125,7 @@ public interface Noise {
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       weightedList = WeightedListParser.of((parseContext1) -> parseElement(parseContext)).parse(parseContext);
       final StringReader reader = parseContext.reader();
-      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(rightParString()).suggest(";").buildFuture());
+      parseContext.addSuggestion((commandContext, suggestionsBuilder) -> suggestionsBuilder.suggest(")").suggest(";").buildFuture());
 
       reader.skipWhitespace();
       if (reader.canRead() && reader.peek() == ';') {
