@@ -63,7 +63,7 @@ public enum OutlineCommand implements CommandRegistrationCallbackBridge {
 
   public static int executeFromKeywordArgs(CommandContext<CommandSourceStack> context, OutlineType outlineType, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final @Nullable BlockFunction inner = keywordArgs.getArg("inner");
-    final RegionProvider<?> region = RegionArgument.getRegionArgument(context, "region");
+    final RegionProvider<?> region = RegionArgument.getRegionProvider(context, "region");
     final RegionProvider<?> outlineRegion = new OutlineRegionProvider(outlineType, region);
     final BlockFunction blockFunction = BlockFunctionArgument.getBlockFunction(context, "block");
     if (inner == null) {

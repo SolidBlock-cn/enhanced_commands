@@ -5,13 +5,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
-import pers.solid.ecmd.util.ExecutionContext;
 
-public enum ConstantItemPredicate implements ItemPredicate {
+public enum ConstantItemPredicate implements ItemPredicateEntry {
   ALWAYS_TRUE(true),
   ALWAYS_FALSE(false);
   private final boolean value;
@@ -36,7 +36,7 @@ public enum ConstantItemPredicate implements ItemPredicate {
   }
 
   @Override
-  public boolean test(ItemPredicate itemPredicate, ExecutionContext executionContext) {
+  public boolean test(ItemStack stack) {
     return value;
   }
 

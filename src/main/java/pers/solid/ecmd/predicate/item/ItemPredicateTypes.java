@@ -7,7 +7,17 @@ import pers.solid.ecmd.api.RegistryBridge;
 public final class ItemPredicateTypes {
   private static final RegistryBridge<ItemPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, ItemPredicateType.REGISTRY);
 
+  public static final AllItemPredicate.Type ALL_TYPE = register("all", AllItemPredicate.Type.ALL_TYPE);
+  public static final AnyItemPredicate.Type ANY_TYPE = register("any", AnyItemPredicate.Type.ANY_TYPE);
+  public static final ComponentPresenceItemPredicate.Type COMPONENT_PRESENCE = register("component_presence", ComponentPresenceItemPredicate.Type.COMPONENT_PRESENCE_TYPE);
+  public static final ComponentValueCheckItemPredicate.Type COMPONENT_VALUE_CHECK = register("component_value_check", ComponentValueCheckItemPredicate.Type.COMPONENT_VALUE_CHECK_TYPE);
   public static final ConstantItemPredicate.Type CONSTANT = register("constant", ConstantItemPredicate.Type.CONSTANT_TYPE);
+  public static final CountItemPredicate.Type COUNT = register("count", CountItemPredicate.Type.COUNT_TYPE);
+  public static final NegatingItemPredicate.Type NEGATING = register("negating", NegatingItemPredicate.Type.NEGATING_TYPE);
+  public static final SimpleItemPredicate.Type SIMPLE = register("simple", SimpleItemPredicate.Type.SIMPLE_TYPE);
+  public static final SimpleCombinationItemPredicate.Type SIMPLE_COMBINATION = register("simmple_combination", SimpleCombinationItemPredicate.Type.SIMPLE_COMBINATION_TYPE);
+  public static final TagItemPredicate.Type SIMPLE_TAG = register("simple_tag", TagItemPredicate.Type.SIMPLE_TAG_TYPE);
+  public static final UnknownItemPredicate.Type UNKNOWN = register("unknown", UnknownItemPredicate.Type.UNKNOWN_TYPE);
 
   private ItemPredicateTypes() {
   }

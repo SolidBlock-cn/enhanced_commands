@@ -1,15 +1,14 @@
 package pers.solid.ecmd.predicate.block;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -31,10 +30,15 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 public interface BlockPredicate extends ExpressionConvertible {
   MapCodec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.byNameCodec().dispatchMap(BlockPredicate::getType, BlockPredicateType::getCodec);
-  Codec<BlockPredicate> CODEC = CodecUtil.combined(BuiltInRegistries.BLOCK.byNameCodec().xmap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), SimpleBlockPredicate::block), MAP_CODEC.codec(), blockPredicate -> blockPredicate instanceof SimpleBlockPredicate s && s.properties().isEmpty() ? s : null);
+  Codec<BlockPredicate> CODEC = CodecUtil.combined(
+      CodecUtil.combinedIdAndTag(SimpleBlockPredicate.STRING_BASED_CODEC, TagBlockPredicate.STRING_BASED_CODEC),
+      MAP_CODEC.codec(),
+      blockPredicate -> blockPredicate instanceof SimpleBlockPredicate s && s.properties().isEmpty() ? Either.left(s) : blockPredicate instanceof TagBlockPredicate t && t.properties().isEmpty() ? Either.right(t) : null,
+      either -> either.map(Function.identity(), Function.identity()));
   ResourceKey<Registry<BlockPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_predicate"));
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));

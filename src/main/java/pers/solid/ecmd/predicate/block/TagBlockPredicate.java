@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
  * @see BlockStateParser#readTag()
  */
 public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
+  public static final Codec<TagBlockPredicate> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.BLOCK).flatComapMap(TagBlockPredicate::new, tagBlockPredicate -> tagBlockPredicate.properties.isEmpty() ? DataResult.success(tagBlockPredicate.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
+
   public static final MapCodec<TagBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockPredicate::new, TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(TagBlockPredicate::tag), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
 
   public TagBlockPredicate(@NotNull TagKey<Block> tag) {

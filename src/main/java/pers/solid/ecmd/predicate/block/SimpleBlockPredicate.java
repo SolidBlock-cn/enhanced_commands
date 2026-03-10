@@ -2,6 +2,8 @@ package pers.solid.ecmd.predicate.block;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
@@ -25,6 +27,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record SimpleBlockPredicate(@NotNull Block block, @NotNull List<PropertyPredicate<?>> properties) implements BlockPredicate {
+  public static final Codec<SimpleBlockPredicate> STRING_BASED_CODEC = BuiltInRegistries.BLOCK.byNameCodec().flatComapMap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), simpleBlockPredicate -> simpleBlockPredicate.properties.isEmpty() ? DataResult.success(simpleBlockPredicate.block) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
+
   public static final MapCodec<SimpleBlockPredicate> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
 
   public SimpleBlockPredicate(@NotNull Block block) {

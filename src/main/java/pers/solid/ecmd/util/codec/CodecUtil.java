@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import net.minecraft.Util;
@@ -173,12 +174,12 @@ public final class CodecUtil {
    * <p>反序列化过程中，当读取到字符串值时，按照 {@code stringBased} 读取，如果读取出错，则正常抛出错误。其他情况下按照 {@code mapBased} 读取。
    * <p>序列化时，根据 {@code function} 进行转化，如果能转化（即结果不为 {@code null}），则按 {@code stringBased} 进行序列化，否则按照 {@code mapBased} 进行序列化。
    */
-  public static <A, B extends A> Codec<A> combined(Codec<@NotNull B> stringBased, Codec<@NotNull A> mapBased, Function<A, @Nullable B> function) {
+  public static <A, B> Codec<A> combined(Codec<@NotNull B> stringBased, Codec<@NotNull A> mapBased, Function<A, @Nullable B> function, Function<@NotNull B, A> functionToStringBased) {
     return new Codec<>() {
       @Override
       public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> ops, T input) {
         final DataResult<String> stringResult = ops.getStringValue(input);
-        return stringResult.result().map(s -> stringBased.decode(ops, input).<Pair<A, T>>map(pair -> pair.mapFirst(Function.identity()))).orElseGet(() -> mapBased.decode(ops, input));
+        return stringResult.result().map(s -> stringBased.decode(ops, input).map(pair -> pair.mapFirst(functionToStringBased))).orElseGet(() -> mapBased.decode(ops, input));
       }
 
       @Override
@@ -194,6 +195,33 @@ public final class CodecUtil {
       @Override
       public String toString() {
         return "combined(" + stringBased.toString() + ", " + mapBased.toString() + ")";
+      }
+    };
+  }
+
+  public static <A, B extends A> Codec<A> combined(Codec<@NotNull B> stringBased, Codec<@NotNull A> mapBased, Function<A, @Nullable B> function) {
+    return combined(stringBased, mapBased, function, b -> b);
+  }
+
+  /**
+   * 用于解析同时支持 ID 和标签的字符串。当读取到不以井号开头的字符串时，使用 {@code unprefixed} codec，当读取到以井号开头的字符串时，使用 {@code prefixed} codec，如果非字符串则错误。
+   *
+   * @param unprefixed   对不以井号开头的字符串使用的 codec。
+   * @param hashPrefixed 对以井号开头的字符串使用的 codec。
+   * @param <A>          不以井号开头的字符串表示的对象类型，例如 Item。
+   * @param <B>          以井号开头的字符串表示的对象类型，例如 TagKey<Item>。
+   */
+  public static <A, B> Codec<Either<A, B>> combinedIdAndTag(Codec<A> unprefixed, Codec<B> hashPrefixed) {
+    return new Codec<>() {
+      @Override
+      public <T> DataResult<Pair<Either<A, B>, T>> decode(DynamicOps<T> dynamicOps, T t) {
+        final DataResult<String> stringValue = dynamicOps.getStringValue(t);
+        return stringValue.flatMap(s -> s.startsWith("#") ? hashPrefixed.decode(dynamicOps, t).map(pair -> pair.mapFirst(Either::right)) : unprefixed.decode(dynamicOps, t).map(pair -> pair.mapFirst(Either::left)));
+      }
+
+      @Override
+      public <T> DataResult<T> encode(Either<A, B> either, DynamicOps<T> dynamicOps, T t) {
+        return either.map(a -> unprefixed.encode(a, dynamicOps, t), b -> hashPrefixed.encode(b, dynamicOps, t));
       }
     };
   }
