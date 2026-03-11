@@ -37,6 +37,8 @@
     "general.GameTypeMixin",
     "general.GenerationChunkHolderMixin",
     "general.IdentifierMixin",
+    "general.ItemParserMixin",
+    "general.ItemParserMixin$StateMixin",
     "general.ItemPredicateArgumentMixin",
     "general.ItemPredicateArgumentMixin$ComponentWrapperMixin",
     "general.ItemPredicateArgumentMixin$ContextMixin",

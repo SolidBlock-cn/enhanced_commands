@@ -15,6 +15,10 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * @see pers.solid.ecmd.argument.ItemPredicateArgument
+ * @see net.minecraft.commands.arguments.item.ItemPredicateArgument
+ */
 public interface ItemPredicate extends ExpressionConvertible {
   MapCodec<ItemPredicate> MAP_CODEC = ItemPredicateType.REGISTRY.byNameCodec().dispatchMap(ItemPredicate::getType, ItemPredicateType::getCodec);
   Codec<ItemPredicate> CODEC = CodecUtil.combined(CodecUtil.combinedIdAndTag(SimpleItemPredicate.STRING_BASED_CODEC, TagItemPredicate.STRING_BASED_CODEC), MAP_CODEC.codec(), predicate -> predicate instanceof TagItemPredicate simpleTag && simpleTag.items().unwrapKey().isPresent() ? Either.right(simpleTag) : predicate instanceof SimpleItemPredicate simpleItem ? Either.left(simpleItem) : null, either -> either.map(Function.identity(), Function.identity()));
