@@ -29,6 +29,7 @@ import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
@@ -45,6 +46,8 @@ import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -182,5 +185,26 @@ public final class MixinShared {
     } else {
       return EnhancedCommandSyntaxException.withCursorEnd(EnhancedEntryPredicate.NOT_FOUND_EXCEPTION.createWithContext(stringReader, identifier, registryRef.location()), cursorAfterId);
     }
+  }
+
+  /**
+   * 在输入了不含冒号的 id 时，除了建议可能以此为开头的 id 之外，还会建议原版命名空间中的 id，此情况下可以省略命名空间。例如，输入了 {@code dir} 时，建议 {@code dirt} 而非 {@code minecraft:dirt}。
+   */
+  @Unique
+  public static <T> Consumer<T> getModifiedConsumer(Function<T, ResourceLocation> identifierFunction, Consumer<T> action, String remaining, BiConsumer<ResourceLocation, T> modifiedSuggestion) {
+    if (GeneralParsingConfig.current.suggestionEmitDefaultNamespace) {
+      if (remaining.indexOf(':') == -1) {
+        return t -> {
+          final ResourceLocation identifier = identifierFunction.apply(t);
+          if (identifier.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE) && (remaining.isEmpty() || !SharedSuggestionProvider.matchesSubStr(remaining, ResourceLocation.DEFAULT_NAMESPACE))) {
+            modifiedSuggestion.accept(identifier, t);
+          } else {
+            action.accept(t);
+          }
+        };
+      }
+    }
+
+    return action;
   }
 }
