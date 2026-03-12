@@ -47,7 +47,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import pers.solid.ecmd.config.EntitySelectorConfig;
+import pers.solid.ecmd.config.EntitySelectorParsingConfig;
 import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -72,7 +72,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @ModifyExpressionValue(method = "get", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
   private static @Nullable Object acceptOptionNameAlias(@Nullable Object originalValue, @Local(argsOnly = true) String option) {
-    if (EntitySelectorConfig.current.acceptOptionNameAlias && originalValue == null && EntitySelectorOptionsExtension.OPTION_NAME_ALIASES.containsKey(option)) {
+    if (EntitySelectorParsingConfig.current.acceptOptionNameAlias && originalValue == null && EntitySelectorOptionsExtension.OPTION_NAME_ALIASES.containsKey(option)) {
       return OPTIONS.get(EntitySelectorOptionsExtension.OPTION_NAME_ALIASES.get(option));
     } else {
       return originalValue;
@@ -86,7 +86,7 @@ public abstract class EntitySelectorOptionsMixin {
   @SuppressWarnings({"rawtypes", "unchecked"})
   @ModifyExpressionValue(method = "suggestNames", at = @At(value = "INVOKE", target = "Ljava/util/Set;iterator()Ljava/util/Iterator;"))
   private static Iterator suggestOptionAliases(Iterator original) {
-    if (EntitySelectorConfig.current.acceptOptionNameAlias && !EntitySelectorOptionsExtension.OPTION_NAME_ALIASES.isEmpty()) {
+    if (EntitySelectorParsingConfig.current.acceptOptionNameAlias && !EntitySelectorOptionsExtension.OPTION_NAME_ALIASES.isEmpty()) {
       final Iterator<Map.Entry<String, Object>> iterator = Maps.transformEntries(EntitySelectorOptionsExtension.OPTION_NAME_ALIASES, (key, value) -> OPTIONS.get(value)).entrySet().iterator();
       return Iterators.concat(original, iterator);
     } else {
@@ -117,9 +117,9 @@ public abstract class EntitySelectorOptionsMixin {
    */
   @Inject(method = "get", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC))
   private static void throwBetterInapplicableException(EntitySelectorParser reader, String option, int restoreCursor, CallbackInfoReturnable<EntitySelectorOptions.Modifier> cir) throws CommandSyntaxException {
-    if (!EntitySelectorConfig.current.detailedInapplicableEntitySelectorOption) return;
+    if (!EntitySelectorParsingConfig.current.detailedInapplicableEntitySelectorOption) return;
     var f = EntitySelectorOptionsExtension.INAPPLICABLE_REASONS.get(option);
-    if (f == null && EntitySelectorConfig.current.acceptOptionNameAlias && EntitySelectorOptionsExtension.OPTION_NAME_ALIASES.containsKey(option)) {
+    if (f == null && EntitySelectorParsingConfig.current.acceptOptionNameAlias && EntitySelectorOptionsExtension.OPTION_NAME_ALIASES.containsKey(option)) {
       final String forwardName = EntitySelectorOptionsExtension.OPTION_NAME_ALIASES.get(option);
       f = EntitySelectorOptionsExtension.INAPPLICABLE_REASONS.get(forwardName);
       option = forwardName;
@@ -144,7 +144,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @Inject(method = "method_9982", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;", remap = false))
   private static void tweakExcludingNameException(EntitySelectorParser reader, CallbackInfo ci) throws CommandSyntaxException {
-    if (!EntitySelectorConfig.current.detailedInapplicableEntitySelectorOption) return;
+    if (!EntitySelectorParsingConfig.current.detailedInapplicableEntitySelectorOption) return;
     final StringReader stringReader = reader.getReader();
     stringReader.setCursor(reader.extension$ec().cursorBeforeOptionName);
     throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "propertyName"), reader.extension$ec().cursorAfterOptionName);
@@ -180,7 +180,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @Inject(method = "method_9980", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;fromReader(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;"))
   private static void acceptNegativeLevel(EntitySelectorParser reader, CallbackInfo ci, @Share("inverted") LocalBooleanRef ref) throws CommandSyntaxException {
-    final boolean inverted = EntitySelectorConfig.current.allowLevelInversion && reader.shouldInvertValue();
+    final boolean inverted = EntitySelectorParsingConfig.current.allowLevelInversion && reader.shouldInvertValue();
     ref.set(inverted);
     final EntitySelectorReaderExtras extras = reader.extension$ec();
     final StringReader stringReader = reader.getReader();
@@ -220,7 +220,7 @@ public abstract class EntitySelectorOptionsMixin {
    */
   @Inject(method = "method_9969", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;setCursor(I)V", remap = false))
   private static void acceptsImplicitNegativeLimit(EntitySelectorParser reader, CallbackInfo ci, @Local(ordinal = 0) int cursor, @Local(ordinal = 1) LocalIntRef readInt) throws CommandSyntaxException {
-    if (!EntitySelectorConfig.current.allowNegativeDistanceForNearest) {
+    if (!EntitySelectorParsingConfig.current.allowNegativeDistanceForNearest) {
       return;
     }
     final EntitySelectorReaderExtras extras = reader.extension$ec();
@@ -269,7 +269,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @Inject(method = "method_9948", at = @At(value = "FIELD", target = "Lnet/minecraft/commands/arguments/selector/options/EntitySelectorOptions;ERROR_INAPPLICABLE_OPTION:Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;", opcode = Opcodes.GETSTATIC))
   private static void tweakInapplicableGameModeException(EntitySelectorParser reader, CallbackInfo ci) throws CommandSyntaxException {
-    if (!EntitySelectorConfig.current.detailedInapplicableEntitySelectorOption) return;
+    if (!EntitySelectorParsingConfig.current.detailedInapplicableEntitySelectorOption) return;
     final StringReader stringReader = reader.getReader();
     stringReader.setCursor(reader.extension$ec().cursorBeforeOptionName);
     throw EnhancedCommandSyntaxException.withCursorEnd(EntitySelectorOptionsExtension.MIXED_OPTION_INVERSION.createWithContext(stringReader, "gamemode"), reader.extension$ec().cursorAfterOptionName);
@@ -283,7 +283,7 @@ public abstract class EntitySelectorOptionsMixin {
   @WrapWithCondition(method = "method_9948", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"))
   private static boolean readMultipleGameModes(EntitySelectorParser reader, Predicate<Entity> predicate, @Local boolean inverted, @Local @NotNull GameType gameMode) throws CommandSyntaxException {
     // 尝试读取更多的游戏模式，即允许多个值。
-    if (!EntitySelectorConfig.current.allowMultipleGameModes) {
+    if (!EntitySelectorParsingConfig.current.allowMultipleGameModes) {
       return true;
     }
     return EntitySelectorOptionsExtension.mixinReadMultipleGameModes(reader, inverted, gameMode);
@@ -312,7 +312,7 @@ public abstract class EntitySelectorOptionsMixin {
    */
   @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/tags/TagKey;create(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/tags/TagKey;", shift = At.Shift.AFTER))
   private static void avoidClearTagSuggestions(EntitySelectorParser reader, CallbackInfo ci, @Local int cursorBeforeType) throws CommandSyntaxException {
-    if (!EntitySelectorConfig.current.fixEntityTypeTagSuggestions) {
+    if (!EntitySelectorParsingConfig.current.fixEntityTypeTagSuggestions) {
       return;
     }
     final CommandContext<?> context = reader.extension$ec().context;
@@ -331,7 +331,7 @@ public abstract class EntitySelectorOptionsMixin {
    */
   @WrapOperation(method = "method_9921", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/SharedSuggestionProvider;suggestResource(Ljava/lang/Iterable;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;"))
   private static CompletableFuture<Suggestions> improveEntityTypeSuggestion(Iterable<ResourceLocation> candidates, SuggestionsBuilder builder, Operation<CompletableFuture<Suggestions>> original) {
-    if (EntitySelectorConfig.current.improveEntityTypeSuggestion) {
+    if (EntitySelectorParsingConfig.current.improveEntityTypeSuggestion) {
       return SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.listElements(), builder, r -> r.key().location(), r -> r.value().getDescription());
     } else {
       return original.call(candidates, builder);
@@ -340,7 +340,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V", ordinal = 0), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/tags/TagKey;create(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/tags/TagKey;")), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   private static void acceptMultipleTypesOnEntry(EntitySelectorParser reader, CallbackInfo ci, int cursorBeforeNegation, boolean inverted, TagKey<EntityType<?>> tagKey) throws CommandSyntaxException {
-    if (!EntitySelectorConfig.current.allowMultipleTypes) {
+    if (!EntitySelectorParsingConfig.current.allowMultipleTypes) {
       return;
     }
     if (EntitySelectorOptionsExtension.mixinReadMultipleTypes(reader, inverted, Either.right(tagKey))) {
@@ -350,7 +350,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @Inject(method = "method_9973", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"), slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/core/registries/BuiltInRegistries;ENTITY_TYPE:Lnet/minecraft/core/DefaultedRegistry;", opcode = Opcodes.GETSTATIC)), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   private static void acceptMultipleTypesOnTag(EntitySelectorParser reader, CallbackInfo ci, int cursorBeforeNegation, boolean inverted, ResourceLocation identifier, EntityType<?> entityType) throws CommandSyntaxException {
-    if (!EntitySelectorConfig.current.allowMultipleTypes) {
+    if (!EntitySelectorParsingConfig.current.allowMultipleTypes) {
       return;
     }
     if (EntitySelectorOptionsExtension.mixinReadMultipleTypes(reader, inverted, Either.left(entityType))) {
@@ -420,7 +420,7 @@ public abstract class EntitySelectorOptionsMixin {
       @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;expect(C)V", ordinal = 2, remap = false)
   })
   private static void addScoreSuggestions(EntitySelectorParser reader, CallbackInfo ci, @Local StringReader stringReader) {
-    if (!EntitySelectorConfig.current.showScoreObjectiveSuggestions) {
+    if (!EntitySelectorParsingConfig.current.showScoreObjectiveSuggestions) {
       return;
     }
     final CommandContext<?> context = reader.extension$ec().context;
@@ -434,7 +434,7 @@ public abstract class EntitySelectorOptionsMixin {
       @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;expect(C)V", ordinal = 2, remap = false, shift = At.Shift.AFTER)
   })
   private static void removeScoreSuggestions(EntitySelectorParser reader, CallbackInfo ci, @Local StringReader stringReader) {
-    if (!EntitySelectorConfig.current.showScoreObjectiveSuggestions) {
+    if (!EntitySelectorParsingConfig.current.showScoreObjectiveSuggestions) {
       return;
     }
     final CommandContext<?> context = reader.extension$ec().context;
@@ -450,7 +450,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @Inject(method = "method_9975", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;fromReader(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/advancements/critereon/MinMaxBounds$Ints;"))
   private static void acceptScoreNegation(EntitySelectorParser reader, CallbackInfo ci, @Local String unquotedString, @Share("inverted") LocalBooleanRef localBooleanRef) {
-    if (EntitySelectorConfig.current.allowScoreInversion && reader.shouldInvertValue()) {
+    if (EntitySelectorParsingConfig.current.allowScoreInversion && reader.shouldInvertValue()) {
       reader.getReader().skipWhitespace();
       localBooleanRef.set(true);
     } else {
@@ -499,7 +499,7 @@ public abstract class EntitySelectorOptionsMixin {
       @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;expect(C)V", ordinal = 5, remap = false)
   })
   private static void addAdvancementSuggestions(EntitySelectorParser reader, CallbackInfo ci, @Local StringReader stringReader) {
-    if (!EntitySelectorConfig.current.showAdvancementsSuggestions) {
+    if (!EntitySelectorParsingConfig.current.showAdvancementsSuggestions) {
       return;
     }
     final CommandContext<?> context = reader.extension$ec().context;
@@ -522,7 +522,7 @@ public abstract class EntitySelectorOptionsMixin {
       @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;expect(C)V", ordinal = 5, shift = At.Shift.AFTER, remap = false)
   })
   private static void removeAdvancementSuggestions(EntitySelectorParser reader, CallbackInfo ci, @Local StringReader stringReader) {
-    if (!EntitySelectorConfig.current.showAdvancementsSuggestions) {
+    if (!EntitySelectorParsingConfig.current.showAdvancementsSuggestions) {
       return;
     }
     final CommandContext<?> context = reader.extension$ec().context;
@@ -542,7 +542,7 @@ public abstract class EntitySelectorOptionsMixin {
   private static String acceptQuotedCriterionName(StringReader instance) throws CommandSyntaxException {
     // 原版的代码中，读取进度条件名称时，只能读取不带引号的字符串，这会无法使用一些含有特殊字符的进度条件名称。
     // 为了解决这样的问题，这里将其调用为可以读取带引号的字符串。
-    return EntitySelectorConfig.current.acceptQuotedAdvancementCriterionName ? instance.readString() : instance.readUnquotedString();
+    return EntitySelectorParsingConfig.current.acceptQuotedAdvancementCriterionName ? instance.readString() : instance.readUnquotedString();
   }
 
   @Inject(method = "method_9974", at = {
@@ -550,7 +550,7 @@ public abstract class EntitySelectorOptionsMixin {
       @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;expect(C)V", ordinal = 4, remap = false)
   })
   private static void addAdvancementCriterionSuggestion(EntitySelectorParser reader, CallbackInfo ci, @Local ResourceLocation advancementId, @Local StringReader stringReader) {
-    if (!EntitySelectorConfig.current.showAdvancementsCriterionSuggestions) {
+    if (!EntitySelectorParsingConfig.current.showAdvancementsCriterionSuggestions) {
       return;
     }
     final CommandContext<?> context = reader.extension$ec().context;
@@ -578,7 +578,7 @@ public abstract class EntitySelectorOptionsMixin {
       @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;expect(C)V", shift = At.Shift.AFTER, ordinal = 4, remap = false)
   })
   private static void removeAdvancementCriterionSuggestions(EntitySelectorParser reader, CallbackInfo ci, @Local StringReader stringReader) {
-    if (!EntitySelectorConfig.current.showAdvancementsCriterionSuggestions) {
+    if (!EntitySelectorParsingConfig.current.showAdvancementsCriterionSuggestions) {
       return;
     }
     final CommandContext<?> context = reader.extension$ec().context;
@@ -605,7 +605,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @WrapOperation(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;read(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/resources/ResourceLocation;"))
   private static ResourceLocation addPredicateNameSuggestions(StringReader stringReader, Operation<ResourceLocation> original, @Local(argsOnly = true) EntitySelectorParser reader) {
-    if (!EntitySelectorConfig.current.showPredicateSuggestions) {
+    if (!EntitySelectorParsingConfig.current.showPredicateSuggestions) {
       return original.call(stringReader);
     }
     final CommandContext<?> context = reader.extension$ec().context;
@@ -622,7 +622,7 @@ public abstract class EntitySelectorOptionsMixin {
 
   @Inject(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;read(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/resources/ResourceLocation;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
   private static void acceptLiteralPredicateInput(EntitySelectorParser reader, CallbackInfo ci, boolean bl) throws CommandSyntaxException {
-    if (!EntitySelectorConfig.current.allowLiteralPredicateJson) {
+    if (!EntitySelectorParsingConfig.current.allowLiteralPredicateJson) {
       return;
     }
     final StringReader stringReader = reader.getReader();
