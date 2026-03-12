@@ -1,8 +1,8 @@
 package pers.solid.ecmd.config;
 
-public class EntitySelectorConfig implements Cloneable {
-  public static final EntitySelectorConfig DEFAULT = new EntitySelectorConfig();
-  public static EntitySelectorConfig current = DEFAULT;
+public class EntitySelectorParsingConfig implements Cloneable {
+  public static final EntitySelectorParsingConfig DEFAULT = new EntitySelectorParsingConfig();
+  public static EntitySelectorParsingConfig current = DEFAULT;
 
   /**
    * 在读取实体选择器时，如果遇到可识别但因某些原因不可应用的选项名称，则尝试详细描述其原因，而非仅表明某选项不适用于这里。
@@ -80,9 +80,9 @@ public class EntitySelectorConfig implements Cloneable {
   public boolean allowLiteralPredicateJson = true;
 
   @Override
-  public EntitySelectorConfig clone() {
+  public EntitySelectorParsingConfig clone() {
     try {
-      return (EntitySelectorConfig) super.clone();
+      return (EntitySelectorParsingConfig) super.clone();
     } catch (CloneNotSupportedException e) {
       throw new AssertionError();
     }

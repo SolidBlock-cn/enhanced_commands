@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public final class ConfigCategories {
   public static final ConfigCategory<CommandsConfig> COMMANDS = register(CommandsConfig.class);
-  public static final ConfigCategory<EntitySelectorConfig> ENTITY_SELECTOR = register(EntitySelectorConfig.class);
+  public static final ConfigCategory<EntitySelectorParsingConfig> ENTITY_SELECTOR = register(EntitySelectorParsingConfig.class);
   public static final ConfigCategory<ItemParsingConfig> ITEM_PARSING = register(ItemParsingConfig.class);
   public static final ConfigCategory<GeneralParsingConfig> GENERAL = register(GeneralParsingConfig.class);
   public static final ConfigCategory<DebugConfig> DEBUG = register(DebugConfig.class);
