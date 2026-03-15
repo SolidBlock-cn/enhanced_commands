@@ -102,7 +102,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     if (entry.description != null) {
       hoverText.append(entry.description).append(CommonComponents.NEW_LINE);
     }
-    hoverText.append(Component.translatable("enhanced_commands.commands.config.get.default", entry.type.displayValue(entry.defaultValue)).withColor(0xffc0c0c0));
+    hoverText.append(Component.translatable("enhanced_commands.commands.config.get.default", entry.type.displayValue(entry.defaultValue)).withColor(0xffdddddd));
     hoverText.append(CommonComponents.NEW_LINE);
     hoverText.append(Component.translatable("enhanced_commands.commands.config.get.current", entry.type.displayValue(entry.getCurrent(), Styles.RESULT)).withColor(0xffc0c0c0));
     return TextUtil.styled(entry.displayName, style -> style
@@ -136,7 +136,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
       MutableComponent text = Component.empty()
           .append(Component.translatable("enhanced_commands.commands.config.category.heading", TextUtil.styledWithColor(category.displayName, COLOR_FOR_CATEGORY)));
       if (category.description != null) {
-        text.append("\n  ").append(TextUtil.styledWithColor(category.description, 0xffc0c0c0));
+        text.append("\n  ").append(TextUtil.styledWithColor(category.description, 0xffdddddd));
       }
       if (!category.configEntries.isEmpty()) {
         text.append("\n  ").append(Component.translatable("enhanced_commands.commands.config.category.entries", category.configEntries.size()).enhanced$$());
@@ -233,7 +233,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
   private static <C, T> Component getTextSummaryForEntry(ConfigEntry<C, T> entry) {
     final MutableComponent text = Component.empty().append(Component.translatable("enhanced_commands.commands.config.entry.heading", TextUtil.styledWithColor(entry.displayName, COLOR_FOR_ENTRY)));
     if (entry.description != null) {
-      text.append("\n  ").append(TextUtil.styledWithColor(entry.description, 0xffc0c0c0));
+      text.append("\n  ").append(TextUtil.styledWithColor(entry.description, 0xffdddddd));
     }
     text.append("\n  ").append(Component.translatable("enhanced_commands.commands.config.get.category", getClickableCategoryName(entry.category)).withColor(0xffc0c0c0));
     text.append("\n  ").append(Component.translatable("enhanced_commands.commands.config.get.default", entry.type.displayValue(entry.defaultValue)).withColor(0xffc0c0c0));

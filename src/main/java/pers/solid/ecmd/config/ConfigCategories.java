@@ -25,7 +25,7 @@ public final class ConfigCategories {
   }
 
   private static @NotNull <C> ConfigCategory<C> register(Class<C> configClass, Map<String, ConfigCategory.EntryModifier<C, ?>> entryModifiers) {
-    final ConfigCategory<C> configCategory = ConfigReflectionHelper.createFromReflection(configClass, entryModifiers);
+    final ConfigCategory<C> configCategory = ConfigReflectionHelper.createCategoryFromReflection(configClass, entryModifiers);
     ConfigCategory.REGISTRY.put(configCategory.name, configCategory);
     return configCategory;
   }

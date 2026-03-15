@@ -1,21 +1,22 @@
 package pers.solid.ecmd.config;
 
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.config.annotations.NoDescription;
 
-@ConfigEntry.NoDescription
+@NoDescription
 public class CommandsConfig implements Cloneable {
   public static final CommandsConfig DEFAULT = new CommandsConfig();
   public static CommandsConfig current = DEFAULT;
 
   public boolean enableDebugCommands = EnhancedCommands.isDevelopmentEnvironment();
 
-  @ConfigEntry.NoDescription
+  @NoDescription
   public boolean enableMoveCommand = true;
 
-  @ConfigEntry.NoDescription
+  @NoDescription
   public boolean enableStackCommand = true;
 
-  @ConfigEntry.NoDescription
+  @NoDescription
   public boolean enableMirrorCommand = true;
 
   @Override
