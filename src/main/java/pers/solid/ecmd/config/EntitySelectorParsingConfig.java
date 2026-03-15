@@ -52,7 +52,7 @@ public class EntitySelectorParsingConfig implements Cloneable {
   public boolean allowMultipleGameModes = true;
 
   /**
-   * 在显示实体类型 id 时，应当同时提示其实体名称。
+   * 在显示实体类型 id 的建议时，同时提示其名称，鼠标悬浮在建议项时显示。
    */
   public boolean improveEntityTypeSuggestion = true;
 
@@ -60,7 +60,7 @@ public class EntitySelectorParsingConfig implements Cloneable {
    * 允许使用像 {@code type=cat|dog} 这样的方式选择多个类型。
    */
   @OverrideDescription(@TextInfo(args = {
-      @TextEntry(value = "type=cat|dog", formatting = ChatFormatting.GRAY)
+      @TextEntry(value = "@e[type=cat|dog]", formatting = ChatFormatting.GRAY)
   }))
   public boolean allowMultipleTypes = true;
 
@@ -72,6 +72,9 @@ public class EntitySelectorParsingConfig implements Cloneable {
   /**
    * 在实体选择器中输入记分项时，提供记分项的建议。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "@a[scores={§n" + "objective§r=value}]", formatting = ChatFormatting.GRAY)
+  }))
   public boolean showScoreObjectiveSuggestions = true;
 
   /**
@@ -85,21 +88,33 @@ public class EntitySelectorParsingConfig implements Cloneable {
   /**
    * 在实体选择器中输入进度时，提供进度 id 的建议。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "@a[advancements={§n" + "advancement_id§r=value}]", formatting = ChatFormatting.GRAY)
+  }))
   public boolean showAdvancementsSuggestions = true;
 
   /**
    * 在实体选择器中输入进度准则时，提供进度准则名称的建议。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "@a[advancements={advancement_id={§n" + "criterion§r=value}}]", formatting = ChatFormatting.GRAY)
+  }))
   public boolean showAdvancementsCriterionSuggestions = true;
 
   /**
    * 在实体选择器中输入进度准则的名称时，允许使用带有引号的字符串，从而避免含有空格等特殊字符的准则名称无法使用的问题。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "@a[advancements={advancement_id={\"quoted criterion\"=true}}]", formatting = ChatFormatting.GRAY)
+  }))
   public boolean acceptQuotedAdvancementCriterionName = true;
 
   /**
-   * 在实体选择器中输入战利品表谓词时，提供谓词 id 的建议。
+   * 在实体选择器中输入战利品表谓词（即 predicate 选项）时，提供谓词 id 的建议。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "predicate", formatting = ChatFormatting.GRAY)
+  }))
   public boolean showPredicateSuggestions = true;
 
   /**

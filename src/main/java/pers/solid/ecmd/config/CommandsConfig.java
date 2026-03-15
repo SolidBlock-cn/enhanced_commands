@@ -3,7 +3,6 @@ package pers.solid.ecmd.config;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.config.annotations.NoDescription;
 
-@NoDescription
 public class CommandsConfig implements Cloneable {
   public static final CommandsConfig DEFAULT = new CommandsConfig();
   public static CommandsConfig current = DEFAULT;
