@@ -2,8 +2,12 @@ package pers.solid.ecmd.config;
 
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.brigadier.StringReader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import pers.solid.ecmd.config.annotations.OverrideDescription;
+import pers.solid.ecmd.config.annotations.TextEntry;
+import pers.solid.ecmd.config.annotations.TextInfo;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.function.Supplier;
@@ -15,11 +19,19 @@ public class GeneralParsingConfig implements Cloneable {
   /**
    * 在显示 id 的建议时，省略默认的命名空间，例如在输入方块 id 时，将提示 {@code oak_planks} 而非 {@code minecraft:oak_planks}。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "oak_planks", formatting = ChatFormatting.GRAY),
+      @TextEntry(value = "minecraft:oak_planks", formatting = ChatFormatting.GRAY)
+  }))
   public boolean suggestionEmitDefaultNamespace = true;
 
   /**
    * 在显示 id 的建议时，如果没有输入命名空间，也会提供非原版命名空间的建议。例如在输入生物群系时，如果输入了 {@code #is_snowy}，将提示 {@code #c:is_snowy}。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "#is_snowy", formatting = ChatFormatting.GRAY),
+      @TextEntry(value = "#c:is_snowy", formatting = ChatFormatting.GRAY)
+  }))
   public boolean suggestNonDefaultNamespacedIds = true;
 
   /**
@@ -40,6 +52,10 @@ public class GeneralParsingConfig implements Cloneable {
   /**
    * 在解析游戏模式时，允许使用其别称，适用于 {@code /gamemode} 命令和实体选择器的 {@code gamemode} 参数。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "/gamemode", formatting = ChatFormatting.GRAY),
+      @TextEntry(value = "gamemode", formatting = ChatFormatting.GRAY)
+  }))
   public boolean acceptGameModeAlias = true;
 
   /**

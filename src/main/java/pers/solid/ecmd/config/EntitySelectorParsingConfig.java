@@ -1,5 +1,10 @@
 package pers.solid.ecmd.config;
 
+import net.minecraft.ChatFormatting;
+import pers.solid.ecmd.config.annotations.OverrideDescription;
+import pers.solid.ecmd.config.annotations.TextEntry;
+import pers.solid.ecmd.config.annotations.TextInfo;
+
 public class EntitySelectorParsingConfig implements Cloneable {
   public static final EntitySelectorParsingConfig DEFAULT = new EntitySelectorParsingConfig();
   public static EntitySelectorParsingConfig current = DEFAULT;
@@ -12,21 +17,38 @@ public class EntitySelectorParsingConfig implements Cloneable {
   /**
    * 在实体选择器中输入选项时，允许输入别称，例如 c、m 等。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "@a[c=1]", formatting = ChatFormatting.GRAY),
+      @TextEntry(value = "@a[limit=1]", formatting = ChatFormatting.GRAY)
+  }))
   public boolean acceptOptionNameAlias = true;
 
   /**
    * 实体选择器的 level 参数允许取反。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "level", formatting = ChatFormatting.GRAY),
+      @TextEntry(value = "@a[level=!2]", formatting = ChatFormatting.GRAY)
+  }))
   public boolean allowLevelInversion = true;
 
   /**
    * 在解析 {@code @p} 时，如果没有指定 {@code sort} 参数，则允许使用负值来表示最远的实体。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "@p", formatting = ChatFormatting.GRAY),
+      @TextEntry(value = "sort", formatting = ChatFormatting.GRAY),
+      @TextEntry(value = "@p[limit=-1]", formatting = ChatFormatting.GRAY),
+      @TextEntry(value = "@a[limit=1, sort=furthest]", formatting = ChatFormatting.GRAY),
+  }))
   public boolean allowNegativeDistanceForNearest = true;
 
   /**
    * 允许使用像 {@code gamemode=creative|adventure} 这样的方式选择多个游戏模式。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "gamemode=creative|adventure", formatting = ChatFormatting.GRAY),
+  }))
   public boolean allowMultipleGameModes = true;
 
   /**
@@ -37,6 +59,9 @@ public class EntitySelectorParsingConfig implements Cloneable {
   /**
    * 允许使用像 {@code type=cat|dog} 这样的方式选择多个类型。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "type=cat|dog", formatting = ChatFormatting.GRAY)
+  }))
   public boolean allowMultipleTypes = true;
 
   /**
@@ -52,6 +77,9 @@ public class EntitySelectorParsingConfig implements Cloneable {
   /**
    * 在输入分数时，允许将分数的预期值取反，例如 {@code @a[scores={a=!1}]}。
    */
+  @OverrideDescription(@TextInfo(args = {
+      @TextEntry(value = "@a[scores={a=!1}]", formatting = ChatFormatting.GRAY),
+  }))
   public boolean allowScoreInversion = true;
 
   /**

@@ -1,11 +1,17 @@
 package pers.solid.ecmd.config;
 
 import net.minecraft.Util;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.config.annotations.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -28,7 +34,7 @@ public final class ConfigReflectionHelper {
    * @see ConfigEntryType#fromClass
    * @see #convertCamelToUnderscore
    */
-  public static <C> ConfigCategory<C> createFromReflection(Class<C> configClass, Map<String, ConfigCategory.EntryModifier<C, ?>> entryModifiers) {
+  public static <C> ConfigCategory<C> createCategoryFromReflection(Class<C> configClass, Map<String, ConfigCategory.EntryModifier<C, ?>> entryModifiers) {
     final String categoryName = convertCamelToUnderscore(StringUtils.removeEnd(configClass.getSimpleName(), "Config"));
 
     // 加载默认配置
@@ -39,13 +45,35 @@ public final class ConfigReflectionHelper {
     } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException("Get CURRENT_CONFIG field", e);
     }
-    final ConfigCategory<C> category = ConfigCategory.create(categoryName, defaultConfig, () -> getCurrentConfigFromField(currentConfigField, configClass), s -> {
+
+    final String nameKey = "enhanced_commands.config." + categoryName;
+    final OverrideName overrideName = configClass.getAnnotation(OverrideName.class);
+    @NotNull Component name;
+    if (overrideName != null) {
+      name = convertToComponent(overrideName.value(), nameKey);
+    } else {
+      name = Component.translatable(nameKey);
+    }
+
+    @Nullable Component description = null;
+    final String descriptionKey = "enhanced_commands.config." + categoryName + ".description";
+    boolean hasDescription = !configClass.isAnnotationPresent(NoDescription.class);
+    if (hasDescription) {
+      final @Nullable OverrideDescription overrideDescription = configClass.getAnnotation(OverrideDescription.class);
+      if (overrideDescription != null) {
+        description = convertToComponent(overrideDescription.value(), descriptionKey);
+      } else {
+        description = Component.translatable(descriptionKey);
+      }
+    }
+
+    final ConfigCategory<C> category = new ConfigCategory<>(categoryName, name, description, defaultConfig, () -> getCurrentConfigFromField(currentConfigField, configClass), s -> {
       try {
         currentConfigField.set(null, s);
       } catch (IllegalAccessException e) {
         throw new RuntimeException(e);
       }
-    }, !configClass.isAnnotationPresent(ConfigEntry.NoDescription.class));
+    });
 
 
     // 从类的字段中读取配置项
@@ -54,8 +82,8 @@ public final class ConfigReflectionHelper {
       if (Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers) || Modifier.isPrivate(modifiers)) {
         continue;
       }
-      final String name = convertCamelToUnderscore(field.getName());
-      createEntryForField(field, category, name, defaultConfig, entryModifiers);
+      final String fieldName = convertCamelToUnderscore(field.getName());
+      createEntryForField(field, category, fieldName, defaultConfig, entryModifiers);
     }
 
     return category;
@@ -115,6 +143,10 @@ public final class ConfigReflectionHelper {
   @SuppressWarnings("unchecked")
   private static <C, T> void createEntryForField(@NotNull Field field, @NotNull ConfigCategory<C> category, @NotNull String name, C defaultConfig, Map<String, ConfigCategory.EntryModifier<C, ?>> builderModifiers) {
     final Class<T> type = (Class<T>) field.getType();
+
+    final ConfigCategory.EntryModifier<C, T> registeredModifier = (ConfigCategory.EntryModifier<C, T>) builderModifiers.get(name);
+    final ConfigCategory.@Nullable EntryModifier<C, T> builderModifier = getBuilderModifierForField(field, registeredModifier);
+
     final ConfigEntry<C, T> entry = category.createEntry(name, ConfigEntryType.fromClass(type), c -> {
       try {
         return (T) field.get(c);
@@ -133,8 +165,32 @@ public final class ConfigReflectionHelper {
       } catch (IllegalAccessException e) {
         throw new RuntimeException("Get default config value", e);
       }
-    }), (ConfigCategory.EntryModifier<C, T>) builderModifiers.get(name), !field.isAnnotationPresent(ConfigEntry.NoDescription.class));
+    }), builderModifier, !field.isAnnotationPresent(NoDescription.class));
     category.configEntries.put(name, entry);
+  }
+
+  private static <C, T> ConfigCategory.@Nullable EntryModifier<C, T> getBuilderModifierForField(@NotNull Field field, ConfigCategory.@Nullable EntryModifier<C, T> next) {
+    final @Nullable OverrideName overrideName = field.getAnnotation(OverrideName.class);
+    final @Nullable OverrideDescription overrideDescription = field.getAnnotation(OverrideDescription.class);
+    final @Nullable ConfigCategory.EntryModifier<C, T> builderModifier;
+    if (overrideName != null || overrideDescription != null || next != null) {
+      builderModifier = builder -> {
+        if (overrideName != null) {
+          builder.setDisplayName(s -> convertToComponent(overrideName.value(), s));
+        }
+        if (overrideDescription != null) {
+          builder.setDescription(s -> convertToComponent(overrideDescription.value(), s));
+        }
+
+        if (next != null) {
+          next.apply(builder);
+        }
+        return builder;
+      };
+    } else {
+      builderModifier = null;
+    }
+    return builderModifier;
   }
 
   /**
@@ -152,5 +208,62 @@ public final class ConfigReflectionHelper {
       }
     }
     return b.toString();
+  }
+
+  /**
+   * 将以注解描述的文本转化为 {@link Component} 对象。
+   *
+   * @param textInfo       描述一个文本组件的注解。
+   * @param fallbackString 当注解的字符串值为默认值时，将使用以此 {@code fallbackString} 值为翻译键的可翻译文本组件。
+   * @return 此注解表示的 {@link Component} 对象。
+   */
+  public static MutableComponent convertToComponent(@NotNull TextInfo textInfo, @NotNull String fallbackString) {
+    return convertToComponent(textInfo.value(), textInfo.args(), textInfo.append(), fallbackString);
+  }
+
+  /**
+   * 将以注解描述的文本转化为 {@link Component} 对象。
+   *
+   * @param textEntry        文本的主内容。参见 {@link TextInfo#value()}。
+   * @param translatableArgs 可翻译文本组件中的 args 参数。参见 {@link TextInfo#args()}。
+   * @param append           文本组件的附加内容。参见 {@link TextInfo#append()}。
+   * @param fallbackString   当注解的字符串值为默认值时，将使用以此 {@code fallbackString} 值为翻译键的可翻译文本组件。
+   * @return 此注解表示的 {@link Component} 对象。
+   * @see #convertToComponent(TextInfo, String)
+   */
+  public static MutableComponent convertToComponent(@NotNull TextEntry textEntry, @NotNull TextEntry @Nullable [] translatableArgs, @NotNull TextEntry @Nullable [] append, @NotNull String fallbackString) {
+    String value = textEntry.value();
+    MutableComponent component;
+
+    @NotNull Object[] argsComponent;
+    if (translatableArgs == null || translatableArgs.length == 0) {
+      argsComponent = TranslatableContents.NO_ARGS;
+    } else {
+      argsComponent = Arrays.stream(translatableArgs).map(info -> convertToComponent(info, null, null, TextEntry.EMPTY_STRING_VALUE)).toArray();
+    }
+    if (TextEntry.EMPTY_STRING_VALUE.equals(value)) {
+      component = Component.translatable(fallbackString, argsComponent);
+    } else {
+      switch (textEntry.type()) {
+        case LITERAL -> component = Component.literal(value);
+        case TRANSLATABLE -> component = Component.translatable(value, argsComponent);
+        case KEYBIND -> component = Component.keybind(value);
+        default -> throw new IllegalStateException("Unsupported type: " + textEntry.type());
+      }
+    }
+
+    if (textEntry.formatting().length != 0) {
+      component.withStyle(textEntry.formatting());
+    }
+    if (textEntry.textColor() != 0) {
+      component.withColor(textEntry.textColor());
+    }
+    if (append != null) {
+      for (final TextEntry appendEntry : append) {
+        component.append(convertToComponent(appendEntry, null, null, TextEntry.EMPTY_STRING_VALUE));
+      }
+    }
+
+    return component;
   }
 }

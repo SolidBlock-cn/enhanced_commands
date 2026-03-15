@@ -46,7 +46,7 @@ public class ConfigCategory<C> {
   /**
    * 设置代表当前配置分类的配置实例的 {@link Consumer}。
    * <p>
-   * 示例：{@code c -> BlockOperationConfig.current = s}
+   * 示例：{@code c -> BlockOperationConfig.current = c}
    */
   public final Consumer<C> currentConfigSetter;
   /**
@@ -127,5 +127,12 @@ public class ConfigCategory<C> {
    *
    * @see #createEntry
    */
-  public interface EntryModifier<C, T> extends UnaryOperator<ConfigEntry.Builder<C, T>> {}
+  public interface EntryModifier<C, T> extends UnaryOperator<ConfigEntry.Builder<C, T>> {
+    default EntryModifier<C, T> andThen(@NotNull EntryModifier<C, T> next) {
+      return builder -> {
+        builder = apply(builder);
+        return next.apply(builder);
+      };
+    }
+  }
 }
