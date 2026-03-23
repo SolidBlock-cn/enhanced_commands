@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.block;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -111,13 +112,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       if (paramIndex == 0) {
-        value = reader.readFloat();
-        if (value > 1) {
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooHigh().createWithContext(reader, value, 1);
-        }
-        if (value < 0) {
-          throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.floatTooLow().createWithContext(reader, value, 0);
-        }
+        value = FloatArgumentType.floatArg(0, 1).parse(reader);
       } else if (paramIndex == 1) {
         predicate = BlockPredicate.parse(parseContext);
       }

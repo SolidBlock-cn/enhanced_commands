@@ -1,8 +1,12 @@
 package pers.solid.ecmd.predicate.item;
 
+import com.google.common.base.Supplier;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
+import pers.solid.ecmd.parse.FunctionContentParser;
+
+import java.util.Map;
 
 public final class ItemPredicateTypes {
   private static final RegistryBridge<ItemPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, ItemPredicateType.REGISTRY);
@@ -14,6 +18,7 @@ public final class ItemPredicateTypes {
   public static final ConstantItemPredicate.Type CONSTANT = register("constant", ConstantItemPredicate.Type.CONSTANT_TYPE);
   public static final CountItemPredicate.Type COUNT = register("count", CountItemPredicate.Type.COUNT_TYPE);
   public static final NegatingItemPredicate.Type NEGATING = register("negating", NegatingItemPredicate.Type.NEGATING_TYPE);
+  public static final ProbabilityItemPredicate.Type PROBABILITY = register("probability", ProbabilityItemPredicate.Type.PROBABILITY_TYPE);
   public static final SimpleItemPredicate.Type SIMPLE = register("simple", SimpleItemPredicate.Type.SIMPLE_TYPE);
   public static final SimpleCombinationItemPredicate.Type SIMPLE_COMBINATION = register("simmple_combination", SimpleCombinationItemPredicate.Type.SIMPLE_COMBINATION_TYPE);
   public static final TagItemPredicate.Type SIMPLE_TAG = register("simple_tag", TagItemPredicate.Type.SIMPLE_TAG_TYPE);
@@ -29,5 +34,10 @@ public final class ItemPredicateTypes {
   public static void init(InitializeContext context) {
     RegistryBridge.registerToRootRegistry(ItemPredicateType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
+    registerFunctions(ItemPredicateParsing.FUNCTIONS);
+  }
+
+  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends ItemPredicate>>> map) {
+    map.put("probability", ProbabilityItemPredicate.Parser::new);
   }
 }

@@ -3,20 +3,28 @@ package pers.solid.ecmd.mixins.general;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.ImmutableStringReader;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.arguments.item.ItemPredicateArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.parsing.packrat.commands.Grammar;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.predicate.item.*;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -36,6 +44,22 @@ public abstract class ItemPredicateArgumentMixin {
   @ModifyReturnValue(method = "method_58529", at = @At("RETURN"))
   private static Predicate<ItemStack> modifyPseudoPredicatesArg(Predicate<ItemStack> original, @Local(argsOnly = true) MinMaxBounds.Ints count) {
     return ItemPredicate.vanillaWrapper(original, new CountItemPredicate(count));
+  }
+
+  /**
+   * 记录参数 {@code commandContext} 的值，因为在调用 {@link Grammar#parseForSuggestions(SuggestionsBuilder)} 的参数没有，但是在 mixin 中会用到。
+   */
+  @Inject(method = "listSuggestions", at = @At("HEAD"))
+  private <S> void recordCommandContextInSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
+    MixinShared.commandContextForPackrat = commandContext;
+  }
+
+  /**
+   * 在完成对 {@link Grammar#parseForSuggestions(SuggestionsBuilder)} 的调用后，及时将其设置为 null，释放内存。
+   */
+  @Inject(method = "listSuggestions", at = @At("RETURN"))
+  private <S> void removeCommandContextInSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
+    MixinShared.commandContextForPackrat = null;
   }
 
   @Mixin(targets = "net.minecraft.commands.arguments.item.ItemPredicateArgument$ComponentWrapper")

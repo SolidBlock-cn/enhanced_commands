@@ -1,5 +1,6 @@
 package pers.solid.ecmd.predicate.item;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -8,6 +9,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.argument.ItemPredicateArgument;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -40,6 +43,10 @@ public interface ItemPredicate extends ExpressionConvertible {
   boolean test(ItemStack stack, ExecutionContext executionContext);
 
   @NotNull ItemPredicateType<?> getType();
+
+  static ItemPredicate parse(ParseContext<?> context) throws CommandSyntaxException {
+    return ItemPredicateArgument.itemPredicate(context.commandBuildContext()).parse(context.reader());
+  }
 
   class VanillaWrapper implements Predicate<ItemStack> {
     private final ItemPredicate modded;

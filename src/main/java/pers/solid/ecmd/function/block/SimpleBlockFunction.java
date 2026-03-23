@@ -69,7 +69,7 @@ public record SimpleBlockFunction(@NotNull Block block, @NotNull List<PropertyFu
     }
 
     @Override
-    public @NotNull SimpleBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       SimpleBlockFunctionParser<?> parser = new SimpleBlockFunctionParser<>(parseContext);
       parser.parseBlockId();
       parser.parseProperties();

@@ -30,6 +30,6 @@ public interface PlayerExtension {
    * 将玩家的活动区域同步至客户端。注意：在执行 {@link #setActiveRegion$ec} 时会自动进行同步，除非设置的是和之前同一个对象。如果修改了 {@link RegionSelection} 自身而没有将玩家的活动区域设置为另一个对象，则需调用此方法。
    */
   default void syncActiveRegion$ec() {
-    // todo complete
+    throw new UnsupportedOperationException();
   }
 }

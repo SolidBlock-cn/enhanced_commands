@@ -92,7 +92,7 @@ public record SimpleBlockPredicate(@NotNull Block block, @NotNull List<PropertyP
     }
 
     @Override
-    public @NotNull BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       SimpleBlockPredicateParser<?> parser = new SimpleBlockPredicateParser<>(parseContext);
       parser.parseBlockId();
       parser.parseProperties();

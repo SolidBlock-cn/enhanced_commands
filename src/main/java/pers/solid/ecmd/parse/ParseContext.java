@@ -23,6 +23,7 @@ import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -79,26 +80,30 @@ public record ParseContext<S>(CommandBuildContext commandBuildContext, StringRea
     } else if (completableFutures.size() == 1) {
       return completableFutures.getFirst();
     } else {
-      final CompletableFuture<Suggestions> result = new CompletableFuture<>();
-      CompletableFuture.allOf(completableFutures.toArray(CompletableFuture[]::new))
-          .thenRun(() -> {
-            final List<Suggestions> results = new ArrayList<>();
-            for (final CompletableFuture<Suggestions> future : completableFutures) {
-              final Suggestions join = future.join();
-              if (join == Special.TERMINATE_IF_NOT_EMPTY_SUGGESTIONS) {
-                // future == null，表示需要标识当建议项不为 null 时，直接结束建议。
-                if (!(results.isEmpty() || results.getLast().isEmpty())) {
-                  break;
-                } else {
-                  continue;
-                }
-              }
-              results.add(join);
-            }
-            result.complete(Suggestions.merge(builder.getInput(), results));
-          });
-      return result;
+      return combineMultipleSuggestions(builder, completableFutures);
     }
+  }
+
+  public static @NotNull CompletableFuture<Suggestions> combineMultipleSuggestions(SuggestionsBuilder builder, Collection<CompletableFuture<Suggestions>> suggestionsList) {
+    final CompletableFuture<Suggestions> result = new CompletableFuture<>();
+    CompletableFuture.allOf(suggestionsList.toArray(CompletableFuture[]::new))
+        .thenRun(() -> {
+          final List<Suggestions> results = new ArrayList<>();
+          for (final CompletableFuture<Suggestions> future : suggestionsList) {
+            final Suggestions join = future.join();
+            if (join == Special.TERMINATE_IF_NOT_EMPTY_SUGGESTIONS) {
+              // future == null，表示需要标识当建议项不为 null 时，直接结束建议。
+              if (!(results.isEmpty() || results.getLast().isEmpty())) {
+                break;
+              } else {
+                continue;
+              }
+            }
+            results.add(join);
+          }
+          result.complete(Suggestions.merge(builder.getInput(), results));
+        });
+    return result;
   }
 
   public ParseContext<S> withSuggestionsOnly(boolean suggestionsOnly) {
