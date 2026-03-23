@@ -48,7 +48,7 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
   }
 
   private static boolean isValidTypeForComponents(@NotNull ItemPredicate predicate) {
-    return predicate instanceof ComponentPresenceItemPredicate<?> || predicate instanceof ComponentValueCheckItemPredicate<?> || predicate instanceof CountItemPredicate || predicate instanceof UnknownItemPredicate;
+    return true;
   }
 
   private static void checkValidityForItemType(@NotNull ItemPredicate predicate) {
@@ -111,7 +111,7 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
     } else if (predicate instanceof ItemPredicateEntry entry) {
       return entry.asEntryString();
     } else {
-      throw new IllegalArgumentException("Unknown type for SimpleCombinationItemPredicate: " + predicate.getClass().getSimpleName());
+      return predicate.asString();
     }
   }
 

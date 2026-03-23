@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -107,7 +106,7 @@ public final class RandomBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable RandomBlockFunction parse(ParseContext<?> parseContext) {
+    public RandomBlockFunction parse(ParseContext<?> parseContext) {
       final StringReader reader = parseContext.reader();
       if (reader.getRemaining().isEmpty()) {
         parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Component.translatable("enhanced_commands.block_function.random")).buildFuture());

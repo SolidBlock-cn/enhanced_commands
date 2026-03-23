@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockFunctionParser;
 import pers.solid.ecmd.function.property.PropertyNameFunction;
 import pers.solid.ecmd.parse.ParseContext;
@@ -75,7 +74,7 @@ public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<Prop
     }
 
     @Override
-    public @Nullable TagBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public TagBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       SimpleBlockFunctionParser<?> parser = new SimpleBlockFunctionParser<>(parseContext);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {

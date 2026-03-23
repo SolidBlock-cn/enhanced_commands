@@ -66,7 +66,7 @@ public interface Checkerboard<T> {
 
   abstract class CheckerboardParser<T> implements FunctionContentParser<T>, NamedParamListParser {
     protected final Set<String> SUPPORTED_PARAMS = Set.of("scale", "floor", "offset");
-    public final WeightedListParser<T> weightedListParser = WeightedListParser.of(this::parseElement);
+    public final WeightedListParser<T> weightedListParser = WeightedListParser.of(parseContext -> parseElement(parseContext));
     protected Vec3 scale = null;
     protected Vec3 floor = null;
     protected Vec3 offset = null;

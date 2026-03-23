@@ -15,7 +15,7 @@ import java.util.Map;
 public final class ConfigEntryTypes {
   public static final ConfigEntryType<Boolean> BOOLEAN = ConfigEntryType.of(Codec.BOOL, ByteBufCodecs.BOOL, TextUtil::wrapBoolean, BoolArgumentType.bool());
   public static final ConfigEntryType<Integer> INTEGER = ConfigEntryType.of(Codec.INT, ByteBufCodecs.INT, TextUtil::literal, IntegerArgumentType.integer());
-  public static final ConfigEntryType<Long> LONG = ConfigEntryType.of(Codec.LONG, ByteBufCodecs.VAR_LONG, TextUtil::literal, LongArgumentType.longArg()); // todo check 什么是 var long？
+  public static final ConfigEntryType<Long> LONG = ConfigEntryType.of(Codec.LONG, ByteBufCodecs.VAR_LONG, TextUtil::literal, LongArgumentType.longArg());
   public static final ConfigEntryType<Float> FLOAT = ConfigEntryType.of(Codec.FLOAT, ByteBufCodecs.FLOAT, TextUtil::literal, FloatArgumentType.floatArg());
   public static final ConfigEntryType<Double> DOUBLE = ConfigEntryType.of(Codec.DOUBLE, ByteBufCodecs.DOUBLE, TextUtil::literal, DoubleArgumentType.doubleArg());
 

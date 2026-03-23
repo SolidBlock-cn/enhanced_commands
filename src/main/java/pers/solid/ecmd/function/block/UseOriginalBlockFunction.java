@@ -9,7 +9,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -43,7 +42,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     }
 
     @Override
-    public @Nullable UseOriginalBlockFunction parse(ParseContext<?> parseContext) {
+    public UseOriginalBlockFunction parse(ParseContext<?> parseContext) {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("~", Component.translatable("enhanced_commands.block_function.use_original"), suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '~') {

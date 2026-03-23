@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.SimpleBlockParser;
 import pers.solid.ecmd.argument.SimpleBlockPredicateParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -83,7 +82,7 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     }
 
     @Override
-    public @Nullable PropertiesNamesBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public PropertiesNamesBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '[') {

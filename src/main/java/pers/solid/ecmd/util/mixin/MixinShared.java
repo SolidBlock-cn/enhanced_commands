@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -76,6 +77,11 @@ public final class MixinShared {
    */
   public static boolean suppressOnStateReplaced = false;
   private static Reference<CommandBuildContext> commandBuildContextReference;
+
+  /**
+   * 用于 Packrat 解析并获取建议时的 commandContext 参数，因为原版在使用 Packrat 获取建议时（例如 {@link pers.solid.ecmd.argument.ItemPredicateArgument}）不会传入 commandContext 参数，因此如果要在 mixin 中使用，得设置此字段。
+   */
+  public static CommandContext<?> commandContextForPackrat = null;
 
   private MixinShared() {
   }
