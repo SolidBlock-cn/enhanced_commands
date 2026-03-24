@@ -1,6 +1,7 @@
 package pers.solid.ecmd.predicate.item;
 
 import com.google.common.base.Supplier;
+import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
@@ -35,6 +36,7 @@ public final class ItemPredicateTypes {
     RegistryBridge.registerToRootRegistry(ItemPredicateType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
     registerFunctions();
+    registerFunctionNames();
   }
 
   private static void registerFunctions() {
@@ -43,5 +45,13 @@ public final class ItemPredicateTypes {
     map.put("any", AnyItemPredicate.Parser::new);
     map.put("count", CountItemPredicate.Parser::new);
     map.put("probability", ProbabilityItemPredicate.Parser::new);
+  }
+
+  private static void registerFunctionNames() {
+    final Map<String, Component> map = ItemPredicateParsing.FUNCTION_NAMES;
+    map.put("all", Component.translatable("enhanced_commands.item_predicate.all"));
+    map.put("any", Component.translatable("enhanced_commands.item_predicate.any"));
+    map.put("count", Component.translatable("enhanced_commands.item_predicate.count"));
+    map.put("probability", Component.translatable("enhanced_commands.item_predicate.probability"));
   }
 }

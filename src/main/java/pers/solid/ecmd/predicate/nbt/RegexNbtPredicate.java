@@ -1,11 +1,15 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.parse.FunctionContentParser;
+import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.regex.Pattern;
@@ -29,6 +33,20 @@ public record RegexNbtPredicate(Pattern pattern, boolean inverted) implements Nb
   }
 
   @Override
+  public boolean equals(Object object) {
+    if (!(object instanceof RegexNbtPredicate that)) return false;
+
+    return inverted == that.inverted && pattern.toString().equals(that.pattern.toString());
+  }
+
+  @Override
+  public int hashCode() {
+    int result = pattern.toString().hashCode();
+    result = 31 * result + Boolean.hashCode(inverted);
+    return result;
+  }
+
+  @Override
   public @NotNull NbtPredicateType<RegexNbtPredicate> getType() {
     return pers.solid.ecmd.predicate.nbt.RegexNbtPredicate.Type.REGEX_TYPE;
   }
@@ -39,6 +57,20 @@ public record RegexNbtPredicate(Pattern pattern, boolean inverted) implements Nb
     @Override
     public MapCodec<RegexNbtPredicate> getCodec() {
       return CODEC;
+    }
+  }
+
+  public static class Parser implements FunctionContentParser<RegexNbtPredicate> {
+    private Pattern pattern;
+
+    @Override
+    public RegexNbtPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+      return new RegexNbtPredicate(pattern, false);
+    }
+
+    @Override
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      pattern = ParsingUtil.readRegex(parseContext.reader());
     }
   }
 }

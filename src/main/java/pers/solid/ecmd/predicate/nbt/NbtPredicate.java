@@ -23,12 +23,12 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
   ResourceKey<Registry<NbtPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate"));
 
   static @NotNull NbtPredicate parse(CommandBuildContext commandBuildContext, String s, CommandSourceStack source) throws CommandSyntaxException {
-    return new NbtPredicateParser<>(new ParseContext<>(commandBuildContext, new StringReader(s), false, true)).parsePredicate(false, false);
+    return new NbtPredicateParser<>(new ParseContext<>(commandBuildContext, new StringReader(s), false, true)).parseNbtPredicate(false, false);
   }
 
   static <S> NbtPredicate parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     final NbtPredicateParser<S> n = new NbtPredicateParser<>(parseContext);
-    return n.parsePredicate(mustExpectSign, equalsForDefault);
+    return n.parseNbtPredicate(mustExpectSign, equalsForDefault);
   }
 
   @Override

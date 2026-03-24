@@ -35,7 +35,7 @@ public record NbtPredicateArgument(boolean onlyCompounds, CommandBuildContext co
   public NbtPredicate parse(StringReader reader) throws CommandSyntaxException {
     final ParseContext<Object> parseContext = new ParseContext<>(commandBuildContext, reader, false, false);
     final NbtPredicateParser<?> parser = new NbtPredicateParser<>(parseContext);
-    return onlyCompounds ? parser.parseCompound(false, false) : parser.parsePredicate(false, false);
+    return onlyCompounds ? parser.parseCompound(false, false) : parser.parseNbtPredicate(false, false);
   }
 
   @Override
@@ -48,7 +48,7 @@ public record NbtPredicateArgument(boolean onlyCompounds, CommandBuildContext co
       if (onlyCompounds) {
         parser.parseCompound(false, false);
       } else {
-        parser.parsePredicate(false, false);
+        parser.parseNbtPredicate(false, false);
       }
     } catch (CommandSyntaxException ignore) {
     }
