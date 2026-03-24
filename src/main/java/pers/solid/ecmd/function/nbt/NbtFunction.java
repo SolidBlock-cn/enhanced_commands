@@ -93,7 +93,7 @@ public interface NbtFunction extends ExpressionConvertible {
 
   static <S> NbtFunction parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     final NbtFunctionParser<S> n = new NbtFunctionParser<>(parseContext);
-    return n.parseFunction(mustExpectSign, equalsForDefault);
+    return n.parseNbtFunction(mustExpectSign, equalsForDefault);
   }
 
   /**

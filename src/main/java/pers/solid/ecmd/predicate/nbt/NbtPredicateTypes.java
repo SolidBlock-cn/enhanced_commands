@@ -1,8 +1,13 @@
 package pers.solid.ecmd.predicate.nbt;
 
+import com.google.common.base.Supplier;
+import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
+import pers.solid.ecmd.parse.FunctionContentParser;
+
+import java.util.Map;
 
 public class NbtPredicateTypes {
   private static final RegistryBridge<NbtPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtPredicateType.REGISTRY);
@@ -15,6 +20,7 @@ public class NbtPredicateTypes {
   public static final NbtPredicateType<MatchCompoundNbtPredicate> MATCH_COMPOUND = register("match_compound", MatchCompoundNbtPredicate.Type.MATCH_COMPOUND_TYPE);
   public static final NbtPredicateType<MatchListNbtPredicate> MATCH_LIST = register("match_list", MatchListNbtPredicate.Type.MATCH_LIST_TYPE);
   public static final NbtPredicateType<MatchPrimitiveNbtPredicate> MATCH_PRIMITIVE = register("match_primitive", MatchPrimitiveNbtPredicate.Type.MATCH_PRIMITIVE_TYPE);
+  public static final NbtPredicateType<NegatingNbtPredicate> NEGATING = register("negating", NegatingNbtPredicate.Type.NEGATING_TYPE);
   public static final NbtPredicateType<RangeNbtPredicate> RANGE = register("exhaustion", RangeNbtPredicate.Type.RANGE_TYPE);
   public static final NbtPredicateType<RegexNbtPredicate> REGEX = register("regex", RegexNbtPredicate.Type.REGEX_TYPE);
 
@@ -31,10 +37,12 @@ public class NbtPredicateTypes {
 
 
   private static void registerFunctions() {
-
+    final Map<String, Supplier<FunctionContentParser<? extends NbtPredicate>>> map = NbtPredicateParsing.FUNCTIONS;
+    map.put("regex", RegexNbtPredicate.Parser::new);
   }
 
   private static void registerFunctionNames() {
-
+    final Map<String, Component> map = NbtPredicateParsing.FUNCTION_NAMES;
+    map.put("regex", Component.translatable("enhanced_commands.nbt_predicate.regex"));
   }
 }
