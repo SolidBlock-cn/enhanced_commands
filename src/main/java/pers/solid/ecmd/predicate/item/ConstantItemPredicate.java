@@ -11,7 +11,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 
-public enum ConstantItemPredicate implements ItemPredicateEntry {
+public enum ConstantItemPredicate implements ItemPredicateWithoutContext {
   ALWAYS_TRUE(true),
   ALWAYS_FALSE(false);
   private final boolean value;

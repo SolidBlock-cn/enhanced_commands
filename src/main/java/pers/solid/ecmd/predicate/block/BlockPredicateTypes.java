@@ -45,7 +45,8 @@ public final class BlockPredicateTypes {
     return REGISTRY_BRIDGE.register(name, value);
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends BlockPredicate>>> map) {
+  private static void registerFunctions() {
+    final Map<String, Supplier<FunctionContentParser<? extends BlockPredicate>>> map = BlockPredicateParsing.FUNCTIONS;
     map.put("all", AllBlockPredicate.Parser::new);
     map.put("any", AnyBlockPredicate.Parser::new);
     map.put("checkerboard", CheckerboardBlockPredicate.Parser::new);
@@ -60,7 +61,8 @@ public final class BlockPredicateTypes {
     map.put("same", () -> new BiPredicateBlockPredicate.Parser(true));
   }
 
-  private static void registerFunctionNames(Map<String, Component> map) {
+  private static void registerFunctionNames() {
+    final Map<String, Component> map = BlockPredicateParsing.FUNCTION_NAMES;
     map.put("all", Component.translatable("enhanced_commands.block_predicate.all"));
     map.put("any", Component.translatable("enhanced_commands.block_predicate.any"));
     map.put("checkerboard", Component.translatable("enhanced_commands.block_predicate.checkerboard"));
@@ -78,7 +80,7 @@ public final class BlockPredicateTypes {
   public static void init(InitializeContext context) {
     RegistryBridge.registerToRootRegistry(BlockPredicateType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
-    registerFunctions(BlockPredicateParsing.FUNCTIONS);
-    registerFunctionNames(BlockPredicateParsing.FUNCTION_NAMES);
+    registerFunctions();
+    registerFunctionNames();
   }
 }

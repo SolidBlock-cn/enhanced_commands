@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
-public record UnknownItemPredicate(Predicate<ItemStack> forward) implements ItemPredicateEntry {
+public record UnknownItemPredicate(Predicate<ItemStack> forward) implements ItemPredicateWithoutContext {
   public static final MapCodec<UnknownItemPredicate> CODEC = MapCodec.unit(new UnknownItemPredicate(Predicates.alwaysFalse()));
 
   @Override

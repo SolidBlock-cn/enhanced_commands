@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.OptionalLong;
 import java.util.Set;
 
-public record ProbabilityItemPredicate(float probability, @NotNull ItemPredicate predicate, OptionalLong seed) implements ItemPredicate {
+public record ProbabilityItemPredicate(float probability, @NotNull ItemPredicate predicate, OptionalLong seed) implements ItemPredicateEntry {
   public static final MapCodec<ProbabilityItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(ProbabilityItemPredicate::new,
       Codec.FLOAT.fieldOf("probability").forGetter(ProbabilityItemPredicate::probability),
       ItemPredicate.CODEC.optionalFieldOf("predicate", ConstantItemPredicate.ALWAYS_TRUE).forGetter(ProbabilityItemPredicate::predicate),

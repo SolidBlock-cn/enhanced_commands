@@ -184,7 +184,9 @@ public final class CodecUtil {
 
       @Override
       public <T> DataResult<T> encode(A input, DynamicOps<T> ops, T prefix) {
-        final B cast = function.apply(input);
+        // 这是考虑到，如果序列化为 NBT，考虑到 NBT 的列表含有不同类型元素可能会存在问题，因此序列化 NBT 时，使用序列化为 map；
+        // 在 1.21.5 后不需要这么做。
+        final B cast = ops.createBoolean(false) instanceof Tag ? null : function.apply(input);
         if (cast == null) {
           return mapBased.encode(input, ops, prefix);
         } else {

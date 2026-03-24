@@ -36,12 +36,13 @@ public final class NbtFunctionTypes {
   public static void init(InitializeContext context) {
     RegistryBridge.registerToRootRegistry(NbtFunctionType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
-    registerFunctions(NbtFunctionParsing.FUNCTIONS);
-    registerFunctionNames(NbtFunctionParsing.FUNCTION_NAMES);
+    registerFunctions();
+    registerFunctionNames();
   }
 
 
-  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends NbtFunction>>> map) {
+  private static void registerFunctions() {
+    final Map<String, Supplier<FunctionContentParser<? extends NbtFunction>>> map = NbtFunctionParsing.FUNCTIONS;
     map.put("concat", ConcatNbtFunction.Parser::new);
     map.put("from", GetDataNbtFunction.Parser::new);
     map.put("pos", PosNbtFunction.Parser::new);
@@ -51,7 +52,8 @@ public final class NbtFunctionTypes {
     map.put("substring", SubstringNbtFunction.Parser::new);
   }
 
-  private static void registerFunctionNames(Map<String, Component> map) {
+  private static void registerFunctionNames() {
+    final Map<String, Component> map = NbtFunctionParsing.FUNCTION_NAMES;
     map.put("concat", Component.translatable("enhanced_commands.nbt_function.concat"));
     map.put("from", Component.translatable("enhanced_commands.nbt_function.from"));
     map.put("pos", Component.translatable("enhanced_commands.nbt_function.pos"));

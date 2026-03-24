@@ -1,13 +1,8 @@
 package pers.solid.ecmd.predicate.nbt;
 
-import com.google.common.base.Supplier;
-import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionContentParser;
-
-import java.util.Map;
 
 public class NbtPredicateTypes {
   private static final RegistryBridge<NbtPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtPredicateType.REGISTRY);
@@ -30,16 +25,16 @@ public class NbtPredicateTypes {
   public static void init(InitializeContext context) {
     RegistryBridge.registerToRootRegistry(NbtPredicateType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
-    registerFunctions(NbtPredicateParsing.FUNCTIONS);
-    registerFunctionNames(NbtPredicateParsing.FUNCTION_NAMES);
+    registerFunctions();
+    registerFunctionNames();
   }
 
 
-  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends NbtPredicate>>> map) {
+  private static void registerFunctions() {
 
   }
 
-  private static void registerFunctionNames(Map<String, Component> map) {
+  private static void registerFunctionNames() {
 
   }
 }

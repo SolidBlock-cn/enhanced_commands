@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPredicate> components) implements ItemPredicate {
+public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPredicate> components) implements ItemPredicateEntry {
   public static final MapCodec<SimpleCombinationItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       ItemPredicate.CODEC.comapFlatMap(predicate -> {
         try {
@@ -103,6 +103,11 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
     return itemType.asString() + (components.isEmpty() ? "" : components.stream().map(SimpleCombinationItemPredicate::toEntryString).collect(Collectors.joining(", ", "[", "]")));
   }
 
+  @Override
+  public String asEntryString() {
+    return "(" + asString() + ")";
+  }
+
   private static String toEntryString(ItemPredicate predicate) {
     if (predicate instanceof NegatingItemPredicate negating) {
       return "!" + toEntryString(negating.predicate());
@@ -111,7 +116,7 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
     } else if (predicate instanceof ItemPredicateEntry entry) {
       return entry.asEntryString();
     } else {
-      return predicate.asString();
+      return "(" + predicate.asString() + ")";
     }
   }
 

@@ -29,6 +29,7 @@
     "general.CommandContextMixin",
     "general.CommandsMixin",
     "general.ComponentPredicateParserMixin",
+    "general.ComponentPredicateParserMixin$ContextMixin",
     "general.EntityArgumentMixin",
     "general.EntityMixin",
     "general.EntitySelectorMixin",
