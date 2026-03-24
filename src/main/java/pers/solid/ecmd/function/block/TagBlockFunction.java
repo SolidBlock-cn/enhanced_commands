@@ -79,7 +79,7 @@ public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<Prop
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
         final TagKey<Block> tagKey = parser.tagId.key();
-        return new TagBlockFunction(parseContext.commandBuildContext().lookupOrThrow(Registries.BLOCK).getOrThrow(tagKey), parser.propertyNameFunctions);
+        return new TagBlockFunction(parseContext.registries().lookupOrThrow(Registries.BLOCK).getOrThrow(tagKey), parser.propertyNameFunctions);
       } else {
         return null;
       }

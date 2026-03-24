@@ -1,7 +1,6 @@
 package pers.solid.ecmd.curve;
 
 import com.google.common.base.Supplier;
-import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
@@ -26,17 +25,18 @@ public final class CurveTypes {
   public static void init(InitializeContext context) {
     RegistryBridge.registerToRootRegistry(CurveType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
-    registerFunctions(CurveParsing.FUNCTIONS);
-    registerFunctionNames(CurveParsing.FUNCTION_NAMES);
+    registerFunctions();
+    registerFunctionNames();
   }
 
 
-  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends CurveProvider<?>>>> map) {
+  private static void registerFunctions() {
+    final Map<String, Supplier<FunctionContentParser<? extends CurveProvider<?>>>> map = CurveParsing.FUNCTIONS;
     map.put("straight", StraightCurve.Parser::new);
     map.put("circle", CircleCurve.Parser::new);
   }
 
 
-  private static void registerFunctionNames(Map<String, Component> map) {
+  private static void registerFunctionNames() {
   }
 }

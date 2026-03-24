@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record ComponentValueCheckItemPredicate<T>(DataComponentType<T> componentType, T value) implements ItemPredicateEntry {
+public record ComponentValueCheckItemPredicate<T>(DataComponentType<T> componentType, T value) implements ItemPredicateEntry, ItemPredicateWithoutContext {
   public static final MapCodec<ComponentValueCheckItemPredicate<?>> CODEC = DataComponentType.PERSISTENT_CODEC.dispatchMap("component_type", ComponentValueCheckItemPredicate::componentType, ComponentValueCheckItemPredicate::codecForComponentType);
 
   @Override
@@ -24,7 +24,7 @@ public record ComponentValueCheckItemPredicate<T>(DataComponentType<T> component
 
   @Override
   public @NotNull String asString() {
-    return "[" + asEntryString() + "]";
+    return "*[" + asEntryString() + "]";
   }
 
   @Override

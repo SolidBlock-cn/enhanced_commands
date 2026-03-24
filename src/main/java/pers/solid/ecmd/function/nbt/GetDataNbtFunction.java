@@ -3,6 +3,7 @@ package pers.solid.ecmd.function.nbt;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.nbt.Tag;
@@ -68,7 +69,7 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
       switch (paramIndex) {
-        case 0 -> nbtSource = parseContext.parseAndSuggestArgument(NbtSourceArgument.nbtSource(parseContext.commandBuildContext()));
+        case 0 -> nbtSource = parseContext.parseAndSuggestArgument(NbtSourceArgument.nbtSource((CommandBuildContext) parseContext.registries()));
         case 1 -> nbtPath = parseContext.parseAndSuggestArgument(NbtPathArgument.nbtPath());
         case 2 -> nbtConcentrationType = parseContext.parseAndSuggestArgument(SimpleEnumArgument.nbtConcentrationType());
       }

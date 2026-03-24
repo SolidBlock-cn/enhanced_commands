@@ -20,7 +20,7 @@ public final class ItemPredicateTypes {
   public static final NegatingItemPredicate.Type NEGATING = register("negating", NegatingItemPredicate.Type.NEGATING_TYPE);
   public static final ProbabilityItemPredicate.Type PROBABILITY = register("probability", ProbabilityItemPredicate.Type.PROBABILITY_TYPE);
   public static final SimpleItemPredicate.Type SIMPLE = register("simple", SimpleItemPredicate.Type.SIMPLE_TYPE);
-  public static final SimpleCombinationItemPredicate.Type SIMPLE_COMBINATION = register("simmple_combination", SimpleCombinationItemPredicate.Type.SIMPLE_COMBINATION_TYPE);
+  public static final SimpleCombinationItemPredicate.Type SIMPLE_COMBINATION = register("simple_combination", SimpleCombinationItemPredicate.Type.SIMPLE_COMBINATION_TYPE);
   public static final TagItemPredicate.Type SIMPLE_TAG = register("simple_tag", TagItemPredicate.Type.SIMPLE_TAG_TYPE);
   public static final UnknownItemPredicate.Type UNKNOWN = register("unknown", UnknownItemPredicate.Type.UNKNOWN_TYPE);
 
@@ -34,10 +34,14 @@ public final class ItemPredicateTypes {
   public static void init(InitializeContext context) {
     RegistryBridge.registerToRootRegistry(ItemPredicateType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
-    registerFunctions(ItemPredicateParsing.FUNCTIONS);
+    registerFunctions();
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends ItemPredicate>>> map) {
+  private static void registerFunctions() {
+    final Map<String, Supplier<FunctionContentParser<? extends ItemPredicate>>> map = ItemPredicateParsing.FUNCTIONS;
+    map.put("all", AllItemPredicate.Parser::new);
+    map.put("any", AnyItemPredicate.Parser::new);
+    map.put("count", CountItemPredicate.Parser::new);
     map.put("probability", ProbabilityItemPredicate.Parser::new);
   }
 }

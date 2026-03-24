@@ -40,6 +40,9 @@ public class ItemPredicateArgument implements ArgumentType<ItemPredicate> {
     return context.getArgument(name, ItemPredicate.class);
   }
 
+  /**
+   * @see pers.solid.ecmd.mixins.general.ItemPredicateArgumentMixin.ContextMixin#combine$enhanced_commands(List)
+   */
   @Override
   public ItemPredicate parse(StringReader stringReader) throws CommandSyntaxException {
     final Grammar<List<Predicate<ItemStack>>> grammarWithContext = ((ItemPredicateArgumentAccessor) forward).getGrammarWithContext();

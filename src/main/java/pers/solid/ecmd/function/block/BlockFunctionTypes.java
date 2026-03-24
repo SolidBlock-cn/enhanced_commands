@@ -58,11 +58,12 @@ public final class BlockFunctionTypes {
     RegistryBridge.registerToRootRegistry(BlockFunctionType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
 
-    registerFunctions(BlockFunctionParsing.FUNCTIONS);
-    registerFunctionNames(BlockFunctionParsing.FUNCTION_NAMES);
+    registerFunctions();
+    registerFunctionNames();
   }
 
-  private static void registerFunctions(Map<String, Supplier<FunctionContentParser<? extends BlockFunction>>> map) {
+  private static void registerFunctions() {
+    final Map<String, Supplier<FunctionContentParser<? extends BlockFunction>>> map = BlockFunctionParsing.FUNCTIONS;
     map.put("pick", PickBlockFunction.Parser::new);
     map.put("dry", DryBlockFunction.Parser::new);
     map.put("overlay", OverlayBlockFunction.Parser::new);
@@ -81,7 +82,8 @@ public final class BlockFunctionTypes {
     map.put("checkerboard-tag", CheckerboardTagBlockFunction.Parser::new);
   }
 
-  private static void registerFunctionNames(Map<String, Component> map) {
+  private static void registerFunctionNames() {
+    final Map<String, Component> map = BlockFunctionParsing.FUNCTION_NAMES;
     map.put("pick", Component.translatable("enhanced_commands.block_function.pick"));
     map.put("dry", Component.translatable("enhanced_commands.block_function.dry"));
     map.put("overlay", Component.translatable("enhanced_commands.block_function.overlay"));

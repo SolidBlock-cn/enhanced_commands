@@ -33,6 +33,9 @@ public abstract class GrammarMixin {
     share.set(null); // 使用 null 而非空列表，以避免每次都创建对象
   }
 
+  /**
+   * 用于使 Packrat 的解析器支持自定义的 {@link EnhancedSuggestionSupplier}，使其获取额外建议，并如果有值，将其与已有的建议合并。
+   */
   @Inject(method = "parseForSuggestions", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/SharedSuggestionProvider;suggest(Ljava/util/stream/Stream;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;"))
   private void replacedSuggestCall(SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local ErrorEntry<StringReader> errorEntry, @Share(SHARE_NAME) LocalRef<List<CompletableFuture<Suggestions>>> share) {
     // 不会取消原行为，因为 EnhancedSuggestionSupplier 会通过原版途径提供空建议。
@@ -55,6 +58,9 @@ public abstract class GrammarMixin {
     }
   }
 
+  /**
+   * 将已获取到的额外建议与通过常规方式得到的建议合并。
+   */
   @ModifyReturnValue(method = "parseForSuggestions", at = @At("RETURN"), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/commands/SharedSuggestionProvider;suggest(Ljava/util/stream/Stream;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;")))
   private CompletableFuture<Suggestions> combineSuggestedValues(CompletableFuture<Suggestions> original, @Share(SHARE_NAME) LocalRef<List<CompletableFuture<Suggestions>>> share, @Local(argsOnly = true) SuggestionsBuilder builder) {
     final List<CompletableFuture<Suggestions>> extraSuggestions = share.get();

@@ -89,7 +89,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
     @Override
     public LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
-        final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.commandBuildContext().asGetterLookup().get(Registries.PREDICATE, ResourceKey.create(Registries.PREDICATE, id));
+        final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.registries().asGetterLookup().get(Registries.PREDICATE, ResourceKey.create(Registries.PREDICATE, id));
         if (lootCondition.isEmpty()) {
           parseContext.reader().setCursor(cursorBeforeId);
           throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.UNKNOWN_LOOT_TABLE_PREDICATE_ID.createWithContext(parseContext.reader(), id.toString()), cursorAfterId);

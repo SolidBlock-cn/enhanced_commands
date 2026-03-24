@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Collectors;
 
-public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateEntry {
+public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateWithoutContext {
   public static final Codec<TagItemPredicate> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.ITEM).<HolderSet<Item>>flatXmap(tagKey -> BuiltInRegistries.ITEM.getTag(tagKey).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag: " + tagKey.location())), items -> items.unwrapKey().map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag"))).xmap(TagItemPredicate::new, TagItemPredicate::items);
 
   public static final MapCodec<TagItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("items").forGetter(TagItemPredicate::items)).apply(i, TagItemPredicate::new));

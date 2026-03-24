@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
@@ -24,17 +25,25 @@ import java.util.function.Predicate;
  */
 public interface ItemPredicate extends ExpressionConvertible {
   MapCodec<ItemPredicate> MAP_CODEC = ItemPredicateType.REGISTRY.byNameCodec().dispatchMap(ItemPredicate::getType, ItemPredicateType::getCodec);
-  Codec<ItemPredicate> CODEC = CodecUtil.combined(CodecUtil.combinedIdAndTag(SimpleItemPredicate.STRING_BASED_CODEC, TagItemPredicate.STRING_BASED_CODEC), MAP_CODEC.codec(), predicate -> predicate instanceof TagItemPredicate simpleTag && simpleTag.items().unwrapKey().isPresent() ? Either.right(simpleTag) : predicate instanceof SimpleItemPredicate simpleItem ? Either.left(simpleItem) : null, either -> either.map(Function.identity(), Function.identity()));
+  Codec<ItemPredicate> CODEC = CodecUtil.combined(CodecUtil.combinedIdAndTag(SimpleItemPredicate.STRING_BASED_CODEC, TagItemPredicate.STRING_BASED_CODEC),
+      MAP_CODEC.codec(),
+      predicate -> predicate instanceof TagItemPredicate simpleTag && simpleTag.items().unwrapKey().isPresent() ? Either.right(simpleTag) : predicate instanceof SimpleItemPredicate simpleItem ? Either.left(simpleItem) : null,
+      either -> either.map(Function.identity(), Function.identity()));
 
   ResourceKey<Registry<ItemPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("item_predicate"));
 
-  static Predicate<ItemStack> vanillaWrapper(Predicate<ItemStack> vanilla, ItemPredicate modded) {
+  static Predicate<ItemStack> asVanillaPredicate(ItemPredicate modded, Predicate<ItemStack> vanilla) {
+    if (modded instanceof ItemPredicateWithoutContext withoutContext) {
+      return withoutContext;
+    }
     return new VanillaWrapper(modded, vanilla);
   }
 
   static ItemPredicate convertOrUnknown(Predicate<ItemStack> forward) {
     if (forward instanceof VanillaWrapper itemPredicateEntry) {
       return itemPredicateEntry.modded;
+    } else if (forward instanceof ItemPredicateWithoutContext withoutContext) {
+      return withoutContext;
     } else {
       return new UnknownItemPredicate(forward);
     }
@@ -45,7 +54,7 @@ public interface ItemPredicate extends ExpressionConvertible {
   @NotNull ItemPredicateType<?> getType();
 
   static ItemPredicate parse(ParseContext<?> context) throws CommandSyntaxException {
-    return ItemPredicateArgument.itemPredicate(context.commandBuildContext()).parse(context.reader());
+    return context.parseAndSuggestArgument(ItemPredicateArgument.itemPredicate((CommandBuildContext) context.registries()));
   }
 
   class VanillaWrapper implements Predicate<ItemStack> {

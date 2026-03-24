@@ -7,7 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public record ComponentPresenceItemPredicate<T>(DataComponentType<T> componentType) implements ItemPredicateEntry {
+public record ComponentPresenceItemPredicate<T>(DataComponentType<T> componentType) implements ItemPredicateEntry, ItemPredicateWithoutContext {
   private static final MapCodec<ComponentPresenceItemPredicate<?>> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(DataComponentType.CODEC.fieldOf("component_type").forGetter(ComponentPresenceItemPredicate::componentType)).apply(i, ComponentPresenceItemPredicate::new));
 
   @Override
@@ -22,7 +22,7 @@ public record ComponentPresenceItemPredicate<T>(DataComponentType<T> componentTy
 
   @Override
   public @NotNull String asString() {
-    return "[" + asEntryString() + "]";
+    return "*[" + asEntryString() + "]";
   }
 
   @Override
