@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 
@@ -46,12 +45,12 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   ).apply(i, CompoundNbtFunction::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(false);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public String asString(boolean requirePrefix) {
     return (allowsMerge ? (requirePrefix ? ": " : "") : "= ") + "{" + source.entrySet().stream().map(entry -> {
       final String key = entry.getKey();
       final NbtFunction value = entry.getValue();
@@ -65,14 +64,14 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   }
 
   @Override
-  public @NotNull NbtFunctionType<?> getType() {
+  public NbtFunctionType<?> getType() {
     return Type.COMPOUND_TYPE;
   }
 
   @Override
-  public @NotNull CompoundTag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public CompoundTag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     final CompoundTag targetCompound = (nbtElement instanceof final CompoundTag nbtCompound && allowsMerge) ? nbtCompound : new CompoundTag();
-    for (Map.Entry<String, NbtFunction> entry : source.entrySet()) {
+    for (Map.Entry<String, @Nullable NbtFunction> entry : source.entrySet()) {
       String key = entry.getKey();
       NbtFunction nbtFunction = entry.getValue();
       if (nbtFunction == null) {

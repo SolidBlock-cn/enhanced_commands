@@ -8,7 +8,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import org.apache.commons.lang3.function.FailableFunction;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.NbtFunctionParser;
@@ -37,7 +36,7 @@ public interface NbtFunction extends ExpressionConvertible {
    * @param predicate   仅符合该谓词的 NBT 元素会被应用。
    * @return 被修改后的 NBT 元素
    */
-  static @NotNull Tag recursivelyApply(FailableFunction<@Nullable Tag, @Nullable Tag, CommandSyntaxException> nbtFunction, Tag nbtElement, @Nullable Predicate<@NotNull Tag> predicate) throws CommandSyntaxException {
+  static Tag recursivelyApply(FailableFunction<@Nullable Tag, @Nullable Tag, CommandSyntaxException> nbtFunction, Tag nbtElement, @Nullable Predicate<Tag> predicate) throws CommandSyntaxException {
     if (predicate == null || predicate.test(nbtElement)) {
       final Tag applied = nbtFunction.apply(nbtElement);
       if (applied != null) {
@@ -100,7 +99,6 @@ public interface NbtFunction extends ExpressionConvertible {
    * 将 NBT 函数用字符串表示后的结果。
    */
   @Override
-  @NotNull
   String asString();
 
   /**
@@ -108,7 +106,6 @@ public interface NbtFunction extends ExpressionConvertible {
    *
    * @param requirePrefix 是否强制在返回的结果前加上冒号或等于号。通常用于 NBT 复合标签的值。比如，NBT 函数“<code>:3</code>”可以写成“<code>3</code>”，但是“<code>{x: 3}</code>”显然不能写成“<code>{x 3}</code>”。
    */
-  @NotNull
   default String asString(boolean requirePrefix) {
     return requirePrefix ? ": " + asString() : asString();
   }
@@ -116,20 +113,20 @@ public interface NbtFunction extends ExpressionConvertible {
   /**
    * @return NBT 函数的类型，将用于序列化。
    */
-  @NotNull NbtFunctionType<?> getType();
+  NbtFunctionType<?> getType();
 
   /**
    * 根据现有的 NBT 元素（可能为 null）返回所需要的 NBT 元素。允许完全忽略原先的 NBT 元素。当接收的 NBT 元素为可变对象时，可能会直接修改并返回它。
    *
    * @param nbtElement 需要被应用的 NBT 元素，可能自身会被修改
    */
-  @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException;
+  Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException;
 
-  default @NotNull FailableFunction<Tag, Tag, CommandSyntaxException> asJavaFunction(ExecutionContext context) {
+  default FailableFunction<Tag, Tag, CommandSyntaxException> asJavaFunction(ExecutionContext context) {
     return input -> apply(input, context);
   }
 
-  default @NotNull Tag recursivelyApply(Tag nbtElement, NbtPredicate predicate, ExecutionContext context) throws CommandSyntaxException {
+  default Tag recursivelyApply(Tag nbtElement, NbtPredicate predicate, ExecutionContext context) throws CommandSyntaxException {
     return recursivelyApply(input -> this.apply(input, context), nbtElement, predicate);
   }
 

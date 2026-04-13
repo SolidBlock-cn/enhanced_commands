@@ -5,7 +5,6 @@ import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.nbt.PosNbtFunction;
 import pers.solid.ecmd.parse.FunctionContentParser;
 
 import java.util.Map;
@@ -16,6 +15,7 @@ public final class NbtFunctionTypes {
   // 基本的 NBT 函数
   public static final NbtFunctionType<CompoundNbtFunction> COMPOUND = register("compound", CompoundNbtFunction.Type.COMPOUND_TYPE);
   public static final NbtFunctionType<ListOpsNbtFunction> LIST_OPS = register("list_ops", ListOpsNbtFunction.Type.LIST_OPS_TYPE);
+  public static final NbtFunctionType<ListInsertionNbtFunction> LIST_INSERTION = register("list_insertion", ListInsertionNbtFunction.Type.LIST_INSERTION_TYPE);
   public static final NbtFunctionType<NumberValueNbtFunction> NUMBER_VALUE = register("number_value", NumberValueNbtFunction.Type.NUMBER_VALUE_TYPE);
   public static final NbtFunctionType<SimpleNbtFunction> SIMPLE = register("simple", SimpleNbtFunction.Type.SIMPLE_TYPE);
 
