@@ -1,24 +1,16 @@
 package pers.solid.ecmd.function.nbt;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -52,96 +44,60 @@ import java.util.stream.Stream;
  *   [2: a; A, ..., B]({d, e, f}) = [A, d, a, f, B]
  * </pre>
  */
-public record ListOpsNbtFunction(@NotNull List<NbtFunction> valueReplacements, @NotNull Map<Integer, NbtFunction> positionalFunctions, @NotNull Map<Integer, List<NbtFunction>> positionalInsertions) implements NbtFunction {
+public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<PositionalListEntry<NbtFunction>> positionalFunctions) implements ListNbtFunction {
   public static final MapCodec<ListOpsNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.list(NbtFunction.CODEC).optionalFieldOf("value_replacements", ImmutableList.of()).forGetter(ListOpsNbtFunction::valueReplacements),
-      Codec.unboundedMap(Codec.INT, NbtFunction.CODEC).optionalFieldOf("positional_functions", ImmutableMap.of()).forGetter(ListOpsNbtFunction::positionalFunctions),
-      Codec.unboundedMap(Codec.INT, Codec.list(NbtFunction.CODEC)).optionalFieldOf("positional_insertions", ImmutableMap.of()).forGetter(ListOpsNbtFunction::positionalInsertions)
+      PositionalListEntry.codec(NbtFunction.CODEC).listOf().optionalFieldOf("positional_functions", ImmutableList.of()).forGetter(ListOpsNbtFunction::positionalFunctions)
   ).apply(i, ListOpsNbtFunction::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(false);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
-    final Function<Map.Entry<Integer, NbtFunction>, String> indexValueToStringMapper = entry -> {
-      final int index = entry.getKey();
-      final String valueAsString = entry.getValue().asString();
-      return index + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
-    };
-    final Function<Map.Entry<Integer, List<NbtFunction>>, String> indexValuesToStringMapper = entry -> {
-      final int index = entry.getKey();
-      MutableBoolean elementRequiresPrefix = new MutableBoolean(true);
-      final String valueAsString = entry.getValue().stream().map(nbtFunction -> {
-        final boolean value = elementRequiresPrefix.booleanValue();
-        elementRequiresPrefix.setFalse();
-        return nbtFunction.asString(value);
-      }).collect(Collectors.joining(", "));
+  public String asString(boolean requirePrefix) {
+    final Function<PositionalListEntry<NbtFunction>, String> indexValueToStringMapper = entry -> {
+      final int index = entry.index();
+      final String valueAsString = entry.value().asString();
       return index + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
     };
     return (requirePrefix ? ": " : "") + "[" + Stream.<String>concat(
         valueReplacements.isEmpty() ? Stream.empty() : valueReplacements.stream().map(NbtFunction::asString),
-        positionalFunctions.isEmpty() ? Stream.empty() : positionalFunctions.entrySet().stream().map(indexValueToStringMapper)
-    ).collect(Collectors.joining(", ")) + ((!valueReplacements.isEmpty() || !positionalFunctions.isEmpty()) && !positionalInsertions.isEmpty() ? "; " : "") + (positionalInsertions.isEmpty() ? "" : Streams.concat(
-        positionalInsertions.entrySet().stream().filter(entry -> entry.getKey() < 0).map(indexValuesToStringMapper),
-        Stream.of("..."),
-        Streams.concat(
-            positionalInsertions.entrySet().stream().filter(entry -> entry.getKey() >= 0).map(indexValuesToStringMapper)
-        )).collect(Collectors.joining(", "))) + "]";
+        positionalFunctions.isEmpty() ? Stream.empty() : positionalFunctions.stream().map(indexValueToStringMapper)
+    ).collect(Collectors.joining(", ")) + "]";
   }
 
   @Override
-  public @NotNull NbtFunctionType<?> getType() {
+  public Type getType() {
     return Type.LIST_OPS_TYPE;
   }
 
   @Override
-  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
-    final ListTag targetList = nbtElement instanceof final ListTag nbtList ? nbtList : new ListTag();
+  public ListTag applyOnList(ListTag listTag, ExecutionContext context) throws CommandSyntaxException {
     if (!valueReplacements.isEmpty()) {
-      targetList.clear();
+      listTag.clear();
       try {
         for (NbtFunction nbtFunction : valueReplacements) {
-          targetList.add(nbtFunction.apply(null, context));
+          listTag.add(nbtFunction.apply(null, context));
         }
       } catch (UnsupportedOperationException ignored) {
       }
     }
     if (!positionalFunctions.isEmpty()) {
-      for (Map.Entry<Integer, NbtFunction> entry : positionalFunctions.entrySet()) {
-        int index = entry.getKey();
-        final NbtFunction function = entry.getValue();
+      for (PositionalListEntry<NbtFunction> entry : positionalFunctions) {
+        int index = entry.index();
+        final NbtFunction function = entry.value();
         if (index < 0) {
-          index += targetList.size();
+          index += listTag.size();
         }
         try {
-          targetList.setTag(index, function.apply(targetList.get(index), context));
+          listTag.setTag(index, function.apply(listTag.get(index), context));
         } catch (UnsupportedOperationException | IndexOutOfBoundsException ignored) {
         }
       }
     }
-    if (!positionalInsertions.isEmpty()) {
-      final int[] positiveIndexes = positionalInsertions.keySet().stream().mapToInt(Integer::intValue).filter(value -> value >= 0).sorted().toArray();
-      final IntStream negativeIndexes = positionalInsertions.keySet().stream().mapToInt(Integer::intValue).filter(value -> value < 0).sorted();
-
-      final int[] array = IntStream.concat(IntStream.range(0, positiveIndexes.length).map(i -> positiveIndexes[positiveIndexes.length - 1 - i]), negativeIndexes).toArray();
-      for (int i = 0, arrayLength = array.length; i < arrayLength; i++) {
-        int index = array[i];
-        final List<NbtFunction> function = positionalInsertions.get(index);
-        if (index < 0) {
-          index += targetList.size() + 1;
-        }
-        try {
-          for (NbtFunction nbtFunction : function) {
-            targetList.add(index + i, nbtFunction.apply(null, context));
-          }
-        } catch (IndexOutOfBoundsException | UnsupportedOperationException ignored) {
-        }
-      }
-    }
-    return targetList;
+    return listTag;
   }
 
   public enum Type implements NbtFunctionType<ListOpsNbtFunction> {

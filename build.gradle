@@ -52,6 +52,9 @@ allprojects {
             officialMojangMappings()
             parchment("org.parchmentmc.data:parchment-$project.minecraft_version:$project.parchment_version@zip")
         }
+
+        // jspecify
+        implementation("org.jspecify:jspecify:1.0.0")
     }
 
     def targetJavaVersion = 21
