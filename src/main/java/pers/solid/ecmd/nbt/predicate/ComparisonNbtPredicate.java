@@ -25,6 +25,11 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implem
 
   @Override
   public String asString() {
+    return asString(true);
+  }
+
+  @Override
+  public String asString(boolean requirePrefix) {
     return comparator.getSerializedName() + " " + TextUtil.toSpacedStringNbt(expected);
   }
 

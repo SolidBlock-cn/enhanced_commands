@@ -33,7 +33,7 @@ public class FunctionsParser<T> implements Parser<T> {
   }
 
   @Override
-  public T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  public @Nullable T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorBeforeFunctionName = reader.getCursor();
     parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(functions, suggestionsBuilder.createOffset(cursorBeforeFunctionName), s -> s + "(", tooltipProvider::apply));

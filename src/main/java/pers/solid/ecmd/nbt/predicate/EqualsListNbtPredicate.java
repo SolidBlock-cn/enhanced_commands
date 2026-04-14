@@ -1,6 +1,5 @@
 package pers.solid.ecmd.nbt.predicate;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
@@ -10,10 +9,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
 
-public record EqualsListNbtPredicate(List<NbtPredicate> expected, boolean inverted) implements NbtPredicate {
+public record EqualsListNbtPredicate(List<NbtPredicate> expected) implements NbtPredicate {
   public static final MapCodec<EqualsListNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(EqualsListNbtPredicate::expected),
-      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(EqualsListNbtPredicate::inverted)
+      NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(EqualsListNbtPredicate::expected)
   ).apply(i, EqualsListNbtPredicate::new));
 
   @Override
@@ -23,23 +21,23 @@ public record EqualsListNbtPredicate(List<NbtPredicate> expected, boolean invert
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (inverted ? "!" : "") + (requirePrefix ? "= " : "") + "[" + expected.stream().map(nbtPredicate -> nbtPredicate.asString(true)).collect(Collectors.joining(", ")) + "]";
+    return (requirePrefix ? "= " : "") + "[" + expected.stream().map(nbtPredicate -> nbtPredicate.asString(true)).collect(Collectors.joining(", ")) + "]";
   }
 
   @Override
   public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final ListTag nbtList))
-      return inverted;
+      return false;
     if (nbtList.size() != expected.size())
-      return inverted;
+      return false;
     final ListIterator<NbtPredicate> listIterator = expected.listIterator();
     while (listIterator.hasNext()) {
       final int nextIndex = listIterator.nextIndex();
       if (!listIterator.next().test(nbtList.get(nextIndex))) {
-        return inverted;
+        return false;
       }
     }
-    return !inverted;
+    return true;
   }
 
   @Override

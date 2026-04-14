@@ -39,8 +39,7 @@ public record NbtFunctionArgument(boolean onlyCompounds, CommandBuildContext com
   @Override
   public NbtFunction parse(StringReader reader) throws CommandSyntaxException {
     final ParseContext<Object> parseContext = new ParseContext<>(commandBuildContext, reader, false, false);
-    final NbtFunctionParser<?> parser = new NbtFunctionParser<>(parseContext);
-    return onlyCompounds ? parser.parsePreferringCompound(false, false) : parser.parseNbtFunction(false, false);
+    return onlyCompounds ? NbtFunctionParser.parsePreferringCompound(parseContext, false, false) : NbtFunctionParser.parseNbtFunction(parseContext, false, false);
   }
 
   @Override
@@ -48,12 +47,11 @@ public record NbtFunctionArgument(boolean onlyCompounds, CommandBuildContext com
     StringReader stringReader = new StringReader(builder.getInput());
     stringReader.setCursor(builder.getStart());
     final ParseContext<S> parseContext = new ParseContext<>(commandBuildContext, stringReader, false, false);
-    final NbtFunctionParser<S> parser = new NbtFunctionParser<>(parseContext);
     try {
       if (onlyCompounds) {
-        parser.parseCompound(false);
+        NbtFunctionParser.parseCompound(parseContext, false);
       } else {
-        parser.parseNbtFunction(false, false);
+        NbtFunctionParser.parseNbtFunction(parseContext, false, false);
       }
     } catch (CommandSyntaxException ignore) {
     }

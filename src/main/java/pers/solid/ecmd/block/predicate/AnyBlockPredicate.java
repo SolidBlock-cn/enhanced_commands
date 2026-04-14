@@ -45,9 +45,9 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
     }
     final ImmutableList<TestResult> build = results.build();
     if (successes > 0) {
-      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.any.pass", successes, build.size()), build);
+      return TestResult.of(true, Component.translatable("enhanced_commands.predicate.any.pass", successes, build.size()), build);
     } else {
-      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.any.fail", successes, build.size()), build);
+      return TestResult.of(false, Component.translatable("enhanced_commands.predicate.any.fail", successes, build.size()), build);
     }
   }
 

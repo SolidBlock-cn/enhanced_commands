@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -56,7 +57,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@org.jetbrains.annotations.Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block block = blockState.getBlock();
     final String old = BuiltInRegistries.BLOCK.getKey(block).toString();
     final String replaced = pattern.matcher(old).replaceAll(replacement);

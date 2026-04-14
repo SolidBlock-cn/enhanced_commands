@@ -32,10 +32,9 @@ import java.util.stream.Collectors;
  *
  * @see net.minecraft.nbt.NbtUtils#compareNbt(Tag, Tag, boolean)
  */
-public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredicate> entries, boolean inverted) implements NbtPredicate {
+public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredicate> entries) implements NbtPredicate {
   public static final MapCodec<MatchCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC.listOf()).<ListMultimap<String, NbtPredicate>>xmap(map -> map.entrySet().stream().collect(ImmutableListMultimap.flatteningToImmutableListMultimap(Map.Entry::getKey, entry -> entry.getValue().stream())), map -> Maps.transformValues(map.asMap(), ImmutableList::copyOf)).fieldOf("entries").forGetter(matchCompoundNbtPredicate -> matchCompoundNbtPredicate.entries),
-      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MatchCompoundNbtPredicate::inverted)
+      Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC.listOf()).<ListMultimap<String, NbtPredicate>>xmap(map -> map.entrySet().stream().collect(ImmutableListMultimap.flatteningToImmutableListMultimap(Map.Entry::getKey, entry -> entry.getValue().stream())), map -> Maps.transformValues(map.asMap(), ImmutableList::copyOf)).fieldOf("entries").forGetter(matchCompoundNbtPredicate -> matchCompoundNbtPredicate.entries)
   ).apply(i, MatchCompoundNbtPredicate::new));
 
   @Override
@@ -45,7 +44,7 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredic
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + "{" + entries.entries().stream().map(pair -> {
+    return (requirePrefix ? ": " : "") + "{" + entries.entries().stream().map(pair -> {
       final String key = pair.getKey();
       final String keyAsString;
       final NbtPredicate value = pair.getValue();
@@ -66,14 +65,14 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredic
   @Override
   public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final CompoundTag nbtCompound))
-      return inverted;
-    for (Map.Entry<String, NbtPredicate> entry : entries.entries()) {
+      return false;
+    for (Map.Entry<@Nullable String, NbtPredicate> entry : entries.entries()) {
       final String key = entry.getKey();
       final NbtPredicate valuePredicate = entry.getValue();
       if (key != null) {
         final Tag actualElement = nbtCompound.get(key);
         if (actualElement == null || !valuePredicate.test(actualElement)) {
-          return inverted;
+          return false;
         }
       } else {
         boolean valueFound = false;
@@ -84,11 +83,11 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredic
           }
         }
         if (!valueFound) {
-          return inverted;
+          return false;
         }
       }
     }
-    return !inverted;
+    return true;
   }
 
   @Override

@@ -12,6 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.nbt.NbtParserShared;
 import pers.solid.ecmd.nbt.function.NbtFunction;
@@ -30,7 +32,7 @@ public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
     try {
       final Tag applied = nbtFunction.apply(blockEntityData.getValue(), context);
       if (applied instanceof CompoundTag nbtCompound) {
@@ -62,7 +64,7 @@ public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtParserShared.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '{') {
-        final NbtFunction nbtFunctionArgument = new NbtFunctionParser<>(parseContext).parsePreferringCompound(false, false);
+        final NbtFunction nbtFunctionArgument = NbtFunctionParser.parsePreferringCompound(parseContext, false, false);
         return new NbtBlockFunction(nbtFunctionArgument);
       } else {
         return null;

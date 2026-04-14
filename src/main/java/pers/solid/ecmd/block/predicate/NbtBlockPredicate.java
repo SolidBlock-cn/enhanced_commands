@@ -66,7 +66,7 @@ public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredi
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtParserShared.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '{') {
-        return new NbtBlockPredicate(new NbtPredicateParser<>(parseContext).parseCompound(false, false));
+        return new NbtBlockPredicate(NbtPredicateParser.parseCompound(parseContext, false));
       } else {
         return null;
       }

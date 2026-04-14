@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.argument.MirrorProvider;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -25,7 +26,7 @@ public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunctio
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@org.jetbrains.annotations.Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
     return blockState.mirror(mirror.apply((CommandSourceStack) context.positionProvider));
   }
 

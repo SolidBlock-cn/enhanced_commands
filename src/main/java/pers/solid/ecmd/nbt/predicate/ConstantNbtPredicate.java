@@ -34,6 +34,11 @@ public enum ConstantNbtPredicate implements NbtPredicate {
   }
 
   @Override
+  public NbtPredicate negate() {
+    return of(!value);
+  }
+
+  @Override
   public NbtPredicateType<ConstantNbtPredicate> getType() {
     return ConstantNbtPredicate.Type.CONSTANT_TYPE;
   }

@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.command.FillReplaceCommand;
@@ -106,7 +107,7 @@ public interface BlockFunction extends ExpressionConvertible {
     parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("{", NbtParserShared.START_OF_COMPOUND).buildFuture());
     if (reader.canRead() && reader.peek() == '{') {
       // 尝试读取 NBT
-      nbtFunction = new NbtFunctionParser<>(parseContext).parseCompound(false);
+      nbtFunction = NbtFunctionParser.parseCompound(parseContext, false);
     } else {
       nbtFunction = null;
     }
@@ -138,7 +139,7 @@ public interface BlockFunction extends ExpressionConvertible {
 
   default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context, @Nullable BlockState oldState, @Nullable BlockPlacementHistory history) {
     final BlockState origState = world.getBlockState(pos);
-    MutableObject<CompoundTag> blockEntityData = new MutableObject<>(null);
+    MutableObject<@Nullable CompoundTag> blockEntityData = new MutableObject<>(null);
     BlockState newState = getModifiedState(origState, origState, world, pos, blockEntityData, context);
     final int modFlags = context.modFlags;
     if ((modFlags & FillReplaceCommand.POST_PROCESS_FLAG) != 0) {
@@ -175,7 +176,7 @@ public interface BlockFunction extends ExpressionConvertible {
    * @param context         正在修改的方块修改时的 flags。
    * @return 修改后的方块状态。
    */
-  BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context);
+  BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context);
 
   BlockFunctionType<?> getType();
 

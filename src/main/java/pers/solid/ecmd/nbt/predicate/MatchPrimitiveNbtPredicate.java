@@ -1,6 +1,5 @@
 package pers.solid.ecmd.nbt.predicate;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtUtils;
@@ -16,10 +15,9 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  *   3b match 3 -> false
  * </pre>
  */
-public record MatchPrimitiveNbtPredicate(Tag expected, boolean inverted) implements NbtPredicate {
+public record MatchPrimitiveNbtPredicate(Tag expected) implements NbtPredicate {
   public static final MapCodec<MatchPrimitiveNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      CodecUtil.NBT_ELEMENT.fieldOf("expected").forGetter(MatchPrimitiveNbtPredicate::expected),
-      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MatchPrimitiveNbtPredicate::inverted)
+      CodecUtil.NBT_ELEMENT.fieldOf("expected").forGetter(MatchPrimitiveNbtPredicate::expected)
   ).apply(i, MatchPrimitiveNbtPredicate::new));
 
   @Override
@@ -29,12 +27,12 @@ public record MatchPrimitiveNbtPredicate(Tag expected, boolean inverted) impleme
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(expected);
+    return (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(expected);
   }
 
   @Override
   public boolean test(Tag nbtElement) {
-    return NbtUtils.compareNbt(nbtElement, expected, true) != inverted;
+    return NbtUtils.compareNbt(nbtElement, expected, true);
   }
 
   @Override

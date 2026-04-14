@@ -1,6 +1,5 @@
 package pers.solid.ecmd.nbt.predicate;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NumericTag;
@@ -10,8 +9,8 @@ import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.bridge.BridgeRange;
 
-public record RangeNbtPredicate(BridgeRange<?> numberRange, boolean inverted) implements NbtPredicate {
-  public static final MapCodec<RangeNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BridgeRange.CODEC.forGetter(RangeNbtPredicate::numberRange), Codec.BOOL.optionalFieldOf("inverted", false).forGetter(RangeNbtPredicate::inverted)).apply(i, RangeNbtPredicate::new));
+public record RangeNbtPredicate(BridgeRange<?> numberRange) implements NbtPredicate {
+  public static final MapCodec<RangeNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BridgeRange.CODEC.forGetter(RangeNbtPredicate::numberRange)).apply(i, RangeNbtPredicate::new));
 
   @Override
   public String asString() {
@@ -20,21 +19,21 @@ public record RangeNbtPredicate(BridgeRange<?> numberRange, boolean inverted) im
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + numberRange.asString();
+    return (requirePrefix ? ": " : "") + numberRange.asString();
   }
 
   @Override
   public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final NumericTag nbtNumber))
-      return inverted;
+      return false;
     if (numberRange instanceof BridgeDoubleRange doubleRange) {
-      return doubleRange.test(nbtNumber.getAsDouble()) != inverted;
+      return doubleRange.test(nbtNumber.getAsDouble());
     } else if (numberRange instanceof BridgeFloatRange floatRange) {
-      return floatRange.test(nbtNumber.getAsFloat()) != inverted;
+      return floatRange.test(nbtNumber.getAsFloat());
     } else if (numberRange instanceof BridgeIntRange intRange) {
-      return intRange.test(nbtNumber.getAsInt()) != inverted;
+      return intRange.test(nbtNumber.getAsInt());
     } else {
-      return inverted;
+      return false;
     }
   }
 

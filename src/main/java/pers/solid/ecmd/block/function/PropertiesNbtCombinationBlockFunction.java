@@ -11,6 +11,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -56,7 +57,7 @@ public record PropertiesNbtCombinationBlockFunction(BlockFunction base, @Nullabl
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
     blockState = base.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     if (properties != null) {
       blockState = properties.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
