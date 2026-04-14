@@ -1,8 +1,10 @@
 package pers.solid.ecmd.util.iterator;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Iterator;
 
-public class SkippingIterator<T> implements Iterator<T> {
+public class SkippingIterator<T extends @Nullable Object> implements Iterator<@Nullable T> {
   public final Iterator<T> forward;
   public final int skipTimes;
   public int timesToNext;
@@ -18,7 +20,7 @@ public class SkippingIterator<T> implements Iterator<T> {
   }
 
   @Override
-  public T next() {
+  public @Nullable T next() {
     if (timesToNext <= 0) {
       timesToNext = skipTimes;
       return forward.next();

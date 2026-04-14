@@ -1,9 +1,11 @@
 package pers.solid.ecmd.util.iterator;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-public final class CatchingIterator<T> implements Iterator<T> {
+public final class CatchingIterator<T extends @Nullable Object> implements Iterator<T> {
   private final Iterator<T> forward;
   private final Consumer<RuntimeException> errorConsumer;
   private boolean hasError;

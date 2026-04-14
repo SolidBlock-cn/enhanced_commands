@@ -9,14 +9,14 @@ import java.util.function.Predicate;
 /**
  * @see BatchedFilterIterator
  */
-public record BatchedFilterIterable<T>(Iterable<@Nullable T> forward, int batchSize, Predicate<@Nullable T> predicate) implements Iterable<@Nullable T> {
+public record BatchedFilterIterable<T extends @Nullable Object>(Iterable<@Nullable T> forward, int batchSize, Predicate<T> predicate) implements Iterable<@Nullable T> {
   @Override
   public Iterator<@Nullable T> iterator() {
     return new BatchedFilterIterator<>(forward.iterator(), batchSize, predicate);
   }
 
   @Override
-  public void forEach(Consumer<? super @Nullable T> action) {
+  public void forEach(Consumer<? super T> action) {
     for (T t : forward) {
       if (predicate.test(t)) {
         action.accept(t);
