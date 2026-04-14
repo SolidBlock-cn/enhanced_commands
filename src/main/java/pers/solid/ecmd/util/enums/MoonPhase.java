@@ -7,7 +7,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.LevelTimeAccess;
 import net.minecraft.world.level.dimension.DimensionType;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 /**
@@ -41,7 +40,7 @@ public enum MoonPhase implements StringRepresentable {
   }
 
   @Override
-  public @NotNull String getSerializedName() {
+  public String getSerializedName() {
     return name;
   }
 }

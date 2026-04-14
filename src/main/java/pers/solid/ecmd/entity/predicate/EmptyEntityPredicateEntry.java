@@ -1,10 +1,8 @@
 package pers.solid.ecmd.entity.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
@@ -13,17 +11,17 @@ public enum EmptyEntityPredicateEntry implements EntityPredicateEntry, StaticEnt
   public static final MapCodec<EmptyEntityPredicateEntry> CODEC = MapCodec.unit(INSTANCE);
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return false;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.empty"));
   }
 
   @Override
-  public @NotNull EntityPredicateType<EmptyEntityPredicateEntry> getType() {
+  public EntityPredicateType<EmptyEntityPredicateEntry> getType() {
     return EntityPredicateTypes.EMPTY;
   }
 

@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -34,7 +33,7 @@ public final class RegionRendering {
    * @param second    第二个方块坐标。
    * @param cameraPos 相机坐标。
    */
-  public static void renderBlockCuboid(@Nullable Vec3i first, @Nullable Vec3i second, PoseStack matrices, VertexConsumer vertexConsumer, @NotNull Vec3 cameraPos) {
+  public static void renderBlockCuboid(@Nullable Vec3i first, @Nullable Vec3i second, PoseStack matrices, VertexConsumer vertexConsumer, Vec3 cameraPos) {
     if ((first == null) != (second == null)) {
       // 构建未完成时，闪烁
       final long measuringTimeMs = Util.getMillis();

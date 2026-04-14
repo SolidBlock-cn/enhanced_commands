@@ -5,22 +5,21 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull NbtPredicate> map, boolean inverted) implements NbtPredicate {
+public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map, boolean inverted) implements NbtPredicate {
   public static final MapCodec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("predicates").forGetter(EqualsCompoundNbtPredicate::map), Codec.BOOL.optionalFieldOf("inverted", false).forGetter(EqualsCompoundNbtPredicate::inverted)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(true);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public String asString(boolean requirePrefix) {
     return (inverted ? "!" : "") + (requirePrefix ? "= " : "") + "{" + map.entrySet().stream().map(entry -> {
       final String key = entry.getKey();
       final String keyAsString;
@@ -36,7 +35,7 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final CompoundTag nbtCompound))
       return inverted;
     if (nbtCompound.size() != map.size())
@@ -53,7 +52,7 @@ public record EqualsCompoundNbtPredicate(@NotNull Map<@NotNull String, @NotNull 
   }
 
   @Override
-  public @NotNull NbtPredicateType<EqualsCompoundNbtPredicate> getType() {
+  public NbtPredicateType<EqualsCompoundNbtPredicate> getType() {
     return EqualsCompoundNbtPredicate.Type.EQUALS_COMPOUND_TYPE;
   }
 

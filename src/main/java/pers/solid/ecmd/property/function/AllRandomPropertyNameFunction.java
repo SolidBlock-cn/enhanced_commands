@@ -8,13 +8,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
 import java.util.Collections;
 import java.util.Set;
 
-public record AllRandomPropertyNameFunction(@NotNull Set<String> except) implements GeneralPropertyFunction.OfName {
+public record AllRandomPropertyNameFunction(Set<String> except) implements GeneralPropertyFunction.OfName {
   public static final MapCodec<AllRandomPropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(AllRandomPropertyNameFunction::new, Codec.STRING.listOf().<Set<String>>xmap(ImmutableSet::copyOf, ImmutableList::copyOf).fieldOf("except").forGetter(AllRandomPropertyNameFunction::except)));
 
   public AllRandomPropertyNameFunction() {
@@ -22,7 +21,7 @@ public record AllRandomPropertyNameFunction(@NotNull Set<String> except) impleme
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "*";
   }
 
@@ -46,7 +45,7 @@ public record AllRandomPropertyNameFunction(@NotNull Set<String> except) impleme
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.ALL_RANDOM;
   }
 

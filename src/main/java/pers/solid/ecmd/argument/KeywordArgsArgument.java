@@ -15,7 +15,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -27,7 +26,7 @@ import java.util.function.Function;
 
 import static pers.solid.ecmd.util.EnhancedCommandSyntaxException.withCursorEnd;
 
-public record KeywordArgsArgument(@Unmodifiable Map<@NotNull String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<@NotNull String, Object> defaultValues, Set<ResourceLocation> shared, Set<String> argumentsFromShared) implements ArgumentType<KeywordArgs> {
+public record KeywordArgsArgument(@Unmodifiable Map<String, ArgumentType<?>> arguments, Set<String> requiredArguments, @Unmodifiable Map<String, Object> defaultValues, Set<ResourceLocation> shared, Set<String> argumentsFromShared) implements ArgumentType<KeywordArgs> {
   public static final DynamicCommandExceptionType UNKNOWN_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.argument.keyword_args.unknown_argument_name", o));
   public static final DynamicCommandExceptionType DUPLICATE_ARGUMENT_NAME = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.argument.keyword_args.duplicate_argument_name", o));
 
@@ -35,7 +34,7 @@ public record KeywordArgsArgument(@Unmodifiable Map<@NotNull String, ArgumentTyp
     return new Builder(new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableMap.Builder<>(), new ImmutableSet.Builder<>(), new ImmutableSet.Builder<>());
   }
 
-  public static Builder builderFromShared(@NotNull Function<CommandBuildContext, KeywordArgsArgument> source, CommandBuildContext commandBuildContext) {
+  public static Builder builderFromShared(Function<CommandBuildContext, KeywordArgsArgument> source, CommandBuildContext commandBuildContext) {
     return builder().addShared(source, commandBuildContext);
   }
 
@@ -137,13 +136,13 @@ public record KeywordArgsArgument(@Unmodifiable Map<@NotNull String, ArgumentTyp
       this.argumentsFromShared = argumentsFromShared;
     }
 
-    public Builder addRequiredArg(@NotNull String name, @NotNull ArgumentType<?> type) {
+    public Builder addRequiredArg(String name, ArgumentType<?> type) {
       arguments.put(name, type);
       requiredArguments.add(name);
       return this;
     }
 
-    public <T> Builder addOptionalArg(@NotNull String name, @NotNull ArgumentType<T> type, @Nullable T defaultValue) {
+    public <T> Builder addOptionalArg(String name, ArgumentType<T> type, @Nullable T defaultValue) {
       arguments.put(name, type);
       if (defaultValue != null) {
         defaultValues.put(name, defaultValue);

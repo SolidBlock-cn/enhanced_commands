@@ -6,7 +6,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.PositionProvider;
 
@@ -24,12 +23,12 @@ public record RotationProvider(float x, float y, boolean xRelative, boolean yRel
   }
 
   @Override
-  public @NotNull Vec3 getPosition(CommandSourceStack source) {
+  public Vec3 getPosition(CommandSourceStack source) {
     return source.getPosition();
   }
 
   @Override
-  public @NotNull Vec2 getRotation(CommandSourceStack source) {
+  public Vec2 getRotation(CommandSourceStack source) {
     return this.toAbsoluteRotation(source);
   }
 
@@ -49,7 +48,7 @@ public record RotationProvider(float x, float y, boolean xRelative, boolean yRel
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final StringBuilder sb = new StringBuilder();
     if (xRelative) sb.append('~');
     if (!xRelative || x != 0) sb.append(x);

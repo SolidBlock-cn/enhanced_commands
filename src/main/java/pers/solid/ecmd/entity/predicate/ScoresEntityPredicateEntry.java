@@ -12,7 +12,6 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.*;
 
 import java.util.List;
@@ -22,7 +21,7 @@ public record ScoresEntityPredicateEntry(List<Entry> scores) implements EntityPr
   public static final MapCodec<ScoresEntityPredicateEntry> CODEC = Entry.CODEC.listOf().fieldOf("scores").xmap(ScoresEntityPredicateEntry::new, ScoresEntityPredicateEntry::scores);
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     final MinecraftServer server = entity.getServer();
     if (server == null) {
       return false;
@@ -49,7 +48,7 @@ public record ScoresEntityPredicateEntry(List<Entry> scores) implements EntityPr
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final MinecraftServer server = entity.getServer();
     if (server == null) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.score.not_on_server"));
@@ -94,7 +93,7 @@ public record ScoresEntityPredicateEntry(List<Entry> scores) implements EntityPr
   }
 
   @Override
-  public @NotNull EntityPredicateType<ScoresEntityPredicateEntry> getType() {
+  public EntityPredicateType<ScoresEntityPredicateEntry> getType() {
     return EntityPredicateTypes.SCORE;
   }
 
@@ -111,7 +110,7 @@ public record ScoresEntityPredicateEntry(List<Entry> scores) implements EntityPr
     ).apply(i, Entry::new));
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return name + (inverted ? "=!" : "=") + StringUtil.wrapRange(score);
     }
   }

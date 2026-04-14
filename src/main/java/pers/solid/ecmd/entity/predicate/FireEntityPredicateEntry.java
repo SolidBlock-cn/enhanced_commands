@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
@@ -18,22 +17,22 @@ public record FireEntityPredicateEntry(BridgeIntRange time, boolean inverted) im
   ).apply(i, FireEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return time.test(entity.getRemainingFireTicks()) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     return EntityPredicateEntry.testInt(entity, entity.getRemainingFireTicks(), time, CRITERION_NAME, displayName, inverted);
   }
 
   @Override
-  public @NotNull EntityPredicateType<FireEntityPredicateEntry> getType() {
+  public EntityPredicateType<FireEntityPredicateEntry> getType() {
     return EntityPredicateTypes.FIRE;
   }
 
   @Override
-  public @NotNull String toOptionEntry() {
+  public String toOptionEntry() {
     return "fire=" + (inverted ? "!" : "") + time.asString();
   }
 }

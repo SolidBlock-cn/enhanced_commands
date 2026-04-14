@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -18,12 +17,12 @@ public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPred
   ).apply(i, AirMaxEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return (entity.getAirSupply() == entity.getMaxAirSupply()) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final int actualAir = entity.getAirSupply();
     final MutableComponent actualHealthText = TextUtil.literal(actualAir).withStyle(Styles.ACTUAL);
     final int maxAir = entity.getMaxAirSupply();
@@ -36,12 +35,12 @@ public record AirMaxEntityPredicateEntry(boolean inverted) implements EntityPred
   }
 
   @Override
-  public @NotNull String toOptionEntry() {
+  public String toOptionEntry() {
     return "air=" + (inverted ? "!" : "") + "max";
   }
 
   @Override
-  public @NotNull EntityPredicateType<AirMaxEntityPredicateEntry> getType() {
+  public EntityPredicateType<AirMaxEntityPredicateEntry> getType() {
     return EntityPredicateTypes.AIR_MAX;
   }
 }

@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -143,7 +142,7 @@ public final class CodecUtil {
    * @param elementCodec 该字段的元素的 codec。
    * @param defaultValue 字段的值不存在时，使用的默认值。
    */
-  public static <A> StrictOptionalFieldCodec<A> optionalField(@NotNull String name, @NotNull Codec<A> elementCodec, @NotNull A defaultValue) {
+  public static <A> StrictOptionalFieldCodec<A> optionalField(String name, Codec<A> elementCodec, A defaultValue) {
     return new StrictOptionalFieldCodec<>(name, elementCodec, defaultValue, true);
   }
 
@@ -155,7 +154,7 @@ public final class CodecUtil {
    * @param defaultValue    字段的值不存在时，使用的默认值。
    * @param emitWhenDefault 在序列化时，当该字段的值等于默认值时，是否直接省略值。默认为 {@code true}。
    */
-  public static <A> StrictOptionalFieldCodec<A> optionalField(@NotNull String name, @NotNull Codec<A> elementCodec, @NotNull A defaultValue, boolean emitWhenDefault) {
+  public static <A> StrictOptionalFieldCodec<A> optionalField(String name, Codec<A> elementCodec, A defaultValue, boolean emitWhenDefault) {
     return new StrictOptionalFieldCodec<>(name, elementCodec, defaultValue, emitWhenDefault);
   }
 
@@ -165,7 +164,7 @@ public final class CodecUtil {
    * @param name         字段的名称。
    * @param elementCodec 该字段的元素的 codec。
    */
-  public static <A> StrictOptionalFieldCodec<Optional<A>> optionalField(@NotNull String name, @NotNull Codec<A> elementCodec) {
+  public static <A> StrictOptionalFieldCodec<Optional<A>> optionalField(String name, Codec<A> elementCodec) {
     return new StrictOptionalFieldCodec<>(name, elementCodec.xmap(Optional::of, Optional::get), Optional.empty(), true);
   }
 
@@ -174,7 +173,7 @@ public final class CodecUtil {
    * <p>反序列化过程中，当读取到字符串值时，按照 {@code stringBased} 读取，如果读取出错，则正常抛出错误。其他情况下按照 {@code mapBased} 读取。
    * <p>序列化时，根据 {@code function} 进行转化，如果能转化（即结果不为 {@code null}），则按 {@code stringBased} 进行序列化，否则按照 {@code mapBased} 进行序列化。
    */
-  public static <A, B> Codec<A> combined(Codec<@NotNull B> stringBased, Codec<@NotNull A> mapBased, Function<A, @Nullable B> function, Function<@NotNull B, A> functionToStringBased) {
+  public static <A, B> Codec<A> combined(Codec<B> stringBased, Codec<A> mapBased, Function<A, @Nullable B> function, Function<B, A> functionToStringBased) {
     return new Codec<>() {
       @Override
       public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> ops, T input) {
@@ -196,12 +195,12 @@ public final class CodecUtil {
 
       @Override
       public String toString() {
-        return "combined(" + stringBased.toString() + ", " + mapBased.toString() + ")";
+        return "combined(" + stringBased + ", " + mapBased + ")";
       }
     };
   }
 
-  public static <A, B extends A> Codec<A> combined(Codec<@NotNull B> stringBased, Codec<@NotNull A> mapBased, Function<A, @Nullable B> function) {
+  public static <A, B extends A> Codec<A> combined(Codec<B> stringBased, Codec<A> mapBased, Function<A, @Nullable B> function) {
     return combined(stringBased, mapBased, function, b -> b);
   }
 
@@ -239,7 +238,7 @@ public final class CodecUtil {
   }
 
   public static <T> MapCodec<T> unimplementedMapCodec(String message) {
-    return new MapCodec<T>() {
+    return new MapCodec<>() {
       @Override
       public <T1> Stream<T1> keys(DynamicOps<T1> ops) {
         return Stream.empty();

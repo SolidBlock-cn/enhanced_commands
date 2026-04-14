@@ -3,7 +3,6 @@ package pers.solid.ecmd.entity.predicate;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -82,7 +81,6 @@ public interface EntityPredicateEntry extends EntityPredicate {
   @Nullable String toOptionEntry();
 
   @Override
-  @NotNull
   default String asString() {
     return "[" + toOptionEntry() + "]";
   }

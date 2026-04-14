@@ -13,7 +13,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.predicate.PropertyPredicate;
@@ -25,18 +24,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record SimpleBlockPredicate(@NotNull Block block, @NotNull List<PropertyPredicate<?>> properties) implements BlockPredicate {
+public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
   public static final Codec<SimpleBlockPredicate> STRING_BASED_CODEC = BuiltInRegistries.BLOCK.byNameCodec().flatComapMap(block -> new SimpleBlockPredicate(block, ImmutableList.of()), simpleBlockPredicate -> simpleBlockPredicate.properties.isEmpty() ? DataResult.success(simpleBlockPredicate.block) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
 
   public static final MapCodec<SimpleBlockPredicate> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockPredicate::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockPredicate(block, properties), CodecUtil.optionalField("properties", PropertyPredicate.getCodec(block).listOf(), ImmutableList.of()).forGetter(SimpleBlockPredicate::properties))));
 
-  public SimpleBlockPredicate(@NotNull Block block) {
+  public SimpleBlockPredicate(Block block) {
     this(block, Collections.emptyList());
   }
 
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final String id = BuiltInRegistries.BLOCK.getKey(block).toString();
     return properties.isEmpty() ? id : id + properties.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "[", "]"));
   }
@@ -78,7 +77,7 @@ public record SimpleBlockPredicate(@NotNull Block block, @NotNull List<PropertyP
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.SIMPLE;
   }
 
@@ -86,7 +85,7 @@ public record SimpleBlockPredicate(@NotNull Block block, @NotNull List<PropertyP
     SIMPLE_TYPE;
 
     @Override
-    public @NotNull MapCodec<SimpleBlockPredicate> getCodec() {
+    public MapCodec<SimpleBlockPredicate> getCodec() {
       return CODEC;
     }
 

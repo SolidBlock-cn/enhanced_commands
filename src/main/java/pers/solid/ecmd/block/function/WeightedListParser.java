@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
@@ -11,18 +12,20 @@ import pers.solid.ecmd.util.iterator.IterateUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static pers.solid.ecmd.util.EnhancedCommandSyntaxException.withCursorEnd;
 
 public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
   public boolean weighted = false;
-  public List<ObjectDoublePair<T>> pairs;
+  public @Nullable List<ObjectDoublePair<T>> pairs;
   protected double weightSum = 0;
   protected int cursorBeforeEntries;
 
   @Override
   public WeightedList<T> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     parseEntryList(parseContext);
+    Objects.requireNonNull(pairs, "pairs");
     final StringReader reader = parseContext.reader();
     if (weightSum == 0) {
       final int cursorEnd = reader.getCursor();
@@ -36,7 +39,7 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
     }
   }
 
-  protected abstract T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
+  protected abstract @Nullable T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
 
   public void parseEntryList(ParseContext<?> parseContext) throws CommandSyntaxException {
     this.pairs = new ArrayList<>();
@@ -92,7 +95,7 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
   public static <T> WeightedListParser<T> of(Parser<T> elementParser) {
     return new WeightedListParser<>() {
       @Override
-      protected T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
+      protected @Nullable T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException {
         return elementParser.parse(parseContext);
       }
     };

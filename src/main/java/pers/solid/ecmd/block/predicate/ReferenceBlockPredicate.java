@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.function.FailableSupplier;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -33,12 +32,12 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.REFERENCE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "$" + id.location();
   }
 
@@ -55,7 +54,7 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
     }
 
     @Override
-    public @NotNull MapCodec<ReferenceBlockPredicate> getCodec() {
+    public MapCodec<ReferenceBlockPredicate> getCodec() {
       return CODEC;
     }
 

@@ -4,7 +4,6 @@ import com.google.gson.*;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import org.apache.commons.lang3.ObjectUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.EnhancedCommands;
@@ -70,7 +69,7 @@ public final class ConfigManager {
     }
   }
 
-  public static <C, T> void readConfigEntryFromJson(@NotNull String name, @NotNull ConfigEntry<C, T> entry, @NotNull C config, @NotNull JsonObject jsonObject) {
+  public static <C, T> void readConfigEntryFromJson(String name, ConfigEntry<C, T> entry, C config, JsonObject jsonObject) {
     final JsonElement jsonElement = jsonObject.get(name);
     if (jsonElement != null) {
       final DataResult<T> parse = entry.type.codec().parse(JsonOps.INSTANCE, jsonElement);
@@ -78,7 +77,7 @@ public final class ConfigManager {
     }
   }
 
-  public static <C, T> void writeConfigEntryToJson(@NotNull String name, @NotNull ConfigEntry<C, T> entry, @NotNull C config, @NotNull JsonObject jsonObject) {
+  public static <C, T> void writeConfigEntryToJson(String name, ConfigEntry<C, T> entry, C config, JsonObject jsonObject) {
     final T value = entry.getter.apply(config);
     jsonObject.add(name, entry.type.codec().encodeStart(JsonOps.INSTANCE, value).getOrThrow());
   }

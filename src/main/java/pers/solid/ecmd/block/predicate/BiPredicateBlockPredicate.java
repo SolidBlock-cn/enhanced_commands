@@ -6,19 +6,20 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.List;
+import java.util.Objects;
 
 public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPredicate blockPredicate2, boolean same) implements BlockPredicate {
   public static final MapCodec<BiPredicateBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.fieldOf("block_predicate1").forGetter(BiPredicateBlockPredicate::blockPredicate1), BlockPredicate.CODEC.fieldOf("block_predicate2").forGetter(BiPredicateBlockPredicate::blockPredicate2), Codec.BOOL.fieldOf("same").forGetter(BiPredicateBlockPredicate::same)).apply(i, BiPredicateBlockPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return (same ? "same" : "diff") + "(" + blockPredicate1.asString() + ", " + blockPredicate2.asString() + ")";
   }
 
@@ -39,7 +40,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.BI_PREDICATE;
   }
 
@@ -47,15 +48,15 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
     BI_PREDICATE_TYPE;
 
     @Override
-    public @NotNull MapCodec<BiPredicateBlockPredicate> getCodec() {
+    public MapCodec<BiPredicateBlockPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<BiPredicateBlockPredicate> {
     private final boolean same;
-    private BlockPredicate value1;
-    private BlockPredicate value2;
+    private @Nullable BlockPredicate value1;
+    private @Nullable BlockPredicate value2;
 
     public Parser(boolean same) {
       this.same = same;
@@ -66,6 +67,7 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
       if (value1 == null) {
         throw SequentialParams.PARAMS_TOO_FEW.createWithContext(parseContext.reader(), 2, 1);
       }
+      Objects.requireNonNull(value2, "value2");
       return new BiPredicateBlockPredicate(value1, value2, same);
     }
 

@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.accessor.SingleItemRecipeAccessor;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -25,16 +24,16 @@ import pers.solid.ecmd.util.StateUtil;
 import java.util.List;
 import java.util.Optional;
 
-public record StonecutBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
+public record StonecutBlockFunction(BlockFunction function) implements BlockFunction {
   public static final MapCodec<StonecutBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EmptyBlockFunction.INSTANCE).forGetter(StonecutBlockFunction::function)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "stonecut(" + (function.isEmpty() ? "" : function.asString()) + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     blockState = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     final Item item = blockState.getBlock().asItem();
     if (item == Items.AIR) {
@@ -69,7 +68,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.STONE_CUT;
   }
 
@@ -77,7 +76,7 @@ public record StonecutBlockFunction(@NotNull BlockFunction function) implements 
     STONE_CUT_TYPE;
 
     @Override
-    public @NotNull MapCodec<StonecutBlockFunction> getCodec() {
+    public MapCodec<StonecutBlockFunction> getCodec() {
       return CODEC;
     }
   }

@@ -16,7 +16,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.*;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.api.CommandContextHelper;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
@@ -45,7 +44,7 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     return ConfigCategory.REGISTRY.get(categoryName);
   }
 
-  private static @NotNull ConfigCategory<?> getCategoryFromContextOrThrow(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+  private static ConfigCategory<?> getCategoryFromContextOrThrow(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
     final String categoryName = StringArgumentType.getString(commandContext, "category");
     final ConfigCategory<?> category = ConfigCategory.REGISTRY.get(categoryName);
     if (category == null) {
@@ -61,12 +60,12 @@ public enum EnhancedCommandsConfigCommand implements CommandRegistrationCallback
     }
   }
 
-  private static @Nullable <C> ConfigEntry<C, ?> getConfigEntryFromContext(CommandContext<CommandSourceStack> commandContext, @NotNull ConfigCategory<C> category) {
+  private static @Nullable <C> ConfigEntry<C, ?> getConfigEntryFromContext(CommandContext<CommandSourceStack> commandContext, ConfigCategory<C> category) {
     final String entryName = StringArgumentType.getString(commandContext, "entry");
     return category.configEntries.get(entryName);
   }
 
-  private static @NotNull <C> ConfigEntry<C, ?> getConfigEntryFromContextOrThrow(CommandContext<CommandSourceStack> commandContext, @NotNull ConfigCategory<C> category) throws CommandSyntaxException {
+  private static <C> ConfigEntry<C, ?> getConfigEntryFromContextOrThrow(CommandContext<CommandSourceStack> commandContext, ConfigCategory<C> category) throws CommandSyntaxException {
     final String entryName = StringArgumentType.getString(commandContext, "entry");
     final ConfigEntry<C, ?> entry = category.configEntries.get(entryName);
     if (entry == null) {

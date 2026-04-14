@@ -4,7 +4,6 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandBuildContext;
 import pers.solid.ecmd.command.EnhancedCommandsConfigCommand;
 
@@ -23,7 +22,7 @@ public class AnyTypeArgument implements ArgumentType<AnyTypeArgument.Pair> {
   }
 
   @Override
-  public Pair parse(StringReader stringReader) throws CommandSyntaxException {
+  public Pair parse(StringReader stringReader) {
     var remaining = stringReader.getRemaining();
     stringReader.setCursor(stringReader.getTotalLength());
     return new Pair(commandBuildContext, remaining);

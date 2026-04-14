@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
@@ -19,12 +18,12 @@ public record LevelEntityPredicateEntry(BridgeIntRange level, boolean inverted) 
   private static final Component CRITERION_NAME = Component.translatable("enhanced_commands.entity_predicate.level");
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return entity instanceof Player player && level.test(player.experienceLevel) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (!(entity instanceof Player player)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
@@ -33,7 +32,7 @@ public record LevelEntityPredicateEntry(BridgeIntRange level, boolean inverted) 
   }
 
   @Override
-  public @NotNull EntityPredicateType<LevelEntityPredicateEntry> getType() {
+  public EntityPredicateType<LevelEntityPredicateEntry> getType() {
     return EntityPredicateTypes.LEVEL;
   }
 

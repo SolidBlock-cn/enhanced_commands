@@ -6,14 +6,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
 public record BypassingPropertyNameFunction(String propertyName, boolean must) implements PropertyNameFunction {
   public static final MapCodec<BypassingPropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(BypassingPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(BypassingPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(BypassingPropertyNameFunction::must)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return propertyName + (must ? "==~" : "=~");
   }
 
@@ -27,7 +26,7 @@ public record BypassingPropertyNameFunction(String propertyName, boolean must) i
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.BYPASSING;
   }
 

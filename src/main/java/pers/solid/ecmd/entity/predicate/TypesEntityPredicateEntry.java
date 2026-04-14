@@ -1,7 +1,6 @@
 package pers.solid.ecmd.entity.predicate;
 
 import com.google.common.collect.Iterables;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -14,7 +13,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -30,12 +28,12 @@ public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<Entity
   ).apply(i, TypesEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return Iterables.any(types, either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().is(tag))) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final boolean anyMatch = types.stream().anyMatch(either -> either.map(type -> type.equals(entity.getType()), tag -> entity.getType().is(tag)));
     final MutableComponent actualText = TextUtil.styled(entity.getType().getDescription(), Styles.ACTUAL);
     final MutableComponent expectedText = ComponentUtils.formatList(types, ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR, either -> either.map(type -> TextUtil.styled(type.getDescription(), Styles.EXPECTED), tag -> Component.literal("#" + tag.location()).withStyle(Styles.EXPECTED)));
@@ -55,7 +53,7 @@ public record TypesEntityPredicateEntry(List<Either<EntityType<?>, TagKey<Entity
   }
 
   @Override
-  public @NotNull EntityPredicateType<TypesEntityPredicateEntry> getType() {
+  public EntityPredicateType<TypesEntityPredicateEntry> getType() {
     return EntityPredicateTypes.TYPES;
   }
 

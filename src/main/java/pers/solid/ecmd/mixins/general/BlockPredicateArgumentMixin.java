@@ -9,6 +9,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,30 +25,30 @@ import java.util.function.Predicate;
 @Mixin(BlockPredicateArgument.class)
 public abstract class BlockPredicateArgumentMixin implements ArgumentTypeExtension {
   @Unique
-  private pers.solid.ecmd.argument.BlockPredicateArgument modArgumentType;
+  private @Nullable pers.solid.ecmd.argument.BlockPredicateArgument enhanced_commands$modArgumentType;
   @Unique
-  private boolean extension = true;
+  private boolean enhanced_commands$extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void injectedInit(CommandBuildContext commandBuildContext, CallbackInfo ci) {
-    this.modArgumentType = new pers.solid.ecmd.argument.BlockPredicateArgument(commandBuildContext);
+  private void injectedInit(CommandBuildContext context, CallbackInfo ci) {
+    this.enhanced_commands$modArgumentType = new pers.solid.ecmd.argument.BlockPredicateArgument(context);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/blocks/BlockPredicateArgument$Result;", at = @At("HEAD"), cancellable = true)
-  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<BlockPredicateArgument.Result> cir) throws CommandSyntaxException {
-    if (modArgumentType != null && extension) {
-      cir.setReturnValue(new ForwardingBlockPredicateArgument(modArgumentType.parse(stringReader)));
+  private void injectedParse(StringReader reader, CallbackInfoReturnable<BlockPredicateArgument.Result> cir) throws CommandSyntaxException {
+    if (enhanced_commands$modArgumentType != null && enhanced_commands$extension) {
+      cir.setReturnValue(new ForwardingBlockPredicateArgument(enhanced_commands$modArgumentType.parse(reader)));
     }
   }
 
   @Inject(method = "listSuggestions", at = @At("HEAD"), cancellable = true)
-  private <S> void injectedListSuggestions(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
-    if (modArgumentType != null && extension)
-      cir.setReturnValue(modArgumentType.listSuggestions(context, builder));
+  private <S> void injectedListSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
+    if (enhanced_commands$modArgumentType != null && enhanced_commands$extension)
+      cir.setReturnValue(enhanced_commands$modArgumentType.listSuggestions(commandContext, suggestionsBuilder));
   }
 
   @Inject(method = "getBlockPredicate", at = @At("RETURN"))
-  private static void injectedGetBlockPredicate(CommandContext<CommandSourceStack> context, String name, CallbackInfoReturnable<Predicate<BlockInWorld>> cir) throws CommandSyntaxException {
+  private static void injectedGetBlockPredicate(CommandContext<CommandSourceStack> context, String name, CallbackInfoReturnable<Predicate<BlockInWorld>> cir) {
     final Predicate<BlockInWorld> returnValue = cir.getReturnValue();
     if (returnValue instanceof ForwardingBlockPredicateArgument forwardedBlockStateArgument) {
       forwardedBlockStateArgument.setSource(context.getSource());
@@ -56,11 +57,11 @@ public abstract class BlockPredicateArgumentMixin implements ArgumentTypeExtensi
 
   @Override
   public boolean enhanced_hasExtension() {
-    return extension;
+    return enhanced_commands$extension;
   }
 
   @Override
   public void enhanced_setExtension(boolean extension) {
-    this.extension = extension;
+    this.enhanced_commands$extension = extension;
   }
 }

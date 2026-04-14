@@ -12,7 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -22,6 +22,7 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.PICK;
   }
 
@@ -53,33 +54,33 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
     PICK_TYPE;
 
     @Override
-    public @NotNull MapCodec<PickBlockFunction> getCodec() {
+    public MapCodec<PickBlockFunction> getCodec() {
       return CODEC;
     }
   }
 
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return functions.asStringStream(ExpressionConvertible::asString).collect(Collectors.joining(", ", "pick(", (seed.isPresent() ? "; seed = " + seed.getAsLong() : "") + ")"));
   }
 
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(pos);
     return functions.getRandom(random).getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
   }
 
 
   public static class Parser implements FunctionContentParser<BlockFunction>, NamedParamListParser {
-    private WeightedList<BlockFunction> weightedList;
+    private @Nullable WeightedList<BlockFunction> weightedList;
     private OptionalLong seed = OptionalLong.empty();
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 
     @Override
-    public BlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return new PickBlockFunction(weightedList, seed);
+    public BlockFunction getParseResult(ParseContext<?> parseContext) {
+      return new PickBlockFunction(Objects.requireNonNull(weightedList, "weightedList"), seed);
     }
 
     @Override

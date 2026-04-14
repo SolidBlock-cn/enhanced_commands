@@ -2,7 +2,6 @@ package pers.solid.ecmd.region;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.enums.OutlineType;
 
@@ -15,12 +14,12 @@ public record OutlineRegionProvider(OutlineType outlineType, RegionProvider<?> r
   }
 
   @Override
-  public @NotNull RegionType<? super OutlineRegion> getType() {
+  public RegionType<? super OutlineRegion> getType() {
     return RegionTypes.OUTLINE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "outline(" + region.asString() + ", " + outlineType.getSerializedName() + ")";
   }
 }

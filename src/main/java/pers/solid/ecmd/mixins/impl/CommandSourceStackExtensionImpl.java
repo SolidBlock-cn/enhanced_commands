@@ -10,7 +10,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,10 +28,10 @@ import java.util.function.Supplier;
 @Mixin(CommandSourceStack.class)
 public abstract class CommandSourceStackExtensionImpl implements CommandSourceStackExtension, PositionProvider {
   @Unique
-  private Map<String, Object> extraArguments = null;
+  private @Nullable Map<String, Object> enhanced_commands$extraArguments = null;
 
   @Shadow
-  public abstract void sendSuccess(Supplier<Component> feedbackSupplier, boolean broadcastToOps);
+  public abstract void sendSuccess(Supplier<Component> messageSupplier, boolean allowLogging);
 
   @Shadow
   public abstract Vec3 getPosition();
@@ -48,13 +47,13 @@ public abstract class CommandSourceStackExtensionImpl implements CommandSourceSt
   public abstract EntityAnchorArgument.Anchor getAnchor();
 
   @Shadow
-  public abstract ServerPlayer getPlayerOrException() throws CommandSyntaxException;
+  public abstract ServerPlayer getPlayerOrException();
 
   @Shadow
   public abstract ServerLevel getLevel();
 
   @Shadow
-  public abstract Entity getEntityOrException() throws CommandSyntaxException;
+  public abstract Entity getEntityOrException();
 
   @Override
   public final void sendFeedback$ecBridge(Supplier<Component> feedbackSupplier, boolean broadcastToOps) {
@@ -62,16 +61,16 @@ public abstract class CommandSourceStackExtensionImpl implements CommandSourceSt
   }
 
   @Override
-  public @NotNull Map<String, Object> getExtraArguments$ec() {
-    return Objects.requireNonNullElseGet(extraArguments, Map::of);
+  public Map<String, Object> getExtraArguments$ec() {
+    return Objects.requireNonNullElseGet(enhanced_commands$extraArguments, Map::of);
   }
 
   @Override
   public void addExtraArgument$ec(String name, Object argument) {
-    if (extraArguments == null) {
-      extraArguments = new HashMap<>();
+    if (enhanced_commands$extraArguments == null) {
+      enhanced_commands$extraArguments = new HashMap<>();
     }
-    extraArguments.put(name, argument);
+    enhanced_commands$extraArguments.put(name, argument);
   }
 
   @Override
@@ -90,7 +89,7 @@ public abstract class CommandSourceStackExtensionImpl implements CommandSourceSt
   }
 
   @Override
-  public @NotNull Entity getEntityOrThrow$ec() throws CommandSyntaxException {
+  public Entity getEntityOrThrow$ec() throws CommandSyntaxException {
     return getEntityOrException();
   }
 
@@ -105,7 +104,7 @@ public abstract class CommandSourceStackExtensionImpl implements CommandSourceSt
   }
 
   @Override
-  public @NotNull Player getPlayerOrThrow$ec() throws CommandSyntaxException {
+  public Player getPlayerOrThrow$ec() throws CommandSyntaxException {
     return getPlayerOrException();
   }
 

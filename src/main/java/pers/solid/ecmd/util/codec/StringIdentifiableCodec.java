@@ -1,7 +1,6 @@
 package pers.solid.ecmd.util.codec;
 
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 
@@ -42,7 +41,7 @@ public class StringIdentifiableCodec<E extends Enum<E> & StringRepresentable> ex
   }
 
   @Override
-  public @NotNull String asString(@NotNull E value) {
+  public String asString(E value) {
     return value.getSerializedName();
   }
 }

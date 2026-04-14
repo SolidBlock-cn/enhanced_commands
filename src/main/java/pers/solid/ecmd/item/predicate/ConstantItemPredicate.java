@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -31,7 +30,7 @@ public enum ConstantItemPredicate implements ItemPredicateWithoutContext {
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return value ? "*" : "!*";
   }
 
@@ -41,7 +40,7 @@ public enum ConstantItemPredicate implements ItemPredicateWithoutContext {
   }
 
   @Override
-  public @NotNull ConstantItemPredicate.Type getType() {
+  public ConstantItemPredicate.Type getType() {
     return ItemPredicateTypes.CONSTANT;
   }
 
@@ -49,7 +48,7 @@ public enum ConstantItemPredicate implements ItemPredicateWithoutContext {
     CONSTANT_TYPE;
 
     @Override
-    public @NotNull MapCodec<ConstantItemPredicate> getCodec() {
+    public MapCodec<ConstantItemPredicate> getCodec() {
       return CODEC;
     }
 

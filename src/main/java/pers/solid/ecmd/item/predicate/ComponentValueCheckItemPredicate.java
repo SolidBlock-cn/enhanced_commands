@@ -5,7 +5,6 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -18,12 +17,12 @@ public record ComponentValueCheckItemPredicate<T>(DataComponentType<T> component
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.COMPONENT_VALUE_CHECK;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "*[" + asEntryString() + "]";
   }
 
@@ -40,7 +39,7 @@ public record ComponentValueCheckItemPredicate<T>(DataComponentType<T> component
     COMPONENT_VALUE_CHECK_TYPE;
 
     @Override
-    public @NotNull MapCodec<ComponentValueCheckItemPredicate<?>> getCodec() {
+    public MapCodec<ComponentValueCheckItemPredicate<?>> getCodec() {
       return CODEC;
     }
   }

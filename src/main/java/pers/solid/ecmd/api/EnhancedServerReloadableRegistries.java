@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
 
@@ -65,14 +64,14 @@ public class EnhancedServerReloadableRegistries {
   /**
    * 仅在此类中注册可重载注册表，不在 Fabric API 或 NeoForge 中注册动态注册表。
    */
-  public static <T> void registerWithoutDynamicRegistry(@NotNull ResourceKey<Registry<T>> registryKey, @NotNull Codec<T> codec) {
+  public static <T> void registerWithoutDynamicRegistry(ResourceKey<Registry<T>> registryKey, Codec<T> codec) {
     REGISTRY.put(registryKey, new EnhancedDynamicRegistryInfo<>(registryKey, codec));
   }
 
   /**
    * 注册可重载注册表的同时，在 Fabric API 或 NeoForge 中注册动态注册表，从而能够像常规的动态注册表那样进行数据生成。经过本模组处理，不会实际经过常规动态注册表流程加载，不会造成注册表冲突。
    */
-  public static <T> void register(@NotNull ResourceKey<Registry<T>> registryKey, @NotNull Codec<T> codec, boolean sync, @NotNull InitializeContext context) {
+  public static <T> void register(ResourceKey<Registry<T>> registryKey, Codec<T> codec, boolean sync, InitializeContext context) {
     registerWithoutDynamicRegistry(registryKey, codec);
     RegistryBridge.registerDynamicRegistry(registryKey, codec, sync, context);
   }

@@ -11,7 +11,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -33,7 +32,7 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.MULTI_VALUE;
   }
 
@@ -74,7 +73,7 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return property.getName() + (inverted ? "!=" : "=") + values.stream().map(property::getName).collect(Collectors.joining("|"));
   }
 }

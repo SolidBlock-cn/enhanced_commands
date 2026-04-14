@@ -6,21 +6,20 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.Set;
 
-public record TagEntityPredicateEntry(@NotNull String tag, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record TagEntityPredicateEntry(String tag, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<TagEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.STRING.fieldOf("tag").forGetter(TagEntityPredicateEntry::tag),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(TagEntityPredicateEntry::inverted)
   ).apply(i, TagEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     if (tag.isEmpty()) {
       return entity.getTags().isEmpty() != inverted;
     } else {
@@ -29,7 +28,7 @@ public record TagEntityPredicateEntry(@NotNull String tag, boolean inverted) imp
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final Set<String> commandTags = entity.getTags();
     if (tag.isEmpty()) {
       // 检测实体是否没有任何标签
@@ -50,7 +49,7 @@ public record TagEntityPredicateEntry(@NotNull String tag, boolean inverted) imp
   }
 
   @Override
-  public @NotNull EntityPredicateType<TagEntityPredicateEntry> getType() {
+  public EntityPredicateType<TagEntityPredicateEntry> getType() {
     return EntityPredicateTypes.TAG;
   }
 

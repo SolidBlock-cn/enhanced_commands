@@ -7,7 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -16,13 +16,14 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
-public record IdContainBlockPredicate(@NotNull Pattern pattern) implements BlockPredicate {
+public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate {
   public static final MapCodec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(IdContainBlockPredicate::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "idcontain(" + StringTag.quoteAndEscape(pattern.pattern()) + ")";
   }
 
@@ -39,7 +40,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.ID_CONTAIN;
   }
 
@@ -62,13 +63,13 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
     ID_CONTAIN_TYPE;
 
     @Override
-    public @NotNull MapCodec<IdContainBlockPredicate> getCodec() {
+    public MapCodec<IdContainBlockPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<IdContainBlockPredicate> {
-    private Pattern pattern;
+    private @Nullable Pattern pattern;
 
     @Override
     public int minSequentialParamsCount() {
@@ -82,6 +83,7 @@ public record IdContainBlockPredicate(@NotNull Pattern pattern) implements Block
 
     @Override
     public IdContainBlockPredicate getParseResult(ParseContext<?> parseContext) { // @formatter:on
+      Objects.requireNonNull(pattern, "pattern");
       return new IdContainBlockPredicate(pattern);
     }
 

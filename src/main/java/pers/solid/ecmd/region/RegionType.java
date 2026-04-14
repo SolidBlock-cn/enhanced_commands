@@ -4,7 +4,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -34,9 +33,7 @@ public interface RegionType<R extends Region> {
     return null;
   }
 
-  @NotNull
   MapCodec<R> getCodec();
 
-  @NotNull
   MapCodec<? extends RegionProvider<? extends R>> getArgumentCodec();
 }

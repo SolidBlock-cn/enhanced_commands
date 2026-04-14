@@ -8,7 +8,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.NbtPathArgument;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.NbtSourceArgument;
 import pers.solid.ecmd.argument.SimpleEnumArgument;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.NbtPath> path, NbtConcentrationType concentrationType) implements NbtFunction {
@@ -28,17 +28,17 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
   ).apply(i, GetDataNbtFunction::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "from(" + source.asString() + ")";
   }
 
   @Override
-  public @NotNull NbtFunctionType<GetDataNbtFunction> getType() {
+  public NbtFunctionType<GetDataNbtFunction> getType() {
     return Type.GET_DATA_TYPE;
   }
 
   @Override
-  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     return source.getConcentratedNbts((CommandSourceStack) context.positionProvider, path.orElse(null), concentrationType, RandomSource.create());
   }
 
@@ -52,7 +52,7 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<GetDataNbtFunction> {
-    private NbtSource<?> nbtSource;
+    private @Nullable NbtSource<?> nbtSource;
     private @Nullable NbtPathArgument.NbtPath nbtPath;
     private NbtConcentrationType nbtConcentrationType = NbtConcentrationType.ALL;
 
@@ -76,7 +76,8 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
     }
 
     @Override
-    public GetDataNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public GetDataNbtFunction getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(nbtSource, "nbtSource");
       return new GetDataNbtFunction(nbtSource, Optional.ofNullable(nbtPath), nbtConcentrationType);
     }
   }

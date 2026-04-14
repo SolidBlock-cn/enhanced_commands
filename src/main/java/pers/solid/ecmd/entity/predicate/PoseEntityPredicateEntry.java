@@ -1,7 +1,6 @@
 package pers.solid.ecmd.entity.predicate;
 
 import com.google.common.collect.ImmutableBiMap;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -9,14 +8,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Pose;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
 import java.util.Optional;
 
-public record PoseEntityPredicateEntry(@NotNull Pose expected, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record PoseEntityPredicateEntry(Pose expected, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final ImmutableBiMap<Pose, String> ENTITY_POSE_NAMES = ImmutableBiMap.<Pose, String>builder()
       .put(Pose.STANDING, "standing")
       .put(Pose.FALL_FLYING, "gliding")
@@ -40,12 +38,12 @@ public record PoseEntityPredicateEntry(@NotNull Pose expected, boolean inverted)
   ).apply(i, PoseEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return (entity.getPose() == expected) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final Pose actual = entity.getPose();
     final boolean equals = actual == expected;
     if (equals) {
@@ -56,7 +54,7 @@ public record PoseEntityPredicateEntry(@NotNull Pose expected, boolean inverted)
   }
 
   @Override
-  public @NotNull EntityPredicateType<PoseEntityPredicateEntry> getType() {
+  public EntityPredicateType<PoseEntityPredicateEntry> getType() {
     return EntityPredicateTypes.POSE;
   }
 

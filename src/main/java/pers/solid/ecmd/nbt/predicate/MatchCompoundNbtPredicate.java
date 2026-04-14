@@ -9,7 +9,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParsingUtil;
 
@@ -33,19 +32,19 @@ import java.util.stream.Collectors;
  *
  * @see net.minecraft.nbt.NbtUtils#compareNbt(Tag, Tag, boolean)
  */
-public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull NbtPredicate> entries, boolean inverted) implements NbtPredicate {
+public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredicate> entries, boolean inverted) implements NbtPredicate {
   public static final MapCodec<MatchCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC.listOf()).<ListMultimap<String, NbtPredicate>>xmap(map -> map.entrySet().stream().collect(ImmutableListMultimap.flatteningToImmutableListMultimap(Map.Entry::getKey, entry -> entry.getValue().stream())), map -> Maps.transformValues(map.asMap(), ImmutableList::copyOf)).fieldOf("entries").forGetter(matchCompoundNbtPredicate -> matchCompoundNbtPredicate.entries),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MatchCompoundNbtPredicate::inverted)
   ).apply(i, MatchCompoundNbtPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(false);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public String asString(boolean requirePrefix) {
     return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + "{" + entries.entries().stream().map(pair -> {
       final String key = pair.getKey();
       final String keyAsString;
@@ -65,7 +64,7 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull 
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final CompoundTag nbtCompound))
       return inverted;
     for (Map.Entry<String, NbtPredicate> entry : entries.entries()) {
@@ -93,7 +92,7 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, @NotNull 
   }
 
   @Override
-  public @NotNull NbtPredicateType<MatchCompoundNbtPredicate> getType() {
+  public NbtPredicateType<MatchCompoundNbtPredicate> getType() {
     return MatchCompoundNbtPredicate.Type.MATCH_COMPOUND_TYPE;
   }
 

@@ -3,7 +3,6 @@ package pers.solid.ecmd.entity.predicate;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
@@ -65,7 +64,7 @@ public final class EntityPredicateTypes {
   private EntityPredicateTypes() {
   }
 
-  private static <T extends EntityPredicate> EntityPredicateType<T> registerSimple(String name, @NotNull MapCodec<T> codec) {
+  private static <T extends EntityPredicate> EntityPredicateType<T> registerSimple(String name, MapCodec<T> codec) {
     return REGISTRY_BRIDGE.register(name, EntityPredicateType.create(codec));
   }
 

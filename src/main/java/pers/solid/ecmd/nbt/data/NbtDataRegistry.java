@@ -52,9 +52,9 @@ public final class NbtDataRegistry {
   }
 
   public static void init() {
-    register("block", parseContext -> BlockNbtData.handle(parseContext));
-    register("entity", parseContext -> EntityNbtData.handle(parseContext));
-    register("literal", parseContext -> LiteralNbtData.handle(parseContext));
-    register("storage", parseContext -> StorageNbtData.handle(parseContext));
+    register("block", BlockNbtData::handle);
+    register("entity", EntityNbtData::handle);
+    register("literal", LiteralNbtData::handle);
+    register("storage", StorageNbtData::handle);
   }
 }

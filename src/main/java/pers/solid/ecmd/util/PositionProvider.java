@@ -10,7 +10,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.NotImplementedException;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.EntityAnchorAccessor;
 
@@ -29,7 +28,7 @@ public interface PositionProvider {
     throw new NotImplementedException();
   }
 
-  default @NotNull Entity getEntityOrThrow$ec() throws CommandSyntaxException {
+  default Entity getEntityOrThrow$ec() throws CommandSyntaxException {
     final Entity entity = getEntity$ec();
     if (entity == null) {
       throw CommandSourceStack.ERROR_NOT_ENTITY.create();
@@ -43,7 +42,7 @@ public interface PositionProvider {
     return entity instanceof Player player ? player : null;
   }
 
-  default @NotNull Player getPlayerOrThrow$ec() throws CommandSyntaxException {
+  default Player getPlayerOrThrow$ec() throws CommandSyntaxException {
     final Player playerEntity = getPlayer$ec();
     if (playerEntity == null) {
       throw CommandSourceStack.ERROR_NOT_PLAYER.create();

@@ -8,7 +8,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.scores.Team;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -20,7 +19,7 @@ public record TeamEntityPredicateEntry(String team, boolean inverted) implements
   ).apply(i, TeamEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     if (!(entity instanceof LivingEntity)) {
       return false;
     } else {
@@ -31,7 +30,7 @@ public record TeamEntityPredicateEntry(String team, boolean inverted) implements
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (!(entity instanceof LivingEntity)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.team.not_living", displayName));
     } else {
@@ -58,7 +57,7 @@ public record TeamEntityPredicateEntry(String team, boolean inverted) implements
   }
 
   @Override
-  public @NotNull EntityPredicateType<TeamEntityPredicateEntry> getType() {
+  public EntityPredicateType<TeamEntityPredicateEntry> getType() {
     return EntityPredicateTypes.TEAM;
   }
 

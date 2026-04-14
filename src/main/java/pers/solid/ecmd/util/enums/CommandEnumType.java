@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
@@ -29,7 +28,7 @@ import java.util.function.Function;
  * @param nameProvider 将枚举常量转化为 {@link Message} 的函数，用于命令界面的 tooltip
  * @param <E>          枚举的类型
  */
-public record CommandEnumType<E extends Enum<E>>(@NotNull ImmutableCollection<E> values, @NotNull EnumCodec<E> codec, @NotNull Function<E, @Nullable Message> nameProvider) {
+public record CommandEnumType<E extends Enum<E>>(ImmutableCollection<E> values, EnumCodec<E> codec, Function<E, @Nullable Message> nameProvider) {
   public static final Component HORIZONTAL_TEXT = Component.translatable("enhanced_commands.direction_type.horizontal");
   public static final Component VERTICAL_TEXT = Component.translatable("enhanced_commands.direction_type.vertical");
   public static final ResourceKey<Registry<CommandEnumType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("command_enum_type"));

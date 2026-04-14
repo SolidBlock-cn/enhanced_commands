@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
@@ -35,12 +34,12 @@ public record SubPredicateEntityPredicateEntry(EntityPredicate predicate, boolea
   }
 
   @Override
-  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  public boolean test(Entity entity, ExecutionContext context) {
     return predicate.test(entity, context) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) throws CommandSyntaxException {
     final TestResult testResult = predicate.testAndDescribe(entity, context, displayName);
     if (inverted) {
       if (testResult.successes()) {
@@ -58,7 +57,7 @@ public record SubPredicateEntityPredicateEntry(EntityPredicate predicate, boolea
   }
 
   @Override
-  public @NotNull EntityPredicateType<SubPredicateEntityPredicateEntry> getType() {
+  public EntityPredicateType<SubPredicateEntityPredicateEntry> getType() {
     return EntityPredicateTypes.SUB_PREDICATE;
   }
 }

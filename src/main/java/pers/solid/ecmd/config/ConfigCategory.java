@@ -1,7 +1,6 @@
 package pers.solid.ecmd.config;
 
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
@@ -24,11 +23,11 @@ public class ConfigCategory<C> {
   /**
    * 配置分类的名称，将影响命令的参数以及存储的 json 文件的名字。在写入注册表时，应当与在注册表中的键保持一致。
    */
-  public final @NotNull String name;
+  public final String name;
   /**
    * 配置分类在游戏内的显示名称，可以带有格式或翻译等。
    */
-  public final @NotNull Component displayName;
+  public final Component displayName;
   /**
    * 配置分类的描述。
    */
@@ -65,7 +64,7 @@ public class ConfigCategory<C> {
    *
    * @see #create
    */
-  public ConfigCategory(@NotNull String name, @NotNull Component displayName, @Nullable Component description, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter) {
+  public ConfigCategory(String name, Component displayName, @Nullable Component description, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter) {
     this.name = name;
     this.displayName = displayName;
     this.description = description;
@@ -77,14 +76,14 @@ public class ConfigCategory<C> {
   /**
    * 创建一个新的配置分类，其显示名称和描述都将根据 {@code name} 来决定。
    */
-  public static <C> ConfigCategory<C> create(@NotNull String name, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter, boolean hasDescription) {
+  public static <C> ConfigCategory<C> create(String name, C defaultConfig, Supplier<C> currentConfigGetter, Consumer<C> currentConfigSetter, boolean hasDescription) {
     return new ConfigCategory<>(name, Component.translatable("enhanced_commands.config." + name), hasDescription ? Component.translatable("enhanced_commands.config." + name + ".description") : null, defaultConfig, currentConfigGetter, currentConfigSetter);
   }
 
   /**
    * 创建属于该分类的一个配置项。
    */
-  public <T> ConfigEntry<C, T> createEntry(@NotNull String name, @NotNull ConfigEntryType<T> type, @NotNull Function<C, T> getter, @NotNull BiConsumer<C, T> setter, @NotNull T defaultValue, @Nullable EntryModifier<C, T> modifier, boolean hasDescription) {
+  public <T> ConfigEntry<C, T> createEntry(String name, ConfigEntryType<T> type, Function<C, T> getter, BiConsumer<C, T> setter, T defaultValue, @Nullable EntryModifier<C, T> modifier, boolean hasDescription) {
     ConfigEntry.Builder<C, T> builder = ConfigEntry.builder(this, type, name)
         .setGetter(getter)
         .setSetter(setter)
@@ -128,7 +127,7 @@ public class ConfigCategory<C> {
    * @see #createEntry
    */
   public interface EntryModifier<C, T> extends UnaryOperator<ConfigEntry.Builder<C, T>> {
-    default EntryModifier<C, T> andThen(@NotNull EntryModifier<C, T> next) {
+    default EntryModifier<C, T> andThen(EntryModifier<C, T> next) {
       return builder -> {
         builder = apply(builder);
         return next.apply(builder);

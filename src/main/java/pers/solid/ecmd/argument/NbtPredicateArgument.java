@@ -11,7 +11,6 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.nbt.predicate.NbtPredicateParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -67,7 +66,7 @@ public record NbtPredicateArgument(boolean onlyCompounds, CommandBuildContext co
     }
 
     @Override
-    public @NotNull NbtPredicateArgument.Template deserializeFromNetwork(FriendlyByteBuf buf) {
+    public NbtPredicateArgument.Template deserializeFromNetwork(FriendlyByteBuf buf) {
       return new NbtPredicateArgument.Template(buf.readBoolean());
     }
 
@@ -77,7 +76,7 @@ public record NbtPredicateArgument(boolean onlyCompounds, CommandBuildContext co
     }
 
     @Override
-    public @NotNull NbtPredicateArgument.Template unpack(NbtPredicateArgument argumentType) {
+    public NbtPredicateArgument.Template unpack(NbtPredicateArgument argumentType) {
       return new NbtPredicateArgument.Template(argumentType.onlyCompounds);
     }
   }
@@ -85,12 +84,12 @@ public record NbtPredicateArgument(boolean onlyCompounds, CommandBuildContext co
   public record Template(boolean onlyCompounds) implements ArgumentTypeInfo.Template<NbtPredicateArgument> {
 
     @Override
-    public @NotNull NbtPredicateArgument instantiate(CommandBuildContext commandRegistryAccess) {
+    public NbtPredicateArgument instantiate(CommandBuildContext commandRegistryAccess) {
       return new NbtPredicateArgument(onlyCompounds, commandRegistryAccess);
     }
 
     @Override
-    public @NotNull ArgumentTypeInfo<NbtPredicateArgument, ?> type() {
+    public ArgumentTypeInfo<NbtPredicateArgument, ?> type() {
       return Info.INSTANCE;
     }
   }

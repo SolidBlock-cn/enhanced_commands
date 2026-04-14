@@ -10,7 +10,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -46,7 +45,6 @@ public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
 
 
   @Override
-  @NotNull
   protected Comparator parseComparator() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     if (reader.canRead() && reader.peek() == '=') {
@@ -106,7 +104,7 @@ public class SimpleBlockFunctionParser<S> extends SimpleBlockParser<S> {
   }
 
   @Override
-  protected @NotNull Property<?> parseProperty() throws CommandSyntaxException {
+  protected Property<?> parseProperty() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final Property<?> property = super.parseProperty();
     // 增加了一个属性之后，需要检查是否已经有通用属性函数，且该函数是否是多余的（即已被所有其他属性指定）。

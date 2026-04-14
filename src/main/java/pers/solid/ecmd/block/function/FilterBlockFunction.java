@@ -9,11 +9,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
+
+import java.util.Objects;
 
 /**
  * 一种特殊的方块函数，当指定的方块函数的结果只有符合指定的谓词时，才会应用。例如：
@@ -23,16 +24,16 @@ import pers.solid.ecmd.parse.ParseContext;
  * </pre>
  * 注意：此方法不一定能够正常地对方块实体进行检测。
  */
-public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull BlockPredicate predicate, @NotNull BlockFunction elseFunction) implements BlockFunction {
+public record FilterBlockFunction(BlockFunction function, BlockPredicate predicate, BlockFunction elseFunction) implements BlockFunction {
   public static final MapCodec<FilterBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(FilterBlockFunction::new, BlockFunction.CODEC.fieldOf("function").forGetter(FilterBlockFunction::function), BlockPredicate.CODEC.fieldOf("predicate").forGetter(FilterBlockFunction::predicate), BlockFunction.CODEC.optionalFieldOf("else", EmptyBlockFunction.INSTANCE).forGetter(FilterBlockFunction::elseFunction)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "filter(" + function.asString() + ", " + predicate.asString() + (elseFunction.isEmpty() ? "" : ", " + elseFunction.asString()) + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final CompoundTag valueBeforeModify = blockEntityData.getValue();
     final BlockState newState = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     final BlockInWorld blockInWorld = new BlockInWorld(level, pos, false);
@@ -45,7 +46,7 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.FILTER;
   }
 
@@ -53,19 +54,19 @@ public record FilterBlockFunction(@NotNull BlockFunction function, @NotNull Bloc
     FILTER_TYPE;
 
     @Override
-    public @NotNull MapCodec<FilterBlockFunction> getCodec() {
+    public MapCodec<FilterBlockFunction> getCodec() {
       return CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<FilterBlockFunction> {
-    private BlockPredicate blockPredicate;
-    private BlockFunction blockFunction;
+    private @Nullable BlockPredicate blockPredicate;
+    private @Nullable BlockFunction blockFunction;
     private @Nullable BlockFunction elseFunction;
 
     @Override
     public FilterBlockFunction getParseResult(ParseContext<?> parseContext) {
-      return new FilterBlockFunction(blockFunction, blockPredicate, elseFunction == null ? EmptyBlockFunction.INSTANCE : elseFunction);
+      return new FilterBlockFunction(Objects.requireNonNull(blockFunction, "blockFunction"), Objects.requireNonNull(blockPredicate, "blockPredicate"), elseFunction == null ? EmptyBlockFunction.INSTANCE : elseFunction);
     }
 
     @Override

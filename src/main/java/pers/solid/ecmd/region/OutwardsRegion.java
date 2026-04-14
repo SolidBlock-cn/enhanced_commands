@@ -11,7 +11,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -25,22 +24,22 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   public static final MapCodec<OutwardsRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3i.CODEC.fieldOf("center").forGetter(OutwardsRegion::center), Codec.INT.fieldOf("x").forGetter(OutwardsRegion::x), Codec.INT.fieldOf("y").forGetter(OutwardsRegion::y), Codec.INT.fieldOf("z").forGetter(OutwardsRegion::z)).apply(i, OutwardsRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     return this.minContainingBlockBox().isInside(vec3i);
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     return BlockPos.withinManhattan(new BlockPos(center), x, y, z).iterator();
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.OUTWARDS;
   }
 
   @Override
-  public @NotNull OutwardsRegion rotated(@NotNull Vec3i pivot, @NotNull Rotation blockRotation) {
+  public OutwardsRegion rotated(Vec3i pivot, Rotation blockRotation) {
     if (blockRotation == Rotation.CLOCKWISE_90 || blockRotation == Rotation.COUNTERCLOCKWISE_90) {
       return new OutwardsRegion(GeoUtil.rotate(center, blockRotation, pivot), z, y, x);
     } else {
@@ -59,12 +58,12 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   }
 
   @Override
-  public @NotNull BoundingBox minContainingBlockBox() {
+  public BoundingBox minContainingBlockBox() {
     return BoundingBox.fromCorners(center.offset(-x, -y, -z), center.offset(x, y, z));
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "outwards(%s %s %s, %s %s %s)".formatted(Integer.toString(x), Integer.toString(y), Integer.toString(z), Integer.toString(center.getX()), Integer.toString(center.getY()), Integer.toString(center.getZ()));
   }
 
@@ -87,12 +86,12 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     }
 
     @Override
-    public @NotNull MapCodec<OutwardsRegion> getCodec() {
+    public MapCodec<OutwardsRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionProvider<OutwardsRegion>> getArgumentCodec() {
+    public MapCodec<? extends RegionProvider<OutwardsRegion>> getArgumentCodec() {
       return OutwardsRegionProvider.CODEC;
     }
   }
@@ -103,7 +102,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
     private int dimensionNumber = 0;
 
     @Override
-    public OutwardsRegionProvider getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public OutwardsRegionProvider getParseResult(ParseContext<?> parseContext) {
       final int paramY = dimensionNumber < 2 ? x : y;
       final int paramZ = dimensionNumber < 3 ? x : z;
       return new OutwardsRegionProvider(center, x, paramY, paramZ);

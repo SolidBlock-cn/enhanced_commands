@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -18,13 +17,13 @@ public record NameEntityPredicateEntry(String name, boolean inverted) implements
   ).apply(i, NameEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     final String actualName = entity.getName().getString();
     return actualName.equals(name) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final String actualName = entity.getName().getString();
     final MutableComponent actualNameText = Component.literal(actualName).withStyle(Styles.ACTUAL);
     if (actualName.equals(name)) {
@@ -35,7 +34,7 @@ public record NameEntityPredicateEntry(String name, boolean inverted) implements
   }
 
   @Override
-  public @NotNull EntityPredicateType<NameEntityPredicateEntry> getType() {
+  public EntityPredicateType<NameEntityPredicateEntry> getType() {
     return EntityPredicateTypes.NAME;
   }
 

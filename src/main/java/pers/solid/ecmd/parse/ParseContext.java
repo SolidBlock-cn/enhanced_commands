@@ -14,7 +14,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.util.StringRepresentable;
 import org.apache.commons.lang3.function.FailableFunction;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
@@ -84,7 +83,7 @@ public record ParseContext<S>(HolderLookup.Provider registries, StringReader rea
     }
   }
 
-  public static @NotNull CompletableFuture<Suggestions> combineMultipleSuggestions(SuggestionsBuilder builder, Collection<CompletableFuture<Suggestions>> suggestionsList) {
+  public static CompletableFuture<Suggestions> combineMultipleSuggestions(SuggestionsBuilder builder, Collection<CompletableFuture<Suggestions>> suggestionsList) {
     final CompletableFuture<Suggestions> result = new CompletableFuture<>();
     CompletableFuture.allOf(suggestionsList.toArray(CompletableFuture[]::new))
         .thenRun(() -> {
@@ -227,20 +226,20 @@ public record ParseContext<S>(HolderLookup.Provider registries, StringReader rea
     return buildSuggestions(suggestions, context, builder);
   }
 
-  public <T> @NotNull T parseAndSuggestValues(Iterable<@NotNull T> iterable, Function<@NotNull T, String> suggestions, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
+  public <T> T parseAndSuggestValues(Iterable<T> iterable, Function<T, String> suggestions, Function<T, @Nullable Message> tooltip, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     setSuggestion((context, builder) -> SharedSuggestionProvider.suggest(iterable, builder, suggestions, tooltip));
     return ParsingUtil.parseValues(this.reader, valueGetter);
   }
 
-  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(Iterable<@NotNull T> iterable, Function<@NotNull T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringRepresentable> T parseAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     return parseAndSuggestValues(iterable, StringRepresentable::getSerializedName, tooltip, valueGetter);
   }
 
-  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(Iterable<@NotNull T> iterable, Function<@NotNull T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringRepresentable> T parseAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
     return parseAndSuggestEnums(iterable, tooltip, codec::byId);
   }
 
-  public <T extends Enum<T> & StringRepresentable> @NotNull T parseAndSuggestEnums(@NotNull T[] iterable, Function<@NotNull T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringRepresentable> T parseAndSuggestEnums(T[] iterable, Function<T, @Nullable Message> tooltip, StringIdentifiableCodec<T> codec) throws CommandSyntaxException {
     return parseAndSuggestEnums(Arrays.asList(iterable), tooltip, codec);
   }
 

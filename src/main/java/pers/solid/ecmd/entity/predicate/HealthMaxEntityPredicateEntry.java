@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -19,12 +18,12 @@ public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityP
   ).apply(i, HealthMaxEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return entity instanceof LivingEntity livingEntity && (livingEntity.getHealth() == livingEntity.getMaxHealth()) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (!(entity instanceof LivingEntity livingEntity)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.commands.health.get.single.not_living", displayName));
     } else {
@@ -41,7 +40,7 @@ public record HealthMaxEntityPredicateEntry(boolean inverted) implements EntityP
   }
 
   @Override
-  public @NotNull EntityPredicateType<HealthMaxEntityPredicateEntry> getType() {
+  public EntityPredicateType<HealthMaxEntityPredicateEntry> getType() {
     return EntityPredicateTypes.HEALTH_MAX;
   }
 

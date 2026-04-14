@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -19,7 +18,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   public static final MapCodec<NegatingBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NegatingBlockPredicate::new, BlockPredicate.CODEC.fieldOf("predicate").forGetter(NegatingBlockPredicate::predicate)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     if (predicate instanceof NegatingBlockPredicate || predicate instanceof ConstantBlockPredicate) {
       return "!(" + predicate.asString() + ")";
     } else {
@@ -43,7 +42,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.NEGATING;
   }
 
@@ -51,7 +50,7 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
     NEGATING_TYPE;
 
     @Override
-    public @NotNull MapCodec<NegatingBlockPredicate> getCodec() {
+    public MapCodec<NegatingBlockPredicate> getCodec() {
       return CODEC;
     }
 

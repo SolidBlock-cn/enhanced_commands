@@ -12,7 +12,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.nbt.NbtParserShared;
@@ -57,19 +56,19 @@ public interface BlockPredicate extends ExpressionConvertible {
     return successes ? successResult(blockPos) : failResult(blockPos);
   }
 
-  static @NotNull BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     return parseUnion(parseContext);
   }
 
-  static @NotNull BlockPredicate parseUnion(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static BlockPredicate parseUnion(ParseContext<?> parseContext) throws CommandSyntaxException {
     return ParsingUtil.parseUnifiable(() -> parseIntersect(parseContext), AnyBlockPredicate::new, "|", UNION_TOOLTIP, parseContext);
   }
 
-  static @NotNull BlockPredicate parseIntersect(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static BlockPredicate parseIntersect(ParseContext<?> parseContext) throws CommandSyntaxException {
     return ParsingUtil.parseUnifiable(() -> parseCombination(parseContext), AllBlockPredicate::new, "&", INTERSECT_TOOLTIP, parseContext);
   }
 
-  static @NotNull <S> BlockPredicate parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
+  static <S> BlockPredicate parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
     final BlockPredicate parseUnit = parseUnit(parseContext);
     if (parseUnit instanceof NbtPredicate) {
       return parseUnit;
@@ -108,7 +107,6 @@ public interface BlockPredicate extends ExpressionConvertible {
     return parseUnit;
   }
 
-  @NotNull
   static BlockPredicate parseUnit(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
@@ -131,6 +129,5 @@ public interface BlockPredicate extends ExpressionConvertible {
     return successOrFail(test, blockInWorld.getPos());
   }
 
-  @NotNull
   BlockPredicateType<?> getType();
 }

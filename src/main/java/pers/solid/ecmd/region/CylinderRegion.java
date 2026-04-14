@@ -13,7 +13,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.Unmodifiable;
@@ -36,7 +35,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   public static final MapCodec<CylinderRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(CylinderRegion::radius), Codec.DOUBLE.fieldOf("height").forGetter(CylinderRegion::height), Vec3.CODEC.fieldOf("center").forGetter(CylinderRegion::center)).apply(i, CylinderRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3 vec3d) {
+  public boolean contains(Vec3 vec3d) {
     if (center.y + height / 2 <= vec3d.y || center.y - height / 2 > vec3d.y) {
       return false; // not in this height
     } else {
@@ -46,8 +45,8 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
-    final Iterable<@NotNull BlockPos> oneHeightRound = Iterables.filter(BlockPos.betweenClosed(Mth.ceil(center.x - radius - 0.5), 0, Mth.ceil(center.z - radius - 0.5), Mth.floor(center.x + radius - 0.5), 0, Mth.floor(center.z + radius - 0.5)), blockPos -> {
+  public Iterator<BlockPos> iterator() {
+    final Iterable<BlockPos> oneHeightRound = Iterables.filter(BlockPos.betweenClosed(Mth.ceil(center.x - radius - 0.5), 0, Mth.ceil(center.z - radius - 0.5), Mth.floor(center.x + radius - 0.5), 0, Mth.floor(center.z + radius - 0.5)), blockPos -> {
       final Vec3 centerPos = blockPos.getCenter();
       return Vector2d.distance(centerPos.x, centerPos.z, center.x, center.z) <= radius;
     });// a one-height cuboid that contains a round
@@ -70,17 +69,17 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull CylinderRegion transformed(Function<Vec3, Vec3> transformation) {
+  public CylinderRegion transformed(Function<Vec3, Vec3> transformation) {
     return new CylinderRegion(radius, height, transformation.apply(center));
   }
 
   @Override
-  public @NotNull Region expanded(double offset) {
+  public Region expanded(double offset) {
     throw new UnsupportedOperationException(MUST_EXPAND_VERTICALLY.create());
   }
 
   @Override
-  public @NotNull CylinderRegion expanded(double offset, Direction direction) {
+  public CylinderRegion expanded(double offset, Direction direction) {
     if (direction.getAxis().isVertical()) {
       if (offset < -height) {
         throw new IllegalArgumentException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().create(-height, offset));
@@ -92,7 +91,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull CylinderRegion expanded(double offset, Direction.Axis axis) {
+  public CylinderRegion expanded(double offset, Direction.Axis axis) {
     if (axis.isVertical()) {
       if (offset * 2 < -height) {
         throw new IllegalArgumentException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().create(-height / 2, offset));
@@ -104,7 +103,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction.Plane type) {
+  public Region expanded(double offset, Direction.Plane type) {
     if (type == Direction.Plane.VERTICAL) {
       if (offset * 2 < -height) {
         throw new IllegalArgumentException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.doubleTooLow().create(-height / 2, offset));
@@ -116,7 +115,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.CYLINDER;
   }
 
@@ -126,12 +125,12 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return String.format("cyl(%s, %s, %s)", StringUtil.nf.format(radius), StringUtil.nf.format(height), StringUtil.wrapVector(center));
   }
 
   @Override
-  public @NotNull AABB minContainingBox() {
+  public AABB minContainingBox() {
     return new AABB(center.x - radius, center.y - height / 2, center.z - radius, center.x + radius, center.y + height / 2, center.z + radius);
   }
 
@@ -154,12 +153,12 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
     }
 
     @Override
-    public @NotNull MapCodec<CylinderRegion> getCodec() {
+    public MapCodec<CylinderRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionProvider<CylinderRegion>> getArgumentCodec() {
+    public MapCodec<? extends RegionProvider<CylinderRegion>> getArgumentCodec() {
       return CylinderRegionProvider.CODEC;
     }
   }

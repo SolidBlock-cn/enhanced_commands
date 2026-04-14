@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.function.BlockFunction;
 import pers.solid.ecmd.block.function.BlockFunctionContext;
@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class ForwardedBlockStateArgument extends BlockInput {
   private final BlockFunction blockFunction;
-  private CommandSourceStack source;
+  private @Nullable CommandSourceStack source;
 
   public ForwardedBlockStateArgument(BlockFunction blockFunction) {
     super(Blocks.AIR.defaultBlockState(), Set.of(), null);
@@ -32,7 +32,7 @@ public class ForwardedBlockStateArgument extends BlockInput {
     return true;
   }
 
-  public void setSource(@NotNull CommandSourceStack source) {
+  public void setSource(CommandSourceStack source) {
     this.source = source;
   }
 

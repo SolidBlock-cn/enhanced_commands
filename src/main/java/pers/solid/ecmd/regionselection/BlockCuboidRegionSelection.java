@@ -15,7 +15,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.BlockCuboidRegion;
 import pers.solid.ecmd.render.RegionRendering;
@@ -71,7 +70,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public List<@NotNull Vec3> getPoints() {
+  public List<Vec3> getPoints() {
     return Stream.of(first, second).filter(Objects::nonNull).map(Vec3::atCenterOf).toList();
   }
 
@@ -96,7 +95,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelection expanded(int offset) throws CommandSyntaxException {
+  public RegionSelection expanded(int offset) throws CommandSyntaxException {
     if (first == null || second == null) {
       throw NOT_COMPLETED.create();
     }
@@ -114,7 +113,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelection expanded(int offset, Direction direction) throws CommandSyntaxException {
+  public RegionSelection expanded(int offset, Direction direction) throws CommandSyntaxException {
     if (first == null || second == null) {
       throw NOT_COMPLETED.create();
     }
@@ -149,7 +148,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelection expanded(int offset, Direction.Plane type) throws CommandSyntaxException {
+  public RegionSelection expanded(int offset, Direction.Plane type) throws CommandSyntaxException {
     if (first == null || second == null) {
       throw NOT_COMPLETED.create();
     }
@@ -164,12 +163,12 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull RegionSelectionType getType() {
+  public RegionSelectionType getType() {
     return RegionSelectionTypes.CUBOID;
   }
 
   @Override
-  public @NotNull IntBackedRegionSelection transformedInt(Function<Vec3i, Vec3i> transformation) {
+  public IntBackedRegionSelection transformedInt(Function<Vec3i, Vec3i> transformation) {
     first = first == null ? null : transformation.apply(first);
     second = second == null ? null : transformation.apply(second);
     resetCalculation();
@@ -177,7 +176,7 @@ public class BlockCuboidRegionSelection extends AbstractRegionSelection<BlockCub
   }
 
   @Override
-  public @NotNull IntBackedRegionSelection clone() {
+  public IntBackedRegionSelection clone() {
     return (IntBackedRegionSelection) super.clone();
   }
 

@@ -3,7 +3,6 @@ package pers.solid.ecmd.region;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.util.PositionProvider;
 
@@ -16,12 +15,12 @@ public record OutwardsRegionProvider(EnhancedCoordinates center, int x, int y, i
   }
 
   @Override
-  public @NotNull RegionType<OutwardsRegion> getType() {
+  public RegionType<OutwardsRegion> getType() {
     return RegionTypes.OUTWARDS;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "outwards(" + center.asString() + ", " + x + " " + y + " " + z + ")";
   }
 }

@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
@@ -19,7 +18,6 @@ public interface PropertyNamePredicate extends ExpressionConvertible {
 
   String propertyName();
 
-  @NotNull
   Type getType();
 
   enum Type implements StringRepresentable {
@@ -37,7 +35,7 @@ public interface PropertyNamePredicate extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
   }

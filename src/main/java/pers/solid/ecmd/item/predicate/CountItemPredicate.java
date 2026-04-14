@@ -6,11 +6,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.ItemPredicateArgumentAccessor;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.StringUtil;
+
+import java.util.Objects;
 
 public record CountItemPredicate(MinMaxBounds.Ints count) implements ItemPredicateEntry, ItemPredicateWithoutContext {
   public static final MapCodec<CountItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(MinMaxBounds.Ints.CODEC.fieldOf("count").forGetter(CountItemPredicate::count)).apply(i, CountItemPredicate::new));
@@ -21,12 +23,12 @@ public record CountItemPredicate(MinMaxBounds.Ints count) implements ItemPredica
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.COUNT;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "[" + asEntryString() + "]";
   }
 
@@ -43,16 +45,17 @@ public record CountItemPredicate(MinMaxBounds.Ints count) implements ItemPredica
     COUNT_TYPE;
 
     @Override
-    public @NotNull MapCodec<CountItemPredicate> getCodec() {
+    public MapCodec<CountItemPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static class Parser implements FunctionContentParser<CountItemPredicate> {
-    private MinMaxBounds.Ints count;
+    private @Nullable MinMaxBounds.Ints count;
 
     @Override
-    public CountItemPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public CountItemPredicate getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(count, "count");
       return new CountItemPredicate(count);
     }
 

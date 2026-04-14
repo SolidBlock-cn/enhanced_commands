@@ -104,7 +104,7 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
     } else {
       longStream = curve.streamPoints(i).mapToLong(value -> mutable.set(value.x, value.y, value.z).asLong()).distinct();
     }
-    Iterable<BlockPos.MutableBlockPos> posIterable = () -> IterateUtils.transformLongToObject(longStream.iterator(), mutable::set);
+    Iterable<BlockPos.@Nullable MutableBlockPos> posIterable = () -> IterateUtils.transformLongToObject(longStream.iterator(), mutable::set);
 
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();

@@ -2,7 +2,6 @@ package pers.solid.ecmd.util.iterator;
 
 import com.google.common.collect.ForwardingIterator;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 
 import java.util.Iterator;
@@ -15,14 +14,14 @@ public class IteratorTask<T> extends ForwardingIterator<T> {
   private boolean started;
   public boolean suspended = false;
 
-  public IteratorTask(@NotNull Component name, @NotNull UUID uuid, @NotNull Iterator<T> delegate) {
+  public IteratorTask(Component name, UUID uuid, Iterator<T> delegate) {
     this.name = name;
     this.uuid = uuid;
     this.delegate = delegate;
   }
 
   @Override
-  public @NotNull Iterator<T> delegate() {
+  public Iterator<T> delegate() {
     return delegate;
   }
 
@@ -36,7 +35,7 @@ public class IteratorTask<T> extends ForwardingIterator<T> {
   }
 
   @Override
-  public @NotNull String toString() {
+  public String toString() {
     return "IteratorTask[" + name.getString() + ", " + delegate + "]";
   }
 }

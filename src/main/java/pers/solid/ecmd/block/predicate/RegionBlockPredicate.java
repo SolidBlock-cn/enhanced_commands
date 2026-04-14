@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.region.Region;
@@ -16,11 +16,13 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
+import java.util.Objects;
+
 public record RegionBlockPredicate(RegionProvider<?> region) implements BlockPredicate {
   public static final MapCodec<RegionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RegionBlockPredicate::new, RegionProvider.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "region(" + region.asString() + ")";
   }
 
@@ -38,7 +40,7 @@ public record RegionBlockPredicate(RegionProvider<?> region) implements BlockPre
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.REGION;
   }
 
@@ -46,16 +48,17 @@ public record RegionBlockPredicate(RegionProvider<?> region) implements BlockPre
     REGION_TYPE;
 
     @Override
-    public @NotNull MapCodec<RegionBlockPredicate> getCodec() {
+    public MapCodec<RegionBlockPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<RegionBlockPredicate> {
-    private RegionProvider<?> regionProvider;
+    private @Nullable RegionProvider<?> regionProvider;
 
     @Override
     public RegionBlockPredicate getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(regionProvider, "regionProvider");
       return new RegionBlockPredicate(regionProvider);
     }
 

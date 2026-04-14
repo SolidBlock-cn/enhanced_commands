@@ -1,12 +1,13 @@
 package pers.solid.ecmd.parse;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import org.jspecify.annotations.Nullable;
 
 public interface FunctionContentParser<T> {
   /**
    * 在完成所有参数的解析后，返回结果。通常在此接口的实现过程中，解析参数时会设置字段的一些值，此方法则使用字段中的值。
    */
-  T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException;
+  @Nullable T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException;
 
   /**
    * 解析括号内的内容。此时 {@code parseContext} 中的 {@code allowSparse} 通常应当是 {@code true}。

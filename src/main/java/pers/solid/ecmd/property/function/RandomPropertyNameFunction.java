@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -15,7 +14,7 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
   public static final MapCodec<RandomPropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RandomPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(RandomPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(RandomPropertyNameFunction::must)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return propertyName + (must ? "==*" : "=*");
   }
 
@@ -29,7 +28,7 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.RANDOM;
   }
 

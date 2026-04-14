@@ -9,7 +9,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -20,12 +19,12 @@ public record ExistencePropertyPredicate<T extends Comparable<T>>(Property<T> pr
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return property.getName() + (exists ? "=*" : "!=*");
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.EXISTENCE;
   }
 

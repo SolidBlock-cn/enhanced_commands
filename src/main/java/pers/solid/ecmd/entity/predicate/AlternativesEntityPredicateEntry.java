@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
@@ -22,12 +21,12 @@ public record AlternativesEntityPredicateEntry(List<EntityPredicate> predicates,
   ).apply(i, AlternativesEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  public boolean test(Entity entity, ExecutionContext context) {
     return predicates.stream().anyMatch(entityPredicate -> entityPredicate.test(entity, context));
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) throws CommandSyntaxException {
     boolean result = false;
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
     for (EntityPredicate entityPredicate : predicates) {
@@ -51,12 +50,12 @@ public record AlternativesEntityPredicateEntry(List<EntityPredicate> predicates,
   }
 
   @Override
-  public @NotNull EntityPredicateType<AlternativesEntityPredicateEntry> getType() {
+  public EntityPredicateType<AlternativesEntityPredicateEntry> getType() {
     return EntityPredicateTypes.ALTERNATIVES;
   }
 
   @Override
-  public @NotNull String toOptionEntry() {
+  public String toOptionEntry() {
     return "alternatives=" + (inverted ? "!" : "") + predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "[", "]"));
   }
 }

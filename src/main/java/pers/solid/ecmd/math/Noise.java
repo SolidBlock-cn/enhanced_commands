@@ -10,7 +10,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.block.function.WeightedListParser;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -85,7 +85,7 @@ public interface Noise {
     return SAMPLER_CACHE.computeIfAbsent(seed, x -> new WeakHashMap<>()).computeIfAbsent(noiseParameters(), noiseParameters -> NormalNoise.create(RandomSource.create(seed), noiseParameters));
   }
 
-  default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, double x, double y, double z) {
+  default <T> T sample(long seed, WeightedList<T> weightedList, double x, double y, double z) {
     final double d = getSampleValue(seed, x, y, z);
     return weightedList.getClampedElement(d);
   }
@@ -97,21 +97,20 @@ public interface Noise {
     y -= offset().y;
     z -= offset().z;
     double noiseValue = noiseSampler.getValue(x * scale.x, y * scale.y, z * scale.z);
-    double d = Mth.clamp((1.0d + noiseValue) / 2.0d, 0.0F, 0.9999);
-    return d;
+    return Mth.clamp((1.0d + noiseValue) / 2.0d, 0.0F, 0.9999);
   }
 
-  default <T> T sample(long seed, @NotNull WeightedList<T> weightedList, Vec3 pos) {
+  default <T> T sample(long seed, WeightedList<T> weightedList, Vec3 pos) {
     return sample(seed, weightedList, pos.x, pos.y, pos.z);
   }
 
   abstract class Parser<T> implements FunctionContentParser<T>, NamedParamListParser {
     protected OptionalLong seed = OptionalLong.empty();
-    protected Integer firstOctave;
-    protected DoubleList amplitudes;
-    protected Vec3 scale;
-    protected WeightedList<T> weightedList;
-    protected Vec3 offset;
+    protected @Nullable Integer firstOctave;
+    protected @Nullable DoubleList amplitudes;
+    protected @Nullable Vec3 scale;
+    protected @Nullable WeightedList<T> weightedList;
+    protected @Nullable Vec3 offset;
     protected final Set<String> SUPPORTED_PARAMS = ImmutableSet.of("first_octave", "amplitudes", "scale", "offset", "seed");
 
     protected abstract T parseElement(ParseContext<?> parseContext) throws CommandSyntaxException;
@@ -176,7 +175,7 @@ public interface Noise {
 
     @MustBeInvokedByOverriders
     @Override
-    public T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       // 补充未设置的值。
       if (firstOctave == null) firstOctave = DEFAULT_FIRST_OCTAVE;
       if (amplitudes == null) amplitudes = DEFAULT_AMPLITUDES;

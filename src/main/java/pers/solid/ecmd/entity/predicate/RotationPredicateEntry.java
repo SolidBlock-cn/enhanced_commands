@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -35,7 +34,7 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
   }
 
   @Override
-  default boolean test(@NotNull Entity entity) {
+  default boolean test(Entity entity) {
     double actualMin = min();
     double actualMax = max();
     double actualAngle = Mth.wrapDegrees(angleOf(entity));
@@ -58,7 +57,7 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
     ).apply(i, Pitch::new));
 
     @Override
-    public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+    public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
       final float angle = entity.getXRot();
       final MutableComponent actual = TextUtil.literal(angle).withStyle(Styles.ACTUAL);
       final MutableComponent expected = Component.literal(toRangeString()).withStyle(Styles.EXPECTED);
@@ -75,12 +74,12 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
     }
 
     @Override
-    public @NotNull String toOptionEntry() {
+    public String toOptionEntry() {
       return "x_rotation=" + toRangeString();
     }
 
     @Override
-    public @NotNull EntityPredicateType<Pitch> getType() {
+    public EntityPredicateType<Pitch> getType() {
       return EntityPredicateTypes.PITCH;
     }
   }
@@ -97,7 +96,7 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
     ).apply(i, Yaw::new));
 
     @Override
-    public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+    public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
       final float angle = entity.getYRot();
       final MutableComponent actual = TextUtil.literal(angle).withStyle(Styles.ACTUAL);
       final MutableComponent expected = Component.literal(toRangeString()).withStyle(Styles.EXPECTED);
@@ -114,12 +113,12 @@ public interface RotationPredicateEntry extends EntityPredicateEntry, StaticEnti
     }
 
     @Override
-    public @NotNull String toOptionEntry() {
+    public String toOptionEntry() {
       return "y_rotation=" + toRangeString();
     }
 
     @Override
-    public @NotNull EntityPredicateType<Yaw> getType() {
+    public EntityPredicateType<Yaw> getType() {
       return EntityPredicateTypes.YAW;
     }
   }

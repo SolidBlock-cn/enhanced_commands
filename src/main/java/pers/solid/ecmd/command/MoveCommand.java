@@ -15,7 +15,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.BlockTransformationCommand;
@@ -97,20 +96,20 @@ public enum MoveCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public void transformEntity(@NotNull Entity entity) {
+      public void transformEntity(Entity entity) {
       }
 
       @Override
-      public void transformEntityBack(@NotNull Entity entity) {
+      public void transformEntityBack(Entity entity) {
       }
 
       @Override
-      public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
+      public BlockState transformBlockState(BlockState original) {
         return original;
       }
 
       @Override
-      public @NotNull Region transformRegion(@NotNull Region region) {
+      public Region transformRegion(Region region) {
         return region.moved(relativeVector);
       }
 
@@ -124,7 +123,7 @@ public enum MoveCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public @NotNull MutableComponent getIteratorTaskName(Region region) {
+      public MutableComponent getIteratorTaskName(Region region) {
         return relativePos.map(pair -> Component.translatable("enhanced_commands.commands.move.task.direction", region.asString(), Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left())), vec3i -> Component.translatable("enhanced_commands.commands.move.task.vector", region.asString(), TextUtil.wrapVector(vec3i)));
       }
     };

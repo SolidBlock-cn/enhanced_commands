@@ -9,26 +9,28 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.argument.MirrorProvider;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
-public record MirrorBlockFunction(@NotNull MirrorProvider mirror) implements BlockFunction {
+import java.util.Objects;
+
+public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunction {
   public static final MapCodec<MirrorBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(MirrorBlockFunction::new, MirrorProvider.CODEC.fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "mirror(" + mirror.getSerializedName() + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     return blockState.mirror(mirror.apply((CommandSourceStack) context.positionProvider));
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.MIRROR;
   }
 
@@ -36,13 +38,13 @@ public record MirrorBlockFunction(@NotNull MirrorProvider mirror) implements Blo
     MIRROR_TYPE;
 
     @Override
-    public @NotNull MapCodec<MirrorBlockFunction> getCodec() {
+    public MapCodec<MirrorBlockFunction> getCodec() {
       return CODEC;
     }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<MirrorBlockFunction> {
-    private MirrorProvider mirror;
+    private @Nullable MirrorProvider mirror;
 
     @Override
     public int minSequentialParamsCount() {
@@ -56,6 +58,7 @@ public record MirrorBlockFunction(@NotNull MirrorProvider mirror) implements Blo
 
     @Override
     public MirrorBlockFunction getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(mirror, "mirror");
       return new MirrorBlockFunction(mirror);
     }
 

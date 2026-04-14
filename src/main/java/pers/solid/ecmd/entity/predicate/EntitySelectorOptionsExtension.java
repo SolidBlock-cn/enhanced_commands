@@ -44,7 +44,6 @@ import net.minecraft.world.scores.Scoreboard;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
@@ -663,7 +662,7 @@ public class EntitySelectorOptionsExtension {
    * 此方法用于 mixin。此方法同时还会添加游戏模式谓词描述。
    */
   @ApiStatus.Internal
-  public static boolean mixinReadMultipleTypes(EntitySelectorParser reader, boolean inverted, @NotNull Either<EntityType<?>, TagKey<EntityType<?>>> already) throws CommandSyntaxException {
+  public static boolean mixinReadMultipleTypes(EntitySelectorParser reader, boolean inverted, Either<EntityType<?>, TagKey<EntityType<?>>> already) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
     final int cursorBeforeWhite = stringReader.getCursor();
     stringReader.skipWhitespace();
@@ -733,7 +732,7 @@ public class EntitySelectorOptionsExtension {
    * @see EntitySelectorOptionsMixin#readMultipleGameModes(EntitySelectorParser, Predicate, boolean, GameType)
    */
   @ApiStatus.Internal
-  public static boolean mixinReadMultipleGameModes(EntitySelectorParser reader, boolean inverted, @NotNull GameType gameMode) throws CommandSyntaxException {
+  public static boolean mixinReadMultipleGameModes(EntitySelectorParser reader, boolean inverted, GameType gameMode) throws CommandSyntaxException {
     final StringReader stringReader = reader.getReader();
     final int cursorBeforeWhite = stringReader.getCursor();
     stringReader.skipWhitespace();
@@ -783,7 +782,7 @@ public class EntitySelectorOptionsExtension {
    * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin。
    */
   @ApiStatus.Internal
-  public static void mixinGetScoreSuggestions(EntitySelectorParser entitySelectorReader, StringReader stringReader, @NotNull CommandContext<?> context) {
+  public static void mixinGetScoreSuggestions(EntitySelectorParser entitySelectorReader, StringReader stringReader, CommandContext<?> context) {
     if (context.getSource() instanceof final CommandSourceStack serverCommandSource) {
       final int cursor = stringReader.getCursor();
       final ServerScoreboard scoreboard = serverCommandSource.getServer().getScoreboard();
@@ -798,7 +797,7 @@ public class EntitySelectorOptionsExtension {
    * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin。
    */
   @ApiStatus.Internal
-  public static void mixinGetAdvancementIdSuggestions(EntitySelectorParser entitySelectorReader, StringReader stringReader, @NotNull CommandContext<?> context) {
+  public static void mixinGetAdvancementIdSuggestions(EntitySelectorParser entitySelectorReader, StringReader stringReader, CommandContext<?> context) {
     if (context.getSource() instanceof final CommandSourceStack serverCommandSource) {
       final int cursor = stringReader.getCursor();
       final var advancementLoader = serverCommandSource.getServer().getAdvancements();
@@ -816,7 +815,7 @@ public class EntitySelectorOptionsExtension {
    * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin。
    */
   @ApiStatus.Internal
-  public static void mixinGetLootConditionIdSuggestions(EntitySelectorParser entitySelectorReader, StringReader stringReader, @NotNull CommandContext<?> context) {
+  public static void mixinGetLootConditionIdSuggestions(EntitySelectorParser entitySelectorReader, StringReader stringReader, CommandContext<?> context) {
     if (context.getSource() instanceof final CommandSourceStack serverCommandSource) {
       final int cursor = stringReader.getCursor();
       final var ids = serverCommandSource.getServer().reloadableRegistries().getKeys(Registries.PREDICATE);
@@ -829,7 +828,6 @@ public class EntitySelectorOptionsExtension {
   /**
    * 此方法用于辅助 {@link EntitySelectorOptionsMixin} 中的 mixin，返回的谓词仅测试被反向的分数条件。
    */
-  @NotNull
   public static Predicate<Entity> mixinInvertedScoredPredicate(List<ScoresEntityPredicateEntry.Entry> invertedScores) {
     return entity -> {
       final MinecraftServer server = entity.getServer();

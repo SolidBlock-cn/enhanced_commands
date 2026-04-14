@@ -2,7 +2,6 @@ package pers.solid.ecmd.util.codec;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 
@@ -37,7 +36,7 @@ public interface EnumCodec<E extends Enum<E>> {
    * @param fallback 字符串 id 对应的枚举常量不存在时返回的值
    * @return 指定的枚举常量，或者在字符串 id 对应的枚举常量不存在时为 {@code fallback} 的值
    */
-  default @NotNull E byId(@Nullable String id, E fallback) {
+  default E byId(@Nullable String id, E fallback) {
     return Objects.requireNonNullElse(this.byId(id), fallback);
   }
 
@@ -49,7 +48,7 @@ public interface EnumCodec<E extends Enum<E>> {
    * @return 枚举常量，成功执行时一定非 {@code null}
    * @throws T 字符串 id 对应的枚举常量不存在
    */
-  default <T extends Throwable> @NotNull E byIdOrThrow(@NotNull String id, Function<String, T> exceptionSupplier) throws T {
+  default <T extends Throwable> E byIdOrThrow(String id, Function<String, T> exceptionSupplier) throws T {
     final E value = byId(id);
     if (value == null) {
       throw exceptionSupplier.apply(id);
@@ -63,20 +62,19 @@ public interface EnumCodec<E extends Enum<E>> {
    * @param value 枚举常量
    * @return 枚举常量对应的字符串 id
    */
-  @NotNull
-  String asString(@NotNull E value);
+  String asString(E value);
 
   /**
    * 对于没有继承 {@link StringRepresentable} 也不需要 {@link Codec} 的枚举，可以利用此类创建一个简单的，需要直接提供枚举常量与字符串 id 之间的转化形式（通常是 lambda 的形式）。
    */
-  record Simple<E extends Enum<E>>(Function<@Nullable String, @Nullable E> byId, Function<@NotNull E, @NotNull String> toId) implements EnumCodec<E> {
+  record Simple<E extends Enum<E>>(Function<@Nullable String, @Nullable E> byId, Function<E, String> toId) implements EnumCodec<E> {
     @Override
     public @Nullable E byId(@Nullable String id) {
       return byId.apply(id);
     }
 
     @Override
-    public @NotNull String asString(@NotNull E value) {
+    public String asString(E value) {
       return toId.apply(value);
     }
   }

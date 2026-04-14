@@ -9,7 +9,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -17,11 +16,11 @@ import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.function.Predicate;
 
-public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull Tag> {
+public interface NbtPredicate extends ExpressionConvertible, Predicate<Tag> {
   Codec<NbtPredicate> CODEC = NbtPredicateType.REGISTRY.byNameCodec().dispatch(NbtPredicate::getType, NbtPredicateType::getCodec);
   ResourceKey<Registry<NbtPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate"));
 
-  static @NotNull NbtPredicate parse(CommandBuildContext commandBuildContext, String s, CommandSourceStack source) throws CommandSyntaxException {
+  static NbtPredicate parse(CommandBuildContext commandBuildContext, String s, CommandSourceStack source) throws CommandSyntaxException {
     return new NbtPredicateParser<>(new ParseContext<>(commandBuildContext, new StringReader(s), false, true)).parseNbtPredicate(false, false);
   }
 
@@ -31,16 +30,16 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
   }
 
   @Override
-  @NotNull String asString();
+  String asString();
 
-  default @NotNull String asString(boolean requirePrefix) {
+  default String asString(boolean requirePrefix) {
     return asString();
   }
 
   @Override
-  boolean test(@NotNull Tag nbtElement);
+  boolean test(Tag nbtElement);
 
-  @NotNull NbtPredicateType<?> getType();
+  NbtPredicateType<?> getType();
 
   enum Type implements StringRepresentable {
     COMPARISON("comparison"),
@@ -61,7 +60,7 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<@NotNull 
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
 

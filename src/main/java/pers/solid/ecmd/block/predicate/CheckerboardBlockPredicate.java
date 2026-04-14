@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
@@ -18,7 +17,7 @@ import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collections;
 
-public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> predicates, @NotNull Vec3 floor, @NotNull Vec3 scale, @NotNull Vec3 offset) implements BlockPredicate, Checkerboard<BlockPredicate> {
+public record CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates, Vec3 floor, Vec3 scale, Vec3 offset) implements BlockPredicate, Checkerboard<BlockPredicate> {
   public static final MapCodec<CheckerboardBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       WeightedList.createMapCodec(BlockPredicate.CODEC).fieldOf("predicates").forGetter(CheckerboardBlockPredicate::predicates),
       Vec3.CODEC.optionalFieldOf("floor", Vec3.ZERO).forGetter(CheckerboardBlockPredicate::floor),
@@ -26,7 +25,7 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
       Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(CheckerboardBlockPredicate::offset)
   ).apply(i, CheckerboardBlockPredicate::new));
 
-  public CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> predicates) {
+  public CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates) {
     this(predicates, Vec3.ZERO, UNIT, Vec3.ZERO);
   }
 
@@ -47,12 +46,12 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.CHECKERBOARD;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final StringBuilder sb = new StringBuilder("checkerboard(");
     sb.append(predicates.asString(ExpressionConvertible::asString));
     appendParameters(sb);
@@ -63,7 +62,7 @@ public record CheckerboardBlockPredicate(@NotNull WeightedList<BlockPredicate> p
     CHECKERBOARD_TYPE;
 
     @Override
-    public @NotNull MapCodec<CheckerboardBlockPredicate> getCodec() {
+    public MapCodec<CheckerboardBlockPredicate> getCodec() {
       return CODEC;
     }
   }

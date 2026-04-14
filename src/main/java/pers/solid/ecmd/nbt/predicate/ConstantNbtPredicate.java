@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 
 public enum ConstantNbtPredicate implements NbtPredicate {
   TRUE(true),
@@ -20,22 +19,22 @@ public enum ConstantNbtPredicate implements NbtPredicate {
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(false);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public String asString(boolean requirePrefix) {
     return (value ? "" : "!") + (requirePrefix ? ": " : "") + "*";
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     return value;
   }
 
   @Override
-  public @NotNull NbtPredicateType<ConstantNbtPredicate> getType() {
+  public NbtPredicateType<ConstantNbtPredicate> getType() {
     return ConstantNbtPredicate.Type.CONSTANT_TYPE;
   }
 

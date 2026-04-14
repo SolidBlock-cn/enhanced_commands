@@ -11,7 +11,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.GameType;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -26,19 +25,19 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry, Stat
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(GameModeEntityPredicateEntry::inverted)
   ).apply(i, (either, inverted) -> either.map(gameMode -> new Single(gameMode, inverted), gameModes -> new Multiple(gameModes, inverted))));
 
-  boolean test(@NotNull ServerPlayer player);
+  boolean test(ServerPlayer player);
 
   TestResult testAndDescribe(ServerPlayer player, Component displayName);
 
   boolean inverted();
 
   @Override
-  default boolean test(@NotNull Entity entity) {
+  default boolean test(Entity entity) {
     return entity instanceof ServerPlayer player && test(player);
   }
 
   @Override
-  default TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  default TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (entity instanceof ServerPlayer player) {
       return testAndDescribe(player, displayName);
     } else {
@@ -47,7 +46,6 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry, Stat
   }
 
   @Override
-  @NotNull
   default EntityPredicateType<GameModeEntityPredicateEntry> getType() {
     return EntityPredicateTypes.GAME_MODE;
   }
@@ -60,7 +58,7 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry, Stat
     }
 
     @Override
-    public boolean test(@NotNull ServerPlayer player) {
+    public boolean test(ServerPlayer player) {
       return (player.gameMode.getGameModeForPlayer() == gameMode) != inverted;
     }
 
@@ -81,7 +79,7 @@ public interface GameModeEntityPredicateEntry extends EntityPredicateEntry, Stat
     }
 
     @Override
-    public boolean test(@NotNull ServerPlayer player) {
+    public boolean test(ServerPlayer player) {
       return gameModes.contains(player.gameMode.getGameModeForPlayer()) != inverted;
     }
 

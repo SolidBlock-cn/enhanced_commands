@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -23,12 +22,12 @@ public record AnyItemPredicate(List<ItemPredicate> predicates) implements Predic
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.ANY_TYPE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "any(" + predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + ")";
   }
 
@@ -36,7 +35,7 @@ public record AnyItemPredicate(List<ItemPredicate> predicates) implements Predic
     ANY_TYPE;
 
     @Override
-    public @NotNull MapCodec<AnyItemPredicate> getCodec() {
+    public MapCodec<AnyItemPredicate> getCodec() {
       return CODEC;
     }
   }

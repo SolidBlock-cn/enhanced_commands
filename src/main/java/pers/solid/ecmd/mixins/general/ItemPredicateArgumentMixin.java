@@ -18,7 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.parsing.packrat.commands.Grammar;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -88,14 +90,15 @@ public abstract class ItemPredicateArgumentMixin {
 
   @Mixin(targets = "net.minecraft.commands.arguments.item.ItemPredicateArgument$Context")
   public static abstract class ContextMixin implements ComponentPredicateParserContextExtension<Predicate<ItemStack>> {
-    private HolderLookup.Provider registries;
+    @Unique
+    private HolderLookup.@Nullable Provider enhanced_commands$registries;
 
     /**
      * 在初始化时，将参数 {@code registries} 记录在字段中，以用于解析。
      */
     @Inject(method = "<init>", at = @At("TAIL"))
     private void recordRegistries(HolderLookup.Provider registries, CallbackInfo ci) {
-      this.registries = registries;
+      this.enhanced_commands$registries = registries;
     }
 
     @ModifyReturnValue(method = "forElementType(Lcom/mojang/brigadier/ImmutableStringReader;Lnet/minecraft/resources/ResourceLocation;)Ljava/util/function/Predicate;", at = @At("RETURN"))
@@ -149,7 +152,7 @@ public abstract class ItemPredicateArgumentMixin {
 
     @Override
     public HolderLookup.Provider registries$enhanced_commands() {
-      return registries;
+      return enhanced_commands$registries;
     }
   }
 }

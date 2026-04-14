@@ -27,7 +27,7 @@ public record NbtTargetArgument(CommandBuildContext commandBuildContext) impleme
     return new NbtTargetArgument(commandBuildContext);
   }
 
-  public static NbtTarget<?> getNbtTarget(CommandContext<CommandSourceStack> context, String name, @Nullable BlockPredicate blockPredicate) throws CommandSyntaxException {
+  public static NbtTarget<?> getNbtTarget(CommandContext<CommandSourceStack> context, String name, @Nullable BlockPredicate blockPredicate) {
     final NbtTarget<?> argument = context.getArgument(name, NbtTarget.class);
     if (argument instanceof BlockNbtData blockNbtData && blockPredicate != null) {
       return new BlockNbtData(blockNbtData.region(), blockPredicate);

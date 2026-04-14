@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.Vec3iProvider;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -18,7 +18,7 @@ import pers.solid.ecmd.util.TextUtil;
 
 import java.util.List;
 
-public record RelBlockPredicate(@NotNull Vec3iProvider relPos, @NotNull BlockPredicate predicate) implements BlockPredicate {
+public record RelBlockPredicate(Vec3iProvider relPos, BlockPredicate predicate) implements BlockPredicate {
 
   public static final MapCodec<RelBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RelBlockPredicate::new, Vec3iProvider.CODEC.fieldOf("rel_pos").forGetter(RelBlockPredicate::relPos), BlockPredicate.CODEC.fieldOf("predicate").forGetter(RelBlockPredicate::predicate)));
 
@@ -37,12 +37,12 @@ public record RelBlockPredicate(@NotNull Vec3iProvider relPos, @NotNull BlockPre
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.REL;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "rel(%s, %s)".formatted(relPos.asString(), predicate.asString());
   }
 
@@ -50,14 +50,14 @@ public record RelBlockPredicate(@NotNull Vec3iProvider relPos, @NotNull BlockPre
     REL_TYPE;
 
     @Override
-    public @NotNull MapCodec<RelBlockPredicate> getCodec() {
+    public MapCodec<RelBlockPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<RelBlockPredicate> {
-    private Vec3iProvider relPos;
-    private BlockPredicate blockPredicate;
+    private @Nullable Vec3iProvider relPos;
+    private @Nullable BlockPredicate blockPredicate;
 
     @Override
     public RelBlockPredicate getParseResult(ParseContext<?> parseContext) {

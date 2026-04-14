@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -19,17 +18,17 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   public static final MapCodec<UseOriginalBlockFunction> CODEC = MapCodec.unit(USE_ORIGINAL);
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "~";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     return originalState;
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.USE_ORIGINAL;
   }
 
@@ -37,7 +36,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
     USE_ORIGINAL_TYPE;
 
     @Override
-    public @NotNull MapCodec<UseOriginalBlockFunction> getCodec() {
+    public MapCodec<UseOriginalBlockFunction> getCodec() {
       return CODEC;
     }
 

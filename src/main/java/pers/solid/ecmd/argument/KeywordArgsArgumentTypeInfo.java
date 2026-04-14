@@ -14,7 +14,6 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.HashSet;
@@ -53,10 +52,10 @@ public class KeywordArgsArgumentTypeInfo implements ArgumentTypeInfo<KeywordArgs
   }
 
   @Override
-  public @NotNull KeywordArgsArgumentTypeInfo.Template deserializeFromNetwork(FriendlyByteBuf buf) {
+  public KeywordArgsArgumentTypeInfo.Template deserializeFromNetwork(FriendlyByteBuf buf) {
     final int size = buf.readInt();
-    final Map<@NotNull String, ArgumentTypeInfo.Template<?>> arguments = new LinkedHashMap<>(size);
-    final Set<@NotNull String> requiredArguments = new HashSet<>();
+    final Map<String, ArgumentTypeInfo.Template<?>> arguments = new LinkedHashMap<>(size);
+    final Set<String> requiredArguments = new HashSet<>();
     for (int i = 0; i < size; i++) {
       final String argName = buf.readUtf();
       final boolean isRequired = buf.readBoolean();
@@ -97,7 +96,7 @@ public class KeywordArgsArgumentTypeInfo implements ArgumentTypeInfo<KeywordArgs
   }
 
   @Override
-  public @NotNull KeywordArgsArgumentTypeInfo.Template unpack(KeywordArgsArgument argumentType) {
+  public KeywordArgsArgumentTypeInfo.Template unpack(KeywordArgsArgument argumentType) {
     final Set<ResourceLocation> shared = argumentType.shared();
     if (shared.isEmpty()) {
       return new Template(Maps.transformValues(argumentType.arguments(), ArgumentTypeInfos::unpack), argumentType.requiredArguments(), shared);
@@ -110,19 +109,19 @@ public class KeywordArgsArgumentTypeInfo implements ArgumentTypeInfo<KeywordArgs
   }
 
   public final class Template implements ArgumentTypeInfo.Template<KeywordArgsArgument> {
-    private final @Unmodifiable Map<@NotNull String, ArgumentTypeInfo.Template<?>> arguments;
-    private final @Unmodifiable Set<@NotNull String> requiredArguments;
+    private final @Unmodifiable Map<String, ArgumentTypeInfo.Template<?>> arguments;
+    private final @Unmodifiable Set<String> requiredArguments;
     private final @Unmodifiable Set<ResourceLocation> shared;
 
-    public Template(Map<@NotNull String, ArgumentTypeInfo.Template<?>> arguments, Set<@NotNull String> requiredArguments, Set<ResourceLocation> shared) {
+    public Template(Map<String, ArgumentTypeInfo.Template<?>> arguments, Set<String> requiredArguments, Set<ResourceLocation> shared) {
       this.arguments = arguments;
       this.requiredArguments = requiredArguments;
       this.shared = shared;
     }
 
     @Override
-    public @NotNull KeywordArgsArgument instantiate(CommandBuildContext commandBuildContext) {
-      final ImmutableMap<@NotNull String, ArgumentType<?>> arguments1 = ImmutableMap.copyOf(Maps.transformValues(arguments, s -> s.instantiate(commandBuildContext)));
+    public KeywordArgsArgument instantiate(CommandBuildContext commandBuildContext) {
+      final ImmutableMap<String, ArgumentType<?>> arguments1 = ImmutableMap.copyOf(Maps.transformValues(arguments, s -> s.instantiate(commandBuildContext)));
       if (shared.isEmpty()) {
         return new KeywordArgsArgument(arguments1, requiredArguments, ImmutableMap.of(), shared, ImmutableSet.of());
       } else {
@@ -141,7 +140,7 @@ public class KeywordArgsArgumentTypeInfo implements ArgumentTypeInfo<KeywordArgs
     }
 
     @Override
-    public @NotNull ArgumentTypeInfo<KeywordArgsArgument, ?> type() {
+    public ArgumentTypeInfo<KeywordArgsArgument, ?> type() {
       return KeywordArgsArgumentTypeInfo.this;
     }
   }

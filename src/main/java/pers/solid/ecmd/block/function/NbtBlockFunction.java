@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.nbt.NbtParserShared;
 import pers.solid.ecmd.nbt.function.NbtFunction;
@@ -21,17 +20,17 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 
-public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements BlockFunction {
+public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction {
   public static final MapCodec<NbtBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockFunction::new, NbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
   public static final DynamicCommandExceptionType NOT_COMPOUND = new DynamicCommandExceptionType(s -> Component.translatable("enhanced_commands.block_function.nbt_not_compound", s));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return nbtFunction.asString();
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     try {
       final Tag applied = nbtFunction.apply(blockEntityData.getValue(), context);
       if (applied instanceof CompoundTag nbtCompound) {
@@ -46,7 +45,7 @@ public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements Bloc
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.NBT;
   }
 
@@ -54,7 +53,7 @@ public record NbtBlockFunction(@NotNull NbtFunction nbtFunction) implements Bloc
     NBT_TYPE;
 
     @Override
-    public @NotNull MapCodec<NbtBlockFunction> getCodec() {
+    public MapCodec<NbtBlockFunction> getCodec() {
       return CODEC;
     }
 

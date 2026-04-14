@@ -19,13 +19,13 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.biome.Biome;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 import static pers.solid.ecmd.util.StringUtil.nf;
@@ -41,7 +41,7 @@ public final class TextUtil {
   /**
    * 将 NBT 转换为可读的字符串。与 {@link net.minecraft.nbt.StringTagVisitor#visit(Tag)} 不同的是，此函数返回的结果中，会在适当的位置添加空格，同时不进行换行，从而确保适当美观，并与 {@link NbtPredicate#asString()} 和 {@link NbtFunction#asString()} 的结果保持一致。
    */
-  public static String toSpacedStringNbt(@NotNull Tag nbtElement) {
+  public static String toSpacedStringNbt(Tag nbtElement) {
     return new SnbtPrinterTagVisitor(StringUtils.EMPTY, 0, new ArrayList<>()).visit(nbtElement);
   }
 
@@ -134,11 +134,7 @@ public final class TextUtil {
   @Contract(value = "null, null -> !null; null, !null -> param2; !null, null -> param1", pure = true)
   public static Component joinNullableLines(@Nullable Component text1, @Nullable Component text2) {
     if (text1 == null) {
-      if (text2 == null) {
-        return Component.empty();
-      } else {
-        return text2;
-      }
+      return Objects.requireNonNullElseGet(text2, Component::empty);
     } else {
       if (text2 == null) {
         return text1;
@@ -152,7 +148,6 @@ public final class TextUtil {
     return CommonComponents.joinLines(Collections2.filter(Arrays.asList(texts), Predicates.notNull()));
   }
 
-  @NotNull
   public static MutableComponent biome(ResourceKey<Biome> key) {
     return Component.translatableWithFallback(Util.makeDescriptionId("biome", key.location()), key.location().getPath().replace('_', ' '));
   }

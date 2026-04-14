@@ -14,7 +14,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -24,7 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directions) implements BlockFunction {
+public record PostProcessBlockFunction(List<Direction> directions) implements BlockFunction {
   public static final List<Direction> ALL_DIRECTIONS = List.of(Direction.values());
   public static final MapCodec<PostProcessBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       ExtraCodecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", ALL_DIRECTIONS).forGetter(PostProcessBlockFunction::directions)
@@ -34,7 +33,7 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
    * @see Block#updateFromNeighbourShapes(BlockState, LevelAccessor, BlockPos)
    */
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
     for (Direction direction : directions) {
@@ -46,12 +45,12 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.POST_PROCESS;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "postprocess(" + (ALL_DIRECTIONS.equals(directions) ? "" : directions.stream().map(Direction::getSerializedName).collect(Collectors.joining(" "))) + ")";
   }
 
@@ -59,13 +58,13 @@ public record PostProcessBlockFunction(@NotNull List<@NotNull Direction> directi
     POST_PROCESS_TYPE;
 
     @Override
-    public @NotNull MapCodec<PostProcessBlockFunction> getCodec() {
+    public MapCodec<PostProcessBlockFunction> getCodec() {
       return CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<PostProcessBlockFunction> {
-    private final Set<@NotNull Direction> directions = new TreeSet<>();
+    private final Set<Direction> directions = new TreeSet<>();
 
     @Override
     public PostProcessBlockFunction getParseResult(ParseContext<?> parseContext) {

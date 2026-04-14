@@ -13,7 +13,7 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -22,10 +22,7 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * To test which a block is exposed in the specified directions and the specified type.
@@ -33,11 +30,11 @@ import java.util.TreeSet;
  * @param exposureType The exposure type. By default, it is exposed to empty collision.
  * @param directions   The directions to test exposure.
  */
-public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull List<@NotNull Direction> directions) implements BlockPredicate {
+public record ExposeBlockPredicate(ExposureType exposureType, List<Direction> directions) implements BlockPredicate {
   public static final MapCodec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), ExtraCodecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", List.of(Direction.values())).forGetter(ExposeBlockPredicate::directions)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "expose(" + exposureType.getSerializedName() + ", " + String.join(" ", Iterables.transform(directions, Direction::getSerializedName)) + ")";
   }
 
@@ -71,7 +68,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.EXPOSE;
   }
 
@@ -123,7 +120,7 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
 
@@ -138,17 +135,18 @@ public record ExposeBlockPredicate(@NotNull ExposureType exposureType, @NotNull 
     EXPOSE_TYPE;
 
     @Override
-    public @NotNull MapCodec<ExposeBlockPredicate> getCodec() {
+    public MapCodec<ExposeBlockPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<ExposeBlockPredicate> {
-    private final Set<@NotNull Direction> directions = new TreeSet<>();
-    private ExposureType exposureType;
+    private final Set<Direction> directions = new TreeSet<>();
+    private @Nullable ExposureType exposureType;
 
     @Override
     public ExposeBlockPredicate getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(exposureType, "exposureType");
       return new ExposeBlockPredicate(exposureType, directions.isEmpty() ? List.of(Direction.values()) : List.copyOf(directions));
     }
 

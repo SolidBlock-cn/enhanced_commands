@@ -15,12 +15,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -50,12 +51,12 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "idreplace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block block = blockState.getBlock();
     final String old = BuiltInRegistries.BLOCK.getKey(block).toString();
     final String replaced = pattern.matcher(old).replaceAll(replacement);
@@ -65,7 +66,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.ID_REPLACE;
   }
 
@@ -73,20 +74,22 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
     ID_REPLACE_TYPE;
 
     @Override
-    public @NotNull MapCodec<IdReplaceBlockFunction> getCodec() {
+    public MapCodec<IdReplaceBlockFunction> getCodec() {
       return CODEC;
     }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<IdReplaceBlockFunction> {
-    private Pattern pattern;
-    private String replacement;
+    private @Nullable Pattern pattern;
+    private @Nullable String replacement;
 
     public Parser() {
     }
 
     @Override
     public IdReplaceBlockFunction getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(pattern, "pattern");
+      Objects.requireNonNull(replacement, "replacement");
       return new IdReplaceBlockFunction(pattern, replacement);
     }
 

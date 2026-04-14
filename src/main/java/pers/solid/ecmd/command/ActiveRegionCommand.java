@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.AxisProvider;
 import pers.solid.ecmd.argument.DirectionProvider;
@@ -48,7 +49,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallbackBridge {
 
   public static int executeGet(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     final ServerPlayer player = context.getSource().getPlayerOrException();
-    final Region region;
+    final @Nullable Region region;
     try {
       region = player.getActiveRegionOrThrow$ec().region();
     } catch (CommandRuntimeException e) {

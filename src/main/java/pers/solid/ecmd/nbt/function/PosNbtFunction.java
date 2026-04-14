@@ -14,6 +14,8 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
 
+import java.util.Objects;
+
 public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
   public static final MapCodec<PosNbtFunction> CODEC = EnhancedCoordinates.CODEC.fieldOf("pos").xmap(PosNbtFunction::new, PosNbtFunction::pos);
 
@@ -44,11 +46,11 @@ public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
   }
 
   public static class Parser implements FunctionContentParser<NbtFunction> {
-    private EnhancedCoordinates posArgument;
+    private @Nullable EnhancedCoordinates posArgument;
 
     @Override
-    public NbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      return new PosNbtFunction(posArgument);
+    public NbtFunction getParseResult(ParseContext<?> parseContext) {
+      return new PosNbtFunction(Objects.requireNonNull(posArgument, "posArgument"));
     }
 
     @Override

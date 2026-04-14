@@ -9,7 +9,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
 
 /**
@@ -57,7 +56,7 @@ public interface RegistryBridge<T> {
    * @apiNote 通常来说，动态注册表是诸如魔咒、世界类型、地物类型等可通过数据加载但不可通过 {@code /reload} 重新加载的注册表，Fabric API 和 NeoForge 均提供相应注册方式。本模组还提供了 {@link EnhancedServerReloadableRegistries}，以实现注册表可通过 {@code /reload} 重新加载。
    */
   @ExpectPlatform
-  static <T> void registerDynamicRegistry(@NotNull ResourceKey<Registry<T>> resourceKey, @NotNull Codec<T> codec, boolean sync, @NotNull InitializeContext context) {
+  static <T> void registerDynamicRegistry(ResourceKey<Registry<T>> resourceKey, Codec<T> codec, boolean sync, InitializeContext context) {
     throw new AssertionError();
   }
 
@@ -66,7 +65,7 @@ public interface RegistryBridge<T> {
    *
    * @apiNote 通常来说，动态注册表是诸如魔咒、世界类型、地物类型等可通过数据加载但不可通过 {@code /reload} 重新加载的注册表，Fabric API 和 NeoForge 均提供相应注册方式。本模组还提供了 {@link EnhancedServerReloadableRegistries}，以实现注册表可通过 {@code /reload} 重新加载。
    */
-  static <T> void registerDynamicRegistry(@NotNull EnhancedDynamicRegistryInfo<T> info, boolean sync, @NotNull InitializeContext context) {
+  static <T> void registerDynamicRegistry(EnhancedDynamicRegistryInfo<T> info, boolean sync, InitializeContext context) {
     registerDynamicRegistry(info.registryKey(), info.codec(), sync, context);
   }
 

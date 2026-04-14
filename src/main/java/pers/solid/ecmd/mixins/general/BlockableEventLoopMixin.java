@@ -2,7 +2,6 @@ package pers.solid.ecmd.mixins.general;
 
 import com.google.common.collect.MapMaker;
 import net.minecraft.util.thread.BlockableEventLoop;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
@@ -16,23 +15,23 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Mixin(BlockableEventLoop.class)
 public class BlockableEventLoopMixin implements BlockableEventLoopExtension {
   @Unique
-  private final Map<UUID, IteratorTask<?>> uuidToTask = new MapMaker().weakValues().makeMap();
+  private final Map<UUID, IteratorTask<?>> enhanced_commands$uuidToTask = new MapMaker().weakValues().makeMap();
   @Unique
-  private final Queue<IteratorTask<?>> iteratorTasks = new ConcurrentLinkedQueue<>();
+  private final Queue<IteratorTask<?>> enhanced_commands$iteratorTasks = new ConcurrentLinkedQueue<>();
 
   @Override
   public void addIteratorTask$ec(IteratorTask<?> task) {
-    iteratorTasks.add(task);
-    uuidToTask.put(task.uuid, task);
+    enhanced_commands$iteratorTasks.add(task);
+    enhanced_commands$uuidToTask.put(task.uuid, task);
   }
 
   @Override
-  public @NotNull Queue<IteratorTask<?>> getIteratorTasks$ec() {
-    return iteratorTasks;
+  public Queue<IteratorTask<?>> getIteratorTasks$ec() {
+    return enhanced_commands$iteratorTasks;
   }
 
   @Override
-  public @NotNull Map<UUID, IteratorTask<?>> getUUIDToIteratorTasks$ec() {
-    return uuidToTask;
+  public Map<UUID, IteratorTask<?>> getUUIDToIteratorTasks$ec() {
+    return enhanced_commands$uuidToTask;
   }
 }

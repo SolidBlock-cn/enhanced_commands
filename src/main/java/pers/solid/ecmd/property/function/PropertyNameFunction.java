@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
@@ -21,7 +20,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
    * 当 must 为 true 时，返回属性或者抛出异常。当 must 为 false 时，返回属性或者 null，不抛出异常。
    */
   @Nullable
-  static Property<?> getProperty(@NotNull BlockState blockState, String propertyName, boolean must) {
+  static Property<?> getProperty(BlockState blockState, String propertyName, boolean must) {
     final StateDefinition<Block, BlockState> stateManager = blockState.getBlock().getStateDefinition();
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null || !blockState.hasProperty(property)) {
@@ -40,7 +39,6 @@ public interface PropertyNameFunction extends ExpressionConvertible {
   @Contract(pure = true)
   String propertyName();
 
-  @NotNull
   Type getType();
 
   enum Type implements StringRepresentable {
@@ -60,7 +58,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
   }

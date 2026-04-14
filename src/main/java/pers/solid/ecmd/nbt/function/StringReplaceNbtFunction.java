@@ -9,7 +9,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -43,17 +43,17 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
   ).apply(i, StringReplaceNbtFunction::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "string_replace(" + StringTag.quoteAndEscape(target) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   @Override
-  public @NotNull NbtFunctionType<?> getType() {
+  public NbtFunctionType<?> getType() {
     return Type.STRING_REPLACE_TYPE;
   }
 
   @Override
-  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (original.isPresent()) {
       nbtElement = original.get().apply(nbtElement, context);
     }
@@ -86,12 +86,14 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
 
   public static class Parser implements FunctionContentParser.MixedParams<StringReplaceNbtFunction> {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
-    private String target, replacement;
-    private Boolean recursive, lenient;
-    private NbtFunction original;
+    private @Nullable String target, replacement;
+    private @Nullable Boolean recursive, lenient;
+    private @Nullable NbtFunction original;
 
     @Override
-    public StringReplaceNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public StringReplaceNbtFunction getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(target, "target");
+      Objects.requireNonNull(replacement, "replacement");
       return new StringReplaceNbtFunction(target, replacement, Boolean.TRUE.equals(recursive), Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
     }
 

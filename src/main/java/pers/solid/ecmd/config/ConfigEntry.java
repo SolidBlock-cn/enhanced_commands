@@ -5,7 +5,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.function.FailableConsumer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
@@ -27,19 +26,19 @@ public class ConfigEntry<C, T> {
   /**
    * 配置项所在的分类。
    */
-  public final @NotNull ConfigCategory<C> category;
+  public final ConfigCategory<C> category;
   /**
    * 配置项的类型，将影响着这个配置项的值的类型，进而影响着其值的呈现方式以及在命令中的输入方式。
    */
-  public final @NotNull ConfigEntryType<T> type;
+  public final ConfigEntryType<T> type;
   /**
    * 配置项的名称，用于命令以及 json 文件。应当与 {@link ConfigCategory#configEntries} 中的键保持完全一致。
    */
-  public final @NotNull String name;
+  public final String name;
   /**
    * 配置项的显示名称，可以带有格式或翻译。
    */
-  public final @NotNull Component displayName;
+  public final Component displayName;
   /**
    * 配置项的描述。
    */
@@ -49,26 +48,26 @@ public class ConfigEntry<C, T> {
    * <p>
    * 示例：{@code config -> config.ignoreBorder}
    */
-  public final @NotNull Function<C, T> getter;
+  public final Function<C, T> getter;
   /**
    * 设置一个配置实例（不一定是当前配置实例）中代表该配置项的值的 {@link BiConsumer}。
    * <p>
    * 示例：{@code (config, value) -> config.ignoreBorder = value}
    */
-  public final @NotNull BiConsumer<C, T> setter;
+  public final BiConsumer<C, T> setter;
   /**
    * 对配置项的值进行验证，当值不符合要求时，将抛出 {@link CommandSyntaxException}。如果任何值都符合要求，可使用 {@link #NO_OP_VALIDATOR}。
    */
-  protected final @NotNull FailableConsumer<? super T, CommandSyntaxException> valueValidator;
+  protected final FailableConsumer<? super T, CommandSyntaxException> valueValidator;
   /**
    * 该配置项的默认值。
    */
-  public final @NotNull T defaultValue;
+  public final T defaultValue;
 
   /**
    * @see #builder
    */
-  private ConfigEntry(@NotNull ConfigCategory<C> category, @NotNull ConfigEntryType<T> type, @NotNull String name, @NotNull Component displayName, @Nullable Component description, @NotNull Function<C, T> getter, @NotNull BiConsumer<C, T> setter, @NotNull FailableConsumer<? super T, CommandSyntaxException> valueValidator, @NotNull T defaultValue) {
+  private ConfigEntry(ConfigCategory<C> category, ConfigEntryType<T> type, String name, Component displayName, @Nullable Component description, Function<C, T> getter, BiConsumer<C, T> setter, FailableConsumer<? super T, CommandSyntaxException> valueValidator, T defaultValue) {
     this.category = category;
     this.type = type;
     this.name = name;
@@ -112,12 +111,12 @@ public class ConfigEntry<C, T> {
     private final String name;
     private final String displayNameTranslationKey;
     private final String descriptionTranslationKey;
-    private Component displayName;
+    private @Nullable Component displayName;
     private @Nullable Component description;
-    private Function<C, T> getter;
-    private BiConsumer<C, T> setter;
+    private @Nullable Function<C, T> getter;
+    private @Nullable BiConsumer<C, T> setter;
     private FailableConsumer<? super T, CommandSyntaxException> valueValidator = NO_OP_VALIDATOR;
-    private T defaultValue;
+    private @Nullable T defaultValue;
 
     /**
      * 创建新的配置项的构建器，可调用各方法以设置该配置项的参数。调用 {@link Builder#build()} 以完成构建。
@@ -133,7 +132,7 @@ public class ConfigEntry<C, T> {
     /**
      * 设置配置项的显示名称。
      */
-    public Builder<C, T> setDisplayName(@NotNull Component displayName) {
+    public Builder<C, T> setDisplayName(Component displayName) {
       this.displayName = displayName;
       return this;
     }
@@ -143,7 +142,7 @@ public class ConfigEntry<C, T> {
      *
      * @param translationKeyToText 以翻译键作为参数（可忽略）生成 {@link Component} 对象的函数，例如：{@code translationKey -> Text.translatable(translationKey, ...)}
      */
-    public Builder<C, T> setDisplayName(@NotNull Function<@NotNull String, @NotNull Component> translationKeyToText) {
+    public Builder<C, T> setDisplayName(Function<String, Component> translationKeyToText) {
       this.displayName = translationKeyToText.apply(displayNameTranslationKey);
       return this;
     }
@@ -161,7 +160,7 @@ public class ConfigEntry<C, T> {
      *
      * @param translationKeyToText 以翻译键作为参数（可忽略）生成 {@link Component} 对象的函数，例如：{@code translationKey -> Text.translatable(translationKey, ...)}
      */
-    public Builder<C, T> setDescription(@NotNull Function<@NotNull String, @Nullable Component> translationKeyToText) {
+    public Builder<C, T> setDescription(Function<String, @Nullable Component> translationKeyToText) {
       this.description = translationKeyToText.apply(descriptionTranslationKey);
       return this;
     }
@@ -181,22 +180,22 @@ public class ConfigEntry<C, T> {
       return this;
     }
 
-    public Builder<C, T> setGetter(@NotNull Function<C, T> getter) {
+    public Builder<C, T> setGetter(Function<C, T> getter) {
       this.getter = getter;
       return this;
     }
 
-    public Builder<C, T> setSetter(@NotNull BiConsumer<C, T> setter) {
+    public Builder<C, T> setSetter(BiConsumer<C, T> setter) {
       this.setter = setter;
       return this;
     }
 
-    public Builder<C, T> setValueValidator(@NotNull FailableConsumer<? super T, CommandSyntaxException> valueValidator) {
+    public Builder<C, T> setValueValidator(FailableConsumer<? super T, CommandSyntaxException> valueValidator) {
       this.valueValidator = valueValidator;
       return this;
     }
 
-    public Builder<C, T> setDefaultValue(@NotNull T defaultValue) {
+    public Builder<C, T> setDefaultValue(T defaultValue) {
       this.defaultValue = defaultValue;
       return this;
     }

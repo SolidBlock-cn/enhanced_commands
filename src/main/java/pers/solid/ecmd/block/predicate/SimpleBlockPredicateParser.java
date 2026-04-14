@@ -13,7 +13,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.property.predicate.*;
@@ -38,7 +37,6 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
     super(parseContext);
   }
 
-  @NotNull
   protected Comparator parseComparator() throws CommandSyntaxException {
     final Comparator comparator;
     StringBuilder stringBuilder = new StringBuilder();

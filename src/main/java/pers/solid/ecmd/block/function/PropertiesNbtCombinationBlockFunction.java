@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
@@ -21,7 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base, @Nullable PropertyNamesBlockFunction properties, @Nullable NbtBlockFunction nbt) implements BlockFunction {
+public record PropertiesNbtCombinationBlockFunction(BlockFunction base, @Nullable PropertyNamesBlockFunction properties, @Nullable NbtBlockFunction nbt) implements BlockFunction {
   public static final MapCodec<PropertiesNbtCombinationBlockFunction> CODEC = RecordCodecBuilder.<Triple<BlockFunction, Optional<PropertyNamesBlockFunction>, Optional<NbtBlockFunction>>>mapCodec(i -> i.apply3(Triple::of,
       BlockFunction.CODEC.fieldOf("base").forGetter(Triple::getLeft),
       CodecUtil.optionalField("properties", PropertyNameFunction.CODEC.listOf()).xmap(o -> o.map(PropertyNamesBlockFunction::new), o -> o.map(PropertyNamesBlockFunction::functions)).forGetter(Triple::getMiddle),
@@ -47,17 +46,17 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return Stream.of(base, properties, nbt).filter(Objects::nonNull).map(BlockFunction::asString).collect(Collectors.joining());
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.PROPERTIES_NBT_COMBINATION;
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     blockState = base.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     if (properties != null) {
       blockState = properties.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
@@ -72,7 +71,7 @@ public record PropertiesNbtCombinationBlockFunction(@NotNull BlockFunction base,
     PROPERTIES_NBT_COMBINATION_TYPE;
 
     @Override
-    public @NotNull MapCodec<PropertiesNbtCombinationBlockFunction> getCodec() {
+    public MapCodec<PropertiesNbtCombinationBlockFunction> getCodec() {
       return CODEC;
     }
   }

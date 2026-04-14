@@ -12,17 +12,17 @@ import java.util.Deque;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements HistoryHolder {
   @Unique
-  private final Deque<History> undoableHistories = new ArrayDeque<>();
+  private final Deque<History> enhanced_commands$undoableHistories = new ArrayDeque<>();
   @Unique
-  private final Deque<History> redoableHistories = new ArrayDeque<>();
+  private final Deque<History> enhanced_commands$redoableHistories = new ArrayDeque<>();
 
   @Override
   public Deque<History> getUndoableHistories$ec() {
-    return undoableHistories;
+    return enhanced_commands$undoableHistories;
   }
 
   @Override
   public Deque<History> getRedoableHistories$ec() {
-    return redoableHistories;
+    return enhanced_commands$redoableHistories;
   }
 }

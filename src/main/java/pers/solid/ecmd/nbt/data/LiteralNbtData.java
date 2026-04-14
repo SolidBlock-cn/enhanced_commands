@@ -12,11 +12,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.nbt.function.NbtFunctionParser;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.nbt.function.NbtFunction;
+import pers.solid.ecmd.nbt.function.NbtFunctionParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
@@ -43,7 +42,7 @@ public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Singl
   }
 
   @Override
-  public void setNbtFor(CommandSourceStack commandSource, MutableObject<CompoundTag> target, CompoundTag nbt) throws CommandSyntaxException {
+  public void setNbtFor(CommandSourceStack commandSource, MutableObject<CompoundTag> target, CompoundTag nbt) {
     target.setValue(nbt);
   }
 
@@ -81,7 +80,7 @@ public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Singl
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "literal " + nbtFunction.asString();
   }
 }

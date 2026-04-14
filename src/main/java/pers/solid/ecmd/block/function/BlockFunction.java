@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.SimpleBlockParser;
@@ -57,11 +56,11 @@ public interface BlockFunction extends ExpressionConvertible {
   Component OVERLAY_TOOLTIP = Component.translatable("enhanced_commands.block_function.overlay.symbol_tooltip");
   Component PICK_TOOLTIP = Component.translatable("enhanced_commands.block_function.pick.symbol_tooltip");
 
-  static @NotNull BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     return parsePick(parseContext);
   }
 
-  static @NotNull BlockFunction parsePick(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static BlockFunction parsePick(ParseContext<?> parseContext) throws CommandSyntaxException {
     return ParsingUtil.parseUnifiable(() -> parseOverlay(parseContext), functions -> {
       ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
       for (BlockFunction function : functions) {
@@ -71,7 +70,7 @@ public interface BlockFunction extends ExpressionConvertible {
     }, "|", PICK_TOOLTIP, parseContext);
   }
 
-  static @NotNull BlockFunction parseOverlay(ParseContext<?> parseContext) throws CommandSyntaxException {
+  static BlockFunction parseOverlay(ParseContext<?> parseContext) throws CommandSyntaxException {
     return ParsingUtil.parseUnifiable(() -> parseCombination(parseContext), functions -> {
       ImmutableList.Builder<BlockFunction> builder = new ImmutableList.Builder<>();
       for (BlockFunction blockFunction : functions) {
@@ -81,7 +80,7 @@ public interface BlockFunction extends ExpressionConvertible {
     }, "*", OVERLAY_TOOLTIP, parseContext);
   }
 
-  static @NotNull <S> BlockFunction parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
+  static <S> BlockFunction parseCombination(ParseContext<S> parseContext) throws CommandSyntaxException {
     final BlockFunction parseUnit = parseUnit(parseContext);
     if (parseUnit instanceof NbtBlockFunction) {
       return parseUnit;
@@ -117,7 +116,6 @@ public interface BlockFunction extends ExpressionConvertible {
     return parseUnit;
   }
 
-  @NotNull
   static BlockFunction parseUnit(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
@@ -177,10 +175,8 @@ public interface BlockFunction extends ExpressionConvertible {
    * @param context         正在修改的方块修改时的 flags。
    * @return 修改后的方块状态。
    */
-  @NotNull
   BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context);
 
-  @NotNull
   BlockFunctionType<?> getType();
 
   default boolean isEmpty() {

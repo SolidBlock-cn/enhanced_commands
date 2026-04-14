@@ -7,13 +7,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.phys.Vec2;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.function.Function;
 
-public enum AxisProvider implements StringRepresentable, Function<@NotNull PositionProvider, Direction.@NotNull Axis> {
+public enum AxisProvider implements StringRepresentable, Function<PositionProvider, Direction.Axis> {
   X(Direction.Axis.X),
   Y(Direction.Axis.Y),
   Z(Direction.Axis.Z),
@@ -48,16 +47,16 @@ public enum AxisProvider implements StringRepresentable, Function<@NotNull Posit
   }
 
   @Override
-  public @NotNull Direction.Axis apply(@NotNull PositionProvider positionProvider) {
+  public Direction.Axis apply(PositionProvider positionProvider) {
     return function.apply(positionProvider);
   }
 
-  public @NotNull Direction.Axis apply(@NotNull CommandSourceStack source) {
+  public Direction.Axis apply(CommandSourceStack source) {
     return function.apply(source);
   }
 
   @Override
-  public @NotNull String getSerializedName() {
+  public String getSerializedName() {
     return name;
   }
 

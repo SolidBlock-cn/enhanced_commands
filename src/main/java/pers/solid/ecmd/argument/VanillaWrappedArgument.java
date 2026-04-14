@@ -11,7 +11,6 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.accessor.ArgumentTypeInfosAccessor;
 import pers.solid.ecmd.util.mixin.ArgumentTypeExtension;
 
@@ -61,7 +60,7 @@ public record VanillaWrappedArgument<T, F extends ArgumentType<T>>(F forward) im
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NotNull VanillaWrappedArgument.Template<T, F, FP> deserializeFromNetwork(FriendlyByteBuf buf) {
+    public VanillaWrappedArgument.Template<T, F, FP> deserializeFromNetwork(FriendlyByteBuf buf) {
       final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getValue(buf.readResourceLocation());
       final FP forwardProperties = forwardSerializer.deserializeFromNetwork(buf);
       return new VanillaWrappedArgument.Template<>(forwardProperties);
@@ -79,7 +78,7 @@ public record VanillaWrappedArgument<T, F extends ArgumentType<T>>(F forward) im
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NotNull VanillaWrappedArgument.Template<T, F, FP> unpack(VanillaWrappedArgument<T, F> argumentType) {
+    public VanillaWrappedArgument.Template<T, F, FP> unpack(VanillaWrappedArgument<T, F> argumentType) {
       final ArgumentTypeInfo<F, FP> forwardSerializer = (ArgumentTypeInfo<F, FP>) ArgumentTypeInfosAccessor.getBY_CLASS().get(argumentType.forward.getClass());
       return new VanillaWrappedArgument.Template<>(forwardSerializer.unpack(argumentType.forward));
     }
@@ -88,13 +87,13 @@ public record VanillaWrappedArgument<T, F extends ArgumentType<T>>(F forward) im
   public record Template<T, F extends ArgumentType<T>, FP extends ArgumentTypeInfo.Template<F>>(FP forwardProperties) implements ArgumentTypeInfo.Template<VanillaWrappedArgument<T, F>> {
 
     @Override
-    public @NotNull VanillaWrappedArgument<T, F> instantiate(CommandBuildContext commandBuildContext) {
+    public VanillaWrappedArgument<T, F> instantiate(CommandBuildContext commandBuildContext) {
       return new VanillaWrappedArgument<>(forwardProperties.instantiate(commandBuildContext));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NotNull VanillaWrappedArgument.Info<T, F, FP> type() {
+    public VanillaWrappedArgument.Info<T, F, FP> type() {
       return (Info<T, F, FP>) Info.INSTANCE;
     }
   }

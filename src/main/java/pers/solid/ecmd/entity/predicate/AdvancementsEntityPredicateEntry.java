@@ -16,7 +16,6 @@ import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -25,13 +24,13 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record AdvancementsEntityPredicateEntry(@NotNull Map<@NotNull ResourceLocation, @NotNull Either<@NotNull Map<@NotNull String, Boolean>, @NotNull Boolean>> map) implements EntityPredicateEntry, StaticEntityPredicate {
+public record AdvancementsEntityPredicateEntry(Map<ResourceLocation, Either<Map<String, Boolean>, Boolean>> map) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<AdvancementsEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(Codec.unboundedMap(Codec.STRING, Codec.BOOL), Codec.BOOL)).fieldOf("advancements").forGetter(AdvancementsEntityPredicateEntry::map)
   ).apply(i, AdvancementsEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     if (!(entity instanceof ServerPlayer serverPlayerEntity)) {
       return false;
     } else {
@@ -78,7 +77,7 @@ public record AdvancementsEntityPredicateEntry(@NotNull Map<@NotNull ResourceLoc
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (!(entity instanceof final ServerPlayer player)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.advancements.not_player", displayName));
     }
@@ -170,7 +169,7 @@ public record AdvancementsEntityPredicateEntry(@NotNull Map<@NotNull ResourceLoc
   }
 
   @Override
-  public @NotNull String toOptionEntry() {
+  public String toOptionEntry() {
     return "advancements=" + map.entrySet().stream().map(entry -> entry.getKey()
         + "=" + entry.getValue().map(
         criterionMap -> criterionMap.entrySet().stream().map(criterionEntry -> StringArgumentType.escapeIfRequired(criterionEntry.getKey()) + "=" + criterionEntry.getValue()).collect(Collectors.joining(", ", "{", "}")),
@@ -179,7 +178,7 @@ public record AdvancementsEntityPredicateEntry(@NotNull Map<@NotNull ResourceLoc
   }
 
   @Override
-  public @NotNull EntityPredicateType<AdvancementsEntityPredicateEntry> getType() {
+  public EntityPredicateType<AdvancementsEntityPredicateEntry> getType() {
     return EntityPredicateTypes.ADVANCEMENT;
   }
 }

@@ -12,7 +12,6 @@ import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -51,7 +50,6 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
   }
 
   @Override
-  @NotNull
   default NbtFunctionType<ConcatNbtFunction> getType() {
     return Type.CONCAT_TYPE;
   }
@@ -78,12 +76,12 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return "concat(" + elements.stream().map(NbtFunction::asString).collect(Collectors.joining(", ")) + ")";
     }
 
     @Override
-    public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+    public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
       final StringJoiner joiner = new StringJoiner(delimiterString(nbtElement, context));
       for (NbtFunction element : elements) {
         joiner.add(nbtToString(element.apply(nbtElement, context)));
@@ -104,12 +102,12 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return "concat(* " + element.asString() + ")";
     }
 
     @Override
-    public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+    public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
       final Tag applied = element.apply(nbtElement, context);
       if (applied instanceof ListTag nbtList) {
         final String delimiterString;
@@ -136,7 +134,7 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     private @Nullable NbtFunction delimiter = null;
 
     @Override
-    public ConcatNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public ConcatNbtFunction getParseResult(ParseContext<?> parseContext) {
       if (flatten) {
         return new Flattened(nbtFunctions.getFirst(), Optional.ofNullable(delimiter));
       } else {

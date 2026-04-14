@@ -5,35 +5,34 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
 
-public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expected, boolean inverted) implements NbtPredicate {
+public record EqualsListNbtPredicate(List<NbtPredicate> expected, boolean inverted) implements NbtPredicate {
   public static final MapCodec<EqualsListNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(EqualsListNbtPredicate::expected),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(EqualsListNbtPredicate::inverted)
   ).apply(i, EqualsListNbtPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(true);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public String asString(boolean requirePrefix) {
     return (inverted ? "!" : "") + (requirePrefix ? "= " : "") + "[" + expected.stream().map(nbtPredicate -> nbtPredicate.asString(true)).collect(Collectors.joining(", ")) + "]";
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final ListTag nbtList))
       return inverted;
     if (nbtList.size() != expected.size())
       return inverted;
-    final ListIterator<@NotNull NbtPredicate> listIterator = expected.listIterator();
+    final ListIterator<NbtPredicate> listIterator = expected.listIterator();
     while (listIterator.hasNext()) {
       final int nextIndex = listIterator.nextIndex();
       if (!listIterator.next().test(nbtList.get(nextIndex))) {
@@ -44,7 +43,7 @@ public record EqualsListNbtPredicate(@NotNull List<@NotNull NbtPredicate> expect
   }
 
   @Override
-  public @NotNull NbtPredicateType<EqualsListNbtPredicate> getType() {
+  public NbtPredicateType<EqualsListNbtPredicate> getType() {
     return EqualsListNbtPredicate.Type.EQUALS_LIST_TYPE;
   }
 

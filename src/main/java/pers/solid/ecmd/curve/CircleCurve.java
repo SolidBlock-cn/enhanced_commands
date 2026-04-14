@@ -12,7 +12,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.joml.AxisAngle4d;
@@ -73,7 +72,7 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
   }
 
   @Override
-  public @NotNull Iterator<Vec3> iteratePoints(Number interval) {
+  public Iterator<Vec3> iteratePoints(Number interval) {
     final Vector3d radiusVecStart = new Vector3d(pivot.x, pivot.y, pivot.z).cross(0, 1, 0);
     if (radiusVecStart.lengthSquared() == 0) {
       if (pivot.y >= 0) {
@@ -108,27 +107,27 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
   }
 
   @Override
-  public @NotNull CircleCurve transformed(Function<Vec3, Vec3> transformation) {
+  public CircleCurve transformed(Function<Vec3, Vec3> transformation) {
     return new CircleCurve(radius, transformation.apply(center), pivot, minAngle, maxAngle);
   }
 
   @Override
-  public @NotNull CircleCurve moved(@NotNull Vec3 relativePos) {
+  public CircleCurve moved(Vec3 relativePos) {
     return new CircleCurve(radius, center.add(relativePos), pivot, minAngle, maxAngle);
   }
 
   @Override
-  public @NotNull CircleCurve rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
+  public CircleCurve rotated(Rotation blockRotation, Vec3 pivot) {
     return new CircleCurve(radius, GeoUtil.rotate(center, blockRotation, pivot), GeoUtil.rotate(pivot, blockRotation, Vec3.ZERO), minAngle, maxAngle);
   }
 
   @Override
-  public @NotNull CircleCurve mirrored(Direction.@NotNull Axis axis, @NotNull Vec3 pivot) {
+  public CircleCurve mirrored(Direction.Axis axis, Vec3 pivot) {
     return new CircleCurve(radius, GeoUtil.mirror(center, axis, pivot), GeoUtil.mirror(this.pivot, axis, Vec3.ZERO), minAngle, maxAngle);
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     StringJoiner joiner = new StringJoiner(", ", "circle(", ")");
     joiner.add("radius = " + radius);
     joiner.add("center = " + StringUtil.wrapVector(center));
@@ -165,7 +164,7 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return CurveTypes.CIRCLE;
   }
 
@@ -173,12 +172,12 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
     INSTANCE;
 
     @Override
-    public @NotNull MapCodec<CircleCurve> getCodec() {
+    public MapCodec<CircleCurve> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends CurveProvider<? extends CircleCurve>> getArgumentCodec() {
+    public MapCodec<? extends CurveProvider<? extends CircleCurve>> getArgumentCodec() {
       return CircleCurveProvider.CODEC;
     }
   }
@@ -204,7 +203,7 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
     private @Nullable DoubleDoublePair range;
 
     @Override
-    public CurveProvider<CircleCurve> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public CurveProvider<CircleCurve> getParseResult(ParseContext<?> parseContext) {
       final EnhancedCoordinates center = this.center == null ? EnhancedPosArgument.CURRENT_BLOCK_POS_CENTER : this.center;
       return new CircleCurveProvider(radius == null ? 1 : radius, center, axis == null ? new Vec3dProvider.Fixed(new Vec3(0, 1, 0)) : axis, range == null ? FULL_MIN : Math.min(range.firstDouble(), range.secondDouble()), range == null ? FULL_MAX : Math.max(range.firstDouble(), range.secondDouble()));
     }

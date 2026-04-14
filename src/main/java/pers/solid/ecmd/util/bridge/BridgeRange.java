@@ -9,7 +9,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.util.StringRepresentable;
 import org.apache.commons.lang3.function.FailableFunction;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -55,7 +54,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
   }
 
 
-  static <T extends Comparable<T>, E1 extends Throwable, R extends BridgeRange<T>> R parse(StringReader reader, FailableFunction<String, T, E1> numberConverter, BiFunction<StringReader, String, CommandSyntaxException> exceptionSupplier, BiFunction<@Nullable T, @Nullable T, @NotNull R> function) throws CommandSyntaxException, E1 {
+  static <T extends Comparable<T>, E1 extends Throwable, R extends BridgeRange<T>> R parse(StringReader reader, FailableFunction<String, T, E1> numberConverter, BiFunction<StringReader, String, CommandSyntaxException> exceptionSupplier, BiFunction<@Nullable T, @Nullable T, R> function) throws CommandSyntaxException, E1 {
     if (!reader.canRead()) {
       throw MinMaxBounds.ERROR_EMPTY.createWithContext(reader);
     } else {
@@ -104,9 +103,9 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
         });
   }
 
-  T getMin();
+  @Nullable T getMin();
 
-  T getMax();
+  @Nullable T getMax();
 
   boolean test(T value);
 
@@ -125,9 +124,9 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
   }
 
   @Override
-  default @NotNull String asString() {
+  default String asString() {
     final T min = getMin();
-    if (isExact()) {
+    if (isExact() && min != null) {
       return min.toString();
     } else {
       final T max = getMax();
@@ -158,7 +157,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return s;
     }
   }

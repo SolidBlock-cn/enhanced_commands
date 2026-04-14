@@ -13,7 +13,6 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -22,14 +21,14 @@ import pers.solid.ecmd.util.bridge.LootBridge;
 
 import java.util.Optional;
 
-public record LootTablePredicateEntityPredicateEntry(@NotNull Holder<LootItemCondition> predicate, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record LootTablePredicateEntityPredicateEntry(Holder<LootItemCondition> predicate, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<LootTablePredicateEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       LootItemCondition.CODEC.fieldOf("predicate").forGetter(LootTablePredicateEntityPredicateEntry::predicate),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(LootTablePredicateEntityPredicateEntry::inverted)
   ).apply(i, LootTablePredicateEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     if (!(entity.level() instanceof final ServerLevel serverWorld)) {
       return false;
     } else {
@@ -53,7 +52,7 @@ public record LootTablePredicateEntityPredicateEntry(@NotNull Holder<LootItemCon
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (!(entity.level() instanceof final ServerLevel serverWorld)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.predicate.not_on_server", displayName));
     } else {
@@ -92,7 +91,7 @@ public record LootTablePredicateEntityPredicateEntry(@NotNull Holder<LootItemCon
   }
 
   @Override
-  public @NotNull EntityPredicateType<LootTablePredicateEntityPredicateEntry> getType() {
+  public EntityPredicateType<LootTablePredicateEntityPredicateEntry> getType() {
     return EntityPredicateTypes.LOOT_TABLE_PREDICATE;
   }
 

@@ -9,7 +9,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -28,7 +27,7 @@ public interface Curve extends ExpressionConvertible {
   /**
    * 沿着这条曲线产生一条像素化的连续的线。这个 BlockPos 有可能是 {@link BlockPos.MutableBlockPos}。
    */
-  default @NotNull Iterator<@NotNull BlockPos> iterator() {
+  default Iterator<BlockPos> iterator() {
     return streamBlockPos().iterator();
   }
 
@@ -37,7 +36,7 @@ public interface Curve extends ExpressionConvertible {
    *
    * @param interval 间距，可变，例如 {@link MutableDouble}。但是在迭代的过程中不应该修改它，而应该由调用者来修改。
    */
-  @NotNull Iterator<@NotNull Vec3> iteratePoints(Number interval);
+  Iterator<Vec3> iteratePoints(Number interval);
 
   /**
    * 沿着这条线，按恒定的距离产生点。
@@ -45,7 +44,7 @@ public interface Curve extends ExpressionConvertible {
    * @param interval 恒定的间距。
    */
   @ApiStatus.NonExtendable
-  default @NotNull Iterator<@NotNull Vec3> iteratePoints(double interval) {
+  default Iterator<Vec3> iteratePoints(double interval) {
     return iteratePoints(Double.valueOf(interval));
   }
 
@@ -54,7 +53,7 @@ public interface Curve extends ExpressionConvertible {
    *
    * @implNote 此方法会被 {@link #iterator()} 使用。如果覆盖了 {@link #iterator()}，那么应该一并覆盖此方法。
    */
-  default @NotNull Stream<@NotNull BlockPos> streamBlockPos() {
+  default Stream<BlockPos> streamBlockPos() {
     return streamPoints(0.1d).map(BlockPos::containing).distinct();
   }
 
@@ -63,45 +62,41 @@ public interface Curve extends ExpressionConvertible {
    *
    * @param interval 间距，可变，例如 {@link MutableDouble}。但是在迭代的过程中不应该修改它，而应该由调用者来修改。
    */
-  default @NotNull Stream<@NotNull Vec3> streamPoints(Number interval) {
+  default Stream<Vec3> streamPoints(Number interval) {
     Iterable<Vec3> iterable = () -> iteratePoints(interval);
     return Streams.stream(iterable);
   }
 
   @ApiStatus.NonExtendable
-  default @NotNull Stream<@NotNull Vec3> streamPoints(double interval) {
+  default Stream<Vec3> streamPoints(double interval) {
     return streamPoints(Double.valueOf(interval));
   }
 
   double length();
 
-  @NotNull
   Curve transformed(Function<Vec3, Vec3> transformation);
 
-  default @NotNull Curve moved(double count, @NotNull Direction direction) {
+  default Curve moved(double count, Direction direction) {
     return moved(Vec3.atLowerCornerOf(direction.getUnitVec3i()).scale(count));
   }
 
 
-  @NotNull
-  default Curve moved(@NotNull Vec3 relativePos) {
+  default Curve moved(Vec3 relativePos) {
     return transformed(vec3d -> vec3d.add(relativePos));
   }
 
-  @NotNull
-  default Curve rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
+  default Curve rotated(Rotation blockRotation, Vec3 pivot) {
     return transformed(vec3d -> GeoUtil.rotate(vec3d, blockRotation, pivot));
   }
 
-  @NotNull
-  default Curve mirrored(@NotNull Direction.Axis axis, @NotNull Vec3 pivot) {
+  default Curve mirrored(Direction.Axis axis, Vec3 pivot) {
     return transformed(vec3d -> GeoUtil.mirror(vec3d, axis, pivot));
   }
 
   @Override
-  @NotNull String asString();
+  String asString();
 
   @Nullable AABB minContainingBox();
 
-  @NotNull CurveType<?> getType();
+  CurveType<?> getType();
 }

@@ -19,13 +19,13 @@ import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 @Mixin(ResourceLocation.class)
 public abstract class IdentifierMixin {
   @Unique
-  private static boolean isUpperCase(char c) {
+  private static boolean enhanced_commands$isUpperCase(char c) {
     return c >= 'A' && c <= 'Z';
   }
 
   @ModifyExpressionValue(method = "readGreedy", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;isAllowedInResourceLocation(C)Z"))
   private static boolean recognizeMoreChars(boolean original, @Local(argsOnly = true) StringReader reader) {
-    return original || (GeneralParsingConfig.current.improvedIdParsing && isUpperCase(reader.peek()));
+    return original || (GeneralParsingConfig.current.improvedIdParsing && enhanced_commands$isUpperCase(reader.peek()));
   }
 
   @Inject(method = {"read(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/resources/ResourceLocation;", "readNonEmpty"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;readGreedy(Lcom/mojang/brigadier/StringReader;)Ljava/lang/String;", shift = At.Shift.AFTER))
@@ -42,7 +42,7 @@ public abstract class IdentifierMixin {
     final String input = reader.getString();
     for (int i = reader.getCursor(); i < cursorAfterString.get(); i++) {
       final char c = input.charAt(i);
-      if (isUpperCase(c)) {
+      if (enhanced_commands$isUpperCase(c)) {
         return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.CONTAINS_UPPER_CASE.createWithContext(reader), cursorAfterString.get());
       }
     }

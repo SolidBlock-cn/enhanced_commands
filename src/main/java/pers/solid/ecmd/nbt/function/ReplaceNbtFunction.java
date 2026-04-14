@@ -4,34 +4,35 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
+
+import java.util.Objects;
 
 /**
  * 在 NBT 中进行替换，将符合谓词的值都应用指定的函数。
  */
-public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFunction function) implements NbtFunction {
+public record ReplaceNbtFunction(NbtPredicate predicate, NbtFunction function) implements NbtFunction {
   public static final MapCodec<ReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtPredicate.CODEC.fieldOf("predicate").forGetter(ReplaceNbtFunction::predicate),
       NbtFunction.CODEC.fieldOf("function").forGetter(ReplaceNbtFunction::function)
   ).apply(i, ReplaceNbtFunction::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "replace(" + predicate.asString(false) + ", " + function.asString() + ")";
   }
 
   @Override
-  public @NotNull NbtFunctionType<ReplaceNbtFunction> getType() {
+  public NbtFunctionType<ReplaceNbtFunction> getType() {
     return Type.REPLACE_TYPE;
   }
 
   @Override
-  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     return function.recursivelyApply(nbtElement, predicate, context);
   }
 
@@ -45,8 +46,8 @@ public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFu
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<ReplaceNbtFunction> {
-    private NbtPredicate nbtPredicate;
-    private NbtFunction nbtFunction;
+    private @Nullable NbtPredicate nbtPredicate;
+    private @Nullable NbtFunction nbtFunction;
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
@@ -57,7 +58,9 @@ public record ReplaceNbtFunction(@NotNull NbtPredicate predicate, @NotNull NbtFu
     }
 
     @Override
-    public ReplaceNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public ReplaceNbtFunction getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(nbtPredicate, "nbtPredicate");
+      Objects.requireNonNull(nbtFunction, "nbtFunction");
       return new ReplaceNbtFunction(nbtPredicate, nbtFunction);
     }
 

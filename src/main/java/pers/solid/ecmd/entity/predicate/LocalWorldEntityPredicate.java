@@ -1,11 +1,9 @@
 package pers.solid.ecmd.entity.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -16,12 +14,12 @@ public enum LocalWorldEntityPredicate implements SpecialEntityPredicate {
   public static final MapCodec<LocalWorldEntityPredicate> CODEC = MapCodec.unit(INSTANCE);
 
   @Override
-  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  public boolean test(Entity entity, ExecutionContext context) {
     return entity.level().equals(context.positionProvider.getWorld$ec());
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final Level world = entity.level();
     final Level sourceWorld = context.positionProvider.getWorld$ec();
     if (world.equals(sourceWorld)) {
@@ -32,12 +30,12 @@ public enum LocalWorldEntityPredicate implements SpecialEntityPredicate {
   }
 
   @Override
-  public @NotNull EntityPredicateType<LocalWorldEntityPredicate> getType() {
+  public EntityPredicateType<LocalWorldEntityPredicate> getType() {
     return EntityPredicateTypes.LOCAL_WORLD;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "<local world>";
   }
 }

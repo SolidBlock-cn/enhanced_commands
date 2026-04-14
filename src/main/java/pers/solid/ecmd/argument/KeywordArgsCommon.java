@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.BlockTransformationTask;
@@ -57,7 +56,7 @@ public final class KeywordArgsCommon {
     return IDS.get(target);
   }
 
-  public static @NotNull ResourceLocation getIdOrThrow(Function<CommandBuildContext, KeywordArgsArgument> target) {
+  public static ResourceLocation getIdOrThrow(Function<CommandBuildContext, KeywordArgsArgument> target) {
     return Preconditions.checkNotNull(getId(target), "unregistered shared keyword args");
   }
 
@@ -65,7 +64,7 @@ public final class KeywordArgsCommon {
     return REGISTRY.get(identifier);
   }
 
-  public static @NotNull Function<CommandBuildContext, KeywordArgsArgument> getByIdOrThrow(ResourceLocation identifier) {
+  public static Function<CommandBuildContext, KeywordArgsArgument> getByIdOrThrow(ResourceLocation identifier) {
     return Preconditions.checkNotNull(getById(identifier), "unknown keyword args type: %s", identifier);
   }
 

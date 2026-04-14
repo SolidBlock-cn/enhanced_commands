@@ -19,7 +19,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 
 import java.util.Collection;
@@ -28,11 +27,11 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public record OmittedRegistryEntryArgument<T>(String omittedNamespace, HolderLookup<T> registryWrapper, ResourceKey<? extends Registry<T>> registryRef) implements ArgumentType<Holder.Reference<T>> {
-  public static <T> OmittedRegistryEntryArgument<T> omittedRegistryEntry(@NotNull String omittedNamespace, @NotNull CommandBuildContext commandBuildContext, @NotNull ResourceKey<? extends Registry<T>> registryRef) {
+  public static <T> OmittedRegistryEntryArgument<T> omittedRegistryEntry(String omittedNamespace, CommandBuildContext commandBuildContext, ResourceKey<? extends Registry<T>> registryRef) {
     return new OmittedRegistryEntryArgument<>(omittedNamespace, commandBuildContext.lookupOrThrow(registryRef), registryRef);
   }
 
-  public static <T> OmittedRegistryEntryArgument<T> omittedRegistryEntry(@NotNull CommandBuildContext commandBuildContext, @NotNull ResourceKey<? extends Registry<T>> registryRef) {
+  public static <T> OmittedRegistryEntryArgument<T> omittedRegistryEntry(CommandBuildContext commandBuildContext, ResourceKey<? extends Registry<T>> registryRef) {
     return omittedRegistryEntry(EnhancedCommands.MOD_ID, commandBuildContext, registryRef);
   }
 
@@ -88,7 +87,7 @@ public record OmittedRegistryEntryArgument<T>(String omittedNamespace, HolderLoo
     }
 
     @Override
-    public @NotNull OmittedRegistryEntryArgument.Info.Template<T> deserializeFromNetwork(FriendlyByteBuf buf) {
+    public OmittedRegistryEntryArgument.Info.Template<T> deserializeFromNetwork(FriendlyByteBuf buf) {
       return new Template<>(buf.readUtf(), ResourceKey.createRegistryKey(buf.readResourceLocation()));
     }
 
@@ -99,20 +98,20 @@ public record OmittedRegistryEntryArgument<T>(String omittedNamespace, HolderLoo
     }
 
     @Override
-    public @NotNull OmittedRegistryEntryArgument.Info.Template<T> unpack(OmittedRegistryEntryArgument<T> argumentType) {
+    public OmittedRegistryEntryArgument.Info.Template<T> unpack(OmittedRegistryEntryArgument<T> argumentType) {
       return new Template<>(argumentType.omittedNamespace, argumentType.registryRef);
     }
 
     public record Template<T>(String omittedNamespace, ResourceKey<? extends Registry<T>> registryRef) implements ArgumentTypeInfo.Template<OmittedRegistryEntryArgument<T>> {
 
       @Override
-      public @NotNull OmittedRegistryEntryArgument<T> instantiate(CommandBuildContext commandBuildContext) {
+      public OmittedRegistryEntryArgument<T> instantiate(CommandBuildContext commandBuildContext) {
         return omittedRegistryEntry(omittedNamespace, commandBuildContext, this.registryRef);
       }
 
       @SuppressWarnings("unchecked")
       @Override
-      public @NotNull ArgumentTypeInfo<OmittedRegistryEntryArgument<T>, Template<T>> type() {
+      public ArgumentTypeInfo<OmittedRegistryEntryArgument<T>, Template<T>> type() {
         return (Info<T>) Info.INSTANCE;
       }
     }

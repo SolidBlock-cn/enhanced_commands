@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -76,7 +75,7 @@ public sealed interface Vec3iProvider extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return StringUtil.wrapVector(value);
     }
   }
@@ -98,7 +97,7 @@ public sealed interface Vec3iProvider extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return length + " " + direction.getSerializedName();
     }
   }
@@ -116,7 +115,7 @@ public sealed interface Vec3iProvider extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
 

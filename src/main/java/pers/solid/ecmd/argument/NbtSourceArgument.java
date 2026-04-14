@@ -23,7 +23,7 @@ public record NbtSourceArgument(CommandBuildContext commandBuildContext) impleme
     return new NbtSourceArgument(commandBuildContext);
   }
 
-  public static NbtSource<?> getNbtSource(CommandContext<CommandSourceStack> context, String name) throws CommandSyntaxException {
+  public static NbtSource<?> getNbtSource(CommandContext<CommandSourceStack> context, String name) {
     return ((NbtSource<?>) context.getArgument(name, NbtSource.class));
   }
 

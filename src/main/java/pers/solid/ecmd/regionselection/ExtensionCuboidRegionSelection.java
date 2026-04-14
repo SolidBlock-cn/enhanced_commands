@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
@@ -95,13 +94,13 @@ public class ExtensionCuboidRegionSelection extends BlockCuboidRegionSelection {
   }
 
   @Override
-  public @NotNull RegionSelectionType getType() {
+  public RegionSelectionType getType() {
     return RegionSelectionTypes.EXTENSION;
   }
 
 
   @Override
-  public @NotNull ExtensionCuboidRegionSelection clone() {
+  public ExtensionCuboidRegionSelection clone() {
     return (ExtensionCuboidRegionSelection) super.clone();
   }
 }

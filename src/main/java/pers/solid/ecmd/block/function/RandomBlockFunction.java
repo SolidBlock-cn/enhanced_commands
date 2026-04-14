@@ -15,7 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -32,8 +32,8 @@ import java.util.Set;
  */
 public final class RandomBlockFunction implements BlockFunction {
   public static final MapCodec<RandomBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.optionalLongFieldOf("seed").forGetter(RandomBlockFunction::seed)).apply(i, RandomBlockFunction::new));
-  private transient FeatureFlagSet featureSet;
-  private transient Block[] blocks;
+  private transient @Nullable FeatureFlagSet featureSet;
+  private transient Block @Nullable [] blocks;
   private final OptionalLong seed;
   public static final RandomBlockFunction RANDOM_SEED = new RandomBlockFunction(OptionalLong.empty());
 
@@ -45,20 +45,20 @@ public final class RandomBlockFunction implements BlockFunction {
     this.seed = seed;
   }
 
-  private @NotNull Block[] getBlocks(RegistryAccess rm, FeatureFlagSet fs) {
+  private Block[] getBlocks(RegistryAccess rm, FeatureFlagSet fs) {
     if (blocks == null || featureSet != fs) {
       return (blocks = calculateBlocks(rm, fs));
     }
     return blocks;
   }
 
-  private @NotNull Block[] calculateBlocks(RegistryAccess rm, FeatureFlagSet fs) {
+  private Block[] calculateBlocks(RegistryAccess rm, FeatureFlagSet fs) {
     this.featureSet = fs;
     return rm.lookupOrThrow(Registries.BLOCK).stream().filter(block -> block.isEnabled(fs)).toArray(Block[]::new);
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     if (seed.isPresent()) {
       return "random(seed = " + seed.getAsLong() + ")";
     }
@@ -66,7 +66,7 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block[] blocks = getBlocks(level.registryAccess(), level.enabledFeatures());
     if (blocks.length == 0) {
       return blockState;
@@ -77,7 +77,7 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.RANDOM;
   }
 
@@ -101,12 +101,12 @@ public final class RandomBlockFunction implements BlockFunction {
     RANDOM_TYPE;
 
     @Override
-    public @NotNull MapCodec<RandomBlockFunction> getCodec() {
+    public MapCodec<RandomBlockFunction> getCodec() {
       return CODEC;
     }
 
     @Override
-    public RandomBlockFunction parse(ParseContext<?> parseContext) {
+    public @Nullable RandomBlockFunction parse(ParseContext<?> parseContext) {
       final StringReader reader = parseContext.reader();
       if (reader.getRemaining().isEmpty()) {
         parseContext.addSuggestion((context, suggestionsBuilder) -> suggestionsBuilder.suggest("*", Component.translatable("enhanced_commands.block_function.random")).buildFuture());
@@ -125,7 +125,7 @@ public final class RandomBlockFunction implements BlockFunction {
     private static final Set<String> SUPPORTED_PARAMS = Set.of("seed");
 
     @Override
-    public RandomBlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public RandomBlockFunction getParseResult(ParseContext<?> parseContext) {
       return new RandomBlockFunction(seed);
     }
 

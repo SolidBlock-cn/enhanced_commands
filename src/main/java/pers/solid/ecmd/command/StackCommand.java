@@ -36,7 +36,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
@@ -220,7 +219,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
     final EntitySelector affectEntities = keywordArgs.getArg("affect_entities");
     final Iterable<Void> collectSourceEntities;
     if (affectEntities != null) {
-      final List<? extends @NotNull Entity> entities = affectEntities.findEntities(source).stream().filter(entity -> region.contains(entity.position())).toList();
+      final List<? extends Entity> entities = affectEntities.findEntities(source).stream().filter(entity -> region.contains(entity.position())).toList();
       collectSourceEntities = Iterables.transform(entities, entity -> {
         sourceEntities.add(new ImmutableTriple<>(entity.position(), entity.getType(), entity.saveWithoutId(new CompoundTag())));
         return null;

@@ -12,7 +12,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Arrays;
@@ -74,7 +73,7 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringRepresentable> ex
   record Instance<E extends Enum<E> & StringRepresentable>(E value) implements EnumOrRandom<E> {
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return value.getSerializedName();
     }
 
@@ -86,7 +85,7 @@ public sealed interface EnumOrRandom<E extends Enum<E> & StringRepresentable> ex
 
   record RandomValue<E extends Enum<E> & StringRepresentable>(E[] values, String name) implements EnumOrRandom<E> {
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
 

@@ -56,6 +56,6 @@ public @interface TextEntry {
     /**
      * @see Component#keybind(String)
      */
-    KEYBIND;
+    KEYBIND
   }
 }

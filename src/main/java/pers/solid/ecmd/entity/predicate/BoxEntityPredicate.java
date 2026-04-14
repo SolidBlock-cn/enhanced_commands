@@ -3,29 +3,27 @@ package pers.solid.ecmd.entity.predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 public record BoxEntityPredicate(AABB box, PositionOffsetInfo offset) implements SpecialEntityPredicate {
   public static final MapCodec<BoxEntityPredicate> CODEC = MapCodec.unit(() -> new BoxEntityPredicate(AABB.unitCubeFromLowerCorner(Vec3.ZERO), PositionOffsetInfo.NO_OP));
-  private static final LoadingCache<@NotNull BoxEntityPredicate, LoadingCache<@NotNull Vec3, AABB>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(input -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(vec3d -> input.box.move(input.offset.apply(vec3d))))));
+  private static final LoadingCache<BoxEntityPredicate, LoadingCache<Vec3, AABB>> cache = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(input -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(vec3d -> input.box.move(input.offset.apply(vec3d))))));
 
   @Override
-  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  public boolean test(Entity entity, ExecutionContext context) {
     return cache.getUnchecked(this).getUnchecked(context.positionProvider.getPosition$ec()).intersects(entity.getBoundingBox());
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final Level expected = context.positionProvider.getWorld$ec();
     final Level actual = entity.level();
     if (!expected.equals(actual)) {
@@ -40,12 +38,12 @@ public record BoxEntityPredicate(AABB box, PositionOffsetInfo offset) implements
   }
 
   @Override
-  public @NotNull EntityPredicateType<BoxEntityPredicate> getType() {
+  public EntityPredicateType<BoxEntityPredicate> getType() {
     return EntityPredicateTypes.BOX;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "<box>";
   }
 }

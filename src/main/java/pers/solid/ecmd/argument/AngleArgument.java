@@ -11,7 +11,6 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentUtils;
 import net.minecraft.network.FriendlyByteBuf;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
@@ -62,7 +61,7 @@ public record AngleArgument(boolean returnRadians, double min, double max) imple
   }
 
   @Override
-  public @NotNull String toString() {
+  public String toString() {
     if (min == Double.NEGATIVE_INFINITY && max == Double.POSITIVE_INFINITY) {
       return "angle(radians = " + returnRadians + ")";
     } else {
@@ -76,12 +75,12 @@ public record AngleArgument(boolean returnRadians, double min, double max) imple
   }
 
   @Override
-  public @NotNull AngleArgument instantiate(CommandBuildContext commandBuildContext) {
+  public AngleArgument instantiate(CommandBuildContext commandBuildContext) {
     return this;
   }
 
   @Override
-  public @NotNull AngleArgument.Info type() {
+  public AngleArgument.Info type() {
     return Info.INSTANCE;
   }
 
@@ -107,7 +106,7 @@ public record AngleArgument(boolean returnRadians, double min, double max) imple
     }
 
     @Override
-    public @NotNull AngleArgument deserializeFromNetwork(FriendlyByteBuf buf) {
+    public AngleArgument deserializeFromNetwork(FriendlyByteBuf buf) {
       final boolean returnRadians = buf.readBoolean();
       byte b = buf.readByte();
       double d = ArgumentUtils.numberHasMin(b) ? buf.readDouble() : Double.NEGATIVE_INFINITY;
@@ -128,7 +127,7 @@ public record AngleArgument(boolean returnRadians, double min, double max) imple
     }
 
     @Override
-    public @NotNull AngleArgument unpack(AngleArgument argumentType) {
+    public AngleArgument unpack(AngleArgument argumentType) {
       return argumentType;
     }
   }

@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -31,14 +31,14 @@ import java.util.Set;
  *   <li>{@code probability(<probability>, <predicate>)} - passes when both probability test and another block predicate passes. Identical to {@code all(probability(<probability>), <predicate>)}.</li>
  *   </ul>
  */
-public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredicate predicate, OptionalLong seed) implements BlockPredicate {
+public record ProbabilityBlockPredicate(float probability, BlockPredicate predicate, OptionalLong seed) implements BlockPredicate {
   public static final MapCodec<ProbabilityBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(ProbabilityBlockPredicate::new,
       Codec.FLOAT.fieldOf("probability").forGetter(ProbabilityBlockPredicate::probability),
       BlockPredicate.CODEC.optionalFieldOf("predicate", ConstantBlockPredicate.ALWAYS_TRUE).forGetter(ProbabilityBlockPredicate::predicate),
       CodecUtil.optionalLongFieldOf("seed").forGetter(ProbabilityBlockPredicate::seed)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final String seedParams = seed.isPresent() ? ", seed = " + seed.getAsLong() : "";
     if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
       return "probability(" + probability + seedParams + ")";
@@ -70,7 +70,7 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.RAND;
   }
 
@@ -78,14 +78,14 @@ public record ProbabilityBlockPredicate(float probability, @NotNull BlockPredica
     RAND_TYPE;
 
     @Override
-    public @NotNull MapCodec<ProbabilityBlockPredicate> getCodec() {
+    public MapCodec<ProbabilityBlockPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.MixedParams<ProbabilityBlockPredicate> {
     private float value;
-    private BlockPredicate predicate;
+    private @Nullable BlockPredicate predicate;
     private OptionalLong seed = OptionalLong.empty();
 
     @Override

@@ -7,6 +7,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,26 +22,26 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(Vec3Argument.class)
 public abstract class Vec3ArgumentMixin implements ArgumentTypeExtension {
   @Unique
-  private EnhancedPosArgument enhanced_commands$modArgumentType;
+  private @Nullable EnhancedPosArgument enhanced_commands$modArgumentType;
   @Unique
   private boolean enhanced_commands$extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void injectedInit(boolean centerIntegers, CallbackInfo ci) {
-    enhanced_commands$modArgumentType = new EnhancedPosArgument(EnhancedPosArgument.NumberType.PREFER_DOUBLE, centerIntegers ? EnhancedPosArgument.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgument.IntAlignType.UNCHANGED);
+  private void injectedInit(boolean centerCorrect, CallbackInfo ci) {
+    enhanced_commands$modArgumentType = new EnhancedPosArgument(EnhancedPosArgument.NumberType.PREFER_DOUBLE, centerCorrect ? EnhancedPosArgument.IntAlignType.HORIZONTALLY_CENTERED : EnhancedPosArgument.IntAlignType.UNCHANGED);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/coordinates/Coordinates;", at = @At("HEAD"), cancellable = true)
-  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<Coordinates> cir) throws CommandSyntaxException {
+  private void injectedParse(StringReader reader, CallbackInfoReturnable<Coordinates> cir) throws CommandSyntaxException {
     if (enhanced_commands$modArgumentType != null && enhanced_commands$extension) {
-      cir.setReturnValue(enhanced_commands$modArgumentType.parse(stringReader));
+      cir.setReturnValue(enhanced_commands$modArgumentType.parse(reader));
     }
   }
 
   @Inject(method = "listSuggestions", at = @At("HEAD"), cancellable = true)
-  private <S> void injectedListSuggestions(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
+  private <S> void injectedListSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
     if (enhanced_commands$modArgumentType != null && enhanced_commands$extension) {
-      cir.setReturnValue(enhanced_commands$modArgumentType.listSuggestions(context, builder));
+      cir.setReturnValue(enhanced_commands$modArgumentType.listSuggestions(commandContext, suggestionsBuilder));
     }
   }
 

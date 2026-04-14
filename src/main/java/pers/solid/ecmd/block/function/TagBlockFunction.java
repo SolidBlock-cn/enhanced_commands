@@ -18,7 +18,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
@@ -28,17 +27,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<PropertyNameFunction> properties) implements BlockFunction {
+public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> properties) implements BlockFunction {
   public static final Codec<TagBlockFunction> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.BLOCK).flatXmap(blockTagKey -> BuiltInRegistries.BLOCK.getTag(blockTagKey).map(holders -> DataResult.success((HolderSet<Block>) holders)).orElseGet(() -> DataResult.error(() -> "unknown tag: " + blockTagKey.location())), holders -> holders.unwrapKey().map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag"))).flatComapMap(TagBlockFunction::new, tagBlockFunction -> tagBlockFunction.properties.isEmpty() ? DataResult.success(tagBlockFunction.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
 
   public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
 
-  public TagBlockFunction(@NotNull HolderSet<Block> tag) {
+  public TagBlockFunction(HolderSet<Block> tag) {
     this(tag, Collections.emptyList());
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final String tagString = tag.unwrap().map(blockTagKey -> "#" + blockTagKey.location(), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ")));
     if (properties.isEmpty()) {
       return "#" + tagString;
@@ -48,7 +47,7 @@ public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<Prop
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final RandomSource random = context.getSplitter(this).at(pos);
     final Optional<Holder<Block>> randomTag = tag.getRandomElement(random);
     if (randomTag.isEmpty()) return blockState;
@@ -60,7 +59,7 @@ public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<Prop
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.TAG;
   }
 
@@ -68,7 +67,7 @@ public record TagBlockFunction(@NotNull HolderSet<Block> tag, @NotNull List<Prop
     TAG_TYPE;
 
     @Override
-    public @NotNull MapCodec<TagBlockFunction> getCodec() {
+    public MapCodec<TagBlockFunction> getCodec() {
       return CODEC;
     }
 

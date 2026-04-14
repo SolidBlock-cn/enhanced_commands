@@ -10,7 +10,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -28,7 +27,7 @@ import java.util.Set;
  */
 public record SelectorEntityPredicate(EntitySelector entitySelector) implements EntityPredicate {
   public static final MapCodec<SelectorEntityPredicate> CODEC = EntitySelectorCodec.INSTANCE.xmap(SelectorEntityPredicate::new, selectorEntityPredicate -> selectorEntityPredicate.entitySelector);
-  private static final LoadingCache<@NotNull EntitySelector, LoadingCache<@NotNull ExecutionContext, Set<Entity>>> CACHE = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(selector -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(context -> {
+  private static final LoadingCache<EntitySelector, LoadingCache<ExecutionContext, Set<Entity>>> CACHE = CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(selector -> CacheBuilder.newBuilder().weakKeys().weakValues().build(CacheLoader.from(context -> {
     try {
       return Set.copyOf(selector.findEntities(((CommandSourceStack) context.positionProvider)));
     } catch (CommandSyntaxException e) {
@@ -37,11 +36,11 @@ public record SelectorEntityPredicate(EntitySelector entitySelector) implements 
   }))));
 
   @Override
-  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  public boolean test(Entity entity, ExecutionContext context) {
     if (entitySelector.getMaxResults() < Integer.MAX_VALUE) {
       return CACHE.getUnchecked(entitySelector).getUnchecked(context).contains(entity);
     } else {
-      final Iterable<@NotNull EntityPredicate> concat = Iterables.concat(entitySelector.extension$ec().getSpecialEntries(), entitySelector.extension$ec().getStandardPredicates());
+      final Iterable<EntityPredicate> concat = Iterables.concat(entitySelector.extension$ec().getSpecialEntries(), entitySelector.extension$ec().getStandardPredicates());
       for (EntityPredicate predicate : concat) {
         if (!predicate.test(entity, context)) {
           return false;
@@ -52,7 +51,7 @@ public record SelectorEntityPredicate(EntitySelector entitySelector) implements 
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) throws CommandSyntaxException {
     List<TestResult> descriptions = new ArrayList<>();
 
     boolean result = true;
@@ -73,12 +72,12 @@ public record SelectorEntityPredicate(EntitySelector entitySelector) implements 
   }
 
   @Override
-  public @NotNull EntityPredicateType<SelectorEntityPredicate> getType() {
+  public EntityPredicateType<SelectorEntityPredicate> getType() {
     return EntityPredicateTypes.SELECTOR;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return EntitySelectors.express(entitySelector);
   }
 

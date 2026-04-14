@@ -1,11 +1,9 @@
 package pers.solid.ecmd.curve;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.Vec3dProvider;
 import pers.solid.ecmd.util.PositionProvider;
@@ -20,14 +18,14 @@ public record CircleCurveProvider(double radius, EnhancedCoordinates center, Vec
   ).apply(i, CircleCurveProvider::new));
 
   @Override
-  public CircleCurve toAbsoluteRegion(PositionProvider positionProvider) throws CommandSyntaxException {
+  public CircleCurve toAbsoluteRegion(PositionProvider positionProvider) {
     final Vec3 absoluteCenter = center.toAbsolutePos(positionProvider);
     final Vec3 axis = this.pivot == null ? new Vec3(0, 1, 0) : this.pivot.toActualVector(positionProvider).normalize();
     return new CircleCurve(this.radius, absoluteCenter, axis, minAngle, maxAngle);
   }
 
   @Override
-  public @NotNull CircleCurve.Type getType() {
+  public CircleCurve.Type getType() {
     return CurveTypes.CIRCLE;
   }
 }

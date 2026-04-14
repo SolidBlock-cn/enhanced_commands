@@ -9,7 +9,6 @@ import joptsimple.internal.Strings;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -25,7 +24,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   public static final MapCodec<HorizontalOffsetBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(HorizontalOffsetBlockPredicate::new, Codec.INT.fieldOf("offset").forGetter(HorizontalOffsetBlockPredicate::offset), BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(HorizontalOffsetBlockPredicate::blockPredicate)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final String s = blockPredicate instanceof HorizontalOffsetBlockPredicate ? "(" + blockPredicate.asString() + ")" : blockPredicate.asString();
     if (offset > 0) {
       return Strings.repeat('<', offset) + s;
@@ -57,7 +56,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.HORIZONTAL_OFFSET;
   }
 
@@ -65,7 +64,7 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
     HORIZONTAL_OFFSET_TYPE;
 
     @Override
-    public @NotNull MapCodec<HorizontalOffsetBlockPredicate> getCodec() {
+    public MapCodec<HorizontalOffsetBlockPredicate> getCodec() {
       return CODEC;
     }
 

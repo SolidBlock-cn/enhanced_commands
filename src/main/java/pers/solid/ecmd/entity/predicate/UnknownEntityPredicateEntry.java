@@ -1,11 +1,9 @@
 package pers.solid.ecmd.entity.predicate;
 
 import com.google.common.base.Predicates;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
@@ -18,12 +16,12 @@ public record UnknownEntityPredicateEntry(Predicate<Entity> predicate) implement
   public static final MapCodec<UnknownEntityPredicateEntry> UNKNOWN = MapCodec.unit(new UnknownEntityPredicateEntry(Predicates.alwaysTrue()));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return predicate.test(entity);
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (test(entity, context)) {
       return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.unknown.true", displayName));
     } else {
@@ -32,7 +30,7 @@ public record UnknownEntityPredicateEntry(Predicate<Entity> predicate) implement
   }
 
   @Override
-  public @NotNull EntityPredicateType<UnknownEntityPredicateEntry> getType() {
+  public EntityPredicateType<UnknownEntityPredicateEntry> getType() {
     return EntityPredicateTypes.UNKNOWN;
   }
 

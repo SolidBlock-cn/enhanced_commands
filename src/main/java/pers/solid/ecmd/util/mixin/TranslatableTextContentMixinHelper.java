@@ -2,14 +2,13 @@ package pers.solid.ecmd.util.mixin;
 
 import com.mojang.serialization.*;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.EnhancedTranslatableTextContent;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class TranslatableTextContentMixinHelper {
-  public static @NotNull MapCodec<TranslatableContents> modifyTranslatableCodec(MapCodec<TranslatableContents> original) {
+  public static MapCodec<TranslatableContents> modifyTranslatableCodec(MapCodec<TranslatableContents> original) {
     final String typeKey = "enhanced_commands:enhanced";
     return new MapCodec<>() {
       @Override

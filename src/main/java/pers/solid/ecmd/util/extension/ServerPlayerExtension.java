@@ -4,7 +4,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.mixins.general.ServerPlayerMixin;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.regionselection.RegionSelectionType;
@@ -21,7 +20,7 @@ public interface ServerPlayerExtension extends PlayerExtension {
   /**
    * 获取玩家的活动区域，如果玩家不存在活动区域，则抛出异常。此方法通常用在必须要玩家拥有活动区域的命令中。
    */
-  default @NotNull RegionSelection getActiveRegionOrThrow$ec() throws CommandSyntaxException {
+  default RegionSelection getActiveRegionOrThrow$ec() throws CommandSyntaxException {
     final RegionSelection region = getActiveRegion$ec();
     if (region == null) {
       throw PLAYER_HAS_NO_ACTIVE_REGION.create(((ServerPlayer) this).getName());

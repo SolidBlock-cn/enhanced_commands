@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
@@ -17,12 +16,12 @@ public record AirEntityPredicateEntry(BridgeIntRange air, boolean inverted) impl
   ).apply(i, AirEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return air.test(entity.getAirSupply()) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     return EntityPredicateEntry.testInt(entity, entity.getAirSupply(), air, Component.translatable("enhanced_commands.entity_predicate.air"), displayName, inverted);
   }
 
@@ -32,7 +31,7 @@ public record AirEntityPredicateEntry(BridgeIntRange air, boolean inverted) impl
   }
 
   @Override
-  public @NotNull EntityPredicateType<AirEntityPredicateEntry> getType() {
+  public EntityPredicateType<AirEntityPredicateEntry> getType() {
     return EntityPredicateTypes.AIR;
   }
 }

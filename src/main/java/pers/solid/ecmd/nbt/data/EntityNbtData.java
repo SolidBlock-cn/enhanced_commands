@@ -20,7 +20,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.entity.predicate.EntitySelectorCodec;
 import pers.solid.ecmd.entity.predicate.EntitySelectors;
@@ -127,7 +126,7 @@ public record EntityNbtData(EntitySelector entitySelector) implements NbtTarget<
   }
 
   @Override
-  public void setNbtFor(CommandSourceStack commandSource, Entity target, CompoundTag nbt) throws CommandSyntaxException {
+  public void setNbtFor(CommandSourceStack commandSource, Entity target, CompoundTag nbt) {
     UUID uuid = target.getUUID();
     target.load(nbt);
     target.setUUID(uuid);
@@ -143,7 +142,7 @@ public record EntityNbtData(EntitySelector entitySelector) implements NbtTarget<
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "entity " + EntitySelectors.express(entitySelector);
   }
 }

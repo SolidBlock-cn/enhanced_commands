@@ -30,7 +30,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
@@ -346,12 +345,12 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
   }
 
   @Override
-  public @NotNull EnhancedPosArgument instantiate(CommandBuildContext commandBuildContext) {
+  public EnhancedPosArgument instantiate(CommandBuildContext commandBuildContext) {
     return this;
   }
 
   @Override
-  public @NotNull ArgumentTypeInfo<EnhancedPosArgument, EnhancedPosArgument> type() {
+  public ArgumentTypeInfo<EnhancedPosArgument, EnhancedPosArgument> type() {
     return Info.INSTANCE;
   }
 
@@ -368,7 +367,7 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
     }
 
     @Override
-    public @NotNull EnhancedPosArgument deserializeFromNetwork(FriendlyByteBuf buf) {
+    public EnhancedPosArgument deserializeFromNetwork(FriendlyByteBuf buf) {
       return new EnhancedPosArgument(buf.readEnum(NumberType.class), buf.readEnum(IntAlignType.class));
     }
 
@@ -379,7 +378,7 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
     }
 
     @Override
-    public @NotNull EnhancedPosArgument unpack(EnhancedPosArgument argumentType) {
+    public EnhancedPosArgument unpack(EnhancedPosArgument argumentType) {
       return argumentType;
     }
   }
@@ -470,7 +469,7 @@ public record EnhancedPosArgument(NumberType numberType, IntAlignType intAlignTy
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
 
