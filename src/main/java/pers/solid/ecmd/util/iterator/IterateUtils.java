@@ -7,6 +7,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.LongFunction;
@@ -101,7 +102,7 @@ public final class IterateUtils {
    * @param skipTimes 一次运行后所跳过的次数。
    */
   @Contract(pure = true)
-  public static <E> Iterable<E> batchAndSkip(Iterable<E> forward, int batchSize, int skipTimes) {
+  public static <E extends @Nullable Object> Iterable<@Nullable E> batchAndSkip(Iterable<E> forward, int batchSize, int skipTimes) {
     return () -> new SkippingIterator<>(new BatchedIterator<>(forward.iterator(), batchSize), skipTimes);
   }
 

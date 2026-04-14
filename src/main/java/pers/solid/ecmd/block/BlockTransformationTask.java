@@ -157,11 +157,13 @@ public class BlockTransformationTask {
     if (box != null && !LoadUtil.isPosLoaded(world, box)) {
       throw FillReplaceCommand.UNLOADED_POS.create();
     }
-    final BoundingBox box2 = region.transformed(posTransformer).minContainingBlockBox();
-    if (box2 != null && !LoadUtil.isPosLoaded(world, box2)) {
-      throw FillReplaceCommand.UNLOADED_POS.create();
-    }
 
+    if (posTransformer != null) {
+      final BoundingBox box2 = region.transformed(posTransformer).minContainingBlockBox();
+      if (box2 != null && !LoadUtil.isPosLoaded(world, box2)) {
+        throw FillReplaceCommand.UNLOADED_POS.create();
+      }
+    }
   }
 
   /**
@@ -178,8 +180,8 @@ public class BlockTransformationTask {
 
   public Iterable<@Nullable BlockPos> modifyIterableForUnloadedPos(Iterable<@Nullable BlockPos> iterable) {
     if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-      return new BatchedFilterIterable<>(iterable, 16, (@Nullable BlockPos blockPos) -> {
-        @SuppressWarnings("deprecation") final boolean chunkLoaded = blockPos != null && world.hasChunkAt(blockPos);
+      return new BatchedFilterIterable<>(iterable, 16, (BlockPos blockPos) -> {
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloadedPos = true;
         }
@@ -187,7 +189,10 @@ public class BlockTransformationTask {
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       return Iterables.transform(iterable, blockPos -> {
-        @SuppressWarnings("deprecation") final boolean chunkLoaded = blockPos != null && world.hasChunkAt(blockPos);
+        if (blockPos == null) {
+          return null;
+        }
+        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloadedPos = true;
           throw new UnloadedPosException(blockPos);
@@ -211,11 +216,11 @@ public class BlockTransformationTask {
     // 转换后的坐标和转换后的方块
     final Long2ReferenceMap<BlockState> transformedStates = new Long2ReferenceLinkedOpenHashMap<>();
     // 转换后的坐标和 NBT，NBT 一般不进行转换
-    final Long2ReferenceMap<CompoundTag> nbts = new Long2ReferenceOpenHashMap<>();
+    final Long2ReferenceMap<@Nullable CompoundTag> nbts = new Long2ReferenceOpenHashMap<>();
 
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
-    final Iterable<Void> storeTransformed;
+    final Iterable<@Nullable Void> storeTransformed;
     {
       Iterable<@Nullable BlockPos> oldPosIterable = modifyIterableForUnloadedPos(region);
 
@@ -231,17 +236,16 @@ public class BlockTransformationTask {
             nbts.put(transformedBlockPos.asLong(), blockInWorld.getEntity().saveWithoutMetadata(world.registryAccess()));
           }
 
-          return null;
         } else {
           // 充 null 值表示未匹配到值，或者是未加载的区块。
           posTransformedOut.put(oldPos.asLong(), null);
 
-          return null;
         }
+        return null;
       });
     }
 
-    final Iterable<Void> collectMatchingTransformed;
+    final Iterable<@Nullable Void> collectMatchingTransformed;
     final LongSet matchingBlockPos;
     if (affectsOnly != null) {
       matchingBlockPos = new LongOpenHashSet();
@@ -261,7 +265,7 @@ public class BlockTransformationTask {
     if (affectsOnly != null) {
       releaseTransformedPos = Iterables.filter(releaseTransformedPos, entry -> matchingBlockPos.contains(entry.getLongKey()));
     }
-    final Iterable<Void> releaseTransformed = Iterables.transform(modifyIterableForUnloadedPos(Iterables.transform(releaseTransformedPos, input -> mutable.set(input.getLongKey()))),
+    final Iterable<@Nullable Void> releaseTransformed = Iterables.transform(modifyIterableForUnloadedPos(Iterables.transform(releaseTransformedPos, input -> mutable.set(input.getLongKey()))),
         transformedBlockPos -> {
           if (transformedBlockPos == null) return null;
           final BlockState transformedState = transformedStates.get(transformedBlockPos.asLong());
@@ -280,16 +284,17 @@ public class BlockTransformationTask {
           return null;
         });
 
-    final Iterable<Void> transformEntities = transformEntities();
+    final Iterable<@Nullable Void> transformEntities = transformEntities();
 
-    final Iterable<Void> collectMatchingRemaining;
-    final Iterable<Void> setRemaining;
+    final Iterable<@Nullable Void> collectMatchingRemaining;
+    final Iterable<@Nullable Void> setRemaining;
 
     if (remaining != null) {
+      final BatchedFilterIterable<@Nullable BlockPos> iterable = new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong()));
       if (affectsOnly != null) {
         final LongList affectedRemaining = new LongArrayList();
         collectMatchingRemaining = Iterables.transform(
-            new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong())),
+            iterable,
             blockPos -> {
               if (blockPos != null && affectsOnly.test(new BlockInWorld(world, blockPos, false), executionContext)) {
                 affectedRemaining.add(blockPos.asLong());
@@ -306,7 +311,7 @@ public class BlockTransformationTask {
       } else {
         collectMatchingRemaining = Collections.emptyList();
         setRemaining = Iterables.transform(
-            new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong())),
+            iterable,
             blockPos -> {
               if (blockPos != null && remaining.setBlock(world, blockPos, blockFunctionContext, null, history)) {
                 affectedBlocks++;
@@ -319,7 +324,7 @@ public class BlockTransformationTask {
     }
 
     final BoundingBox untransformedBox;
-    final Iterable<Void> addInterpolation;
+    final Iterable<@Nullable Void> addInterpolation;
     if (interpolation && posTransformer != null && invertedPosTransformer != null && (untransformedBox = region.minContainingBlockBox()) != null) {
       final List<BlockPos> transformedCorners = new ArrayList<>();
       untransformedBox.forAllCorners(blockPos -> transformedCorners.add(BlockPos.containing(posTransformer.apply(blockPos.getCenter()))));
@@ -334,12 +339,15 @@ public class BlockTransformationTask {
                 if (nearestOriginal.isPresent()) {
                   final long nearestOriginalLong = nearestOriginal.get().asLong();
                   if (posTransformedOut.get(nearestOriginalLong) != null) {
-                    final BlockState state = posTransformedOut.get(nearestOriginalLong);
+                    BlockState state = posTransformedOut.get(nearestOriginalLong);
+                    if (state == null) {
+                      state = Blocks.AIR.defaultBlockState();
+                    }
                     if (history != null && !history.oldStates.containsKey(transformedPos.asLong())) {
                       history.recordBlockAndEntity(world, transformedPos, state);
                     }
                     boolean affected = MixinShared.setBlockStateWithModFlags(world, transformedPos, state, blockFunctionContext.flags, blockFunctionContext.modFlags);
-                    final CompoundTag nbtCompound = nbts.get(transformedPos.asLong());
+                    final @Nullable CompoundTag nbtCompound = nbts.get(transformedPos.asLong());
                     final @Nullable BlockEntity transformedBlockEntity;
                     if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(transformedPos)) != null) {
                       transformedBlockEntity.loadWithComponents(nbtCompound, world.registryAccess());
@@ -361,8 +369,8 @@ public class BlockTransformationTask {
     return new TaskSeries(this, storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation);
   }
 
-  private Iterable<Void> transformEntities() {
-    final Iterable<Void> transformEntities;
+  private Iterable<@Nullable Void> transformEntities() {
+    final Iterable<@Nullable Void> transformEntities;
     if (entitiesToAffect != null) {
       transformEntities = Iterables.transform(() -> entitiesToAffect, entity -> {
         if (history != null) {
@@ -399,13 +407,13 @@ public class BlockTransformationTask {
     return new Builder(world, region);
   }
 
-  public record TaskSeries(BlockTransformationTask self, Iterable<Void> storeTransformed, Iterable<Void> collectMatchingTransformed, Iterable<Void> releaseTransformed, Iterable<Void> transformEntities, Iterable<Void> collectMatchingRemaining, Iterable<Void> setRemaining, Iterable<Void> addInterpolation) {
+  public record TaskSeries(BlockTransformationTask self, Iterable<@Nullable Void> storeTransformed, Iterable<@Nullable Void> collectMatchingTransformed, Iterable<@Nullable Void> releaseTransformed, Iterable<@Nullable Void> transformEntities, Iterable<@Nullable Void> collectMatchingRemaining, Iterable<@Nullable Void> setRemaining, Iterable<@Nullable Void> addInterpolation) {
     // 使用 iterable 而非 iterator 是为了惰性计算，有些迭代器所使用的集合是在之前的迭代器中添加的，为了避免出现错误，应该在完成了添加集合元素之后，再调用集合的 iterator() 方法。
-    private Iterable<Void> logIterable(String message) {
+    private Iterable<@Nullable Void> logIterable(String message) {
       return IterateUtils.singletonPeekingIterable(() -> LOGGER.info("Task {}: {}", self.region.asString(), message));
     }
 
-    public Iterator<Void> getSpeedAdjustedTask() {
+    public Iterator<@Nullable Void> getSpeedAdjustedTask() {
       return Iterables.concat(
           () -> IterateUtils.singletonPeekingIterator(self::addUndoableHistory),
           logIterable("store_transformed"),
@@ -425,32 +433,32 @@ public class BlockTransformationTask {
       ).iterator();
     }
 
-    public Iterator<Void> getImmediateTask() {
+    public Iterator<@Nullable Void> getImmediateTask() {
       return UnloadedPosException.catching(Iterables.concat(() -> IterateUtils.singletonPeekingIterator(self::addUndoableHistory), storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation).iterator());
     }
   }
 
+  @SuppressWarnings("UnusedReturnValue")
   public static final class Builder {
     private final Level world;
     private final Region region;
-    private Function<Vec3i, Vec3i> blockPosTransformer;
+    private @Nullable Function<Vec3i, Vec3i> blockPosTransformer;
     private @Nullable Function<Vec3, Vec3> posTransformer;
-    private Function<BlockState, BlockState> blockStateTransformer;
+    private @Nullable Function<BlockState, BlockState> blockStateTransformer;
     private @Nullable Consumer<Entity> entityTransformer;
     private @Nullable Consumer<Entity> reverseEntityTransformer;
-    private ExecutionContext executionContext;
-    private BlockFunctionContext blockFunctionContext;
+    private @Nullable ExecutionContext executionContext;
+    private @Nullable BlockFunctionContext blockFunctionContext;
     private @Nullable BlockPredicate affectsOnly = null;
     private @Nullable BlockPredicate transformsOnly = null;
     private @Nullable BlockFunction remaining = DEFAULT_REMAINING_FUNCTION;
     private @Nullable Iterator<? extends Entity> entitiesToAffect = null;
-    private Function<Vec3, Vec3> invertedPosTransformer;
+    private @Nullable Function<Vec3, Vec3> invertedPosTransformer;
     private boolean interpolation = false;
     private UnloadedPosBehavior unloadedPosBehavior = UnloadedPosBehavior.REJECT;
     private boolean bypassLimit = false;
     private @Nullable BlockTransformationHistory history;
-    private HistoryHolder historyHolder;
-    // todo 检查可空性
+    private @Nullable HistoryHolder historyHolder;
 
     public Builder(Level world, Region region) {
       this.world = world;
@@ -540,6 +548,10 @@ public class BlockTransformationTask {
     }
 
     public BlockTransformationTask build() {
+      Objects.requireNonNull(blockPosTransformer, "blockPosTransformer");
+      Objects.requireNonNull(blockStateTransformer, "blockStateTransformer");
+      Objects.requireNonNull(executionContext, "executionContext");
+      Objects.requireNonNull(blockFunctionContext, "blockFunctionContext");
       return new BlockTransformationTask(blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, executionContext, blockFunctionContext, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyHolder, history);
     }
   }

@@ -18,18 +18,18 @@ import java.util.function.Predicate;
  * <p>如果使用 {@code new BatchedFilterIterator(..., 3, ...)}</p>
  * <blockquote><u>1</u> <u>0 0 0</u> <u>0 1</u> <u>0 0 1</u> <u>0 1</u> <u>1</u> <u>0 1</u> <u>0 0 0</u></blockquote>
  */
-public final class BatchedFilterIterator<T> extends AbstractIterator<@Nullable T> {
-  private final Iterator<@Nullable T> forward;
+public final class BatchedFilterIterator<T extends @Nullable Object> extends AbstractIterator<@Nullable T> {
+  private final Iterator<T> forward;
   private final int batchSize;
-  private final Predicate<@Nullable T> predicate;
+  private final Predicate<T> predicate;
 
-  public BatchedFilterIterator(Iterator<@Nullable T> forward, int batchSize, Predicate<@Nullable T> predicate) {
+  public BatchedFilterIterator(Iterator<T> forward, int batchSize, Predicate<T> predicate) {
     this.forward = forward;
     this.batchSize = batchSize;
     this.predicate = predicate;
   }
 
-  public Iterator<@Nullable T> forward() {
+  public Iterator<T> forward() {
     return forward;
   }
 
@@ -37,7 +37,7 @@ public final class BatchedFilterIterator<T> extends AbstractIterator<@Nullable T
     return batchSize;
   }
 
-  public Predicate<@Nullable T> predicate() {
+  public Predicate<T> predicate() {
     return predicate;
   }
 
@@ -81,7 +81,7 @@ public final class BatchedFilterIterator<T> extends AbstractIterator<@Nullable T
   }
 
   @Override
-  public void forEachRemaining(Consumer<? super @Nullable T> action) {
+  public void forEachRemaining(Consumer<? super T> action) {
     while (forward.hasNext()) {
       final T next = forward.next();
       if (predicate.test(next)) action.accept(next);
