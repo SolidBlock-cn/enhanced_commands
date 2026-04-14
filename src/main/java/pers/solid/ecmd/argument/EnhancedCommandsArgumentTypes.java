@@ -18,6 +18,7 @@ public class EnhancedCommandsArgumentTypes {
     register("curve", CurveArgument.class, SingletonArgumentInfo.contextAware(CurveArgument::new));
     register("direction", DirectionArgument.class, SingletonArgumentInfo.contextFree(DirectionArgument::direction));
     register("entity_predicate", EntityPredicateArgument.class, SingletonArgumentInfo.contextAware(EntityPredicateArgument::new));
+    register("item_function", ItemFunctionArgument.class, SingletonArgumentInfo.contextAware(ItemFunctionArgument::new));
     register("item_predicate", ItemPredicateArgument.class, SingletonArgumentInfo.contextAware(ItemPredicateArgument::new));
     register("nbt_function", NbtFunctionArgument.class, NbtFunctionArgument.Info.INSTANCE);
     register("nbt_predicate", NbtPredicateArgument.class, NbtPredicateArgument.Info.INSTANCE);
