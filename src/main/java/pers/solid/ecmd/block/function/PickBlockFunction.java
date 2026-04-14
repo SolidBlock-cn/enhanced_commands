@@ -2,12 +2,10 @@ package pers.solid.ecmd.block.function;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -39,7 +37,6 @@ import java.util.stream.Collectors;
  * 允许零值，但总和不能为零。
  */
 public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalLong seed) implements BlockFunction {
-  public static final SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.block_function.pick.zero_sum"));
   public static final MapCodec<PickBlockFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(WeightedList.createMapCodec(BlockFunction.CODEC).forGetter(PickBlockFunction::functions), CodecUtil.optionalLongFieldOf("seed").forGetter(PickBlockFunction::seed)).apply(instance, PickBlockFunction::new));
 
   public PickBlockFunction(WeightedList<BlockFunction> functions) {

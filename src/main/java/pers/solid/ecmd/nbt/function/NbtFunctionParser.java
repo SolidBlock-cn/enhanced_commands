@@ -15,6 +15,7 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.nbt.NbtParserShared;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -34,6 +35,8 @@ public final class NbtFunctionParser {
   public static final Component REMOVE_KEY = Component.translatable("enhanced_commands.nbt_function.remove_key");
   public static final Component ECLIPSE = Component.translatable("enhanced_commands.nbt_function.eclipse");
   public static final SimpleCommandExceptionType DUPLICATE_ECLIPSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.duplicate_eclipse"));
+  public static final Component OVERLAY_TOOLTIP = Component.translatable("enhanced_commands.function.overlay.symbol_tooltip");
+  public static final Component PICK_TOOLTIP = Component.translatable("enhanced_commands.function.pick.symbol_tooltip");
 
   private NbtFunctionParser() {
   }
@@ -42,7 +45,7 @@ public final class NbtFunctionParser {
     return ParsingUtil.suggestString("-", REMOVE_KEY, suggestionsBuilder).buildFuture();
   }
 
-  private static CompletableFuture<Suggestions> suggestListEclipse(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder) {
+  private static CompletableFuture<Suggestions> suggestListEclipse(SuggestionsBuilder suggestionsBuilder) {
     return ParsingUtil.suggestString("...", ECLIPSE, suggestionsBuilder).buildFuture();
   }
 
@@ -80,10 +83,8 @@ public final class NbtFunctionParser {
 
   public static <S> CompoundNbtFunction parseCompound(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    parseContext.setSuggestion(NbtParserShared::suggestCompoundStart);
-    reader.expect('{');
-    parseContext.clearSuggestion();
-    reader.skipWhitespace();
+    NbtParserShared.handleCompoundStart(parseContext, reader);
+
     Map<String, @Nullable NbtFunction> entries = new LinkedHashMap<>();
 
     while (!reader.canRead() || reader.peek() != '}') {
@@ -115,22 +116,13 @@ public final class NbtFunctionParser {
         }
         entries.put(key, null);
       }
-      parseContext.terminateSuggestionsIfNotEmpty();
-      parseContext.addSuggestion(NbtParserShared::suggestCompoundSeparate);
-      if (reader.canRead() && reader.peek() == ',') {
-        reader.skip();
-        parseContext.clearSuggestion();
-        reader.skipWhitespace();
-      } else {
+
+      if (NbtParserShared.handleCompoundSeparate(parseContext, reader)) {
         break;
       }
     }
 
-    reader.skipWhitespace();
-    parseContext.terminateSuggestionsIfNotEmpty();
-    parseContext.addSuggestion(NbtParserShared::suggestCompoundEnd);
-    reader.expect('}');
-    parseContext.clearSuggestion();
+    NbtParserShared.handleCompoundEnd(parseContext, reader);
     return new CompoundNbtFunction(entries, !isUsingEqual);
   }
 
@@ -141,19 +133,15 @@ public final class NbtFunctionParser {
    */
   public static <S> NbtFunction parseList(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    reader.expect('[');
-    reader.skipWhitespace();
+    NbtParserShared.handListStart(parseContext, reader);
 
-    parseContext.setSuggestion(NbtParserShared::suggestListEnd);
     List<@Nullable Pair<@Nullable Integer, NbtFunction>> instructions = new ArrayList<>();
-
     boolean hasFoundEclipse = false;
-
     while (!reader.canRead() || reader.peek() != ']') {
       int cursorBeforeListElement = reader.getCursor();
       // 先检测是否有省略号。
       if (!hasFoundEclipse) {
-        parseContext.addSuggestion((context, suggestionsBuilder) -> suggestListEclipse(context, suggestionsBuilder.createOffset(cursorBeforeListElement)));
+        parseContext.addSuggestion((context, suggestionsBuilder) -> suggestListEclipse(suggestionsBuilder.createOffset(cursorBeforeListElement)));
       }
       if (reader.canRead(3) && reader.peek() == '.' && reader.peek(1) == '.' && reader.peek(2) == '.') {
         // 解析到了省略号的情况
@@ -208,46 +196,40 @@ public final class NbtFunctionParser {
       }
 
       reader.skipWhitespace();
-      parseContext.terminateSuggestionsIfNotEmpty();
-      parseContext.addSuggestion(NbtParserShared::suggestListSeparate);
-
-      if (reader.canRead() && reader.peek() == ',') {
-        reader.skip();
-        parseContext.clearSuggestion();
-        reader.skipWhitespace();
-      } else {
+      if (NbtParserShared.handleListSeparate(parseContext, reader)) {
         break;
       }
     } // end while
 
-    reader.skipWhitespace();
-    parseContext.addSuggestion(NbtParserShared::suggestListEnd);
-    reader.expect(']');
-    parseContext.clearSuggestion();
+    NbtParserShared.handleListEnd(parseContext, reader);
 
     // 解析完成，处理数据
     if (hasFoundEclipse) {
       final ImmutableList.Builder<NbtFunction> insertBefore = new ImmutableList.Builder<>();
       final ImmutableList.Builder<NbtFunction> insertAfter = new ImmutableList.Builder<>();
+      final ImmutableList.Builder<PositionalListEntry<NbtFunction>> insertPositional = new ImmutableList.Builder<>();
       ImmutableList.Builder<NbtFunction> currentAppending = insertBefore;
 
       for (Pair<@Nullable Integer, NbtFunction> instruction : instructions) {
         if (instruction == null) {
           currentAppending = insertAfter;
+        } else if (instruction.getFirst() != null) {
+          insertPositional.add(new PositionalListEntry<>(instruction.getFirst(), instruction.getSecond()));
         } else {
           currentAppending.add(instruction.getSecond());
         }
       }
 
-      return new ListInsertionNbtFunction(insertBefore.build(), insertAfter.build());
+      return new ListInsertionNbtFunction(insertBefore.build(), insertAfter.build(), insertPositional.build());
     } else {
       final ImmutableList.Builder<NbtFunction> replacements = new ImmutableList.Builder<>();
       final ImmutableList.Builder<PositionalListEntry<NbtFunction>> positional = new ImmutableList.Builder<>();
 
       for (Pair<@Nullable Integer, NbtFunction> instruction : instructions) {
         if (instruction == null) {
-          // 这种情况一般不应该发生
-        } else if (instruction.getFirst() == null) {
+          continue;
+        }
+        if (instruction.getFirst() == null) {
           replacements.add(instruction.getSecond());
         } else {
           positional.add(new PositionalListEntry<>(instruction.getFirst(), instruction.getSecond()));
@@ -258,18 +240,45 @@ public final class NbtFunctionParser {
     }
   }
 
-
   public static <S> NbtFunction parseNbtFunction(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     // 尝试解析函数名称；如果不是函数语法，则恢复 cursor 重新解析；如果是函数语法，则按照函数语法解析，如果函数不存在，则报错。
-    final StringReader reader = parseContext.reader();
 
     // 解析等号和不等号
-    final boolean isUsingEqual = NbtFunctionParser.parseBeforeFunctionName(parseContext, mustExpectSign, equalsForDefault, reader);
+    final boolean isUsingEqual = NbtFunctionParser.parseBeforeFunctionName(parseContext, mustExpectSign, equalsForDefault);
 
+    return parseAfterSign(parseContext, isUsingEqual);
+  }
+
+  private static <S> NbtFunction parseAfterSign(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
+    return parsePick(parseContext, isUsingEqual);
+  }
+
+  static NbtFunction parsePick(ParseContext<?> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseOverlay(parseContext, isUsingEqual), functions -> {
+      ImmutableList.Builder<NbtFunction> builder = new ImmutableList.Builder<>();
+      for (NbtFunction function : functions) {
+        builder.add(function);
+      }
+      return new PickNbtFunction(new WeightedList.Uniform<>(builder.build()));
+    }, "|", PICK_TOOLTIP, parseContext);
+  }
+
+  static NbtFunction parseOverlay(ParseContext<?> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
+    return ParsingUtil.parseUnifiable(() -> parseUnit(parseContext, isUsingEqual), functions -> {
+      ImmutableList.Builder<NbtFunction> builder = new ImmutableList.Builder<>();
+      for (NbtFunction blockFunction : functions) {
+        builder.add(blockFunction);
+      }
+      return new OverlayNbtFunction(builder.build());
+    }, "*", OVERLAY_TOOLTIP, parseContext);
+  }
+
+  private static <S> NbtFunction parseUnit(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
+    final StringReader reader = parseContext.reader();
     final int cursorBeforeValue = reader.getCursor();
     parseContext.addSuggestion((context, suggestionsBuilder) -> suggestValueDifferentTypes(suggestionsBuilder.createOffset(cursorBeforeValue)));
 
-    final NbtFunction functionGrammar = NbtFunctionParser.parseFunctionGrammar(parseContext, reader);
+    final NbtFunction functionGrammar = NbtFunctionParser.parseFunctionGrammar(parseContext);
     if (functionGrammar != null) return functionGrammar;
 
     if (!reader.canRead()) {
@@ -294,31 +303,34 @@ public final class NbtFunctionParser {
    * 解析复合标签或者函数语法的函数，不会解析其他类型如数字、列表等。与 {@link #parseCompound} 不同的是，仍会解析函数语法，尽管这些情况下的 NBT 函数运行的结果不一定是复合标签。
    */
   public static <S> NbtFunction parsePreferringCompound(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
-    final StringReader reader = parseContext.reader();
-
     // 解析等号和不等号
-    final boolean isUsingEqual = NbtFunctionParser.parseBeforeFunctionName(parseContext, mustExpectSign, equalsForDefault, reader);
+    final boolean isUsingEqual = NbtFunctionParser.parseBeforeFunctionName(parseContext, mustExpectSign, equalsForDefault);
 
-    final NbtFunction functionGrammar = NbtFunctionParser.parseFunctionGrammar(parseContext, reader);
+    final NbtFunction functionGrammar = NbtFunctionParser.parseFunctionGrammar(parseContext);
     if (functionGrammar != null) return functionGrammar;
 
     parseContext.terminateSuggestionsIfNotEmpty();
-    parseContext.addSuggestion(NbtParserShared::suggestCompoundStart);
+    parseContext.addSuggestion((context, suggestionsBuilder) -> NbtParserShared.suggestCompoundStart(suggestionsBuilder));
     return parseCompound(parseContext, isUsingEqual);
   }
 
-  private static @Nullable <S> NbtFunction parseFunctionGrammar(ParseContext<S> parseContext, StringReader reader) throws CommandSyntaxException {
+  private static @Nullable <S> NbtFunction parseFunctionGrammar(ParseContext<S> parseContext) throws CommandSyntaxException {
+    final StringReader reader = parseContext.reader();
     final int cursorBeforeFunctionName = reader.getCursor();
     final NbtFunction functionGrammar = NbtFunctionParsing.FUNCTIONS_PARSER.parse(parseContext);
     if (functionGrammar != null) {
       return functionGrammar;
     } else {
+      if (reader.getCursor() != cursorBeforeFunctionName) {
+        parseContext.terminateSuggestionsIfNotEmpty();
+      }
       reader.setCursor(cursorBeforeFunctionName);
     }
     return null;
   }
 
-  private static <S> boolean parseBeforeFunctionName(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault, StringReader reader) throws CommandSyntaxException {
+  private static <S> boolean parseBeforeFunctionName(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
+    final StringReader reader = parseContext.reader();
     final int cursorBeforeSign = reader.getCursor();
     final boolean isUsingEqual = parseSign(parseContext, mustExpectSign, equalsForDefault);
 

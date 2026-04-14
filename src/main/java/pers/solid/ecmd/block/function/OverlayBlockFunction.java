@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * 叠加多个方块函数，依次应用。
  */
 public record OverlayBlockFunction(List<BlockFunction> functions) implements BlockFunction {
-  public static final MapCodec<OverlayBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("predicates").forGetter(OverlayBlockFunction::functions)));
+  public static final MapCodec<OverlayBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(OverlayBlockFunction::new, BlockFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayBlockFunction::functions)));
 
   public OverlayBlockFunction(BlockFunction... functions) {
     this(List.of(functions));

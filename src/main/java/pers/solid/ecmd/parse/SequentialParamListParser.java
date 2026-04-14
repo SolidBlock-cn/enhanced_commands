@@ -3,6 +3,7 @@ package pers.solid.ecmd.parse;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Contract;
 
@@ -36,7 +37,7 @@ public interface SequentialParamListParser {
     if (paramsCount >= minSequentialParamsCount()) {
       parseContext.addSuggestion((context, builder) -> {
         if (builder.getRemaining().isEmpty()) {
-          builder.suggest(Character.toString(terminateChar()));
+          suggestTerminateChar(builder);
         }
         return builder.buildFuture();
       });
@@ -61,10 +62,10 @@ public interface SequentialParamListParser {
       parseContext.addSuggestion((context, builder) -> {
         if (builder.getRemaining().isEmpty()) {
           if (hasMoreParams) {
-            builder.suggest(Character.toString(separatorChar()));
+            suggestSeparatorChar(builder);
           }
           if (satisfiedParams) {
-            builder.suggest(Character.toString(terminateChar()));
+            suggestTerminateChar(builder);
           }
         }
         return builder.buildFuture();
@@ -87,6 +88,14 @@ public interface SequentialParamListParser {
     if (paramsCount < minSequentialParamsCount()) {
       throw PARAMS_TOO_FEW.createWithContext(reader, paramsCount, minSequentialParamsCount());
     }
+  }
+
+  default void suggestSeparatorChar(SuggestionsBuilder builder) {
+    builder.suggest(Character.toString(separatorChar()));
+  }
+
+  default void suggestTerminateChar(SuggestionsBuilder builder) {
+    builder.suggest(Character.toString(terminateChar()));
   }
 
   /**

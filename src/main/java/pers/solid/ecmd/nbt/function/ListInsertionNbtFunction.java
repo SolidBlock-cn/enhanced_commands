@@ -13,10 +13,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtFunction> insertAfter) implements ListNbtFunction {
+public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtFunction> insertAfter, List<PositionalListEntry<NbtFunction>> insertPositional) implements ListNbtFunction {
   public static final MapCodec<ListInsertionNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtFunction.CODEC.listOf().optionalFieldOf("insert_before", ImmutableList.of()).forGetter(ListInsertionNbtFunction::insertBefore),
-      NbtFunction.CODEC.listOf().optionalFieldOf("insert_after", ImmutableList.of()).forGetter(ListInsertionNbtFunction::insertAfter)
+      NbtFunction.CODEC.listOf().optionalFieldOf("insert_after", ImmutableList.of()).forGetter(ListInsertionNbtFunction::insertAfter),
+      PositionalListEntry.codec(NbtFunction.CODEC).listOf().optionalFieldOf("insert_positional", ImmutableList.of()).forGetter(ListInsertionNbtFunction::insertPositional)
   ).apply(i, ListInsertionNbtFunction::new));
 
   @Override
@@ -35,8 +36,20 @@ public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtF
 
   @Override
   public ListTag applyOnList(ListTag listTag, ExecutionContext context) throws CommandSyntaxException {
-    listTag.addAll(0, IterateUtils.transformFailableArrayList(insertBefore, f -> f.apply(null, context)));
-    listTag.addAll(IterateUtils.transformFailableArrayList(insertAfter, f -> f.apply(null, context)));
+    try {
+      listTag.addAll(0, IterateUtils.transformFailableArrayList(insertBefore, f -> f.apply(null, context)));
+    } catch (UnsupportedOperationException | IndexOutOfBoundsException ignore) {
+    }
+    try {
+      listTag.addAll(IterateUtils.transformFailableArrayList(insertAfter, f -> f.apply(null, context)));
+    } catch (UnsupportedOperationException | IndexOutOfBoundsException ignore) {
+    }
+    for (PositionalListEntry<NbtFunction> entry : insertPositional) {
+      try {
+        listTag.add(entry.index(), entry.value().apply(null, context));
+      } catch (UnsupportedOperationException | IndexOutOfBoundsException ignore) {
+      }
+    }
     return listTag;
   }
 

@@ -2,8 +2,10 @@ package pers.solid.ecmd.block.function;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
@@ -17,6 +19,7 @@ import java.util.Objects;
 import static pers.solid.ecmd.util.EnhancedCommandSyntaxException.withCursorEnd;
 
 public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
+  public static final SimpleCommandExceptionType SUM_ZERO = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.function.pick.zero_sum"));
   public boolean weighted = false;
   public @Nullable List<ObjectDoublePair<T>> pairs;
   protected double weightSum = 0;
@@ -30,7 +33,7 @@ public abstract class WeightedListParser<T> implements Parser<WeightedList<T>> {
     if (weightSum == 0) {
       final int cursorEnd = reader.getCursor();
       reader.setCursor(cursorBeforeEntries);
-      throw withCursorEnd(PickBlockFunction.SUM_ZERO.createWithContext(reader), cursorEnd);
+      throw withCursorEnd(SUM_ZERO.createWithContext(reader), cursorEnd);
     }
     if (weighted) {
       return new WeightedList.Weighted<>(pairs);

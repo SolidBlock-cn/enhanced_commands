@@ -19,6 +19,10 @@ public final class NbtFunctionTypes {
   public static final NbtFunctionType<NumberValueNbtFunction> NUMBER_VALUE = register("number_value", NumberValueNbtFunction.Type.NUMBER_VALUE_TYPE);
   public static final NbtFunctionType<SimpleNbtFunction> SIMPLE = register("simple", SimpleNbtFunction.Type.SIMPLE_TYPE);
 
+  // 复合的 NBT 函数
+  public static final OverlayNbtFunction.Type OVERLAY = register("overlay", OverlayNbtFunction.Type.OVERLAY_TYPE);
+  public static final PickNbtFunction.Type PICK = register("pick", PickNbtFunction.Type.PICK_TYPE);
+
   // 特殊的 NBT 函数
 
   public static final NbtFunctionType<ConcatNbtFunction> CONCAT = register("concat", ConcatNbtFunction.Type.CONCAT_TYPE);
@@ -45,6 +49,8 @@ public final class NbtFunctionTypes {
     final Map<String, Supplier<FunctionContentParser<? extends NbtFunction>>> map = NbtFunctionParsing.FUNCTIONS;
     map.put("concat", ConcatNbtFunction.Parser::new);
     map.put("from", GetDataNbtFunction.Parser::new);
+    map.put("overlay", OverlayNbtFunction.Parser::new);
+    map.put("pick", PickNbtFunction.Parser::new);
     map.put("pos", PosNbtFunction.Parser::new);
     map.put("regex_replace", RegexReplaceNbtFunction.Parser::new);
     map.put("replace", ReplaceNbtFunction.Parser::new);
@@ -56,6 +62,8 @@ public final class NbtFunctionTypes {
     final Map<String, Component> map = NbtFunctionParsing.FUNCTION_NAMES;
     map.put("concat", Component.translatable("enhanced_commands.nbt_function.concat"));
     map.put("from", Component.translatable("enhanced_commands.nbt_function.from"));
+    map.put("overlay", Component.translatable("enhanced_commands.function.overlay"));
+    map.put("pick", Component.translatable("enhanced_commands.function.pick"));
     map.put("pos", Component.translatable("enhanced_commands.nbt_function.pos"));
     map.put("regex_replace", Component.translatable("enhanced_commands.nbt_function.regex_replace"));
     map.put("replace", Component.translatable("enhanced_commands.nbt_function.replace"));

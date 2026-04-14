@@ -13,9 +13,9 @@ import java.util.function.Function;
  * @param <E> 枚举类型
  */
 public class StringIdentifiableCodec<E extends Enum<E> & StringRepresentable> extends StringRepresentable.StringRepresentableCodec<E> implements EnumCodec<E> {
-  private final Function<String, E> idToIdentifiable;
+  private final Function<String, @Nullable E> idToIdentifiable;
 
-  private StringIdentifiableCodec(E[] values, Function<String, E> idToIdentifiable) {
+  private StringIdentifiableCodec(E[] values, Function<String, @Nullable E> idToIdentifiable) {
     super(values, idToIdentifiable, Enum::ordinal);
     this.idToIdentifiable = idToIdentifiable;
   }
@@ -31,13 +31,13 @@ public class StringIdentifiableCodec<E extends Enum<E> & StringRepresentable> ex
    * 根据枚举的 {@code values()} 方法创建，通常是枚举常量的数组形式，并转化由 {@link StringRepresentable#getSerializedName()} 返回的字符串 id。
    */
   public static <E extends Enum<E> & StringRepresentable> StringIdentifiableCodec<E> create(E[] values, Function<String, String> valueNameTransformer) {
-    Function<String, E> function = StringRepresentable.createNameLookup(values, valueNameTransformer);
+    Function<String, @Nullable E> function = StringRepresentable.createNameLookup(values, valueNameTransformer);
     return new StringIdentifiableCodec<>(values, function);
   }
 
   @Override
   public @Nullable E byId(@Nullable String id) {
-    return this.idToIdentifiable.apply(id);
+    return id == null ? null : this.idToIdentifiable.apply(id);
   }
 
   @Override
