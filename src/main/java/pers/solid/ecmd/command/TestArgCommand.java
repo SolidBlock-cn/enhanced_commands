@@ -31,6 +31,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -43,13 +44,13 @@ import pers.solid.ecmd.block.function.BlockFunction;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.curve.Curve;
 import pers.solid.ecmd.curve.CurveProvider;
+import pers.solid.ecmd.entity.predicate.EntityPredicate;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.item.function.ItemFunction;
-import pers.solid.ecmd.nbt.function.NbtFunction;
-import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.entity.predicate.EntityPredicate;
 import pers.solid.ecmd.item.predicate.ItemPredicate;
+import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionProvider;
 import pers.solid.ecmd.util.*;
@@ -171,6 +172,21 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             .executes(context -> executeCodecTest(context, getCompoundTag(context, "nbt_compound"), CompoundTag.CODEC, NbtOps.INSTANCE)))
         .then(literal("json_test")
             .executes(context -> executeCodecTest(context, getCompoundTag(context, "nbt_compound"), CompoundTag.CODEC, JsonOps.INSTANCE)))
+    );
+  }
+
+  private static <T extends ArgumentBuilder<CommandSourceStack, T>> T addExtraItemFunctionProperties(T argumentBuilder, CommandBuildContext commandBuildContext) {
+    return argumentBuilder.then(argument("item_function", ItemFunctionArgument.itemFunction(commandBuildContext))
+        .then(literal("give")
+            .executes(context -> {
+              final ItemFunction itemFunction = ItemFunctionArgument.getItemFunction(context, "item_function");
+              final CommandSourceStack source = context.getSource();
+              final ItemStack stack = itemFunction.getModifiedStack(ItemStack.EMPTY, ItemStack.EMPTY, new ExecutionContext(source));
+              final ItemStack stackCopy = stack.copy();
+              final boolean b = source.getPlayerOrException().addItem(stack);
+              context.getSource().sendFeedback$ecBridge(stackCopy::getDisplayName, true);
+              return BooleanUtils.toInteger(b);
+            }))
     );
   }
 
@@ -402,6 +418,15 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             EntityPredicateArgument::getEntityPredicate,
             ExpressionConvertible::asString,
             EntityPredicate.CODEC))
+        .then(addValueProperties(
+            addExtraItemFunctionProperties(literal("item_function"), commandBuildContext),
+            commandBuildContext,
+            "item_function",
+            ItemFunctionArgument.itemFunction(commandBuildContext),
+            parseContext -> ItemFunctionArgument.itemFunction(commandBuildContext).parse(parseContext.reader()),
+            ItemFunctionArgument::getItemFunction,
+            ExpressionConvertible::asString,
+            ItemFunction.CODEC))
         .then(addValueProperties(
             literal("item_predicate"),
             commandBuildContext,

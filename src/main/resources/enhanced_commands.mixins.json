@@ -4,6 +4,7 @@
   "package": "pers.solid.ecmd.mixins",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "ItemParserAccessor",
     "accessor.ArgumentTypeInfosAccessor",
     "accessor.BlockDisplayEntityAccessor",
     "accessor.BlockInWorldAccessor",

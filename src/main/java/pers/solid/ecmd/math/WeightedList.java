@@ -37,7 +37,7 @@ public sealed interface WeightedList<E> {
    * @return 指定位置的元素。
    */
   default E getClampedElement(@Range(from = 0, to = 1) double position) {
-    return getElementAt(position * size());
+    return Objects.requireNonNull(getElementAt(position * size()), "clamped element");
   }
 
   Stream<String> asStringStream(Function<E, String> converter);
