@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -17,7 +16,7 @@ import pers.solid.ecmd.util.TestResult;
 import java.util.ArrayList;
 import java.util.List;
 
-public record AnyBlockPredicate(List<@NotNull BlockPredicate> predicates) implements BlockPredicate {
+public record AnyBlockPredicate(List<BlockPredicate> predicates) implements BlockPredicate {
   public static final MapCodec<AnyBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("predicates").forGetter(AnyBlockPredicate::predicates)).apply(i, AnyBlockPredicate::new));
 
   public AnyBlockPredicate(BlockPredicate... predicates) {
@@ -25,7 +24,7 @@ public record AnyBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "any(" + String.join(", ", Collections2.transform(predicates, ExpressionConvertible::asString)) + ")";
   }
 
@@ -53,7 +52,7 @@ public record AnyBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.ANY;
   }
 
@@ -61,7 +60,7 @@ public record AnyBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
     ANY_TYPE;
 
     @Override
-    public @NotNull MapCodec<AnyBlockPredicate> getCodec() {
+    public MapCodec<AnyBlockPredicate> getCodec() {
       return CODEC;
     }
   }

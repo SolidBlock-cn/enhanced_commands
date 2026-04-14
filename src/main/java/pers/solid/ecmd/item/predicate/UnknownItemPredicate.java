@@ -3,7 +3,6 @@ package pers.solid.ecmd.item.predicate;
 import com.google.common.base.Predicates;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
@@ -16,12 +15,12 @@ public record UnknownItemPredicate(Predicate<ItemStack> forward) implements Item
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.UNKNOWN;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "<unknown>";
   }
 
@@ -29,7 +28,7 @@ public record UnknownItemPredicate(Predicate<ItemStack> forward) implements Item
     UNKNOWN_TYPE;
 
     @Override
-    public @NotNull MapCodec<UnknownItemPredicate> getCodec() {
+    public MapCodec<UnknownItemPredicate> getCodec() {
       return CODEC;
     }
   }

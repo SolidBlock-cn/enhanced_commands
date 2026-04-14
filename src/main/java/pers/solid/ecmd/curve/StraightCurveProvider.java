@@ -1,9 +1,7 @@
 package pers.solid.ecmd.curve;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.util.PositionProvider;
 
@@ -14,12 +12,12 @@ public record StraightCurveProvider(EnhancedCoordinates from, EnhancedCoordinate
   ).apply(i, StraightCurveProvider::new));
 
   @Override
-  public StraightCurve toAbsoluteRegion(PositionProvider positionProvider) throws CommandSyntaxException {
+  public StraightCurve toAbsoluteRegion(PositionProvider positionProvider) {
     return new StraightCurve(from.toAbsolutePos(positionProvider), to.toAbsolutePos(positionProvider));
   }
 
   @Override
-  public @NotNull StraightCurve.Type getType() {
+  public StraightCurve.Type getType() {
     return CurveTypes.STRAIGHT;
   }
 }

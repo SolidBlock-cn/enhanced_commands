@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
@@ -33,17 +32,17 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3.atLowerCornerOf(pos)).getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
   }
 
   @Override
-  public @NotNull BlockFunctionType<NoiseBlockFunction> getType() {
+  public BlockFunctionType<NoiseBlockFunction> getType() {
     return BlockFunctionTypes.NOISE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final String listString = list.asString(ExpressionConvertible::asString);
     final String parametersString = asParametersString();
     return "noise(" + listString + (parametersString.isEmpty() ? "" : "; " + parametersString) + ")";
@@ -53,7 +52,7 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
     INSTANCE;
 
     @Override
-    public @NotNull MapCodec<NoiseBlockFunction> getCodec() {
+    public MapCodec<NoiseBlockFunction> getCodec() {
       return CODEC;
     }
   }
@@ -66,7 +65,7 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
     }
 
     @Override
-    public NoiseBlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public BlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       super.getParseResult(parseContext);
       return new NoiseBlockFunction(weightedList, seed, new NormalNoise.NoiseParameters(firstOctave, amplitudes), scale, offset);
     }

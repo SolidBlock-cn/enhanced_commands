@@ -1,7 +1,6 @@
 package pers.solid.ecmd.region;
 
 import com.google.common.collect.Iterators;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,7 +10,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -37,7 +35,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     try {
       return region.contains(vec3i) && !region.expanded(-thickness, Direction.Plane.HORIZONTAL).contains(vec3i);
     } catch (IllegalArgumentException args) {
@@ -52,7 +50,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.CUBOID_WALL;
   }
 
@@ -68,12 +66,12 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public @NotNull BoundingBox minContainingBlockBox() {
+  public BoundingBox minContainingBlockBox() {
     return region.minContainingBlockBox();
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return String.format("cuboid_wall(%s %s %s, %s %s %s, %s)", region.minX(), region.minY(), region.minZ(), region.maxX(), region.maxY(), region.maxZ(), thickness);
   }
 
@@ -83,16 +81,16 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     return Iterators.concat(Iterators.transform(decompose().iterator(), BlockCuboidRegion::iterator));
   }
 
   @Override
-  public Stream<@NotNull BlockPos> stream() {
+  public Stream<BlockPos> stream() {
     return decompose().flatMap(Region::stream);
   }
 
-  public @NotNull Stream<BlockCuboidRegion> decompose() {
+  public Stream<BlockCuboidRegion> decompose() {
     // 考虑正好中间的空间为零的情况，这种情况下，正好相当于实心的 BlockCuboidRegion
     if (region.minX() + thickness > region.maxX() - thickness
         || region.minZ() + thickness > region.maxZ() - thickness) {
@@ -129,19 +127,19 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
     }
 
     @Override
-    public @NotNull MapCodec<CuboidWallRegion> getCodec() {
+    public MapCodec<CuboidWallRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends CuboidWallRegionProvider> getArgumentCodec() {
+    public MapCodec<? extends CuboidWallRegionProvider> getArgumentCodec() {
       return CuboidWallRegionProvider.CODEC;
     }
   }
 
   public static final class Parser extends CuboidOutlineRegion.AbstractParser<CuboidWallRegionProvider> {
     @Override
-    public CuboidWallRegionProvider getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public CuboidWallRegionProvider getParseResult(ParseContext<?> parseContext) {
       return new CuboidWallRegionProvider(new BlockCuboidRegionProvider(fromPos, toPos), thickness);
     }
   }

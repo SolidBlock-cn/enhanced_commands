@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -23,12 +22,12 @@ public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverte
   ).apply(i, TypeEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return Objects.equals(entityType, entity.getType()) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final EntityType<?> actualType = entity.getType();
     final boolean equals = Objects.equals(actualType, entityType);
     final MutableComponent actualText = TextUtil.styled(actualType.getDescription(), Styles.ACTUAL);
@@ -48,7 +47,7 @@ public record TypeEntityPredicateEntry(EntityType<?> entityType, boolean inverte
   }
 
   @Override
-  public @NotNull EntityPredicateType<TypeEntityPredicateEntry> getType() {
+  public EntityPredicateType<TypeEntityPredicateEntry> getType() {
     return EntityPredicateTypes.TYPE;
   }
 

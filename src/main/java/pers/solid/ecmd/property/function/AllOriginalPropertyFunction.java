@@ -6,14 +6,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collections;
 import java.util.Set;
 
-public record AllOriginalPropertyFunction(@NotNull Set<Property<?>> except) implements GeneralPropertyFunction {
+public record AllOriginalPropertyFunction(Set<Property<?>> except) implements GeneralPropertyFunction {
   public AllOriginalPropertyFunction() {
     this(Collections.emptySet());
   }
@@ -23,7 +22,7 @@ public record AllOriginalPropertyFunction(@NotNull Set<Property<?>> except) impl
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "~";
   }
 

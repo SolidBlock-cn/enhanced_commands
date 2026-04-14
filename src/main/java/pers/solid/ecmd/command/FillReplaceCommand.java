@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
@@ -127,7 +126,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
       }
     }
 
-    final Iterable<@NotNull BlockPos> posIterable;
+    final Iterable<BlockPos> posIterable;
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();
 
@@ -214,7 +213,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
     }
   }
 
-  public static int getFlags(@NotNull KeywordArgs args) {
+  public static int getFlags(KeywordArgs args) {
     int value = 0;
     if (args.getBoolean("notify_listeners")) {
       value |= Block.UPDATE_CLIENTS;
@@ -232,7 +231,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
     return value;
   }
 
-  public static int getModFlags(@NotNull KeywordArgs args) {
+  public static int getModFlags(KeywordArgs args) {
     int value = 0;
     if (args.supportsArg("post_process") && args.getBoolean("post_process")) {
       value |= POST_PROCESS_FLAG;

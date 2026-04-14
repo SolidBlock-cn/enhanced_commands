@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
@@ -48,12 +47,12 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   }
 
   @Override
-  public @NotNull BlockPredicateType<?> getType() {
+  public BlockPredicateType<?> getType() {
     return BlockPredicateTypes.NOISE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final String listString = list.asString(ExpressionConvertible::asString);
     final String parametersString = asParametersString();
     return "noise(" + listString + (parametersString.isEmpty() ? "" : "; " + parametersString) + ")";
@@ -63,7 +62,7 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
     NOISE_TYPE;
 
     @Override
-    public @NotNull MapCodec<NoiseBlockPredicate> getCodec() {
+    public MapCodec<NoiseBlockPredicate> getCodec() {
       return CODEC;
     }
   }
@@ -75,7 +74,7 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
     }
 
     @Override
-    public NoiseBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public BlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       super.getParseResult(parseContext);
       return new NoiseBlockPredicate(weightedList, seed, new NormalNoise.NoiseParameters(firstOctave, amplitudes), scale, offset);
     }

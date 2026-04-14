@@ -1,10 +1,8 @@
 package pers.solid.ecmd.entity.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -19,7 +17,7 @@ public enum AliveEntityPredicate implements StaticEntityPredicate, EntityPredica
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final boolean alive = entity.isAlive();
     if (alive) {
       return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.alive.true", displayName));
@@ -29,7 +27,7 @@ public enum AliveEntityPredicate implements StaticEntityPredicate, EntityPredica
   }
 
   @Override
-  public @NotNull EntityPredicateType<AliveEntityPredicate> getType() {
+  public EntityPredicateType<AliveEntityPredicate> getType() {
     return EntityPredicateTypes.ALIVE;
   }
 
@@ -39,7 +37,7 @@ public enum AliveEntityPredicate implements StaticEntityPredicate, EntityPredica
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "@e";
   }
 }

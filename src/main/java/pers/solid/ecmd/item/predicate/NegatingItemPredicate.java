@@ -3,7 +3,6 @@ package pers.solid.ecmd.item.predicate;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 
 public record NegatingItemPredicate(ItemPredicate predicate) implements PredicateBasedItemPredicate {
@@ -15,12 +14,12 @@ public record NegatingItemPredicate(ItemPredicate predicate) implements Predicat
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.NEGATING;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "!" + predicate().asString();
   }
 
@@ -28,7 +27,7 @@ public record NegatingItemPredicate(ItemPredicate predicate) implements Predicat
     NEGATING_TYPE;
 
     @Override
-    public @NotNull MapCodec<NegatingItemPredicate> getCodec() {
+    public MapCodec<NegatingItemPredicate> getCodec() {
       return CODEC;
     }
   }

@@ -21,7 +21,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -40,7 +39,7 @@ public interface RegionSelection extends ExpressionConvertible {
    */
   SimpleCommandExceptionType NOT_COMPLETED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.region_selection.not_completed"));
   Codec<RegionSelection> CODEC = RegionSelectionType.CODEC.dispatch(RegionSelection::getType, RegionSelectionType::codec);
-  StreamCodec<RegistryFriendlyByteBuf, RegionSelection> PACKET_CODEC = RegionSelectionType.PACKET_CODEC.dispatch(RegionSelection::getType, CacheBuilder.newBuilder().build(CacheLoader.from((@NotNull RegionSelectionType type) -> StreamCodec.ofMember(RegionSelection::serializeToNetwork, (FriendlyByteBuf buf) -> {
+  StreamCodec<RegistryFriendlyByteBuf, RegionSelection> PACKET_CODEC = RegionSelectionType.PACKET_CODEC.dispatch(RegionSelection::getType, CacheBuilder.newBuilder().build(CacheLoader.from((RegionSelectionType type) -> StreamCodec.ofMember(RegionSelection::serializeToNetwork, (FriendlyByteBuf buf) -> {
     final RegionSelection regionSelection = type.createRegionSelection();
     regionSelection.readPacket(buf);
     return regionSelection;
@@ -60,7 +59,7 @@ public interface RegionSelection extends ExpressionConvertible {
    */
   Supplier<Component> clickSecondPoint(Vec3 point, Player player);
 
-  List<@NotNull Vec3> getPoints();
+  List<Vec3> getPoints();
 
   void readPoints(List<Vec3> points);
 
@@ -79,48 +78,48 @@ public interface RegionSelection extends ExpressionConvertible {
    * 移动选区自身，并通常返回自身。
    */
   @Contract(mutates = "this")
-  default @NotNull RegionSelection moved(@NotNull Vec3i relativePos) throws CommandSyntaxException {
+  default RegionSelection moved(Vec3i relativePos) throws CommandSyntaxException {
     return moved(Vec3.atLowerCornerOf(relativePos));
   }
 
-  default @NotNull RegionSelection moved(@NotNull Vec3 relativePos) throws CommandSyntaxException {
+  default RegionSelection moved(Vec3 relativePos) throws CommandSyntaxException {
     return transformed(vec3d -> vec3d.add(relativePos));
   }
 
-  default @NotNull RegionSelection rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) throws CommandSyntaxException {
+  default RegionSelection rotated(Rotation blockRotation, Vec3 pivot) throws CommandSyntaxException {
     return transformed(vec3d -> GeoUtil.rotate(vec3d, blockRotation, pivot));
   }
 
-  default @NotNull RegionSelection mirrored(@NotNull Direction.Axis axis, @NotNull Vec3 pivot) throws CommandSyntaxException {
+  default RegionSelection mirrored(Direction.Axis axis, Vec3 pivot) throws CommandSyntaxException {
     return transformed(vec3d -> GeoUtil.mirror(vec3d, axis, pivot));
   }
 
-  default @NotNull RegionSelection expanded(double offset) throws CommandSyntaxException {
+  default RegionSelection expanded(double offset) throws CommandSyntaxException {
     throw new UnsupportedOperationException();
   }
 
   /**
    * 区域沿指定坐标轴延伸浮点数值后的区域。
    */
-  default @NotNull RegionSelection expanded(double offset, Direction.Axis axis) throws CommandSyntaxException {
+  default RegionSelection expanded(double offset, Direction.Axis axis) throws CommandSyntaxException {
     throw new UnsupportedOperationException();
   }
 
   /**
    * 区域往指定方向延伸浮点数值后的区域，被延伸的那一侧是沿该方向最远的一侧。
    */
-  default @NotNull RegionSelection expanded(double offset, Direction direction) throws CommandSyntaxException {
+  default RegionSelection expanded(double offset, Direction direction) throws CommandSyntaxException {
     throw new UnsupportedOperationException();
   }
 
-  default @NotNull RegionSelection expanded(double offset, Direction.Plane type) throws CommandSyntaxException {
+  default RegionSelection expanded(double offset, Direction.Plane type) throws CommandSyntaxException {
     throw new UnsupportedOperationException();
   }
 
   /**
    * 对区域对象自身进行修改并返回自身。
    */
-  @NotNull RegionSelection transformed(Function<Vec3, Vec3> transformation) throws CommandSyntaxException;
+  RegionSelection transformed(Function<Vec3, Vec3> transformation) throws CommandSyntaxException;
 
   /**
    * 转换为具体的 Region 对象。一般来说，它应该是缓存在对象的字段中的，如果自身有修改，则该字段清除，下次调用时再重新计算。
@@ -130,7 +129,6 @@ public interface RegionSelection extends ExpressionConvertible {
   RegionSelection clone();
 
   @Override
-  @NotNull
   default String asString() {
     try {
       return region().asString();
@@ -140,7 +138,6 @@ public interface RegionSelection extends ExpressionConvertible {
   }
 
   @Contract(pure = true)
-  @NotNull
   RegionSelectionType getType();
 
   void readPacket(FriendlyByteBuf buf);

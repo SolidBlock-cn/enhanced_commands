@@ -2,7 +2,6 @@ package pers.solid.ecmd.entity.predicate;
 
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.function.Predicate;
@@ -12,7 +11,7 @@ import java.util.function.Predicate;
  */
 public interface StaticEntityPredicate extends EntityPredicate, Predicate<Entity> {
   @Override
-  default boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  default boolean test(Entity entity, ExecutionContext context) {
     return test(entity);
   }
 }

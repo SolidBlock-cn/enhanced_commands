@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 public record ComponentPresenceItemPredicate<T>(DataComponentType<T> componentType) implements ItemPredicateEntry, ItemPredicateWithoutContext {
   private static final MapCodec<ComponentPresenceItemPredicate<?>> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(DataComponentType.CODEC.fieldOf("component_type").forGetter(ComponentPresenceItemPredicate::componentType)).apply(i, ComponentPresenceItemPredicate::new));
@@ -16,12 +15,12 @@ public record ComponentPresenceItemPredicate<T>(DataComponentType<T> componentTy
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.COMPONENT_PRESENCE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "*[" + asEntryString() + "]";
   }
 
@@ -34,7 +33,7 @@ public record ComponentPresenceItemPredicate<T>(DataComponentType<T> componentTy
     COMPONENT_PRESENCE_TYPE;
 
     @Override
-    public @NotNull MapCodec<ComponentPresenceItemPredicate<?>> getCodec() {
+    public MapCodec<ComponentPresenceItemPredicate<?>> getCodec() {
       return CODEC;
     }
   }

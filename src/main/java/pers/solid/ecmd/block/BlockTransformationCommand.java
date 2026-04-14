@@ -16,7 +16,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import pers.solid.ecmd.argument.KeywordArgs;
@@ -26,8 +25,8 @@ import pers.solid.ecmd.block.function.BlockFunction;
 import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
-import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.entity.predicate.EntityPredicate;
+import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -51,15 +50,13 @@ public interface BlockTransformationCommand {
 
   Vec3 transformPosBack(Vec3 transformed);
 
-  void transformEntity(@NotNull Entity entity);
+  void transformEntity(Entity entity);
 
-  void transformEntityBack(@NotNull Entity entity);
+  void transformEntityBack(Entity entity);
 
-  @NotNull
-  BlockState transformBlockState(@NotNull BlockState original);
+  BlockState transformBlockState(BlockState original);
 
-  @NotNull
-  Region transformRegion(@NotNull Region region);
+  Region transformRegion(Region region);
 
   /**
    * 完成操作时通知影响的方块和实体的数量。
@@ -69,7 +66,6 @@ public interface BlockTransformationCommand {
    */
   void notifyCompletion(CommandSourceStack source, @Range(from = 0, to = Long.MAX_VALUE) int affectedBlocks, @Range(from = -1, to = Long.MAX_VALUE) int affectedEntities);
 
-  @NotNull
   MutableComponent getIteratorTaskName(Region region);
 
   default int execute(Region region, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -83,7 +79,7 @@ public interface BlockTransformationCommand {
     final int flags = FillReplaceCommand.getFlags(keywordArgs);
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final @Nullable Long seed = keywordArgs.getArg("seed");
-    final BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(getIteratorTaskName(region), world, flags, modFlags) : null;
+    final @Nullable BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(getIteratorTaskName(region), world, flags, modFlags) : null;
     final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(world, region)
         .setBlockPredicateContext(new ExecutionContext(world.getRandom(), source, seed))
         .setBlockFunctionContext(new BlockFunctionContext(flags, modFlags, world.getRandom(), source, seed))

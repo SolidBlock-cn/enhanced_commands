@@ -65,7 +65,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
     }
   }
 
-  private void decomposeTemplate(@NotNull String translation, Consumer<FormattedText> partsConsumer) {
+  private void decomposeTemplate(String translation, Consumer<FormattedText> partsConsumer) {
     Matcher matcher = ARG_FORMAT.matcher(translation);
 
     int implicitIndex = 0;
@@ -204,7 +204,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
   }
 
   @Override
-  public <T> @NotNull Optional<T> visit(FormattedText.StyledContentConsumer<T> visitor, Style style) {
+  public <T> Optional<T> visit(FormattedText.StyledContentConsumer<T> visitor, Style style) {
     this.decompose();
 
     for (FormattedText stringVisitable : this.translations) {
@@ -218,7 +218,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
   }
 
   @Override
-  public <T> @NotNull Optional<T> visit(FormattedText.ContentConsumer<T> visitor) {
+  public <T> Optional<T> visit(FormattedText.ContentConsumer<T> visitor) {
     this.decompose();
 
     for (FormattedText stringVisitable : this.translations) {
@@ -232,7 +232,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
   }
 
   @Override
-  public @NotNull MutableComponent resolve(@Nullable CommandSourceStack source, @Nullable Entity sender, int depth) throws CommandSyntaxException {
+  public MutableComponent resolve(@Nullable CommandSourceStack source, @Nullable Entity sender, int depth) throws CommandSyntaxException {
     final Object[] args = getArgs();
     final Object[] parsedObjects = new Object[args.length];
 
@@ -248,7 +248,7 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
     return MutableComponent.create(new EnhancedTranslatableTextContent(getKey(), getFallback(), parsedObjects));
   }
 
-  public @NotNull String toString() {
+  public String toString() {
     return "enhanced_translation{key='"
         + this.getKey()
         + "'"
@@ -267,6 +267,6 @@ public class EnhancedTranslatableTextContent extends TranslatableContents {
 
   @Override
   public int hashCode() {
-    return super.hashCode();
+    return super.hashCode() * 31 + 1;
   }
 }

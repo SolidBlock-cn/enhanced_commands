@@ -7,7 +7,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -17,11 +16,11 @@ import pers.solid.ecmd.util.TestResult;
 import java.util.ArrayList;
 import java.util.List;
 
-public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implements BlockPredicate {
+public record AllBlockPredicate(List<BlockPredicate> predicates) implements BlockPredicate {
   public static final MapCodec<AllBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("predicates").forGetter(AllBlockPredicate::predicates)).apply(i, AllBlockPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "all(" + String.join(", ", Collections2.transform(predicates, ExpressionConvertible::asString)) + ")";
   }
 
@@ -49,7 +48,7 @@ public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.ALL;
   }
 
@@ -57,7 +56,7 @@ public record AllBlockPredicate(List<@NotNull BlockPredicate> predicates) implem
     ALL_TYPE;
 
     @Override
-    public @NotNull MapCodec<AllBlockPredicate> getCodec() {
+    public MapCodec<AllBlockPredicate> getCodec() {
       return CODEC;
     }
   }

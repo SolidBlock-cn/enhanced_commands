@@ -54,7 +54,7 @@ public record BlockNbtData(RegionProvider<?> region, BlockPredicate blockPredica
   }
 
   @Override
-  public Collection<BlockEntity> values(CommandSourceStack source) throws CommandSyntaxException {
+  public Collection<BlockEntity> values(CommandSourceStack source) {
     final Region region = this.region.toAbsoluteRegion(source);
     final ServerLevel world = source.getLevel();
     final ImmutableList<BlockEntity> blockEntities;
@@ -181,7 +181,7 @@ public record BlockNbtData(RegionProvider<?> region, BlockPredicate blockPredica
   }
 
   @Override
-  public void setNbtFor(CommandSourceStack commandSource, BlockEntity target, CompoundTag nbt) throws CommandSyntaxException {
+  public void setNbtFor(CommandSourceStack commandSource, BlockEntity target, CompoundTag nbt) {
     target.loadWithComponents(nbt, commandSource.registryAccess());
     target.setChanged();
     final Level world = target.getLevel();

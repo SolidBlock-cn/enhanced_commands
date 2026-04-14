@@ -14,7 +14,6 @@ import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.iterator.IteratorTask;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class BlockTransformationHistory extends BlockPlacementHistory {
-  public final List<Triple<@NotNull Entity, @Nullable Pair<@NotNull Consumer<Entity>, @NotNull Consumer<Entity>>, @Nullable Vec3>> reverseEntities = new ArrayList<>();
+  public final List<Triple<Entity, @Nullable Pair<Consumer<Entity>, Consumer<Entity>>, @Nullable Vec3>> reverseEntities = new ArrayList<>();
 
   public BlockTransformationHistory(Component name, ServerLevel world, int flag, int modFlag) {
     super(name, world, flag, modFlag);
@@ -35,7 +34,7 @@ public class BlockTransformationHistory extends BlockPlacementHistory {
   }
 
   @Override
-  public @NotNull Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockTransformationHistory> undo(CommandSourceStack source, boolean immediately, boolean undoable) {
+  public Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockTransformationHistory> undo(CommandSourceStack source, boolean immediately, boolean undoable) {
     final var s = super.undo(source, immediately, undoable);
     final @Nullable IteratorTask<?> superTask = s.getFirst();
     final @Nullable BlockPlacementHistory superHistory = s.getSecond();

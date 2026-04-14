@@ -9,7 +9,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -20,31 +19,31 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public record UnionRegion(@NotNull List<Region> regions) implements RegionsBasedRegion<UnionRegion, Region> {
+public record UnionRegion(List<Region> regions) implements RegionsBasedRegion<UnionRegion, Region> {
   public static final MapCodec<UnionRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, UnionRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3 vec3d) {
+  public boolean contains(Vec3 vec3d) {
     return regions.stream().anyMatch(region -> region.contains(vec3d));
   }
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     return regions.stream().anyMatch(region -> region.contains(vec3i));
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     return stream().iterator();
   }
 
   @Override
-  public Stream<@NotNull BlockPos> stream() {
+  public Stream<BlockPos> stream() {
     return regions.stream().flatMap(Region::stream).map(BlockPos::immutable).distinct();
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.UNION;
   }
 
@@ -57,13 +56,13 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "union(" + String.join(", ", Collections2.transform(regions, Region::asString)) + ")";
   }
 
   @Override
   public @Nullable AABB minContainingBox() {
-    final List<@NotNull AABB> maxContainingBoxes = regions.stream().map(Region::minContainingBox).filter(Objects::nonNull).toList();
+    final List<AABB> maxContainingBoxes = regions.stream().map(Region::minContainingBox).filter(Objects::nonNull).toList();
     final double minX = maxContainingBoxes.stream().mapToDouble(value -> value.minX).min().orElse(Double.POSITIVE_INFINITY);
     final double minY = maxContainingBoxes.stream().mapToDouble(value -> value.minY).min().orElse(Double.POSITIVE_INFINITY);
     final double minZ = maxContainingBoxes.stream().mapToDouble(value -> value.minZ).min().orElse(Double.POSITIVE_INFINITY);
@@ -78,7 +77,7 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
   }
 
   @Override
-  public UnionRegion newRegion(@NotNull List<Region> regions) {
+  public UnionRegion newRegion(List<Region> regions) {
     return new UnionRegion(regions);
   }
 
@@ -101,12 +100,12 @@ public record UnionRegion(@NotNull List<Region> regions) implements RegionsBased
     }
 
     @Override
-    public @NotNull MapCodec<UnionRegion> getCodec() {
+    public MapCodec<UnionRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionProvider<UnionRegion>> getArgumentCodec() {
+    public MapCodec<? extends RegionProvider<UnionRegion>> getArgumentCodec() {
       return UnionRegionProvider.CODEC;
     }
   }

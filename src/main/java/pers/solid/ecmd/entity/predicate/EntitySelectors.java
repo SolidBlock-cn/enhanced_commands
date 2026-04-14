@@ -10,7 +10,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
@@ -32,7 +31,7 @@ public final class EntitySelectors {
   /**
    * 类似于 {@link EntitySelectorParser#parse()}，但是允许省略开头的“@e”等变量。
    */
-  public static EntitySelector readOmittibleEntitySelector(@NotNull EntitySelectorParser entitySelectorReader) throws CommandSyntaxException {
+  public static EntitySelector readOmittibleEntitySelector(EntitySelectorParser entitySelectorReader) throws CommandSyntaxException {
     final var accessor = (EntitySelectorParserAccessor) entitySelectorReader;
     final StringReader stringReader = entitySelectorReader.getReader();
 

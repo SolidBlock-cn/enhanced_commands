@@ -10,23 +10,22 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 /**
  * 去除方块函数中的流体，并将 waterlogged 设为 false。这不一定总是能够成功。
  */
-public record DryBlockFunction(@NotNull BlockFunction function) implements BlockFunction {
+public record DryBlockFunction(BlockFunction function) implements BlockFunction {
   public static final MapCodec<DryBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockFunction.CODEC.optionalFieldOf("function", EmptyBlockFunction.INSTANCE).forGetter(DryBlockFunction::function)).apply(i, DryBlockFunction::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "dry(" + (function.isEmpty() ? "" : function.asString()) + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     BlockState state = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
       state = state.setValue(BlockStateProperties.WATERLOGGED, false);
@@ -38,7 +37,7 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.DRY;
   }
 
@@ -46,7 +45,7 @@ public record DryBlockFunction(@NotNull BlockFunction function) implements Block
     DRY_TYPE;
 
     @Override
-    public @NotNull MapCodec<DryBlockFunction> getCodec() {
+    public MapCodec<DryBlockFunction> getCodec() {
       return CODEC;
     }
   }

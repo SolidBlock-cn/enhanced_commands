@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -21,12 +20,12 @@ public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tag, boolean inv
   ).apply(i, TypeTagEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return entity.getType().is(tag) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final EntityType<?> type = entity.getType();
     final boolean isInTag = type.is(tag);
     if (inverted) {
@@ -45,7 +44,7 @@ public record TypeTagEntityPredicateEntry(TagKey<EntityType<?>> tag, boolean inv
   }
 
   @Override
-  public @NotNull EntityPredicateType<TypeTagEntityPredicateEntry> getType() {
+  public EntityPredicateType<TypeTagEntityPredicateEntry> getType() {
     return EntityPredicateTypes.TYPE_TAG;
   }
 

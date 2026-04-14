@@ -9,18 +9,17 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
-public record NbtMatchingEntityPredicateEntry(@NotNull CompoundTag nbt, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
+public record NbtMatchingEntityPredicateEntry(CompoundTag nbt, boolean inverted) implements EntityPredicateEntry, StaticEntityPredicate {
   public static final MapCodec<NbtMatchingEntityPredicateEntry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       CompoundTag.CODEC.fieldOf("nbt").forGetter(NbtMatchingEntityPredicateEntry::nbt),
       Codec.BOOL.optionalFieldOf("inverted", false).forGetter(NbtMatchingEntityPredicateEntry::inverted)
   ).apply(i, NbtMatchingEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     CompoundTag actualNbt = entity.saveWithoutId(new CompoundTag());
     if (entity instanceof ServerPlayer serverPlayerEntity) {
       ItemStack itemStack = serverPlayerEntity.getInventory().getSelected();
@@ -33,7 +32,7 @@ public record NbtMatchingEntityPredicateEntry(@NotNull CompoundTag nbt, boolean 
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     CompoundTag actualNbt = entity.saveWithoutId(new CompoundTag());
     if (entity instanceof ServerPlayer serverPlayerEntity) {
       ItemStack itemStack = serverPlayerEntity.getInventory().getSelected();
@@ -52,7 +51,7 @@ public record NbtMatchingEntityPredicateEntry(@NotNull CompoundTag nbt, boolean 
   }
 
   @Override
-  public @NotNull EntityPredicateType<NbtMatchingEntityPredicateEntry> getType() {
+  public EntityPredicateType<NbtMatchingEntityPredicateEntry> getType() {
     return EntityPredicateTypes.NBT;
   }
 

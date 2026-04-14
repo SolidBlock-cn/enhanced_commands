@@ -9,7 +9,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -19,26 +18,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-public record IntersectRegion(@NotNull List<Region> regions) implements RegionsBasedRegion<IntersectRegion, Region> {
+public record IntersectRegion(List<Region> regions) implements RegionsBasedRegion<IntersectRegion, Region> {
   public static final MapCodec<IntersectRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegionsBasedRegion.regionsCodecField(Region.CODEC)).apply(i, IntersectRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3 vec3d) {
+  public boolean contains(Vec3 vec3d) {
     return regions.stream().allMatch(region -> region.contains(vec3d));
   }
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     return regions.stream().allMatch(region -> region.contains(vec3i));
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     return stream().iterator();
   }
 
   @Override
-  public Stream<@NotNull BlockPos> stream() {
+  public Stream<BlockPos> stream() {
     if (regions.isEmpty()) {
       return Stream.empty();
     }
@@ -47,7 +46,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.INTERSECT;
   }
 
@@ -68,7 +67,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "intersect(" + String.join(", ", Collections2.transform(regions, Region::asString)) + ")";
   }
 
@@ -89,7 +88,7 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
   }
 
   @Override
-  public IntersectRegion newRegion(@NotNull List<Region> regions) {
+  public IntersectRegion newRegion(List<Region> regions) {
     return new IntersectRegion(regions);
   }
 
@@ -112,12 +111,12 @@ public record IntersectRegion(@NotNull List<Region> regions) implements RegionsB
     }
 
     @Override
-    public @NotNull MapCodec<IntersectRegion> getCodec() {
+    public MapCodec<IntersectRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionProvider<IntersectRegion>> getArgumentCodec() {
+    public MapCodec<? extends RegionProvider<IntersectRegion>> getArgumentCodec() {
       return IntersectRegionProvider.CODEC;
     }
   }

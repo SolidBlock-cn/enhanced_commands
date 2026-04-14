@@ -3,7 +3,6 @@ package pers.solid.ecmd.region;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.StringUtil;
@@ -20,12 +19,12 @@ public record SphereRegionProvider(double radius, EnhancedCoordinates center) im
   }
 
   @Override
-  public @NotNull RegionType<SphereRegion> getType() {
+  public RegionType<SphereRegion> getType() {
     return RegionTypes.SPHERE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "sphere(" + StringUtil.nf.format(radius) + ", " + center.asString() + ")";
   }
 }

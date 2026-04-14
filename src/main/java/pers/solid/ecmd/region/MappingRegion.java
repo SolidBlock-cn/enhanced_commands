@@ -4,7 +4,6 @@ import com.google.common.collect.Iterators;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -26,24 +25,23 @@ public interface MappingRegion extends RegionBasedRegion<MappingRegion, Region> 
   }
 
   @Override
-  default boolean contains(@NotNull Vec3i vec3i) {
+  default boolean contains(Vec3i vec3i) {
     return region().contains(getOriginalPosOf(vec3i));
   }
 
   @Override
-  default boolean contains(@NotNull Vec3 vec3d) {
+  default boolean contains(Vec3 vec3d) {
     return region().contains(getOriginalPosOf(vec3d));
   }
 
   @Override
-  @NotNull
   default Iterator<BlockPos> iterator() {
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
     return Iterators.transform(region().iterator(), input -> mutable.set(getMappedPosOf(input)));
   }
 
   @Override
-  default Stream<@NotNull BlockPos> stream() {
+  default Stream<BlockPos> stream() {
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
     return region().stream().map(blockPos -> mutable.set(getMappedPosOf(blockPos)));
   }

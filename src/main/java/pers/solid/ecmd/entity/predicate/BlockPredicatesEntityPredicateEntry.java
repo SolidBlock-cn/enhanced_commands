@@ -1,7 +1,6 @@
 package pers.solid.ecmd.entity.predicate;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -9,7 +8,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -24,7 +22,7 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedCoordinates,
   public static final MapCodec<BlockPredicatesEntityPredicateEntry> CODEC = pairCodec.listOf().fieldOf("predicates").xmap(BlockPredicatesEntityPredicateEntry::new, BlockPredicatesEntityPredicateEntry::predicates);
 
   @Override
-  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  public boolean test(Entity entity, ExecutionContext context) {
     for (Pair<EnhancedCoordinates, BlockPredicate> pair : predicates) {
       final var pos = pair.getFirst();
       final var predicate = pair.getSecond();
@@ -36,7 +34,7 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedCoordinates,
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final ImmutableList.Builder<TestResult> attachments = new ImmutableList.Builder<>();
     boolean result = true;
     for (Pair<EnhancedCoordinates, BlockPredicate> pair : predicates) {
@@ -54,12 +52,12 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedCoordinates,
   }
 
   @Override
-  public @NotNull EntityPredicateType<BlockPredicatesEntityPredicateEntry> getType() {
+  public EntityPredicateType<BlockPredicatesEntityPredicateEntry> getType() {
     return EntityPredicateTypes.BLOCK_PREDICATES;
   }
 
   @Override
-  public @NotNull String toOptionEntry() {
+  public String toOptionEntry() {
     return "block=" + predicates.stream().map(entry -> entry.getFirst().asString() + " = " + entry.getSecond().asString()).collect(Collectors.joining(", ", "{", "}"));
   }
 }

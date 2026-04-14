@@ -2,7 +2,6 @@ package pers.solid.ecmd.curve;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.util.PositionProvider;
@@ -10,7 +9,6 @@ import pers.solid.ecmd.util.PositionProvider;
 public interface CurveProvider<T extends Curve> {
   Codec<CurveProvider<?>> CODEC = CurveType.REGISTRY.byNameCodec().dispatch(CurveProvider::getType, CurveType::getArgumentCodec);
 
-  @NotNull
   static CurveProvider<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final int cursorOnStart = parseContext.reader().getCursor();
     for (Parser<CurveProvider<?>> parser : CurveParsing.PARSERS) {
@@ -25,8 +23,7 @@ public interface CurveProvider<T extends Curve> {
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(parseContext.reader());
   }
 
-  T toAbsoluteRegion(PositionProvider positionProvider) throws CommandSyntaxException;
+  T toAbsoluteRegion(PositionProvider positionProvider);
 
-  @NotNull
   CurveType<? super T> getType();
 }

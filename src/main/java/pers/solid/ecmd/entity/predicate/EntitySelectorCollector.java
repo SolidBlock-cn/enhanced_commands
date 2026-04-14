@@ -4,7 +4,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.*;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
@@ -81,14 +80,14 @@ public enum EntitySelectorCollector implements StringRepresentable {
   }
 
   @Override
-  public @NotNull String getSerializedName() {
+  public String getSerializedName() {
     return name;
   }
 
   /**
    * 将 {@code null} 元素转化为空列表，将非 {@code null} 元素转化为单元素的列表。
    */
-  private static <T> Stream<@NotNull T> stream(@Nullable T element) {
+  private static <T> Stream<T> stream(@Nullable T element) {
     return element == null ? Stream.empty() : Stream.of(element);
   }
 

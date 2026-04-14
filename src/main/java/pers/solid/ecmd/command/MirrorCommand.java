@@ -18,7 +18,6 @@ import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.api.FlipStateCallback;
 import pers.solid.ecmd.argument.*;
@@ -73,7 +72,7 @@ public enum MirrorCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public void transformEntity(@NotNull Entity entity) {
+      public void transformEntity(Entity entity) {
         final float newYaw = entity.mirror(switch (axis) {
           case X -> Mirror.FRONT_BACK;
           case Z -> Mirror.LEFT_RIGHT;
@@ -93,17 +92,17 @@ public enum MirrorCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public void transformEntityBack(@NotNull Entity entity) {
+      public void transformEntityBack(Entity entity) {
         transformEntity(entity);
       }
 
       @Override
-      public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
+      public BlockState transformBlockState(BlockState original) {
         return FlipStateCallback.getMirroredState(original, axis);
       }
 
       @Override
-      public @NotNull Region transformRegion(@NotNull Region region) {
+      public Region transformRegion(Region region) {
         return region.mirrored(axis, pivot.getCenter());
       }
 
@@ -117,7 +116,7 @@ public enum MirrorCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public @NotNull MutableComponent getIteratorTaskName(Region region) {
+      public MutableComponent getIteratorTaskName(Region region) {
         return Component.translatable("enhanced_commands.commands.mirror.task", region.asString());
       }
     }.execute(region, keywordArgs, context);

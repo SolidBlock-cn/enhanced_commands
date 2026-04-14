@@ -1,7 +1,6 @@
 package pers.solid.ecmd.config;
 
 import org.apache.commons.lang3.Validate;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Map;
@@ -20,11 +19,11 @@ public final class ConfigCategories {
   private ConfigCategories() {
   }
 
-  private static @NotNull <C> ConfigCategory<C> register(Class<C> configClass) {
+  private static <C> ConfigCategory<C> register(Class<C> configClass) {
     return register(configClass, Collections.emptyMap());
   }
 
-  private static @NotNull <C> ConfigCategory<C> register(Class<C> configClass, Map<String, ConfigCategory.EntryModifier<C, ?>> entryModifiers) {
+  private static <C> ConfigCategory<C> register(Class<C> configClass, Map<String, ConfigCategory.EntryModifier<C, ?>> entryModifiers) {
     final ConfigCategory<C> configCategory = ConfigReflectionHelper.createCategoryFromReflection(configClass, entryModifiers);
     ConfigCategory.REGISTRY.put(configCategory.name, configCategory);
     return configCategory;

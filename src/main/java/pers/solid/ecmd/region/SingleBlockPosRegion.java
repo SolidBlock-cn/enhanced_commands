@@ -12,25 +12,26 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.Function;
 
 public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, CuboidRegion {
   public static final MapCodec<SingleBlockPosRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3i.CODEC.fieldOf("pos").forGetter(SingleBlockPosRegion::pos)).apply(i, SingleBlockPosRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     return this.pos.equals(vec3i);
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.SINGLE;
   }
 
@@ -45,22 +46,22 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "single(%s %s %s)".formatted(pos.getX(), pos.getY(), pos.getZ());
   }
 
   @Override
-  public @NotNull AABB minContainingBox() {
+  public AABB minContainingBox() {
     return new AABB(new BlockPos(pos));
   }
 
   @Override
-  public @NotNull BoundingBox minContainingBlockBox() {
+  public BoundingBox minContainingBlockBox() {
     return BoundingBox.fromCorners(pos, pos);
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     return Iterators.singletonIterator(new BlockPos(pos));
   }
 
@@ -83,12 +84,12 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public @NotNull MapCodec<SingleBlockPosRegion> getCodec() {
+    public MapCodec<SingleBlockPosRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionProvider<SingleBlockPosRegion>> getArgumentCodec() {
+    public MapCodec<? extends RegionProvider<SingleBlockPosRegion>> getArgumentCodec() {
       return SingleBlockPosRegionProvider.CODEC;
     }
   }
@@ -100,7 +101,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     INSTANCE;
 
     @Override
-    public SingleBlockPosRegionProvider parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable SingleBlockPosRegionProvider parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       final int cursorBeforeParse = reader.getCursor();
       final EnhancedPosArgument argumentType = EnhancedPosArgument.blockPos();
@@ -121,7 +122,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
 
   public enum FunctionParser implements FunctionContentParser.SequentialParams<RegionProvider<SingleBlockPosRegion>> {
     INSTANCE;
-    private EnhancedCoordinates posArgument;
+    private @Nullable EnhancedCoordinates posArgument;
 
     @Override
     public int minSequentialParamsCount() {
@@ -134,10 +135,9 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
     }
 
     @Override
-    public RegionProvider<SingleBlockPosRegion> getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
-      final EnhancedCoordinates posArgument1 = posArgument;
-      posArgument = null;
-      return new SingleBlockPosRegionProvider(posArgument1);
+    public RegionProvider<SingleBlockPosRegion> getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(posArgument, "posArgument");
+      return new SingleBlockPosRegionProvider(posArgument);
     }
 
     @Override

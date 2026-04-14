@@ -14,7 +14,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.function.PropertyFunction;
@@ -24,17 +23,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record SimpleBlockFunction(@NotNull Block block, @NotNull List<PropertyFunction<?>> properties) implements BlockFunction {
+public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
   public static final Codec<SimpleBlockFunction> STRING_BASED_CODEC = BuiltInRegistries.BLOCK.byNameCodec().flatComapMap(block -> new SimpleBlockFunction(block, ImmutableList.of()), simpleBlockFunction -> simpleBlockFunction.properties.isEmpty() ? DataResult.success(simpleBlockFunction.block) : DataResult.error(() -> "cannot serialize function with properties to strings"));
 
   public static final MapCodec<SimpleBlockFunction> CODEC = BuiltInRegistries.BLOCK.byNameCodec().dispatchMap("block", SimpleBlockFunction::block, block -> RecordCodecBuilder.mapCodec(i -> i.ap(properties -> new SimpleBlockFunction(block, properties), CodecUtil.optionalField("properties", PropertyFunction.getCodec(block).listOf(), Collections.emptyList()).forGetter(SimpleBlockFunction::properties))));
 
-  public SimpleBlockFunction(@NotNull Block block) {
+  public SimpleBlockFunction(Block block) {
     this(block, Collections.emptyList());
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final StringBuilder stringBuilder = new StringBuilder(BuiltInRegistries.BLOCK.getKey(block).toString());
     if (!properties.isEmpty()) {
       stringBuilder.append('[');
@@ -45,7 +44,7 @@ public record SimpleBlockFunction(@NotNull Block block, @NotNull List<PropertyFu
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     BlockState stateToPlace = block.defaultBlockState();
     final RandomSource random = context.getSplitter(this).at(pos);
     for (PropertyFunction<?> propertyFunction : properties) {
@@ -55,7 +54,7 @@ public record SimpleBlockFunction(@NotNull Block block, @NotNull List<PropertyFu
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.SIMPLE;
   }
 
@@ -63,7 +62,7 @@ public record SimpleBlockFunction(@NotNull Block block, @NotNull List<PropertyFu
     SIMPLE_TYPE;
 
     @Override
-    public @NotNull MapCodec<SimpleBlockFunction> getCodec() {
+    public MapCodec<SimpleBlockFunction> getCodec() {
       return CODEC;
     }
 

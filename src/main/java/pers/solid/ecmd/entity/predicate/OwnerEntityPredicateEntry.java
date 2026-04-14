@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -36,7 +35,7 @@ public record OwnerEntityPredicateEntry(@Nullable EntityPredicate owner, boolean
   ).apply(i, (owner, inverted) -> new OwnerEntityPredicateEntry(owner.orElse(null), inverted)));
 
   @Override
-  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  public boolean test(Entity entity, ExecutionContext context) {
     if (owner == null) {
       return (entity instanceof OwnableEntity tameable && tameable.getOwnerUUID() != null) == inverted;
     } else {
@@ -45,7 +44,7 @@ public record OwnerEntityPredicateEntry(@Nullable EntityPredicate owner, boolean
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) throws CommandSyntaxException {
     if (entity instanceof OwnableEntity tameable) {
       final LivingEntity actualOwner = tameable.getOwner();
       if (owner == null) {
@@ -84,7 +83,7 @@ public record OwnerEntityPredicateEntry(@Nullable EntityPredicate owner, boolean
   }
 
   @Override
-  public @NotNull EntityPredicateType<OwnerEntityPredicateEntry> getType() {
+  public EntityPredicateType<OwnerEntityPredicateEntry> getType() {
     return EntityPredicateTypes.OWNER;
   }
 

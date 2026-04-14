@@ -17,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.iterator.IteratorTask;
@@ -53,12 +52,12 @@ public class BlockPlacementHistory implements History {
   }
 
   @Override
-  public @NotNull Component getName() {
+  public Component getName() {
     return name;
   }
 
   @Override
-  public @NotNull Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockPlacementHistory> undo(CommandSourceStack source, boolean immediately, boolean undoable) {
+  public Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockPlacementHistory> undo(CommandSourceStack source, boolean immediately, boolean undoable) {
     if (task != null) {
       task.suspended = true;
     }

@@ -7,7 +7,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.Optionull;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
@@ -18,8 +17,8 @@ import java.util.function.Function;
 
 public class FunctionsParser<T> implements Parser<T> {
   private final Set<String> functions;
-  private final Function<@NotNull String, @Nullable FunctionContentParser<? extends T>> parserFactory;
-  private final Function<@NotNull String, @Nullable Component> tooltipProvider;
+  private final Function<String, @Nullable FunctionContentParser<? extends T>> parserFactory;
+  private final Function<String, @Nullable Component> tooltipProvider;
 
   public FunctionsParser(Set<String> functions, Function<String, @Nullable FunctionContentParser<? extends T>> parserFactory, Function<String, @Nullable Component> tooltipProvider) {
     this.functions = functions;

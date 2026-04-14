@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -30,6 +29,7 @@ import pers.solid.ecmd.property.predicate.Comparator;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -46,8 +46,8 @@ public abstract class SimpleBlockParser<S> {
     }
     return builder.buildFuture();
   };
-  public Block block;
-  public ResourceLocation blockId;
+  public @Nullable Block block;
+  public @Nullable ResourceLocation blockId;
   public @Nullable HolderSet.Named<Block> tagId;
   public final ParseContext<S> parseContext;
 
@@ -169,7 +169,7 @@ public abstract class SimpleBlockParser<S> {
     if (reader.canRead()) {
       comparator = parseComparator();
     } else {
-      throw BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, this.blockId.toString(), property.getName());
+      throw BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, this.blockId != null ? this.blockId.toString() : "<unknown block id>", property.getName());
     }
     reader.skipWhitespace();
 
@@ -177,7 +177,6 @@ public abstract class SimpleBlockParser<S> {
     parsePropertyNameValue(property, comparator);
   }
 
-  @NotNull
   protected Property<?> parseProperty() throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     addPropertyNameSuggestions();
@@ -187,9 +186,9 @@ public abstract class SimpleBlockParser<S> {
     if (propertyName.isEmpty()) {
       final int cursorAfterReadString = reader.getCursor();
       reader.setCursor(cursorBeforeReadString);
-      throw EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, this.blockId.toString(), propertyName), cursorAfterReadString);
+      throw EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_EXPECTED_VALUE.createWithContext(reader, this.blockId != null ? this.blockId.toString() : "<unknown block id>", propertyName), cursorAfterReadString);
     }
-    final StateDefinition<Block, BlockState> stateManager = block.getStateDefinition();
+    final StateDefinition<Block, BlockState> stateManager = Objects.requireNonNull(block, "block").getStateDefinition();
     Property<?> property = stateManager.getProperty(propertyName);
     if (property == null) {
       final int cursorAfterReadString = reader.getCursor();
@@ -200,7 +199,6 @@ public abstract class SimpleBlockParser<S> {
     return property;
   }
 
-  @NotNull
   protected abstract Comparator parseComparator() throws CommandSyntaxException;
 
   @SuppressWarnings("unchecked")
@@ -211,6 +209,7 @@ public abstract class SimpleBlockParser<S> {
   protected abstract void addComparatorTypeSuggestions();
 
   protected void addPropertyNameSuggestions() {
+    Objects.requireNonNull(block, "block");
     parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(block.getStateDefinition().getProperties().stream().map(Property::getName), suggestionsBuilder));
   }
 
@@ -325,7 +324,7 @@ public abstract class SimpleBlockParser<S> {
     });
   }
 
-  protected static <T> SuggestionProvider<T> getTagPropertiesValueSuggestions(@NotNull HolderSet.Named<Block> tagId, String propertyName) {
+  protected static <T> SuggestionProvider<T> getTagPropertiesValueSuggestions(HolderSet.Named<Block> tagId, String propertyName) {
     return (context, suggestionsBuilder) -> {
       for (Holder<Block> registryEntry : tagId) {
         Block block = registryEntry.value();

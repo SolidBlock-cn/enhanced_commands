@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 
@@ -15,7 +14,7 @@ public record ExistencePropertyNamePredicate(String propertyName, boolean exists
   public static final MapCodec<ExistencePropertyNamePredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(ExistencePropertyNamePredicate::new, Codec.STRING.fieldOf("property").forGetter(ExistencePropertyNamePredicate::propertyName), Codec.BOOL.optionalFieldOf("exists", false).forGetter(ExistencePropertyNamePredicate::exists)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return propertyName + (exists ? "=*" : "!=*");
   }
 
@@ -44,7 +43,7 @@ public record ExistencePropertyNamePredicate(String propertyName, boolean exists
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.EXISTENCE;
   }
 }

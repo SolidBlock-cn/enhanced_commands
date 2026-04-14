@@ -1,20 +1,18 @@
 package pers.solid.ecmd.entity.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
 public record SimpleBooleanEntityPredicateEntry(SimpleBooleanEntityPredicateType type, boolean expected) implements EntityPredicateEntry, StaticEntityPredicate {
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return type.predicate.test(entity) == expected;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final boolean test = type.predicate.test(entity);
     if (test) {
       return TestResult.of(expected, Component.translatable(type.trueTranslationKey, displayName));
@@ -24,7 +22,7 @@ public record SimpleBooleanEntityPredicateEntry(SimpleBooleanEntityPredicateType
   }
 
   @Override
-  public @NotNull EntityPredicateType<SimpleBooleanEntityPredicateEntry> getType() {
+  public EntityPredicateType<SimpleBooleanEntityPredicateEntry> getType() {
     return type;
   }
 

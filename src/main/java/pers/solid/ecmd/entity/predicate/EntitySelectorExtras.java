@@ -5,7 +5,6 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.Logger;
@@ -29,14 +28,14 @@ public class EntitySelectorExtras {
   /**
    * 该实体选择器所使用的 {@link CommandSourceStack}。可能会在实际调用时发生改变。
    */
-  public CommandSourceStack source;
+  public @Nullable CommandSourceStack source;
 
   /**
    * 以可序列化的形式记录 {@link EntitySelector#position}，因为该字段类型为 {@link Function}，无法序列化其数据，因此需要在 {@link EntitySelectorParser#getSelector()} 中手动存储其序列化数据。
    *
    * @see EntitySelectorParserMixin#recordMoreInfoAtBuild(EntitySelector)
    */
-  public @NotNull PositionOffsetInfo positionOffsetInfo = PositionOffsetInfo.NO_OP;
+  public PositionOffsetInfo positionOffsetInfo = PositionOffsetInfo.NO_OP;
 
   /**
    * 以可序列化的形式记录 {@link EntitySelectorParser#deltaX}、{@link EntitySelectorParser#deltaY}、{@link EntitySelectorParser#deltaZ}，因为这些数据并不会存储在 {@link EntitySelector} 中。
@@ -64,17 +63,19 @@ public class EntitySelectorExtras {
   /**
    * 该实体选择实际用于判断实体的谓词对象。
    */
-  private @Unmodifiable List<SpecialEntityPredicate> specialEntries = null;
+  private @Unmodifiable
+  @Nullable List<SpecialEntityPredicate> specialEntries = null;
   /**
    * 实体选择器的常规谓词。
    */
-  private @Unmodifiable List<EntityPredicate> standardPredicates = null;
+  private @Unmodifiable
+  @Nullable List<EntityPredicate> standardPredicates = null;
 
   public EntitySelectorExtras(EntitySelector self) {
     this.self = self;
   }
 
-  public void updateSource(@NotNull CommandSourceStack source) {
+  public void updateSource(CommandSourceStack source) {
     if (!source.equals(this.source)) {
       this.source = source;
       this.contextWrapper.setValue(new ExecutionContext(source));
@@ -88,14 +89,14 @@ public class EntitySelectorExtras {
     return entitySelector.extension$ec();
   }
 
-  public @NotNull @Unmodifiable List<SpecialEntityPredicate> getSpecialEntries() {
+  public @Unmodifiable List<SpecialEntityPredicate> getSpecialEntries() {
     if (specialEntries == null) {
       specialEntries = EntitySelectors.calculateSpecialEntries(self);
     }
     return specialEntries;
   }
 
-  public @NotNull @Unmodifiable List<EntityPredicate> getStandardPredicates() {
+  public @Unmodifiable List<EntityPredicate> getStandardPredicates() {
     if (standardPredicates == null) {
       standardPredicates = EntitySelectors.calculateStandardPredicates(self);
     }

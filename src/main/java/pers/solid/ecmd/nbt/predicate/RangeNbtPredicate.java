@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.bridge.BridgeDoubleRange;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
@@ -15,17 +14,17 @@ public record RangeNbtPredicate(BridgeRange<?> numberRange, boolean inverted) im
   public static final MapCodec<RangeNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BridgeRange.CODEC.forGetter(RangeNbtPredicate::numberRange), Codec.BOOL.optionalFieldOf("inverted", false).forGetter(RangeNbtPredicate::inverted)).apply(i, RangeNbtPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(false);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public String asString(boolean requirePrefix) {
     return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + numberRange.asString();
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final NumericTag nbtNumber))
       return inverted;
     if (numberRange instanceof BridgeDoubleRange doubleRange) {
@@ -40,7 +39,7 @@ public record RangeNbtPredicate(BridgeRange<?> numberRange, boolean inverted) im
   }
 
   @Override
-  public @NotNull NbtPredicateType<RangeNbtPredicate> getType() {
+  public NbtPredicateType<RangeNbtPredicate> getType() {
     return RangeNbtPredicate.Type.RANGE_TYPE;
   }
 

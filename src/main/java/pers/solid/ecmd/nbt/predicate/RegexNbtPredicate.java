@@ -6,12 +6,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public record RegexNbtPredicate(Pattern pattern, boolean inverted) implements NbtPredicate {
@@ -21,12 +22,12 @@ public record RegexNbtPredicate(Pattern pattern, boolean inverted) implements Nb
   ).apply(i, RegexNbtPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return (inverted ? "!" : "") + "~ " + StringTag.quoteAndEscape(pattern.toString());
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof StringTag nbtString))
       return inverted;
     return inverted != pattern.matcher(nbtString.getAsString()).find();
@@ -47,7 +48,7 @@ public record RegexNbtPredicate(Pattern pattern, boolean inverted) implements Nb
   }
 
   @Override
-  public @NotNull NbtPredicateType<RegexNbtPredicate> getType() {
+  public NbtPredicateType<RegexNbtPredicate> getType() {
     return RegexNbtPredicate.Type.REGEX_TYPE;
   }
 
@@ -61,10 +62,11 @@ public record RegexNbtPredicate(Pattern pattern, boolean inverted) implements Nb
   }
 
   public static class Parser implements FunctionContentParser<RegexNbtPredicate> {
-    private Pattern pattern;
+    private @Nullable Pattern pattern;
 
     @Override
-    public RegexNbtPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public RegexNbtPredicate getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(pattern, "pattern");
       return new RegexNbtPredicate(pattern, false);
     }
 

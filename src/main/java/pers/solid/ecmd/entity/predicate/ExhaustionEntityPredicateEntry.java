@@ -1,13 +1,11 @@
 package pers.solid.ecmd.entity.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
@@ -20,12 +18,12 @@ public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolea
   private static final Component CRITERION_NAME = Component.translatable("enhanced_commands.entity_predicate.exhaustion");
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     return entity instanceof final Player player && exhaustion.test(player.getFoodData().getExhaustionLevel()) != inverted;
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (!(entity instanceof final Player player)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.general.not_player", displayName, CRITERION_NAME));
     } else {
@@ -34,7 +32,7 @@ public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolea
   }
 
   @Override
-  public @NotNull EntityPredicateType<ExhaustionEntityPredicateEntry> getType() {
+  public EntityPredicateType<ExhaustionEntityPredicateEntry> getType() {
     return EntityPredicateTypes.EXHAUSTION;
   }
 

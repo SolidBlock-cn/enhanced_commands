@@ -3,7 +3,6 @@ package pers.solid.ecmd.util.codec;
 import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.OptionalFieldCodec;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Stream;
 
@@ -27,21 +26,21 @@ public class StrictOptionalFieldCodec<A> extends MapCodec<A> {
   /**
    * 字段的名称。
    */
-  final @NotNull String name;
+  final String name;
   /**
    * 字段的元素的 codec。
    */
-  private final @NotNull Codec<A> elementCodec;
+  private final Codec<A> elementCodec;
   /**
    * 反序列化过程中，字段不存在时所采取的默认值。
    */
-  private final @NotNull A defaultValue;
+  private final A defaultValue;
   /**
    * 在序列化过程中，如果值正好等于默认值，是否在序列化的结果中省略。
    */
   private final boolean emitWhenDefault;
 
-  public StrictOptionalFieldCodec(@NotNull String name, @NotNull Codec<A> elementCodec, @NotNull A defaultValue, boolean emitWhenDefault) {
+  public StrictOptionalFieldCodec(String name, Codec<A> elementCodec, A defaultValue, boolean emitWhenDefault) {
     this.name = name;
     this.elementCodec = elementCodec;
     this.defaultValue = defaultValue;

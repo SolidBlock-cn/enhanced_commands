@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 
 public record SimplePropertyNameFunction(String propertyName, String valueName, boolean must) implements PropertyNameFunction {
@@ -18,7 +17,7 @@ public record SimplePropertyNameFunction(String propertyName, String valueName, 
   ));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return propertyName + (must ? "==" : "=") + valueName;
   }
 
@@ -32,7 +31,7 @@ public record SimplePropertyNameFunction(String propertyName, String valueName, 
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.SIMPLE;
   }
 

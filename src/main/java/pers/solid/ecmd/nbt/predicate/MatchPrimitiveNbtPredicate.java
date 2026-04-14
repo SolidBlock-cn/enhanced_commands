@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
@@ -24,22 +23,22 @@ public record MatchPrimitiveNbtPredicate(Tag expected, boolean inverted) impleme
   ).apply(i, MatchPrimitiveNbtPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(false);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
+  public String asString(boolean requirePrefix) {
     return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(expected);
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     return NbtUtils.compareNbt(nbtElement, expected, true) != inverted;
   }
 
   @Override
-  public @NotNull NbtPredicateType<MatchPrimitiveNbtPredicate> getType() {
+  public NbtPredicateType<MatchPrimitiveNbtPredicate> getType() {
     return MatchPrimitiveNbtPredicate.Type.MATCH_PRIMITIVE_TYPE;
   }
 

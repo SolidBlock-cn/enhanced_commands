@@ -24,9 +24,9 @@ public abstract class ServerPlayerMixin implements ServerPlayerExtension, Histor
   @Final
   public MinecraftServer server;
   @Unique
-  private final Deque<History> undoableHistories = new ArrayDeque<>();
+  private final Deque<History> enhanced_commands$undoableHistories = new ArrayDeque<>();
   @Unique
-  private final Deque<History> redoableHistories = new ArrayDeque<>();
+  private final Deque<History> enhanced_commands$redoableHistories = new ArrayDeque<>();
   @Unique
   private RegionSelectionType ec$regionSelectionType = RegionSelectionTypes.CUBOID;
 
@@ -50,11 +50,11 @@ public abstract class ServerPlayerMixin implements ServerPlayerExtension, Histor
 
   @Override
   public Deque<History> getUndoableHistories$ec() {
-    return undoableHistories;
+    return enhanced_commands$undoableHistories;
   }
 
   @Override
   public Deque<History> getRedoableHistories$ec() {
-    return redoableHistories;
+    return enhanced_commands$redoableHistories;
   }
 }

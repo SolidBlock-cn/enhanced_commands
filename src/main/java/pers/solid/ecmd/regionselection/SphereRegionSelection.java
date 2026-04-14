@@ -18,7 +18,6 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.region.SphereRegion;
 import pers.solid.ecmd.render.RegionRendering;
@@ -88,8 +87,8 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public List<@NotNull Vec3> getPoints() {
-    final Stream<@NotNull Vec3> stream = Stream.of(center, radiusTarget).filter(Objects::nonNull);
+  public List<Vec3> getPoints() {
+    final Stream<Vec3> stream = Stream.of(center, radiusTarget).filter(Objects::nonNull);
     return stream.toList();
   }
 
@@ -114,7 +113,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull SphereRegionSelection transformed(Function<Vec3, Vec3> transformation) throws CommandSyntaxException {
+  public SphereRegionSelection transformed(Function<Vec3, Vec3> transformation) throws CommandSyntaxException {
     if (center == null || radiusTarget == null) {
       throw NOT_COMPLETED.create();
     }
@@ -126,7 +125,7 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull SphereRegionSelection expanded(double offset) throws CommandSyntaxException {
+  public SphereRegionSelection expanded(double offset) throws CommandSyntaxException {
     if (center == null || radiusTarget == null) {
       throw NOT_COMPLETED.create();
     }
@@ -139,22 +138,22 @@ public class SphereRegionSelection extends AbstractRegionSelection<SphereRegion>
   }
 
   @Override
-  public @NotNull SphereRegionSelection expanded(double offset, Direction direction) {
+  public SphereRegionSelection expanded(double offset, Direction direction) {
     throw new UnsupportedOperationException(SphereRegion.EXPAND_FAILED.create());
   }
 
   @Override
-  public @NotNull SphereRegionSelection expanded(double offset, Direction.Plane type) {
+  public SphereRegionSelection expanded(double offset, Direction.Plane type) {
     throw new UnsupportedOperationException(SphereRegion.EXPAND_FAILED.create());
   }
 
   @Override
-  public @NotNull SphereRegionSelection expanded(double offset, Direction.Axis axis) {
+  public SphereRegionSelection expanded(double offset, Direction.Axis axis) {
     throw new UnsupportedOperationException(SphereRegion.EXPAND_FAILED.create());
   }
 
   @Override
-  public @NotNull RegionSelectionType getType() {
+  public RegionSelectionType getType() {
     return RegionSelectionTypes.SPHERE;
   }
 

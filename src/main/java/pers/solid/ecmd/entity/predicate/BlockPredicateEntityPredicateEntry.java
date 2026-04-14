@@ -1,11 +1,9 @@
 package pers.solid.ecmd.entity.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.PositionProvider;
@@ -18,12 +16,12 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate predicate) imple
   public static final MapCodec<BlockPredicateEntityPredicateEntry> CODEC = BlockPredicate.CODEC.fieldOf("predicate").xmap(BlockPredicateEntityPredicateEntry::new, BlockPredicateEntityPredicateEntry::predicate);
 
   @Override
-  public boolean test(@NotNull Entity entity, @NotNull ExecutionContext context) {
+  public boolean test(Entity entity, ExecutionContext context) {
     return predicate.test(new BlockInWorld(entity.level(), entity.blockPosition(), false), new ExecutionContext(entity.getRandom(), PositionProvider.of(entity), null));
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final TestResult testResult = predicate.testAndDescribe(new BlockInWorld(entity.level(), entity.blockPosition(), false), new ExecutionContext(entity.getRandom(), PositionProvider.of(entity), null));
     if (testResult.successes()) {
       return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.block.pass", displayName, TextUtil.wrapVector(entity.blockPosition())), List.of(testResult));
@@ -33,13 +31,13 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate predicate) imple
   }
 
   @Override
-  public @NotNull String toOptionEntry() {
+  public String toOptionEntry() {
     final String string = predicate.asString();
     return "block=" + (string.startsWith("{") ? "(" + string + ")" : string);
   }
 
   @Override
-  public @NotNull EntityPredicateType<BlockPredicateEntityPredicateEntry> getType() {
+  public EntityPredicateType<BlockPredicateEntityPredicateEntry> getType() {
     return EntityPredicateTypes.BLOCK_PREDICATE;
   }
 }

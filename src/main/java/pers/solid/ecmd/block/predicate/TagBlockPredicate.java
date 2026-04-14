@@ -13,7 +13,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
@@ -27,17 +26,17 @@ import java.util.stream.Collectors;
 /**
  * @see BlockStateParser#readTag()
  */
-public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
+public record TagBlockPredicate(TagKey<Block> tag, @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
   public static final Codec<TagBlockPredicate> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.BLOCK).flatComapMap(TagBlockPredicate::new, tagBlockPredicate -> tagBlockPredicate.properties.isEmpty() ? DataResult.success(tagBlockPredicate.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
 
   public static final MapCodec<TagBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockPredicate::new, TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(TagBlockPredicate::tag), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
 
-  public TagBlockPredicate(@NotNull TagKey<Block> tag) {
+  public TagBlockPredicate(TagKey<Block> tag) {
     this(tag, Collections.emptyList());
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     if (properties.isEmpty()) {
       return "#" + tag.location();
     } else {
@@ -83,7 +82,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.TAG;
   }
 
@@ -91,7 +90,7 @@ public record TagBlockPredicate(@NotNull TagKey<Block> tag, @NotNull @Unmodifiab
     TAG_TYPE;
 
     @Override
-    public @NotNull MapCodec<TagBlockPredicate> getCodec() {
+    public MapCodec<TagBlockPredicate> getCodec() {
       return CODEC;
     }
 

@@ -4,6 +4,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.block.predicate.NbtBlockPredicate;
@@ -12,7 +13,7 @@ import pers.solid.ecmd.util.ExecutionContext;
 
 public class ForwardingBlockPredicateArgument implements BlockPredicateArgument.Result {
   private final BlockPredicate modBlockPredicate;
-  private CommandSourceStack source;
+  private @Nullable CommandSourceStack source;
 
   public ForwardingBlockPredicateArgument(BlockPredicate modBlockPredicate) {
     this.modBlockPredicate = modBlockPredicate;

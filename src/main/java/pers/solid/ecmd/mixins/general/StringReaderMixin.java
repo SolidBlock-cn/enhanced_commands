@@ -17,7 +17,7 @@ public abstract class StringReaderMixin {
   private int cursor;
 
   @Shadow
-  public abstract String readString() throws CommandSyntaxException;
+  public abstract String readString();
 
   @Shadow
   public abstract String readUnquotedString();
@@ -26,12 +26,12 @@ public abstract class StringReaderMixin {
    * 当没有解析到内容（即抛出需要某个值的错误）时，尝试读取一下后面的内容并设置其 cursorEnd
    */
   @Unique
-  private CommandSyntaxException trySetCursorEndForNone(CommandSyntaxException commandSyntaxException) {
+  private CommandSyntaxException enhanced_commands$trySetCursorEndForNone(CommandSyntaxException commandSyntaxException) {
     final int initialCursor = cursor;
     readUnquotedString();
     final int cursorAfterUnquotedString = cursor;
     if (cursorAfterUnquotedString > initialCursor) {
-      EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterUnquotedString);
+      commandSyntaxException = EnhancedCommandSyntaxException.withCursorEnd(commandSyntaxException, cursorAfterUnquotedString);
       cursor = initialCursor;
     }
     return commandSyntaxException;
@@ -39,7 +39,7 @@ public abstract class StringReaderMixin {
 
   @ModifyExpressionValue(remap = false, method = "readInt", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(to = @At(value = "INVOKE", target = "Ljava/lang/Integer;parseInt(Ljava/lang/String;)I")))
   public CommandSyntaxException modifiedReadNoneInt(CommandSyntaxException commandSyntaxException) {
-    return trySetCursorEndForNone(commandSyntaxException);
+    return enhanced_commands$trySetCursorEndForNone(commandSyntaxException);
   }
 
   @ModifyExpressionValue(remap = false, method = "readInt", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/Integer;parseInt(Ljava/lang/String;)I")))
@@ -49,7 +49,7 @@ public abstract class StringReaderMixin {
 
   @ModifyExpressionValue(remap = false, method = "readLong", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(to = @At(value = "INVOKE", target = "Ljava/lang/Long;parseLong(Ljava/lang/String;)J")))
   public CommandSyntaxException modifiedReadNoneLong(CommandSyntaxException commandSyntaxException) {
-    return trySetCursorEndForNone(commandSyntaxException);
+    return enhanced_commands$trySetCursorEndForNone(commandSyntaxException);
   }
 
   @ModifyExpressionValue(remap = false, method = "readLong", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/Long;parseLong(Ljava/lang/String;)J")))
@@ -60,7 +60,7 @@ public abstract class StringReaderMixin {
 
   @ModifyExpressionValue(remap = false, method = "readDouble", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(to = @At(value = "INVOKE", target = "Ljava/lang/Double;parseDouble(Ljava/lang/String;)D")))
   public CommandSyntaxException modifiedReadNoneDouble(CommandSyntaxException commandSyntaxException) {
-    return trySetCursorEndForNone(commandSyntaxException);
+    return enhanced_commands$trySetCursorEndForNone(commandSyntaxException);
   }
 
   @ModifyExpressionValue(remap = false, method = "readDouble", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/Double;parseDouble(Ljava/lang/String;)D")))
@@ -70,7 +70,7 @@ public abstract class StringReaderMixin {
 
   @ModifyExpressionValue(remap = false, method = "readFloat", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(to = @At(value = "INVOKE", target = "Ljava/lang/Float;parseFloat(Ljava/lang/String;)F")))
   public CommandSyntaxException modifiedReadNoneFloat(CommandSyntaxException commandSyntaxException) {
-    return trySetCursorEndForNone(commandSyntaxException);
+    return enhanced_commands$trySetCursorEndForNone(commandSyntaxException);
   }
 
   @ModifyExpressionValue(remap = false, method = "readFloat", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/exceptions/DynamicCommandExceptionType;createWithContext(Lcom/mojang/brigadier/ImmutableStringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/exceptions/CommandSyntaxException;"), slice = @Slice(from = @At(value = "INVOKE", target = "Ljava/lang/Float;parseFloat(Ljava/lang/String;)F")))

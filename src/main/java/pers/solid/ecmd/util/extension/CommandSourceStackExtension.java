@@ -2,7 +2,6 @@ package pers.solid.ecmd.util.extension;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.mixins.impl.CommandSourceStackExtensionImpl;
 import pers.solid.ecmd.util.PositionProvider;
@@ -23,7 +22,6 @@ public interface CommandSourceStackExtension extends PositionProvider {
     ((CommandSourceStack) this).sendSuccess(feedbackSupplier, broadcastToOps);
   }
 
-  @NotNull
   Map<String, Object> getExtraArguments$ec();
 
   default void addExtraArgument$ec(String name, Object argument) {

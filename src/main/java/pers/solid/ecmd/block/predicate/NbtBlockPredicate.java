@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.nbt.NbtParserShared;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.nbt.predicate.NbtPredicateParser;
@@ -20,11 +19,11 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
-public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements BlockPredicate {
+public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredicate {
   public static final MapCodec<NbtBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt").forGetter(NbtBlockPredicate::nbtPredicate)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return nbtPredicate.asString(false);
   }
 
@@ -50,7 +49,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.NBT;
   }
 
@@ -58,7 +57,7 @@ public record NbtBlockPredicate(@NotNull NbtPredicate nbtPredicate) implements B
     NBT_TYPE;
 
     @Override
-    public @NotNull MapCodec<NbtBlockPredicate> getCodec() {
+    public MapCodec<NbtBlockPredicate> getCodec() {
       return CODEC;
     }
 

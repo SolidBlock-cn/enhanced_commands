@@ -37,7 +37,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -281,7 +280,7 @@ public abstract class EntitySelectorOptionsMixin {
   }
 
   @WrapWithCondition(method = "method_9948", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static boolean readMultipleGameModes(EntitySelectorParser reader, Predicate<Entity> predicate, @Local boolean inverted, @Local @NotNull GameType gameMode) throws CommandSyntaxException {
+  private static boolean readMultipleGameModes(EntitySelectorParser reader, Predicate<Entity> predicate, @Local boolean inverted, @Local GameType gameMode) throws CommandSyntaxException {
     // 尝试读取更多的游戏模式，即允许多个值。
     if (!EntitySelectorParsingConfig.current.allowMultipleGameModes) {
       return true;
@@ -291,7 +290,7 @@ public abstract class EntitySelectorOptionsMixin {
 
 
   @ModifyArg(method = "method_9948", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"))
-  private static Predicate<Entity> addGameModeInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local @NotNull GameType gameMode) {
+  private static Predicate<Entity> addGameModeInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local GameType gameMode) {
     return new StaticEntityPredicateWrapper(predicate, new GameModeEntityPredicateEntry.Single(gameMode, inverted));
   }
 

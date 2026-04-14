@@ -9,7 +9,6 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
@@ -21,12 +20,10 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
     return Type.CODEC.dispatch(PropertyPredicate::getType, type -> type.getCodec(block));
   }
 
-  @NotNull
   static <T extends Comparable<T>> MutableComponent propertyAndValue(BlockState blockState, Property<T> property) {
     return Component.literal(property.getName() + "=" + property.getName(blockState.getValue(property)));
   }
 
-  @NotNull
   Type getType();
 
   boolean test(BlockState blockState);
@@ -50,7 +47,7 @@ public interface PropertyPredicate<T extends Comparable<T>> extends ExpressionCo
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
 

@@ -102,19 +102,19 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static MutableComponent createSuspendButton(UUID uuid) {
-    return Component.translatable("enhanced_commands.commands.tasks.suspend").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks suspend " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.tasks.suspend.tooltip"))));
+    return Component.translatable("enhanced_commands.commands.tasks.suspend").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks suspend " + uuid)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.tasks.suspend.tooltip"))));
   }
 
   private static MutableComponent createContinueButton(UUID uuid) {
-    return Component.translatable("enhanced_commands.commands.tasks.continue").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks continue " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.tasks.continue.tooltip"))));
+    return Component.translatable("enhanced_commands.commands.tasks.continue").withStyle(style -> style.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks continue " + uuid)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.tasks.continue.tooltip"))));
   }
 
   private static MutableComponent createSprintButton(UUID uuid) {
-    return Component.translatable("enhanced_commands.commands.tasks.sprint").withStyle(style -> style.withUnderlined(true).withColor(ChatFormatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks sprint " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.tasks.sprint.tooltip"))));
+    return Component.translatable("enhanced_commands.commands.tasks.sprint").withStyle(style -> style.withUnderlined(true).withColor(ChatFormatting.YELLOW).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks sprint " + uuid)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.tasks.sprint.tooltip"))));
   }
 
   private static MutableComponent createRemoveButton(UUID uuid) {
-    return Component.translatable("enhanced_commands.commands.tasks.remove").withStyle(style -> style.withUnderlined(true).withColor(ChatFormatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks remove " + uuid.toString())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.tasks.remove.tooltip"))));
+    return Component.translatable("enhanced_commands.commands.tasks.remove").withStyle(style -> style.withUnderlined(true).withColor(ChatFormatting.RED).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tasks remove " + uuid)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.tasks.remove.tooltip"))));
   }
 
   private static int executeSetTaskSuspension(MinecraftServer server, CommandContext<CommandSourceStack> context, UUID uuid, boolean suspension) throws CommandSyntaxException {

@@ -2,7 +2,6 @@ package pers.solid.ecmd.util.extension;
 
 import net.minecraft.commands.CommandSourceStack;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.history.History;
@@ -31,7 +30,7 @@ public interface HistoryHolder {
    *
    * @param history 可撤销的历史记录。
    */
-  default void addUndoableHistory$ec(@NotNull History history) {
+  default void addUndoableHistory$ec(History history) {
     addHistoryTo(history, getUndoableHistories$ec());
   }
 
@@ -40,11 +39,11 @@ public interface HistoryHolder {
    *
    * @param history 可重做的历史记录。
    */
-  default void addRedoableHistory$ec(@NotNull History history) {
+  default void addRedoableHistory$ec(History history) {
     addHistoryTo(history, getRedoableHistories$ec());
   }
 
-  private void addHistoryTo(@NotNull History history, Deque<History> histories) {
+  private void addHistoryTo(History history, Deque<History> histories) {
     histories.addLast(history);
     final int exceeding = histories.size() - getMaxHistoryCount$ec();
     if (exceeding > 0) {

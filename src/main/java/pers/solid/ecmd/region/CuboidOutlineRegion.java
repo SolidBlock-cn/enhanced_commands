@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
@@ -24,6 +23,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) implements RegionBasedRegion.IntBacked<CuboidOutlineRegion, BlockCuboidRegion> {
@@ -46,7 +46,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     try {
       return region.contains(vec3i) && region.expanded(-thickness).contains(vec3i);
     } catch (IllegalArgumentException illegalArgumentException) {
@@ -56,16 +56,16 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     return Iterators.concat(Iterators.transform(decompose().iterator(), BlockCuboidRegion::iterator));
   }
 
   @Override
-  public Stream<@NotNull BlockPos> stream() {
+  public Stream<BlockPos> stream() {
     return decompose().flatMap(Region::stream);
   }
 
-  public @NotNull Stream<BlockCuboidRegion> decompose() {
+  public Stream<BlockCuboidRegion> decompose() {
     final Stream<BlockCuboidRegion> walls = new CuboidWallRegion(region, thickness).decompose();
     return Streams.concat(
         Stream.of(new BlockCuboidRegion(region.minX(), region.maxY() - thickness + 1, region.minZ(), region.maxX(), region.maxY(), region.maxZ())),
@@ -80,7 +80,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.CUBOID_OUTLINE;
   }
 
@@ -90,12 +90,12 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public @NotNull BoundingBox minContainingBlockBox() {
+  public BoundingBox minContainingBlockBox() {
     return region.blockBox();
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return String.format("cuboid_outline(%s %s %s, %s %s %s, %s)", region.minX(), region.minY(), region.minZ(), region.maxX(), region.maxY(), region.maxZ(), thickness);
   }
 
@@ -123,18 +123,18 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
     }
 
     @Override
-    public @NotNull MapCodec<CuboidOutlineRegion> getCodec() {
+    public MapCodec<CuboidOutlineRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends CuboidOutlineRegionProvider> getArgumentCodec() {
+    public MapCodec<? extends CuboidOutlineRegionProvider> getArgumentCodec() {
       return CuboidOutlineRegionProvider.CODEC;
     }
   }
 
   public static abstract sealed class AbstractParser<R extends RegionProvider<?>> implements FunctionContentParser.SequentialParams<R> permits Parser, CuboidWallRegion.Parser {
-    protected EnhancedCoordinates fromPos, toPos;
+    protected @Nullable EnhancedCoordinates fromPos, toPos;
     protected int thickness = 1;
     protected int cursorBeforeFunctionName = 0, cursorAfterParenthesis = 0;
 
@@ -180,7 +180,9 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
 
   public static final class Parser extends AbstractParser<CuboidOutlineRegionProvider> {
     @Override
-    public CuboidOutlineRegionProvider getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public CuboidOutlineRegionProvider getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(fromPos, "fromPos");
+      Objects.requireNonNull(toPos, "toPos");
       return new CuboidOutlineRegionProvider(new BlockCuboidRegionProvider(fromPos, toPos), thickness);
     }
   }

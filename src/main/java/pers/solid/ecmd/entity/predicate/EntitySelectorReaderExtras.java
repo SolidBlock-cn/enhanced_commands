@@ -26,7 +26,7 @@ public class EntitySelectorReaderExtras {
   /**
    * 指“@”后的内容的类型。
    */
-  public String atVariable;
+  public @Nullable String atVariable;
   /**
    * 如果是通过 @r、@p 等选择器指定的实体类型，则为 {@code true}。在这种情况下，应该允许指定一个 type 参数来覆盖此设置。
    */
@@ -50,7 +50,7 @@ public class EntitySelectorReaderExtras {
   /**
    * 此 context 对象用于提供建议。在非提供建议的情景下，此字段有可能是 null。
    */
-  public CommandContext<?> context = null;
+  public @Nullable CommandContext<?> context = null;
   /**
    * 此集合包含本模组中已经使用了的参数名称，只有当此参数禁止重复使用时才会加入到这个里面，并表示为之外的参数检测重复。值为是否是表示为反向的（即 {@code option=!probability}，因为一些参数允许多次使用反向的用法（如 {@code option=!value1,option=!value2}），但是不允许混合使用反向和未反向用法（如 {@code option=!value1,option=value2} 或 {@code option=value1,option=!value2}）或多次使用非反向的用法（如 {@code option=value1,option=value2}）。
    */

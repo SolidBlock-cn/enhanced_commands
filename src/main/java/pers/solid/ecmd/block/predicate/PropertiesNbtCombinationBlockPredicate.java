@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.property.predicate.PropertyNamePredicate;
@@ -31,7 +30,7 @@ import java.util.stream.Stream;
  *   oak_sign{front_text = [~"a", ~"b", *, *]}
  * </pre>
  */
-public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate base, @Nullable PropertiesNamesBlockPredicate properties, @Nullable NbtBlockPredicate nbt) implements BlockPredicate {
+public record PropertiesNbtCombinationBlockPredicate(BlockPredicate base, @Nullable PropertiesNamesBlockPredicate properties, @Nullable NbtBlockPredicate nbt) implements BlockPredicate {
   public static final MapCodec<PropertiesNbtCombinationBlockPredicate> CODEC = RecordCodecBuilder.<Triple<BlockPredicate, Optional<PropertiesNamesBlockPredicate>, Optional<NbtBlockPredicate>>>mapCodec(i -> i.apply3(Triple::of,
       BlockPredicate.CODEC.fieldOf("base").forGetter(Triple::getLeft),
       CodecUtil.optionalField("properties", PropertyNamePredicate.CODEC.listOf()).xmap(o -> o.map(PropertiesNamesBlockPredicate::new), o -> o.map(PropertiesNamesBlockPredicate::predicates)).forGetter(Triple::getMiddle),
@@ -57,7 +56,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return Stream.of(base, properties, nbt).filter(Objects::nonNull).map(ExpressionConvertible::asString).collect(Collectors.joining());
   }
 
@@ -87,7 +86,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.PROPERTIES_NBT_COMBINATION;
   }
 
@@ -95,7 +94,7 @@ public record PropertiesNbtCombinationBlockPredicate(@NotNull BlockPredicate bas
     PROPERTIES_NBT_COMBINATION_TYPE;
 
     @Override
-    public @NotNull MapCodec<PropertiesNbtCombinationBlockPredicate> getCodec() {
+    public MapCodec<PropertiesNbtCombinationBlockPredicate> getCodec() {
       return CODEC;
     }
   }

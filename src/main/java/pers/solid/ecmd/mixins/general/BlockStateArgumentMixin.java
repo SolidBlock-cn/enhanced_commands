@@ -9,6 +9,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,26 +28,26 @@ import java.util.concurrent.CompletableFuture;
 @Mixin(BlockStateArgument.class)
 public abstract class BlockStateArgumentMixin implements ArgumentTypeExtension {
   @Unique
-  private BlockFunctionArgument modArgumentType;
+  private @Nullable BlockFunctionArgument enhanced_commands$modArgumentType;
   @Unique
-  private boolean extension = true;
+  private boolean enhanced_commands$extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void injectedInit(CommandBuildContext commandBuildContext, CallbackInfo ci) {
-    this.modArgumentType = new BlockFunctionArgument(commandBuildContext);
+  private void injectedInit(CommandBuildContext buildContext, CallbackInfo ci) {
+    this.enhanced_commands$modArgumentType = new BlockFunctionArgument(buildContext);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/blocks/BlockInput;", at = @At("HEAD"), cancellable = true)
-  private void injectedParse(StringReader stringReader, CallbackInfoReturnable<BlockInput> cir) throws CommandSyntaxException {
-    if (modArgumentType != null && extension) {
-      cir.setReturnValue(new ForwardedBlockStateArgument(modArgumentType.parse(stringReader)));
+  private void injectedParse(StringReader reader, CallbackInfoReturnable<BlockInput> cir) throws CommandSyntaxException {
+    if (enhanced_commands$modArgumentType != null && enhanced_commands$extension) {
+      cir.setReturnValue(new ForwardedBlockStateArgument(enhanced_commands$modArgumentType.parse(reader)));
     }
   }
 
   @Inject(method = "listSuggestions", at = @At("HEAD"), cancellable = true)
-  private <S> void injectedListSuggestions(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
-    if (modArgumentType != null && extension) {
-      cir.setReturnValue(modArgumentType.listSuggestions(context, builder));
+  private <S> void injectedListSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
+    if (enhanced_commands$modArgumentType != null && enhanced_commands$extension) {
+      cir.setReturnValue(enhanced_commands$modArgumentType.listSuggestions(commandContext, suggestionsBuilder));
     }
   }
 
@@ -60,11 +61,11 @@ public abstract class BlockStateArgumentMixin implements ArgumentTypeExtension {
 
   @Override
   public boolean enhanced_hasExtension() {
-    return extension;
+    return enhanced_commands$extension;
   }
 
   @Override
   public void enhanced_setExtension(boolean extension) {
-    this.extension = extension;
+    this.enhanced_commands$extension = extension;
   }
 }

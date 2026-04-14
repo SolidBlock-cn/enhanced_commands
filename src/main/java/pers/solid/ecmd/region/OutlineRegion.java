@@ -8,7 +8,6 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -16,6 +15,7 @@ import pers.solid.ecmd.util.enums.OutlineType;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public record OutlineRegion(OutlineType outlineType, Region region) implements RegionBasedRegion<OutlineRegion, Region> {
@@ -50,27 +50,27 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   @Override
-  public boolean contains(@NotNull Vec3 vec3d) {
+  public boolean contains(Vec3 vec3d) {
     return false;
   }
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     return outlineType.modifiedTest(region::contains, new BlockPos(vec3i));
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     return stream().iterator();
   }
 
   @Override
-  public Stream<@NotNull BlockPos> stream() {
+  public Stream<BlockPos> stream() {
     return region.stream().filter(this::contains);
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.OUTLINE;
   }
 
@@ -85,7 +85,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "outline(" + region.asString() + ", " + outlineType.getSerializedName() + ")";
   }
 
@@ -118,22 +118,23 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
     }
 
     @Override
-    public @NotNull MapCodec<OutlineRegion> getCodec() {
+    public MapCodec<OutlineRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends OutlineRegionProvider> getArgumentCodec() {
+    public MapCodec<? extends OutlineRegionProvider> getArgumentCodec() {
       return OutlineRegionProvider.CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<OutlineRegionProvider> {
     private OutlineType outlineType = OutlineType.OUTLINE;
-    private RegionProvider<?> regionProvider;
+    private @Nullable RegionProvider<?> regionProvider;
 
     @Override
     public OutlineRegionProvider getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(regionProvider, "regionProvider");
       return new OutlineRegionProvider(outlineType, regionProvider);
     }
 

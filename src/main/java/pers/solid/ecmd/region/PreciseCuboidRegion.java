@@ -9,7 +9,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
@@ -18,6 +17,7 @@ import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -46,12 +46,12 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public boolean contains(@NotNull Vec3 vec3d) {
+  public boolean contains(Vec3 vec3d) {
     return box.contains(vec3d);
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     final BlockCuboidRegion round = round();
     return round == null ? Collections.emptyIterator() : round.iterator();
   }
@@ -73,17 +73,17 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public @NotNull PreciseCuboidRegion transformed(Function<Vec3, Vec3> transformation) {
+  public PreciseCuboidRegion transformed(Function<Vec3, Vec3> transformation) {
     return new PreciseCuboidRegion(transformation.apply(new Vec3(box.minX, box.minY, box.minZ)), transformation.apply(new Vec3(box.maxX, box.maxY, box.maxZ)));
   }
 
   @Override
-  public @NotNull Region expanded(double offset) {
+  public Region expanded(double offset) {
     return new PreciseCuboidRegion(box.inflate(offset));
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction.Axis axis) {
+  public Region expanded(double offset, Direction.Axis axis) {
     var x = axis.choose(offset, 0, 0);
     var y = axis.choose(0, offset, 0);
     var z = axis.choose(0, 0, offset);
@@ -91,7 +91,7 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction direction) {
+  public Region expanded(double offset, Direction direction) {
     if (offset > 0) {
       return new PreciseCuboidRegion(box.expandTowards(Vec3.atLowerCornerOf(direction.getNormal()).scale(offset)));
     } else if (offset < 0) {
@@ -103,7 +103,7 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction.Plane type) {
+  public Region expanded(double offset, Direction.Plane type) {
     if (offset == 0) {
       return this;
     }
@@ -127,7 +127,7 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.CUBOID_PRECISE;
   }
 
@@ -143,7 +143,7 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "cuboid_precise(%s %s %s, %s %s %s)".formatted(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
   }
 
@@ -172,22 +172,24 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
     }
 
     @Override
-    public @NotNull MapCodec<PreciseCuboidRegion> getCodec() {
+    public MapCodec<PreciseCuboidRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionProvider<? extends PreciseCuboidRegion>> getArgumentCodec() {
+    public MapCodec<? extends RegionProvider<? extends PreciseCuboidRegion>> getArgumentCodec() {
       return PreciseCuboidRegionProvider.CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<PreciseCuboidRegionProvider> {
-    private EnhancedCoordinates from;
-    private EnhancedCoordinates to;
+    private @Nullable EnhancedCoordinates from;
+    private @Nullable EnhancedCoordinates to;
 
     @Override
     public PreciseCuboidRegionProvider getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(from, "from");
+      Objects.requireNonNull(to, "to");
       return new PreciseCuboidRegionProvider(from, to);
     }
 

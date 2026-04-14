@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -33,7 +32,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return value ? "*" : "!*";
   }
 
@@ -52,7 +51,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.CONSTANT;
   }
 
@@ -60,7 +59,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
     CONSTANT_TYPE;
 
     @Override
-    public @NotNull MapCodec<ConstantBlockPredicate> getCodec() {
+    public MapCodec<ConstantBlockPredicate> getCodec() {
       return CODEC;
     }
 

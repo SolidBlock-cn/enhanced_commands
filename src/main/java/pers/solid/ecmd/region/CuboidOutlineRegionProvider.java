@@ -3,7 +3,6 @@ package pers.solid.ecmd.region;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.PositionProvider;
 
 public record CuboidOutlineRegionProvider(BlockCuboidRegionProvider region, int thickness) implements RegionProvider<CuboidOutlineRegion> {
@@ -15,12 +14,12 @@ public record CuboidOutlineRegionProvider(BlockCuboidRegionProvider region, int 
   }
 
   @Override
-  public @NotNull RegionType<? super CuboidOutlineRegion> getType() {
+  public RegionType<? super CuboidOutlineRegion> getType() {
     return RegionTypes.CUBOID_OUTLINE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "cuboid_outline(" + region.from().asString() + ", " + region.to().asString() + ", " + thickness + ")";
   }
 }

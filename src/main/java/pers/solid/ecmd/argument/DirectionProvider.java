@@ -6,13 +6,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.phys.Vec2;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.PositionProvider;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.function.Function;
 
-public enum DirectionProvider implements StringRepresentable, Function<@NotNull PositionProvider, @NotNull Direction> {
+public enum DirectionProvider implements StringRepresentable, Function<PositionProvider, Direction> {
   DOWN(Direction.DOWN),
   UP(Direction.UP),
   NORTH(Direction.NORTH),
@@ -44,7 +43,7 @@ public enum DirectionProvider implements StringRepresentable, Function<@NotNull 
   private final String name;
   private final Function<PositionProvider, Direction> function;
 
-  DirectionProvider(@NotNull Direction direction) {
+  DirectionProvider(Direction direction) {
     this.name = direction.getSerializedName();
     this.function = positionProvider -> direction;
   }
@@ -55,16 +54,16 @@ public enum DirectionProvider implements StringRepresentable, Function<@NotNull 
   }
 
   @Override
-  public @NotNull Direction apply(@NotNull PositionProvider positionProvider) {
+  public Direction apply(PositionProvider positionProvider) {
     return function.apply(positionProvider);
   }
 
-  public @NotNull Direction apply(@NotNull CommandSourceStack source) {
+  public Direction apply(CommandSourceStack source) {
     return function.apply(source);
   }
 
   @Override
-  public @NotNull String getSerializedName() {
+  public String getSerializedName() {
     return name;
   }
 

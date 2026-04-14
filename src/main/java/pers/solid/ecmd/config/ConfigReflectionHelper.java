@@ -42,7 +42,7 @@ public final class ConfigReflectionHelper {
     final Field currentConfigField;
     try {
       currentConfigField = getCurrentConfigFieldFromClass(configClass);
-    } catch (NoSuchFieldException | IllegalAccessException e) {
+    } catch (NoSuchFieldException e) {
       throw new RuntimeException("Get CURRENT_CONFIG field", e);
     }
 
@@ -89,7 +89,7 @@ public final class ConfigReflectionHelper {
     return category;
   }
 
-  private static <C> @NotNull C getDefaultConfigFromClass(Class<C> configClass) {
+  private static <C> C getDefaultConfigFromClass(Class<C> configClass) {
     final C defaultConfig;
     try {
       Field field = getDefaultConfigFieldFromClass(configClass);
@@ -105,7 +105,7 @@ public final class ConfigReflectionHelper {
     return defaultConfig;
   }
 
-  private static <C> @NotNull Field getDefaultConfigFieldFromClass(Class<C> configClass) throws NoSuchFieldException, IllegalAccessException {
+  private static <C> Field getDefaultConfigFieldFromClass(Class<C> configClass) throws NoSuchFieldException {
     final Field field = configClass.getField("DEFAULT");
     final int modifiers = field.getModifiers();
     if (Modifier.isFinal(modifiers) && Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)) {
@@ -115,7 +115,7 @@ public final class ConfigReflectionHelper {
     }
   }
 
-  private static <C> @NotNull C getCurrentConfigFromField(Field field, Class<C> configClass) {
+  private static <C> C getCurrentConfigFromField(Field field, Class<C> configClass) {
     final C currentConfig;
     try {
       Object o = field.get(null);
@@ -130,7 +130,7 @@ public final class ConfigReflectionHelper {
     return currentConfig;
   }
 
-  private static <C> @NotNull Field getCurrentConfigFieldFromClass(Class<C> configClass) throws NoSuchFieldException, IllegalAccessException {
+  private static <C> Field getCurrentConfigFieldFromClass(Class<C> configClass) throws NoSuchFieldException {
     final Field field = configClass.getField("current");
     final int modifiers = field.getModifiers();
     if (!Modifier.isFinal(modifiers) && Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers)) {
@@ -141,7 +141,7 @@ public final class ConfigReflectionHelper {
   }
 
   @SuppressWarnings("unchecked")
-  private static <C, T> void createEntryForField(@NotNull Field field, @NotNull ConfigCategory<C> category, @NotNull String name, C defaultConfig, Map<String, ConfigCategory.EntryModifier<C, ?>> builderModifiers) {
+  private static <C, T> void createEntryForField(Field field, ConfigCategory<C> category, String name, C defaultConfig, Map<String, ConfigCategory.EntryModifier<C, ?>> builderModifiers) {
     final Class<T> type = (Class<T>) field.getType();
 
     final ConfigCategory.EntryModifier<C, T> registeredModifier = (ConfigCategory.EntryModifier<C, T>) builderModifiers.get(name);
@@ -169,7 +169,7 @@ public final class ConfigReflectionHelper {
     category.configEntries.put(name, entry);
   }
 
-  private static <C, T> ConfigCategory.@Nullable EntryModifier<C, T> getBuilderModifierForField(@NotNull Field field, ConfigCategory.@Nullable EntryModifier<C, T> next) {
+  private static <C, T> ConfigCategory.@Nullable EntryModifier<C, T> getBuilderModifierForField(Field field, ConfigCategory.@Nullable EntryModifier<C, T> next) {
     final @Nullable OverrideName overrideName = field.getAnnotation(OverrideName.class);
     final @Nullable OverrideDescription overrideDescription = field.getAnnotation(OverrideDescription.class);
     final @Nullable ConfigCategory.EntryModifier<C, T> builderModifier;
@@ -217,7 +217,7 @@ public final class ConfigReflectionHelper {
    * @param fallbackString 当注解的字符串值为默认值时，将使用以此 {@code fallbackString} 值为翻译键的可翻译文本组件。
    * @return 此注解表示的 {@link Component} 对象。
    */
-  public static MutableComponent convertToComponent(@NotNull TextInfo textInfo, @NotNull String fallbackString) {
+  public static MutableComponent convertToComponent(TextInfo textInfo, String fallbackString) {
     return convertToComponent(textInfo.value(), textInfo.args(), textInfo.append(), fallbackString);
   }
 
@@ -231,7 +231,7 @@ public final class ConfigReflectionHelper {
    * @return 此注解表示的 {@link Component} 对象。
    * @see #convertToComponent(TextInfo, String)
    */
-  public static MutableComponent convertToComponent(@NotNull TextEntry textEntry, @NotNull TextEntry @Nullable [] translatableArgs, @NotNull TextEntry @Nullable [] append, @NotNull String fallbackString) {
+  public static MutableComponent convertToComponent(TextEntry textEntry, TextEntry @Nullable [] translatableArgs, TextEntry @Nullable [] append, String fallbackString) {
     String value = textEntry.value();
     MutableComponent component;
 

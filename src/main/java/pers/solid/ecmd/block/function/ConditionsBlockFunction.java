@@ -11,7 +11,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -21,15 +20,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> conditions) implements BlockFunction {
+public record ConditionsBlockFunction(List<ConditionalBlockFunction> conditions) implements BlockFunction {
   public static final MapCodec<ConditionsBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(ExtraCodecs.nonEmptyList(ConditionalBlockFunction.CODEC.codec().listOf()).fieldOf("conditions").forGetter(ConditionsBlockFunction::conditions)).apply(i, ConditionsBlockFunction::new));
 
-  public ConditionsBlockFunction(@NotNull ConditionalBlockFunction... conditions) {
+  public ConditionsBlockFunction(ConditionalBlockFunction... conditions) {
     this(List.of(conditions));
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final BlockInWorld blockInWorld = new BlockInWorld(level, pos, false);
     for (ConditionalBlockFunction function : conditions) {
       if (function.condition().test(blockInWorld, context)) {
@@ -44,12 +43,12 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.CONDITIONS;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return conditions.stream().map(f -> f.condition().asString() + ", " + f.functionIfTrue().asString() + (f.functionIfFalse() == EmptyBlockFunction.INSTANCE ? "" : ", " + f.functionIfFalse().asString())).collect(Collectors.joining("; ", "ifs(", ")"));
   }
 
@@ -57,7 +56,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
     CONDITIONS_TYPE;
 
     @Override
-    public @NotNull MapCodec<ConditionsBlockFunction> getCodec() {
+    public MapCodec<ConditionsBlockFunction> getCodec() {
       return CODEC;
     }
   }
@@ -66,7 +65,7 @@ public record ConditionsBlockFunction(@NotNull List<ConditionalBlockFunction> co
     private final List<ConditionalBlockFunction> functions = new ArrayList<>();
 
     @Override
-    public ConditionsBlockFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public ConditionsBlockFunction getParseResult(ParseContext<?> parseContext) {
       return new ConditionsBlockFunction(functions);
     }
 

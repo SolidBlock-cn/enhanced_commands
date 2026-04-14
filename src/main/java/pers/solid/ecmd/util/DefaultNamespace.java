@@ -8,7 +8,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 
 import java.util.Locale;
@@ -20,16 +19,16 @@ import java.util.stream.Stream;
  * 处理带有非原版的默认命名空间的类。
  */
 public class DefaultNamespace {
-  private final @NotNull String namespace;
-  private final @NotNull ResourceLocation exampleId;
+  private final String namespace;
+  private final ResourceLocation exampleId;
   public static final DefaultNamespace ENHANCED_COMMANDS = new DefaultNamespace(EnhancedCommands.MOD_ID);
 
-  public DefaultNamespace(@NotNull String namespace) {
+  public DefaultNamespace(String namespace) {
     this.namespace = namespace;
     this.exampleId = ResourceLocation.fromNamespaceAndPath(namespace, "");
   }
 
-  public DefaultNamespace(@NotNull ResourceLocation exampleId) {
+  public DefaultNamespace(ResourceLocation exampleId) {
     this.namespace = exampleId.getNamespace();
     this.exampleId = exampleId;
   }
@@ -107,7 +106,7 @@ public class DefaultNamespace {
   /**
    * @see SharedSuggestionProvider#suggestResource(Stream, SuggestionsBuilder, String)
    */
-  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Stream<ResourceLocation> candidates, SuggestionsBuilder builder, String prefix) {
+  public CompletableFuture<Suggestions> suggestIdentifiers(Stream<ResourceLocation> candidates, SuggestionsBuilder builder, String prefix) {
     return suggestIdentifiers(candidates::iterator, builder, prefix);
   }
 
@@ -115,7 +114,7 @@ public class DefaultNamespace {
   /**
    * @see SharedSuggestionProvider#suggestResource(Iterable, SuggestionsBuilder)
    */
-  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Iterable<ResourceLocation> candidates, SuggestionsBuilder builder) {
+  public CompletableFuture<Suggestions> suggestIdentifiers(Iterable<ResourceLocation> candidates, SuggestionsBuilder builder) {
     String string = builder.getRemaining().toLowerCase(Locale.ROOT);
     SharedSuggestionProvider.filterResources(candidates, string, Function.identity(), (id) -> builder.suggest(toSimplerString(id)));
     return builder.buildFuture();
@@ -124,7 +123,7 @@ public class DefaultNamespace {
   /**
    * @see SharedSuggestionProvider#suggestResource(Iterable, SuggestionsBuilder, Function, Function)
    */
-  public <T> CompletableFuture<Suggestions> suggestFromIdentifier(@NotNull Iterable<T> candidates, SuggestionsBuilder builder, Function<T, ResourceLocation> identifier, Function<T, Message> tooltip) {
+  public <T> CompletableFuture<Suggestions> suggestFromIdentifier(Iterable<T> candidates, SuggestionsBuilder builder, Function<T, ResourceLocation> identifier, Function<T, Message> tooltip) {
     String string = builder.getRemaining().toLowerCase(Locale.ROOT);
     SharedSuggestionProvider.filterResources(candidates, string, identifier, (object) -> builder.suggest(toSimplerString(identifier.apply(object)), tooltip.apply(object)));
     return builder.buildFuture();
@@ -133,14 +132,14 @@ public class DefaultNamespace {
   /**
    * @see SharedSuggestionProvider#suggestResource(Stream, SuggestionsBuilder)
    */
-  public CompletableFuture<Suggestions> suggestIdentifiers(@NotNull Stream<ResourceLocation> candidates, SuggestionsBuilder builder) {
+  public CompletableFuture<Suggestions> suggestIdentifiers(Stream<ResourceLocation> candidates, SuggestionsBuilder builder) {
     return suggestIdentifiers(candidates::iterator, builder);
   }
 
   /**
    * @see SharedSuggestionProvider#suggestResource(Stream, SuggestionsBuilder, Function, Function)
    */
-  public <T> CompletableFuture<Suggestions> suggestFromIdentifier(@NotNull Stream<T> candidates, SuggestionsBuilder builder, Function<T, ResourceLocation> identifier, Function<T, Message> tooltip) {
+  public <T> CompletableFuture<Suggestions> suggestFromIdentifier(Stream<T> candidates, SuggestionsBuilder builder, Function<T, ResourceLocation> identifier, Function<T, Message> tooltip) {
     return suggestFromIdentifier(candidates::iterator, builder, identifier, tooltip);
   }
 }

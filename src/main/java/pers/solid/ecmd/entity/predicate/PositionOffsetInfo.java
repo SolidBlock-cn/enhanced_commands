@@ -6,7 +6,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -36,7 +35,7 @@ public record PositionOffsetInfo(@Nullable Double x, @Nullable Double y, @Nullab
   }
 
   @Override
-  public @NotNull Vec3 apply(@NotNull Vec3 vec3d) {
+  public Vec3 apply(Vec3 vec3d) {
     if (x == null && y == null && z == null) {
       return vec3d;
     } else {

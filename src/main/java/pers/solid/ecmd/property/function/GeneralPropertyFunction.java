@@ -2,7 +2,6 @@ package pers.solid.ecmd.property.function;
 
 import com.google.common.collect.Collections2;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -18,7 +17,6 @@ public interface GeneralPropertyFunction extends PropertyFunction<Integer> {
     }
   }
 
-  @NotNull
   Set<Property<?>> except();
 
   interface OfName extends PropertyNameFunction {
@@ -31,7 +29,6 @@ public interface GeneralPropertyFunction extends PropertyFunction<Integer> {
       }
     }
 
-    @NotNull
     Collection<String> except();
   }
 }

@@ -11,7 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -31,7 +31,7 @@ public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
   public static final MapCodec<StraightCurve> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Vec3.CODEC.fieldOf("from").forGetter(StraightCurve::from), Vec3.CODEC.fieldOf("to").forGetter(StraightCurve::to)).apply(i, StraightCurve::new));
 
   @Override
-  public @NotNull Stream<BlockPos> streamBlockPos() {
+  public Stream<BlockPos> streamBlockPos() {
     final BlockPos fromBlockPos = BlockPos.containing(from);
     final BlockPos toBlockPos = BlockPos.containing(to);
     if (fromBlockPos.equals(toBlockPos)) {
@@ -83,7 +83,7 @@ public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
   }
 
   @Override
-  public @NotNull Iterator<Vec3> iteratePoints(Number interval) {
+  public Iterator<Vec3> iteratePoints(Number interval) {
     final Vec3 relVec = to.subtract(from);
     final double totalLength = relVec.length();
     final Vec3 unitVec = relVec.scale(1 / totalLength);
@@ -108,22 +108,22 @@ public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
   }
 
   @Override
-  public @NotNull StraightCurve transformed(Function<Vec3, Vec3> transformation) {
+  public StraightCurve transformed(Function<Vec3, Vec3> transformation) {
     return new StraightCurve(transformation.apply(from), transformation.apply(to));
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "straight(%s, %s)".formatted(StringUtil.wrapVector(from), StringUtil.wrapVector(to));
   }
 
   @Override
-  public @NotNull AABB minContainingBox() {
+  public AABB minContainingBox() {
     return new AABB(from, to);
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.INSTANCE;
   }
 
@@ -131,18 +131,18 @@ public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
     INSTANCE;
 
     @Override
-    public @NotNull MapCodec<StraightCurve> getCodec() {
+    public MapCodec<StraightCurve> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends CurveProvider<? extends StraightCurve>> getArgumentCodec() {
+    public MapCodec<? extends CurveProvider<? extends StraightCurve>> getArgumentCodec() {
       return StraightCurveProvider.CODEC;
     }
   }
 
   protected static final class Parser implements FunctionContentParser.SequentialParams<CurveProvider<StraightCurve>> {
-    private EnhancedCoordinates from, to;
+    private @Nullable EnhancedCoordinates from, to;
     private boolean usingKeyword = false;
 
     @Override

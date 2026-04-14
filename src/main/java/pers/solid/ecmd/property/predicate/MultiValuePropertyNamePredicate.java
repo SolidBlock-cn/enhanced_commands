@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
@@ -70,12 +69,12 @@ public record MultiValuePropertyNamePredicate(String propertyName, List<String> 
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.MULTI_VALUE;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return propertyName + (inverted ? "!=" : "=") + StringUtils.join(valueNames, "|");
   }
 }

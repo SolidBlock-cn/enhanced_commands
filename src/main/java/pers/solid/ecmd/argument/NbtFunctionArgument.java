@@ -11,7 +11,6 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.nbt.function.CompoundNbtFunction;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.nbt.function.NbtFunctionParser;
@@ -71,7 +70,7 @@ public record NbtFunctionArgument(boolean onlyCompounds, CommandBuildContext com
     }
 
     @Override
-    public NbtFunctionArgument.@NotNull Template deserializeFromNetwork(FriendlyByteBuf buf) {
+    public NbtFunctionArgument.Template deserializeFromNetwork(FriendlyByteBuf buf) {
       return new NbtFunctionArgument.Template(buf.readBoolean());
     }
 
@@ -81,7 +80,7 @@ public record NbtFunctionArgument(boolean onlyCompounds, CommandBuildContext com
     }
 
     @Override
-    public NbtFunctionArgument.@NotNull Template unpack(NbtFunctionArgument argumentType) {
+    public NbtFunctionArgument.Template unpack(NbtFunctionArgument argumentType) {
       return new NbtFunctionArgument.Template(argumentType.onlyCompounds);
     }
   }
@@ -89,12 +88,12 @@ public record NbtFunctionArgument(boolean onlyCompounds, CommandBuildContext com
   public record Template(boolean onlyCompounds) implements ArgumentTypeInfo.Template<NbtFunctionArgument> {
 
     @Override
-    public @NotNull NbtFunctionArgument instantiate(CommandBuildContext commandRegistryAccess) {
+    public NbtFunctionArgument instantiate(CommandBuildContext commandRegistryAccess) {
       return new NbtFunctionArgument(onlyCompounds, commandRegistryAccess);
     }
 
     @Override
-    public @NotNull ArgumentTypeInfo<NbtFunctionArgument, ?> type() {
+    public ArgumentTypeInfo<NbtFunctionArgument, ?> type() {
       return Info.INSTANCE;
     }
   }

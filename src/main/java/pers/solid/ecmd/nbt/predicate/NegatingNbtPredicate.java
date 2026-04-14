@@ -3,23 +3,22 @@ package pers.solid.ecmd.nbt.predicate;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 
 public record NegatingNbtPredicate(NbtPredicate predicate) implements NbtPredicate {
   public static final MapCodec<NegatingNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(NbtPredicate.CODEC.fieldOf("predicate").forGetter(NegatingNbtPredicate::predicate)).apply(i, NegatingNbtPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "!" + predicate.asString();
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     return !predicate.test(nbtElement);
   }
 
   @Override
-  public @NotNull NbtPredicateType<NegatingNbtPredicate> getType() {
+  public NbtPredicateType<NegatingNbtPredicate> getType() {
     return NbtPredicateTypes.NEGATING;
   }
 

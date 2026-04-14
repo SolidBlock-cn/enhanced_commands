@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 /**
@@ -41,7 +40,7 @@ public enum VoidImmuneType implements StringRepresentable {
   }
 
   @Override
-  public @NotNull String getSerializedName() {
+  public String getSerializedName() {
     return this.name;
   }
 }

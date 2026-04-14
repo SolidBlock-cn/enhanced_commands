@@ -3,7 +3,6 @@ package pers.solid.ecmd.nbt.function;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.*;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -19,24 +18,24 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  */
 public record NumberValueNbtFunction(NumericTag number) implements NbtFunction {
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return asString(true);
   }
 
   @Override
-  public @NotNull String asString(boolean requirePrefix) {
-    return "= " + number.toString();
+  public String asString(boolean requirePrefix) {
+    return "= " + number;
   }
 
   public static final MapCodec<NumberValueNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_NUMBER.fieldOf("number").forGetter(NumberValueNbtFunction::number)).apply(i, NumberValueNbtFunction::new));
 
   @Override
-  public @NotNull NbtFunctionType<?> getType() {
+  public NbtFunctionType<?> getType() {
     return Type.NUMBER_VALUE_TYPE;
   }
 
   @Override
-  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) {
+  public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) {
     if (nbtElement instanceof DoubleTag) {
       return DoubleTag.valueOf(number.getAsDouble());
     } else if (nbtElement instanceof FloatTag) {

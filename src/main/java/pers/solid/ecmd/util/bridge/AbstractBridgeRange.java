@@ -1,6 +1,5 @@
 package pers.solid.ecmd.util.bridge;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -26,7 +25,7 @@ public abstract class AbstractBridgeRange<T extends Comparable<T>> implements Br
   }
 
   @Override
-  public boolean test(@NotNull T value) {
+  public boolean test(T value) {
     return (min == null || min.compareTo(value) <= 0) && (max == null || max.compareTo(value) >= 0);
   }
 

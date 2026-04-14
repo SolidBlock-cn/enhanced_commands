@@ -1,6 +1,5 @@
 package pers.solid.ecmd.mixins.accessor;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
@@ -21,7 +20,7 @@ public interface EntitySelectorParserAccessor {
   List<Predicate<Entity>> getPredicates();
 
   @Invoker
-  void callParseOptions() throws CommandSyntaxException;
+  void callParseOptions();
 
   @Invoker
   void callFinalizePredicates();

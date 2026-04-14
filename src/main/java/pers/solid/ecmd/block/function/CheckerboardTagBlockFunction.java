@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
@@ -32,11 +32,11 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   ).apply(i, CheckerboardTagBlockFunction::new));
   private final HolderSet<Block> entryList;
   private final WeightedList<Block> weightedList;
-  private final @NotNull Vec3 floor;
-  private final @NotNull Vec3 scale;
-  private final @NotNull Vec3 offset;
+  private final Vec3 floor;
+  private final Vec3 scale;
+  private final Vec3 offset;
 
-  public CheckerboardTagBlockFunction(@NotNull HolderSet<Block> entryList, @NotNull Vec3 floor, @NotNull Vec3 scale, @NotNull Vec3 offset) {
+  public CheckerboardTagBlockFunction(HolderSet<Block> entryList, Vec3 floor, Vec3 scale, Vec3 offset) {
     this.entryList = entryList;
     this.weightedList = new WeightedList.Uniform<>(entryList.stream().map(Holder::value).toList());
     this.floor = floor;
@@ -45,18 +45,18 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block entry = getEntry(weightedList, pos);
     return entry == null ? blockState : entry.defaultBlockState();
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.CHECKERBOARD_TAG;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final StringBuilder sb = new StringBuilder("checkerboard-tag(");
     final String mapped = entryList.unwrap().map(tagKey -> tagKey.location().toString(), list -> list.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ")));
     sb.append("#").append(mapped);
@@ -68,22 +68,22 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   }
 
   @Override
-  public @NotNull Vec3 floor() {
+  public Vec3 floor() {
     return floor;
   }
 
   @Override
-  public @NotNull Vec3 scale() {
+  public Vec3 scale() {
     return scale;
   }
 
   @Override
-  public @NotNull Vec3 offset() {
+  public Vec3 offset() {
     return offset;
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(@Nullable Object obj) {
     if (obj == this) return true;
     if (obj == null || obj.getClass() != this.getClass()) return false;
     var that = (CheckerboardTagBlockFunction) obj;
@@ -111,17 +111,17 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
     CHECKERBOARD_TAG_TYPE;
 
     @Override
-    public @NotNull MapCodec<CheckerboardTagBlockFunction> getCodec() {
+    public MapCodec<CheckerboardTagBlockFunction> getCodec() {
       return CODEC;
     }
   }
 
   public static class Parser extends CheckerboardParser<BlockFunction> {
-    protected HolderSet.Named<Block> tagKey;
+    protected @Nullable HolderSet.Named<Block> tagKey;
 
     @Override
     protected CheckerboardTagBlockFunction getParseResult(Vec3 floor, Vec3 scale, Vec3 offset) {
-      return new CheckerboardTagBlockFunction(tagKey, floor, scale, offset);
+      return new CheckerboardTagBlockFunction(Objects.requireNonNull(tagKey, "tagKey"), floor, scale, offset);
     }
 
     @Override

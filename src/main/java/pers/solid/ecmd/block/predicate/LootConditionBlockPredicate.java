@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -42,13 +42,12 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
   }
 
   @Override
-  @NotNull
   public Type getType() {
     return BlockPredicateTypes.LOOT_CONDITION;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "predicate(" + entry.unwrap().map(key -> key.location().toString(), lootCondition -> LootItemCondition.CODEC.encodeStart(NbtOps.INSTANCE, entry).toString()) + ")";
   }
 
@@ -56,14 +55,14 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
     LOOT_CONDITION_TYPE;
 
     @Override
-    public @NotNull MapCodec<LootConditionBlockPredicate> getCodec() {
+    public MapCodec<LootConditionBlockPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<LootConditionBlockPredicate> {
-    protected ResourceLocation id;
-    protected LootItemCondition anonymous;
+    protected @Nullable ResourceLocation id;
+    protected @Nullable LootItemCondition anonymous;
     protected int cursorBeforeId, cursorAfterId;
 
     private static CompletableFuture<Suggestions> getLootConditionIdSuggestions(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder, int cursorBeforeId) {
@@ -87,7 +86,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
     }
 
     @Override
-    public LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
         final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.registries().asGetterLookup().get(Registries.PREDICATE, ResourceKey.create(Registries.PREDICATE, id));
         if (lootCondition.isEmpty()) {

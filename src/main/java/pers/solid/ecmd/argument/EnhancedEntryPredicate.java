@@ -17,7 +17,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
@@ -33,13 +32,13 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
    */
   record EntryBased<T>(Holder.Reference<T> value) implements EnhancedEntryPredicate<T> {
     @Override
-    public @NotNull Either<Holder.Reference<T>, HolderSet.Named<T>> unwrap() {
+    public Either<Holder.Reference<T>, HolderSet.Named<T>> unwrap() {
       return Either.left(value);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> @NotNull Optional<ResourceOrTagArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> registryRef) {
+    public <E> Optional<ResourceOrTagArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> registryRef) {
       return this.value.key().isFor(registryRef) ? Optional.of((ResourceOrTagArgument.Result<E>) this) : Optional.empty();
     }
 
@@ -48,7 +47,7 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
     }
 
     @Override
-    public @NotNull String asPrintable() {
+    public String asPrintable() {
       return this.value.key().location().toString();
     }
   }
@@ -58,13 +57,13 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
    */
   record TagBased<T>(HolderSet.Named<T> tag) implements EnhancedEntryPredicate<T> {
     @Override
-    public @NotNull Either<Holder.Reference<T>, HolderSet.Named<T>> unwrap() {
+    public Either<Holder.Reference<T>, HolderSet.Named<T>> unwrap() {
       return Either.right(this.tag);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> @NotNull Optional<ResourceOrTagArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> registryRef) {
+    public <E> Optional<ResourceOrTagArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> registryRef) {
       return this.tag.key().isFor(registryRef) ? Optional.of((ResourceOrTagArgument.Result<E>) this) : Optional.empty();
     }
 
@@ -73,7 +72,7 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
     }
 
     @Override
-    public @NotNull String asPrintable() {
+    public String asPrintable() {
       return "#" + this.tag.key().location();
     }
   }
@@ -98,7 +97,7 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
     public static final SimpleCommandExceptionType MULTIPLE_VALUE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.registry_entry_predicate.multiple"));
 
     @Override
-    public @NotNull Either<Holder.Reference<T>, HolderSet.Named<T>> unwrap() {
+    public Either<Holder.Reference<T>, HolderSet.Named<T>> unwrap() {
       try {
         throw MULTIPLE_VALUE.create();
       } catch (CommandSyntaxException e) {
@@ -108,12 +107,12 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E> @NotNull Optional<ResourceOrTagArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> registryRef) {
+    public <E> Optional<ResourceOrTagArgument.Result<E>> cast(ResourceKey<? extends Registry<E>> registryRef) {
       return predicates.iterator().next().cast(registryRef).isPresent() ? Optional.of((ResourceOrTagArgument.Result<E>) this) : Optional.empty();
     }
 
     @Override
-    public @NotNull String asPrintable() {
+    public String asPrintable() {
       return predicates.stream().map(ResourceOrTagArgument.Result::asPrintable).collect(Collectors.joining("|"));
     }
 

@@ -9,7 +9,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -95,7 +94,7 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return StringUtil.wrapVector(vec3d);
     }
   }
@@ -117,7 +116,7 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return length() + " " + directionProvider().getSerializedName();
     }
   }
@@ -137,7 +136,7 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return "rotated " + rotation.asString();
     }
   }
@@ -157,7 +156,7 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       return "facing " + pos.asString();
     }
   }
@@ -178,7 +177,7 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
 

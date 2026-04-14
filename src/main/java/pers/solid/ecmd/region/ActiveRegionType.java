@@ -1,13 +1,12 @@
 package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.Encoder;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -18,7 +17,7 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<ActiveRegionP
   private static final MapCodec<Region> CODEC = MapCodec.assumeMapUnsafe(Codec.of(Encoder.error("Cannot encode"), Decoder.error("Region NBT cannot hold this type of region")));
 
   @Override
-  public ActiveRegionProvider parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  public @Nullable ActiveRegionProvider parse(ParseContext<?> parseContext) {
     parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("$", Component.translatable("enhanced_commands.region.active_region"), suggestionsBuilder).buildFuture());
     final StringReader reader = parseContext.reader();
     if (reader.canRead() && reader.peek() == '$') {
@@ -31,12 +30,12 @@ public enum ActiveRegionType implements RegionType<Region>, Parser<ActiveRegionP
   }
 
   @Override
-  public @NotNull MapCodec<Region> getCodec() {
+  public MapCodec<Region> getCodec() {
     return CODEC;
   }
 
   @Override
-  public @NotNull MapCodec<? extends ActiveRegionProvider> getArgumentCodec() {
+  public MapCodec<? extends ActiveRegionProvider> getArgumentCodec() {
     return ActiveRegionProvider.CODEC;
   }
 }

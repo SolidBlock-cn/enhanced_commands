@@ -9,7 +9,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.OptionalLong;
 import java.util.Set;
 
-public record ProbabilityItemPredicate(float probability, @NotNull ItemPredicate predicate, OptionalLong seed) implements ItemPredicateEntry {
+public record ProbabilityItemPredicate(float probability, ItemPredicate predicate, OptionalLong seed) implements ItemPredicateEntry {
   public static final MapCodec<ProbabilityItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(ProbabilityItemPredicate::new,
       Codec.FLOAT.fieldOf("probability").forGetter(ProbabilityItemPredicate::probability),
       ItemPredicate.CODEC.optionalFieldOf("predicate", ConstantItemPredicate.ALWAYS_TRUE).forGetter(ProbabilityItemPredicate::predicate),
@@ -37,12 +37,12 @@ public record ProbabilityItemPredicate(float probability, @NotNull ItemPredicate
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.PROBABILITY;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     final String seedParams = seed.isPresent() ? ", seed = " + seed.getAsLong() : "";
     if (predicate == ConstantItemPredicate.ALWAYS_TRUE) {
       return "probability(" + probability + seedParams + ")";
@@ -55,14 +55,14 @@ public record ProbabilityItemPredicate(float probability, @NotNull ItemPredicate
     PROBABILITY_TYPE;
 
     @Override
-    public @NotNull MapCodec<ProbabilityItemPredicate> getCodec() {
+    public MapCodec<ProbabilityItemPredicate> getCodec() {
       return CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.MixedParams<ProbabilityItemPredicate> {
     private float value;
-    private ItemPredicate predicate;
+    private @Nullable ItemPredicate predicate;
     private OptionalLong seed = OptionalLong.empty();
 
     @Override

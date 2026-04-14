@@ -11,7 +11,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorAccessor;
 import pers.solid.ecmd.util.*;
@@ -99,15 +98,15 @@ public interface EntityPredicate extends ExpressionConvertible {
     return simplifiedBySelector(EntitySelectors.readOmittibleEntitySelector(entitySelectorReader));
   }
 
-  static TestResult successResult(@NotNull Entity entity) {
+  static TestResult successResult(Entity entity) {
     return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.pass", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
 
-  static TestResult failResult(@NotNull Entity entity) {
+  static TestResult failResult(Entity entity) {
     return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.fail", TextUtil.styled(entity.getDisplayName(), Styles.TARGET)));
   }
 
-  static TestResult successOrFail(boolean successes, @NotNull Entity entity) {
+  static TestResult successOrFail(boolean successes, Entity entity) {
     return successes ? successResult(entity) : failResult(entity);
   }
 
@@ -117,13 +116,13 @@ public interface EntityPredicate extends ExpressionConvertible {
    * @param entity 被测试的实体
    * @return 如果实体满足条件，则为 {@code true}
    */
-  boolean test(@NotNull Entity entity, @NotNull ExecutionContext context);
+  boolean test(Entity entity, ExecutionContext context);
 
   /**
    * 测试实体并返回描述信息。调用时请使用此类，但覆盖时请覆盖 {@link #testAndDescribe(Entity, ExecutionContext, Component)}。
    */
   @ApiStatus.NonExtendable
-  default TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context) throws CommandSyntaxException {
+  default TestResult testAndDescribe(Entity entity, ExecutionContext context) throws CommandSyntaxException {
     return testAndDescribe(entity, context, TextUtil.styled(entity.getDisplayName(), Styles.TARGET));
   }
 
@@ -134,7 +133,7 @@ public interface EntityPredicate extends ExpressionConvertible {
    * @param context     测试实体的环境。
    * @param displayName 被测试的实体的显示名称。
    */
-  TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException;
+  TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) throws CommandSyntaxException;
 
-  @NotNull EntityPredicateType<?> getType();
+  EntityPredicateType<?> getType();
 }

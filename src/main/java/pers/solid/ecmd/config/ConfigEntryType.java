@@ -7,7 +7,6 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.codec.StreamCodec;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.function.Function;
@@ -27,10 +26,10 @@ public interface ConfigEntryType<T> {
    * @return 对应类的 {@link ConfigEntryType} 对象，通常不是一个新的对象
    */
   @SuppressWarnings("unchecked")
-  static <T> @NotNull ConfigEntryType<T> fromClass(Class<T> classObject) {
+  static <T> ConfigEntryType<T> fromClass(Class<T> classObject) {
     final ConfigEntryType<?> configEntryType = ConfigEntryTypes.CLASS_TO_TYPE.get(classObject);
     if (configEntryType == null) {
-      throw new IllegalArgumentException("No such config entry type for " + classObject.toString());
+      throw new IllegalArgumentException("No such config entry type for " + classObject);
     } else {
       return (ConfigEntryType<T>) configEntryType;
     }
@@ -39,22 +38,21 @@ public interface ConfigEntryType<T> {
   /**
    * 配置类型的 codec，主要用于序列化为 json 文件。
    */
-  @NotNull Codec<T> codec();
+  Codec<T> codec();
 
   /**
    * 配置类型的 packet codec，主要用于将该配置类型的值在客户端与服务器之间通信。
    */
-  @NotNull StreamCodec<? super RegistryFriendlyByteBuf, T> packetCodec();
+  StreamCodec<? super RegistryFriendlyByteBuf, T> packetCodec();
 
   /**
    * 以 {@link Component} 的形式显示该配置类型的值。
    */
-  @NotNull Component displayValue(T value);
+  Component displayValue(T value);
 
   /**
    * 以 {@link Component} 的形式显示该配置类型的值，并添加相应样式。不需要重写此方法。
    */
-  @NotNull
   default Component displayValue(T value, UnaryOperator<Style> styleUpdater) {
     return TextUtil.styled(displayValue(value), styleUpdater);
   }
@@ -63,7 +61,7 @@ public interface ConfigEntryType<T> {
   /**
    * 该配置类型对应的 {@link ArgumentType}，用于在命令中解析参数。
    */
-  @NotNull ArgumentType<T> getArgumentType(CommandBuildContext commandBuildContext);
+  ArgumentType<T> getArgumentType(CommandBuildContext commandBuildContext);
 
   /**
    * 创建一个简单的 {@link ConfigEntryType}，其中 {@link ArgumentType} 为恒定值，不受 {@code commandBuildContext} 的影响。
@@ -81,12 +79,12 @@ public interface ConfigEntryType<T> {
 
   record Simple<T>(Codec<T> codec, StreamCodec<? super RegistryFriendlyByteBuf, T> packetCodec, Function<T, Component> displayFunction, Function<CommandBuildContext, ? extends ArgumentType<T>> argumentTypeProvider) implements ConfigEntryType<T> {
     @Override
-    public @NotNull Component displayValue(T value) {
+    public Component displayValue(T value) {
       return displayFunction.apply(value);
     }
 
     @Override
-    public @NotNull ArgumentType<T> getArgumentType(CommandBuildContext commandBuildContext) {
+    public ArgumentType<T> getArgumentType(CommandBuildContext commandBuildContext) {
       return argumentTypeProvider.apply(commandBuildContext);
     }
   }

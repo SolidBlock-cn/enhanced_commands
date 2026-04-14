@@ -1,6 +1,5 @@
 package pers.solid.ecmd.entity.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -9,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
@@ -20,7 +18,7 @@ public record EffectEntityPredicateEntry(Holder<MobEffect> effect, boolean inver
   ).apply(i, EffectEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return false;
     }
@@ -29,7 +27,7 @@ public record EffectEntityPredicateEntry(Holder<MobEffect> effect, boolean inver
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
@@ -43,7 +41,7 @@ public record EffectEntityPredicateEntry(Holder<MobEffect> effect, boolean inver
   }
 
   @Override
-  public @NotNull EntityPredicateType<EffectEntityPredicateEntry> getType() {
+  public EntityPredicateType<EffectEntityPredicateEntry> getType() {
     return EntityPredicateTypes.EFFECT;
   }
 

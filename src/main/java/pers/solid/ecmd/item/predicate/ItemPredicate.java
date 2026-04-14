@@ -8,7 +8,6 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.ItemPredicateArgument;
 import pers.solid.ecmd.parse.ParseContext;
@@ -51,7 +50,7 @@ public interface ItemPredicate extends ExpressionConvertible {
 
   boolean test(ItemStack stack, ExecutionContext executionContext);
 
-  @NotNull ItemPredicateType<?> getType();
+  ItemPredicateType<?> getType();
 
   static ItemPredicate parse(ParseContext<?> context) throws CommandSyntaxException {
     return context.parseAndSuggestArgument(ItemPredicateArgument.itemPredicate((CommandBuildContext) context.registries()));

@@ -51,7 +51,7 @@ public enum HistoryCommand implements CommandRegistrationCallbackBridge {
       .addOptionalArg("sort", stringEnum("latest", "oldest"), "latest")
       .build();
 
-  public static @NotNull HistoryHolder getHistoryHolderFromArgs(CommandSourceStack source, KeywordArgs keywordArgs) throws CommandSyntaxException {
+  public static HistoryHolder getHistoryHolderFromArgs(CommandSourceStack source, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final EntitySelector selector = keywordArgs.getArg("target");
     if (selector == null) {
       if (keywordArgs.getBoolean("target-server")) {
@@ -101,7 +101,7 @@ public enum HistoryCommand implements CommandRegistrationCallbackBridge {
     return executeClear(source, holder, "redo".equals(keywordArgs.getArg("type")));
   }
 
-  private static int executeClear(CommandSourceStack source, @NotNull HistoryHolder historyHolder, boolean redo) {
+  private static int executeClear(CommandSourceStack source, HistoryHolder historyHolder, boolean redo) {
     final Component targetName = targetName(historyHolder);
     if (redo) {
       historyHolder = historyHolder.inverse();
@@ -122,7 +122,7 @@ public enum HistoryCommand implements CommandRegistrationCallbackBridge {
     return executeList(source, fromSourceOrThrow(source), 0, 7, true, false);
   }
 
-  private static @NotNull HistoryHolder fromSourceOrThrow(CommandSourceStack source) throws CommandSyntaxException {
+  private static HistoryHolder fromSourceOrThrow(CommandSourceStack source) throws CommandSyntaxException {
     final HistoryHolder holder = HistoryHolder.fromSource(source);
     if (holder != null) {
       return holder;
@@ -136,7 +136,7 @@ public enum HistoryCommand implements CommandRegistrationCallbackBridge {
     }
   }
 
-  private static int executeList(CommandSourceStack source, @NotNull HistoryHolder historyHolder, int from, int limit, boolean latestFirst, boolean redo) {
+  private static int executeList(CommandSourceStack source, HistoryHolder historyHolder, int from, int limit, boolean latestFirst, boolean redo) {
     final Component targetName = targetName(historyHolder);
     if (redo) {
       historyHolder = historyHolder.inverse();

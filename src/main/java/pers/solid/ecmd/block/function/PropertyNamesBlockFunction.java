@@ -10,7 +10,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
@@ -20,20 +19,20 @@ import pers.solid.ecmd.property.function.PropertyNameFunction;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> functions) implements BlockFunction {
+public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) implements BlockFunction {
   public static final MapCodec<PropertyNamesBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertyNamesBlockFunction::new, PropertyNameFunction.CODEC.listOf().fieldOf("properties").forGetter(PropertyNamesBlockFunction::functions)));
 
-  public PropertyNamesBlockFunction(@NotNull PropertyNameFunction... functions) {
+  public PropertyNamesBlockFunction(PropertyNameFunction... functions) {
     this(List.of(functions));
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "[" + functions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(",")) + "]";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final RandomSource random = context.getSplitter(this).at(pos);
     for (PropertyNameFunction propertyNameFunction : functions) {
       blockState = propertyNameFunction.getModifiedState(originalState, blockState, random);
@@ -42,7 +41,7 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.PROPERTY_NAMES;
   }
 
@@ -50,7 +49,7 @@ public record PropertyNamesBlockFunction(@NotNull List<PropertyNameFunction> fun
     PROPERTY_NAMES_TYPE;
 
     @Override
-    public @NotNull MapCodec<PropertyNamesBlockFunction> getCodec() {
+    public MapCodec<PropertyNamesBlockFunction> getCodec() {
       return CODEC;
     }
 

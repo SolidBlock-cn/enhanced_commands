@@ -3,7 +3,6 @@ package pers.solid.ecmd.util.extension;
 import com.google.common.collect.Iterables;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.thread.BlockableEventLoop;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.command.FillReplaceCommand;
@@ -31,10 +30,8 @@ public interface BlockableEventLoopExtension {
     return task;
   }
 
-  @NotNull
   Queue<IteratorTask<?>> getIteratorTasks$ec();
 
-  @NotNull
   Map<UUID, IteratorTask<?>> getUUIDToIteratorTasks$ec();
 
   /**

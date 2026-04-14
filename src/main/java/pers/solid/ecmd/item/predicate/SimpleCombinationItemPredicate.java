@@ -4,7 +4,6 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
@@ -43,21 +42,21 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
     }
   }
 
-  private static boolean isValidTypeForItemType(@NotNull ItemPredicate predicate) {
+  private static boolean isValidTypeForItemType(ItemPredicate predicate) {
     return predicate instanceof SimpleItemPredicate || predicate instanceof TagItemPredicate || predicate == ConstantItemPredicate.ALWAYS_TRUE;
   }
 
-  private static boolean isValidTypeForComponents(@NotNull ItemPredicate predicate) {
+  private static boolean isValidTypeForComponents(ItemPredicate predicate) {
     return true;
   }
 
-  private static void checkValidityForItemType(@NotNull ItemPredicate predicate) {
+  private static void checkValidityForItemType(ItemPredicate predicate) {
     if (!isValidTypeForItemType(predicate)) {
       throw new IllegalArgumentException("item_type for SimpleCombinationItemPredicate only supports types of simple_item, simple_tag and always-true constant.");
     }
   }
 
-  private static void checkValidityForComponents(@NotNull ItemPredicate predicate) {
+  private static void checkValidityForComponents(ItemPredicate predicate) {
     if (isValidTypeForComponents(predicate)) {
       return;
     }
@@ -94,12 +93,12 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.SIMPLE_COMBINATION;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return itemType.asString() + (components.isEmpty() ? "" : components.stream().map(SimpleCombinationItemPredicate::toEntryString).collect(Collectors.joining(", ", "[", "]")));
   }
 
@@ -124,7 +123,7 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
     SIMPLE_COMBINATION_TYPE;
 
     @Override
-    public @NotNull MapCodec<SimpleCombinationItemPredicate> getCodec() {
+    public MapCodec<SimpleCombinationItemPredicate> getCodec() {
       return CODEC;
     }
   }

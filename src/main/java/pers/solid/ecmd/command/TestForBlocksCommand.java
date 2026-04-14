@@ -21,7 +21,6 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.*;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
@@ -219,7 +218,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return name;
     }
   }

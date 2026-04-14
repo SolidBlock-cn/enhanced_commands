@@ -32,7 +32,6 @@ import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.function.FailableSupplier;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.ParserUtilsAccessor;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
@@ -189,7 +188,7 @@ public final class ParsingUtil {
    *
    * @see ParseContext#parseAndSuggestValues
    */
-  public static <T> @NotNull T parseValues(StringReader reader, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
+  public static <T> T parseValues(StringReader reader, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     final int cursorBeforeRead = reader.getCursor();
     final String name = reader.readString();
     final int cursorAfterRead = reader.getCursor();
@@ -207,7 +206,7 @@ public final class ParsingUtil {
    *
    * @see StringReader#isAllowedInUnquotedString(char)
    */
-  public static boolean isAllowedInUnquotedString(final @NotNull String s) {
+  public static boolean isAllowedInUnquotedString(final String s) {
     for (int i = 0; i < s.length(); i++) {
       final char c = s.charAt(i);
       if (!StringReader.isAllowedInUnquotedString(c))
@@ -219,7 +218,7 @@ public final class ParsingUtil {
   /**
    * 尝试使用不带引号的形式示字符串，如果不行，则带上引号。
    */
-  public static String quoteStringIfNeeded(final @NotNull String s) {
+  public static String quoteStringIfNeeded(final String s) {
     if (isAllowedInUnquotedString(s)) {
       return s;
     } else {
@@ -290,7 +289,7 @@ public final class ParsingUtil {
   /**
    * 通过反射的方式，从 {@link JsonReader} 中读取位置信息。
    */
-  public static int getPos(@NotNull JsonReader jsonReader) {
+  public static int getPos(JsonReader jsonReader) {
     return ParserUtilsAccessor.invokeGetPos(jsonReader) - 1;
   }
 
@@ -321,7 +320,7 @@ public final class ParsingUtil {
    *   <li>{@code 1, 2, 3} -> {@code (1, 2, 3)}</li>
    * </ul>
    */
-  public static @NotNull Vec3 parseShortenableVec3d(StringReader reader) throws CommandSyntaxException {
+  public static Vec3 parseShortenableVec3d(StringReader reader) throws CommandSyntaxException {
     final double x = reader.readDouble();
     final int beforeFirstWhite = reader.getCursor();
     reader.skipWhitespace();

@@ -9,26 +9,28 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.EnumOrRandom;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
-public record RotateBlockFunction(@NotNull EnumOrRandom<Rotation> rotation) implements BlockFunction {
+import java.util.Objects;
+
+public record RotateBlockFunction(EnumOrRandom<Rotation> rotation) implements BlockFunction {
   public static final MapCodec<RotateBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RotateBlockFunction::new, EnumOrRandom.getCodec(Rotation.CODEC, Rotation::values).fieldOf("rotation").forGetter(RotateBlockFunction::rotation)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "rotate(" + rotation.getSerializedName() + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     return blockState.rotate(rotation.apply(level.getRandom()));
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.ROTATE;
   }
 
@@ -36,13 +38,13 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<Rotation> rotation) impl
     ROTATE_TYPE;
 
     @Override
-    public @NotNull MapCodec<RotateBlockFunction> getCodec() {
+    public MapCodec<RotateBlockFunction> getCodec() {
       return CODEC;
     }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<RotateBlockFunction> {
-    private EnumOrRandom<Rotation> rotation;
+    private @Nullable EnumOrRandom<Rotation> rotation;
 
     @Override
     public int minSequentialParamsCount() {
@@ -56,6 +58,7 @@ public record RotateBlockFunction(@NotNull EnumOrRandom<Rotation> rotation) impl
 
     @Override
     public RotateBlockFunction getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(rotation, "rotation");
       return new RotateBlockFunction(rotation);
     }
 

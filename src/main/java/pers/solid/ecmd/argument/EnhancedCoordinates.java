@@ -15,7 +15,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.mixins.accessor.LocalCoordinatesAccessor;
 import pers.solid.ecmd.mixins.accessor.WorldCoordinatesAccessor;
@@ -86,7 +85,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
   Vec3 toAbsolutePos(PositionProvider positionProvider);
 
   @Override
-  default @NotNull Vec3 getPosition(CommandSourceStack source) {
+  default Vec3 getPosition(CommandSourceStack source) {
     return toAbsolutePos(source);
   }
 
@@ -97,7 +96,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
   Vec2 toAbsoluteRotation(PositionProvider positionProvider);
 
   @Override
-  default @NotNull Vec2 getRotation(CommandSourceStack source) {
+  default Vec2 getRotation(CommandSourceStack source) {
     return toAbsoluteRotation(source);
   }
 
@@ -115,7 +114,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
     }
 
     @Override
-    public @NotNull String getSerializedName() {
+    public String getSerializedName() {
       return this.name;
     }
   }
@@ -224,7 +223,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       final StringBuilder sb = new StringBuilder();
       final boolean isInt = intAlignType != null;
       if (xRelative) sb.append('~');
@@ -294,7 +293,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
     }
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       final StringBuilder sb = new StringBuilder();
       sb.append('^');
       if (x() != 0) sb.append(StringUtil.nf.format(x()));

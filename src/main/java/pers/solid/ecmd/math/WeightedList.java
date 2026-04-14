@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
@@ -25,7 +26,7 @@ public sealed interface WeightedList<E> {
    * @param position 元素位置，对于均匀列表相当于元素下标。
    * @return 指定位置的元素。
    */
-  E getElementAt(double position);
+  @Nullable E getElementAt(double position);
 
   double size();
 
@@ -68,7 +69,7 @@ public sealed interface WeightedList<E> {
     }
 
     @Override
-    public E getElementAt(double position) {
+    public @Nullable E getElementAt(double position) {
       if (elements.isEmpty()) {
         return null;
       }

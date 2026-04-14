@@ -14,7 +14,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -90,7 +89,7 @@ public final class NbtUtil {
    * @return 新的 {@link ListTag} 对象。
    */
   @Contract(value = "null -> null; !null -> new", pure = true)
-  public static @Nullable ListTag fromIterable(@Nullable Iterable<@NotNull Tag> elements) {
+  public static @Nullable ListTag fromIterable(@Nullable Iterable<Tag> elements) {
     if (elements == null) return null;
     final ListTag nbtList = new ListTag();
     Iterables.addAll(nbtList, elements);
@@ -103,7 +102,7 @@ public final class NbtUtil {
    * @return 新的 {@link ListTag} 对象。
    */
   @Contract(value = "null, _ -> null; !null, _ -> new", pure = true)
-  public static <T> @Nullable ListTag fromIterable(@Nullable Iterable<@NotNull T> elements, @NotNull Function<T, Tag> function) {
+  public static <T> @Nullable ListTag fromIterable(@Nullable Iterable<T> elements, Function<T, Tag> function) {
     if (elements == null) return null;
     final ListTag nbtList = new ListTag();
     Iterables.addAll(nbtList, Iterables.transform(elements, function));
@@ -116,7 +115,7 @@ public final class NbtUtil {
    * @return 转换后的不可修改的 {@link List} 对象。
    */
   @Contract(value = "null, _ -> null; !null, _ -> new", pure = true)
-  public static <T> @Nullable List<T> toImmutableList(@Nullable ListTag nbtList, @NotNull java.util.function.Function<@NotNull CompoundTag, T> function) {
+  public static <T> @Nullable List<T> toImmutableList(@Nullable ListTag nbtList, java.util.function.Function<CompoundTag, T> function) {
     if (nbtList == null) return null;
     return nbtList.stream().filter(nbtElement -> nbtElement instanceof CompoundTag).map(nbtElement -> (CompoundTag) nbtElement).map(function).toList();
   }
@@ -127,7 +126,7 @@ public final class NbtUtil {
    * 如果 NBT 元素为数字，则直接返回这个值，否则抛出错误。
    */
   @Contract(value = "_, _ -> param1", pure = true)
-  public static @NotNull NumericTag toNumberOrThrow(@NotNull Tag nbtElement, @NotNull NbtPathArgument.NbtPath path) throws CommandSyntaxException {
+  public static NumericTag toNumberOrThrow(Tag nbtElement, NbtPathArgument.NbtPath path) throws CommandSyntaxException {
     if (nbtElement instanceof NumericTag number) {
       return number;
     } else {

@@ -126,9 +126,5 @@ public interface NamedParamListParser {
         break;
       }
     }
-    else {
-      return;
-    }
-
   }
 }

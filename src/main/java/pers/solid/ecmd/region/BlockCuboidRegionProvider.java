@@ -2,7 +2,6 @@ package pers.solid.ecmd.region;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.util.PositionProvider;
 
@@ -18,12 +17,12 @@ public record BlockCuboidRegionProvider(EnhancedCoordinates from, EnhancedCoordi
   }
 
   @Override
-  public @NotNull RegionType<BlockCuboidRegion> getType() {
+  public RegionType<BlockCuboidRegion> getType() {
     return RegionTypes.CUBOID;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "cuboid(" + from.asString() + ", " + to.asString() + ")";
   }
 }

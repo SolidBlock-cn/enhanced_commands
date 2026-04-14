@@ -14,7 +14,6 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.math.EnumOrRandom;
 import pers.solid.ecmd.math.NbtConcentrationType;
@@ -91,13 +90,13 @@ public final class SimpleEnumArgument<E extends Enum<E>> implements ArgumentType
   }
 
   @Override
-  public @NotNull SimpleEnumArgument<E> instantiate(CommandBuildContext commandRegistryAccess) {
+  public SimpleEnumArgument<E> instantiate(CommandBuildContext commandRegistryAccess) {
     return this;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public @NotNull ArgumentTypeInfo<SimpleEnumArgument<E>, SimpleEnumArgument<E>> type() {
+  public ArgumentTypeInfo<SimpleEnumArgument<E>, SimpleEnumArgument<E>> type() {
     return (Info<E>) Info.INSTANCE;
   }
 
@@ -111,7 +110,7 @@ public final class SimpleEnumArgument<E extends Enum<E>> implements ArgumentType
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NotNull SimpleEnumArgument<E> deserializeFromNetwork(FriendlyByteBuf buf) {
+    public SimpleEnumArgument<E> deserializeFromNetwork(FriendlyByteBuf buf) {
       final ResourceLocation id = buf.readResourceLocation();
       return new SimpleEnumArgument<>((CommandEnumType<E>) CommandEnumType.REGISTRY.getOptional(id).orElseThrow(() -> new NoSuchElementException("unknown enum argument type id: " + id)));
     }
@@ -122,7 +121,7 @@ public final class SimpleEnumArgument<E extends Enum<E>> implements ArgumentType
     }
 
     @Override
-    public @NotNull SimpleEnumArgument<E> unpack(SimpleEnumArgument<E> argumentType) {
+    public SimpleEnumArgument<E> unpack(SimpleEnumArgument<E> argumentType) {
       return argumentType;
     }
   }

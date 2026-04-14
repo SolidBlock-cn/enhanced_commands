@@ -16,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.storage.CommandStorage;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.NbtConcentrationType;
 import pers.solid.ecmd.parse.ParseContext;
@@ -79,7 +78,7 @@ public record StorageNbtData(ResourceLocation identifier) implements NbtTarget.S
   }
 
   @Override
-  public void setNbtFor(CommandSourceStack commandSource, CommandStorage target, CompoundTag nbt) throws CommandSyntaxException {
+  public void setNbtFor(CommandSourceStack commandSource, CommandStorage target, CompoundTag nbt) {
     target.set(identifier, nbt);
   }
 
@@ -89,7 +88,7 @@ public record StorageNbtData(ResourceLocation identifier) implements NbtTarget.S
   }
 
   @Override
-  public @NotNull String asString() {
-    return "storage " + identifier.toString();
+  public String asString() {
+    return "storage " + identifier;
   }
 }

@@ -2,7 +2,6 @@ package pers.solid.ecmd.util;
 
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.OptionalLong;
@@ -35,7 +34,7 @@ public class ExecutionContext {
     }
   }
 
-  protected @NotNull SeedStorage<Object> getSplitterStorage() {
+  protected SeedStorage<Object> getSplitterStorage() {
     if (splitterStorage == null) {
       return splitterStorage = new SeedStorage<>(getSeed());
     } else {
@@ -47,15 +46,15 @@ public class ExecutionContext {
     return getSplitterStorage().getSeed(key);
   }
 
-  public @NotNull PositionalRandomFactory getSplitter(Object key) {
+  public PositionalRandomFactory getSplitter(Object key) {
     return getSplitterStorage().getSplitter(key);
   }
 
-  public @NotNull PositionalRandomFactory getSplitterForSeed(long seed) {
+  public PositionalRandomFactory getSplitterForSeed(long seed) {
     return getSplitterStorage().getSplitterForSeed(seed);
   }
 
-  public @NotNull PositionalRandomFactory getSplitterForOptionalSeed(Object key, OptionalLong seed) {
+  public PositionalRandomFactory getSplitterForOptionalSeed(Object key, OptionalLong seed) {
     return seed.isPresent() ? getSplitterForSeed(seed.getAsLong()) : getSplitter(key);
   }
 }

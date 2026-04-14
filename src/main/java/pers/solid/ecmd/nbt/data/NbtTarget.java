@@ -32,7 +32,7 @@ public interface NbtTarget<T> extends NbtSource<T> {
   /**
    * 设置指定的对象的 NBT 数据。
    */
-  void setNbtFor(CommandSourceStack commandSource, T target, CompoundTag nbt) throws CommandSyntaxException;
+  void setNbtFor(CommandSourceStack commandSource, T target, CompoundTag nbt);
 
   default void setNbt(CommandSourceStack source, CompoundTag nbt) throws CommandSyntaxException {
     for (T value : values(source)) {

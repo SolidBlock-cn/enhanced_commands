@@ -1,6 +1,5 @@
 package pers.solid.ecmd.entity.predicate;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -13,7 +12,6 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.StringUtil;
@@ -27,7 +25,7 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
   ).apply(i, EffectsEntityPredicateEntry::new));
 
   @Override
-  public boolean test(@NotNull Entity entity) {
+  public boolean test(Entity entity) {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return false;
     }
@@ -43,7 +41,7 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
   }
 
   @Override
-  public TestResult testAndDescribe(@NotNull Entity entity, @NotNull ExecutionContext context, Component displayName) throws CommandSyntaxException {
+  public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     if (!(entity instanceof final LivingEntity livingEntity)) {
       return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.effect.not_living"));
     }
@@ -84,7 +82,7 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
   }
 
   @Override
-  public @NotNull EntityPredicateType<EffectsEntityPredicateEntry> getType() {
+  public EntityPredicateType<EffectsEntityPredicateEntry> getType() {
     return EntityPredicateTypes.EFFECTS;
   }
 
@@ -106,7 +104,7 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
     ).apply(i, Entry::new));
 
     @Override
-    public @NotNull String asString() {
+    public String asString() {
       final Holder<MobEffect> effectEntry = effect;
       final MobEffectsPredicate.MobEffectInstancePredicate effectData = data;
       final StringJoiner joiner = new StringJoiner(", ", "{", "}");

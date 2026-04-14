@@ -4,7 +4,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -20,26 +19,22 @@ public interface PosPredicatesBasedPosPredicate<T extends PosPredicatesBasedPosP
   }
 
   @Override
-  @NotNull
-  default PosPredicate moved(@NotNull Vec3i relativePos) {
+  default PosPredicate moved(Vec3i relativePos) {
     return newPosPredicateWithTransformation(r -> (R) r.moved(relativePos));
   }
 
   @Override
-  @NotNull
-  default PosPredicate moved(@NotNull Vec3 relativePos) {
+  default PosPredicate moved(Vec3 relativePos) {
     return newPosPredicateWithTransformation(r -> (R) r.moved(relativePos));
   }
 
   @Override
-  @NotNull
-  default PosPredicate rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
+  default PosPredicate rotated(Rotation blockRotation, Vec3 pivot) {
     return newPosPredicateWithTransformation(r -> (R) r.rotated(blockRotation, pivot));
   }
 
   @Override
-  @NotNull
-  default PosPredicate mirrored(@NotNull Direction.Axis axis, @NotNull Vec3 pivot) {
+  default PosPredicate mirrored(Direction.Axis axis, Vec3 pivot) {
     return newPosPredicateWithTransformation(r -> (R) r.mirrored(axis, pivot));
   }
 

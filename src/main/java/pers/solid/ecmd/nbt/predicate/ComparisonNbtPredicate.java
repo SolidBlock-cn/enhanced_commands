@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.property.predicate.Comparator;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
@@ -25,12 +24,12 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implem
   ).apply(i, ComparisonNbtPredicate::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return comparator.getSerializedName() + " " + TextUtil.toSpacedStringNbt(expected);
   }
 
   @Override
-  public boolean test(@NotNull Tag nbtElement) {
+  public boolean test(Tag nbtElement) {
     if (nbtElement instanceof NumericTag actualNumber && expected instanceof NumericTag expectedNumber) {
       final byte actualType = actualNumber.getId();
       final byte expectedType = expectedNumber.getId();
@@ -57,7 +56,7 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implem
   }
 
   @Override
-  public @NotNull NbtPredicateType<ComparisonNbtPredicate> getType() {
+  public NbtPredicateType<ComparisonNbtPredicate> getType() {
     return ComparisonNbtPredicate.Type.COMPARISON_TYPE;
   }
 

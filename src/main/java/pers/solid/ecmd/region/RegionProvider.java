@@ -3,7 +3,6 @@ package pers.solid.ecmd.region;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -15,7 +14,6 @@ import pers.solid.ecmd.util.PositionProvider;
 public interface RegionProvider<R extends Region> extends ExpressionConvertible {
   Codec<RegionProvider<?>> CODEC = RegionType.REGISTRY.byNameCodec().dispatch(RegionProvider::getType, RegionType::getArgumentCodec);
 
-  @NotNull
   static RegionProvider<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorOnStart = reader.getCursor();
@@ -33,6 +31,5 @@ public interface RegionProvider<R extends Region> extends ExpressionConvertible 
 
   R toAbsoluteRegion(PositionProvider positionProvider);
 
-  @NotNull
   RegionType<? super R> getType();
 }

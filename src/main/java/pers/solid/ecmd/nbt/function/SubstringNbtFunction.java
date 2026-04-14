@@ -10,7 +10,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -19,6 +18,7 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -45,7 +45,7 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
   public static final Dynamic2CommandExceptionType EXCEEDS_STRING_LENGTH_INVERSE = new Dynamic2CommandExceptionType((index, length) -> Component.translatable("enhanced_commands.nbt_function.substring.exceeds_string_length_inverse", index, length));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "substring(" + startIndex + (endIndex.isPresent() ? ", " + endIndex.get() : "") + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
@@ -60,12 +60,12 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
   }
 
   @Override
-  public @NotNull NbtFunctionType<SubstringNbtFunction> getType() {
+  public NbtFunctionType<SubstringNbtFunction> getType() {
     return Type.SUBSTRING_TYPE;
   }
 
   @Override
-  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (original.isPresent()) {
       nbtElement = original.get().apply(nbtElement, context);
     }
@@ -113,14 +113,15 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
   }
 
   public static class Parser implements FunctionContentParser.MixedParams<SubstringNbtFunction> {
-    private Integer startIndex, endIndex;
-    private Boolean lenient;
+    private @Nullable Integer startIndex, endIndex;
+    private @Nullable Boolean lenient;
     private @Nullable NbtFunction original;
     private static final Collection<String> SUPPORTED = Set.of("lenient", "original");
 
     @Override
-    public SubstringNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public SubstringNbtFunction getParseResult(ParseContext<?> parseContext) {
       final Optional<Integer> endIndex = Optional.ofNullable(this.endIndex);
+      Objects.requireNonNull(startIndex, "startIndex");
       return new SubstringNbtFunction(startIndex, endIndex, Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
     }
 

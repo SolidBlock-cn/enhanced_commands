@@ -29,7 +29,7 @@ import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
@@ -76,12 +76,12 @@ public final class MixinShared {
    * 如果此值为 {@code true}，那么会抑制 {@link net.minecraft.world.level.chunk.LevelChunk#setBlockState(BlockPos, BlockState, boolean)} 对 {@link BlockState#onRemove(Level, BlockPos, BlockState, boolean)} 的调用。通常来说，这是一个临时的设置，在调用前修改此值，调用后立即复原，以免对其他模组产生影响。
    */
   public static boolean suppressOnStateReplaced = false;
-  private static Reference<CommandBuildContext> commandBuildContextReference;
+  private static @Nullable Reference<CommandBuildContext> commandBuildContextReference;
 
   /**
    * 用于 Packrat 解析并获取建议时的 commandContext 参数，因为原版在使用 Packrat 获取建议时（例如 {@link pers.solid.ecmd.argument.ItemPredicateArgument}）不会传入 commandContext 参数，因此如果要在 mixin 中使用，得设置此字段。
    */
-  public static CommandContext<?> commandContextForPackrat = null;
+  public static @Nullable CommandContext<?> commandContextForPackrat = null;
 
   private MixinShared() {
   }
@@ -96,7 +96,7 @@ public final class MixinShared {
     MixinShared.suppressOnStateReplaced = false;
   }
 
-  public static boolean setBlockStateWithModFlags(@NotNull LevelWriter world, BlockPos blockPos, BlockState blockState, int flags, int modFlags) {
+  public static boolean setBlockStateWithModFlags(LevelWriter world, BlockPos blockPos, BlockState blockState, int flags, int modFlags) {
     MixinShared.implementModFlag(modFlags);
     boolean result;
     try {

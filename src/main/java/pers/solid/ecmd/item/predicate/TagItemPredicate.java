@@ -12,7 +12,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Collectors;
 
@@ -31,12 +30,12 @@ public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateWi
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return ItemPredicateTypes.SIMPLE_TAG;
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return items.unwrap().map(itemTagKey -> "#" + itemTagKey.location(), holders -> holders.stream().map(Holder::getRegisteredName).collect(Collectors.joining("|")));
   }
 
@@ -44,7 +43,7 @@ public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateWi
     SIMPLE_TAG_TYPE;
 
     @Override
-    public @NotNull MapCodec<TagItemPredicate> getCodec() {
+    public MapCodec<TagItemPredicate> getCodec() {
       return CODEC;
     }
   }

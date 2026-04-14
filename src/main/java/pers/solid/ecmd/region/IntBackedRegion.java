@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.GeoUtil;
 import pers.solid.ecmd.util.Styles;
@@ -46,27 +45,24 @@ public interface IntBackedRegion extends Region {
   }
 
   @Override
-  boolean contains(@NotNull Vec3i vec3i);
+  boolean contains(Vec3i vec3i);
 
   @Override
-  default boolean contains(@NotNull Vec3 vec3d) {
+  default boolean contains(Vec3 vec3d) {
     return contains(BlockPos.containing(vec3d));
   }
 
   @Override
-  @NotNull
-  default Region moved(@NotNull Vec3i relativePos) {
+  default Region moved(Vec3i relativePos) {
     return transformedInt(vec3i -> vec3i.offset(relativePos));
   }
 
   @Override
-  @NotNull
-  default Region moved(@NotNull Vec3 relativePos) {
+  default Region moved(Vec3 relativePos) {
     return moved(toFlooredIntOrThrow(relativePos, MOVE_MUST_INT_VECTOR));
   }
 
   @Override
-  @NotNull
   default Region expanded(double offset) {
     if (offset == (int) offset) {
       return expanded((int) offset);
@@ -80,7 +76,6 @@ public interface IntBackedRegion extends Region {
   }
 
   @Override
-  @NotNull
   default Region expanded(double offset, Direction.Axis axis) {
     if (offset == (int) offset) {
       return expanded((int) offset, axis);
@@ -94,7 +89,6 @@ public interface IntBackedRegion extends Region {
   }
 
   @Override
-  @NotNull
   default Region expanded(double offset, Direction direction) {
     if (offset == (int) offset) {
       return expanded((int) offset, direction);
@@ -108,7 +102,6 @@ public interface IntBackedRegion extends Region {
   }
 
   @Override
-  @NotNull
   default Region expanded(double offset, Direction.Plane type) {
     if (offset == (int) offset) {
       return expanded((int) offset, type);
@@ -122,31 +115,27 @@ public interface IntBackedRegion extends Region {
   }
 
   @Override
-  @NotNull
-  default Region rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
+  default Region rotated(Rotation blockRotation, Vec3 pivot) {
     return rotated(toCenteredIntOrThrow(pivot, ROTATION_PIVOT_MUST_CENTER), blockRotation);
   }
 
-  @NotNull
-  default Region rotated(@NotNull Vec3i pivot, @NotNull Rotation blockRotation) {
+  default Region rotated(Vec3i pivot, Rotation blockRotation) {
     return transformedInt(vec3i -> GeoUtil.rotate(vec3i, blockRotation, pivot));
   }
 
   Region transformedInt(Function<Vec3i, Vec3i> transformation);
 
   @Override
-  default @NotNull Region transformed(Function<Vec3, Vec3> transformation) {
+  default Region transformed(Function<Vec3, Vec3> transformation) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  @NotNull
-  default Region mirrored(Direction.@NotNull Axis axis, @NotNull Vec3 pivot) {
+  default Region mirrored(Direction.Axis axis, Vec3 pivot) {
     return mirrored(toCenteredIntOrThrow(pivot, MIRROR_PIVOT_MUST_CENTER), axis);
   }
 
-  @NotNull
-  default Region mirrored(Vec3i pivot, Direction.@NotNull Axis axis) {
+  default Region mirrored(Vec3i pivot, Direction.Axis axis) {
     return transformedInt(vec3i -> GeoUtil.mirror(vec3i, axis, pivot));
   }
 

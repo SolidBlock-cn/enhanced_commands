@@ -12,7 +12,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
@@ -32,42 +31,42 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
   public static final MapCodec<SphereRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.DOUBLE.fieldOf("radius").forGetter(SphereRegion::radius), Vec3.CODEC.fieldOf("center").forGetter(SphereRegion::center)).apply(i, SphereRegion::new));
 
   @Override
-  public boolean contains(@NotNull Vec3 vec3d) {
+  public boolean contains(Vec3 vec3d) {
     return vec3d.closerThan(center, radius);
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     return Streams.stream(new PreciseCuboidRegion(center.add(-radius, -radius, -radius), center.add(radius, radius, radius))).filter(blockPos -> blockPos.closerToCenterThan(center, radius)).iterator();
   }
 
   @Override
-  public @NotNull SphereRegion transformed(Function<Vec3, Vec3> transformation) {
+  public SphereRegion transformed(Function<Vec3, Vec3> transformation) {
     return new SphereRegion(radius, transformation.apply(center));
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.SPHERE;
   }
 
   @Override
-  public @NotNull SphereRegion expanded(double offset) {
+  public SphereRegion expanded(double offset) {
     return new SphereRegion(radius + offset, center);
   }
 
   @Override
-  public @NotNull SphereRegion expanded(double offset, Direction.Plane type) {
+  public SphereRegion expanded(double offset, Direction.Plane type) {
     throw new UnsupportedOperationException(EXPAND_FAILED.create());
   }
 
   @Override
-  public @NotNull SphereRegion expanded(double offset, Direction.Axis axis) {
+  public SphereRegion expanded(double offset, Direction.Axis axis) {
     throw new UnsupportedOperationException(EXPAND_FAILED.create());
   }
 
   @Override
-  public @NotNull SphereRegion expanded(double offset, Direction direction) {
+  public SphereRegion expanded(double offset, Direction direction) {
     throw new UnsupportedOperationException(EXPAND_FAILED.create());
   }
 
@@ -77,12 +76,12 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "sphere(%s, %s)".formatted(StringUtil.nf.format(radius), StringUtil.wrapVector(center));
   }
 
   @Override
-  public @NotNull AABB minContainingBox() {
+  public AABB minContainingBox() {
     return AABB.ofSize(center, 2 * radius, 2 * radius, 2 * radius);
   }
 
@@ -105,12 +104,12 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
     }
 
     @Override
-    public @NotNull MapCodec<SphereRegion> getCodec() {
+    public MapCodec<SphereRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<SphereRegionProvider> getArgumentCodec() {
+    public MapCodec<SphereRegionProvider> getArgumentCodec() {
       return SphereRegionProvider.CODEC;
     }
   }

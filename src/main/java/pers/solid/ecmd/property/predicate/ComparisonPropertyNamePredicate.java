@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
@@ -22,7 +21,7 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
       Codec.STRING.fieldOf("value").forGetter(ComparisonPropertyNamePredicate::valueName)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return propertyName + comparator.getSerializedName() + valueName;
   }
 
@@ -67,7 +66,7 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return Type.COMPARISON;
   }
 }

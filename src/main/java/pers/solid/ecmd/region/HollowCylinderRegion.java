@@ -12,7 +12,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.joml.Vector2d;
@@ -26,7 +25,7 @@ import pers.solid.ecmd.util.enums.OutlineType;
 
 import java.util.*;
 
-public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull CylinderRegion region) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
+public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion region) implements RegionBasedRegion<HollowCylinderRegion, CylinderRegion> {
   public static final MapCodec<HollowCylinderRegion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
           OutlineType.OUTLINE_TYPE_FIELD.forGetter(HollowCylinderRegion::outlineType),
           CylinderRegion.CODEC.fieldOf("region").forGetter(HollowCylinderRegion::region))
@@ -49,12 +48,12 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
   }
 
   @Override
-  public boolean contains(@NotNull Vec3 vec3d) {
+  public boolean contains(Vec3 vec3d) {
     return contains(BlockPos.containing(vec3d));
   }
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     final long topHeight = region.getTopHeight();
     final long bottomHeight = region.getBottomHeight();
     if (outlineType == OutlineType.OUTLINE || outlineType == OutlineType.OUTLINE_CONNECTED || outlineType == OutlineType.FLOOR_AND_CEIL) {
@@ -73,21 +72,21 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
   }
 
   @Override
-  public @NotNull Iterator<BlockPos> iterator() {
+  public Iterator<BlockPos> iterator() {
     final Vec3 center = region.center();
     final double radius = region.radius();
     final int topHeight = region.getTopHeight();
     final int bottomHeight = region.getBottomHeight();
 
-    final Iterable<@NotNull BlockPos> iterable = BlockPos.betweenClosed(Mth.ceil(center.x - radius - 0.5), 0, Mth.ceil(center.z - radius - 0.5), Mth.floor(center.x + radius - 0.5), 0, Mth.floor(center.z + radius - 0.5));
-    final Iterable<@NotNull BlockPos> flatOutlineRound = Iterables.filter(iterable, blockPos -> horizontallyWithinHollowCylinder(region, outlineType, blockPos));
+    final Iterable<BlockPos> iterable = BlockPos.betweenClosed(Mth.ceil(center.x - radius - 0.5), 0, Mth.ceil(center.z - radius - 0.5), Mth.floor(center.x + radius - 0.5), 0, Mth.floor(center.z + radius - 0.5));
+    final Iterable<BlockPos> flatOutlineRound = Iterables.filter(iterable, blockPos -> horizontallyWithinHollowCylinder(region, outlineType, blockPos));
     if (outlineType == OutlineType.OUTLINE || outlineType == OutlineType.OUTLINE_CONNECTED || outlineType == OutlineType.FLOOR_AND_CEIL) {
       if (topHeight == bottomHeight) {
         return Iterables.transform(iterable, blockPos -> blockPos.atY(bottomHeight)).iterator();
       } else if (topHeight < bottomHeight) {
         throw new IllegalStateException("Invalid hollow cylinder! topHeight < bottomHeight, topHeight = " + topHeight + ", bottomHeight = " + bottomHeight);
       }
-      List<Iterable<@NotNull BlockPos>> parts = new ArrayList<>();
+      List<Iterable<BlockPos>> parts = new ArrayList<>();
       // add top and bottom ceiling
       parts.add(Iterables.concat(Iterables.transform(Iterables.filter(iterable, blockPos -> horizontallyWithinCylinder(region, Vec3.atCenterOf(blockPos))), blockPos -> List.of(blockPos.atY(topHeight), blockPos.atY(bottomHeight)))));
       // add walls that excluded the top and bottom ceiling
@@ -107,7 +106,7 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return RegionTypes.HOLLOW_CYLINDER;
   }
 
@@ -123,12 +122,12 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return String.format("hcyl(%s, %s, %s, %s)", StringUtil.nf.format(region.radius()), StringUtil.nf.format(region.height()), StringUtil.wrapVector(region.center()), outlineType.getSerializedName());
   }
 
   @Override
-  public @NotNull AABB minContainingBox() {
+  public AABB minContainingBox() {
     return region.minContainingBox();
   }
 
@@ -151,12 +150,12 @@ public record HollowCylinderRegion(@NotNull OutlineType outlineType, @NotNull Cy
     }
 
     @Override
-    public @NotNull MapCodec<HollowCylinderRegion> getCodec() {
+    public MapCodec<HollowCylinderRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionProvider<HollowCylinderRegion>> getArgumentCodec() {
+    public MapCodec<? extends RegionProvider<HollowCylinderRegion>> getArgumentCodec() {
       return HollowCylinderRegionProvider.CODEC;
     }
   }

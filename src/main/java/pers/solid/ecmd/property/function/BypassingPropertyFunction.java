@@ -7,7 +7,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 /**
@@ -33,7 +32,7 @@ public record BypassingPropertyFunction<T extends Comparable<T>>(Property<T> pro
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return property.getName() + (must ? "==~" : "=~");
   }
 

@@ -1,6 +1,5 @@
 package pers.solid.ecmd.mixins.accessor;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
@@ -35,7 +34,7 @@ public interface EntitySelectorAccessor {
   Function<Vec3, Vec3> getPosition();
 
   @Invoker
-  void callCheckPermissions(CommandSourceStack source) throws CommandSyntaxException;
+  void callCheckPermissions(CommandSourceStack source);
 
   @Accessor
   @Nullable AABB getAabb();

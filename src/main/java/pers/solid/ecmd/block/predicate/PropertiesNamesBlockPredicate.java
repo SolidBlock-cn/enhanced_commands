@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
@@ -27,11 +26,11 @@ import java.util.stream.Collectors;
 /**
  * @see TagBlockPredicate#properties
  */
-public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate> predicates) implements BlockPredicate {
+public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicates) implements BlockPredicate {
   public static final MapCodec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(",", "[", "]"));
   }
 
@@ -68,7 +67,7 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockPredicateTypes.PROPERTY_NAMES;
   }
 
@@ -76,7 +75,7 @@ public record PropertiesNamesBlockPredicate(@NotNull List<PropertyNamePredicate>
     PROPERTY_NAMES_TYPE;
 
     @Override
-    public @NotNull MapCodec<PropertiesNamesBlockPredicate> getCodec() {
+    public MapCodec<PropertiesNamesBlockPredicate> getCodec() {
       return CODEC;
     }
 

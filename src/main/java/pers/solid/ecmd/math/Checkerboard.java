@@ -4,7 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.block.function.WeightedListParser;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -22,16 +22,13 @@ import java.util.Set;
 public interface Checkerboard<T> {
   Vec3 UNIT = new Vec3(1, 1, 1);
 
-  @NotNull
   Vec3 floor();
 
-  @NotNull
   Vec3 scale();
 
-  @NotNull
   Vec3 offset();
 
-  default T getEntry(@NotNull WeightedList<T> entries, BlockPos pos) {
+  default @Nullable T getEntry(WeightedList<T> entries, BlockPos pos) {
     final Vec3 offset = offset();
     final Vec3 floor = floor();
     final Vec3 scale = scale();
@@ -66,12 +63,11 @@ public interface Checkerboard<T> {
 
   abstract class CheckerboardParser<T> implements FunctionContentParser<T>, NamedParamListParser {
     protected final Set<String> SUPPORTED_PARAMS = Set.of("scale", "floor", "offset");
-    public final WeightedListParser<T> weightedListParser = WeightedListParser.of(parseContext -> parseElement(parseContext));
-    protected Vec3 scale = null;
-    protected Vec3 floor = null;
-    protected Vec3 offset = null;
-    protected int cursorBeforeFunctionName;
-    protected WeightedList<T> weightedList;
+    public final WeightedListParser<T> weightedListParser = WeightedListParser.of(this::parseElement);
+    protected @Nullable Vec3 scale = null;
+    protected @Nullable Vec3 floor = null;
+    protected @Nullable Vec3 offset = null;
+    protected @Nullable WeightedList<T> weightedList;
 
     @Override
     public @Unmodifiable Collection<String> supportedParams() {
@@ -79,7 +75,7 @@ public interface Checkerboard<T> {
     }
 
     @Override
-    public T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public T getParseResult(ParseContext<?> parseContext) {
       if (scale == null) {
         scale = UNIT;
       }

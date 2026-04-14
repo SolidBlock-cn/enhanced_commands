@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
@@ -36,7 +35,7 @@ public class SimpleBooleanEntityPredicateType implements EntityPredicateType<Sim
   }
 
   @Override
-  public @NotNull MapCodec<SimpleBooleanEntityPredicateEntry> codec() {
+  public MapCodec<SimpleBooleanEntityPredicateEntry> codec() {
     return codec;
   }
 }

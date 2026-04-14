@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
@@ -15,7 +14,7 @@ public interface ItemFunction extends ExpressionConvertible {
   MapCodec<ItemFunction> MAP_CODEC = ItemFunctionType.REGISTRY.byNameCodec().dispatchMap(ItemFunction::getType, ItemFunctionType::getCodec);
   Codec<ItemFunction> CODEC = MAP_CODEC.codec();
 
-  @NotNull ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context);
+  ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context);
 
-  @NotNull ItemFunctionType<?> getType();
+  ItemFunctionType<?> getType();
 }

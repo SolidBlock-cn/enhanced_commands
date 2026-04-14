@@ -14,7 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -22,6 +22,7 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -31,12 +32,12 @@ import java.util.regex.Pattern;
  */
 public final class IdContainBlockFunction implements BlockFunction {
   public static final MapCodec<IdContainBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(IdContainBlockFunction::new, CodecUtil.PATTERN.fieldOf("pattern").forGetter(IdContainBlockFunction::pattern), CodecUtil.optionalLongFieldOf("seed").forGetter(IdContainBlockFunction::seed)));
-  private final @NotNull Pattern pattern;
+  private final Pattern pattern;
   private final OptionalLong seed;
-  private transient Level world;
-  private transient Block[] blocks;
+  private transient @Nullable Level world;
+  private transient Block @Nullable [] blocks;
 
-  public IdContainBlockFunction(@NotNull Pattern pattern, OptionalLong seed) {
+  public IdContainBlockFunction(Pattern pattern, OptionalLong seed) {
     this.pattern = pattern;
     this.seed = seed;
   }
@@ -45,8 +46,8 @@ public final class IdContainBlockFunction implements BlockFunction {
     return seed;
   }
 
-  public @NotNull Block[] getBlocks(@NotNull Level world) {
-    if (!world.equals(this.world)) {
+  public Block[] getBlocks(Level world) {
+    if (!world.equals(this.world) || blocks == null) {
       blocks = world.holderLookup(Registries.BLOCK).listElements().filter(reference -> pattern.matcher(reference.key().location().toString()).find()).map(Holder.Reference::value).toArray(Block[]::new);
       this.world = world;
     }
@@ -54,12 +55,12 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "idcontain(" + StringTag.quoteAndEscape(pattern.toString()) + (seed.isPresent() ? ", seed = " + seed.getAsLong() : "") + ")";
   }
 
   @Override
-  public @NotNull BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
     final Block[] blocks = getBlocks(level);
     final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(pos);
     if (blocks.length == 0) {
@@ -69,7 +70,7 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public @NotNull Type getType() {
+  public Type getType() {
     return BlockFunctionTypes.ID_CONTAIN;
   }
 
@@ -90,7 +91,7 @@ public final class IdContainBlockFunction implements BlockFunction {
     return result;
   }
 
-  public @NotNull Pattern pattern() {
+  public Pattern pattern() {
     return pattern;
   }
 
@@ -98,7 +99,7 @@ public final class IdContainBlockFunction implements BlockFunction {
     ID_CONTAIN_TYPE;
 
     @Override
-    public @NotNull MapCodec<IdContainBlockFunction> getCodec() {
+    public MapCodec<IdContainBlockFunction> getCodec() {
       return CODEC;
     }
 
@@ -106,11 +107,12 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   public static class Parser implements FunctionContentParser.MixedParams<IdContainBlockFunction> {
     private static final Set<String> SUPPORTED_PARAM_NAMES = ImmutableSet.of("seed");
-    private Pattern pattern;
+    private @Nullable Pattern pattern;
     private OptionalLong seed = OptionalLong.empty();
 
     @Override
     public IdContainBlockFunction getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(pattern, "pattern");
       return new IdContainBlockFunction(pattern, seed);
     }
 

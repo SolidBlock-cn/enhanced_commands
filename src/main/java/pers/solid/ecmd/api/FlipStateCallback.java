@@ -5,7 +5,6 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.*;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * 本模组对方块状态进行上下的翻转时的事件，用于在 {@link #getMirroredState(BlockState, Direction.Axis)} 中在进行上下翻转时使用。对于水平方向的翻转，请直接使用 {@link BlockState#mirror(Mirror)} 方法。
@@ -28,13 +27,13 @@ public interface FlipStateCallback {
    * @param original     在一整个事件调用之前的方块状态。
    * @return 上下翻转后的方块状态。
    */
-  @NotNull BlockState getFlippedState(@NotNull BlockState intermediate, @NotNull BlockState original);
+  BlockState getFlippedState(BlockState intermediate, BlockState original);
 
   /**
    * 上下翻转方块状态，此方法不能实现多个事件的嵌套。请不要覆盖此方法。
    */
   @ApiStatus.NonExtendable
-  default @NotNull BlockState getFlippedState(@NotNull BlockState blockState) {
+  default BlockState getFlippedState(BlockState blockState) {
     return getFlippedState(blockState, blockState);
   }
 

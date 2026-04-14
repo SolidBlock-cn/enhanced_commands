@@ -147,7 +147,7 @@ public enum RotateCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public void transformEntity(@NotNull Entity entity) {
+      public void transformEntity(Entity entity) {
         final float newYaw;
         if (blockRotation != null) {
           newYaw = entity.rotate(blockRotation);
@@ -162,7 +162,7 @@ public enum RotateCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public void transformEntityBack(@NotNull Entity entity) {
+      public void transformEntityBack(Entity entity) {
         final float newYaw;
         if (blockRotation != null) {
           newYaw = entity.rotate(switch (blockRotation) {
@@ -182,12 +182,12 @@ public enum RotateCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public @NotNull BlockState transformBlockState(@NotNull BlockState original) {
+      public BlockState transformBlockState(BlockState original) {
         return original.rotate(nearestBlockRotation);
       }
 
       @Override
-      public @NotNull Region transformRegion(@NotNull Region region) {
+      public Region transformRegion(Region region) {
         return region.rotated(nearestBlockRotation, pivot.getCenter());
       }
 
@@ -201,7 +201,7 @@ public enum RotateCommand implements CommandRegistrationCallbackBridge {
       }
 
       @Override
-      public @NotNull MutableComponent getIteratorTaskName(Region region) {
+      public MutableComponent getIteratorTaskName(Region region) {
         return Component.translatable("enhanced_commands.commands.rotate.task", region.asString());
       }
     };

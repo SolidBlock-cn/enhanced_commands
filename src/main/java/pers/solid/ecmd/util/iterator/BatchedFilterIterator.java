@@ -19,17 +19,17 @@ import java.util.function.Predicate;
  * <blockquote><u>1</u> <u>0 0 0</u> <u>0 1</u> <u>0 0 1</u> <u>0 1</u> <u>1</u> <u>0 1</u> <u>0 0 0</u></blockquote>
  */
 public final class BatchedFilterIterator<T> extends AbstractIterator<@Nullable T> {
-  private final Iterator<T> forward;
+  private final Iterator<@Nullable T> forward;
   private final int batchSize;
-  private final Predicate<T> predicate;
+  private final Predicate<@Nullable T> predicate;
 
-  public BatchedFilterIterator(Iterator<T> forward, int batchSize, Predicate<T> predicate) {
+  public BatchedFilterIterator(Iterator<@Nullable T> forward, int batchSize, Predicate<@Nullable T> predicate) {
     this.forward = forward;
     this.batchSize = batchSize;
     this.predicate = predicate;
   }
 
-  public Iterator<T> forward() {
+  public Iterator<@Nullable T> forward() {
     return forward;
   }
 
@@ -37,12 +37,12 @@ public final class BatchedFilterIterator<T> extends AbstractIterator<@Nullable T
     return batchSize;
   }
 
-  public Predicate<T> predicate() {
+  public Predicate<@Nullable T> predicate() {
     return predicate;
   }
 
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(@Nullable Object obj) {
     if (obj == this) return true;
     if (obj == null || obj.getClass() != this.getClass()) return false;
     var that = (BatchedFilterIterator<?>) obj;
@@ -66,7 +66,7 @@ public final class BatchedFilterIterator<T> extends AbstractIterator<@Nullable T
   }
 
   @Override
-  protected T computeNext() {
+  protected @Nullable T computeNext() {
     for (int i = 0; i < batchSize; i++) {
       if (forward.hasNext()) {
         final var value = forward.next();
@@ -81,7 +81,7 @@ public final class BatchedFilterIterator<T> extends AbstractIterator<@Nullable T
   }
 
   @Override
-  public void forEachRemaining(Consumer<? super T> action) {
+  public void forEachRemaining(Consumer<? super @Nullable T> action) {
     while (forward.hasNext()) {
       final T next = forward.next();
       if (predicate.test(next)) action.accept(next);

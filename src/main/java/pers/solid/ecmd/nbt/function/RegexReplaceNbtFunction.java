@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -17,6 +16,7 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -40,17 +40,17 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
   ).apply(i, RegexReplaceNbtFunction::new));
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "regex_replace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
   }
 
   @Override
-  public @NotNull NbtFunctionType<RegexReplaceNbtFunction> getType() {
+  public NbtFunctionType<RegexReplaceNbtFunction> getType() {
     return Type.REGEX_TYPE;
   }
 
   @Override
-  public @NotNull Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (original.isPresent()) {
       nbtElement = original.get().apply(nbtElement, context);
     }
@@ -122,13 +122,15 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
 
   public static class Parser implements FunctionContentParser.MixedParams<RegexReplaceNbtFunction> {
     private static final Set<String> SUPPORTED = Set.of("recursive", "lenient", "original");
-    private Pattern regex;
-    private String replacement;
-    private Boolean recursive, lenient;
-    private NbtFunction original;
+    private @Nullable Pattern regex;
+    private @Nullable String replacement;
+    private @Nullable Boolean recursive, lenient;
+    private @Nullable NbtFunction original;
 
     @Override
-    public RegexReplaceNbtFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public RegexReplaceNbtFunction getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(regex, "regex");
+      Objects.requireNonNull(replacement, "replacement");
       return new RegexReplaceNbtFunction(regex, replacement, Boolean.TRUE.equals(recursive), Boolean.TRUE.equals(lenient), Optional.ofNullable(original));
     }
 

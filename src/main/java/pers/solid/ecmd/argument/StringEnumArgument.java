@@ -15,7 +15,6 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.ArrayList;
@@ -59,12 +58,12 @@ public record StringEnumArgument(Collection<String> values, boolean acceptsOther
   }
 
   @Override
-  public @NotNull StringEnumArgument instantiate(CommandBuildContext commandRegistryAccess) {
+  public StringEnumArgument instantiate(CommandBuildContext commandRegistryAccess) {
     return this;
   }
 
   @Override
-  public @NotNull ArgumentTypeInfo<StringEnumArgument, ?> type() {
+  public ArgumentTypeInfo<StringEnumArgument, ?> type() {
     return Info.INSTANCE;
   }
 
@@ -78,7 +77,7 @@ public record StringEnumArgument(Collection<String> values, boolean acceptsOther
     }
 
     @Override
-    public @NotNull StringEnumArgument deserializeFromNetwork(FriendlyByteBuf buf) {
+    public StringEnumArgument deserializeFromNetwork(FriendlyByteBuf buf) {
       return new StringEnumArgument(buf.readCollection(ArrayList::new, ByteBufCodecs.STRING_UTF8), buf.readBoolean());
     }
 
@@ -93,7 +92,7 @@ public record StringEnumArgument(Collection<String> values, boolean acceptsOther
     }
 
     @Override
-    public @NotNull StringEnumArgument unpack(StringEnumArgument argumentType) {
+    public StringEnumArgument unpack(StringEnumArgument argumentType) {
       return argumentType;
     }
   }

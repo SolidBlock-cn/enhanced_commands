@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
 import pers.solid.ecmd.argument.EnhancedPosArgument;
@@ -22,6 +21,7 @@ import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -71,19 +71,18 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     return new BlockCuboidRegion(Math.min(x1, x2), Math.min(y1, y2), Math.min(z1, z2), Math.max(x1, x2), Math.max(y1, y2), Math.max(z1, z2));
   }
 
-  @NotNull
   @Override
   public Iterator<BlockPos> iterator() {
     return BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ).iterator();
   }
 
   @Override
-  public @NotNull BlockCuboidRegion moved(@NotNull Vec3i relativePos) {
+  public BlockCuboidRegion moved(Vec3i relativePos) {
     return new BlockCuboidRegion(minX + relativePos.getX(), minY + relativePos.getY(), minZ + relativePos.getZ(), maxX + relativePos.getX(), maxY + relativePos.getY(), maxZ + relativePos.getZ());
   }
 
   @Override
-  public @NotNull Region moved(@NotNull Vec3 relativePos) {
+  public Region moved(Vec3 relativePos) {
     if (relativePos.x % 1d == 0 && relativePos.y % 1d == 0 && relativePos.z % 1d == 0) {
       return moved(new Vec3i((int) relativePos.x, (int) relativePos.y, (int) relativePos.z));
     } else {
@@ -92,7 +91,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region rotated(@NotNull Rotation blockRotation, @NotNull Vec3 pivot) {
+  public Region rotated(Rotation blockRotation, Vec3 pivot) {
     if (pivot.equals(Vec3.atCenterOf(BlockPos.containing(pivot)))) {
       return rotated(BlockPos.containing(pivot), blockRotation);
     } else {
@@ -101,7 +100,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region mirrored(Direction.@NotNull Axis axis, @NotNull Vec3 pivot) {
+  public Region mirrored(Direction.Axis axis, Vec3 pivot) {
     if (pivot.equals(Vec3.atCenterOf(BlockPos.containing(pivot)))) {
       return mirrored(BlockPos.containing(pivot), axis);
     } else {
@@ -123,12 +122,12 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region transformed(Function<Vec3, Vec3> transformation) {
+  public Region transformed(Function<Vec3, Vec3> transformation) {
     return asCuboidRegion().transformed(transformation);
   }
 
   @Override
-  public @NotNull Region expanded(double offset) {
+  public Region expanded(double offset) {
     if (offset % 1 == 0) {
       return expanded((int) offset);
     } else {
@@ -136,12 +135,12 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
   }
 
-  public @NotNull BlockCuboidRegion expanded(int offset) {
+  public BlockCuboidRegion expanded(int offset) {
     return new BlockCuboidRegion(blockBox().inflatedBy(offset));
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction.Axis axis) {
+  public Region expanded(double offset, Direction.Axis axis) {
     if (offset % 1 == 0) {
       return expanded((int) offset, axis);
     } else {
@@ -149,7 +148,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
   }
 
-  public @NotNull BlockCuboidRegion expanded(int offset, Direction.Axis axis) {
+  public BlockCuboidRegion expanded(int offset, Direction.Axis axis) {
     var x = axis.choose(offset, 0, 0);
     var y = axis.choose(0, offset, 0);
     var z = axis.choose(0, 0, offset);
@@ -157,7 +156,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction direction) {
+  public Region expanded(double offset, Direction direction) {
     if (offset % 1 == 0) {
       return expanded((int) offset, direction);
     } else {
@@ -165,7 +164,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
   }
 
-  public @NotNull BlockCuboidRegion expanded(int offset, Direction direction) {
+  public BlockCuboidRegion expanded(int offset, Direction direction) {
     var vector = direction.getNormal().multiply(offset);
     if (direction.getStepX() + direction.getStepY() + direction.getStepZ() > 0) {
       return new BlockCuboidRegion(minX, minY, minZ, maxX + vector.getX(), maxY + vector.getY(), maxZ + vector.getZ());
@@ -175,7 +174,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull Region expanded(double offset, Direction.Plane type) {
+  public Region expanded(double offset, Direction.Plane type) {
     if (offset % 1 == 0) {
       return expanded((int) offset, type);
     } else {
@@ -184,7 +183,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull BlockCuboidRegion expanded(int offset, Direction.Plane type) {
+  public BlockCuboidRegion expanded(int offset, Direction.Plane type) {
     return switch (type) {
       case HORIZONTAL -> new BlockCuboidRegion(minX - offset, minY, minZ - offset, maxX + offset, maxY, maxZ + offset);
       case VERTICAL -> new BlockCuboidRegion(minX, minY - offset, minZ, maxX, maxY + offset, maxZ);
@@ -192,7 +191,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull BlockCuboidRegion.Type getType() {
+  public BlockCuboidRegion.Type getType() {
     return RegionTypes.CUBOID;
   }
 
@@ -202,7 +201,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull BoundingBox minContainingBlockBox() {
+  public BoundingBox minContainingBlockBox() {
     return blockBox();
   }
 
@@ -212,7 +211,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public @NotNull String asString() {
+  public String asString() {
     return "cuboid(%s %s %s, %s %s %s)".formatted(Integer.toString(minX), Integer.toString(minY), Integer.toString(minZ), Integer.toString(maxX), Integer.toString(maxY), Integer.toString(maxZ));
   }
 
@@ -222,12 +221,12 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public boolean contains(@NotNull Vec3i vec3i) {
+  public boolean contains(Vec3i vec3i) {
     return minX <= vec3i.getX() && vec3i.getX() <= maxX && minY <= vec3i.getY() && vec3i.getY() <= maxY && minZ <= vec3i.getZ() && vec3i.getZ() <= maxZ;
   }
 
   @Override
-  public boolean contains(@NotNull Vec3 vec3d) {
+  public boolean contains(Vec3 vec3d) {
     return contains(BlockPos.containing(vec3d));
   }
 
@@ -250,22 +249,23 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
     }
 
     @Override
-    public @NotNull MapCodec<BlockCuboidRegion> getCodec() {
+    public MapCodec<BlockCuboidRegion> getCodec() {
       return CODEC;
     }
 
     @Override
-    public @NotNull MapCodec<? extends RegionProvider<? extends BlockCuboidRegion>> getArgumentCodec() {
+    public MapCodec<? extends RegionProvider<? extends BlockCuboidRegion>> getArgumentCodec() {
       return BlockCuboidRegionProvider.CODEC;
     }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<BlockCuboidRegionProvider> {
-    private EnhancedCoordinates from;
-    private EnhancedCoordinates to;
+    private @Nullable EnhancedCoordinates from;
+    private @Nullable EnhancedCoordinates to;
 
     @Override
     public BlockCuboidRegionProvider getParseResult(ParseContext<?> parseContext) {
+      Objects.requireNonNull(from, "from");
       return new BlockCuboidRegionProvider(from, to == null ? from : to);
     }
 
