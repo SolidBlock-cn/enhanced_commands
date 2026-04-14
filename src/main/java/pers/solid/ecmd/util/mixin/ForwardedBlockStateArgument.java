@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.function.block.BlockFunction;
-import pers.solid.ecmd.function.block.BlockFunctionContext;
+import pers.solid.ecmd.block.function.BlockFunction;
+import pers.solid.ecmd.block.function.BlockFunctionContext;
 
 import java.util.Set;
 

@@ -12,7 +12,7 @@ import pers.solid.ecmd.argument.KeywordArgs;
 import pers.solid.ecmd.argument.KeywordArgsArgument;
 import pers.solid.ecmd.argument.KeywordArgsCommon;
 import pers.solid.ecmd.argument.RegionArgument;
-import pers.solid.ecmd.function.block.PostProcessBlockFunction;
+import pers.solid.ecmd.block.function.PostProcessBlockFunction;
 import pers.solid.ecmd.region.RegionProvider;
 
 import static net.minecraft.commands.Commands.argument;

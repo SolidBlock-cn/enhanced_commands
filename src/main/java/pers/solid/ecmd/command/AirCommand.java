@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.math.NbtConcentrationType;
-import pers.solid.ecmd.nbt.NbtTarget;
+import pers.solid.ecmd.nbt.data.NbtTarget;
 import pers.solid.ecmd.util.NbtUtil;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;

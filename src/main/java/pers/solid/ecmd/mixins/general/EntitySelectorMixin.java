@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.predicate.entity.EntitySelectorCollector;
+import pers.solid.ecmd.entity.predicate.EntitySelectorCollector;
 import pers.solid.ecmd.util.extension.EntitySelectorExtension;
 
 import java.util.List;

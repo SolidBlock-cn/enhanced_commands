@@ -3,7 +3,7 @@ package pers.solid.ecmd.util.extension;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import org.jetbrains.annotations.Contract;
 import pers.solid.ecmd.mixins.general.EntitySelectorMixin;
-import pers.solid.ecmd.predicate.entity.EntitySelectorExtras;
+import pers.solid.ecmd.entity.predicate.EntitySelectorExtras;
 
 /**
  * 此接口通过 {@link EntitySelectorMixin} 使得 {@link EntitySelector} 实现。

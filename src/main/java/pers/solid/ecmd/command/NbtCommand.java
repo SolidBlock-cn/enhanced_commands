@@ -15,11 +15,11 @@ import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
-import pers.solid.ecmd.function.nbt.*;
 import pers.solid.ecmd.math.NbtConcentrationType;
-import pers.solid.ecmd.nbt.NbtSource;
-import pers.solid.ecmd.nbt.NbtTarget;
-import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.nbt.data.NbtSource;
+import pers.solid.ecmd.nbt.data.NbtTarget;
+import pers.solid.ecmd.nbt.function.*;
+import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.ArrayList;

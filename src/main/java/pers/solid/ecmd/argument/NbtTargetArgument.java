@@ -11,11 +11,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.api.CommandContextHelper;
-import pers.solid.ecmd.nbt.BlockNbtData;
-import pers.solid.ecmd.nbt.NbtDataRegistry;
-import pers.solid.ecmd.nbt.NbtTarget;
+import pers.solid.ecmd.block.predicate.BlockPredicate;
+import pers.solid.ecmd.nbt.data.BlockNbtData;
+import pers.solid.ecmd.nbt.data.NbtDataRegistry;
+import pers.solid.ecmd.nbt.data.NbtTarget;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.predicate.block.BlockPredicate;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
 import java.util.Collection;

@@ -10,9 +10,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.block.predicate.*;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
-import pers.solid.ecmd.predicate.block.*;
 
 import java.util.List;
 import java.util.OptionalLong;

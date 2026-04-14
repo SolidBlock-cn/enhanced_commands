@@ -2,7 +2,7 @@ package pers.solid.ecmd.util.extension;
 
 import net.minecraft.commands.arguments.item.ComponentPredicateParser;
 import net.minecraft.core.HolderLookup;
-import pers.solid.ecmd.predicate.item.ItemPredicate;
+import pers.solid.ecmd.item.predicate.ItemPredicate;
 
 import java.util.List;
 

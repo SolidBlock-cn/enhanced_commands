@@ -8,7 +8,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
-import pers.solid.ecmd.function.block.BlockFunction;
+import pers.solid.ecmd.block.function.BlockFunction;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;

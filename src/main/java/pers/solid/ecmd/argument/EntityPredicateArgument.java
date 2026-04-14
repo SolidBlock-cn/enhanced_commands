@@ -11,8 +11,8 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import pers.solid.ecmd.predicate.entity.EntityPredicate;
-import pers.solid.ecmd.predicate.entity.EntitySelectors;
+import pers.solid.ecmd.entity.predicate.EntityPredicate;
+import pers.solid.ecmd.entity.predicate.EntitySelectors;
 
 import java.util.Collection;
 import java.util.List;

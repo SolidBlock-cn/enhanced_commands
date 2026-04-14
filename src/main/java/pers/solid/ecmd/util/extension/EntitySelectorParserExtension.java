@@ -4,9 +4,9 @@ import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Contract;
 import pers.solid.ecmd.mixins.general.EntitySelectorParserMixin;
-import pers.solid.ecmd.predicate.entity.EntityPredicateEntry;
-import pers.solid.ecmd.predicate.entity.EntitySelectorReaderExtras;
-import pers.solid.ecmd.predicate.entity.StaticEntityPredicate;
+import pers.solid.ecmd.entity.predicate.EntityPredicateEntry;
+import pers.solid.ecmd.entity.predicate.EntitySelectorReaderExtras;
+import pers.solid.ecmd.entity.predicate.StaticEntityPredicate;
 
 import java.util.function.Predicate;
 

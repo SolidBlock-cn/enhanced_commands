@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.predicate.item.*;
+import pers.solid.ecmd.item.predicate.*;
 import pers.solid.ecmd.util.extension.ComponentPredicateParserContextExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 

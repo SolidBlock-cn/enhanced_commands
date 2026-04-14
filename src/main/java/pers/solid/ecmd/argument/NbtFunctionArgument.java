@@ -12,8 +12,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
-import pers.solid.ecmd.function.nbt.CompoundNbtFunction;
-import pers.solid.ecmd.function.nbt.NbtFunction;
+import pers.solid.ecmd.nbt.function.CompoundNbtFunction;
+import pers.solid.ecmd.nbt.function.NbtFunction;
+import pers.solid.ecmd.nbt.function.NbtFunctionParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.concurrent.CompletableFuture;
