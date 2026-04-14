@@ -7,8 +7,8 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
+import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.data.BlockPredicateDataGeneration;
-import pers.solid.ecmd.predicate.block.BlockPredicate;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -20,7 +20,7 @@ import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.NbtTargetArgument;
 import pers.solid.ecmd.config.CommandsConfig;
 import pers.solid.ecmd.mixins.accessor.ExecuteCommandAccessor;
-import pers.solid.ecmd.nbt.NbtTarget;
+import pers.solid.ecmd.nbt.data.NbtTarget;
 import pers.solid.ecmd.region.ActiveRegionProvider;
 
 import java.util.Collections;

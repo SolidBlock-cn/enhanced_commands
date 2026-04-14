@@ -9,8 +9,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import pers.solid.ecmd.nbt.NbtDataRegistry;
-import pers.solid.ecmd.nbt.NbtSource;
+import pers.solid.ecmd.nbt.data.NbtDataRegistry;
+import pers.solid.ecmd.nbt.data.NbtSource;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 

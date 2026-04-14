@@ -8,8 +8,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.function.block.BlockFunction;
-import pers.solid.ecmd.predicate.block.BlockPredicate;
+import pers.solid.ecmd.block.function.BlockFunction;
+import pers.solid.ecmd.block.predicate.BlockPredicate;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;

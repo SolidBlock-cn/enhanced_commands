@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Entity;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.argument.EntityPredicateArgument;
-import pers.solid.ecmd.predicate.entity.EntityPredicate;
+import pers.solid.ecmd.entity.predicate.EntityPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;

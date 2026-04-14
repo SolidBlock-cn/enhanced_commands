@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import pers.solid.ecmd.function.block.WeightedListParser;
+import pers.solid.ecmd.block.function.WeightedListParser;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;

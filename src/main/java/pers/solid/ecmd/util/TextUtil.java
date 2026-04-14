@@ -21,8 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.function.nbt.NbtFunction;
-import pers.solid.ecmd.predicate.nbt.NbtPredicate;
+import pers.solid.ecmd.nbt.function.NbtFunction;
+import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
