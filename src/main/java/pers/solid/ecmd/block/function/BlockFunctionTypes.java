@@ -84,9 +84,9 @@ public final class BlockFunctionTypes {
 
   private static void registerFunctionNames() {
     final Map<String, Component> map = BlockFunctionParsing.FUNCTION_NAMES;
-    map.put("pick", Component.translatable("enhanced_commands.block_function.pick"));
+    map.put("pick", Component.translatable("enhanced_commands.function.pick"));
     map.put("dry", Component.translatable("enhanced_commands.block_function.dry"));
-    map.put("overlay", Component.translatable("enhanced_commands.block_function.overlay"));
+    map.put("overlay", Component.translatable("enhanced_commands.function.overlay"));
     map.put("filter", Component.translatable("enhanced_commands.block_function.filter"));
     map.put("idcontain", Component.translatable("enhanced_commands.block_function.id_contain"));
     map.put("stonecut", Component.translatable("enhanced_commands.block_function.stone_cut"));

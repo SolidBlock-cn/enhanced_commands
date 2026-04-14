@@ -116,10 +116,8 @@ public final class NbtPredicateParser {
    */
   public static <S> NbtPredicate parseCompound(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    parseContext.setSuggestion(NbtParserShared::suggestCompoundStart);
-    reader.expect('{');
-    parseContext.clearSuggestion();
-    reader.skipWhitespace();
+    NbtParserShared.handleCompoundStart(parseContext, reader);
+
     ListMultimap<String, NbtPredicate> entries = LinkedListMultimap.create();
 
     while (!reader.canRead() || reader.peek() != '}') {
@@ -141,23 +139,14 @@ public final class NbtPredicateParser {
       }
 
       reader.skipWhitespace();
-      entries.put(key, NbtPredicateParser.parseNbtPredicate(parseContext, true, false));
-      parseContext.terminateSuggestionsIfNotEmpty();
-      parseContext.addSuggestion(NbtParserShared::suggestCompoundSeparate);
-      if (reader.canRead() && reader.peek() == ',') {
-        reader.skip();
-        parseContext.clearSuggestion();
-        reader.skipWhitespace();
-      } else {
+      entries.put(key, parseNbtPredicate(parseContext, true, false));
+
+      if (NbtParserShared.handleCompoundSeparate(parseContext, reader)) {
         break;
       }
     }
 
-    reader.skipWhitespace();
-    parseContext.terminateSuggestionsIfNotEmpty();
-    parseContext.addSuggestion(NbtParserShared::suggestCompoundEnd);
-    reader.expect('}');
-    parseContext.clearSuggestion();
+    NbtParserShared.handleCompoundEnd(parseContext, reader);
     if (isUsingEqual) {
       try {
         return new EqualsCompoundNbtPredicate(entries.entries().stream().collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, Map.Entry::getValue)));
@@ -176,12 +165,10 @@ public final class NbtPredicateParser {
    */
   public static <S> NbtPredicate parseList(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    reader.expect('[');
-    reader.skipWhitespace();
+    NbtParserShared.handListStart(parseContext, reader);
+
     final List<NbtPredicate> expected = new ArrayList<>();
     final List<PositionalListEntry<NbtPredicate>> expectedPositional = isUsingEqual ? null : new ArrayList<>();
-
-    parseContext.addSuggestion(NbtParserShared::suggestListEnd);
     while (!reader.canRead() || reader.peek() != ']') {
       int cursorBeforeListElement = reader.getCursor();
       boolean isUsingPositionalPredicate = false;
@@ -194,7 +181,7 @@ public final class NbtPredicateParser {
         try {
           final int index = reader.readInt();
           reader.skipWhitespace();
-          final NbtPredicate nbtPredicate = NbtPredicateParser.parseNbtPredicate(parseContext, true, false);
+          final NbtPredicate nbtPredicate = parseNbtPredicate(parseContext, true, false);
           expectedPositional.add(new PositionalListEntry<>(index, nbtPredicate));
           isUsingPositionalPredicate = true;
         } catch (CommandSyntaxException e) {
@@ -206,7 +193,7 @@ public final class NbtPredicateParser {
       }
       if (!isUsingPositionalPredicate) {
         try {
-          final NbtPredicate nbtPredicate = NbtPredicateParser.parseNbtPredicate(parseContext, false, isUsingEqual);
+          final NbtPredicate nbtPredicate = parseNbtPredicate(parseContext, false, isUsingEqual);
           expected.add(nbtPredicate);
         } catch (CommandSyntaxException exception) {
           if (exceptionWhenParsingPositionalPredicate != null) {
@@ -220,21 +207,12 @@ public final class NbtPredicateParser {
       }
 
       reader.skipWhitespace();
-      parseContext.terminateSuggestionsIfNotEmpty();
-      parseContext.addSuggestion(NbtParserShared::suggestListSeparate);
-      if (reader.canRead() && reader.peek() == ',') {
-        reader.skip();
-        parseContext.clearSuggestion();
-        reader.skipWhitespace();
-      } else {
+      if (NbtParserShared.handleListSeparate(parseContext, reader)) {
         break;
       }
     }
 
-    reader.skipWhitespace();
-    parseContext.addSuggestion(NbtParserShared::suggestListEnd);
-    reader.expect(']');
-    parseContext.clearSuggestion();
+    NbtParserShared.handleListEnd(parseContext, reader);
     return isUsingEqual ? new EqualsListNbtPredicate(expected) : new MatchListNbtPredicate(expected, expectedPositional);
   }
 
@@ -349,7 +327,7 @@ public final class NbtPredicateParser {
       return parseList(parseContext.withAllowSparse(true), isUsingEqual);
     } else if (reader.peek() == '(') {
       final ParseContext<S> parseContextSparse = parseContext.withAllowSparse(true);
-      return ParsingUtil.parseParentheses(() -> NbtPredicateParser.parseNbtPredicate(parseContextSparse, false, isUsingEqual), parseContextSparse);
+      return ParsingUtil.parseParentheses(() -> parseNbtPredicate(parseContextSparse, false, isUsingEqual), parseContextSparse);
     } else if (reader.peek() == '!') {
       reader.skip();
       reader.skipWhitespace();

@@ -54,8 +54,8 @@ public interface BlockFunction extends ExpressionConvertible {
       either -> either.map(Function.identity(), Function.identity()));
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_function.cannot_parse"));
-  Component OVERLAY_TOOLTIP = Component.translatable("enhanced_commands.block_function.overlay.symbol_tooltip");
-  Component PICK_TOOLTIP = Component.translatable("enhanced_commands.block_function.pick.symbol_tooltip");
+  Component OVERLAY_TOOLTIP = Component.translatable("enhanced_commands.function.overlay.symbol_tooltip");
+  Component PICK_TOOLTIP = Component.translatable("enhanced_commands.function.pick.symbol_tooltip");
 
   static BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     return parsePick(parseContext);

@@ -38,7 +38,7 @@ import java.util.function.Function;
  * @param suggestionsOnly 解析过程中是否仅提供建议，而非实际进行解析。如果为 {@code true}，那么一些不影响后续解析过程的操作可以不进行。
  * @param allowSparse     对于特定类型的语法，是否允许各部分用空格隔开。一般来说，直接用作命令参数、外面没有括号时，是 {@code false}。如果是在括号（或有明显其他割开定界符的环境）内解析，则为 {@code true}。在解析内容时，如果设置到在括号等语法内解析另一个对象，则通常来说此字段应该是 {@code true}。例如，在直接作为命令参数时，方块函数 {@code a|b} 不能写成 {@code a | b}，但是在被括号括起来的情况下，添加空格则完全没有问题，例如 {@code (a|b)} 和 {@code (a | b)} 都正确。
  */
-public record ParseContext<S>(HolderLookup.Provider registries, StringReader reader, List<SuggestionProvider<S>> suggestions, boolean suggestionsOnly, boolean allowSparse) {
+public record ParseContext<S>(HolderLookup.@Nullable Provider registries, StringReader reader, List<SuggestionProvider<S>> suggestions, boolean suggestionsOnly, boolean allowSparse) {
   public ParseContext(String string) {
     this(new StringReader(string));
   }
@@ -51,7 +51,7 @@ public record ParseContext<S>(HolderLookup.Provider registries, StringReader rea
     this(registries, new StringReader(string), suggestionsOnly, allowSparse);
   }
 
-  public ParseContext(HolderLookup.Provider registries, StringReader reader, boolean suggestionsOnly, boolean allowSparse) {
+  public ParseContext(HolderLookup.@Nullable Provider registries, StringReader reader, boolean suggestionsOnly, boolean allowSparse) {
     this(registries, reader, new ArrayList<>(), suggestionsOnly, allowSparse);
   }
 
@@ -60,7 +60,7 @@ public record ParseContext<S>(HolderLookup.Provider registries, StringReader rea
    *
    * @see com.mojang.brigadier.CommandDispatcher#getCompletionSuggestions(ParseResults, int)
    */
-  public static <S> CompletableFuture<Suggestions> buildSuggestions(List<SuggestionProvider<S>> suggestions, CommandContext<S> context, SuggestionsBuilder builder) {
+  public static <S> CompletableFuture<Suggestions> buildSuggestions(@Nullable List<SuggestionProvider<S>> suggestions, CommandContext<S> context, SuggestionsBuilder builder) {
     if (suggestions == null) {
       return Suggestions.empty();
     }
@@ -231,7 +231,7 @@ public record ParseContext<S>(HolderLookup.Provider registries, StringReader rea
     return ParsingUtil.parseValues(this.reader, valueGetter);
   }
 
-  public <T extends Enum<T> & StringRepresentable> T parseAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip, FailableFunction<String, T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
+  public <T extends Enum<T> & StringRepresentable> T parseAndSuggestEnums(Iterable<T> iterable, Function<T, @Nullable Message> tooltip, FailableFunction<String, @Nullable T, CommandSyntaxException> valueGetter) throws CommandSyntaxException {
     return parseAndSuggestValues(iterable, StringRepresentable::getSerializedName, tooltip, valueGetter);
   }
 
