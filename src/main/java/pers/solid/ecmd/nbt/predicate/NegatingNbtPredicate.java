@@ -27,7 +27,7 @@ public record NegatingNbtPredicate(NbtPredicate predicate) implements NbtPredica
 
     @Override
     public MapCodec<NegatingNbtPredicate> getCodec() {
-      return null;
+      return CODEC;
     }
   }
 }

@@ -10,8 +10,8 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map, boolean inverted) implements NbtPredicate {
-  public static final MapCodec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("predicates").forGetter(EqualsCompoundNbtPredicate::map), Codec.BOOL.optionalFieldOf("inverted", false).forGetter(EqualsCompoundNbtPredicate::inverted)));
+public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map) implements NbtPredicate {
+  public static final MapCodec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("predicates").forGetter(EqualsCompoundNbtPredicate::map)));
 
   @Override
   public String asString() {
@@ -20,7 +20,7 @@ public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map, boolean 
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (inverted ? "!" : "") + (requirePrefix ? "= " : "") + "{" + map.entrySet().stream().map(entry -> {
+    return (requirePrefix ? "= " : "") + "{" + map.entrySet().stream().map(entry -> {
       final String key = entry.getKey();
       final String keyAsString;
       final NbtPredicate value = entry.getValue();
@@ -37,18 +37,18 @@ public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map, boolean 
   @Override
   public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final CompoundTag nbtCompound))
-      return inverted;
+      return false;
     if (nbtCompound.size() != map.size())
-      return inverted;
+      return false;
     for (Map.Entry<String, NbtPredicate> entry : map.entrySet()) {
       final String key = entry.getKey();
       final NbtPredicate valuePredicate = entry.getValue();
       final Tag actualElement = nbtCompound.get(key);
       if (actualElement == null || !valuePredicate.test(actualElement)) {
-        return inverted;
+        return false;
       }
     }
-    return !inverted;
+    return true;
   }
 
   @Override

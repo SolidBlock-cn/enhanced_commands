@@ -7,6 +7,7 @@ import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.Codec;
@@ -132,14 +133,15 @@ public final class ParsingUtil {
    * @param parseUnit 解析括号内的内容。
    * @throws CommandSyntaxException 当有左括号但缺失右括号时。
    */
-  public static <T, E extends Throwable> @Nullable T parseParentheses(FailableSupplier<T, E> parseUnit, ParseContext<?> parseContext) throws E, CommandSyntaxException {
+  public static <T extends @Nullable Object, E extends Throwable> T parseParentheses(FailableSupplier<T, E> parseUnit, ParseContext<?> parseContext) throws E, CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     parseContext.addSuggestion((context, suggestionsBuilder) -> suggestString("(", suggestionsBuilder).buildFuture());
     if (reader.canRead() && reader.peek() == '(') {
       reader.skip();
       reader.skipWhitespace();
       final T parse = parseUnit.get();
-      parseContext.setSuggestion((context, suggestionsBuilder) -> suggestString(")", suggestionsBuilder).buildFuture());
+//      parseContext.terminateSuggestionsIfNotEmpty();
+      parseContext.addSuggestion((context, suggestionsBuilder) -> suggestString(")", suggestionsBuilder).buildFuture());
       reader.skipWhitespace();
       reader.expect(')');
       parseContext.clearSuggestion();
@@ -157,13 +159,14 @@ public final class ParsingUtil {
    * @param joiningString        多个值之间用于间隔的间隔字符串。
    * @param joiningStringTooltip 当为 {@code joiningString} 提供建议时，应该显示的提示文本（tooltip）。
    */
-  public static <T, E extends Throwable> T parseUnifiable(FailableSupplier<T, E> parseUnit, FailableFunction<List<T>, T, E> merger, String joiningString, Message joiningStringTooltip, ParseContext<?> parseContext) throws E {
+  public static <T, E extends Throwable, S> T parseUnifiable(FailableSupplier<T, E> parseUnit, FailableFunction<List<T>, T, E> merger, String joiningString, Message joiningStringTooltip, ParseContext<S> parseContext) throws E {
     final T first = parseUnit.get();
     final StringReader reader = parseContext.reader();
     final int cursorBeforeWhite = reader.getCursor();
     int cursorAfterLastUnit = cursorBeforeWhite;
     if (parseContext.allowSparse()) reader.skipWhitespace();
-    parseContext.addSuggestion((context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder).buildFuture());
+    final SuggestionProvider<S> joiningStringSuggestion = (context, suggestionsBuilder) -> suggestString(joiningString, joiningStringTooltip, suggestionsBuilder).buildFuture();
+    parseContext.addSuggestion(joiningStringSuggestion);
     if (reader.getString().startsWith(joiningString, reader.getCursor())) {
       final List<T> units = new ArrayList<>();
       units.add(first);
@@ -174,6 +177,7 @@ public final class ParsingUtil {
         units.add(parseUnit.get());
         cursorAfterLastUnit = reader.getCursor();
         if (parseContext.allowSparse()) reader.skipWhitespace();
+        parseContext.addSuggestion(joiningStringSuggestion);
       }
       reader.setCursor(cursorAfterLastUnit);
       return merger.apply(units);

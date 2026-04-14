@@ -10,6 +10,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
@@ -25,7 +27,7 @@ public record DryBlockFunction(BlockFunction function) implements BlockFunction 
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
     BlockState state = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
       state = state.setValue(BlockStateProperties.WATERLOGGED, false);

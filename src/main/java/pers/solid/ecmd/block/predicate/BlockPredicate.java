@@ -41,8 +41,8 @@ public interface BlockPredicate extends ExpressionConvertible {
   ResourceKey<Registry<BlockPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_predicate"));
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));
-  Component INTERSECT_TOOLTIP = Component.translatable("enhanced_commands.block_predicate.all.symbol_tooltip");
-  Component UNION_TOOLTIP = Component.translatable("enhanced_commands.block_predicate.any.symbol_tooltip");
+  Component INTERSECT_TOOLTIP = Component.translatable("enhanced_commands.predicate.all.symbol_tooltip");
+  Component UNION_TOOLTIP = Component.translatable("enhanced_commands.predicate.any.symbol_tooltip");
 
   static TestResult successResult(BlockPos blockPos) {
     return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.pass", TextUtil.wrapVector(blockPos)));
@@ -99,7 +99,7 @@ public interface BlockPredicate extends ExpressionConvertible {
     });
     if (reader.canRead() && reader.peek() == '{') {
       // 尝试读取 NBT
-      nbtPredicate = new NbtPredicateParser<>(parseContext).parseCompound(false, false);
+      nbtPredicate = NbtPredicateParser.parseCompound(parseContext, false);
     } else nbtPredicate = null;
     if (propertyNamePredicates != null || nbtPredicate != null) {
       return new PropertiesNbtCombinationBlockPredicate(parseUnit, propertyNamePredicates == null ? null : new PropertiesNamesBlockPredicate(propertyNamePredicates), nbtPredicate == null ? null : new NbtBlockPredicate(nbtPredicate));

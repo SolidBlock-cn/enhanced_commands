@@ -12,6 +12,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
@@ -20,7 +22,7 @@ public record ReferenceBlockFunction(ResourceKey<BlockFunction> id) implements B
   public static final MapCodec<ReferenceBlockFunction> CODEC = ReferenceEntry.createCodec(BlockFunction.REGISTRY_KEY, ReferenceBlockFunction::new);
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, MutableObject<CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
     try {
       if (!(level instanceof ServerLevel serverWorld)) {
         return blockState;

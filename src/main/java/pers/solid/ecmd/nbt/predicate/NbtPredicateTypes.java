@@ -13,6 +13,8 @@ public class NbtPredicateTypes {
   private static final RegistryBridge<NbtPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtPredicateType.REGISTRY);
 
   // 基本的 NBT 谓词
+  public static final NbtPredicateType<AllNbtPredicate> ALL = register("all", AllNbtPredicate.Type.ALL_TYPE);
+  public static final NbtPredicateType<AnyNbtPredicate> ANY = register("any", AnyNbtPredicate.Type.ANY_TYPE);
   public static final NbtPredicateType<ComparisonNbtPredicate> COMPARISON = register("comparison", ComparisonNbtPredicate.Type.COMPARISON_TYPE);
   public static final NbtPredicateType<ConstantNbtPredicate> CONSTANT = register("constant", ConstantNbtPredicate.Type.CONSTANT_TYPE);
   public static final NbtPredicateType<EqualsCompoundNbtPredicate> EQUALS_COMPOUND = register("equals_compound", EqualsCompoundNbtPredicate.Type.EQUALS_COMPOUND_TYPE);
@@ -38,6 +40,8 @@ public class NbtPredicateTypes {
 
   private static void registerFunctions() {
     final Map<String, Supplier<FunctionContentParser<? extends NbtPredicate>>> map = NbtPredicateParsing.FUNCTIONS;
+    map.put("all", AllNbtPredicate.Parser::new);
+    map.put("any", AnyNbtPredicate.Parser::new);
     map.put("regex", RegexNbtPredicate.Parser::new);
   }
 

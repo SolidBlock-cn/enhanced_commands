@@ -79,9 +79,9 @@ public record PropertiesNbtCombinationBlockPredicate(BlockPredicate base, @Nulla
     if (attachments.size() == 1) {
       return attachments.get(0);
     } else if (Iterables.all(attachments, TestResult::successes)) {
-      return TestResult.of(true, Component.translatable("enhanced_commands.block_predicate.all.pass"), attachments);
+      return TestResult.of(true, Component.translatable("enhanced_commands.predicate.all.pass"), attachments);
     } else {
-      return TestResult.of(false, Component.translatable("enhanced_commands.block_predicate.all.fail"), attachments);
+      return TestResult.of(false, Component.translatable("enhanced_commands.predicate.all.fail"), attachments);
     }
   }
 

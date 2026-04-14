@@ -1,6 +1,5 @@
 package pers.solid.ecmd.nbt.predicate;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
@@ -27,11 +26,10 @@ import java.util.stream.Stream;
  *   [=[2, 3], =[4, 5]] match [[2, 3, 4, 5]] -> false
  * </pre>
  */
-public record MatchListNbtPredicate(List<NbtPredicate> expected, List<PositionalListEntry<NbtPredicate>> positionalExpected, boolean inverted) implements NbtPredicate {
+public record MatchListNbtPredicate(List<NbtPredicate> expected, List<PositionalListEntry<NbtPredicate>> positionalExpected) implements NbtPredicate {
   public static final MapCodec<MatchListNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(MatchListNbtPredicate::expected),
-      PositionalListEntry.codec(NbtPredicate.CODEC).listOf().fieldOf("positional_expected").forGetter(MatchListNbtPredicate::positionalExpected),
-      Codec.BOOL.optionalFieldOf("inverted", false).forGetter(MatchListNbtPredicate::inverted)
+      PositionalListEntry.codec(NbtPredicate.CODEC).listOf().fieldOf("positional_expected").forGetter(MatchListNbtPredicate::positionalExpected)
   ).apply(i, MatchListNbtPredicate::new));
 
   @Override
@@ -41,7 +39,7 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (inverted ? "!" : "") + (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::asString), positionalExpected.stream().map(pair -> {
+    return (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::asString), positionalExpected.stream().map(pair -> {
       final String valueAsString = pair.value().asString(true);
       return pair.index() + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
     })).collect(Collectors.joining(", ")) + "]";
@@ -50,7 +48,7 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
   @Override
   public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof ListTag nbtList)) {
-      return inverted;
+      return false;
     }
     for (NbtPredicate nbtPredicate : expected) {
       boolean elementMatched = false;
@@ -61,7 +59,7 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
         }
       }
       if (!elementMatched)
-        return inverted;
+        return false;
     }
     final int size = nbtList.size();
     for (PositionalListEntry<NbtPredicate> pair : positionalExpected) {
@@ -71,13 +69,13 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
       }
       if (expectedIndex >= 0 && size > expectedIndex) {
         if (!pair.value().test(nbtList.get(expectedIndex))) {
-          return inverted;
+          return false;
         }
       } else {
-        return inverted;
+        return false;
       }
     }
-    return !inverted;
+    return true;
   }
 
   @Override

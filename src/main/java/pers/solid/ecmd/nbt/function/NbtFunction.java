@@ -10,8 +10,8 @@ import net.minecraft.resources.ResourceKey;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
@@ -90,8 +90,7 @@ public interface NbtFunction extends ExpressionConvertible {
   }
 
   static <S> NbtFunction parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
-    final NbtFunctionParser<S> n = new NbtFunctionParser<>(parseContext);
-    return n.parseNbtFunction(mustExpectSign, equalsForDefault);
+    return NbtFunctionParser.parseNbtFunction(parseContext, mustExpectSign, equalsForDefault);
   }
 
   /**

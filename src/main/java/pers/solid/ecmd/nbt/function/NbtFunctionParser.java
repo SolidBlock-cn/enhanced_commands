@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public class NbtFunctionParser<S> {
+public final class NbtFunctionParser {
   public static final Component MERGE = Component.translatable("enhanced_commands.nbt_function.merge");
   public static final Component EQUAL = Component.translatable("enhanced_commands.nbt_function.equal");
   public static final SimpleCommandExceptionType SIGN_EXPECTED = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.sign_expected"));
@@ -34,10 +34,8 @@ public class NbtFunctionParser<S> {
   public static final Component REMOVE_KEY = Component.translatable("enhanced_commands.nbt_function.remove_key");
   public static final Component ECLIPSE = Component.translatable("enhanced_commands.nbt_function.eclipse");
   public static final SimpleCommandExceptionType DUPLICATE_ECLIPSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.duplicate_eclipse"));
-  private final ParseContext<S> parseContext;
 
-  public NbtFunctionParser(ParseContext<S> parseContext) {
-    this.parseContext = parseContext;
+  private NbtFunctionParser() {
   }
 
   private static CompletableFuture<Suggestions> suggestCompoundRemoveKey(CommandContext<?> context, SuggestionsBuilder suggestionsBuilder) {
@@ -60,7 +58,7 @@ public class NbtFunctionParser<S> {
     return suggestionsBuilder.buildFuture();
   }
 
-  public boolean parseSign(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
+  public static <S> boolean parseSign(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorBeforeSign = reader.getCursor();
     parseContext.addSuggestion((context, suggestionsBuilder) -> {
@@ -80,7 +78,7 @@ public class NbtFunctionParser<S> {
     return NbtParserShared.parseColonOrEqual(mustExpectSign, equalsForDefault, reader, cursorBeforeSign, SIGN_EXPECTED);
   }
 
-  public CompoundNbtFunction parseCompound(boolean isUsingEqual) throws CommandSyntaxException {
+  public static <S> CompoundNbtFunction parseCompound(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     parseContext.setSuggestion(NbtParserShared::suggestCompoundStart);
     reader.expect('{');
@@ -110,7 +108,7 @@ public class NbtFunctionParser<S> {
 
       reader.skipWhitespace();
       if (!markAsRemoveKey) {
-        entries.put(key, parseNbtFunction(true, false));
+        entries.put(key, NbtFunctionParser.parseNbtFunction(parseContext, true, false));
       } else {
         if (reader.canRead() && (reader.peek() == ':' || reader.peek() == '=')) {
           throw EnhancedCommandSyntaxException.withCursorEnd(SIGN_UNEXPECTED_WHEN_REMOVING_KEY.createWithContext(reader), reader.getCursor() + 1);
@@ -141,7 +139,7 @@ public class NbtFunctionParser<S> {
    *
    * @see TagParser#readListTag()
    */
-  public NbtFunction parseList(boolean isUsingEqual) throws CommandSyntaxException {
+  public static <S> NbtFunction parseList(ParseContext<S> parseContext, boolean isUsingEqual) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     reader.expect('[');
     reader.skipWhitespace();
@@ -181,7 +179,7 @@ public class NbtFunctionParser<S> {
             final int index = reader.readInt();
             reader.skipWhitespace();
             parseContext.clearSuggestion();
-            final NbtFunction nbtFunction = parseNbtFunction(true, false);
+            final NbtFunction nbtFunction = NbtFunctionParser.parseNbtFunction(parseContext, true, false);
             parseContext.terminateSuggestionsIfNotEmpty();
             instructions.add(Pair.of(index, nbtFunction));
             isUsingPositionalPredicate = true;
@@ -194,7 +192,7 @@ public class NbtFunctionParser<S> {
         }
         if (!isUsingPositionalPredicate) {
           try {
-            final NbtFunction nbtFunction = parseNbtFunction(false, isUsingEqual);
+            final NbtFunction nbtFunction = NbtFunctionParser.parseNbtFunction(parseContext, false, isUsingEqual);
             parseContext.terminateSuggestionsIfNotEmpty();
             instructions.add(Pair.of(null, nbtFunction));
           } catch (CommandSyntaxException exception) {
@@ -261,26 +259,26 @@ public class NbtFunctionParser<S> {
   }
 
 
-  public NbtFunction parseNbtFunction(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
+  public static <S> NbtFunction parseNbtFunction(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     // 尝试解析函数名称；如果不是函数语法，则恢复 cursor 重新解析；如果是函数语法，则按照函数语法解析，如果函数不存在，则报错。
     final StringReader reader = parseContext.reader();
 
     // 解析等号和不等号
-    final boolean isUsingEqual = parseBeforeFunctionName(mustExpectSign, equalsForDefault, reader);
+    final boolean isUsingEqual = NbtFunctionParser.parseBeforeFunctionName(parseContext, mustExpectSign, equalsForDefault, reader);
 
     final int cursorBeforeValue = reader.getCursor();
     parseContext.addSuggestion((context, suggestionsBuilder) -> suggestValueDifferentTypes(suggestionsBuilder.createOffset(cursorBeforeValue)));
 
-    final NbtFunction functionGrammar = parseFunctionGrammar(reader);
+    final NbtFunction functionGrammar = NbtFunctionParser.parseFunctionGrammar(parseContext, reader);
     if (functionGrammar != null) return functionGrammar;
 
     if (!reader.canRead()) {
       throw TagParser.ERROR_EXPECTED_VALUE.createWithContext(reader);
     }
     if (reader.peek() == '{') {
-      return parseCompound(isUsingEqual);
+      return parseCompound(parseContext, isUsingEqual);
     } else if (reader.peek() == '[' && !(reader.canRead(3) && !StringReader.isQuotedStringStart(reader.peek()) && reader.peek(2) == ';')) {
-      return parseList(isUsingEqual);
+      return parseList(parseContext, isUsingEqual);
     } else {
       final Tag element = new TagParser(reader).readValue();
 
@@ -295,21 +293,21 @@ public class NbtFunctionParser<S> {
   /**
    * 解析复合标签或者函数语法的函数，不会解析其他类型如数字、列表等。与 {@link #parseCompound} 不同的是，仍会解析函数语法，尽管这些情况下的 NBT 函数运行的结果不一定是复合标签。
    */
-  public NbtFunction parsePreferringCompound(boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
+  public static <S> NbtFunction parsePreferringCompound(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
 
     // 解析等号和不等号
-    final boolean isUsingEqual = parseBeforeFunctionName(mustExpectSign, equalsForDefault, reader);
+    final boolean isUsingEqual = NbtFunctionParser.parseBeforeFunctionName(parseContext, mustExpectSign, equalsForDefault, reader);
 
-    final NbtFunction functionGrammar = parseFunctionGrammar(reader);
+    final NbtFunction functionGrammar = NbtFunctionParser.parseFunctionGrammar(parseContext, reader);
     if (functionGrammar != null) return functionGrammar;
 
     parseContext.terminateSuggestionsIfNotEmpty();
     parseContext.addSuggestion(NbtParserShared::suggestCompoundStart);
-    return parseCompound(isUsingEqual);
+    return parseCompound(parseContext, isUsingEqual);
   }
 
-  private @Nullable NbtFunction parseFunctionGrammar(StringReader reader) throws CommandSyntaxException {
+  private static @Nullable <S> NbtFunction parseFunctionGrammar(ParseContext<S> parseContext, StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeFunctionName = reader.getCursor();
     final NbtFunction functionGrammar = NbtFunctionParsing.FUNCTIONS_PARSER.parse(parseContext);
     if (functionGrammar != null) {
@@ -320,9 +318,9 @@ public class NbtFunctionParser<S> {
     return null;
   }
 
-  private boolean parseBeforeFunctionName(boolean mustExpectSign, boolean equalsForDefault, StringReader reader) throws CommandSyntaxException {
+  private static <S> boolean parseBeforeFunctionName(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault, StringReader reader) throws CommandSyntaxException {
     final int cursorBeforeSign = reader.getCursor();
-    final boolean isUsingEqual = parseSign(mustExpectSign, equalsForDefault);
+    final boolean isUsingEqual = parseSign(parseContext, mustExpectSign, equalsForDefault);
 
     final boolean hasExplicitSign = cursorBeforeSign != reader.getCursor();
     reader.skipWhitespace();

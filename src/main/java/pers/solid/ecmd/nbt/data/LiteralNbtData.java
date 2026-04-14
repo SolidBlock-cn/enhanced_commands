@@ -28,7 +28,7 @@ public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Singl
 
   public static LiteralNbtData handle(ParseContext<?> parseContext) throws CommandSyntaxException {
     ParsingUtil.expectAndSkipWhitespace(parseContext.reader());
-    final NbtFunction nbtFunction = new NbtFunctionParser<>(parseContext).parseNbtFunction(false, false);
+    final NbtFunction nbtFunction = NbtFunctionParser.parseNbtFunction(parseContext, false, false);
     return new LiteralNbtData(nbtFunction);
   }
 

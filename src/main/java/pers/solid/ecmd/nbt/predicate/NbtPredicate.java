@@ -21,25 +21,29 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<Tag> {
   ResourceKey<Registry<NbtPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate"));
 
   static NbtPredicate parse(CommandBuildContext commandBuildContext, String s, CommandSourceStack source) throws CommandSyntaxException {
-    return new NbtPredicateParser<>(new ParseContext<>(commandBuildContext, new StringReader(s), false, true)).parseNbtPredicate(false, false);
+    return NbtPredicateParser.parseNbtPredicate(new ParseContext<>(commandBuildContext, new StringReader(s), false, true), false, false);
   }
 
   static <S> NbtPredicate parse(ParseContext<S> parseContext, boolean mustExpectSign, boolean equalsForDefault) throws CommandSyntaxException {
-    final NbtPredicateParser<S> n = new NbtPredicateParser<>(parseContext);
-    return n.parseNbtPredicate(mustExpectSign, equalsForDefault);
+    return NbtPredicateParser.parseNbtPredicate(parseContext, mustExpectSign, equalsForDefault);
   }
 
   @Override
   String asString();
 
   default String asString(boolean requirePrefix) {
-    return asString();
+    return requirePrefix ? ": " + asString() : asString();
   }
 
   @Override
   boolean test(Tag nbtElement);
 
   NbtPredicateType<?> getType();
+
+  @Override
+  default NbtPredicate negate() {
+    return new NegatingNbtPredicate(this);
+  }
 
   enum Type implements StringRepresentable {
     COMPARISON("comparison"),

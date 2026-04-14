@@ -63,8 +63,8 @@ public final class BlockPredicateTypes {
 
   private static void registerFunctionNames() {
     final Map<String, Component> map = BlockPredicateParsing.FUNCTION_NAMES;
-    map.put("all", Component.translatable("enhanced_commands.block_predicate.all"));
-    map.put("any", Component.translatable("enhanced_commands.block_predicate.any"));
+    map.put("all", Component.translatable("enhanced_commands.predicate.all"));
+    map.put("any", Component.translatable("enhanced_commands.predicate.any"));
     map.put("checkerboard", Component.translatable("enhanced_commands.block_predicate.checkerboard"));
     map.put("diff", Component.translatable("enhanced_commands.block_predicate.bi_predicate_diff"));
     map.put("expose", Component.translatable("enhanced_commands.block_predicate.expose"));
