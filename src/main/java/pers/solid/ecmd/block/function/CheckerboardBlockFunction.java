@@ -29,7 +29,7 @@ public record CheckerboardBlockFunction(WeightedList<BlockFunction> functions, V
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<CheckerboardBlockFunction> getType() {
     return BlockFunctionTypes.CHECKERBOARD;
   }
 
@@ -45,15 +45,6 @@ public record CheckerboardBlockFunction(WeightedList<BlockFunction> functions, V
     sb.append(functions.asString(ExpressionConvertible::asString));
     appendParameters(sb);
     return sb.append(")").toString();
-  }
-
-  public enum Type implements BlockFunctionType<CheckerboardBlockFunction> {
-    CHECKERBOARD_TYPE;
-
-    @Override
-    public MapCodec<CheckerboardBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser extends CheckerboardParser<BlockFunction> {

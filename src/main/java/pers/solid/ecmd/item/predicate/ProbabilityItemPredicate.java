@@ -37,7 +37,7 @@ public record ProbabilityItemPredicate(float probability, ItemPredicate predicat
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<ProbabilityItemPredicate> getType() {
     return ItemPredicateTypes.PROBABILITY;
   }
 
@@ -48,15 +48,6 @@ public record ProbabilityItemPredicate(float probability, ItemPredicate predicat
       return "probability(" + probability + seedParams + ")";
     } else {
       return "probability(" + probability + ", " + predicate.asString() + seedParams + ")";
-    }
-  }
-
-  public enum Type implements ItemPredicateType<ProbabilityItemPredicate> {
-    PROBABILITY_TYPE;
-
-    @Override
-    public MapCodec<ProbabilityItemPredicate> getCodec() {
-      return CODEC;
     }
   }
 

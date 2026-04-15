@@ -47,17 +47,8 @@ public record FilterBlockFunction(BlockFunction function, BlockPredicate predica
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<FilterBlockFunction> getType() {
     return BlockFunctionTypes.FILTER;
-  }
-
-  public enum Type implements BlockFunctionType<FilterBlockFunction> {
-    FILTER_TYPE;
-
-    @Override
-    public MapCodec<FilterBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<FilterBlockFunction> {

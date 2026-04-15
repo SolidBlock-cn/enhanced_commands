@@ -47,7 +47,7 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   }
 
   @Override
-  public BlockPredicateType<?> getType() {
+  public BlockPredicateType<NoiseBlockPredicate> getType() {
     return BlockPredicateTypes.NOISE;
   }
 
@@ -56,15 +56,6 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
     final String listString = list.asString(ExpressionConvertible::asString);
     final String parametersString = asParametersString();
     return "noise(" + listString + (parametersString.isEmpty() ? "" : "; " + parametersString) + ")";
-  }
-
-  public enum Type implements BlockPredicateType<NoiseBlockPredicate> {
-    NOISE_TYPE;
-
-    @Override
-    public MapCodec<NoiseBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser extends Noise.Parser<BlockPredicate> {

@@ -123,22 +123,8 @@ public record StraightCurve(Vec3 from, Vec3 to) implements Curve {
   }
 
   @Override
-  public Type getType() {
-    return Type.INSTANCE;
-  }
-
-  public enum Type implements CurveType<StraightCurve> {
-    INSTANCE;
-
-    @Override
-    public MapCodec<StraightCurve> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends CurveProvider<? extends StraightCurve>> getArgumentCodec() {
-      return StraightCurveProvider.CODEC;
-    }
+  public CurveType<StraightCurve> getType() {
+    return CurveTypes.STRAIGHT;
   }
 
   protected static final class Parser implements FunctionContentParser.SequentialParams<CurveProvider<StraightCurve>> {

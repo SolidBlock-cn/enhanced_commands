@@ -35,7 +35,7 @@ public record ReferenceBlockFunction(ResourceKey<BlockFunction> id) implements B
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<ReferenceBlockFunction> getType() {
     return BlockFunctionTypes.REFERENCE;
   }
 
@@ -46,20 +46,15 @@ public record ReferenceBlockFunction(ResourceKey<BlockFunction> id) implements B
 
   @Override
   public CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-    return Type.INSTANCE.createExceptionForUnknownId(reader, identifier);
+    return Parser.INSTANCE.createExceptionForUnknownId(reader, identifier);
   }
 
 
-  public static class Type extends PrefixedIdParser<ReferenceBlockFunction, BlockFunction> implements BlockFunctionType<ReferenceBlockFunction> {
-    public static final Type INSTANCE = new Type();
+  public static class Parser extends PrefixedIdParser<ReferenceBlockFunction, BlockFunction> {
+    public static final Parser INSTANCE = new Parser();
 
-    protected Type() {
+    protected Parser() {
       super('$', Component.translatable("enhanced_commands.block_function.reference"), BlockFunction.REGISTRY_KEY);
-    }
-
-    @Override
-    public MapCodec<ReferenceBlockFunction> getCodec() {
-      return CODEC;
     }
 
     @Override

@@ -30,20 +30,15 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<UseOriginalBlockFunction> getType() {
     return BlockFunctionTypes.USE_ORIGINAL;
   }
 
-  public enum Type implements BlockFunctionType<UseOriginalBlockFunction>, Parser<UseOriginalBlockFunction> {
-    USE_ORIGINAL_TYPE;
+  public enum WaveParser implements Parser<UseOriginalBlockFunction> {
+    INSTANCE;
 
     @Override
-    public MapCodec<UseOriginalBlockFunction> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public UseOriginalBlockFunction parse(ParseContext<?> parseContext) {
+    public @Nullable UseOriginalBlockFunction parse(ParseContext<?> parseContext) {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("~", Component.translatable("enhanced_commands.block_function.use_original"), suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '~') {

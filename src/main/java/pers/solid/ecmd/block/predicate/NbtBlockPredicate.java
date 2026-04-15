@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.nbt.NbtParserShared;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.nbt.predicate.NbtPredicateParser;
@@ -49,20 +50,15 @@ public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredi
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<NbtBlockPredicate> getType() {
     return BlockPredicateTypes.NBT;
   }
 
-  public enum Type implements BlockPredicateType<NbtBlockPredicate>, Parser<NbtBlockPredicate> {
-    NBT_TYPE;
+  public enum NbtParser implements Parser<NbtBlockPredicate> {
+    INSTANCE;
 
     @Override
-    public MapCodec<NbtBlockPredicate> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public NbtBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable NbtBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtParserShared.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '{') {

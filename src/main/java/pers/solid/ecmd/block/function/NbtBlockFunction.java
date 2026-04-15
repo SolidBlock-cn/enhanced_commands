@@ -47,20 +47,15 @@ public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<NbtBlockFunction> getType() {
     return BlockFunctionTypes.NBT;
   }
 
-  public enum Type implements BlockFunctionType<NbtBlockFunction>, Parser<NbtBlockFunction> {
-    NBT_TYPE;
+  public enum NbtParser implements Parser<NbtBlockFunction> {
+    INSTANCE;
 
     @Override
-    public MapCodec<NbtBlockFunction> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public NbtBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable NbtBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("{", NbtParserShared.START_OF_COMPOUND, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '{') {

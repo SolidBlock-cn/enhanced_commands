@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 @Unmodifiable
 public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   ResourceKey<Registry<Region>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region"));
-  Codec<Region> CODEC = RegionType.REGISTRY.byNameCodec().dispatch(Region::getType, RegionType::getCodec);
+  Codec<Region> CODEC = RegionType.REGISTRY.byNameCodec().dispatch(Region::getType, RegionType::codec);
 
   static Region getCached(RegionProvider<?> regionProvider, PositionProvider positionProvider) {
     return CacheStorage.cache.getUnchecked(regionProvider).getUnchecked(positionProvider);

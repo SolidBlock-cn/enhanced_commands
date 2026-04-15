@@ -31,17 +31,8 @@ public record RotateBlockFunction(EnumOrRandom<Rotation> rotation) implements Bl
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<RotateBlockFunction> getType() {
     return BlockFunctionTypes.ROTATE;
-  }
-
-  public enum Type implements BlockFunctionType<RotateBlockFunction> {
-    ROTATE_TYPE;
-
-    @Override
-    public MapCodec<RotateBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<RotateBlockFunction> {

@@ -23,7 +23,7 @@ public record CountItemPredicate(MinMaxBounds.Ints count) implements ItemPredica
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<CountItemPredicate> getType() {
     return ItemPredicateTypes.COUNT;
   }
 
@@ -38,15 +38,6 @@ public record CountItemPredicate(MinMaxBounds.Ints count) implements ItemPredica
       return ItemPredicateArgumentAccessor.getCOUNT_ID() + "=" + StringUtil.wrapRange(count);
     } else {
       return "count(" + StringUtil.wrapRange(count) + ")";
-    }
-  }
-
-  public enum Type implements ItemPredicateType<CountItemPredicate> {
-    COUNT_TYPE;
-
-    @Override
-    public MapCodec<CountItemPredicate> getCodec() {
-      return CODEC;
     }
   }
 

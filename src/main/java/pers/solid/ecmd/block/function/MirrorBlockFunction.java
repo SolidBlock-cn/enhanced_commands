@@ -31,17 +31,8 @@ public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunctio
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<MirrorBlockFunction> getType() {
     return BlockFunctionTypes.MIRROR;
-  }
-
-  public enum Type implements BlockFunctionType<MirrorBlockFunction> {
-    MIRROR_TYPE;
-
-    @Override
-    public MapCodec<MirrorBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<MirrorBlockFunction> {

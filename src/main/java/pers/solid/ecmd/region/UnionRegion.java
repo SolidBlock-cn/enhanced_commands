@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -43,7 +42,7 @@ public record UnionRegion(List<Region> regions) implements RegionsBasedRegion<Un
   }
 
   @Override
-  public Type getType() {
+  public RegionType<UnionRegion> getType() {
     return RegionTypes.UNION;
   }
 
@@ -79,35 +78,6 @@ public record UnionRegion(List<Region> regions) implements RegionsBasedRegion<Un
   @Override
   public UnionRegion newRegion(List<Region> regions) {
     return new UnionRegion(regions);
-  }
-
-  public enum Type implements RegionType<UnionRegion> {
-    UNION_TYPE;
-
-    @Override
-    public String functionName() {
-      return "union";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.union");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<UnionRegionProvider> parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<UnionRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends RegionProvider<UnionRegion>> getArgumentCodec() {
-      return UnionRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<UnionRegionProvider> {

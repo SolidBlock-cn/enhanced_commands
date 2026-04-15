@@ -40,17 +40,8 @@ public record RegionBlockPredicate(RegionProvider<?> region) implements BlockPre
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<RegionBlockPredicate> getType() {
     return BlockPredicateTypes.REGION;
-  }
-
-  public enum Type implements BlockPredicateType<RegionBlockPredicate> {
-    REGION_TYPE;
-
-    @Override
-    public MapCodec<RegionBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<RegionBlockPredicate> {

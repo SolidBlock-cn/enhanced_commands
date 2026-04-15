@@ -6,6 +6,7 @@ import net.minecraft.Util;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Arrays;
@@ -32,7 +33,7 @@ public enum Comparator implements StringRepresentable {
     this.biPredicate = biPredicate;
   }
 
-  public static Comparator fromName(String name) {
+  public static @Nullable Comparator fromName(String name) {
     return NAME_TO_VALUE.get(name);
   }
 

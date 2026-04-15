@@ -17,7 +17,7 @@ public record ComponentValueCheckItemPredicate<T>(DataComponentType<T> component
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<ComponentValueCheckItemPredicate<?>> getType() {
     return ItemPredicateTypes.COMPONENT_VALUE_CHECK;
   }
 
@@ -33,14 +33,5 @@ public record ComponentValueCheckItemPredicate<T>(DataComponentType<T> component
 
   private static <T> MapCodec<ComponentValueCheckItemPredicate<T>> codecForComponentType(DataComponentType<T> type) {
     return type.codecOrThrow().fieldOf("value").xmap(t -> new ComponentValueCheckItemPredicate<>(type, t), ComponentValueCheckItemPredicate::value);
-  }
-
-  public enum Type implements ItemPredicateType<ComponentValueCheckItemPredicate<?>> {
-    COMPONENT_VALUE_CHECK_TYPE;
-
-    @Override
-    public MapCodec<ComponentValueCheckItemPredicate<?>> getCodec() {
-      return CODEC;
-    }
   }
 }

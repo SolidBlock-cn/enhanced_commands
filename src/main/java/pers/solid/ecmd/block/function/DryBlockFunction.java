@@ -39,21 +39,12 @@ public record DryBlockFunction(BlockFunction function) implements BlockFunction 
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<DryBlockFunction> getType() {
     return BlockFunctionTypes.DRY;
   }
 
-  public enum Type implements BlockFunctionType<DryBlockFunction> {
-    DRY_TYPE;
-
-    @Override
-    public MapCodec<DryBlockFunction> getCodec() {
-      return CODEC;
-    }
-  }
-
   public static class Parser implements FunctionContentParser.SequentialParams<DryBlockFunction> {
-    BlockFunction blockFunction = null;
+    private @Nullable BlockFunction blockFunction = null;
 
     @Override
     public DryBlockFunction getParseResult(ParseContext<?> parseContext) {

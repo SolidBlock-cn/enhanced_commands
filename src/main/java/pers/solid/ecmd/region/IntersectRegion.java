@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +45,7 @@ public record IntersectRegion(List<Region> regions) implements RegionsBasedRegio
   }
 
   @Override
-  public Type getType() {
+  public RegionType<IntersectRegion> getType() {
     return RegionTypes.INTERSECT;
   }
 
@@ -90,35 +89,6 @@ public record IntersectRegion(List<Region> regions) implements RegionsBasedRegio
   @Override
   public IntersectRegion newRegion(List<Region> regions) {
     return new IntersectRegion(regions);
-  }
-
-  public enum Type implements RegionType<IntersectRegion> {
-    INTERSECT_TYPE;
-
-    @Override
-    public String functionName() {
-      return "intersect";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.intersect");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<IntersectRegionProvider> parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<IntersectRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends RegionProvider<IntersectRegion>> getArgumentCodec() {
-      return IntersectRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<IntersectRegionProvider> {

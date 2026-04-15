@@ -44,19 +44,9 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<PickBlockFunction> getType() {
     return BlockFunctionTypes.PICK;
   }
-
-  public enum Type implements BlockFunctionType<PickBlockFunction> {
-    PICK_TYPE;
-
-    @Override
-    public MapCodec<PickBlockFunction> getCodec() {
-      return CODEC;
-    }
-  }
-
 
   @Override
   public String asString() {

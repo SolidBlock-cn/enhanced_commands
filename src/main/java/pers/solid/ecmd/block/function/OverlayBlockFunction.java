@@ -42,17 +42,8 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<OverlayBlockFunction> getType() {
     return BlockFunctionTypes.OVERLAY;
-  }
-
-  public enum Type implements BlockFunctionType<OverlayBlockFunction> {
-    OVERLAY_TYPE;
-
-    @Override
-    public MapCodec<OverlayBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<OverlayBlockFunction> {

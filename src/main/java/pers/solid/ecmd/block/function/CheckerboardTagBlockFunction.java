@@ -52,7 +52,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<CheckerboardTagBlockFunction> getType() {
     return BlockFunctionTypes.CHECKERBOARD_TAG;
   }
 
@@ -106,15 +106,6 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
         "floor=" + floor + ", " +
         "scale=" + scale + ", " +
         "offset=" + offset + ']';
-  }
-
-  public enum Type implements BlockFunctionType<CheckerboardTagBlockFunction> {
-    CHECKERBOARD_TAG_TYPE;
-
-    @Override
-    public MapCodec<CheckerboardTagBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser extends CheckerboardParser<BlockFunction> {

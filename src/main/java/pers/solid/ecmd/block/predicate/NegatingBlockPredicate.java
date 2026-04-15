@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -42,20 +43,15 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<NegatingBlockPredicate> getType() {
     return BlockPredicateTypes.NEGATING;
   }
 
-  public enum Type implements BlockPredicateType<NegatingBlockPredicate>, Parser<BlockPredicate> {
-    NEGATING_TYPE;
+  public enum NegationParser implements Parser<BlockPredicate> {
+    INSTANCE;
 
     @Override
-    public MapCodec<NegatingBlockPredicate> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("!", Component.translatable("enhanced_commands.block_predicate.negation"), suggestionsBuilder).buildFuture());
       boolean negates = false;
       boolean suffixed = false;

@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -51,20 +52,15 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<ConstantBlockPredicate> getType() {
     return BlockPredicateTypes.CONSTANT;
   }
 
-  public enum Type implements BlockPredicateType<ConstantBlockPredicate>, Parser<ConstantBlockPredicate> {
-    CONSTANT_TYPE;
+  public enum ConstantParser implements Parser<ConstantBlockPredicate> {
+    INSTANCE;
 
     @Override
-    public MapCodec<ConstantBlockPredicate> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public ConstantBlockPredicate parse(ParseContext<?> parseContext) {
+    public @Nullable ConstantBlockPredicate parse(ParseContext<?> parseContext) {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("*", Component.translatable("enhanced_commands.block_predicate.constant"), suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '*') {

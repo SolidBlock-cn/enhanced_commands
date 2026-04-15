@@ -80,7 +80,7 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   }
 
   @Override
-  public Type getType() {
+  public RegionType<CuboidOutlineRegion> getType() {
     return RegionTypes.CUBOID_OUTLINE;
   }
 
@@ -102,35 +102,6 @@ public record CuboidOutlineRegion(BlockCuboidRegion region, int thickness) imple
   @Override
   public @Nullable AABB minContainingBox() {
     return region.minContainingBox();
-  }
-
-  public enum Type implements RegionType<CuboidOutlineRegion> {
-    CUBOID_OUTLINE_TYPE;
-
-    @Override
-    public String functionName() {
-      return "cuboid_outline";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.cuboid_outline");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<CuboidOutlineRegionProvider> parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<CuboidOutlineRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends CuboidOutlineRegionProvider> getArgumentCodec() {
-      return CuboidOutlineRegionProvider.CODEC;
-    }
   }
 
   public static abstract sealed class AbstractParser<R extends RegionProvider<?>> implements FunctionContentParser.SequentialParams<R> permits Parser, CuboidWallRegion.Parser {

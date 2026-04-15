@@ -70,17 +70,8 @@ public record ProbabilityBlockPredicate(float probability, BlockPredicate predic
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<ProbabilityBlockPredicate> getType() {
     return BlockPredicateTypes.RAND;
-  }
-
-  public enum Type implements BlockPredicateType<ProbabilityBlockPredicate> {
-    RAND_TYPE;
-
-    @Override
-    public MapCodec<ProbabilityBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.MixedParams<ProbabilityBlockPredicate> {

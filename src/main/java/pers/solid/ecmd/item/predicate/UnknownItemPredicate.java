@@ -15,21 +15,12 @@ public record UnknownItemPredicate(Predicate<ItemStack> forward) implements Item
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<UnknownItemPredicate> getType() {
     return ItemPredicateTypes.UNKNOWN;
   }
 
   @Override
   public String asString() {
     return "<unknown>";
-  }
-
-  public enum Type implements ItemPredicateType<UnknownItemPredicate> {
-    UNKNOWN_TYPE;
-
-    @Override
-    public MapCodec<UnknownItemPredicate> getCodec() {
-      return CODEC;
-    }
   }
 }

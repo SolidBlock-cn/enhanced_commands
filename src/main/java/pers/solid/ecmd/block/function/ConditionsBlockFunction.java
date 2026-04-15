@@ -45,22 +45,13 @@ public record ConditionsBlockFunction(List<ConditionalBlockFunction> conditions)
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<ConditionsBlockFunction> getType() {
     return BlockFunctionTypes.CONDITIONS;
   }
 
   @Override
   public String asString() {
     return conditions.stream().map(f -> f.condition().asString() + ", " + f.functionIfTrue().asString() + (f.functionIfFalse() == EmptyBlockFunction.INSTANCE ? "" : ", " + f.functionIfFalse().asString())).collect(Collectors.joining("; ", "ifs(", ")"));
-  }
-
-  public enum Type implements BlockFunctionType<ConditionsBlockFunction> {
-    CONDITIONS_TYPE;
-
-    @Override
-    public MapCodec<ConditionsBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser<ConditionsBlockFunction> {

@@ -7,11 +7,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
 import java.util.Iterator;
@@ -50,7 +48,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public Type getType() {
+  public RegionType<CuboidWallRegion> getType() {
     return RegionTypes.CUBOID_WALL;
   }
 
@@ -106,35 +104,6 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
         // higher z part
         new BlockCuboidRegion(region.minX() + thickness, region.minY(), region.maxZ() - thickness + 1, region.maxX() - thickness, region.maxY(), region.maxZ())
     );
-  }
-
-  public enum Type implements RegionType<CuboidWallRegion> {
-    CUBOID_WALL_TYPE;
-
-    @Override
-    public String functionName() {
-      return "cuboid_wall";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.cuboid_wall");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<CuboidWallRegionProvider> parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<CuboidWallRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends CuboidWallRegionProvider> getArgumentCodec() {
-      return CuboidWallRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser extends CuboidOutlineRegion.AbstractParser<CuboidWallRegionProvider> {

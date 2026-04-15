@@ -93,6 +93,7 @@ public class SimpleBlockPredicateParser<S> extends SimpleBlockParser<S> {
       final int cursorAfterParseValue = reader.getCursor();
       if (parse.isEmpty()) {
         reader.setCursor(cursorBeforeParseValue);
+        Objects.requireNonNull(blockId, "blockId is null, did you call parseBlockId()?");
         throw EnhancedCommandSyntaxException.withCursorEnd(BlockStateParser.ERROR_INVALID_VALUE.createWithContext(reader, blockId.toString(), property.getName(), valueName), cursorAfterParseValue);
       } else if (values.contains(parse.get())) {
         reader.setCursor(cursorBeforeParseValue);

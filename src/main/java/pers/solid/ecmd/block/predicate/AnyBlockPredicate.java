@@ -52,17 +52,8 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<AnyBlockPredicate> getType() {
     return BlockPredicateTypes.ANY;
-  }
-
-  public enum Type implements BlockPredicateType<AnyBlockPredicate> {
-    ANY_TYPE;
-
-    @Override
-    public MapCodec<AnyBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public record Parser(List<BlockPredicate> blockPredicates) implements FunctionContentParser.SequentialParams<AnyBlockPredicate> {

@@ -24,13 +24,4 @@ public record SimpleItemFunction(Holder<Item> item) implements ItemFunction {
   public String asString() {
     return item.getRegisteredName();
   }
-
-  public enum Type implements ItemFunctionType<SimpleItemFunction> {
-    SIMPLE_TYPE;
-
-    @Override
-    public MapCodec<SimpleItemFunction> getCodec() {
-      return CODEC;
-    }
-  }
 }

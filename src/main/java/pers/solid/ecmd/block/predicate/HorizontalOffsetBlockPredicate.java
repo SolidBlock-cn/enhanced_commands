@@ -9,6 +9,7 @@ import joptsimple.internal.Strings;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -56,20 +57,15 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<HorizontalOffsetBlockPredicate> getType() {
     return BlockPredicateTypes.HORIZONTAL_OFFSET;
   }
 
-  public enum Type implements BlockPredicateType<HorizontalOffsetBlockPredicate>, Parser<BlockPredicate> {
-    HORIZONTAL_OFFSET_TYPE;
+  public enum HorizontalOffsetParser implements Parser<BlockPredicate> {
+    INSTANCE;
 
     @Override
-    public MapCodec<HorizontalOffsetBlockPredicate> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> {
         ParsingUtil.suggestString("<", BENEATH_BLOCK, suggestionsBuilder);
         ParsingUtil.suggestString(">", ABOVE_BLOCK, suggestionsBuilder);

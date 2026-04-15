@@ -43,20 +43,15 @@ public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) i
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<PropertyNamesBlockFunction> getType() {
     return BlockFunctionTypes.PROPERTY_NAMES;
   }
 
-  public enum Type implements BlockFunctionType<PropertyNamesBlockFunction>, Parser<PropertyNamesBlockFunction> {
-    PROPERTY_NAMES_TYPE;
+  public enum PropertyNamesParser implements Parser<PropertyNamesBlockFunction> {
+    INSTANCE;
 
     @Override
-    public MapCodec<PropertyNamesBlockFunction> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public PropertyNamesBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable PropertyNamesBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '[') {

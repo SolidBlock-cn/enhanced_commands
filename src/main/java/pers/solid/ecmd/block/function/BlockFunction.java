@@ -46,12 +46,12 @@ import java.util.function.Function;
  */
 public interface BlockFunction extends ExpressionConvertible {
   ResourceKey<Registry<BlockFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_function"));
-  MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.byNameCodec().dispatchMap(BlockFunction::getType, BlockFunctionType::getCodec);
-  Codec<BlockFunction> CODEC = CodecUtil.combined(
+  MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.byNameCodec().dispatchMap(BlockFunction::getType, BlockFunctionType::codec);
+  Codec<BlockFunction> CODEC = Codec.lazyInitialized(() -> CodecUtil.combined(
       CodecUtil.combinedIdAndTag(SimpleBlockFunction.STRING_BASED_CODEC, TagBlockFunction.STRING_BASED_CODEC),
       MAP_CODEC.codec(),
       blockFunction -> blockFunction instanceof SimpleBlockFunction s && s.properties().isEmpty() ? Either.left(s) : blockFunction instanceof TagBlockFunction t && t.properties().isEmpty() ? Either.right(t) : null,
-      either -> either.map(Function.identity(), Function.identity()));
+      either -> either.map(Function.identity(), Function.identity())));
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_function.cannot_parse"));
   Component OVERLAY_TOOLTIP = Component.translatable("enhanced_commands.function.overlay.symbol_tooltip");
@@ -122,7 +122,7 @@ public interface BlockFunction extends ExpressionConvertible {
     final int cursorOnStart = reader.getCursor();
 
     // 强制将 simple 调整到最后再去使用
-    for (Parser<BlockFunction> argumentParser : Iterables.concat(BlockFunctionParsing.PARSERS, Collections.singleton(SimpleBlockFunction.Type.SIMPLE_TYPE))) {
+    for (Parser<? extends BlockFunction> argumentParser : Iterables.concat(BlockFunctionParsing.PARSERS, Collections.singleton(SimpleBlockFunction.SimpleParser.INSTANCE))) {
       reader.setCursor(cursorOnStart);
       final BlockFunction parse = argumentParser.parse(parseContext);
       if (parse != null) {

@@ -45,13 +45,4 @@ public final class RandomItemFunction implements ItemFunction {
   public String asString() {
     return "*";
   }
-
-  public enum Type implements ItemFunctionType<RandomItemFunction> {
-    RANDOM_TYPE;
-
-    @Override
-    public MapCodec<RandomItemFunction> getCodec() {
-      return CODEC;
-    }
-  }
 }

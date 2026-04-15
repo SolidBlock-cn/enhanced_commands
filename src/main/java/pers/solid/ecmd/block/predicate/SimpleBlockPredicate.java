@@ -22,6 +22,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> properties) implements BlockPredicate {
@@ -77,23 +78,19 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<SimpleBlockPredicate> getType() {
     return BlockPredicateTypes.SIMPLE;
   }
 
-  public enum Type implements BlockPredicateType<SimpleBlockPredicate>, Parser<BlockPredicate> {
-    SIMPLE_TYPE;
-
-    @Override
-    public MapCodec<SimpleBlockPredicate> getCodec() {
-      return CODEC;
-    }
+  public enum SimpleParser implements Parser<BlockPredicate> {
+    INSTANCE;
 
     @Override
     public BlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       SimpleBlockPredicateParser<?> parser = new SimpleBlockPredicateParser<>(parseContext);
       parser.parseBlockId();
       parser.parseProperties();
+      Objects.requireNonNull(parser.block, "block");
       return new SimpleBlockPredicate(parser.block, parser.propertyPredicates);
     }
   }

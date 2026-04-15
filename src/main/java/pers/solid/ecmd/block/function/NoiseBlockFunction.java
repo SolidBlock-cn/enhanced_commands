@@ -50,15 +50,6 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
     return "noise(" + listString + (parametersString.isEmpty() ? "" : "; " + parametersString) + ")";
   }
 
-  public enum Type implements BlockFunctionType<NoiseBlockFunction> {
-    INSTANCE;
-
-    @Override
-    public MapCodec<NoiseBlockFunction> getCodec() {
-      return CODEC;
-    }
-  }
-
   public static class Parser extends Noise.Parser<BlockFunction> {
 
     @Override

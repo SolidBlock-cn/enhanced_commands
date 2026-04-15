@@ -1,6 +1,7 @@
 package pers.solid.ecmd.item.predicate;
 
 import com.google.common.base.Supplier;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
@@ -12,24 +13,28 @@ import java.util.Map;
 public final class ItemPredicateTypes {
   private static final RegistryBridge<ItemPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, ItemPredicateType.REGISTRY);
 
-  public static final AllItemPredicate.Type ALL_TYPE = register("all", AllItemPredicate.Type.ALL_TYPE);
-  public static final AnyItemPredicate.Type ANY_TYPE = register("any", AnyItemPredicate.Type.ANY_TYPE);
-  public static final ComponentPresenceItemPredicate.Type COMPONENT_PRESENCE = register("component_presence", ComponentPresenceItemPredicate.Type.COMPONENT_PRESENCE_TYPE);
-  public static final ComponentValueCheckItemPredicate.Type COMPONENT_VALUE_CHECK = register("component_value_check", ComponentValueCheckItemPredicate.Type.COMPONENT_VALUE_CHECK_TYPE);
-  public static final ConstantItemPredicate.Type CONSTANT = register("constant", ConstantItemPredicate.Type.CONSTANT_TYPE);
-  public static final CountItemPredicate.Type COUNT = register("count", CountItemPredicate.Type.COUNT_TYPE);
-  public static final NegatingItemPredicate.Type NEGATING = register("negating", NegatingItemPredicate.Type.NEGATING_TYPE);
-  public static final ProbabilityItemPredicate.Type PROBABILITY = register("probability", ProbabilityItemPredicate.Type.PROBABILITY_TYPE);
-  public static final SimpleItemPredicate.Type SIMPLE = register("simple", SimpleItemPredicate.Type.SIMPLE_TYPE);
-  public static final SimpleCombinationItemPredicate.Type SIMPLE_COMBINATION = register("simple_combination", SimpleCombinationItemPredicate.Type.SIMPLE_COMBINATION_TYPE);
-  public static final TagItemPredicate.Type SIMPLE_TAG = register("simple_tag", TagItemPredicate.Type.SIMPLE_TAG_TYPE);
-  public static final UnknownItemPredicate.Type UNKNOWN = register("unknown", UnknownItemPredicate.Type.UNKNOWN_TYPE);
+  public static final ItemPredicateType<AllItemPredicate> ALL_TYPE = register("all", AllItemPredicate.CODEC);
+  public static final ItemPredicateType<AnyItemPredicate> ANY_TYPE = register("any", AnyItemPredicate.CODEC);
+  public static final ItemPredicateType<ComponentPresenceItemPredicate<?>> COMPONENT_PRESENCE = register("component_presence", ComponentPresenceItemPredicate.CODEC);
+  public static final ItemPredicateType<ComponentValueCheckItemPredicate<?>> COMPONENT_VALUE_CHECK = register("component_value_check", ComponentValueCheckItemPredicate.CODEC);
+  public static final ItemPredicateType<ConstantItemPredicate> CONSTANT = register("constant", ConstantItemPredicate.CODEC);
+  public static final ItemPredicateType<CountItemPredicate> COUNT = register("count", CountItemPredicate.CODEC);
+  public static final ItemPredicateType<NegatingItemPredicate> NEGATING = register("negating", NegatingItemPredicate.CODEC);
+  public static final ItemPredicateType<ProbabilityItemPredicate> PROBABILITY = register("probability", ProbabilityItemPredicate.CODEC);
+  public static final ItemPredicateType<SimpleItemPredicate> SIMPLE = register("simple", SimpleItemPredicate.CODEC);
+  public static final ItemPredicateType<SimpleCombinationItemPredicate> SIMPLE_COMBINATION = register("simple_combination", SimpleCombinationItemPredicate.CODEC);
+  public static final ItemPredicateType<TagItemPredicate> SIMPLE_TAG = register("simple_tag", TagItemPredicate.CODEC);
+  public static final ItemPredicateType<UnknownItemPredicate> UNKNOWN = register("unknown", UnknownItemPredicate.CODEC);
 
   private ItemPredicateTypes() {
   }
 
   private static <T extends ItemPredicateType<?>> T register(String name, T value) {
     return REGISTRY_BRIDGE.register(name, value);
+  }
+
+  private static <T extends ItemPredicate> ItemPredicateType<T> register(String name, MapCodec<T> codec) {
+    return register(name, new ItemPredicateType.Simple<>(codec));
   }
 
   public static void init(InitializeContext context) {

@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.util.ExecutionContext;
 
-public enum EmptyItemFunction implements ItemFunction, ItemFunctionType<EmptyItemFunction> {
+public enum EmptyItemFunction implements ItemFunction {
   INSTANCE;
   public static final MapCodec<EmptyItemFunction> CODEC = MapCodec.unit(INSTANCE);
 
@@ -14,13 +14,8 @@ public enum EmptyItemFunction implements ItemFunction, ItemFunctionType<EmptyIte
   }
 
   @Override
-  public EmptyItemFunction getType() {
+  public ItemFunctionType<EmptyItemFunction> getType() {
     return ItemFunctionTypes.EMPTY;
-  }
-
-  @Override
-  public MapCodec<EmptyItemFunction> getCodec() {
-    return CODEC;
   }
 
   @Override

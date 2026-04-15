@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -70,7 +69,7 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   }
 
   @Override
-  public Type getType() {
+  public RegionType<OutlineRegion> getType() {
     return RegionTypes.OUTLINE;
   }
 
@@ -97,35 +96,6 @@ public record OutlineRegion(OutlineType outlineType, Region region) implements R
   @Override
   public OutlineRegion newRegion(Region region) {
     return new OutlineRegion(outlineType, region);
-  }
-
-  public enum Type implements RegionType<OutlineRegion> {
-    OUTLINE_TYPE;
-
-    @Override
-    public String functionName() {
-      return "outline";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.outline");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<? extends OutlineRegionProvider> parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<OutlineRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends OutlineRegionProvider> getArgumentCodec() {
-      return OutlineRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<OutlineRegionProvider> {
