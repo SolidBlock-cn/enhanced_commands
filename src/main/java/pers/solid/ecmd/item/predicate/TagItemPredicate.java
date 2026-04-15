@@ -16,12 +16,12 @@ import net.minecraft.world.item.ItemStack;
 import java.util.stream.Collectors;
 
 public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateWithoutContext {
-  public static final Codec<TagItemPredicate> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.ITEM).<HolderSet<Item>>flatXmap(tagKey -> BuiltInRegistries.ITEM.getTag(tagKey).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag: " + tagKey.location())), items -> items.unwrapKey().map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag"))).xmap(TagItemPredicate::new, TagItemPredicate::items);
+  public static final Codec<TagItemPredicate> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.ITEM).<HolderSet<Item>>flatXmap(tagKey -> BuiltInRegistries.ITEM.get(tagKey).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag: " + tagKey.location())), items -> items.unwrapKey().map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag"))).xmap(TagItemPredicate::new, TagItemPredicate::items);
 
   public static final MapCodec<TagItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(RegistryCodecs.homogeneousList(Registries.ITEM).fieldOf("items").forGetter(TagItemPredicate::items)).apply(i, TagItemPredicate::new));
 
   public TagItemPredicate(TagKey<Item> tagKey) {
-    this(BuiltInRegistries.ITEM.getTag(tagKey).orElseThrow(() -> new RuntimeException("Item " + tagKey + " not found!")));
+    this(BuiltInRegistries.ITEM.get(tagKey).orElseThrow(() -> new RuntimeException("Item " + tagKey + " not found!")));
   }
 
   @Override

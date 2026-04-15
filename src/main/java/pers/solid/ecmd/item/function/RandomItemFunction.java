@@ -25,7 +25,7 @@ public final class RandomItemFunction implements ItemFunction {
 
   private Item[] calculateItems(RegistryAccess rm, FeatureFlagSet fs) {
     this.featureSet = fs;
-    return rm.registryOrThrow(Registries.ITEM).stream().filter(block -> block.isEnabled(fs)).toArray(Item[]::new);
+    return rm.lookupOrThrow(Registries.ITEM).stream().filter(block -> block.isEnabled(fs)).toArray(Item[]::new);
   }
 
   @Override

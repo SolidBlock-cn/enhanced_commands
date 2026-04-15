@@ -64,7 +64,7 @@ public final class ItemFunctionParser {
         builder.suggest("*");
         builder.suggest("@");
       }
-      return SharedSuggestionProvider.suggestResource(itemLookup.listElements(), builder, entry -> entry.key().location(), entry -> entry.value().getDescription());
+      return SharedSuggestionProvider.suggestResource(itemLookup.listElements(), builder, entry -> entry.key().location(), entry -> entry.value().getName());
     });
 
     if (reader.canRead()) {
@@ -104,7 +104,7 @@ public final class ItemFunctionParser {
     final ResourceLocation identifier = ResourceLocation.read(reader);
     final int cursorAfterId = reader.getCursor();
 
-    final Optional<Holder.Reference<Item>> itemReference = BuiltInRegistries.ITEM.getHolder(identifier);
+    final Optional<Holder.Reference<Item>> itemReference = BuiltInRegistries.ITEM.get(identifier);
     if (itemReference.isEmpty()) {
       reader.setCursor(cursorBeforeId);
       throw EnhancedCommandSyntaxException.withCursorEnd(ItemParserAccessor.getERROR_UNKNOWN_ITEM().createWithContext(reader, identifier), cursorAfterId);
