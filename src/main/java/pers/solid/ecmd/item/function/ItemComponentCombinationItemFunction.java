@@ -38,13 +38,4 @@ public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemF
       return baseString + affiliate.stream().map(ItemFunction::asString).collect(Collectors.joining(", ", "[", "]"));
     }
   }
-
-  public enum Type implements ItemFunctionType<ItemComponentCombinationItemFunction> {
-    ITEM_COMPONENT_COMBINATION_TYPE;
-
-    @Override
-    public MapCodec<ItemComponentCombinationItemFunction> getCodec() {
-      return CODEC;
-    }
-  }
 }

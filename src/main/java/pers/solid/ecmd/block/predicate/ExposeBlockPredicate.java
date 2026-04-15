@@ -68,7 +68,7 @@ public record ExposeBlockPredicate(ExposureType exposureType, List<Direction> di
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<ExposeBlockPredicate> getType() {
     return BlockPredicateTypes.EXPOSE;
   }
 
@@ -128,15 +128,6 @@ public record ExposeBlockPredicate(ExposureType exposureType, List<Direction> di
 
     public MutableComponent getDisplayName() {
       return Component.translatable("enhanced_commands.exposure_type." + name);
-    }
-  }
-
-  public enum Type implements BlockPredicateType<ExposeBlockPredicate> {
-    EXPOSE_TYPE;
-
-    @Override
-    public MapCodec<ExposeBlockPredicate> getCodec() {
-      return CODEC;
     }
   }
 

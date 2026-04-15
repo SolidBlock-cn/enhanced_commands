@@ -31,13 +31,4 @@ public record OverlayItemFunction(List<ItemFunction> functions) implements ItemF
   public String asString() {
     return functions.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "overlay(", ")"));
   }
-
-  public enum Type implements ItemFunctionType<OverlayItemFunction> {
-    OVERLAY_TYPE;
-
-    @Override
-    public MapCodec<OverlayItemFunction> getCodec() {
-      return CODEC;
-    }
-  }
 }

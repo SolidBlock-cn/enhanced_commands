@@ -19,10 +19,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -174,6 +171,8 @@ public final class CodecUtil {
    * <p>序列化时，根据 {@code function} 进行转化，如果能转化（即结果不为 {@code null}），则按 {@code stringBased} 进行序列化，否则按照 {@code mapBased} 进行序列化。
    */
   public static <A, B> Codec<A> combined(Codec<B> stringBased, Codec<A> mapBased, Function<A, @Nullable B> function, Function<B, A> functionToStringBased) {
+    Objects.requireNonNull(stringBased, "stringBased codec");
+    Objects.requireNonNull(mapBased, "mapBased codec");
     return new Codec<>() {
       @Override
       public <T> DataResult<Pair<A, T>> decode(DynamicOps<T> ops, T input) {
@@ -213,6 +212,8 @@ public final class CodecUtil {
    * @param <B>          以井号开头的字符串表示的对象类型，例如 TagKey<Item>。
    */
   public static <A, B> Codec<Either<A, B>> combinedIdAndTag(Codec<A> unprefixed, Codec<B> hashPrefixed) {
+    Objects.requireNonNull(unprefixed, "unprefixed codec");
+    Objects.requireNonNull(hashPrefixed, "hashPrefixed codec");
     return new Codec<>() {
       @Override
       public <T> DataResult<Pair<Either<A, B>, T>> decode(DynamicOps<T> dynamicOps, T t) {

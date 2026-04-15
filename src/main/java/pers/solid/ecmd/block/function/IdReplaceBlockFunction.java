@@ -67,17 +67,8 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<IdReplaceBlockFunction> getType() {
     return BlockFunctionTypes.ID_REPLACE;
-  }
-
-  public enum Type implements BlockFunctionType<IdReplaceBlockFunction> {
-    ID_REPLACE_TYPE;
-
-    @Override
-    public MapCodec<IdReplaceBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<IdReplaceBlockFunction> {

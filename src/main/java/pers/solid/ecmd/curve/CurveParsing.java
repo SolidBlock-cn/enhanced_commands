@@ -16,5 +16,5 @@ public class CurveParsing {
   public static final Map<String, Supplier<FunctionContentParser<? extends CurveProvider<?>>>> FUNCTIONS = new LinkedHashMap<>();
   public static final Map<String, Component> FUNCTION_NAMES = new HashMap<>();
   public static final Parser<CurveProvider<?>> FUNCTIONS_PARSER = new FunctionsParser<>(FUNCTIONS, FUNCTION_NAMES);
-  public static final List<Parser<CurveProvider<?>>> PARSERS = Lists.newArrayList(FUNCTIONS_PARSER);
+  public static final List<Parser<? extends CurveProvider<?>>> PARSERS = Lists.newArrayList(FUNCTIONS_PARSER);
 }

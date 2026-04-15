@@ -27,7 +27,7 @@ public enum ActiveRegionProvider implements RegionProvider<Region> {
   }
 
   @Override
-  public ActiveRegionType getType() {
+  public RegionType<Region> getType() {
     return RegionTypes.ACTIVE_REGION;
   }
 

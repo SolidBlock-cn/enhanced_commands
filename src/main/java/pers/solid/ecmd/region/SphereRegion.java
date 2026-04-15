@@ -46,7 +46,7 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
   }
 
   @Override
-  public Type getType() {
+  public RegionType<SphereRegion> getType() {
     return RegionTypes.SPHERE;
   }
 
@@ -83,35 +83,6 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
   @Override
   public AABB minContainingBox() {
     return AABB.ofSize(center, 2 * radius, 2 * radius, 2 * radius);
-  }
-
-  public enum Type implements RegionType<SphereRegion> {
-    SPHERE_TYPE;
-
-    @Override
-    public String functionName() {
-      return "sphere";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.sphere");
-    }
-
-    @Override
-    public Parser parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<SphereRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<SphereRegionProvider> getArgumentCodec() {
-      return SphereRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.MixedParams<SphereRegionProvider> {

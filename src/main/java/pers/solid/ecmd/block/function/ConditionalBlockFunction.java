@@ -46,17 +46,8 @@ public record ConditionalBlockFunction(BlockPredicate condition, BlockFunction f
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<ConditionalBlockFunction> getType() {
     return BlockFunctionTypes.CONDITIONAL;
-  }
-
-  public enum Type implements BlockFunctionType<ConditionalBlockFunction> {
-    CONDITIONAL_TYPE;
-
-    @Override
-    public MapCodec<ConditionalBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<ConditionalBlockFunction> {

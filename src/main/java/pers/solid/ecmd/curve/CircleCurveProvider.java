@@ -25,7 +25,7 @@ public record CircleCurveProvider(double radius, EnhancedCoordinates center, Vec
   }
 
   @Override
-  public CircleCurve.Type getType() {
+  public CurveType<CircleCurve> getType() {
     return CurveTypes.CIRCLE;
   }
 }

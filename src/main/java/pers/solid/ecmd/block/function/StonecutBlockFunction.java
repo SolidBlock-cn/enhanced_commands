@@ -70,17 +70,8 @@ public record StonecutBlockFunction(BlockFunction function) implements BlockFunc
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<StonecutBlockFunction> getType() {
     return BlockFunctionTypes.STONE_CUT;
-  }
-
-  public enum Type implements BlockFunctionType<StonecutBlockFunction> {
-    STONE_CUT_TYPE;
-
-    @Override
-    public MapCodec<StonecutBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<StonecutBlockFunction> {

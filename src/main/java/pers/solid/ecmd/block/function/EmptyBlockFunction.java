@@ -9,7 +9,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-public enum EmptyBlockFunction implements BlockFunction, BlockFunctionType<EmptyBlockFunction> {
+public enum EmptyBlockFunction implements BlockFunction {
   INSTANCE;
   public static final MapCodec<EmptyBlockFunction> CODEC = MapCodec.unit(INSTANCE);
 
@@ -19,13 +19,8 @@ public enum EmptyBlockFunction implements BlockFunction, BlockFunctionType<Empty
   }
 
   @Override
-  public EmptyBlockFunction getType() {
+  public BlockFunctionType<EmptyBlockFunction> getType() {
     return BlockFunctionTypes.EMPTY;
-  }
-
-  @Override
-  public MapCodec<EmptyBlockFunction> getCodec() {
-    return CODEC;
   }
 
   @Override

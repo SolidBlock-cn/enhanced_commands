@@ -34,13 +34,4 @@ public record SetComponentItemFunction<T>(DataComponentType<T> component, T valu
   private static <T> MapCodec<SetComponentItemFunction<T>> codecForDataComponentType(DataComponentType<T> dataComponentType) {
     return dataComponentType.codecOrThrow().fieldOf("value").xmap(t -> new SetComponentItemFunction<>(dataComponentType, t), SetComponentItemFunction::value);
   }
-
-  public enum Type implements ItemFunctionType<SetComponentItemFunction<?>> {
-    SET_COMPONENT_TYPE;
-
-    @Override
-    public MapCodec<SetComponentItemFunction<?>> getCodec() {
-      return CODEC;
-    }
-  }
 }

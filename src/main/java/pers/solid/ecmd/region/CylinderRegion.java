@@ -115,7 +115,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public Type getType() {
+  public RegionType<CylinderRegion> getType() {
     return RegionTypes.CYLINDER;
   }
 
@@ -132,35 +132,6 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   @Override
   public AABB minContainingBox() {
     return new AABB(center.x - radius, center.y - height / 2, center.z - radius, center.x + radius, center.y + height / 2, center.z + radius);
-  }
-
-  public enum Type implements RegionType<CylinderRegion> {
-    CYLINDER_TYPE;
-
-    @Override
-    public String functionName() {
-      return "cyl";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.cylinder");
-    }
-
-    @Override
-    public Parser parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<CylinderRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends RegionProvider<CylinderRegion>> getArgumentCodec() {
-      return CylinderRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.MixedParams<CylinderRegionProvider> {

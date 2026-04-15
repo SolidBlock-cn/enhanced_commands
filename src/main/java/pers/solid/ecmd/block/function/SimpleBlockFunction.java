@@ -23,6 +23,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> properties) implements BlockFunction {
@@ -56,23 +57,19 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<SimpleBlockFunction> getType() {
     return BlockFunctionTypes.SIMPLE;
   }
 
-  public enum Type implements BlockFunctionType<SimpleBlockFunction>, Parser<BlockFunction> {
-    SIMPLE_TYPE;
-
-    @Override
-    public MapCodec<SimpleBlockFunction> getCodec() {
-      return CODEC;
-    }
+  public enum SimpleParser implements Parser<BlockFunction> {
+    INSTANCE;
 
     @Override
     public BlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       SimpleBlockFunctionParser<?> parser = new SimpleBlockFunctionParser<>(parseContext);
       parser.parseBlockId();
       parser.parseProperties();
+      Objects.requireNonNull(parser.block, "block");
       return new SimpleBlockFunction(parser.block, parser.propertyFunctions);
     }
   }

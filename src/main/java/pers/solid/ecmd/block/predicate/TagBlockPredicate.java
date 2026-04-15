@@ -13,6 +13,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
@@ -82,20 +83,15 @@ public record TagBlockPredicate(TagKey<Block> tag, @UnmodifiableView List<Proper
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<TagBlockPredicate> getType() {
     return BlockPredicateTypes.TAG;
   }
 
-  public enum Type implements BlockPredicateType<TagBlockPredicate>, Parser<TagBlockPredicate> {
+  public enum TagParser implements Parser<TagBlockPredicate> {
     TAG_TYPE;
 
     @Override
-    public MapCodec<TagBlockPredicate> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public TagBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable TagBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       SimpleBlockPredicateParser<?> parser = new SimpleBlockPredicateParser<>(parseContext);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {

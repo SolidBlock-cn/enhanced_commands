@@ -10,7 +10,9 @@ public interface CurveType<T extends Curve> {
   ResourceKey<Registry<CurveType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("curve_type"));
   Registry<CurveType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
-  MapCodec<T> getCodec();
+  MapCodec<T> codec();
 
-  MapCodec<? extends CurveProvider<? extends T>> getArgumentCodec();
+  MapCodec<? extends CurveProvider<? extends T>> providerCodec();
+
+  record Simple<T extends Curve>(MapCodec<T> codec, MapCodec<? extends CurveProvider<? extends T>> providerCodec) implements CurveType<T> {}
 }

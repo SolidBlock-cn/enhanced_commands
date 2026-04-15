@@ -14,21 +14,12 @@ public record NegatingItemPredicate(ItemPredicate predicate) implements Predicat
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<NegatingItemPredicate> getType() {
     return ItemPredicateTypes.NEGATING;
   }
 
   @Override
   public String asString() {
     return "!" + predicate().asString();
-  }
-
-  public enum Type implements ItemPredicateType<NegatingItemPredicate> {
-    NEGATING_TYPE;
-
-    @Override
-    public MapCodec<NegatingItemPredicate> getCodec() {
-      return CODEC;
-    }
   }
 }

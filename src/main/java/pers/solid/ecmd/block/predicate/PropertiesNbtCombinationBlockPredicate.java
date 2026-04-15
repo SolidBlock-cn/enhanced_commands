@@ -86,16 +86,7 @@ public record PropertiesNbtCombinationBlockPredicate(BlockPredicate base, @Nulla
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<PropertiesNbtCombinationBlockPredicate> getType() {
     return BlockPredicateTypes.PROPERTIES_NBT_COMBINATION;
-  }
-
-  public enum Type implements BlockPredicateType<PropertiesNbtCombinationBlockPredicate> {
-    PROPERTIES_NBT_COMBINATION_TYPE;
-
-    @Override
-    public MapCodec<PropertiesNbtCombinationBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 }

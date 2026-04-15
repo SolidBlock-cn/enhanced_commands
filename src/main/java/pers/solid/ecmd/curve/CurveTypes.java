@@ -1,6 +1,7 @@
 package pers.solid.ecmd.curve;
 
 import com.google.common.base.Supplier;
+import com.mojang.serialization.MapCodec;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
@@ -12,14 +13,18 @@ public final class CurveTypes {
   private static final RegistryBridge<CurveType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, CurveType.REGISTRY);
 
 
-  public static final StraightCurve.Type STRAIGHT = register("straight", StraightCurve.Type.INSTANCE);
-  public static final CircleCurve.Type CIRCLE = register("circle", CircleCurve.Type.INSTANCE);
+  public static final CurveType<StraightCurve> STRAIGHT = register("straight", StraightCurve.CODEC, StraightCurveProvider.CODEC);
+  public static final CurveType<CircleCurve> CIRCLE = register("circle", CircleCurve.CODEC, CircleCurveProvider.CODEC);
 
   private CurveTypes() {
   }
 
   public static <T extends CurveType<?>> T register(String name, T curveType) {
     return REGISTRY_BRIDGE.register(name, curveType);
+  }
+
+  public static <T extends Curve> CurveType<T> register(String name, MapCodec<T> codec, MapCodec<? extends CurveProvider<? extends T>> providerCodec) {
+    return register(name, new CurveType.Simple<>(codec, providerCodec));
   }
 
   public static void init(InitializeContext context) {

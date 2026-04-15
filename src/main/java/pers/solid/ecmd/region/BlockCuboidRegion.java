@@ -9,7 +9,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
@@ -191,7 +190,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public BlockCuboidRegion.Type getType() {
+  public RegionType<BlockCuboidRegion> getType() {
     return RegionTypes.CUBOID;
   }
 
@@ -228,35 +227,6 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   @Override
   public boolean contains(Vec3 vec3d) {
     return contains(BlockPos.containing(vec3d));
-  }
-
-  public enum Type implements RegionType<BlockCuboidRegion> {
-    CUBOID_TYPE;
-
-    @Override
-    public String functionName() {
-      return "cuboid";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.cuboid");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<? extends RegionProvider<? extends BlockCuboidRegion>> parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<BlockCuboidRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends RegionProvider<? extends BlockCuboidRegion>> getArgumentCodec() {
-      return BlockCuboidRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<BlockCuboidRegionProvider> {

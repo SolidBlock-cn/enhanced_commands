@@ -23,11 +23,11 @@ import java.util.function.Predicate;
  * @see net.minecraft.commands.arguments.item.ItemPredicateArgument
  */
 public interface ItemPredicate extends ExpressionConvertible {
-  MapCodec<ItemPredicate> MAP_CODEC = ItemPredicateType.REGISTRY.byNameCodec().dispatchMap(ItemPredicate::getType, ItemPredicateType::getCodec);
-  Codec<ItemPredicate> CODEC = CodecUtil.combined(CodecUtil.combinedIdAndTag(SimpleItemPredicate.STRING_BASED_CODEC, TagItemPredicate.STRING_BASED_CODEC),
+  MapCodec<ItemPredicate> MAP_CODEC = ItemPredicateType.REGISTRY.byNameCodec().dispatchMap(ItemPredicate::getType, ItemPredicateType::codec);
+  Codec<ItemPredicate> CODEC = Codec.lazyInitialized(() -> CodecUtil.combined(CodecUtil.combinedIdAndTag(SimpleItemPredicate.STRING_BASED_CODEC, TagItemPredicate.STRING_BASED_CODEC),
       MAP_CODEC.codec(),
       predicate -> predicate instanceof TagItemPredicate simpleTag && simpleTag.items().unwrapKey().isPresent() ? Either.right(simpleTag) : predicate instanceof SimpleItemPredicate simpleItem ? Either.left(simpleItem) : null,
-      either -> either.map(Function.identity(), Function.identity()));
+      either -> either.map(Function.identity(), Function.identity())));
 
   ResourceKey<Registry<ItemPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("item_predicate"));
 

@@ -16,6 +16,7 @@ import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 
 import java.util.Collections;
+import java.util.Objects;
 
 public record CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates, Vec3 floor, Vec3 scale, Vec3 offset) implements BlockPredicate, Checkerboard<BlockPredicate> {
   public static final MapCodec<CheckerboardBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -46,7 +47,7 @@ public record CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<CheckerboardBlockPredicate> getType() {
     return BlockPredicateTypes.CHECKERBOARD;
   }
 
@@ -58,19 +59,10 @@ public record CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates
     return sb.append(")").toString();
   }
 
-  public enum Type implements BlockPredicateType<CheckerboardBlockPredicate> {
-    CHECKERBOARD_TYPE;
-
-    @Override
-    public MapCodec<CheckerboardBlockPredicate> getCodec() {
-      return CODEC;
-    }
-  }
-
-
   public static class Parser extends CheckerboardParser<BlockPredicate> {
     @Override
     protected CheckerboardBlockPredicate getParseResult(Vec3 floor, Vec3 scale, Vec3 offset) {
+      Objects.requireNonNull(weightedList, "CheckerboardParser.weightedList");
       return new CheckerboardBlockPredicate(weightedList, floor, scale, offset);
     }
 

@@ -26,13 +26,4 @@ public record PickItemFunction(WeightedList<ItemFunction> functions) implements 
   public String asString() {
     return functions.asString(ExpressionConvertible::asString);
   }
-
-  public enum Type implements ItemFunctionType<PickItemFunction> {
-    PICK_TYPE;
-
-    @Override
-    public MapCodec<PickItemFunction> getCodec() {
-      return CODEC;
-    }
-  }
 }

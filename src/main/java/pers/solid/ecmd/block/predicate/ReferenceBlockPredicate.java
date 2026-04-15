@@ -32,7 +32,7 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<ReferenceBlockPredicate> getType() {
     return BlockPredicateTypes.REFERENCE;
   }
 
@@ -43,19 +43,14 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
 
   @Override
   public CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-    return Type.INSTANCE.createExceptionForUnknownId(reader, identifier);
+    return ReferenceParser.INSTANCE.createExceptionForUnknownId(reader, identifier);
   }
 
-  public static class Type extends PrefixedIdParser<ReferenceBlockPredicate, BlockPredicate> implements BlockPredicateType<ReferenceBlockPredicate> {
-    public static final Type INSTANCE = new Type();
+  public static class ReferenceParser extends PrefixedIdParser<ReferenceBlockPredicate, BlockPredicate> {
+    public static final ReferenceParser INSTANCE = new ReferenceParser();
 
-    protected Type() {
+    protected ReferenceParser() {
       super('$', Component.translatable("enhanced_commands.block_predicate.reference"), BlockPredicate.REGISTRY_KEY);
-    }
-
-    @Override
-    public MapCodec<ReferenceBlockPredicate> getCodec() {
-      return CODEC;
     }
 
     @Override

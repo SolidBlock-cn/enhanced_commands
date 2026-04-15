@@ -11,7 +11,7 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 
 public interface ItemFunction extends ExpressionConvertible {
   ResourceKey<Registry<ItemFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("item_function"));
-  MapCodec<ItemFunction> MAP_CODEC = ItemFunctionType.REGISTRY.byNameCodec().dispatchMap(ItemFunction::getType, ItemFunctionType::getCodec);
+  MapCodec<ItemFunction> MAP_CODEC = ItemFunctionType.REGISTRY.byNameCodec().dispatchMap(ItemFunction::getType, ItemFunctionType::codec);
   Codec<ItemFunction> CODEC = MAP_CODEC.codec();
 
   ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context);

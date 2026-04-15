@@ -1,26 +1,33 @@
 package pers.solid.ecmd.region;
 
+import com.google.common.base.Suppliers;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
+import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.Parser;
+
+import java.util.function.Supplier;
 
 public final class RegionTypes {
   private static final RegistryBridge<RegionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, RegionType.REGISTRY);
 
-  public static final SingleBlockPosRegion.Type SINGLE = register("single", SingleBlockPosRegion.Type.INSTANCE);
-  public static final BlockCuboidRegion.Type CUBOID = register("cuboid", BlockCuboidRegion.Type.CUBOID_TYPE);
-  public static final PreciseCuboidRegion.Type CUBOID_PRECISE = register("cuboid_precise", PreciseCuboidRegion.Type.PRECISE_CUBOID_TYPE);
-  public static final SphereRegion.Type SPHERE = register("sphere", SphereRegion.Type.SPHERE_TYPE);
-  public static final IntersectRegion.Type INTERSECT = register("intersect", IntersectRegion.Type.INTERSECT_TYPE);
-  public static final UnionRegion.Type UNION = register("union", UnionRegion.Type.UNION_TYPE);
-  public static final OutlineRegion.Type OUTLINE = register("outline", OutlineRegion.Type.OUTLINE_TYPE);
-  public static final CylinderRegion.Type CYLINDER = register("cylinder", CylinderRegion.Type.CYLINDER_TYPE);
-  public static final HollowCylinderRegion.Type HOLLOW_CYLINDER = register("hollow_cylinder", HollowCylinderRegion.Type.HOLLOW_CYLINDER_TYPE);
-  public static final CuboidOutlineRegion.Type CUBOID_OUTLINE = register("cuboid_outline", CuboidOutlineRegion.Type.CUBOID_OUTLINE_TYPE);
-  public static final CuboidWallRegion.Type CUBOID_WALL = register("cuboid_wall", CuboidWallRegion.Type.CUBOID_WALL_TYPE);
-  public static final OutwardsRegion.Type OUTWARDS = register("outwards", OutwardsRegion.Type.INSTANCE);
-  public static final ActiveRegionType ACTIVE_REGION = register("active_region", ActiveRegionType.TYPE);
+  public static final RegionType<SingleBlockPosRegion> SINGLE = register("single", SingleBlockPosRegion.CODEC, SingleBlockPosRegionProvider.CODEC, Suppliers.ofInstance(SingleBlockPosRegion.FunctionParser.INSTANCE));
+  public static final RegionType<BlockCuboidRegion> CUBOID = register("cuboid", BlockCuboidRegion.CODEC, BlockCuboidRegionProvider.CODEC, "cuboid", Component.translatable("enhanced_commands.region.cuboid"), BlockCuboidRegion.Parser::new);
+  public static final RegionType<PreciseCuboidRegion> CUBOID_PRECISE = register("cuboid_precise", PreciseCuboidRegion.CODEC, PreciseCuboidRegionProvider.CODEC, "cuboid_precise", Component.translatable("enhanced_commands.region.cuboid"), PreciseCuboidRegion.Parser::new);
+  public static final RegionType<SphereRegion> SPHERE = register("sphere", SphereRegion.CODEC, SphereRegionProvider.CODEC, SphereRegion.Parser::new);
+  public static final RegionType<IntersectRegion> INTERSECT = register("intersect", IntersectRegion.CODEC, IntersectRegionProvider.CODEC, IntersectRegion.Parser::new);
+  public static final RegionType<UnionRegion> UNION = register("union", UnionRegion.CODEC, UnionRegionProvider.CODEC, UnionRegion.Parser::new);
+  public static final RegionType<OutlineRegion> OUTLINE = register("outline", OutlineRegion.CODEC, OutlineRegionProvider.CODEC, OutlineRegion.Parser::new);
+  public static final RegionType<CylinderRegion> CYLINDER = register("cylinder", CylinderRegion.CODEC, CylinderRegionProvider.CODEC, "cyl", Component.translatable("enhanced_commands.region.cylinder"), CylinderRegion.Parser::new);
+  public static final RegionType<HollowCylinderRegion> HOLLOW_CYLINDER = register("hollow_cylinder", HollowCylinderRegion.CODEC, HollowCylinderRegionProvider.CODEC, "hcyl", Component.translatable("enhanced_commands.region.hollow_cylinder"), HollowCylinderRegion.Parser::new);
+  public static final RegionType<CuboidOutlineRegion> CUBOID_OUTLINE = register("cuboid_outline", CuboidOutlineRegion.CODEC, CuboidOutlineRegionProvider.CODEC, CuboidOutlineRegion.Parser::new);
+  public static final RegionType<CuboidWallRegion> CUBOID_WALL = register("cuboid_wall", CuboidWallRegion.CODEC, CuboidWallRegionProvider.CODEC, CuboidWallRegion.Parser::new);
+  public static final RegionType<OutwardsRegion> OUTWARDS = register("outwards", OutwardsRegion.CODEC, OutwardsRegionProvider.CODEC, OutwardsRegion.Parser::new);
+  public static final RegionType<Region> ACTIVE_REGION = register("active_region", ActiveRegionParser.CODEC, ActiveRegionProvider.CODEC, null, null, Suppliers.ofInstance(null));
 
   private RegionTypes() {
   }
@@ -37,8 +44,17 @@ public final class RegionTypes {
     return REGISTRY_BRIDGE.register(name, value);
   }
 
+  private static <T extends Region> RegionType<T> register(String name, MapCodec<T> codec, MapCodec<? extends RegionProvider<T>> providerCodec, Supplier<@Nullable FunctionContentParser<? extends RegionProvider<? extends T>>> parserSupplier) {
+    return register(name, new RegionType.Simple<>(codec, providerCodec, name, Component.translatable("enhanced_commands.region." + name), parserSupplier));
+  }
+
+  private static <T extends Region> RegionType<T> register(String name, MapCodec<T> codec, MapCodec<? extends RegionProvider<T>> providerCodec, @Nullable String functionName, @Nullable Component tooltip, Supplier<@Nullable FunctionContentParser<? extends RegionProvider<? extends T>>> parserSupplier) {
+    return register(name, new RegionType.Simple<>(codec, providerCodec, functionName, tooltip, parserSupplier));
+  }
+
   public static void init(InitializeContext context) {
     RegistryBridge.registerToRootRegistry(RegionType.REGISTRY, context);
+    RegionParsing.PARSERS.add(ActiveRegionParser.INSTANCE);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
   }
 }

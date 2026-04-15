@@ -1,6 +1,7 @@
 package pers.solid.ecmd.block.function;
 
 import com.google.common.base.Supplier;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
@@ -16,42 +17,50 @@ import java.util.Map;
 public final class BlockFunctionTypes {
   private static final RegistryBridge<BlockFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, BlockFunctionType.REGISTRY);
 
+  public static final BlockFunctionType<SimpleBlockFunction> SIMPLE = register("simple", SimpleBlockFunction.CODEC);
+  public static final BlockFunctionType<PropertyNamesBlockFunction> PROPERTY_NAMES = register("property_names", PropertyNamesBlockFunction.CODEC, PropertyNamesBlockFunction.PropertyNamesParser.INSTANCE);
+  public static final BlockFunctionType<NbtBlockFunction> NBT = register("nbt", NbtBlockFunction.CODEC, NbtBlockFunction.NbtParser.INSTANCE);
+  public static final BlockFunctionType<PropertiesNbtCombinationBlockFunction> PROPERTIES_NBT_COMBINATION = register("properties_nbt_combination", PropertiesNbtCombinationBlockFunction.CODEC);
+  public static final BlockFunctionType<EmptyBlockFunction> EMPTY = register("empty", EmptyBlockFunction.CODEC);
+  public static final BlockFunctionType<RandomBlockFunction> RANDOM = register("random", RandomBlockFunction.CODEC, RandomBlockFunction.RandomParser.INSTANCE);
+  public static final BlockFunctionType<TagBlockFunction> TAG = register("tag", TagBlockFunction.CODEC, TagBlockFunction.TagParser.INSTANCE);
+  public static final BlockFunctionType<UseOriginalBlockFunction> USE_ORIGINAL = register("use_original", UseOriginalBlockFunction.CODEC, UseOriginalBlockFunction.WaveParser.INSTANCE);
 
-  public static final SimpleBlockFunction.Type SIMPLE = register("simple", SimpleBlockFunction.Type.SIMPLE_TYPE);
-  public static final PropertyNamesBlockFunction.Type PROPERTY_NAMES = register("property_names", PropertyNamesBlockFunction.Type.PROPERTY_NAMES_TYPE);
-  public static final NbtBlockFunction.Type NBT = register("nbt", NbtBlockFunction.Type.NBT_TYPE);
-  public static final PropertiesNbtCombinationBlockFunction.Type PROPERTIES_NBT_COMBINATION = register("properties_nbt_combination", PropertiesNbtCombinationBlockFunction.Type.PROPERTIES_NBT_COMBINATION_TYPE);
-  public static final EmptyBlockFunction EMPTY = register("empty", EmptyBlockFunction.INSTANCE);
-  public static final RandomBlockFunction.Type RANDOM = register("random", RandomBlockFunction.Type.RANDOM_TYPE);
-  public static final TagBlockFunction.Type TAG = register("tag", TagBlockFunction.Type.TAG_TYPE);
-  public static final UseOriginalBlockFunction.Type USE_ORIGINAL = register("use_original", UseOriginalBlockFunction.Type.USE_ORIGINAL_TYPE);
-
-  public static final CheckerboardBlockFunction.Type CHECKERBOARD = register("checkerboard", CheckerboardBlockFunction.Type.CHECKERBOARD_TYPE);
-  public static final CheckerboardTagBlockFunction.Type CHECKERBOARD_TAG = register("checkerboard-tag", CheckerboardTagBlockFunction.Type.CHECKERBOARD_TAG_TYPE);
-  public static final ConditionalBlockFunction.Type CONDITIONAL = register("conditional", ConditionalBlockFunction.Type.CONDITIONAL_TYPE);
-  public static final ConditionsBlockFunction.Type CONDITIONS = register("conditions", ConditionsBlockFunction.Type.CONDITIONS_TYPE);
-  public static final DryBlockFunction.Type DRY = register("dry", DryBlockFunction.Type.DRY_TYPE);
-  public static final FilterBlockFunction.Type FILTER = register("filter", FilterBlockFunction.Type.FILTER_TYPE);
-  public static final IdContainBlockFunction.Type ID_CONTAIN = register("id_contain", IdContainBlockFunction.Type.ID_CONTAIN_TYPE);
-  public static final IdReplaceBlockFunction.Type ID_REPLACE = register("id_replace", IdReplaceBlockFunction.Type.ID_REPLACE_TYPE);
-  public static final MirrorBlockFunction.Type MIRROR = register("mirror", MirrorBlockFunction.Type.MIRROR_TYPE);
-  public static final NoiseBlockFunction.Type NOISE = register("noise", NoiseBlockFunction.Type.INSTANCE);
-  public static final OverlayBlockFunction.Type OVERLAY = register("overlay", OverlayBlockFunction.Type.OVERLAY_TYPE);
-  public static final PickBlockFunction.Type PICK = register("pick", PickBlockFunction.Type.PICK_TYPE);
-  public static final PostProcessBlockFunction.Type POST_PROCESS = register("post_process", PostProcessBlockFunction.Type.POST_PROCESS_TYPE);
-  public static final ReferenceBlockFunction.Type REFERENCE = register("reference", ReferenceBlockFunction.Type.INSTANCE);
-  public static final RotateBlockFunction.Type ROTATE = register("rotate", RotateBlockFunction.Type.ROTATE_TYPE);
-  public static final StonecutBlockFunction.Type STONE_CUT = register("stonecut", StonecutBlockFunction.Type.STONE_CUT_TYPE);
+  public static final BlockFunctionType<CheckerboardBlockFunction> CHECKERBOARD = register("checkerboard", CheckerboardBlockFunction.CODEC);
+  public static final BlockFunctionType<CheckerboardTagBlockFunction> CHECKERBOARD_TAG = register("checkerboard-tag", CheckerboardTagBlockFunction.CODEC);
+  public static final BlockFunctionType<ConditionalBlockFunction> CONDITIONAL = register("conditional", ConditionalBlockFunction.CODEC);
+  public static final BlockFunctionType<ConditionsBlockFunction> CONDITIONS = register("conditions", ConditionsBlockFunction.CODEC);
+  public static final BlockFunctionType<DryBlockFunction> DRY = register("dry", DryBlockFunction.CODEC);
+  public static final BlockFunctionType<FilterBlockFunction> FILTER = register("filter", FilterBlockFunction.CODEC);
+  public static final BlockFunctionType<IdContainBlockFunction> ID_CONTAIN = register("id_contain", IdContainBlockFunction.CODEC);
+  public static final BlockFunctionType<IdReplaceBlockFunction> ID_REPLACE = register("id_replace", IdReplaceBlockFunction.CODEC);
+  public static final BlockFunctionType<MirrorBlockFunction> MIRROR = register("mirror", MirrorBlockFunction.CODEC);
+  public static final BlockFunctionType<NoiseBlockFunction> NOISE = register("noise", NoiseBlockFunction.CODEC);
+  public static final BlockFunctionType<OverlayBlockFunction> OVERLAY = register("overlay", OverlayBlockFunction.CODEC);
+  public static final BlockFunctionType<PickBlockFunction> PICK = register("pick", PickBlockFunction.CODEC);
+  public static final BlockFunctionType<PostProcessBlockFunction> POST_PROCESS = register("post_process", PostProcessBlockFunction.CODEC);
+  public static final BlockFunctionType<ReferenceBlockFunction> REFERENCE = register("reference", ReferenceBlockFunction.CODEC, ReferenceBlockFunction.Parser.INSTANCE);
+  public static final BlockFunctionType<RotateBlockFunction> ROTATE = register("rotate", RotateBlockFunction.CODEC);
+  public static final BlockFunctionType<StonecutBlockFunction> STONE_CUT = register("stonecut", StonecutBlockFunction.CODEC);
 
   private BlockFunctionTypes() {
   }
 
   @SuppressWarnings("unchecked")
   private static <T extends BlockFunctionType<?>> T register(String name, T value) {
-    if (value != SimpleBlockFunction.Type.SIMPLE_TYPE && value instanceof Parser<?> parser) {
+    if (value instanceof Parser<?> parser) {
       BlockFunctionParsing.PARSERS.add((Parser<BlockFunction>) parser);
     }
     return REGISTRY_BRIDGE.register(name, value);
+  }
+
+  private static <T extends BlockFunction> BlockFunctionType<T> register(String name, MapCodec<T> codec) {
+    return register(name, new BlockFunctionType.Simple<>(codec));
+  }
+
+  private static <T extends BlockFunction> BlockFunctionType<T> register(String name, MapCodec<T> codec, Parser<? extends BlockFunction> parser) {
+    BlockFunctionParsing.PARSERS.add(parser);
+    return register(name, codec);
   }
 
   public static void init(InitializeContext context) {

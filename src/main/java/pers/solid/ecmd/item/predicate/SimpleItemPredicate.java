@@ -18,21 +18,12 @@ public record SimpleItemPredicate(Item item) implements ItemPredicateWithoutCont
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<SimpleItemPredicate> getType() {
     return ItemPredicateTypes.SIMPLE;
   }
 
   @Override
   public String asString() {
     return BuiltInRegistries.ITEM.getKey(item).toString();
-  }
-
-  public enum Type implements ItemPredicateType<SimpleItemPredicate> {
-    SIMPLE_TYPE;
-
-    @Override
-    public MapCodec<SimpleItemPredicate> getCodec() {
-      return CODEC;
-    }
   }
 }

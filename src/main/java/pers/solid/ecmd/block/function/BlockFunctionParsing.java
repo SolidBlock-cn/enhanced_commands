@@ -35,7 +35,7 @@ public class BlockFunctionParsing {
   /**
    * 方块函数的所有解析器。注意这个列表是可变的。
    */
-  public static final List<Parser<BlockFunction>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
+  public static final List<Parser<? extends BlockFunction>> PARSERS = Lists.newArrayList(PARENTHESES_PARSER, FUNCTIONS_PARSER);
 
   private BlockFunctionParsing() {
   }

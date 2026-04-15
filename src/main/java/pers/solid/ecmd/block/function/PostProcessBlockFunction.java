@@ -47,22 +47,13 @@ public record PostProcessBlockFunction(List<Direction> directions) implements Bl
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<PostProcessBlockFunction> getType() {
     return BlockFunctionTypes.POST_PROCESS;
   }
 
   @Override
   public String asString() {
     return "postprocess(" + (ALL_DIRECTIONS.equals(directions) ? "" : directions.stream().map(Direction::getSerializedName).collect(Collectors.joining(" "))) + ")";
-  }
-
-  public enum Type implements BlockFunctionType<PostProcessBlockFunction> {
-    POST_PROCESS_TYPE;
-
-    @Override
-    public MapCodec<PostProcessBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<PostProcessBlockFunction> {

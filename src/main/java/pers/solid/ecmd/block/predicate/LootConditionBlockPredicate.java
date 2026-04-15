@@ -42,22 +42,13 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<LootConditionBlockPredicate> getType() {
     return BlockPredicateTypes.LOOT_CONDITION;
   }
 
   @Override
   public String asString() {
     return "predicate(" + entry.unwrap().map(key -> key.location().toString(), lootCondition -> LootItemCondition.CODEC.encodeStart(NbtOps.INSTANCE, entry).toString()) + ")";
-  }
-
-  public enum Type implements BlockPredicateType<LootConditionBlockPredicate> {
-    LOOT_CONDITION_TYPE;
-
-    @Override
-    public MapCodec<LootConditionBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<LootConditionBlockPredicate> {

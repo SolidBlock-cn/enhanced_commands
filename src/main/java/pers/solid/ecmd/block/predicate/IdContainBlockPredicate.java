@@ -40,7 +40,7 @@ public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<IdContainBlockPredicate> getType() {
     return BlockPredicateTypes.ID_CONTAIN;
   }
 
@@ -57,15 +57,6 @@ public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate
   @Override
   public int hashCode() {
     return pattern.pattern().hashCode();
-  }
-
-  public enum Type implements BlockPredicateType<IdContainBlockPredicate> {
-    ID_CONTAIN_TYPE;
-
-    @Override
-    public MapCodec<IdContainBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<IdContainBlockPredicate> {

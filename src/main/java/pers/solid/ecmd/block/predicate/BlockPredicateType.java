@@ -10,5 +10,7 @@ public interface BlockPredicateType<T extends BlockPredicate> {
   ResourceKey<Registry<BlockPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_predicate_type"));
   Registry<BlockPredicateType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
-  MapCodec<T> getCodec();
+  MapCodec<T> codec();
+
+  record Simple<T extends BlockPredicate>(MapCodec<T> codec) implements BlockPredicateType<T> {}
 }

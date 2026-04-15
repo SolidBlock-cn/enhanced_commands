@@ -17,7 +17,7 @@ public record StraightCurveProvider(EnhancedCoordinates from, EnhancedCoordinate
   }
 
   @Override
-  public StraightCurve.Type getType() {
+  public CurveType<StraightCurve> getType() {
     return CurveTypes.STRAIGHT;
   }
 }

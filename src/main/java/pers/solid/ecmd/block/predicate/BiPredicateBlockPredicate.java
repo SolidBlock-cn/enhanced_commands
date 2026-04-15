@@ -40,17 +40,8 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<BiPredicateBlockPredicate> getType() {
     return BlockPredicateTypes.BI_PREDICATE;
-  }
-
-  public enum Type implements BlockPredicateType<BiPredicateBlockPredicate> {
-    BI_PREDICATE_TYPE;
-
-    @Override
-    public MapCodec<BiPredicateBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<BiPredicateBlockPredicate> {

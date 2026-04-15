@@ -22,22 +22,13 @@ public record AllItemPredicate(List<ItemPredicate> predicates) implements Predic
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<AllItemPredicate> getType() {
     return ItemPredicateTypes.ALL_TYPE;
   }
 
   @Override
   public String asString() {
     return "all(" + predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + ")";
-  }
-
-  public enum Type implements ItemPredicateType<AllItemPredicate> {
-    ALL_TYPE;
-
-    @Override
-    public MapCodec<AllItemPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public record Parser(List<ItemPredicate> itemPredicates) implements FunctionContentParser.SequentialParams<AllItemPredicate> {

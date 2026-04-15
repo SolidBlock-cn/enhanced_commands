@@ -10,5 +10,8 @@ public interface ItemPredicateType<T extends ItemPredicate> {
   ResourceKey<Registry<ItemPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("item_predicate_type"));
   Registry<ItemPredicateType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
-  MapCodec<T> getCodec();
+  MapCodec<T> codec();
+
+  record Simple<T extends ItemPredicate>(MapCodec<T> codec) implements ItemPredicateType<T> {
+  }
 }

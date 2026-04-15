@@ -61,20 +61,15 @@ public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> 
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<TagBlockFunction> getType() {
     return BlockFunctionTypes.TAG;
   }
 
-  public enum Type implements BlockFunctionType<TagBlockFunction>, Parser<TagBlockFunction> {
-    TAG_TYPE;
+  public enum TagParser implements Parser<TagBlockFunction> {
+    INSTANCE;
 
     @Override
-    public MapCodec<TagBlockFunction> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public TagBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable TagBlockFunction parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       SimpleBlockFunctionParser<?> parser = new SimpleBlockFunctionParser<>(parseContext);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {

@@ -8,7 +8,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import pers.solid.ecmd.argument.EnhancedCoordinates;
@@ -34,7 +33,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   }
 
   @Override
-  public Type getType() {
+  public RegionType<OutwardsRegion> getType() {
     return RegionTypes.OUTWARDS;
   }
 
@@ -65,35 +64,6 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   @Override
   public String asString() {
     return "outwards(%s %s %s, %s %s %s)".formatted(Integer.toString(x), Integer.toString(y), Integer.toString(z), Integer.toString(center.getX()), Integer.toString(center.getY()), Integer.toString(center.getZ()));
-  }
-
-  public enum Type implements RegionType<OutwardsRegion> {
-    INSTANCE;
-
-    @Override
-    public String functionName() {
-      return "outwards";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.outwards");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<OutwardsRegionProvider> parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<OutwardsRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends RegionProvider<OutwardsRegion>> getArgumentCodec() {
-      return OutwardsRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<OutwardsRegionProvider> {

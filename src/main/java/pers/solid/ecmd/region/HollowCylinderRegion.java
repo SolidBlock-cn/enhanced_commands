@@ -8,7 +8,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -106,7 +105,7 @@ public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion regio
   }
 
   @Override
-  public Type getType() {
+  public RegionType<HollowCylinderRegion> getType() {
     return RegionTypes.HOLLOW_CYLINDER;
   }
 
@@ -131,41 +130,12 @@ public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion regio
     return region.minContainingBox();
   }
 
-  public enum Type implements RegionType<HollowCylinderRegion> {
-    HOLLOW_CYLINDER_TYPE;
-
-    @Override
-    public String functionName() {
-      return "hcyl";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.hollow_cylinder");
-    }
-
-    @Override
-    public Parser parser() {
-      return new Parser();
-    }
-
-    @Override
-    public MapCodec<HollowCylinderRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends RegionProvider<HollowCylinderRegion>> getArgumentCodec() {
-      return HollowCylinderRegionProvider.CODEC;
-    }
-  }
-
   public static final class Parser implements FunctionContentParser.MixedParams<HollowCylinderRegionProvider> {
     private static final Set<String> SUPPORTED_PARAMS = Set.of("radius", "height", "center", "type");
     private @Nullable Double radius = null;
     private @Nullable Double height = null;
     private @Nullable EnhancedCoordinates center = null;
-    private OutlineType type = null;
+    private @Nullable OutlineType type = null;
 
     @Override
     public HollowCylinderRegionProvider getParseResult(ParseContext<?> parseContext) {

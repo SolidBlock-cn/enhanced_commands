@@ -37,22 +37,13 @@ public record RelBlockPredicate(Vec3iProvider relPos, BlockPredicate predicate) 
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<RelBlockPredicate> getType() {
     return BlockPredicateTypes.REL;
   }
 
   @Override
   public String asString() {
     return "rel(%s, %s)".formatted(relPos.asString(), predicate.asString());
-  }
-
-  public enum Type implements BlockPredicateType<RelBlockPredicate> {
-    REL_TYPE;
-
-    @Override
-    public MapCodec<RelBlockPredicate> getCodec() {
-      return CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<RelBlockPredicate> {

@@ -30,21 +30,12 @@ public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateWi
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<TagItemPredicate> getType() {
     return ItemPredicateTypes.SIMPLE_TAG;
   }
 
   @Override
   public String asString() {
     return items.unwrap().map(itemTagKey -> "#" + itemTagKey.location(), holders -> holders.stream().map(Holder::getRegisteredName).collect(Collectors.joining("|")));
-  }
-
-  public enum Type implements ItemPredicateType<TagItemPredicate> {
-    SIMPLE_TAG_TYPE;
-
-    @Override
-    public MapCodec<TagItemPredicate> getCodec() {
-      return CODEC;
-    }
   }
 }

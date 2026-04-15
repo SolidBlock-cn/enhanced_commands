@@ -78,7 +78,7 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<RandomBlockFunction> getType() {
     return BlockFunctionTypes.RANDOM;
   }
 
@@ -98,13 +98,8 @@ public final class RandomBlockFunction implements BlockFunction {
     return "RandomBlockFunction{}";
   }
 
-  public enum Type implements BlockFunctionType<RandomBlockFunction>, Parser<RandomBlockFunction> {
-    RANDOM_TYPE;
-
-    @Override
-    public MapCodec<RandomBlockFunction> getCodec() {
-      return CODEC;
-    }
+  public enum RandomParser implements Parser<RandomBlockFunction> {
+    INSTANCE;
 
     @Override
     public @Nullable RandomBlockFunction parse(ParseContext<?> parseContext) {

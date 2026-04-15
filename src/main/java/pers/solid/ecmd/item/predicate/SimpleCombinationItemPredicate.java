@@ -93,7 +93,7 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
   }
 
   @Override
-  public Type getType() {
+  public ItemPredicateType<SimpleCombinationItemPredicate> getType() {
     return ItemPredicateTypes.SIMPLE_COMBINATION;
   }
 
@@ -116,15 +116,6 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
       return entry.asEntryString();
     } else {
       return "(" + predicate.asString() + ")";
-    }
-  }
-
-  public enum Type implements ItemPredicateType<SimpleCombinationItemPredicate> {
-    SIMPLE_COMBINATION_TYPE;
-
-    @Override
-    public MapCodec<SimpleCombinationItemPredicate> getCodec() {
-      return CODEC;
     }
   }
 }

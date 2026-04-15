@@ -9,7 +9,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +30,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
   }
 
   @Override
-  public Type getType() {
+  public RegionType<SingleBlockPosRegion> getType() {
     return RegionTypes.SINGLE;
   }
 
@@ -63,35 +62,6 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
   @Override
   public Iterator<BlockPos> iterator() {
     return Iterators.singletonIterator(new BlockPos(pos));
-  }
-
-  public enum Type implements RegionType<SingleBlockPosRegion> {
-    INSTANCE;
-
-    @Override
-    public String functionName() {
-      return "single";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.single");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<RegionProvider<SingleBlockPosRegion>> parser() {
-      return FunctionParser.INSTANCE;
-    }
-
-    @Override
-    public MapCodec<SingleBlockPosRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends RegionProvider<SingleBlockPosRegion>> getArgumentCodec() {
-      return SingleBlockPosRegionProvider.CODEC;
-    }
   }
 
   /**

@@ -164,22 +164,8 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
   }
 
   @Override
-  public Type getType() {
+  public CurveType<CircleCurve> getType() {
     return CurveTypes.CIRCLE;
-  }
-
-  public enum Type implements CurveType<CircleCurve> {
-    INSTANCE;
-
-    @Override
-    public MapCodec<CircleCurve> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends CurveProvider<? extends CircleCurve>> getArgumentCodec() {
-      return CircleCurveProvider.CODEC;
-    }
   }
 
   /**

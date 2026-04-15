@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.block.SimpleBlockParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
@@ -67,20 +68,15 @@ public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicat
   }
 
   @Override
-  public Type getType() {
+  public BlockPredicateType<ProbabilityBlockPredicate> getType() {
     return BlockPredicateTypes.PROPERTY_NAMES;
   }
 
-  public enum Type implements BlockPredicateType<PropertiesNamesBlockPredicate>, Parser<PropertiesNamesBlockPredicate> {
-    PROPERTY_NAMES_TYPE;
+  public enum PropertyNamesParser implements Parser<PropertiesNamesBlockPredicate> {
+    INSTANCE;
 
     @Override
-    public MapCodec<PropertiesNamesBlockPredicate> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public PropertiesNamesBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable PropertiesNamesBlockPredicate parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString("[", SimpleBlockParser.START_OF_PROPERTIES, suggestionsBuilder).buildFuture());
       final StringReader reader = parseContext.reader();
       if (reader.canRead() && reader.peek() == '[') {

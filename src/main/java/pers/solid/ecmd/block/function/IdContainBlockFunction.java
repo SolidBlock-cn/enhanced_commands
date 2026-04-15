@@ -71,7 +71,7 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<IdContainBlockFunction> getType() {
     return BlockFunctionTypes.ID_CONTAIN;
   }
 
@@ -94,16 +94,6 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   public Pattern pattern() {
     return pattern;
-  }
-
-  public enum Type implements BlockFunctionType<IdContainBlockFunction> {
-    ID_CONTAIN_TYPE;
-
-    @Override
-    public MapCodec<IdContainBlockFunction> getCodec() {
-      return CODEC;
-    }
-
   }
 
   public static class Parser implements FunctionContentParser.MixedParams<IdContainBlockFunction> {

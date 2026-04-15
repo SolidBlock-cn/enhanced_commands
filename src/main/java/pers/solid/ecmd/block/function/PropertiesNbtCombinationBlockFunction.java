@@ -52,7 +52,7 @@ public record PropertiesNbtCombinationBlockFunction(BlockFunction base, @Nullabl
   }
 
   @Override
-  public Type getType() {
+  public BlockFunctionType<PropertiesNbtCombinationBlockFunction> getType() {
     return BlockFunctionTypes.PROPERTIES_NBT_COMBINATION;
   }
 
@@ -66,14 +66,5 @@ public record PropertiesNbtCombinationBlockFunction(BlockFunction base, @Nullabl
       blockState = nbt.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     }
     return blockState;
-  }
-
-  public enum Type implements BlockFunctionType<PropertiesNbtCombinationBlockFunction> {
-    PROPERTIES_NBT_COMBINATION_TYPE;
-
-    @Override
-    public MapCodec<PropertiesNbtCombinationBlockFunction> getCodec() {
-      return CODEC;
-    }
   }
 }

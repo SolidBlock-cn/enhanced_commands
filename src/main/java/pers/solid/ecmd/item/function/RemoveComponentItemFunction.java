@@ -32,13 +32,4 @@ public record RemoveComponentItemFunction<T>(DataComponentType<T> component) imp
   public String asEntryString() {
     return "!" + BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component);
   }
-
-  public enum Type implements ItemFunctionType<RemoveComponentItemFunction<?>> {
-    REMOVE_COMPONENT_TYPE;
-
-    @Override
-    public MapCodec<RemoveComponentItemFunction<?>> getCodec() {
-      return CODEC;
-    }
-  }
 }

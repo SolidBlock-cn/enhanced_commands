@@ -6,7 +6,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -127,7 +126,7 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public Type getType() {
+  public RegionType<PreciseCuboidRegion> getType() {
     return RegionTypes.CUBOID_PRECISE;
   }
 
@@ -148,38 +147,8 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public @Nullable AABB minContainingBox() {
+  public AABB minContainingBox() {
     return box;
-  }
-
-
-  public enum Type implements RegionType<PreciseCuboidRegion> {
-    PRECISE_CUBOID_TYPE;
-
-    @Override
-    public String functionName() {
-      return "cuboid_precise";
-    }
-
-    @Override
-    public Component tooltip() {
-      return Component.translatable("enhanced_commands.region.cuboid");
-    }
-
-    @Override
-    public FunctionContentParser.SequentialParams<? extends RegionProvider<? extends PreciseCuboidRegion>> parser() {
-      return new PreciseCuboidRegion.Parser();
-    }
-
-    @Override
-    public MapCodec<PreciseCuboidRegion> getCodec() {
-      return CODEC;
-    }
-
-    @Override
-    public MapCodec<? extends RegionProvider<? extends PreciseCuboidRegion>> getArgumentCodec() {
-      return PreciseCuboidRegionProvider.CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<PreciseCuboidRegionProvider> {
