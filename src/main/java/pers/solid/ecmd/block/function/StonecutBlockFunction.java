@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import pers.solid.ecmd.mixins.accessor.SingleItemRecipeAccessor;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.StateUtil;

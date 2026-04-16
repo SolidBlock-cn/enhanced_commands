@@ -3,10 +3,10 @@ package pers.solid.ecmd.util.extension;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Contract;
-import pers.solid.ecmd.mixins.general.EntitySelectorParserMixin;
 import pers.solid.ecmd.entity.predicate.EntityPredicateEntry;
 import pers.solid.ecmd.entity.predicate.EntitySelectorReaderExtras;
 import pers.solid.ecmd.entity.predicate.StaticEntityPredicate;
+import pers.solid.ecmd.mixins.general.EntitySelectorParserMixin;
 
 import java.util.function.Predicate;
 

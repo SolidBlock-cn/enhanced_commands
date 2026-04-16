@@ -1,46 +1,34 @@
 package pers.solid.ecmd.parse;
 
-import com.google.common.base.Functions;
-import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.Optionull;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-public class FunctionsParser<T> implements Parser<T> {
-  private final Set<String> functions;
-  private final Function<String, @Nullable FunctionContentParser<? extends T>> parserFactory;
-  private final Function<String, @Nullable Component> tooltipProvider;
-
-  public FunctionsParser(Set<String> functions, Function<String, @Nullable FunctionContentParser<? extends T>> parserFactory, Function<String, @Nullable Component> tooltipProvider) {
-    this.functions = functions;
-    this.parserFactory = parserFactory;
-    this.tooltipProvider = tooltipProvider;
-  }
-
-  public FunctionsParser(Map<String, Supplier<FunctionContentParser<? extends T>>> functions, Map<String, Component> functionNames) {
-    this.functions = functions.keySet();
-    this.parserFactory = s -> Optionull.map(functions.get(s), Supplier::get);
-    this.tooltipProvider = Functions.forMap(functionNames, null);
+public interface FunctionsParser<T> extends Parser<T> {
+  static <T> FunctionsParser<T> create() {
+    return new Impl<>(new LinkedHashMap<>(), new HashMap<>());
   }
 
   @Override
-  public @Nullable T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+  default @Nullable T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     final int cursorBeforeFunctionName = reader.getCursor();
-    parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(functions, suggestionsBuilder.createOffset(cursorBeforeFunctionName), s -> s + "(", tooltipProvider::apply));
+    final Iterable<String> functionNames = functionNames();
+    parseContext.addSuggestion((context, suggestionsBuilder) -> SharedSuggestionProvider.suggest(functionNames, suggestionsBuilder.createOffset(cursorBeforeFunctionName), s -> s + "(", this::getTooltipForFunction));
     final String unquotedString = reader.readUnquotedString();
     if (!unquotedString.isEmpty() && reader.canRead() && reader.peek() == '(') {
       final int cursorAfterFunctionName = reader.getCursor();
-      final FunctionContentParser<? extends T> functionContentParser = parserFactory.apply(unquotedString);
+      final FunctionContentParser<? extends T> functionContentParser = getParserForFunction(unquotedString);
       if (functionContentParser != null) {
         functionContentParser.onBeforeParentheses(unquotedString, cursorBeforeFunctionName, cursorAfterFunctionName);
         return parseParenthesis(functionContentParser, parseContext);
@@ -53,7 +41,19 @@ public class FunctionsParser<T> implements Parser<T> {
     }
   }
 
-  public T parseParenthesis(FunctionContentParser<? extends T> parser, ParseContext<?> parseContext) throws CommandSyntaxException {
+  Iterable<String> functionNames();
+
+  @Nullable FunctionContentParser<? extends T> getParserForFunction(String functionName);
+
+  @Nullable Component getTooltipForFunction(String functionName);
+
+  void register(String functionName, @Nullable Supplier<@Nullable Component> tooltip, @Nullable Supplier<@Nullable FunctionContentParser<? extends T>> parser);
+
+  default void register(String functionName, @Nullable Component tooltip, @Nullable Supplier<@Nullable FunctionContentParser<? extends T>> parser) {
+    register(functionName, tooltip == null ? null : Suppliers.ofInstance(tooltip), parser);
+  }
+
+  default @Nullable T parseParenthesis(FunctionContentParser<? extends T> parser, ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     if (!(reader.canRead() && reader.peek() == '(')) {
       return null;
@@ -74,5 +74,37 @@ public class FunctionsParser<T> implements Parser<T> {
       return parser.getParseResult(parseContext);
     }
     throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerExpectedSymbol().createWithContext(reader, ')');
+  }
+
+  record Impl<T>(Map<String, @Nullable Supplier<@Nullable FunctionContentParser<? extends T>>> parsers, Map<String, Supplier<@Nullable Component>> tooltips) implements FunctionsParser<T> {
+
+    @Override
+    public Iterable<String> functionNames() {
+      return parsers.keySet();
+    }
+
+    @Override
+    public @Nullable FunctionContentParser<? extends T> getParserForFunction(String functionName) {
+      final Supplier<@Nullable FunctionContentParser<? extends T>> supplier = parsers.get(functionName);
+      return supplier == null ? null : supplier.get();
+    }
+
+    @Override
+    public @Nullable Component getTooltipForFunction(String functionName) {
+      return tooltips.get(functionName).get();
+    }
+
+    @Override
+    public void register(String functionName, @Nullable Supplier<@Nullable Component> tooltip, @Nullable Supplier<@Nullable FunctionContentParser<? extends T>> parser) {
+      if (tooltips.containsKey(functionName) || parsers.containsKey(functionName)) {
+        throw new IllegalArgumentException("Duplicate function names: " + functionName);
+      }
+      if (tooltip != null) {
+        tooltips.put(functionName, tooltip);
+      }
+      if (parser != null) {
+        parsers.put(functionName, parser);
+      }
+    }
   }
 }
