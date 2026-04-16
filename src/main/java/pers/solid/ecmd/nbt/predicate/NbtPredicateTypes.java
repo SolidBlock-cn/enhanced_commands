@@ -1,13 +1,10 @@
 package pers.solid.ecmd.nbt.predicate;
 
-import com.google.common.base.Supplier;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionContentParser;
-
-import java.util.Map;
+import pers.solid.ecmd.parse.FunctionsParser;
 
 public class NbtPredicateTypes {
   private static final RegistryBridge<NbtPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtPredicateType.REGISTRY);
@@ -34,19 +31,13 @@ public class NbtPredicateTypes {
     RegistryBridge.registerToRootRegistry(NbtPredicateType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
     registerFunctions();
-    registerFunctionNames();
   }
 
 
   private static void registerFunctions() {
-    final Map<String, Supplier<FunctionContentParser<? extends NbtPredicate>>> map = NbtPredicateParsing.FUNCTIONS;
-    map.put("all", AllNbtPredicate.Parser::new);
-    map.put("any", AnyNbtPredicate.Parser::new);
-    map.put("regex", RegexNbtPredicate.Parser::new);
-  }
-
-  private static void registerFunctionNames() {
-    final Map<String, Component> map = NbtPredicateParsing.FUNCTION_NAMES;
-    map.put("regex", Component.translatable("enhanced_commands.nbt_predicate.regex"));
+    final FunctionsParser<NbtPredicate> functionsParser = NbtPredicateParsing.FUNCTIONS_PARSER;
+    functionsParser.register("all", Component.translatable("enhanced_commands.predicate.all"), AllNbtPredicate.Parser::new);
+    functionsParser.register("any", Component.translatable("enhanced_commands.predicate.any"), AnyNbtPredicate.Parser::new);
+    functionsParser.register("regex", Component.translatable("enhanced_commands.nbt_predicate.regex"), RegexNbtPredicate.Parser::new);
   }
 }

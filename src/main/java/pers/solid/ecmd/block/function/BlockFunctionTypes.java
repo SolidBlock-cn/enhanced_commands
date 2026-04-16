@@ -1,15 +1,12 @@
 package pers.solid.ecmd.block.function;
 
-import com.google.common.base.Supplier;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionContentParser;
+import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
-
-import java.util.Map;
 
 /**
  * 本模组的所有方块函数类型。每个类型都需要通过 {@link #register} 方法注册。只有注册了类型的方块函数才能正确编码与解码。
@@ -68,46 +65,25 @@ public final class BlockFunctionTypes {
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
 
     registerFunctions();
-    registerFunctionNames();
   }
 
   private static void registerFunctions() {
-    final Map<String, Supplier<FunctionContentParser<? extends BlockFunction>>> map = BlockFunctionParsing.FUNCTIONS;
-    map.put("pick", PickBlockFunction.Parser::new);
-    map.put("dry", DryBlockFunction.Parser::new);
-    map.put("overlay", OverlayBlockFunction.Parser::new);
-    map.put("filter", FilterBlockFunction.Parser::new);
-    map.put("idcontain", IdContainBlockFunction.Parser::new);
-    map.put("stonecut", StonecutBlockFunction.Parser::new);
-    map.put("if", ConditionalBlockFunction.Parser::new);
-    map.put("ifs", ConditionsBlockFunction.Parser::new);
-    map.put("idreplace", IdReplaceBlockFunction.Parser::new);
-    map.put("postprocess", PostProcessBlockFunction.Parser::new);
-    map.put("random", RandomBlockFunction.RandFuncParser::new);
-    map.put("rotate", RotateBlockFunction.Parser::new);
-    map.put("mirror", MirrorBlockFunction.Parser::new);
-    map.put("noise", NoiseBlockFunction.Parser::new);
-    map.put("checkerboard", CheckerboardBlockFunction.Parser::new);
-    map.put("checkerboard-tag", CheckerboardTagBlockFunction.Parser::new);
-  }
-
-  private static void registerFunctionNames() {
-    final Map<String, Component> map = BlockFunctionParsing.FUNCTION_NAMES;
-    map.put("pick", Component.translatable("enhanced_commands.function.pick"));
-    map.put("dry", Component.translatable("enhanced_commands.block_function.dry"));
-    map.put("overlay", Component.translatable("enhanced_commands.function.overlay"));
-    map.put("filter", Component.translatable("enhanced_commands.block_function.filter"));
-    map.put("idcontain", Component.translatable("enhanced_commands.block_function.id_contain"));
-    map.put("stonecut", Component.translatable("enhanced_commands.block_function.stone_cut"));
-    map.put("if", Component.translatable("enhanced_commands.block_function.conditional"));
-    map.put("ifs", Component.translatable("enhanced_commands.block_function.conditions"));
-    map.put("idreplace", Component.translatable("enhanced_commands.block_function.id_replace"));
-    map.put("postprocess", Component.translatable("enhanced_commands.block_function.post_process"));
-    map.put("random", Component.translatable("enhanced_commands.block_function.random"));
-    map.put("rotate", Component.translatable("enhanced_commands.block_function.rotate"));
-    map.put("mirror", Component.translatable("enhanced_commands.block_function.mirror"));
-    map.put("noise", Component.translatable("enhanced_commands.block_function.noise"));
-    map.put("checkerboard", Component.translatable("enhanced_commands.block_function.checkerboard"));
-    map.put("checkerboard-tag", Component.translatable("enhanced_commands.block_function.checkerboard-tag"));
+    final FunctionsParser<BlockFunction> functionsParser = BlockFunctionParsing.FUNCTIONS_PARSER;
+    functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickBlockFunction.Parser::new);
+    functionsParser.register("dry", Component.translatable("enhanced_commands.block_function.dry"), DryBlockFunction.Parser::new);
+    functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), OverlayBlockFunction.Parser::new);
+    functionsParser.register("filter", Component.translatable("enhanced_commands.block_function.filter"), FilterBlockFunction.Parser::new);
+    functionsParser.register("idcontain", Component.translatable("enhanced_commands.block_function.id_contain"), IdContainBlockFunction.Parser::new);
+    functionsParser.register("stonecut", Component.translatable("enhanced_commands.block_function.stone_cut"), StonecutBlockFunction.Parser::new);
+    functionsParser.register("if", Component.translatable("enhanced_commands.block_function.conditional"), ConditionalBlockFunction.Parser::new);
+    functionsParser.register("ifs", Component.translatable("enhanced_commands.block_function.conditions"), ConditionsBlockFunction.Parser::new);
+    functionsParser.register("idreplace", Component.translatable("enhanced_commands.block_function.id_replace"), IdReplaceBlockFunction.Parser::new);
+    functionsParser.register("postprocess", Component.translatable("enhanced_commands.block_function.post_process"), PostProcessBlockFunction.Parser::new);
+    functionsParser.register("random", Component.translatable("enhanced_commands.block_function.random"), RandomBlockFunction.RandFuncParser::new);
+    functionsParser.register("rotate", Component.translatable("enhanced_commands.block_function.rotate"), RotateBlockFunction.Parser::new);
+    functionsParser.register("mirror", Component.translatable("enhanced_commands.block_function.mirror"), MirrorBlockFunction.Parser::new);
+    functionsParser.register("noise", Component.translatable("enhanced_commands.block_function.noise"), NoiseBlockFunction.Parser::new);
+    functionsParser.register("checkerboard", Component.translatable("enhanced_commands.block_function.checkerboard"), CheckerboardBlockFunction.Parser::new);
+    functionsParser.register("checkerboard-,tag", Component.translatable("enhanced_commands.block_function.checkerboard-tag"), CheckerboardTagBlockFunction.Parser::new);
   }
 }

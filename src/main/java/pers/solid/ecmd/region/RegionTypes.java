@@ -8,7 +8,6 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionContentParser;
-import pers.solid.ecmd.parse.Parser;
 
 import java.util.function.Supplier;
 
@@ -32,14 +31,10 @@ public final class RegionTypes {
   private RegionTypes() {
   }
 
-  @SuppressWarnings("unchecked")
   private static <T extends RegionType<?>> T register(String name, T value) {
     final String functionName = value.functionName();
     if (functionName != null) {
-      RegionParsing.FUNCTIONS.put(functionName, value);
-    }
-    if (value instanceof Parser<?>) {
-      RegionParsing.PARSERS.add((Parser<? extends RegionProvider<?>>) value);
+      RegionParsing.FUNCTIONS_PARSER.register(functionName, value::tooltip, value::parser);
     }
     return REGISTRY_BRIDGE.register(name, value);
   }

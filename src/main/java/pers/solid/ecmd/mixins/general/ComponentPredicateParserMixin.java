@@ -16,9 +16,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.parse.PackratTermFromParser;
 import pers.solid.ecmd.item.predicate.ItemPredicate;
 import pers.solid.ecmd.item.predicate.ItemPredicateParsing;
+import pers.solid.ecmd.parse.PackratTermFromParser;
 import pers.solid.ecmd.util.extension.ComponentPredicateParserContextExtension;
 
 import java.util.List;

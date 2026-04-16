@@ -1,14 +1,11 @@
 package pers.solid.ecmd.item.predicate;
 
-import com.google.common.base.Supplier;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionContentParser;
-
-import java.util.Map;
+import pers.solid.ecmd.parse.FunctionsParser;
 
 public final class ItemPredicateTypes {
   private static final RegistryBridge<ItemPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, ItemPredicateType.REGISTRY);
@@ -41,22 +38,13 @@ public final class ItemPredicateTypes {
     RegistryBridge.registerToRootRegistry(ItemPredicateType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
     registerFunctions();
-    registerFunctionNames();
   }
 
   private static void registerFunctions() {
-    final Map<String, Supplier<FunctionContentParser<? extends ItemPredicate>>> map = ItemPredicateParsing.FUNCTIONS;
-    map.put("all", AllItemPredicate.Parser::new);
-    map.put("any", AnyItemPredicate.Parser::new);
-    map.put("count", CountItemPredicate.Parser::new);
-    map.put("probability", ProbabilityItemPredicate.Parser::new);
-  }
-
-  private static void registerFunctionNames() {
-    final Map<String, Component> map = ItemPredicateParsing.FUNCTION_NAMES;
-    map.put("all", Component.translatable("enhanced_commands.item_predicate.all"));
-    map.put("any", Component.translatable("enhanced_commands.item_predicate.any"));
-    map.put("count", Component.translatable("enhanced_commands.item_predicate.count"));
-    map.put("probability", Component.translatable("enhanced_commands.item_predicate.probability"));
+    final FunctionsParser<ItemPredicate> functionsParser = ItemPredicateParsing.FUNCTIONS_PARSER;
+    functionsParser.register("all", Component.translatable("enhanced_commands.item_predicate.all"), AllItemPredicate.Parser::new);
+    functionsParser.register("any", Component.translatable("enhanced_commands.item_predicate.any"), AnyItemPredicate.Parser::new);
+    functionsParser.register("count", Component.translatable("enhanced_commands.item_predicate.count"), CountItemPredicate.Parser::new);
+    functionsParser.register("probability", Component.translatable("enhanced_commands.item_predicate.probability"), ProbabilityItemPredicate.Parser::new);
   }
 }

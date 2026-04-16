@@ -1,13 +1,10 @@
 package pers.solid.ecmd.nbt.function;
 
-import com.google.common.base.Supplier;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionContentParser;
-
-import java.util.Map;
+import pers.solid.ecmd.parse.FunctionsParser;
 
 public final class NbtFunctionTypes {
   private static final RegistryBridge<NbtFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtFunctionType.REGISTRY);
@@ -41,33 +38,19 @@ public final class NbtFunctionTypes {
     RegistryBridge.registerToRootRegistry(NbtFunctionType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
     registerFunctions();
-    registerFunctionNames();
   }
 
 
   private static void registerFunctions() {
-    final Map<String, Supplier<FunctionContentParser<? extends NbtFunction>>> map = NbtFunctionParsing.FUNCTIONS;
-    map.put("concat", ConcatNbtFunction.Parser::new);
-    map.put("from", GetDataNbtFunction.Parser::new);
-    map.put("overlay", OverlayNbtFunction.Parser::new);
-    map.put("pick", PickNbtFunction.Parser::new);
-    map.put("pos", PosNbtFunction.Parser::new);
-    map.put("regex_replace", RegexReplaceNbtFunction.Parser::new);
-    map.put("replace", ReplaceNbtFunction.Parser::new);
-    map.put("string_replace", StringReplaceNbtFunction.Parser::new);
-    map.put("substring", SubstringNbtFunction.Parser::new);
-  }
-
-  private static void registerFunctionNames() {
-    final Map<String, Component> map = NbtFunctionParsing.FUNCTION_NAMES;
-    map.put("concat", Component.translatable("enhanced_commands.nbt_function.concat"));
-    map.put("from", Component.translatable("enhanced_commands.nbt_function.from"));
-    map.put("overlay", Component.translatable("enhanced_commands.function.overlay"));
-    map.put("pick", Component.translatable("enhanced_commands.function.pick"));
-    map.put("pos", Component.translatable("enhanced_commands.nbt_function.pos"));
-    map.put("regex_replace", Component.translatable("enhanced_commands.nbt_function.regex_replace"));
-    map.put("replace", Component.translatable("enhanced_commands.nbt_function.replace"));
-    map.put("string_replace", Component.translatable("enhanced_commands.nbt_function.string_replace"));
-    map.put("substring", Component.translatable("enhanced_commands.nbt_function.substring"));
+    final FunctionsParser<NbtFunction> functionsParser = NbtFunctionParsing.FUNCTIONS_PARSER;
+    functionsParser.register("concat", Component.translatable("enhanced_commands.nbt_function.concat"), ConcatNbtFunction.Parser::new);
+    functionsParser.register("from", Component.translatable("enhanced_commands.nbt_function.from"), GetDataNbtFunction.Parser::new);
+    functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), OverlayNbtFunction.Parser::new);
+    functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickNbtFunction.Parser::new);
+    functionsParser.register("pos", Component.translatable("enhanced_commands.nbt_function.pos"), PosNbtFunction.Parser::new);
+    functionsParser.register("regex_replace", Component.translatable("enhanced_commands.nbt_function.regex_replace"), RegexReplaceNbtFunction.Parser::new);
+    functionsParser.register("replace", Component.translatable("enhanced_commands.nbt_function.replace"), ReplaceNbtFunction.Parser::new);
+    functionsParser.register("string_replace", Component.translatable("enhanced_commands.nbt_function.string_replace"), StringReplaceNbtFunction.Parser::new);
+    functionsParser.register("substring", Component.translatable("enhanced_commands.nbt_function.substring"), SubstringNbtFunction.Parser::new);
   }
 }

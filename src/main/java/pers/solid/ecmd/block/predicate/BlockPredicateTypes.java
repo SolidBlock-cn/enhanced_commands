@@ -1,15 +1,12 @@
 package pers.solid.ecmd.block.predicate;
 
-import com.google.common.base.Supplier;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
-import pers.solid.ecmd.parse.FunctionContentParser;
+import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
-
-import java.util.Map;
 
 public final class BlockPredicateTypes {
   private static final RegistryBridge<BlockPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, BlockPredicateType.REGISTRY);
@@ -52,41 +49,24 @@ public final class BlockPredicateTypes {
   }
 
   private static void registerFunctions() {
-    final Map<String, Supplier<FunctionContentParser<? extends BlockPredicate>>> map = BlockPredicateParsing.FUNCTIONS;
-    map.put("all", AllBlockPredicate.Parser::new);
-    map.put("any", AnyBlockPredicate.Parser::new);
-    map.put("checkerboard", CheckerboardBlockPredicate.Parser::new);
-    map.put("diff", () -> new BiPredicateBlockPredicate.Parser(false));
-    map.put("expose", ExposeBlockPredicate.Parser::new);
-    map.put("idcontain", IdContainBlockPredicate.Parser::new);
-    map.put("noise", NoiseBlockPredicate.Parser::new);
-    map.put("predicate", LootConditionBlockPredicate.Parser::new);
-    map.put("probability", ProbabilityBlockPredicate.Parser::new);
-    map.put("region", RegionBlockPredicate.Parser::new);
-    map.put("rel", RelBlockPredicate.Parser::new);
-    map.put("same", () -> new BiPredicateBlockPredicate.Parser(true));
-  }
-
-  private static void registerFunctionNames() {
-    final Map<String, Component> map = BlockPredicateParsing.FUNCTION_NAMES;
-    map.put("all", Component.translatable("enhanced_commands.predicate.all"));
-    map.put("any", Component.translatable("enhanced_commands.predicate.any"));
-    map.put("checkerboard", Component.translatable("enhanced_commands.block_predicate.checkerboard"));
-    map.put("diff", Component.translatable("enhanced_commands.block_predicate.bi_predicate_diff"));
-    map.put("expose", Component.translatable("enhanced_commands.block_predicate.expose"));
-    map.put("idcontain", Component.translatable("enhanced_commands.block_predicate.id_contain"));
-    map.put("noise", Component.translatable("enhanced_commands.block_predicate.noise"));
-    map.put("predicate", Component.translatable("enhanced_commands.block_predicate.loot_condition"));
-    map.put("probability", Component.translatable("enhanced_commands.block_predicate.probability"));
-    map.put("region", Component.translatable("enhanced_commands.block_predicate.region"));
-    map.put("rel", Component.translatable("enhanced_commands.block_predicate.rel"));
-    map.put("same", Component.translatable("enhanced_commands.block_predicate.bi_predicate_same"));
+    final FunctionsParser<BlockPredicate> functionsParser = BlockPredicateParsing.FUNCTIONS_PARSER;
+    functionsParser.register("all", Component.translatable("enhanced_commands.predicate.all"), AllBlockPredicate.Parser::new);
+    functionsParser.register("any", Component.translatable("enhanced_commands.predicate.any"), AnyBlockPredicate.Parser::new);
+    functionsParser.register("checkerboard", Component.translatable("enhanced_commands.block_predicate.checkerboard"), CheckerboardBlockPredicate.Parser::new);
+    functionsParser.register("diff", Component.translatable("enhanced_commands.block_predicate.bi_predicate_diff"), () -> new BiPredicateBlockPredicate.Parser(false));
+    functionsParser.register("expose", Component.translatable("enhanced_commands.block_predicate.expose"), ExposeBlockPredicate.Parser::new);
+    functionsParser.register("idcontain", Component.translatable("enhanced_commands.block_predicate.id_contain"), IdContainBlockPredicate.Parser::new);
+    functionsParser.register("noise", Component.translatable("enhanced_commands.block_predicate.noise"), NoiseBlockPredicate.Parser::new);
+    functionsParser.register("predicate", Component.translatable("enhanced_commands.block_predicate.loot_condition"), LootConditionBlockPredicate.Parser::new);
+    functionsParser.register("probability", Component.translatable("enhanced_commands.block_predicate.probability"), ProbabilityBlockPredicate.Parser::new);
+    functionsParser.register("region", Component.translatable("enhanced_commands.block_predicate.region"), RegionBlockPredicate.Parser::new);
+    functionsParser.register("rel", Component.translatable("enhanced_commands.block_predicate.rel"), RelBlockPredicate.Parser::new);
+    functionsParser.register("same", Component.translatable("enhanced_commands.block_predicate.bi_predicate_same"), () -> new BiPredicateBlockPredicate.Parser(true));
   }
 
   public static void init(InitializeContext context) {
     RegistryBridge.registerToRootRegistry(BlockPredicateType.REGISTRY, context);
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
     registerFunctions();
-    registerFunctionNames();
   }
 }

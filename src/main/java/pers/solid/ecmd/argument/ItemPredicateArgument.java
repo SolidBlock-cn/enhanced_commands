@@ -11,9 +11,9 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.util.parsing.packrat.commands.Grammar;
 import net.minecraft.world.item.ItemStack;
-import pers.solid.ecmd.mixins.accessor.ItemPredicateArgumentAccessor;
 import pers.solid.ecmd.item.predicate.ItemPredicate;
 import pers.solid.ecmd.item.predicate.SimpleCombinationItemPredicate;
+import pers.solid.ecmd.mixins.accessor.ItemPredicateArgumentAccessor;
 
 import java.util.Collection;
 import java.util.List;
