@@ -33,7 +33,7 @@ public interface SequentialParamListParser {
 
     int paramsCount = 0;
 
-    // when allows zero params, deal with empty
+    // 允许零个参数时，处理空
     if (paramsCount >= minSequentialParamsCount()) {
       parseContext.addSuggestion((context, builder) -> {
         if (builder.getRemaining().isEmpty()) {

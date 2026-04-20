@@ -45,6 +45,7 @@
   "enhanced_commands.argument.item.feature_required": "物品ID：%s（%s）存在，但是无法使用，因为当前世界没有启用相应的功能标签（通常是实验性内容）",
   "enhanced_commands.argument.item_function.end_component_modification": "结束组件修改列表",
   "enhanced_commands.argument.item_function.modify_component_value": "通过应用NBT函数来修改组件的值",
+  "enhanced_commands.argument.item_function.remove_component": "移除一个组件",
   "enhanced_commands.argument.item_function.separate_component_modification": "分隔组件修改项",
   "enhanced_commands.argument.item_function.set_component_value": "为组件设置值",
   "enhanced_commands.argument.item_function.start_component_modification": "开始组件修改列表",

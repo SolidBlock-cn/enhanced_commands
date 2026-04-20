@@ -14,35 +14,26 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 这是专用于处理列表的 NBT 函数。如果目标 NBT 元素不是列表，将返回对空列表应用函数的值。默认情况下，会替换整个列表的内容，例如：
+ * <p>这是专用于处理列表的 NBT 函数。如果目标 NBT 元素不是列表，将返回对空列表应用函数的值。
+ * <p>如果列表定义了未指定特定位置的值，那么这些元素会先替换整个列表的内容，例如：
  * <pre>
- *   [a, b, c]([d, e, f]) = [a, b, c]
+ *   [a, b, c] 应用于 [d, e, f] 效果：[a, b, c]
  * </pre>
- * 可以指定特定位置的值。如果特定的位置不存在，则不执行操作：
+ * <p>可以设置特定位置的值。如果特定的位置不存在，则不执行操作：
  * <pre>
- *   [2: b]([d, e, f]) = [d, e, b]
- *   [0: a, 2: b]([d, e, f]) = [a, e, b]
- *   [0: a, 3: b]([d, e, f]) = [a, e, f]
+ *   [2: b] 应用于 [d, e, f] 效果：[d, e, b]
+ *   [0: a, 2: b] 应用于 [d, e, f] 效果：[a, e, b]
+ *   [0: a, 3: b] 应用于[d, e, f] 效果：[a, e, f]
  * </pre>
- * 可以前插值和后插值：
+ * <p>如果没有指定任何替换元素和特定位置的元素：会将任何列表转换为空列表：
  * <pre>
- *   [A, ...]({d, e, f}) = [A, d, e, f]
- *   [..., B, C]({d, e, f}) = [d, e, f, B, C]
+ *   [] 应用于 [a, b, c] 效果：[]
  * </pre>
- * 插值也可以指定插值的位置：
- * <pre>
- *   [1: A, ...]({d, e, f}) = [d, A, e, f]
- *   [..., 1: A]({d, e, f}) = [d, e, A, f]
- * </pre>
- * 指定插值的位置时，也可以一次插入多个值：
- * <pre>
- *   [1: A, B, C, ...]({d, e, f}) = [d, A, B, C, e, f]
- * </pre>
- * 可以先修改值再插值：
- * <pre>
- *   [a, b, c; A, ..., B]({d, e, f}) = [A, a, b, c, B]
- *   [2: a; A, ..., B]({d, e, f}) = [A, d, a, f, B]
- * </pre>
+ *
+ * <p>此 NBT 函数仅可设置指定位置的值。如需要在列表中插入元素，请使用 {@link ListInsertionNbtFunction}。在 NBT 函数语法中，只要中括号中有省略号，就会被视为 {@link ListInsertionNbtFunction}。
+ *
+ * @param valueReplacements   需要被替换的元素列表。当此列表不是空，或者当 {@link #positionalFunctions} 为空时，会先清空原有列表，并直接替换为此列表的内容。
+ * @param positionalFunctions 需要插入的元素及其对应索引的列表。
  */
 public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<PositionalListEntry<NbtFunction>> positionalFunctions) implements ListNbtFunction {
   public static final MapCodec<ListOpsNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -75,7 +66,7 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<Posit
 
   @Override
   public ListTag applyOnList(ListTag listTag, ExecutionContext context) throws CommandSyntaxException {
-    if (!valueReplacements.isEmpty()) {
+    if (!valueReplacements.isEmpty() || positionalFunctions.isEmpty()) {
       listTag.clear();
       try {
         for (NbtFunction nbtFunction : valueReplacements) {

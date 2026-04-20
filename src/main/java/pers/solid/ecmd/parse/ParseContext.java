@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
+import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,29 +30,28 @@ import java.util.function.Function;
 
 /**
  * <p>命令解析时的环境，包括解析时所使用的 {@code StringReader}、存储建议的列表以及解析时的一些选项，可用于在解析的同时提供建议，相当于一次性完成 {@link ArgumentType#parse(StringReader)} 和 {@link ArgumentType#listSuggestions(CommandContext, SuggestionsBuilder)} 的两个工作，但需要注意的是，对于 {@link ArgumentType} 而言，这个解析过程仍会运行两遍，一遍用于解析结果，一遍用于提供建议。为了更灵活地控制建议提供过程，此类允许一次性提供多个建议。解析过程结束时（包括抛出 {@link CommandSyntaxException} 时），{@link #reader} 所在的 {@link StringReader#cursor cursor} 就是调用 {@link SuggestionProvider} 的 {offset} 的初始位置，而这是位置也正是 {@link CommandSyntaxException} 的 cursor 位置。
- * <p>此类通常用作解析内容的函数的参数，存储其解析时的一些选项，如是否仅提供建议而非实际解析、是否允许分散的内容等。
+ * <p>此类通常用作解析内容的函数的参数，存储其解析时的一些选项，如是否仅提供建议而非实际解析、是否允许松散的内容等。
  *
  * @param <S>             其 commandSource 的类型。
- * @param registries      常用于命令中，用于从注册表中获取一些信息，常见于方块、物品、实体等的 ID 解析过程中。
+ * @param registries      常用于命令中，用于从注册表中获取一些信息，常见于方块、物品、实体等的 ID 解析过程中。如果为 null，那么在调用 {@link #registries()} 时会调用 {@link MixinShared#getCommandBuildContext()}。
  * @param reader          {@link StringReader} 对象，会直接用于解析。在提供建议时，也会基于此对象的 {@link StringReader#string string} 和 {@link StringReader#cursor cursor} 来提供建议。
  * @param suggestions     存储解析过程中所需要提供的建议。解析的过程不提供具体的建议，只指定如何提供建议（{@link SuggestionProvider}）。可以提供多种不同的建议。
  * @param suggestionsOnly 解析过程中是否仅提供建议，而非实际进行解析。如果为 {@code true}，那么一些不影响后续解析过程的操作可以不进行。
- * @param allowSparse     对于特定类型的语法，是否允许各部分用空格隔开。一般来说，直接用作命令参数、外面没有括号时，是 {@code false}。如果是在括号（或有明显其他割开定界符的环境）内解析，则为 {@code true}。在解析内容时，如果设置到在括号等语法内解析另一个对象，则通常来说此字段应该是 {@code true}。例如，在直接作为命令参数时，方块函数 {@code a|b} 不能写成 {@code a | b}，但是在被括号括起来的情况下，添加空格则完全没有问题，例如 {@code (a|b)} 和 {@code (a | b)} 都正确。
+ * @param allowSparse     对于特定类型的语法，是否允许解析松散的内容（内容允许用空格隔开）。一般来说，直接用作命令参数、外面没有括号时，是 {@code false}。如果是在括号（或有明显其他割开定界符的环境）内解析，则为 {@code true}。在解析内容时，如果设置到在括号等语法内解析另一个对象，则通常来说此字段应该是 {@code true}。例如，在直接作为命令参数时，方块函数 {@code a|b} 不能写成 {@code a | b}，但是在被括号括起来的情况下，添加空格则完全没有问题，例如 {@code (a|b)} 和 {@code (a | b)} 都正确。
  */
-public record ParseContext<S>(HolderLookup.@Nullable Provider registries, StringReader reader, List<SuggestionProvider<S>> suggestions, boolean suggestionsOnly, boolean allowSparse) {
-  public ParseContext(String string) {
-    this(new StringReader(string));
-  }
-
+public record ParseContext<S>(@Nullable HolderLookup.Provider registries, StringReader reader, List<SuggestionProvider<S>> suggestions, boolean suggestionsOnly, boolean allowSparse) {
+  /**
+   * 创建 {@link ParseContext} 对象，并使用 {@link MixinShared#getCommandBuildContext()} 作为 {@link #registries}。通常用于一些没有 {@code commandBuildContext} 的原版命令的 mixin 中。
+   */
   public ParseContext(StringReader reader) {
     this(null, reader, false, false);
   }
 
-  public ParseContext(HolderLookup.Provider registries, String string, boolean suggestionsOnly, boolean allowSparse) {
+  public ParseContext(@Nullable HolderLookup.Provider registries, String string, boolean suggestionsOnly, boolean allowSparse) {
     this(registries, new StringReader(string), suggestionsOnly, allowSparse);
   }
 
-  public ParseContext(HolderLookup.@Nullable Provider registries, StringReader reader, boolean suggestionsOnly, boolean allowSparse) {
+  public ParseContext(@Nullable HolderLookup.Provider registries, StringReader reader, boolean suggestionsOnly, boolean allowSparse) {
     this(registries, reader, new ArrayList<>(), suggestionsOnly, allowSparse);
   }
 
@@ -112,6 +112,9 @@ public record ParseContext<S>(HolderLookup.@Nullable Provider registries, String
     return new ParseContext<>(registries, reader, suggestions, suggestionsOnly, allowSparse);
   }
 
+  /**
+   * 返回修改 {@code allowSparse} 后的对象，不会修改原有对象。通常用于在解析过程中遇到括号等允许里面含有松散内容的情况。
+   */
   public ParseContext<S> withAllowSparse(boolean allowSparse) {
     if (this.allowSparse == allowSparse) {
       return this;
@@ -119,11 +122,21 @@ public record ParseContext<S>(HolderLookup.@Nullable Provider registries, String
     return new ParseContext<>(registries, reader, suggestions, suggestionsOnly, allowSparse);
   }
 
+  /**
+   * 将当前解析过程中的所有建议项替换为提供的一个建议项，原有的将被清除。
+   *
+   * @param suggestion 需要提供的建议项。
+   */
   public void setSuggestion(SuggestionProvider<S> suggestion) {
     this.suggestions.clear();
     this.suggestions.add(suggestion);
   }
 
+  /**
+   * 添加一个建议项，原有的建议项不会被清除。
+   *
+   * @param suggestion 需要增加的建议项。
+   */
   public void addSuggestion(SuggestionProvider<S> suggestion) {
     this.suggestions.add(suggestion);
   }
@@ -132,15 +145,27 @@ public record ParseContext<S>(HolderLookup.@Nullable Provider registries, String
     return List.copyOf(suggestions);
   }
 
+  /**
+   * 将建议项替换为指定的列表的内容。
+   *
+   * @param suggestions 建议项的列表，后续该对象的修改均对此不会起作用。
+   */
   public void replaceAllSuggestions(List<SuggestionProvider<S>> suggestions) {
     this.suggestions.clear();
     this.suggestions.addAll(suggestions);
   }
 
+  /**
+   * 为建议项的列表添加一条特殊的规则：如果此前提供的建议项实际非空的话，那么将停止提供列表中的后续的建议，否则继续。
+   * <p>例如：如果当前 {@link #suggestions} 为 {@code [a, b, TERMINATE_IF_NOT_EMPTY, c, d]}，在提供建议的过程中，如果 {@code a} 和 {@code b} 提供的建议非空（也就是实际提供了建议），那么不再提供 {@code c} 和 {@code d} 的建议。
+   */
   public void terminateSuggestionsIfNotEmpty() {
     suggestions.add(Special.TERMINATE_IF_NOT_EMPTY.forceCast());
   }
 
+  /**
+   * 清除所有的建议项。
+   */
   public void clearSuggestion() {
     this.suggestions.clear();
   }
@@ -194,26 +219,32 @@ public record ParseContext<S>(HolderLookup.@Nullable Provider registries, String
       }
     }
     final String unit = reader.getString().substring(cursorBeforeUnit, reader.getCursor());
-    if (unit.isEmpty()) {
-      if (v == 0) {
-        return 0;
-      } else {
-        reader.setCursor(cursorBeforeUnit);
-        throw EnhancedCommandsCommandExceptionTypes.ANGLE_UNIT_EXPECTED.createWithContext(reader, substring);
+    switch (unit) {
+      case "" -> {
+        if (v == 0) {
+          return 0;
+        } else {
+          reader.setCursor(cursorBeforeUnit);
+          throw EnhancedCommandsCommandExceptionTypes.ANGLE_UNIT_EXPECTED.createWithContext(reader, substring);
+        }
       }
-    } else if ("deg".equals(unit)) {
-      clearSuggestion();
-      return radians ? Math.toRadians(v) : v;
-    } else if ("rad".equals(unit)) {
-      clearSuggestion();
-      return radians ? v : Math.toDegrees(v);
-    } else if ("turn".equals(unit)) {
-      clearSuggestion();
-      return (radians ? Math.PI * 2 : 360) * v;
-    } else {
-      final int cursorAfterUnit = reader.getCursor();
-      reader.setCursor(cursorBeforeUnit);
-      throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.ANGLE_UNIT_UNKNOWN.createWithContext(reader, unit), cursorAfterUnit);
+      case "deg" -> {
+        clearSuggestion();
+        return radians ? Math.toRadians(v) : v;
+      }
+      case "rad" -> {
+        clearSuggestion();
+        return radians ? v : Math.toDegrees(v);
+      }
+      case "turn" -> {
+        clearSuggestion();
+        return (radians ? Math.PI * 2 : 360) * v;
+      }
+      default -> {
+        final int cursorAfterUnit = reader.getCursor();
+        reader.setCursor(cursorBeforeUnit);
+        throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.ANGLE_UNIT_UNKNOWN.createWithContext(reader, unit), cursorAfterUnit);
+      }
     }
   }
 
@@ -253,6 +284,11 @@ public record ParseContext<S>(HolderLookup.@Nullable Provider registries, String
       return argumentType.listSuggestions(context, builderOffset);
     });
     return argumentType.parse(reader);
+  }
+
+  @Override
+  public HolderLookup.Provider registries() {
+    return registries == null ? MixinShared.getCommandBuildContext() : registries;
   }
 
   public enum Special implements SuggestionProvider<Void> {

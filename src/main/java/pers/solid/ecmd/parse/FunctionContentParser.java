@@ -3,6 +3,11 @@ package pers.solid.ecmd.parse;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * 专用于解析函数式语法的函数内容的类。通常在 {@link FunctionsParser} 中，当解析到函数式语法并且读取到函数名称后，才会创建或使用此类去解析函数内容。
+ *
+ * @implNote 解析过程中，可以将解析到的一些内容存储为字段，因为这个对象通常只在解析到此函数时被创建，解析完毕后不再使用。
+ */
 public interface FunctionContentParser<T> {
   /**
    * 在完成所有参数的解析后，返回结果。通常在此接口的实现过程中，解析参数时会设置字段的一些值，此方法则使用字段中的值。

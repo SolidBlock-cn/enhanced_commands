@@ -14,11 +14,40 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+/**
+ * <p>此接口用于解析函数式语法（{@code 函数名称(函数内容)}），并提供一系列相关的解析处理机制（包括提供建议、异常处理等）。接口的默认实现见于 {@link Impl}。可以调用 {@code register} 方法以注册函数名称及其解析方式。
+ *
+ * <p>示例（其中 {@code T} 可以替换为你需要的类型）：
+ * <pre>{@code
+ * // 创建新的 parser
+ * FunctionsParser<T> functionsParser = FunctionsParser.create();
+ *
+ * // 注册函数名称
+ * functionsParser.register("example", Component.literal("example"), () -> ... );  // 此 lambda 返回一个 FunctionContentParser
+ *
+ * // 进行解析
+ * functionsParser.parse(...)
+ * }</pre>
+ *
+ * @param <T> 需要解析的函数式语法所表示的对象的类型。
+ * @see #create()
+ * @see #parse
+ * @see #register(String, Component, Supplier)
+ * @see #register(String, Supplier, Supplier)
+ */
 public interface FunctionsParser<T> extends Parser<T> {
+  /**
+   * 使用此接口的标准实现，创建一个新的 {@link FunctionsParser} 对象。可以对此解析器注册函数名称及其对应的解析方式。
+   */
   static <T> FunctionsParser<T> create() {
     return new Impl<>(new LinkedHashMap<>(), new HashMap<>());
   }
 
+  /**
+   * 解析已经注册的函数语法。如果没有发现任何的函数语法，将返回 {@code null}，但 reader 的 cursor 不会还原；如果解析到了函数语法，但是函数名称不识别，会直接抛出异常。
+   *
+   * @throws CommandSyntaxException 函数名称无效，或者注册的解析器在解析函数内容时出现异常。
+   */
   @Override
   default @Nullable T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
@@ -41,14 +70,26 @@ public interface FunctionsParser<T> extends Parser<T> {
     }
   }
 
+  /**
+   * @return 可识别的函数名称的 iterable（通常是集合），用于在命令中提供建议。
+   */
   Iterable<String> functionNames();
 
   @Nullable FunctionContentParser<? extends T> getParserForFunction(String functionName);
 
+  /**
+   * @return 函数名称对应的提示文本，用于在命令中提供建议。
+   */
   @Nullable Component getTooltipForFunction(String functionName);
 
+  /**
+   * 注册一个函数名称及其对应的提示文本和解析器。
+   */
   void register(String functionName, @Nullable Supplier<@Nullable Component> tooltip, @Nullable Supplier<@Nullable FunctionContentParser<? extends T>> parser);
 
+  /**
+   * 注册一个函数名称及其对应的提示文本和解析器。
+   */
   default void register(String functionName, @Nullable Component tooltip, @Nullable Supplier<@Nullable FunctionContentParser<? extends T>> parser) {
     register(functionName, tooltip == null ? null : Suppliers.ofInstance(tooltip), parser);
   }

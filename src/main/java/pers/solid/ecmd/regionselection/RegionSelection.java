@@ -11,8 +11,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -44,10 +42,6 @@ public interface RegionSelection extends ExpressionConvertible {
     regionSelection.readPacket(buf);
     return regionSelection;
   })))::getUnchecked);
-
-  static RegionSelection fromNbt(Tag nbtElement) {
-    return CODEC.parse(NbtOps.INSTANCE, nbtElement).getOrThrow();
-  }
 
   /**
    * 设置第一个点时的操作。有可能是直接设置的特定的点，也有可能是重新开始一个全新的区域。
@@ -143,10 +137,6 @@ public interface RegionSelection extends ExpressionConvertible {
   void readPacket(FriendlyByteBuf buf);
 
   void serializeToNetwork(FriendlyByteBuf buf);
-
-  default Tag createNbt() {
-    return CODEC.encodeStart(NbtOps.INSTANCE, this).getOrThrow();
-  }
 
   /**
    * <p>使用简单的线框来绘制这个区域，通常需要勾勒出该区域的大致图形以及关键点。

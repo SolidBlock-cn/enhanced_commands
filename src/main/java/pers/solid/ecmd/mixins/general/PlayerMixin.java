@@ -2,12 +2,18 @@ package pers.solid.ecmd.mixins.general;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -19,7 +25,15 @@ import pers.solid.ecmd.util.extension.PlayerExtension;
 import java.util.Optional;
 
 @Mixin(Player.class)
-public abstract class PlayerMixin implements PlayerExtension {
+public abstract class PlayerMixin extends LivingEntity implements PlayerExtension {
+  @Shadow
+  @Final
+  private static Logger LOGGER;
+
+  protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
+    super(entityType, level);
+  }
+
   /**
    * 当 ignoreBoundary 设置为 true 时，允许玩家传送到世界界限以外，也就是不要执行 setPosition。
    *
@@ -40,17 +54,17 @@ public abstract class PlayerMixin implements PlayerExtension {
 
   @Override
   public @Nullable RegionSelection getActiveRegion$ec() {
-    return ((Entity) (Object) this).getEntityData().get(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID).orElse(null);
+    return this.getEntityData().get(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID).orElse(null);
   }
 
   @Override
   public void setActiveRegion$ec(@Nullable RegionSelection region) {
-    ((Entity) (Object) this).getEntityData().set(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID, Optional.ofNullable(region), true);
+    this.getEntityData().set(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID, Optional.ofNullable(region), true);
   }
 
   @Override
   public void syncActiveRegion$ec() {
-    final SynchedEntityData dataTracker = ((Player) (Object) this).getEntityData();
+    final SynchedEntityData dataTracker = getEntityData();
     dataTracker.set(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID, dataTracker.get(EnhancedCommandsTrackedData.DATA_ACTIVE_REGION_ID), true);
   }
 
@@ -58,7 +72,8 @@ public abstract class PlayerMixin implements PlayerExtension {
   private void readModSaveData(CompoundTag tag, CallbackInfo ci) {
     final Tag value = tag.get("enhanced_commands:active_region");
     if (value != null) {
-      setActiveRegion$ec(RegionSelection.fromNbt(value));
+      // 这里的 createSerializationContext 可能也不需要
+      setActiveRegion$ec(RegionSelection.CODEC.parse(registryAccess().createSerializationContext(NbtOps.INSTANCE), value).resultOrPartial(LOGGER::error).orElse(null));
     } else {
       setActiveRegion$ec(null);
     }
@@ -68,7 +83,7 @@ public abstract class PlayerMixin implements PlayerExtension {
   private void writeModSaveData(CompoundTag tag, CallbackInfo ci) {
     final RegionSelection activeRegion = getActiveRegion$ec();
     if (activeRegion != null) {
-      tag.put("enhanced_commands:active_region", activeRegion.createNbt());
+      tag.put("enhanced_commands:active_region", RegionSelection.CODEC.encodeStart(registryAccess().createSerializationContext(NbtOps.INSTANCE), activeRegion).resultOrPartial(LOGGER::error).orElse(null));
     } else {
       tag.remove("enhanced_commands:active_region");
     }
