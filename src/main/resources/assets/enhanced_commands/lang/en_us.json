@@ -45,6 +45,7 @@
   "enhanced_commands.argument.item.feature_required": "The item ID %s (%s) exists, but it cannot be used because required feature flags are not enabled (usually experimental features)",
   "enhanced_commands.argument.item_function.end_component_modification": "End component modification list",
   "enhanced_commands.argument.item_function.modify_component_value": "Modify value for component by applying an NBT function",
+  "enhanced_commands.argument.item_function.remove_component": "Remove a component",
   "enhanced_commands.argument.item_function.separate_component_modification": "Separate component modification entries",
   "enhanced_commands.argument.item_function.set_component_value": "Set value for component",
   "enhanced_commands.argument.item_function.start_component_modification": "Start component modification list",

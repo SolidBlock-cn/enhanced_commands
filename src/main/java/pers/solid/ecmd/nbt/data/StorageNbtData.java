@@ -84,7 +84,7 @@ public record StorageNbtData(ResourceLocation identifier) implements NbtTarget.S
 
   @Override
   public Component feedbackModify(Collection<CommandStorage> values) {
-    return Component.translatable("commands.data.storage.modified", this.identifier);
+    return Component.translatable("commands.data.storage.modified", this.identifier.toString());
   }
 
   @Override
