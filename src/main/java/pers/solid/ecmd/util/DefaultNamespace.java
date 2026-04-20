@@ -5,9 +5,20 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Lifecycle;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistrationInfo;
+import net.minecraft.core.Registry;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 
 import java.util.Locale;
@@ -19,10 +30,12 @@ import java.util.stream.Stream;
  * 处理带有非原版的默认命名空间的类。
  */
 public class DefaultNamespace {
-  private final String namespace;
-  private final ResourceLocation exampleId;
   public static final DefaultNamespace MINECRAFT = new DefaultNamespace(ResourceLocation.DEFAULT_NAMESPACE);
   public static final DefaultNamespace ENHANCED_COMMANDS = new DefaultNamespace(EnhancedCommands.MOD_ID);
+  private final String namespace;
+  private final ResourceLocation exampleId;
+  private @Nullable Codec<ResourceLocation> idCodec = null;
+  private @Nullable StreamCodec<ByteBuf, ResourceLocation> idStreamCodec = null;
 
   public DefaultNamespace(String namespace) {
     this.namespace = namespace;
@@ -34,7 +47,62 @@ public class DefaultNamespace {
     this.exampleId = exampleId;
   }
 
-  public ResourceLocation of(String id) {
+  private static String readString(StringReader reader) {
+    int i = reader.getCursor();
+
+    while (reader.canRead()) {
+      final char c = reader.peek();
+      if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || c == ':' || c == '/' || c == '.' || c == '-') {
+        reader.skip();
+      } else {
+        break;
+      }
+    }
+
+    return reader.getString().substring(i, reader.getCursor());
+  }
+
+  private Codec<ResourceLocation> createIdCodec() {
+    return Codec.STRING.comapFlatMap(this::read, ResourceLocation::toString).stable();
+  }
+
+  private StreamCodec<ByteBuf, ResourceLocation> createIdStreamCodec() {
+    return ByteBufCodecs.STRING_UTF8.map(ResourceLocation::parse, ResourceLocation::toString);
+  }
+
+  public Codec<ResourceLocation> idCodec() {
+    if (idCodec == null) {
+      idCodec = createIdCodec();
+    }
+    return idCodec;
+  }
+
+  public StreamCodec<ByteBuf, ResourceLocation> idStreamCodec() {
+    if (idStreamCodec == null) {
+      idStreamCodec = createIdStreamCodec();
+    }
+    return idStreamCodec;
+  }
+
+  /**
+   * @see Registry#referenceHolderWithLifecycle()
+   */
+  private <T> Codec<Holder.Reference<T>> referenceHolderWithLifecycleForRegistry(Registry<T> registry) {
+    Codec<Holder.Reference<T>> codec = idCodec().comapFlatMap((resourceLocation) -> registry.get(resourceLocation).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + registry.key() + ": " + resourceLocation)), (reference) -> reference.key().location());
+    return ExtraCodecs.overrideLifecycle(codec, (reference) -> registry.registrationInfo(reference.key()).map(RegistrationInfo::lifecycle).orElse(Lifecycle.experimental()));
+  }
+
+  /**
+   * @see Registry#byNameCodec()
+   */
+  public <T> Codec<T> byNameCodecForRegistry(Registry<T> registry) {
+    return referenceHolderWithLifecycleForRegistry(registry).flatComapMap(Holder.Reference::value, (value) -> {
+      final Holder<T> holder = registry.wrapAsHolder(value);
+      return holder instanceof Holder.Reference<T> reference ? DataResult.success(reference) : DataResult.error(() -> "Unregistered holder in " + registry.key() + ": " + value);
+    });
+  }
+
+  public ResourceLocation parse(String id) {
     int i = id.indexOf(':');
     if (i >= 0) {
       String path = id.substring(i + 1);
@@ -57,22 +125,6 @@ public class DefaultNamespace {
     }
   }
 
-
-  private static String readString(StringReader reader) {
-    int i = reader.getCursor();
-
-    while (reader.canRead()) {
-      final char c = reader.peek();
-      if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || c == ':' || c == '/' || c == '.' || c == '-') {
-        reader.skip();
-      } else {
-        break;
-      }
-    }
-
-    return reader.getString().substring(i, reader.getCursor());
-  }
-
   /**
    * @see ResourceLocation#read(StringReader)
    */
@@ -82,7 +134,7 @@ public class DefaultNamespace {
     final int cursorAfterId = reader.getCursor();
 
     try {
-      return of(string);
+      return parse(string);
     } catch (ResourceLocationException var4) {
       reader.setCursor(cursorBeforeId);
       for (int i = reader.getCursor(); i < cursorAfterId; i++) {
@@ -92,6 +144,17 @@ public class DefaultNamespace {
         }
       }
       throw EnhancedCommandSyntaxException.withCursorEnd(ResourceLocation.ERROR_INVALID.createWithContext(reader), cursorAfterId);
+    }
+  }
+
+  /**
+   * @see ResourceLocation#read(String)
+   */
+  public DataResult<ResourceLocation> read(String id) {
+    try {
+      return DataResult.success(parse(id));
+    } catch (ResourceLocationException resourceLocationException) {
+      return DataResult.error(() -> "Not a valid id: " + id + " " + resourceLocationException.getMessage());
     }
   }
 

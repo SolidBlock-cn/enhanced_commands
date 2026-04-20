@@ -11,6 +11,7 @@ public final class ItemFunctionTypes {
   private static final RegistryBridge<ItemFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, ItemFunctionType.REGISTRY);
 
   public static final ItemFunctionType<EmptyItemFunction> EMPTY = register("empty", EmptyItemFunction.CODEC);
+  public static final ItemFunctionType<EnchantItemFunction> ENCHANT = register("enchant", EnchantItemFunction.CODEC);
   public static final ItemFunctionType<ItemComponentCombinationItemFunction> ITEM_COMPONENT_COMBINATION = register("item_component_combination", ItemComponentCombinationItemFunction.CODEC);
   public static final ItemFunctionType<ModifyComponentItemFunction<?>> MODIFY_COMPONENT = register("modify_component", ModifyComponentItemFunction.CODEC);
   public static final ItemFunctionType<OverlayItemFunction> OVERLAY = register("overlay", OverlayItemFunction.CODEC);
@@ -39,6 +40,7 @@ public final class ItemFunctionTypes {
 
   private static void registerFunctions() {
     final FunctionsParser<ItemFunction> functionsParser = ItemFunctionParsing.FUNCTIONS_PARSER;
+    functionsParser.register("enchant", Component.translatable("enhanced_commands.item_function.enchant"), EnchantItemFunction.Parser::new);
     functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), OverlayItemFunction.Parser::new);
     functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickItemFunction.Parser::new);
   }

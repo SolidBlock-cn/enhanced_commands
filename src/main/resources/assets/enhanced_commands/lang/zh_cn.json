@@ -799,6 +799,7 @@
   "enhanced_commands.function.pick": "随机选择一个方块函数",
   "enhanced_commands.function.pick.symbol_tooltip": "增加可选项",
   "enhanced_commands.function.pick.zero_sum": "权重值的和不能为零",
+  "enhanced_commands.item_function.enchant": "修改物品魔咒",
   "enhanced_commands.item_predicate.all": "多个条件的交集，只有在全部通过时通过",
   "enhanced_commands.item_predicate.any": "多个条件的并集，当至少一个条件通过时通过",
   "enhanced_commands.item_predicate.count": "测试物品堆叠的个数",

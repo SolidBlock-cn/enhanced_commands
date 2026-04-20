@@ -31,6 +31,8 @@ import net.minecraft.nbt.*;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -181,11 +183,14 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             .executes(context -> {
               final ItemFunction itemFunction = ItemFunctionArgument.getItemFunction(context, "item_function");
               final CommandSourceStack source = context.getSource();
-              final ItemStack stack = itemFunction.getModifiedStack(ItemStack.EMPTY, ItemStack.EMPTY, new ExecutionContext(source));
-              final ItemStack stackCopy = stack.copy();
-              final boolean b = source.getPlayerOrException().addItem(stack);
-              context.getSource().sendFeedback$ecBridge(stackCopy::getDisplayName, true);
-              return BooleanUtils.toInteger(b);
+              if (!(source.getEntity() instanceof LivingEntity livingEntity)) {
+                return 0;
+              }
+              final ItemStack mainHandItem = livingEntity.getMainHandItem();
+              final ItemStack stack = itemFunction.getModifiedStack(mainHandItem, mainHandItem, new ExecutionContext(source));
+              livingEntity.setItemInHand(InteractionHand.MAIN_HAND, stack);
+              context.getSource().sendFeedback$ecBridge(stack::getDisplayName, true);
+              return 1;
             }))
     );
   }

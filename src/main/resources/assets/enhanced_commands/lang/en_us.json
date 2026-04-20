@@ -799,6 +799,7 @@
   "enhanced_commands.function.pick": "Pick one block function randomly",
   "enhanced_commands.function.pick.symbol_tooltip": "Add alternative",
   "enhanced_commands.function.pick.zero_sum": "The sum of weight values cannot be zero",
+  "enhanced_commands.item_function.enchant": "Modify item enchantments",
   "enhanced_commands.item_predicate.all": "Intersect multiple conditions, passes only if all pass",
   "enhanced_commands.item_predicate.any": "Union multiple conditions, passes if at least one passes",
   "enhanced_commands.item_predicate.count": "Test the count of item stack",

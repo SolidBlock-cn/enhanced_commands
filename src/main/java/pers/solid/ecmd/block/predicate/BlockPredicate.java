@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public interface BlockPredicate extends ExpressionConvertible {
-  MapCodec<BlockPredicate> MAP_CODEC = BlockPredicateType.REGISTRY.byNameCodec().dispatchMap(BlockPredicate::getType, BlockPredicateType::codec);
+  MapCodec<BlockPredicate> MAP_CODEC = BlockPredicateType.CODEC.dispatchMap(BlockPredicate::getType, BlockPredicateType::codec);
   Codec<BlockPredicate> CODEC = Codec.lazyInitialized(() -> CodecUtil.combined(
       CodecUtil.combinedIdAndTag(SimpleBlockPredicate.STRING_BASED_CODEC, TagBlockPredicate.STRING_BASED_CODEC),
       MAP_CODEC.codec(),
