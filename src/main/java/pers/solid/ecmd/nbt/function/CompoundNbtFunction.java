@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -38,9 +39,9 @@ import java.util.stream.Collectors;
  *
  * @param allowsMerge 是否允许对 NBT 复合标签进行合并
  */
-public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boolean allowsMerge) implements NbtFunction {
+public record CompoundNbtFunction(Map<String, Optional<NbtFunction>> source, boolean allowsMerge) implements NbtFunction {
   public static final MapCodec<CompoundNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Codec.unboundedMap(Codec.STRING, NbtFunction.CODEC).optionalFieldOf("source", ImmutableMap.of()).forGetter(CompoundNbtFunction::source),
+      Codec.unboundedMap(Codec.STRING, Codec.optionalField("value", NbtFunction.CODEC, false).codec()).optionalFieldOf("source", ImmutableMap.of()).forGetter(CompoundNbtFunction::source),
       Codec.BOOL.optionalFieldOf("allows_merge", true).forGetter(CompoundNbtFunction::allowsMerge)
   ).apply(i, CompoundNbtFunction::new));
 
@@ -53,42 +54,33 @@ public record CompoundNbtFunction(Map<String, @Nullable NbtFunction> source, boo
   public String asString(boolean requirePrefix) {
     return (allowsMerge ? (requirePrefix ? ": " : "") : "= ") + "{" + source.entrySet().stream().map(entry -> {
       final String key = entry.getKey();
-      final NbtFunction value = entry.getValue();
-      if (value == null) {
+      final Optional<NbtFunction> value = entry.getValue();
+      if (value.isEmpty()) {
         return "- " + key;
       } else {
-        final String valueAsString = value.asString(true);
+        final String valueAsString = value.get().asString(true);
         return key + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
       }
     }).collect(Collectors.joining(", ")) + "}";
   }
 
   @Override
-  public NbtFunctionType<?> getType() {
-    return Type.COMPOUND_TYPE;
+  public NbtFunctionType<CompoundNbtFunction> getType() {
+    return NbtFunctionTypes.COMPOUND;
   }
 
   @Override
   public CompoundTag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     final CompoundTag targetCompound = (nbtElement instanceof final CompoundTag nbtCompound && allowsMerge) ? nbtCompound : new CompoundTag();
-    for (Map.Entry<String, @Nullable NbtFunction> entry : source.entrySet()) {
+    for (Map.Entry<String, Optional<NbtFunction>> entry : source.entrySet()) {
       String key = entry.getKey();
-      NbtFunction nbtFunction = entry.getValue();
-      if (nbtFunction == null) {
+      Optional<NbtFunction> nbtFunction = entry.getValue();
+      if (nbtFunction.isEmpty()) {
         targetCompound.remove(key);
       } else {
-        targetCompound.put(key, nbtFunction.apply(targetCompound.get(key), context));
+        targetCompound.put(key, nbtFunction.get().apply(targetCompound.get(key), context));
       }
     }
     return targetCompound;
-  }
-
-  public enum Type implements NbtFunctionType<CompoundNbtFunction> {
-    COMPOUND_TYPE;
-
-    @Override
-    public MapCodec<CompoundNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 }

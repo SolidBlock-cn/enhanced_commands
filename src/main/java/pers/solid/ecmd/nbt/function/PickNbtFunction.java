@@ -30,17 +30,8 @@ public record PickNbtFunction(WeightedList<NbtFunction> functions) implements Nb
   public static final MapCodec<PickNbtFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(WeightedList.createMapCodec(NbtFunction.CODEC).forGetter(PickNbtFunction::functions)).apply(instance, PickNbtFunction::new));
 
   @Override
-  public Type getType() {
+  public NbtFunctionType<PickNbtFunction> getType() {
     return NbtFunctionTypes.PICK;
-  }
-
-  public enum Type implements NbtFunctionType<PickNbtFunction> {
-    PICK_TYPE;
-
-    @Override
-    public MapCodec<PickNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   @Override

@@ -22,8 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,17 +29,6 @@ import java.util.stream.Stream;
  * 一些常用 codec 及处理 codec 的类，用于进行原版无法达成的复杂处理。
  */
 public final class CodecUtil {
-  /**
-   * 处理正则表达式的 codec，当表达式无效时，返回 error。
-   */
-  public static final Codec<Pattern> PATTERN = Codec.STRING.flatXmap(s -> {
-    try {
-      return DataResult.success(Pattern.compile(s));
-    } catch (PatternSyntaxException e) {
-      return DataResult.error(e::getMessage);
-    }
-  }, pattern -> DataResult.success(pattern.pattern()));
-
   /**
    * NBT 元素的 codec，部分内容使用了和 {@link Codec#PASSTHROUGH} 相似的处理方式，但是对于非 NBT 的 ops，会先转换为字符串，以确保所有 NBT 数据的类型都不会失真。
    *

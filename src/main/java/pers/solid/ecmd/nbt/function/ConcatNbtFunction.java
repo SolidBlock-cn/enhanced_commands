@@ -41,7 +41,7 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
 
   boolean flatten();
 
-  default String delimiterString(Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
+  default String delimiterString(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     if (delimiter().isPresent()) {
       return nbtToString(delimiter().get().apply(nbtElement, context));
     } else {
@@ -51,17 +51,7 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
 
   @Override
   default NbtFunctionType<ConcatNbtFunction> getType() {
-    return Type.CONCAT_TYPE;
-  }
-
-
-  enum Type implements NbtFunctionType<ConcatNbtFunction> {
-    CONCAT_TYPE;
-
-    @Override
-    public MapCodec<ConcatNbtFunction> getCodec() {
-      return CODEC;
-    }
+    return NbtFunctionTypes.CONCAT;
   }
 
   record Direct(List<NbtFunction> elements, Optional<NbtFunction> delimiter) implements ConcatNbtFunction {

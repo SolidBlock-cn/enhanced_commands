@@ -21,10 +21,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public final class NbtFunctionParser {
@@ -85,7 +82,7 @@ public final class NbtFunctionParser {
     final StringReader reader = parseContext.reader();
     NbtParserShared.handleCompoundStart(parseContext, reader);
 
-    Map<String, @Nullable NbtFunction> entries = new LinkedHashMap<>();
+    Map<String, Optional<NbtFunction>> entries = new LinkedHashMap<>();
 
     while (!reader.canRead() || reader.peek() != '}') {
       reader.skipWhitespace();
@@ -109,12 +106,12 @@ public final class NbtFunctionParser {
 
       reader.skipWhitespace();
       if (!markAsRemoveKey) {
-        entries.put(key, NbtFunctionParser.parseNbtFunction(parseContext, true, false));
+        entries.put(key, Optional.of(NbtFunctionParser.parseNbtFunction(parseContext, true, false)));
       } else {
         if (reader.canRead() && (reader.peek() == ':' || reader.peek() == '=')) {
           throw EnhancedCommandSyntaxException.withCursorEnd(SIGN_UNEXPECTED_WHEN_REMOVING_KEY.createWithContext(reader), reader.getCursor() + 1);
         }
-        entries.put(key, null);
+        entries.put(key, Optional.empty());
       }
 
       if (NbtParserShared.handleCompoundSeparate(parseContext, reader)) {

@@ -40,19 +40,10 @@ public enum ConstantNbtPredicate implements NbtPredicate {
 
   @Override
   public NbtPredicateType<ConstantNbtPredicate> getType() {
-    return ConstantNbtPredicate.Type.CONSTANT_TYPE;
+    return NbtPredicateTypes.CONSTANT;
   }
 
   public static ConstantNbtPredicate of(boolean value) {
     return value ? TRUE : FALSE;
-  }
-
-  public enum Type implements NbtPredicateType<ConstantNbtPredicate> {
-    CONSTANT_TYPE;
-
-    @Override
-    public MapCodec<ConstantNbtPredicate> getCodec() {
-      return CODEC;
-    }
   }
 }

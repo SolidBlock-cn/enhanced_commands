@@ -11,5 +11,7 @@ public interface NbtPredicateType<T extends NbtPredicate> {
   ResourceKey<Registry<NbtPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate_type"));
   Registry<NbtPredicateType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
-  MapCodec<T> getCodec();
+  MapCodec<T> codec();
+
+  record Simple<T extends NbtPredicate>(MapCodec<T> codec) implements NbtPredicateType<T> {}
 }

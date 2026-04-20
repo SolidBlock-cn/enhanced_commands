@@ -1,5 +1,6 @@
 package pers.solid.ecmd.nbt.function;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
@@ -10,25 +11,29 @@ public final class NbtFunctionTypes {
   private static final RegistryBridge<NbtFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, NbtFunctionType.REGISTRY);
 
   // 基本的 NBT 函数
-  public static final NbtFunctionType<CompoundNbtFunction> COMPOUND = register("compound", CompoundNbtFunction.Type.COMPOUND_TYPE);
-  public static final NbtFunctionType<ListOpsNbtFunction> LIST_OPS = register("list_ops", ListOpsNbtFunction.Type.LIST_OPS_TYPE);
-  public static final NbtFunctionType<ListInsertionNbtFunction> LIST_INSERTION = register("list_insertion", ListInsertionNbtFunction.Type.LIST_INSERTION_TYPE);
-  public static final NbtFunctionType<NumberValueNbtFunction> NUMBER_VALUE = register("number_value", NumberValueNbtFunction.Type.NUMBER_VALUE_TYPE);
-  public static final NbtFunctionType<SimpleNbtFunction> SIMPLE = register("simple", SimpleNbtFunction.Type.SIMPLE_TYPE);
+  public static final NbtFunctionType<CompoundNbtFunction> COMPOUND = register("compound", CompoundNbtFunction.CODEC);
+  public static final NbtFunctionType<ListOpsNbtFunction> LIST_OPS = register("list_ops", ListOpsNbtFunction.CODEC);
+  public static final NbtFunctionType<ListInsertionNbtFunction> LIST_INSERTION = register("list_insertion", ListInsertionNbtFunction.CODEC);
+  public static final NbtFunctionType<NumberValueNbtFunction> NUMBER_VALUE = register("number_value", NumberValueNbtFunction.CODEC);
+  public static final NbtFunctionType<SimpleNbtFunction> SIMPLE = register("simple", SimpleNbtFunction.CODEC);
 
   // 复合的 NBT 函数
-  public static final OverlayNbtFunction.Type OVERLAY = register("overlay", OverlayNbtFunction.Type.OVERLAY_TYPE);
-  public static final PickNbtFunction.Type PICK = register("pick", PickNbtFunction.Type.PICK_TYPE);
+  public static final NbtFunctionType<OverlayNbtFunction> OVERLAY = register("overlay", OverlayNbtFunction.CODEC);
+  public static final NbtFunctionType<PickNbtFunction> PICK = register("pick", PickNbtFunction.CODEC);
 
   // 特殊的 NBT 函数
 
-  public static final NbtFunctionType<ConcatNbtFunction> CONCAT = register("concat", ConcatNbtFunction.Type.CONCAT_TYPE);
-  public static final NbtFunctionType<GetDataNbtFunction> GET_DATA = register("get_data", GetDataNbtFunction.Type.GET_DATA_TYPE);
-  public static final NbtFunctionType<PosNbtFunction> POS = register("pos", PosNbtFunction.Type.POS_TYPE);
-  public static final NbtFunctionType<RegexReplaceNbtFunction> REGEX_REPLACE = register("regex_replace", RegexReplaceNbtFunction.Type.REGEX_TYPE);
-  public static final NbtFunctionType<ReplaceNbtFunction> REPLACE = register("replace", ReplaceNbtFunction.Type.REPLACE_TYPE);
-  public static final NbtFunctionType<StringReplaceNbtFunction> STRING_REPLACE = register("string_replace", StringReplaceNbtFunction.Type.STRING_REPLACE_TYPE);
-  public static final NbtFunctionType<SubstringNbtFunction> SUBSTRING = register("substring", SubstringNbtFunction.Type.SUBSTRING_TYPE);
+  public static final NbtFunctionType<ConcatNbtFunction> CONCAT = register("concat", ConcatNbtFunction.CODEC);
+  public static final NbtFunctionType<GetDataNbtFunction> GET_DATA = register("get_data", GetDataNbtFunction.CODEC);
+  public static final NbtFunctionType<PosNbtFunction> POS = register("pos", PosNbtFunction.CODEC);
+  public static final NbtFunctionType<RegexReplaceNbtFunction> REGEX_REPLACE = register("regex_replace", RegexReplaceNbtFunction.CODEC);
+  public static final NbtFunctionType<ReplaceNbtFunction> REPLACE = register("replace", ReplaceNbtFunction.CODEC);
+  public static final NbtFunctionType<StringReplaceNbtFunction> STRING_REPLACE = register("string_replace", StringReplaceNbtFunction.CODEC);
+  public static final NbtFunctionType<SubstringNbtFunction> SUBSTRING = register("substring", SubstringNbtFunction.CODEC);
+
+  private static <T extends NbtFunction> NbtFunctionType<T> register(String name, MapCodec<T> codec) {
+    return register(name, new NbtFunctionType.Simple<>(codec));
+  }
 
   private static <T extends NbtFunctionType<?>> T register(String name, T value) {
     return REGISTRY_BRIDGE.register(name, value);
@@ -39,7 +44,6 @@ public final class NbtFunctionTypes {
     REGISTRY_BRIDGE.validateAndRegisterContents(context);
     registerFunctions();
   }
-
 
   private static void registerFunctions() {
     final FunctionsParser<NbtFunction> functionsParser = NbtFunctionParsing.FUNCTIONS_PARSER;

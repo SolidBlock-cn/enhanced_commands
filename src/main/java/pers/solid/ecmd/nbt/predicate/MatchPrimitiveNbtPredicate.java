@@ -37,15 +37,6 @@ public record MatchPrimitiveNbtPredicate(Tag expected) implements NbtPredicate {
 
   @Override
   public NbtPredicateType<MatchPrimitiveNbtPredicate> getType() {
-    return MatchPrimitiveNbtPredicate.Type.MATCH_PRIMITIVE_TYPE;
-  }
-
-  public enum Type implements NbtPredicateType<MatchPrimitiveNbtPredicate> {
-    MATCH_PRIMITIVE_TYPE;
-
-    @Override
-    public MapCodec<MatchPrimitiveNbtPredicate> getCodec() {
-      return CODEC;
-    }
+    return NbtPredicateTypes.MATCH_PRIMITIVE;
   }
 }

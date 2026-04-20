@@ -22,21 +22,12 @@ public record SimpleNbtFunction(Tag element) implements NbtFunction {
   }
 
   @Override
-  public NbtFunctionType<?> getType() {
-    return Type.SIMPLE_TYPE;
+  public NbtFunctionType<SimpleNbtFunction> getType() {
+    return NbtFunctionTypes.SIMPLE;
   }
 
   @Override
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) {
     return element;
-  }
-
-  public enum Type implements NbtFunctionType<SimpleNbtFunction> {
-    SIMPLE_TYPE;
-
-    @Override
-    public MapCodec<SimpleNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 }

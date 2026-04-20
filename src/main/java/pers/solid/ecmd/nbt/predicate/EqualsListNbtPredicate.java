@@ -42,15 +42,6 @@ public record EqualsListNbtPredicate(List<NbtPredicate> expected) implements Nbt
 
   @Override
   public NbtPredicateType<EqualsListNbtPredicate> getType() {
-    return EqualsListNbtPredicate.Type.EQUALS_LIST_TYPE;
-  }
-
-  public enum Type implements NbtPredicateType<EqualsListNbtPredicate> {
-    EQUALS_LIST_TYPE;
-
-    @Override
-    public MapCodec<EqualsListNbtPredicate> getCodec() {
-      return CODEC;
-    }
+    return NbtPredicateTypes.EQUALS_LIST;
   }
 }

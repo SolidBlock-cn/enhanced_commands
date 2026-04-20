@@ -60,8 +60,8 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<Posit
   }
 
   @Override
-  public Type getType() {
-    return Type.LIST_OPS_TYPE;
+  public NbtFunctionType<ListOpsNbtFunction> getType() {
+    return NbtFunctionTypes.LIST_OPS;
   }
 
   @Override
@@ -89,14 +89,5 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<Posit
       }
     }
     return listTag;
-  }
-
-  public enum Type implements NbtFunctionType<ListOpsNbtFunction> {
-    LIST_OPS_TYPE;
-
-    @Override
-    public MapCodec<ListOpsNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 }
