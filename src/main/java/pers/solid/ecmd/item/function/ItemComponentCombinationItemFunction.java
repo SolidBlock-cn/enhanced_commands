@@ -35,7 +35,7 @@ public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemF
     if (affiliate.isEmpty()) {
       return baseString;
     } else {
-      return baseString + affiliate.stream().map(ItemFunction::asString).collect(Collectors.joining(", ", "[", "]"));
+      return baseString + affiliate.stream().map(itemFunction -> itemFunction instanceof ItemFunctionEntry entry ? entry.asEntryString() : "(" + itemFunction.asString() + ")").collect(Collectors.joining(", ", "[", "]"));
     }
   }
 }

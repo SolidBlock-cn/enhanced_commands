@@ -45,4 +45,14 @@ public final class RandomItemFunction implements ItemFunction {
   public String asString() {
     return "*";
   }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof RandomItemFunction;
+  }
+
+  @Override
+  public int hashCode() {
+    return 0;
+  }
 }

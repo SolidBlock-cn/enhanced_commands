@@ -1,5 +1,6 @@
 package pers.solid.ecmd.util;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import org.jetbrains.annotations.Nullable;
@@ -56,5 +57,9 @@ public class ExecutionContext {
 
   public PositionalRandomFactory getSplitterForOptionalSeed(Object key, OptionalLong seed) {
     return seed.isPresent() ? getSplitterForSeed(seed.getAsLong()) : getSplitter(key);
+  }
+
+  public HolderLookup.Provider registries() {
+    return positionProvider.getWorld$ec().registryAccess();
   }
 }
