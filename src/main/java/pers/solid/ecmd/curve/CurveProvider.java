@@ -7,7 +7,7 @@ import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.util.PositionProvider;
 
 public interface CurveProvider<T extends Curve> {
-  Codec<CurveProvider<?>> CODEC = CurveType.REGISTRY.byNameCodec().dispatch(CurveProvider::getType, CurveType::providerCodec);
+  Codec<CurveProvider<?>> CODEC = CurveType.CODEC.dispatch(CurveProvider::getType, CurveType::providerCodec);
 
   static CurveProvider<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final int cursorOnStart = parseContext.reader().getCursor();

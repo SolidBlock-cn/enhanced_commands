@@ -17,6 +17,7 @@ import pers.solid.ecmd.config.ConfigCategories;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigManager;
 import pers.solid.ecmd.curve.CurveTypes;
+import pers.solid.ecmd.enchantment.function.EnchantmentModificationTypes;
 import pers.solid.ecmd.entity.predicate.EntityPredicate;
 import pers.solid.ecmd.entity.predicate.EntityPredicateTypes;
 import pers.solid.ecmd.entity.predicate.EntitySelectorOptionsExtension;
@@ -62,6 +63,7 @@ public class EnhancedCommands {
     BlockPredicateTypes.init(context);
     CommandEnumType.init(context);
     CurveTypes.init(context);
+    EnchantmentModificationTypes.init(context);
     EntityPredicateTypes.init(context);
     ItemFunctionTypes.init(context);
     ItemPredicateTypes.init(context);

@@ -1,5 +1,6 @@
 package pers.solid.ecmd.region;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
@@ -8,12 +9,14 @@ import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionContentParser;
+import pers.solid.ecmd.util.DefaultNamespace;
 
 import java.util.function.Supplier;
 
 public interface RegionType<R extends Region> {
   ResourceKey<Registry<RegionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_type"));
   Registry<RegionType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
+  Codec<RegionType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY);
 
   /**
    * 该区域类型对应的函数名称，用于解析。如果为 null，则表示此区域不是使用函数表示的。

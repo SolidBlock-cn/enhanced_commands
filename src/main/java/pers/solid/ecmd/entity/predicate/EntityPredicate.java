@@ -27,7 +27,7 @@ import java.util.function.Predicate;
  * @see net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition
  */
 public interface EntityPredicate extends ExpressionConvertible {
-  Codec<EntityPredicate> CODEC = EntityPredicateType.REGISTRY.byNameCodec().dispatch(EntityPredicate::getType, EntityPredicateType::codec);
+  Codec<EntityPredicate> CODEC = EntityPredicateType.CODEC.dispatch(EntityPredicate::getType, EntityPredicateType::codec);
   ResourceKey<Registry<EntityPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("entity_predicate"));
 
   /**

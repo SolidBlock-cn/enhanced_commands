@@ -12,7 +12,7 @@ import pers.solid.ecmd.util.PositionProvider;
  * @see net.minecraft.commands.arguments.coordinates.Coordinates
  */
 public interface RegionProvider<R extends Region> extends ExpressionConvertible {
-  Codec<RegionProvider<?>> CODEC = RegionType.REGISTRY.byNameCodec().dispatch(RegionProvider::getType, RegionType::providerCodec);
+  Codec<RegionProvider<?>> CODEC = RegionType.CODEC.dispatch(RegionProvider::getType, RegionType::providerCodec);
 
   static RegionProvider<?> parse(ParseContext<?> parseContext) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();

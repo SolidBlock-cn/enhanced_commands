@@ -1,10 +1,16 @@
 package pers.solid.ecmd.util;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.OptionalLong;
 
 public class ExecutionContext {
@@ -12,6 +18,7 @@ public class ExecutionContext {
   public final PositionProvider positionProvider;
   private @Nullable Long seed;
   private @Nullable SeedStorage<Object> splitterStorage;
+  private @Nullable LootContext lootContext;
 
   public ExecutionContext(RandomSource random, PositionProvider positionProvider, @Nullable Long seed) {
     this.random = random;
@@ -61,5 +68,16 @@ public class ExecutionContext {
 
   public HolderLookup.Provider registries() {
     return positionProvider.getWorld$ec().registryAccess();
+  }
+
+  public LootContext lootContext() {
+    if (lootContext != null) {
+      return lootContext;
+    }
+    lootContext = new LootContext.Builder(new LootParams.Builder((ServerLevel) positionProvider.getWorld$ec())
+        .withParameter(LootContextParams.ORIGIN, positionProvider.getPosition$ec())
+        .withParameter(LootContextParams.THIS_ENTITY, positionProvider.getEntity$ec())
+        .create(new ContextKeySet.Builder().optional(LootContextParams.ORIGIN).optional(LootContextParams.THIS_ENTITY).build())).create(Optional.empty());
+    return lootContext;
   }
 }

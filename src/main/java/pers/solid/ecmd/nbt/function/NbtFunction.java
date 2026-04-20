@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  * <p>每个 NBT 函数都有对应的类型，即 {@link NbtFunctionType}，决定了该 NBT 函数将进行序列化和反序列化。
  */
 public interface NbtFunction extends ExpressionConvertible {
-  Codec<NbtFunction> CODEC = NbtFunctionType.REGISTRY.byNameCodec().dispatch(NbtFunction::getType, NbtFunctionType::codec);
+  Codec<NbtFunction> CODEC = NbtFunctionType.CODEC.dispatch(NbtFunction::getType, NbtFunctionType::codec);
   ResourceKey<Registry<NbtFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_function"));
 
   /**

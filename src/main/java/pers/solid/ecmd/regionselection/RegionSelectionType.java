@@ -10,13 +10,14 @@ import net.minecraft.resources.ResourceKey;
 import org.jetbrains.annotations.Contract;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.RegistryBridge;
+import pers.solid.ecmd.util.DefaultNamespace;
 
 import java.util.function.Supplier;
 
 public interface RegionSelectionType {
   ResourceKey<Registry<RegionSelectionType>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_selection_type"));
   Registry<RegionSelectionType> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
-  Codec<RegionSelectionType> CODEC = REGISTRY.byNameCodec();
+  Codec<RegionSelectionType> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY);
   StreamCodec<RegistryFriendlyByteBuf, RegionSelectionType> PACKET_CODEC = ByteBufCodecs.registry(REGISTRY_KEY);
 
   /**
