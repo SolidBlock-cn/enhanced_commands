@@ -1,11 +1,18 @@
 package pers.solid.ecmd.item.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.block.function.WeightedListParser;
 import pers.solid.ecmd.math.WeightedList;
+import pers.solid.ecmd.parse.FunctionContentParser;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
+
+import java.util.Objects;
 
 public record PickItemFunction(WeightedList<ItemFunction> functions) implements ItemFunction {
   public static final MapCodec<PickItemFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -24,6 +31,21 @@ public record PickItemFunction(WeightedList<ItemFunction> functions) implements 
 
   @Override
   public String asString() {
-    return functions.asString(ExpressionConvertible::asString);
+    return "pick(" + functions.asString(ExpressionConvertible::asString) + ")";
+  }
+
+  public static class Parser implements FunctionContentParser<ItemFunction> {
+    private @Nullable WeightedList<ItemFunction> weightedList;
+
+    @Override
+    public ItemFunction getParseResult(ParseContext<?> parseContext) {
+      return new PickItemFunction(Objects.requireNonNull(weightedList, "weightedList"));
+    }
+
+    @Override
+    public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
+      final WeightedListParser<ItemFunction> weightedListParser = WeightedListParser.of((parseContext1) -> ItemFunctionParser.parse(parseContext));
+      weightedList = weightedListParser.parse(parseContext);
+    }
   }
 }

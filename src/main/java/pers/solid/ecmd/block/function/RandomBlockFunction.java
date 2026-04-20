@@ -85,12 +85,12 @@ public final class RandomBlockFunction implements BlockFunction {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    return o instanceof RandomBlockFunction;
+    return o instanceof RandomBlockFunction that && this.seed.equals(that.seed);
   }
 
   @Override
   public int hashCode() {
-    return 0;
+    return seed.hashCode();
   }
 
   @Override

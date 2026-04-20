@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 public class DefaultNamespace {
   private final String namespace;
   private final ResourceLocation exampleId;
+  public static final DefaultNamespace MINECRAFT = new DefaultNamespace(ResourceLocation.DEFAULT_NAMESPACE);
   public static final DefaultNamespace ENHANCED_COMMANDS = new DefaultNamespace(EnhancedCommands.MOD_ID);
 
   public DefaultNamespace(String namespace) {

@@ -133,14 +133,14 @@ public final class ParsingUtil {
    * @param parseUnit 解析括号内的内容。
    * @throws CommandSyntaxException 当有左括号但缺失右括号时。
    */
-  public static <T extends @Nullable Object, E extends Throwable> T parseParentheses(FailableSupplier<T, E> parseUnit, ParseContext<?> parseContext) throws E, CommandSyntaxException {
+  public static <T extends @Nullable Object, E extends Throwable> @Nullable T parseParentheses(FailableSupplier<T, E> parseUnit, ParseContext<?> parseContext) throws E, CommandSyntaxException {
     final StringReader reader = parseContext.reader();
     parseContext.addSuggestion((context, suggestionsBuilder) -> suggestString("(", suggestionsBuilder).buildFuture());
     if (reader.canRead() && reader.peek() == '(') {
       reader.skip();
       reader.skipWhitespace();
+      parseContext.clearSuggestion();
       final T parse = parseUnit.get();
-//      parseContext.terminateSuggestionsIfNotEmpty();
       parseContext.addSuggestion((context, suggestionsBuilder) -> suggestString(")", suggestionsBuilder).buildFuture());
       reader.skipWhitespace();
       reader.expect(')');
