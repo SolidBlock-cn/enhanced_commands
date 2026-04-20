@@ -61,7 +61,7 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
 
   @Override
   public NbtFunctionType<SubstringNbtFunction> getType() {
-    return Type.SUBSTRING_TYPE;
+    return NbtFunctionTypes.SUBSTRING;
   }
 
   @Override
@@ -100,15 +100,6 @@ public record SubstringNbtFunction(int startIndex, Optional<Integer> endIndex, b
       } else {
         throw e;
       }
-    }
-  }
-
-  public enum Type implements NbtFunctionType<SubstringNbtFunction> {
-    SUBSTRING_TYPE;
-
-    @Override
-    public MapCodec<SubstringNbtFunction> getCodec() {
-      return CODEC;
     }
   }
 

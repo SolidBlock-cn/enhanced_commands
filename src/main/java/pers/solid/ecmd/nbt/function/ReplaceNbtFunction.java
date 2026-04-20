@@ -28,21 +28,12 @@ public record ReplaceNbtFunction(NbtPredicate predicate, NbtFunction function) i
 
   @Override
   public NbtFunctionType<ReplaceNbtFunction> getType() {
-    return Type.REPLACE_TYPE;
+    return NbtFunctionTypes.REPLACE;
   }
 
   @Override
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     return function.recursivelyApply(nbtElement, predicate, context);
-  }
-
-  public enum Type implements NbtFunctionType<ReplaceNbtFunction> {
-    REPLACE_TYPE;
-
-    @Override
-    public MapCodec<ReplaceNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<ReplaceNbtFunction> {

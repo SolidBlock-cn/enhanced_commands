@@ -26,7 +26,7 @@ public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
 
   @Override
   public NbtFunctionType<PosNbtFunction> getType() {
-    return Type.POS_TYPE;
+    return NbtFunctionTypes.POS;
   }
 
   @Override
@@ -36,26 +36,17 @@ public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
     return result.getOrThrow(EnhancedCommandsCommandExceptionTypes.CANNOT_PARSE::create);
   }
 
-  public enum Type implements NbtFunctionType<PosNbtFunction> {
-    POS_TYPE;
-
-    @Override
-    public MapCodec<PosNbtFunction> getCodec() {
-      return CODEC;
-    }
-  }
-
   public static class Parser implements FunctionContentParser<NbtFunction> {
-    private @Nullable EnhancedCoordinates posArgument;
+    private @Nullable EnhancedCoordinates enhancedCoordinates;
 
     @Override
     public NbtFunction getParseResult(ParseContext<?> parseContext) {
-      return new PosNbtFunction(Objects.requireNonNull(posArgument, "posArgument"));
+      return new PosNbtFunction(Objects.requireNonNull(enhancedCoordinates, "enhancedCoordinates"));
     }
 
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
-      posArgument = parseContext.parseAndSuggestArgument(EnhancedPosArgument.posPreferringCenteredInt());
+      enhancedCoordinates = parseContext.parseAndSuggestArgument(EnhancedPosArgument.posPreferringCenteredInt());
     }
   }
 }

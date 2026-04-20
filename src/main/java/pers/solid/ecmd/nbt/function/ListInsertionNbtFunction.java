@@ -53,8 +53,8 @@ public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtF
   }
 
   @Override
-  public Type getType() {
-    return Type.LIST_INSERTION_TYPE;
+  public NbtFunctionType<ListInsertionNbtFunction> getType() {
+    return NbtFunctionTypes.LIST_INSERTION;
   }
 
   @Override
@@ -74,14 +74,5 @@ public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtF
       }
     }
     return listTag;
-  }
-
-  public enum Type implements NbtFunctionType<ListInsertionNbtFunction> {
-    LIST_INSERTION_TYPE;
-
-    @Override
-    public MapCodec<ListInsertionNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 }

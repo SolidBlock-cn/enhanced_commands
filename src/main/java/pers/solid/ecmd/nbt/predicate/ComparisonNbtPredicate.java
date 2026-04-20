@@ -62,15 +62,6 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implem
 
   @Override
   public NbtPredicateType<ComparisonNbtPredicate> getType() {
-    return ComparisonNbtPredicate.Type.COMPARISON_TYPE;
-  }
-
-  public enum Type implements NbtPredicateType<ComparisonNbtPredicate> {
-    COMPARISON_TYPE;
-
-    @Override
-    public MapCodec<ComparisonNbtPredicate> getCodec() {
-      return CODEC;
-    }
+    return NbtPredicateTypes.COMPARISON;
   }
 }

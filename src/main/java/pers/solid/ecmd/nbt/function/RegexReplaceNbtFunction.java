@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.util.ExtraCodecs;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import pers.solid.ecmd.parse.FunctionContentParser;
@@ -13,7 +14,6 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
   public static final MapCodec<RegexReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      CodecUtil.PATTERN.fieldOf("pattern").forGetter(RegexReplaceNbtFunction::pattern),
+      ExtraCodecs.PATTERN.fieldOf("pattern").forGetter(RegexReplaceNbtFunction::pattern),
       Codec.STRING.fieldOf("replacement").forGetter(RegexReplaceNbtFunction::replacement),
       Codec.BOOL.optionalFieldOf("recursive", false).forGetter(RegexReplaceNbtFunction::recursive),
       Codec.BOOL.optionalFieldOf("lenient", false).forGetter(RegexReplaceNbtFunction::lenient),
@@ -46,7 +46,7 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
 
   @Override
   public NbtFunctionType<RegexReplaceNbtFunction> getType() {
-    return Type.REGEX_TYPE;
+    return NbtFunctionTypes.REGEX_REPLACE;
   }
 
   @Override
@@ -109,15 +109,6 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
     result = 31 * result + Boolean.hashCode(lenient);
     result = 31 * result + original.hashCode();
     return result;
-  }
-
-  public enum Type implements NbtFunctionType<RegexReplaceNbtFunction> {
-    REGEX_TYPE;
-
-    @Override
-    public MapCodec<RegexReplaceNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.MixedParams<RegexReplaceNbtFunction> {

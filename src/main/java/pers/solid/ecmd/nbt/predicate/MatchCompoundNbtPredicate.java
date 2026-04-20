@@ -92,15 +92,6 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredic
 
   @Override
   public NbtPredicateType<MatchCompoundNbtPredicate> getType() {
-    return MatchCompoundNbtPredicate.Type.MATCH_COMPOUND_TYPE;
-  }
-
-  public enum Type implements NbtPredicateType<MatchCompoundNbtPredicate> {
-    MATCH_COMPOUND_TYPE;
-
-    @Override
-    public MapCodec<MatchCompoundNbtPredicate> getCodec() {
-      return CODEC;
-    }
+    return NbtPredicateTypes.MATCH_COMPOUND;
   }
 }

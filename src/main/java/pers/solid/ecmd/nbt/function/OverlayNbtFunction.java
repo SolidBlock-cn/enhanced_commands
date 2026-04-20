@@ -27,7 +27,7 @@ public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunc
   }
 
   @Override
-  public Type getType() {
+  public NbtFunctionType<OverlayNbtFunction> getType() {
     return NbtFunctionTypes.OVERLAY;
   }
 
@@ -40,15 +40,6 @@ public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunc
       throw new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.overlay.empty")).create();
     }
     return nbtElement;
-  }
-
-  public enum Type implements NbtFunctionType<OverlayNbtFunction> {
-    OVERLAY_TYPE;
-
-    @Override
-    public MapCodec<OverlayNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<OverlayNbtFunction> {

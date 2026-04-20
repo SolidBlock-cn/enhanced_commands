@@ -48,8 +48,8 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
   }
 
   @Override
-  public NbtFunctionType<?> getType() {
-    return Type.STRING_REPLACE_TYPE;
+  public NbtFunctionType<StringReplaceNbtFunction> getType() {
+    return NbtFunctionTypes.STRING_REPLACE;
   }
 
   @Override
@@ -72,15 +72,6 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
         throw NO_VALUE.create();
       }
       throw NOT_A_STRING.create(nbtElement.getType().getPrettyName());
-    }
-  }
-
-  public enum Type implements NbtFunctionType<StringReplaceNbtFunction> {
-    STRING_REPLACE_TYPE;
-
-    @Override
-    public MapCodec<StringReplaceNbtFunction> getCodec() {
-      return CODEC;
     }
   }
 

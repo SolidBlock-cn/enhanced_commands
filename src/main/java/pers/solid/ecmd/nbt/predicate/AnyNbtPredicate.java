@@ -27,17 +27,8 @@ public record AnyNbtPredicate(List<NbtPredicate> predicates) implements NbtPredi
   }
 
   @Override
-  public Type getType() {
-    return Type.ANY_TYPE;
-  }
-
-  public enum Type implements NbtPredicateType<AnyNbtPredicate> {
-    ANY_TYPE;
-
-    @Override
-    public MapCodec<AnyNbtPredicate> getCodec() {
-      return CODEC;
-    }
+  public NbtPredicateType<AnyNbtPredicate> getType() {
+    return NbtPredicateTypes.ANY;
   }
 
   public record Parser(List<NbtPredicate> nbtPredicates) implements FunctionContentParser.SequentialParams<AnyNbtPredicate> {

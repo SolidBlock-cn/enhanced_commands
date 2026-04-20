@@ -21,13 +21,4 @@ public record NegatingNbtPredicate(NbtPredicate predicate) implements NbtPredica
   public NbtPredicateType<NegatingNbtPredicate> getType() {
     return NbtPredicateTypes.NEGATING;
   }
-
-  public enum Type implements NbtPredicateType<NegatingNbtPredicate> {
-    NEGATING_TYPE;
-
-    @Override
-    public MapCodec<NegatingNbtPredicate> getCodec() {
-      return CODEC;
-    }
-  }
 }

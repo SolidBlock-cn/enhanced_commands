@@ -11,5 +11,7 @@ public interface NbtFunctionType<T extends NbtFunction> {
   ResourceKey<Registry<NbtFunctionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_function_type"));
   Registry<NbtFunctionType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
 
-  MapCodec<T> getCodec();
+  MapCodec<T> codec();
+
+  record Simple<T extends NbtFunction>(MapCodec<T> codec) implements NbtFunctionType<T> {}
 }

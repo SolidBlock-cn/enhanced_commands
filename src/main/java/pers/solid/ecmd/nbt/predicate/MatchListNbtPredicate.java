@@ -80,15 +80,6 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
 
   @Override
   public NbtPredicateType<MatchListNbtPredicate> getType() {
-    return MatchListNbtPredicate.Type.MATCH_LIST_TYPE;
-  }
-
-  public enum Type implements NbtPredicateType<MatchListNbtPredicate> {
-    MATCH_LIST_TYPE;
-
-    @Override
-    public MapCodec<MatchListNbtPredicate> getCodec() {
-      return CODEC;
-    }
+    return NbtPredicateTypes.MATCH_LIST;
   }
 }

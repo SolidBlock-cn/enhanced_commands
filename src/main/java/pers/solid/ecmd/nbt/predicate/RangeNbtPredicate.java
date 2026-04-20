@@ -39,15 +39,6 @@ public record RangeNbtPredicate(BridgeRange<?> numberRange) implements NbtPredic
 
   @Override
   public NbtPredicateType<RangeNbtPredicate> getType() {
-    return RangeNbtPredicate.Type.RANGE_TYPE;
-  }
-
-  public enum Type implements NbtPredicateType<RangeNbtPredicate> {
-    RANGE_TYPE;
-
-    @Override
-    public MapCodec<RangeNbtPredicate> getCodec() {
-      return CODEC;
-    }
+    return NbtPredicateTypes.RANGE;
   }
 }

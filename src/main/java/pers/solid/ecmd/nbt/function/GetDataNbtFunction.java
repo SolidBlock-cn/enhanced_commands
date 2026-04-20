@@ -34,21 +34,12 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
 
   @Override
   public NbtFunctionType<GetDataNbtFunction> getType() {
-    return Type.GET_DATA_TYPE;
+    return NbtFunctionTypes.GET_DATA;
   }
 
   @Override
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     return source.getConcentratedNbts((CommandSourceStack) context.positionProvider, path.orElse(null), concentrationType, RandomSource.create());
-  }
-
-  public enum Type implements NbtFunctionType<GetDataNbtFunction> {
-    GET_DATA_TYPE;
-
-    @Override
-    public MapCodec<GetDataNbtFunction> getCodec() {
-      return CODEC;
-    }
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<GetDataNbtFunction> {

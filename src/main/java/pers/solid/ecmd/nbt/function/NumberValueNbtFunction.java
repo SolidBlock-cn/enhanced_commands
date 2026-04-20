@@ -30,8 +30,8 @@ public record NumberValueNbtFunction(NumericTag number) implements NbtFunction {
   public static final MapCodec<NumberValueNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_NUMBER.fieldOf("number").forGetter(NumberValueNbtFunction::number)).apply(i, NumberValueNbtFunction::new));
 
   @Override
-  public NbtFunctionType<?> getType() {
-    return Type.NUMBER_VALUE_TYPE;
+  public NbtFunctionType<NumberValueNbtFunction> getType() {
+    return NbtFunctionTypes.NUMBER_VALUE;
   }
 
   @Override
@@ -48,15 +48,6 @@ public record NumberValueNbtFunction(NumericTag number) implements NbtFunction {
       return ShortTag.valueOf(number.getAsShort());
     } else {
       return number;
-    }
-  }
-
-  public enum Type implements NbtFunctionType<NumberValueNbtFunction> {
-    NUMBER_VALUE_TYPE;
-
-    @Override
-    public MapCodec<NumberValueNbtFunction> getCodec() {
-      return CODEC;
     }
   }
 }
