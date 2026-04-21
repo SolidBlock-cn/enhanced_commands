@@ -9,6 +9,8 @@
 - [方向](direction/zh.md)
 - [实体谓词](entity_predicate/zh.md)
 - [实体选择器](entity_selector/zh.md)
+- [物品函数](item_function/zh.md)
+- [物品谓词](item_predicate/zh.md)
 - [关键字参数](keyword_args/zh.md)
 - [NBT 聚合类型](nbt_concentration_type/zh.md)
 - [NBT 函数](nbt_function/zh.md)

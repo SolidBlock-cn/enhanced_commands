@@ -38,7 +38,7 @@ public record ModifyComponentItemFunction<T>(DataComponentType<T> component, Nbt
       throw new CommandRuntimeException(e);
     }
 
-    final T appliedParsed = component.codecOrThrow().parse(ops, applied).getOrThrow();// todo 考虑抛出一个不一样的异常
+    final T appliedParsed = component.codecOrThrow().parse(ops, applied).getOrThrow();// todo 考虑抛出一个不一样的异常，考虑此类接口的方法要不要都抛出 CommandSyntaxException
 
     itemStack.set(component, appliedParsed);
     return itemStack;

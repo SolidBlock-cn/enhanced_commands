@@ -27,7 +27,7 @@ public record SimplePropertyNameFunction(String propertyName, String valueName, 
     if (property == null) {
       return blockState;
     }
-    return StateUtil.withPropertyOfValueByName(blockState, property, valueName, must);
+    return StateUtil.withPropertyOfValueByName(blockState, property, valueName, must); // 考虑抛出 CommandSyntaxException
   }
 
   @Override

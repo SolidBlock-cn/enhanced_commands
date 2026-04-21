@@ -9,6 +9,8 @@ Besides using vanilla argument types, this mod also adds some extra and more com
 - [direction](direction/en.md)
 - [entity predicate](entity_predicate/en.md)
 - [entity selector](entity_selector/en.md)
+- [item function](item_function/en.md)
+- [item predicate](item_predicate/en.md)
 - [keyword arguments](keyword_args/en.md)
 - [NBT concentration type](nbt_concentration_type/en.md)
 - [NBT function](nbt_function/en.md)
