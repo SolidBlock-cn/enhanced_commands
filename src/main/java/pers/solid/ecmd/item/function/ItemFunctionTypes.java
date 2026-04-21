@@ -20,6 +20,7 @@ public final class ItemFunctionTypes {
   public static final ItemFunctionType<RemoveComponentItemFunction<?>> REMOVE_COMPONENT = register("remove_component", RemoveComponentItemFunction.CODEC);
   public static final ItemFunctionType<SetComponentItemFunction<?>> SET_COMPONENT = register("set_component", SetComponentItemFunction.CODEC);
   public static final ItemFunctionType<SimpleItemFunction> SIMPLE = register("simple", SimpleItemFunction.CODEC);
+  public static final ItemFunctionType<TagItemFunction> TAG = register("tag", TagItemFunction.CODEC);
 
   private ItemFunctionTypes() {
   }

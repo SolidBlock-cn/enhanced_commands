@@ -40,7 +40,7 @@ public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> 
 
   @Override
   public String expressAsString() {
-    final String tagString = tag.unwrap().map(blockTagKey -> "#" + blockTagKey.location(), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ")));
+    final String tagString = tag.unwrap().map(blockTagKey -> "#" + blockTagKey.location(), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ", "[", "]")));
     if (properties.isEmpty()) {
       return "#" + tagString;
     } else {
