@@ -30,6 +30,7 @@ import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.nbt.function.NbtFunctionTypes;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.nbt.predicate.NbtPredicateTypes;
+import pers.solid.ecmd.number.NumberProviderParser;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
@@ -70,6 +71,7 @@ public class EnhancedCommands {
     NbtDataRegistry.init();
     NbtFunctionTypes.init(context);
     NbtPredicateTypes.init(context);
+    NumberProviderParser.registerFunctions();
     RegionTypes.init(context);
     RegionSelectionTypes.init(context);
     EnhancedCommandsArgumentTypes.init();

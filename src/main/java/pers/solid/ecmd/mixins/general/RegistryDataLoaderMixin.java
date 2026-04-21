@@ -20,7 +20,7 @@ public abstract class RegistryDataLoaderMixin {
   /**
    * 在加载原版的动态注册表（不可加载）时，排除本模组注册的可重复加载的注册表，因为这些表会在专门的事件中加载，不应重复。
    *
-   * @see pers.solid.ecmd.mixins.impl.ReloadableServerRegistriesMixin#appendMoreCompletableFutures(Stream, RegistryOps, ResourceManager, Executor)
+   * @see ReloadableServerRegistriesMixin#appendMoreCompletableFutures(Stream, RegistryOps, ResourceManager, Executor)
    */
   @ModifyExpressionValue(method = "load(Lnet/minecraft/resources/RegistryDataLoader$LoadingFunction;Lnet/minecraft/core/RegistryAccess;Ljava/util/List;)Lnet/minecraft/core/RegistryAccess$Frozen;", at = @At(value = "INVOKE", target = "Ljava/util/List;stream()Ljava/util/stream/Stream;"), slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryDataLoader;createContext(Lnet/minecraft/core/RegistryAccess;Ljava/util/List;)Lnet/minecraft/resources/RegistryOps$RegistryInfoLookup;")))
   private static Stream<RegistryDataLoader.RegistryData<?>> excludeModRegistryData(Stream<RegistryDataLoader.RegistryData<?>> original) {

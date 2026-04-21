@@ -15,7 +15,6 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
 
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -27,7 +26,7 @@ public interface ItemPredicate extends ExpressionConvertible {
   Codec<ItemPredicate> CODEC = Codec.lazyInitialized(() -> CodecUtil.combined(CodecUtil.combinedIdAndTag(SimpleItemPredicate.STRING_BASED_CODEC, TagItemPredicate.STRING_BASED_CODEC),
       MAP_CODEC.codec(),
       predicate -> predicate instanceof TagItemPredicate simpleTag && simpleTag.items().unwrapKey().isPresent() ? Either.right(simpleTag) : predicate instanceof SimpleItemPredicate simpleItem ? Either.left(simpleItem) : null,
-      either -> either.map(Function.identity(), Function.identity())));
+      Either::unwrap));
 
   ResourceKey<Registry<ItemPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("item_predicate"));
 

@@ -29,7 +29,6 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 public interface BlockPredicate extends ExpressionConvertible {
   MapCodec<BlockPredicate> MAP_CODEC = BlockPredicateType.CODEC.dispatchMap(BlockPredicate::getType, BlockPredicateType::codec);
@@ -37,7 +36,7 @@ public interface BlockPredicate extends ExpressionConvertible {
       CodecUtil.combinedIdAndTag(SimpleBlockPredicate.STRING_BASED_CODEC, TagBlockPredicate.STRING_BASED_CODEC),
       MAP_CODEC.codec(),
       blockPredicate -> blockPredicate instanceof SimpleBlockPredicate s && s.properties().isEmpty() ? Either.left(s) : blockPredicate instanceof TagBlockPredicate t && t.properties().isEmpty() ? Either.right(t) : null,
-      either -> either.map(Function.identity(), Function.identity())));
+      Either::unwrap));
   ResourceKey<Registry<BlockPredicate>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_predicate"));
 
   SimpleCommandExceptionType CANNOT_PARSE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.block_predicate.cannot_parse"));

@@ -1,6 +1,5 @@
 package pers.solid.ecmd.argument;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -25,7 +24,6 @@ import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * @see Coordinates
@@ -46,7 +44,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
         default -> UnknownPos.ALWAYS_FAIL;
       });
   Codec<DefaultPos> LIST_BASED_CODEC = Codec.DOUBLE.listOf(3, 3).xmap(doubles -> DefaultPos.doubleBased(doubles.get(0), doubles.get(1), doubles.get(2), false, false, false), defaultPos -> List.of(defaultPos.x, defaultPos.y, defaultPos.z));
-  Codec<EnhancedCoordinates> CODEC = Codec.either(MAP_BASED_CODEC.codec(), LIST_BASED_CODEC).xmap(fsEither -> fsEither.map(Function.identity(), Function.identity()), Either::left);
+  Codec<EnhancedCoordinates> CODEC = Codec.withAlternative(MAP_BASED_CODEC.codec(), LIST_BASED_CODEC);
 
   static boolean isInt(Coordinates posArgument) {
     return posArgument instanceof EnhancedCoordinates enhancedCoordinates && enhancedCoordinates.isInt();
