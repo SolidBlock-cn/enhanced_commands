@@ -12,10 +12,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -138,9 +135,9 @@ public final class MixinShared {
   }
 
   public static <T> void mixinSuggestWithTooltip(ResourceKey<? extends Registry<T>> registryRef, HolderLookup<T> registryWrapper, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
-    final Function<? super T, ? extends Message> nameSuggestionProvider = ParsingUtil.getNameSuggestionProvider(registryRef);
+    final Function<? super Holder.Reference<T>, ? extends Message> nameSuggestionProvider = ParsingUtil.getNameSuggestionProvider(registryRef);
     if (nameSuggestionProvider != null) {
-      cir.setReturnValue(SharedSuggestionProvider.suggestResource(registryWrapper.listElements(), builder, ref -> ref.key().location(), ref -> nameSuggestionProvider.apply(ref.value())));
+      cir.setReturnValue(SharedSuggestionProvider.suggestResource(registryWrapper.listElements(), builder, ref -> ref.key().location(), nameSuggestionProvider::apply));
     } else if (Registries.BIOME.equals(registryRef)) {
       cir.setReturnValue(SharedSuggestionProvider.suggestResource(registryWrapper.listElementIds(), builder, ResourceKey::location, key -> Component.translatable(Util.makeDescriptionId("biome", key.location()))));
     }
