@@ -281,7 +281,7 @@ public final class ItemFunctionParser {
     final int cursorBeforeComponentType = reader.getCursor();
     final ResourceLocation id = readIdentifierEnhanced(reader);
     final int cursorAfterComponentType = reader.getCursor();
-    DataComponentType<?> dataComponentType = BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(id);
+    DataComponentType<?> dataComponentType = BuiltInRegistries.DATA_COMPONENT_TYPE.get(id);
     if (dataComponentType == null) {
       reader.setCursor(cursorBeforeComponentType);
       throw EnhancedCommandSyntaxException.withCursorEnd(ItemParserAccessor.getERROR_UNKNOWN_COMPONENT().createWithContext(reader, id), cursorAfterComponentType);

@@ -39,9 +39,9 @@ public class ExecutionContext {
 
   public static ExecutionContext fromLootContext(LootContext lootContext) {
     return new ExecutionContext(lootContext.getRandom(), new PositionProvider.Simple(
-        lootContext.getParameter(LootContextParams.ORIGIN),
-        Optional.ofNullable(lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY)).map(Entity::getRotationVector).orElse(Vec2.ZERO),
-        lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY),
+        lootContext.getParam(LootContextParams.ORIGIN),
+        Optional.ofNullable(lootContext.getParamOrNull(LootContextParams.THIS_ENTITY)).map(Entity::getRotationVector).orElse(Vec2.ZERO),
+        lootContext.getParamOrNull(LootContextParams.THIS_ENTITY),
         EntityAnchorArgument.Anchor.FEET
     ), null);
   }

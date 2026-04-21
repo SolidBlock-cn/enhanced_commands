@@ -88,7 +88,7 @@ public class DefaultNamespace {
    * @see Registry#referenceHolderWithLifecycle()
    */
   private <T> Codec<Holder.Reference<T>> referenceHolderWithLifecycleForRegistry(Registry<T> registry) {
-    Codec<Holder.Reference<T>> codec = idCodec().comapFlatMap((resourceLocation) -> registry.get(resourceLocation).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + registry.key() + ": " + resourceLocation)), (reference) -> reference.key().location());
+    Codec<Holder.Reference<T>> codec = idCodec().comapFlatMap((resourceLocation) -> registry.getHolder(resourceLocation).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + registry.key() + ": " + resourceLocation)), (reference) -> reference.key().location());
     return ExtraCodecs.overrideLifecycle(codec, (reference) -> registry.registrationInfo(reference.key()).map(RegistrationInfo::lifecycle).orElse(Lifecycle.experimental()));
   }
 
