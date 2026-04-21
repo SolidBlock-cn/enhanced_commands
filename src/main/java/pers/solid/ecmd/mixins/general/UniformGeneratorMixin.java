@@ -34,7 +34,7 @@ public abstract class UniformGeneratorMixin implements NumberProviderExtension {
     if (min instanceof ConstantValue(float minValue) && max instanceof ConstantValue(float maxValue)) {
       return StringUtil.nf.format(minValue) + ".." + StringUtil.nf.format(maxValue);
     } else {
-      return "uniform(" + ((NumberProviderExtension) min).asString$enhancedCommands() + ", " + ((NumberProviderExtension) max).asString$enhancedCommands();
+      return "uniform(" + ((NumberProviderExtension) min).asString$enhancedCommands() + ", " + ((NumberProviderExtension) max).asString$enhancedCommands() + ")";
     }
   }
 }

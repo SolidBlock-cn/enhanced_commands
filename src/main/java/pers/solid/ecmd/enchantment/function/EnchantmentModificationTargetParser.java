@@ -36,22 +36,33 @@ public final class EnchantmentModificationTargetParser {
     final int cursorStart = reader.getCursor();
     parseContext.addSuggestion((context, builder) -> {
       builder = builder.createOffset(cursorStart);
-      SharedSuggestionProvider.suggest(List.of("any_of", "all_of"), builder);
+      SharedSuggestionProvider.suggest(List.of("any of", "all of"), builder);
       return SharedSuggestionProvider.suggest(Arrays.asList(EnchantmentModificationTarget.Special.values()), builder, EnchantmentModificationTarget.Special::getSerializedName, EnchantmentModificationTarget.Special::getDescription);
     });
     final String unquotedString = reader.readUnquotedString();
-    final EnchantmentModificationTarget.@Nullable Special special = EnchantmentModificationTarget.Special.CODEC.byId(unquotedString);
-    if (special != null) {
-      return special;
-    }
     boolean isAll = false;
-    if ("all_of".equals(unquotedString)) {
-      isAll = true;
-      reader.skipWhitespace();
-    } else if ("any_of".equals(unquotedString)) {
-      reader.skipWhitespace();
-    } else {
-      reader.setCursor(cursorStart);
+    boolean hasFoundOf = false;
+    if ("all".equals(unquotedString)) {
+      if (tryReadWordOf(reader)) {
+        isAll = true;
+        hasFoundOf = true;
+        parseContext.clearSuggestion();
+        ParsingUtil.expectAndSkipWhitespace(reader);
+      }
+    } else if ("any".equals(unquotedString)) {
+      if (tryReadWordOf(reader)) {
+        hasFoundOf = true;
+        parseContext.clearSuggestion();
+        ParsingUtil.expectAndSkipWhitespace(reader);
+      }
+    }
+    if (!hasFoundOf) {
+      final EnchantmentModificationTarget.@Nullable Special special = EnchantmentModificationTarget.Special.CODEC.byId(unquotedString);
+      if (special != null) {
+        return special;
+      } else {
+        reader.setCursor(cursorStart);
+      }
     }
 
     final HolderSet<Enchantment> holders = parseEnchantmentList(parseContext);
@@ -60,6 +71,27 @@ public final class EnchantmentModificationTargetParser {
     } else {
       return new EnchantmentModificationTarget.Tag(holders, isAll);
     }
+  }
+
+  /**
+   * 在解析到关键字“all”或“any”后，尝试读取后面的“of”，如果没有，则返回 {@code restoreCursor} 的位置。
+   *
+   * @return 是否读取到了单词“of”。
+   */
+  private static boolean tryReadWordOf(StringReader reader) {
+    final int cursorBeforeWhite = reader.getCursor();
+    reader.skipWhitespace();
+    final int cursorStart = reader.getCursor();
+    if (cursorBeforeWhite >= cursorStart) {
+      reader.setCursor(cursorBeforeWhite);
+      return false;
+    }
+    final String unquotedString = reader.readUnquotedString();
+    if ("of".equals(unquotedString)) {
+      return true;
+    }
+    reader.setCursor(cursorBeforeWhite);
+    return false;
   }
 
   public static <S> HolderSet<Enchantment> parseEnchantmentList(ParseContext<S> parseContext) throws CommandSyntaxException {
@@ -72,9 +104,9 @@ public final class EnchantmentModificationTargetParser {
 
   public static <S> HolderSet<Enchantment> parseEnchantmentOrTag(ParseContext<S> parseContext) throws CommandSyntaxException {
     final HolderLookup.RegistryLookup<Enchantment> lookup = parseContext.registries().lookupOrThrow(Registries.ENCHANTMENT);
-    parseContext.addSuggestion((context, builder) -> suggestEnchantmentOrTag(builder, lookup));
     final StringReader reader = parseContext.reader();
     final int cursorStart = reader.getCursor();
+    parseContext.addSuggestion((context, builder) -> suggestEnchantmentOrTag(builder.createOffset(cursorStart), lookup));
     if (reader.canRead() && reader.peek() == '#') {
       reader.skip();
       final ResourceLocation tagId = ResourceLocation.read(reader);

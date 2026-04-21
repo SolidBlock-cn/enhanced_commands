@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public record EnchantItemFunction(List<EnchantmentModification> modifications) implements ItemFunction {
   public static final MapCodec<EnchantItemFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      EnchantmentModification.CODEC.codec().listOf().fieldOf("modifications").forGetter(EnchantItemFunction::modifications)
+      EnchantmentModification.CODEC.listOf().fieldOf("modifications").forGetter(EnchantItemFunction::modifications)
   ).apply(i, EnchantItemFunction::new));
 
   @Override
