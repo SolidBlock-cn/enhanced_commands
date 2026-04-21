@@ -1,22 +1,29 @@
 package pers.solid.ecmd.enchantment.function;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -39,5 +46,31 @@ public record NaturalEnchantmentModification(int level, Optional<HolderSet<Encha
   @Override
   public EnchantmentModificationType<NaturalEnchantmentModification> getType() {
     return EnchantmentModificationTypes.NATURAL;
+  }
+
+  /**
+   * 解析关键字 {@code natural} 及空格之后的内容。在运行此方法时，指针已经在关键字 {@code natural} 及空格之后。
+   */
+  public static <S> NaturalEnchantmentModification parseAfterKeyword(ParseContext<S> parseContext) throws CommandSyntaxException {
+    final StringReader reader = parseContext.reader();
+    final int level = reader.readInt();
+    final int cursorAfterLevel = reader.getCursor();
+    reader.skipWhitespace();
+    final HolderLookup.RegistryLookup<Enchantment> lookup = parseContext.registries().lookupOrThrow(Registries.ENCHANTMENT);
+    parseContext.setSuggestion((context, builder) -> EnchantmentModificationTargetParser.suggestEnchantmentOrTag(builder, lookup));
+    if (reader.canRead() && (ResourceLocation.isAllowedInResourceLocation(reader.peek()) || reader.peek() == '#')) {
+      final HolderSet<Enchantment> holders = EnchantmentModificationTargetParser.parseEnchantmentList(parseContext);
+      return new NaturalEnchantmentModification(level, Optional.of(holders));
+    } else {
+      reader.setCursor(cursorAfterLevel);
+      return new NaturalEnchantmentModification(level, Optional.empty());
+    }
+  }
+
+  @Override
+  public String asString() {
+    return possibleValues.map(
+        enchantmentHolderSet -> "natural " + level + " " + enchantmentHolderSet.unwrap().map(tagKey -> "#" + tagKey.location(),
+            holders -> holders.stream().map(Holder::getRegisteredName).collect(Collectors.joining("|")))).orElseGet(() -> "natural " + level);
   }
 }

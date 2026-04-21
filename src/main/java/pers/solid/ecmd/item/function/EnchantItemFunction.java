@@ -1,25 +1,18 @@
 package pers.solid.ecmd.item.function;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.enchantment.function.EnchantmentModification;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
-import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.mixin.MixinShared;
+import pers.solid.ecmd.util.ExpressionConvertible;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +40,7 @@ public record EnchantItemFunction(List<EnchantmentModification> modifications) i
 
   @Override
   public String asString() {
-    return modifications.stream().map(m -> EnchantmentModification.CODEC.codec().encodeStart(MixinShared.getCommandBuildContext().createSerializationContext(NbtOps.INSTANCE), m).getPartialOrThrow().toString()).collect(Collectors.joining(", ", "enchant(", ")"));
+    return modifications.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "enchant(", ")"));
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<EnchantItemFunction> {
@@ -60,16 +53,8 @@ public record EnchantItemFunction(List<EnchantmentModification> modifications) i
 
     @Override
     public void parseSequentialParameter(ParseContext<?> parseContext, int paramIndex) throws CommandSyntaxException {
-      final StringReader reader = parseContext.reader();
-      final int cursorStart = reader.getCursor();
-      final CompoundTag compoundTag = new TagParser(reader).readStruct();
-      final DataResult<EnchantmentModification> parse = EnchantmentModification.CODEC.codec().parse(parseContext.registries().createSerializationContext(NbtOps.INSTANCE), compoundTag);
-      final int cursorEnd = reader.getCursor();
-      final EnchantmentModification result = parse.getOrThrow(s -> {
-        reader.setCursor(cursorStart);
-        return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.CANNOT_PARSE.createWithContext(reader, s), cursorEnd);
-      });
-      modifications.add(result);
+      final EnchantmentModification parse = EnchantmentModification.parse(parseContext);
+      modifications.add(parse);
     }
   }
 }

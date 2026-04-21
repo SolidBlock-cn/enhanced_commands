@@ -76,6 +76,6 @@ public interface PositionProvider {
     }
   }
 
-  record Simple(Vec3 getPosition$ec, Vec2 getRotation$ec, @Nullable Player getEntity$ec, EntityAnchorArgument.Anchor getEntityAnchor$ec) implements PositionProvider {
+  record Simple(Vec3 getPosition$ec, Vec2 getRotation$ec, @Nullable Entity getEntity$ec, EntityAnchorArgument.Anchor getEntityAnchor$ec) implements PositionProvider {
   }
 }

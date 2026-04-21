@@ -17,6 +17,9 @@
     ],
     "net/minecraft/class_3222": [
       "pers/solid/ecmd/util/extension/ServerPlayerExtension"
+    ],
+    "net/minecraft/class_5658": [
+      "pers/solid/ecmd/util/extension/NumberProviderExtension"
     ]
   }
 }

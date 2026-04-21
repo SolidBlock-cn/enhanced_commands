@@ -1,4 +1,4 @@
-package pers.solid.ecmd.mixins.impl;
+package pers.solid.ecmd.mixins.general;
 
 import com.google.gson.JsonElement;
 import com.llamalad7.mixinextras.injector.ModifyReceiver;
