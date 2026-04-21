@@ -94,7 +94,7 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return StringUtil.wrapVector(vec3d);
     }
   }
@@ -116,7 +116,7 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return length() + " " + directionProvider().getSerializedName();
     }
   }
@@ -136,8 +136,8 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
-      return "rotated " + rotation.asString();
+    public String expressAsString() {
+      return "rotated " + rotation.expressAsString();
     }
   }
 
@@ -156,8 +156,8 @@ public sealed interface Vec3dProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
-      return "facing " + pos.asString();
+    public String expressAsString() {
+      return "facing " + pos.expressAsString();
     }
   }
 

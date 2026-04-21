@@ -25,8 +25,8 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   public static final MapCodec<HorizontalOffsetBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(HorizontalOffsetBlockPredicate::new, Codec.INT.fieldOf("offset").forGetter(HorizontalOffsetBlockPredicate::offset), BlockPredicate.CODEC.fieldOf("block_predicate").forGetter(HorizontalOffsetBlockPredicate::blockPredicate)));
 
   @Override
-  public String asString() {
-    final String s = blockPredicate instanceof HorizontalOffsetBlockPredicate ? "(" + blockPredicate.asString() + ")" : blockPredicate.asString();
+  public String expressAsString() {
+    final String s = blockPredicate instanceof HorizontalOffsetBlockPredicate ? "(" + blockPredicate.expressAsString() + ")" : blockPredicate.expressAsString();
     if (offset > 0) {
       return Strings.repeat('<', offset) + s;
     } else if (offset < 0) {

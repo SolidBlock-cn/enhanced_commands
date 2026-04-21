@@ -145,7 +145,7 @@ public interface Region extends Iterable<BlockPos>, ExpressionConvertible {
   }
 
   @Override
-  String asString();
+  String expressAsString();
 
   /**
    * 包含该区域内所有坐标的最小长方体区域。

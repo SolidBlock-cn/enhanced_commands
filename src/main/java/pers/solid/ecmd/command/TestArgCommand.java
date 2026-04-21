@@ -128,7 +128,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
               final NbtPredicate reparsedPredicate = NbtPredicate.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false);
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate", Component.literal(reparsedPredicate.asString(false)).withStyle(Styles.RESULT)), false);
               final NbtFunction reparsedFunction = NbtFunction.parse(new ParseContext<>(commandBuildContext, s, false, true), false, false);
-              source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Component.literal(reparsedFunction.asString()).withStyle(Styles.RESULT)), false);
+              source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_function", Component.literal(reparsedFunction.expressAsString()).withStyle(Styles.RESULT)), false);
               final boolean reparsedPredicateMatches = reparsedPredicate.test(nbtElement);
               source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testarg.nbt.reparsed_predicate_matches", TextUtil.wrapBoolean(reparsedPredicateMatches)), false);
               final boolean reparsedFunctionEqual = reparsedFunction.apply(null, new ExecutionContext(source)).equals(nbtElement);
@@ -250,9 +250,9 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             .then(argument("pos", type)
                 .executes(execution)
                 .then(literal("string")
-                    .executes(context -> executeStringShow(context, getPosArgument(context, "pos"), ExpressionConvertible::asString)))
+                    .executes(context -> executeStringShow(context, getPosArgument(context, "pos"), ExpressionConvertible::expressAsString)))
                 .then(literal("string_test")
-                    .executes(context -> executeStringTest(context, getPosArgument(context, "pos"), ExpressionConvertible::asString, s -> type.parse(new StringReader(s)))))
+                    .executes(context -> executeStringTest(context, getPosArgument(context, "pos"), ExpressionConvertible::expressAsString, s -> type.parse(new StringReader(s)))))
                 .then(literal("nbt")
                     .executes(context -> executeCodecShow(context, getPosArgument(context, "pos"), EnhancedCoordinates.CODEC, NbtOps.INSTANCE)))
                 .then(literal("json")
@@ -289,7 +289,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
               int numOfNotIteratedButMatch = 0;
               final ImmutableSet<BlockPos> collect = region.stream().map(BlockPos::immutable).collect(ImmutableSet.toImmutableSet());
               final Set<BlockPos> iteratedNearby = new HashSet<>();
-              final BlockPlacementHistory history = new BlockPlacementHistory(Component.translatable("enhanced_commands.commands.testarg.region.illustrate.task_name", region.asString()), world, Block.UPDATE_CLIENTS, 0);
+              final BlockPlacementHistory history = new BlockPlacementHistory(Component.translatable("enhanced_commands.commands.testarg.region.illustrate.task_name", region.expressAsString()), world, Block.UPDATE_CLIENTS, 0);
               for (BlockPos blockPos : collect) {
                 if (region.contains(blockPos)) {
                   history.recordBlockAndEntity(world, blockPos, Blocks.GLASS.defaultBlockState());
@@ -334,7 +334,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static <A extends ExpressionConvertible> int executeConvertShow(CommandContext<CommandSourceStack> context, Codec<A> codec) throws CommandSyntaxException {
-    return executeConvertShow(getNbtTag(context, "nbt"), codec, a -> context.getSource().sendFeedback$ecBridge(() -> Component.literal(a.asString()).withStyle(Styles.RESULT), false), context.getSource().registryAccess());
+    return executeConvertShow(getNbtTag(context, "nbt"), codec, a -> context.getSource().sendFeedback$ecBridge(() -> Component.literal(a.expressAsString()).withStyle(Styles.RESULT), false), context.getSource().registryAccess());
   }
 
   private static <A> int executeStringShow(CommandContext<CommandSourceStack> context, A fetchedArg, FailableFunction<A, String, CommandSyntaxException> toString) throws CommandSyntaxException {
@@ -394,7 +394,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             BlockFunctionArgument.blockFunction(commandBuildContext),
             BlockFunction::parse,
             BlockFunctionArgument::getBlockFunction,
-            ExpressionConvertible::asString,
+            ExpressionConvertible::expressAsString,
             BlockFunction.CODEC))
         .then(addValueProperties(
             literal("block_predicate"),
@@ -403,7 +403,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             BlockPredicateArgument.blockPredicate(commandBuildContext),
             BlockPredicate::parse,
             BlockPredicateArgument::getBlockPredicate,
-            ExpressionConvertible::asString,
+            ExpressionConvertible::expressAsString,
             BlockPredicate.CODEC))
         .then(addValueProperties(
             literal("curve"),
@@ -412,7 +412,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             CurveArgument.curve(commandBuildContext),
             (parseContext, commandContext) -> CurveProvider.parse(parseContext).toAbsoluteRegion(commandContext.getSource()),
             CurveArgument::getCurve,
-            ExpressionConvertible::asString,
+            ExpressionConvertible::expressAsString,
             Curve.CODEC))
         .then(addValueProperties(
             literal("entity_predicate"),
@@ -421,7 +421,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             EntityPredicateArgument.entityPredicate(commandBuildContext),
             parseContext -> EntityPredicate.parse(new EntitySelectorParser(parseContext.reader(), true)),
             EntityPredicateArgument::getEntityPredicate,
-            ExpressionConvertible::asString,
+            ExpressionConvertible::expressAsString,
             EntityPredicate.CODEC))
         .then(addValueProperties(
             addExtraItemFunctionProperties(literal("item_function"), commandBuildContext),
@@ -430,7 +430,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             ItemFunctionArgument.itemFunction(commandBuildContext),
             parseContext -> ItemFunctionArgument.itemFunction(commandBuildContext).parse(parseContext.reader()),
             ItemFunctionArgument::getItemFunction,
-            ExpressionConvertible::asString,
+            ExpressionConvertible::expressAsString,
             ItemFunction.CODEC))
         .then(addValueProperties(
             literal("item_predicate"),
@@ -439,7 +439,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             ItemPredicateArgument.itemPredicate(commandBuildContext),
             parseContext -> ItemPredicateArgument.itemPredicate(commandBuildContext).parse(parseContext.reader()),
             ItemPredicateArgument::getItemPredicate,
-            ExpressionConvertible::asString,
+            ExpressionConvertible::expressAsString,
             ItemPredicate.CODEC))
         .then(addNbtProperties(literal("nbt"), commandBuildContext))
         .then(addNbtCompoundProperties(literal("nbt_compound")))
@@ -450,7 +450,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             NbtPredicateArgument.element(commandBuildContext),
             parseContext -> NbtPredicate.parse(parseContext, false, false),
             NbtPredicateArgument::getNbtPredicate,
-            NbtPredicate::asString,
+            NbtPredicate::expressAsString,
             NbtPredicate.CODEC))
         .then(addValueProperties(
             addExtraNbtFunctionProperties(literal("nbt_function"), commandBuildContext),
@@ -459,7 +459,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             NbtFunctionArgument.element(commandBuildContext),
             parseContext -> NbtFunction.parse(parseContext, false, false),
             NbtFunctionArgument::getNbtFunction,
-            NbtFunction::asString,
+            NbtFunction::expressAsString,
             NbtFunction.CODEC))
         .then(addPosProperties(literal("pos")))
         .then(addValueProperties(
@@ -469,7 +469,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
             RegionArgument.region(commandBuildContext),
             (parseContext, commandContext) -> RegionProvider.parse(parseContext).toAbsoluteRegion(commandContext.getSource()),
             RegionArgument::getRegion,
-            Region::asString,
+            Region::expressAsString,
             Region.CODEC))
     );
   }

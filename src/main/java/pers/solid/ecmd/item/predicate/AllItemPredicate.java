@@ -27,8 +27,8 @@ public record AllItemPredicate(List<ItemPredicate> predicates) implements Predic
   }
 
   @Override
-  public String asString() {
-    return "all(" + predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + ")";
+  public String expressAsString() {
+    return "all(" + predicates.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ")) + ")";
   }
 
   public record Parser(List<ItemPredicate> itemPredicates) implements FunctionContentParser.SequentialParams<AllItemPredicate> {

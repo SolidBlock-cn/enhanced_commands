@@ -31,8 +31,8 @@ public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicat
   public static final MapCodec<PropertiesNamesBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(PropertiesNamesBlockPredicate::new, PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(PropertiesNamesBlockPredicate::predicates)));
 
   @Override
-  public String asString() {
-    return predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(",", "[", "]"));
+  public String expressAsString() {
+    return predicates.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(",", "[", "]"));
   }
 
   @Override

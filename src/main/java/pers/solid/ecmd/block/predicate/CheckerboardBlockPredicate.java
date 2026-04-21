@@ -52,9 +52,9 @@ public record CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final StringBuilder sb = new StringBuilder("checkerboard(");
-    sb.append(predicates.asString(ExpressionConvertible::asString));
+    sb.append(predicates.asString(ExpressionConvertible::expressAsString));
     appendParameters(sb);
     return sb.append(")").toString();
   }

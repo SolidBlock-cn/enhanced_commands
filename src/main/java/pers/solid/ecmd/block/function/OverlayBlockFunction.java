@@ -29,8 +29,8 @@ public record OverlayBlockFunction(List<BlockFunction> functions) implements Blo
   }
 
   @Override
-  public String asString() {
-    return "overlay(" + functions.stream().map(BlockFunction::asString).collect(Collectors.joining(", ")) + ")";
+  public String expressAsString() {
+    return "overlay(" + functions.stream().map(BlockFunction::expressAsString).collect(Collectors.joining(", ")) + ")";
   }
 
   @Override

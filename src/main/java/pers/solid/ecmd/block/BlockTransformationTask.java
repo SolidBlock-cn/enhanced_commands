@@ -410,7 +410,7 @@ public class BlockTransformationTask {
   public record TaskSeries(BlockTransformationTask self, Iterable<@Nullable Void> storeTransformed, Iterable<@Nullable Void> collectMatchingTransformed, Iterable<@Nullable Void> releaseTransformed, Iterable<@Nullable Void> transformEntities, Iterable<@Nullable Void> collectMatchingRemaining, Iterable<@Nullable Void> setRemaining, Iterable<@Nullable Void> addInterpolation) {
     // 使用 iterable 而非 iterator 是为了惰性计算，有些迭代器所使用的集合是在之前的迭代器中添加的，为了避免出现错误，应该在完成了添加集合元素之后，再调用集合的 iterator() 方法。
     private Iterable<@Nullable Void> logIterable(String message) {
-      return IterateUtils.singletonPeekingIterable(() -> LOGGER.info("Task {}: {}", self.region.asString(), message));
+      return IterateUtils.singletonPeekingIterable(() -> LOGGER.info("Task {}: {}", self.region.expressAsString(), message));
     }
 
     public Iterator<@Nullable Void> getSpeedAdjustedTask() {

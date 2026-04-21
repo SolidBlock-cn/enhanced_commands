@@ -149,7 +149,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
       posIterable = region;
     }
 
-    final Component taskName = Component.translatable("enhanced_commands.commands.setblocks.task_name", region.asString());
+    final Component taskName = Component.translatable("enhanced_commands.commands.setblocks.task_name", region.expressAsString());
     final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, context.flags, context.modFlags) : null;
 
     // 第一部分：收集 oldStates

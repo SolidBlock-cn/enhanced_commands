@@ -76,7 +76,7 @@ public record SphereRegion(double radius, Vec3 center) implements Region {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "sphere(%s, %s)".formatted(StringUtil.nf.format(radius), StringUtil.wrapVector(center));
   }
 

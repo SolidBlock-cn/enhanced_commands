@@ -22,7 +22,7 @@ public record UnionRegionProvider(List<RegionProvider<?>> regions) implements Re
   }
 
   @Override
-  public String asString() {
-    return "union(" + regions.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + ")";
+  public String expressAsString() {
+    return "union(" + regions.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ")) + ")";
   }
 }

@@ -49,8 +49,8 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
   }
 
   @Override
-  public String asString() {
-    return functions.asStringStream(ExpressionConvertible::asString).collect(Collectors.joining(", ", "pick(", (seed.isPresent() ? "; seed = " + seed.getAsLong() : "") + ")"));
+  public String expressAsString() {
+    return functions.asStringStream(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "pick(", (seed.isPresent() ? "; seed = " + seed.getAsLong() : "") + ")"));
   }
 
 

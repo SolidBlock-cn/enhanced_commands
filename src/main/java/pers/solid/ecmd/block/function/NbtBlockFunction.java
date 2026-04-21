@@ -27,8 +27,8 @@ public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction
   public static final DynamicCommandExceptionType NOT_COMPOUND = new DynamicCommandExceptionType(s -> Component.translatable("enhanced_commands.block_function.nbt_not_compound", s));
 
   @Override
-  public String asString() {
-    return nbtFunction.asString();
+  public String expressAsString() {
+    return nbtFunction.expressAsString();
   }
 
   @Override

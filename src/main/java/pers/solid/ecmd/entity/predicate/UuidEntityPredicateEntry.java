@@ -37,7 +37,7 @@ public record UuidEntityPredicateEntry(UUID uuid) implements SpecialEntityPredic
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return uuid.toString();
   }
 }

@@ -15,7 +15,7 @@ public record EqualsListNbtPredicate(List<NbtPredicate> expected) implements Nbt
   ).apply(i, EqualsListNbtPredicate::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(true);
   }
 

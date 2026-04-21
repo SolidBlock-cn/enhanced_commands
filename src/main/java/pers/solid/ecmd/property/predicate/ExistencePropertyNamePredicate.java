@@ -14,7 +14,7 @@ public record ExistencePropertyNamePredicate(String propertyName, boolean exists
   public static final MapCodec<ExistencePropertyNamePredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(ExistencePropertyNamePredicate::new, Codec.STRING.fieldOf("property").forGetter(ExistencePropertyNamePredicate::propertyName), Codec.BOOL.optionalFieldOf("exists", false).forGetter(ExistencePropertyNamePredicate::exists)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return propertyName + (exists ? "=*" : "!=*");
   }
 

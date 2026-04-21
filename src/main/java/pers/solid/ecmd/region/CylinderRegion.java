@@ -125,7 +125,7 @@ public record CylinderRegion(@Range(from = 0, to = Long.MAX_VALUE) double radius
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return String.format("cyl(%s, %s, %s)", StringUtil.nf.format(radius), StringUtil.nf.format(height), StringUtil.wrapVector(center));
   }
 

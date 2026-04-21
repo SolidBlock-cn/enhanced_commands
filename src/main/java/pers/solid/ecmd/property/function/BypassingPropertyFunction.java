@@ -32,7 +32,7 @@ public record BypassingPropertyFunction<T extends Comparable<T>>(Property<T> pro
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return property.getName() + (must ? "==~" : "=~");
   }
 

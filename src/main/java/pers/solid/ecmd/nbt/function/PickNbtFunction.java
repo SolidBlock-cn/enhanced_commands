@@ -35,8 +35,8 @@ public record PickNbtFunction(WeightedList<NbtFunction> functions) implements Nb
   }
 
   @Override
-  public String asString() {
-    return functions.asStringStream(ExpressionConvertible::asString).collect(Collectors.joining(", ", "pick(", ")"));
+  public String expressAsString() {
+    return functions.asStringStream(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "pick(", ")"));
   }
 
   @Override

@@ -33,7 +33,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return value ? "*" : "!*";
   }
 

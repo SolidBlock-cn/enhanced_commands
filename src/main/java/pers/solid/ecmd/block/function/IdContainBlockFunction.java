@@ -57,7 +57,7 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "idcontain(" + StringTag.quoteAndEscape(pattern.toString()) + (seed.isPresent() ? ", seed = " + seed.getAsLong() : "") + ")";
   }
 

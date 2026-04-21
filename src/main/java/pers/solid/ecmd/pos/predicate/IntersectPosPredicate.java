@@ -13,8 +13,8 @@ public record IntersectPosPredicate(Collection<PosPredicate> posPredicates) impl
   }
 
   @Override
-  public String asString() {
-    return posPredicates.stream().map(posPredicate -> posPredicate instanceof UnionPosPredicate unionPosPredicate ? unionPosPredicate.posPredicates().stream().map(PosPredicate::asString).collect(Collectors.joining("|", "(", ")")) : posPredicate.asString()).collect(Collectors.joining("&"));
+  public String expressAsString() {
+    return posPredicates.stream().map(posPredicate -> posPredicate instanceof UnionPosPredicate unionPosPredicate ? unionPosPredicate.posPredicates().stream().map(PosPredicate::expressAsString).collect(Collectors.joining("|", "(", ")")) : posPredicate.expressAsString()).collect(Collectors.joining("&"));
   }
 
   @Override

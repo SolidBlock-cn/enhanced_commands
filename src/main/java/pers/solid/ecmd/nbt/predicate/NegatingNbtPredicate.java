@@ -8,8 +8,8 @@ public record NegatingNbtPredicate(NbtPredicate predicate) implements NbtPredica
   public static final MapCodec<NegatingNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(NbtPredicate.CODEC.fieldOf("predicate").forGetter(NegatingNbtPredicate::predicate)).apply(i, NegatingNbtPredicate::new));
 
   @Override
-  public String asString() {
-    return "!" + predicate.asString();
+  public String expressAsString() {
+    return "!" + predicate.expressAsString();
   }
 
   @Override

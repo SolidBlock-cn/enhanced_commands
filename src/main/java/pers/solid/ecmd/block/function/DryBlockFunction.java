@@ -22,8 +22,8 @@ public record DryBlockFunction(BlockFunction function) implements BlockFunction 
   public static final MapCodec<DryBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockFunction.CODEC.optionalFieldOf("function", EmptyBlockFunction.INSTANCE).forGetter(DryBlockFunction::function)).apply(i, DryBlockFunction::new));
 
   @Override
-  public String asString() {
-    return "dry(" + (function.isEmpty() ? "" : function.asString()) + ")";
+  public String expressAsString() {
+    return "dry(" + (function.isEmpty() ? "" : function.expressAsString()) + ")";
   }
 
   @Override

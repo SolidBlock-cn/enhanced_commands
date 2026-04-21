@@ -40,7 +40,7 @@ public record ReferenceBlockFunction(ResourceKey<BlockFunction> id) implements B
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "$" + id.location();
   }
 

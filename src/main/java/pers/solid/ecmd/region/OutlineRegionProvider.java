@@ -19,7 +19,7 @@ public record OutlineRegionProvider(OutlineType outlineType, RegionProvider<?> r
   }
 
   @Override
-  public String asString() {
-    return "outline(" + region.asString() + ", " + outlineType.getSerializedName() + ")";
+  public String expressAsString() {
+    return "outline(" + region.expressAsString() + ", " + outlineType.getSerializedName() + ")";
   }
 }

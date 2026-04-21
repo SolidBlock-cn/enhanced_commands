@@ -29,8 +29,8 @@ public record FilterBlockFunction(BlockFunction function, BlockPredicate predica
   public static final MapCodec<FilterBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply3(FilterBlockFunction::new, BlockFunction.CODEC.fieldOf("function").forGetter(FilterBlockFunction::function), BlockPredicate.CODEC.fieldOf("predicate").forGetter(FilterBlockFunction::predicate), BlockFunction.CODEC.optionalFieldOf("else", EmptyBlockFunction.INSTANCE).forGetter(FilterBlockFunction::elseFunction)));
 
   @Override
-  public String asString() {
-    return "filter(" + function.asString() + ", " + predicate.asString() + (elseFunction.isEmpty() ? "" : ", " + elseFunction.asString()) + ")";
+  public String expressAsString() {
+    return "filter(" + function.expressAsString() + ", " + predicate.expressAsString() + (elseFunction.isEmpty() ? "" : ", " + elseFunction.expressAsString()) + ")";
   }
 
   @Override

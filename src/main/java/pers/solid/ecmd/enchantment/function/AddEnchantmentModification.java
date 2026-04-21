@@ -135,10 +135,10 @@ public record AddEnchantmentModification(EnchantmentModificationTarget enchantme
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final StringBuilder sb = new StringBuilder(enchantment.asEntryString());
     sb.append(' ');
-    sb.append(level.asString());
+    sb.append(level.expressAsString());
     if (supportedOnly || clamp) {
       sb.append(" -");
       if (supportedOnly) sb.append("s");

@@ -24,7 +24,7 @@ public record SphereRegionProvider(double radius, EnhancedCoordinates center) im
   }
 
   @Override
-  public String asString() {
-    return "sphere(" + StringUtil.nf.format(radius) + ", " + center.asString() + ")";
+  public String expressAsString() {
+    return "sphere(" + StringUtil.nf.format(radius) + ", " + center.expressAsString() + ")";
   }
 }

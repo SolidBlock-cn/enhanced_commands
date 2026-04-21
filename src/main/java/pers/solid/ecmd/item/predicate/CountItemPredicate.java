@@ -28,7 +28,7 @@ public record CountItemPredicate(MinMaxBounds.Ints count) implements ItemPredica
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "[" + asEntryString() + "]";
   }
 

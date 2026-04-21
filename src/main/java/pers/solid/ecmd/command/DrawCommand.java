@@ -126,7 +126,7 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
       });
     }
 
-    final MutableComponent taskName = Component.translatable("enhanced_commands.commands.draw.task_name", curve.asString());
+    final MutableComponent taskName = Component.translatable("enhanced_commands.commands.draw.task_name", curve.expressAsString());
     final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, context.flags, context.modFlags) : null;
 
 

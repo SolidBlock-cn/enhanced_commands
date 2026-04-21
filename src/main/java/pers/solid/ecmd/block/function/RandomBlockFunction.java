@@ -59,7 +59,7 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     if (seed.isPresent()) {
       return "random(seed = " + seed.getAsLong() + ")";
     }

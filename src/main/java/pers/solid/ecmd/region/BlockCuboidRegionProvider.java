@@ -22,7 +22,7 @@ public record BlockCuboidRegionProvider(EnhancedCoordinates from, EnhancedCoordi
   }
 
   @Override
-  public String asString() {
-    return "cuboid(" + from.asString() + ", " + to.asString() + ")";
+  public String expressAsString() {
+    return "cuboid(" + from.expressAsString() + ", " + to.expressAsString() + ")";
   }
 }

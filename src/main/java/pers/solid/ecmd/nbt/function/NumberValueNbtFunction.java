@@ -18,7 +18,7 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  */
 public record NumberValueNbtFunction(NumericTag number) implements NbtFunction {
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(true);
   }
 

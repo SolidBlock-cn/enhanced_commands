@@ -178,7 +178,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
     final BlockPredicate transformOnly = keywordArgs.getArg("transform_only");
 
 
-    final MutableComponent taskName = Component.translatable("enhanced_commands.commands.stack.task_name", region.asString(), Integer.toString(stackAmount));
+    final MutableComponent taskName = Component.translatable("enhanced_commands.commands.stack.task_name", region.expressAsString(), Integer.toString(stackAmount));
     final int flags = FillReplaceCommand.getFlags(keywordArgs);
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final @Nullable BlockPlacementHistory history = keywordArgs.getBoolean("undoable") ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;

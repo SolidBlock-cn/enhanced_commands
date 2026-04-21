@@ -45,7 +45,7 @@ public record CollectorEntityPredicate(EntitySelectorCollector collector) implem
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "@" + collector.getSerializedName();
   }
 }

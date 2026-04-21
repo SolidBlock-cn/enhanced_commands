@@ -20,7 +20,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   public static final MapCodec<UseOriginalBlockFunction> CODEC = MapCodec.unit(USE_ORIGINAL);
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "~";
   }
 

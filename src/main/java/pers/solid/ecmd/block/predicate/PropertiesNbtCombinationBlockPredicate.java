@@ -56,8 +56,8 @@ public record PropertiesNbtCombinationBlockPredicate(BlockPredicate base, @Nulla
   }
 
   @Override
-  public String asString() {
-    return Stream.of(base, properties, nbt).filter(Objects::nonNull).map(ExpressionConvertible::asString).collect(Collectors.joining());
+  public String expressAsString() {
+    return Stream.of(base, properties, nbt).filter(Objects::nonNull).map(ExpressionConvertible::expressAsString).collect(Collectors.joining());
   }
 
   @Override

@@ -99,7 +99,7 @@ public record ScoresEntityPredicateEntry(List<Entry> scores) implements EntityPr
 
   @Override
   public String toOptionEntry() {
-    return scores.stream().map(Entry::asString).collect(Collectors.joining(", ", "scores={", "}"));
+    return scores.stream().map(Entry::expressAsString).collect(Collectors.joining(", ", "scores={", "}"));
   }
 
   public record Entry(String name, MinMaxBounds.Ints score, boolean inverted) implements ExpressionConvertible {
@@ -110,7 +110,7 @@ public record ScoresEntityPredicateEntry(List<Entry> scores) implements EntityPr
     ).apply(i, Entry::new));
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return name + (inverted ? "=!" : "=") + StringUtil.wrapRange(score);
     }
   }

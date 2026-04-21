@@ -169,7 +169,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
     final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!keywordArgs.getBoolean("immediately") && region.numberOfBlocksAffected() > 2048) {
-      ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(Component.translatable("enhanced_commands.commands.convertblocks.task_name", region.asString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
+      ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(Component.translatable("enhanced_commands.commands.convertblocks.task_name", region.expressAsString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {

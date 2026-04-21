@@ -69,7 +69,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
       final LocalCoordinatesAccessor a = (LocalCoordinatesAccessor) lookingPosArgument;
       return "^" + StringUtil.nf.format(a.getLeft()) + " ^" + StringUtil.nf.format(a.getUp()) + " ^" + StringUtil.nf.format(a.getForwards());
     } else if (posArgument instanceof EnhancedCoordinates enhancedCoordinates) {
-      return enhancedCoordinates.asString();
+      return enhancedCoordinates.expressAsString();
     } else {
       return "<unsupported>";
     }
@@ -221,7 +221,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       final StringBuilder sb = new StringBuilder();
       final boolean isInt = intAlignType != null;
       if (xRelative) sb.append('~');
@@ -291,7 +291,7 @@ public interface EnhancedCoordinates extends Coordinates, ExpressionConvertible 
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       final StringBuilder sb = new StringBuilder();
       sb.append('^');
       if (x() != 0) sb.append(StringUtil.nf.format(x()));

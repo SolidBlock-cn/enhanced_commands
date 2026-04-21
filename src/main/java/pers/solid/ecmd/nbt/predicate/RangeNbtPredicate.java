@@ -13,13 +13,13 @@ public record RangeNbtPredicate(BridgeRange<?> numberRange) implements NbtPredic
   public static final MapCodec<RangeNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BridgeRange.CODEC.forGetter(RangeNbtPredicate::numberRange)).apply(i, RangeNbtPredicate::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(false);
   }
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (requirePrefix ? ": " : "") + numberRange.asString();
+    return (requirePrefix ? ": " : "") + numberRange.expressAsString();
   }
 
   @Override

@@ -50,7 +50,7 @@ public record DistanceEntityPredicate(MinMaxBounds.Doubles distance, PositionOff
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "[distance=" + StringUtil.wrapRange(distance) + "]";
   }
 }

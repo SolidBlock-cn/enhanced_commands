@@ -39,7 +39,7 @@ public final class TextUtil {
   }
 
   /**
-   * 将 NBT 转换为可读的字符串。与 {@link net.minecraft.nbt.StringTagVisitor#visit(Tag)} 不同的是，此函数返回的结果中，会在适当的位置添加空格，同时不进行换行，从而确保适当美观，并与 {@link NbtPredicate#asString()} 和 {@link NbtFunction#asString()} 的结果保持一致。
+   * 将 NBT 转换为可读的字符串。与 {@link net.minecraft.nbt.StringTagVisitor#visit(Tag)} 不同的是，此函数返回的结果中，会在适当的位置添加空格，同时不进行换行，从而确保适当美观，并与 {@link NbtPredicate#expressAsString()} 和 {@link NbtFunction#expressAsString()} 的结果保持一致。
    */
   public static String toSpacedStringNbt(Tag nbtElement) {
     return new SnbtPrinterTagVisitor(StringUtils.EMPTY, 0, new ArrayList<>()).visit(nbtElement);
@@ -74,7 +74,7 @@ public final class TextUtil {
   }
 
   public static MutableComponent literal(ExpressionConvertible value) {
-    return Component.literal(value.asString());
+    return Component.literal(value.expressAsString());
   }
 
   /**

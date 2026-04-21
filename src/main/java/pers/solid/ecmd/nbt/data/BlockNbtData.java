@@ -202,7 +202,7 @@ public record BlockNbtData(RegionProvider<?> region, BlockPredicate blockPredica
   }
 
   @Override
-  public String asString() {
-    return "block " + region.asString();
+  public String expressAsString() {
+    return "block " + region.expressAsString();
   }
 }

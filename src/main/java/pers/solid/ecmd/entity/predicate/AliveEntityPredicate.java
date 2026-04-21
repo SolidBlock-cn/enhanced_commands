@@ -37,7 +37,7 @@ public enum AliveEntityPredicate implements StaticEntityPredicate, EntityPredica
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "@e";
   }
 }

@@ -58,6 +58,6 @@ public record BlockPredicatesEntityPredicateEntry(List<Pair<EnhancedCoordinates,
 
   @Override
   public String toOptionEntry() {
-    return "block=" + predicates.stream().map(entry -> entry.getFirst().asString() + " = " + entry.getSecond().asString()).collect(Collectors.joining(", ", "{", "}"));
+    return "block=" + predicates.stream().map(entry -> entry.getFirst().expressAsString() + " = " + entry.getSecond().expressAsString()).collect(Collectors.joining(", ", "{", "}"));
   }
 }

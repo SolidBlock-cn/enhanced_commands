@@ -47,7 +47,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "predicate(" + entry.unwrap().map(key -> key.location().toString(), lootCondition -> LootItemCondition.CODEC.encodeStart(NbtOps.INSTANCE, entry).toString()) + ")";
   }
 

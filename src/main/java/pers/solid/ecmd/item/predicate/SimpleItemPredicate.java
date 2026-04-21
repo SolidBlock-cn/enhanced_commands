@@ -23,7 +23,7 @@ public record SimpleItemPredicate(Item item) implements ItemPredicateWithoutCont
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return BuiltInRegistries.ITEM.getKey(item).toString();
   }
 }

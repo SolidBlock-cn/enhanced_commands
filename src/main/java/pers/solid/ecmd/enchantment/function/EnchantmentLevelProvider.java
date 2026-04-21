@@ -50,7 +50,7 @@ public interface EnchantmentLevelProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return ((NumberProviderExtension) numberProvider).asString$enhancedCommands();
     }
   }
@@ -73,7 +73,7 @@ public interface EnchantmentLevelProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return "clamped " + ((NumberProviderExtension) numberProvider).asString$enhancedCommands();
     }
   }
@@ -93,7 +93,7 @@ public interface EnchantmentLevelProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return Type.RANDOM_REASONABLE.getSerializedName();
     }
   }
@@ -113,7 +113,7 @@ public interface EnchantmentLevelProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return Type.RANDOM_POSSIBLE.getSerializedName();
     }
   }
@@ -133,7 +133,7 @@ public interface EnchantmentLevelProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return Type.MAX_REASONABLE.getSerializedName();
     }
   }

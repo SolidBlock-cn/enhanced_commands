@@ -21,7 +21,7 @@ public record SimpleItemFunction(Holder<Item> item) implements ItemFunction {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return item.getRegisteredName();
   }
 }

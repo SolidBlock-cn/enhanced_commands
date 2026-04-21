@@ -19,7 +19,7 @@ public record CuboidOutlineRegionProvider(BlockCuboidRegionProvider region, int 
   }
 
   @Override
-  public String asString() {
-    return "cuboid_outline(" + region.from().asString() + ", " + region.to().asString() + ", " + thickness + ")";
+  public String expressAsString() {
+    return "cuboid_outline(" + region.from().expressAsString() + ", " + region.to().expressAsString() + ", " + thickness + ")";
   }
 }

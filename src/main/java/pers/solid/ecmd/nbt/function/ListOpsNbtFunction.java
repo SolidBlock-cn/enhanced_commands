@@ -42,7 +42,7 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<Posit
   ).apply(i, ListOpsNbtFunction::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(false);
   }
 
@@ -50,11 +50,11 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<Posit
   public String asString(boolean requirePrefix) {
     final Function<PositionalListEntry<NbtFunction>, String> indexValueToStringMapper = entry -> {
       final int index = entry.index();
-      final String valueAsString = entry.value().asString();
+      final String valueAsString = entry.value().expressAsString();
       return index + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
     };
     return (requirePrefix ? ": " : "") + "[" + Stream.<String>concat(
-        valueReplacements.isEmpty() ? Stream.empty() : valueReplacements.stream().map(NbtFunction::asString),
+        valueReplacements.isEmpty() ? Stream.empty() : valueReplacements.stream().map(NbtFunction::expressAsString),
         positionalFunctions.isEmpty() ? Stream.empty() : positionalFunctions.stream().map(indexValueToStringMapper)
     ).collect(Collectors.joining(", ")) + "]";
   }

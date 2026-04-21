@@ -36,11 +36,11 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final StringBuilder stringBuilder = new StringBuilder(BuiltInRegistries.BLOCK.getKey(block).toString());
     if (!properties.isEmpty()) {
       stringBuilder.append('[');
-      stringBuilder.append(properties.stream().map(PropertyFunction::asString).collect(Collectors.joining(", ")));
+      stringBuilder.append(properties.stream().map(PropertyFunction::expressAsString).collect(Collectors.joining(", ")));
       stringBuilder.append(']');
     }
     return stringBuilder.toString();

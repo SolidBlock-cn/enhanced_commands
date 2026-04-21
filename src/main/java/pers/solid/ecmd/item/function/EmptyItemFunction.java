@@ -19,7 +19,7 @@ public enum EmptyItemFunction implements ItemFunction {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "~";
   }
 }

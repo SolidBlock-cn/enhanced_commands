@@ -45,7 +45,7 @@ public record SingleBlockPosRegion(Vec3i pos) implements IntBackedRegion, Cuboid
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "single(%s %s %s)".formatted(pos.getX(), pos.getY(), pos.getZ());
   }
 

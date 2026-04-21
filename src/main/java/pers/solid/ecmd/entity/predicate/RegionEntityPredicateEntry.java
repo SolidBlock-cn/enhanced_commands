@@ -16,7 +16,7 @@ public record RegionEntityPredicateEntry(RegionProvider<?> region) implements En
 
   @Override
   public String toOptionEntry() {
-    return "region=" + region.asString();
+    return "region=" + region.expressAsString();
   }
 
   @Override
@@ -28,9 +28,9 @@ public record RegionEntityPredicateEntry(RegionProvider<?> region) implements En
   public TestResult testAndDescribe(Entity entity, ExecutionContext context, Component displayName) {
     final Region cached = Region.getCached(region, context.positionProvider);
     if (cached.contains(entity.position())) {
-      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.region.true", displayName, cached.asString()));
+      return TestResult.of(true, Component.translatable("enhanced_commands.entity_predicate.region.true", displayName, cached.expressAsString()));
     } else {
-      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.region.false", displayName, cached.asString()));
+      return TestResult.of(false, Component.translatable("enhanced_commands.entity_predicate.region.false", displayName, cached.expressAsString()));
     }
   }
 

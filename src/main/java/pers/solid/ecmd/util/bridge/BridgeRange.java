@@ -124,7 +124,7 @@ public interface BridgeRange<T extends Comparable<T>> extends ExpressionConverti
   }
 
   @Override
-  default String asString() {
+  default String expressAsString() {
     final T min = getMin();
     if (isExact() && min != null) {
       return min.toString();

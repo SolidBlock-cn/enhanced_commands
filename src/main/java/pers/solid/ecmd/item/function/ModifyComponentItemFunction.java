@@ -50,12 +50,12 @@ public record ModifyComponentItemFunction<T>(DataComponentType<T> component, Nbt
   }
 
   @Override
-  public String asString() {
-    return "modify_component(" + BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component) + ", " + function.asString() + ")";
+  public String expressAsString() {
+    return "modify_component(" + BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component) + ", " + function.expressAsString() + ")";
   }
 
   @Override
   public String asEntryString() {
-    return BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component) + ": " + function.asString();
+    return BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component) + ": " + function.expressAsString();
   }
 }

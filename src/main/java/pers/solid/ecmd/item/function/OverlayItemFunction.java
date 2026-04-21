@@ -33,8 +33,8 @@ public record OverlayItemFunction(List<ItemFunction> functions) implements ItemF
   }
 
   @Override
-  public String asString() {
-    return functions.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "overlay(", ")"));
+  public String expressAsString() {
+    return functions.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "overlay(", ")"));
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<OverlayItemFunction> {

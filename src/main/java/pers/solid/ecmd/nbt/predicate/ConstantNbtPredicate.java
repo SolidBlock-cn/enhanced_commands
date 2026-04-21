@@ -19,7 +19,7 @@ public enum ConstantNbtPredicate implements NbtPredicate {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(false);
   }
 

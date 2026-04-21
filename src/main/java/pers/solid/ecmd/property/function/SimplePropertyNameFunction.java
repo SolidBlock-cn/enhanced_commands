@@ -17,7 +17,7 @@ public record SimplePropertyNameFunction(String propertyName, String valueName, 
   ));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return propertyName + (must ? "==" : "=") + valueName;
   }
 

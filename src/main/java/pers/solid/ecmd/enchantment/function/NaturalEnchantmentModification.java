@@ -68,7 +68,7 @@ public record NaturalEnchantmentModification(int level, Optional<HolderSet<Encha
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return possibleValues.map(
         enchantmentHolderSet -> "natural " + level + " " + enchantmentHolderSet.unwrap().map(tagKey -> "#" + tagKey.location(),
             holders -> holders.stream().map(Holder::getRegisteredName).collect(Collectors.joining("|")))).orElseGet(() -> "natural " + level);

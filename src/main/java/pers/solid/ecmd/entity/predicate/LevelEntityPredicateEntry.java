@@ -38,6 +38,6 @@ public record LevelEntityPredicateEntry(BridgeIntRange level, boolean inverted) 
 
   @Override
   public String toOptionEntry() {
-    return "level=" + (inverted ? "!" : "") + level.asString();
+    return "level=" + (inverted ? "!" : "") + level.expressAsString();
   }
 }

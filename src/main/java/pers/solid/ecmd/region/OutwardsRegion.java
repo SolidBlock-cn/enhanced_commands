@@ -62,7 +62,7 @@ public record OutwardsRegion(Vec3i center, int x, int y, int z) implements IntBa
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "outwards(%s %s %s, %s %s %s)".formatted(Integer.toString(x), Integer.toString(y), Integer.toString(z), Integer.toString(center.getX()), Integer.toString(center.getY()), Integer.toString(center.getZ()));
   }
 

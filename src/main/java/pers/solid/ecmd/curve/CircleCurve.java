@@ -127,7 +127,7 @@ public record CircleCurve(double radius, Vec3 center, Vec3 pivot, double minAngl
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     StringJoiner joiner = new StringJoiner(", ", "circle(", ")");
     joiner.add("radius = " + radius);
     joiner.add("center = " + StringUtil.wrapVector(center));

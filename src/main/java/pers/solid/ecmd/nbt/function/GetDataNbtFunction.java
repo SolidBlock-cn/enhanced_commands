@@ -28,8 +28,8 @@ public record GetDataNbtFunction(NbtSource<?> source, Optional<NbtPathArgument.N
   ).apply(i, GetDataNbtFunction::new));
 
   @Override
-  public String asString() {
-    return "from(" + source.asString() + ")";
+  public String expressAsString() {
+    return "from(" + source.expressAsString() + ")";
   }
 
   @Override

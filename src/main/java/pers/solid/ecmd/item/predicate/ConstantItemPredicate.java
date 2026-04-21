@@ -31,7 +31,7 @@ public enum ConstantItemPredicate implements ItemPredicateWithoutContext {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return value ? "*" : "!*";
   }
 

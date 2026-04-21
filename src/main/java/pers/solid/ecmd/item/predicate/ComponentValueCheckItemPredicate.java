@@ -22,7 +22,7 @@ public record ComponentValueCheckItemPredicate<T>(DataComponentType<T> component
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "*[" + asEntryString() + "]";
   }
 

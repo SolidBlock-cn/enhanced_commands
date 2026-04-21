@@ -47,8 +47,8 @@ public record PropertiesNbtCombinationBlockFunction(BlockFunction base, @Nullabl
   }
 
   @Override
-  public String asString() {
-    return Stream.of(base, properties, nbt).filter(Objects::nonNull).map(BlockFunction::asString).collect(Collectors.joining());
+  public String expressAsString() {
+    return Stream.of(base, properties, nbt).filter(Objects::nonNull).map(BlockFunction::expressAsString).collect(Collectors.joining());
   }
 
   @Override

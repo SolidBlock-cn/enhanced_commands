@@ -21,7 +21,7 @@ public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunctio
   public static final MapCodec<MirrorBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(MirrorBlockFunction::new, MirrorProvider.CODEC.fieldOf("mirror").forGetter(MirrorBlockFunction::mirror)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "mirror(" + mirror.getSerializedName() + ")";
   }
 

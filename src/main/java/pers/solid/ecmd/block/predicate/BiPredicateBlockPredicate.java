@@ -19,8 +19,8 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   public static final MapCodec<BiPredicateBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.fieldOf("block_predicate1").forGetter(BiPredicateBlockPredicate::blockPredicate1), BlockPredicate.CODEC.fieldOf("block_predicate2").forGetter(BiPredicateBlockPredicate::blockPredicate2), Codec.BOOL.fieldOf("same").forGetter(BiPredicateBlockPredicate::same)).apply(i, BiPredicateBlockPredicate::new));
 
   @Override
-  public String asString() {
-    return (same ? "same" : "diff") + "(" + blockPredicate1.asString() + ", " + blockPredicate2.asString() + ")";
+  public String expressAsString() {
+    return (same ? "same" : "diff") + "(" + blockPredicate1.expressAsString() + ", " + blockPredicate2.expressAsString() + ")";
   }
 
   @Override

@@ -22,8 +22,8 @@ public record RegionBlockPredicate(RegionProvider<?> region) implements BlockPre
   public static final MapCodec<RegionBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RegionBlockPredicate::new, RegionProvider.CODEC.fieldOf("region").forGetter(RegionBlockPredicate::region)));
 
   @Override
-  public String asString() {
-    return "region(" + region.asString() + ")";
+  public String expressAsString() {
+    return "region(" + region.expressAsString() + ")";
   }
 
   @Override

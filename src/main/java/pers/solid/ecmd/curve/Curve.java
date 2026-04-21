@@ -94,7 +94,7 @@ public interface Curve extends ExpressionConvertible {
   }
 
   @Override
-  String asString();
+  String expressAsString();
 
   @Nullable AABB minContainingBox();
 

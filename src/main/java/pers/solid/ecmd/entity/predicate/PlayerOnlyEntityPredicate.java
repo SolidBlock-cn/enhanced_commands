@@ -34,7 +34,7 @@ public enum PlayerOnlyEntityPredicate implements SpecialEntityPredicate, StaticE
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "<player only>";
   }
 }

@@ -74,7 +74,7 @@ public record MultiValuePropertyNamePredicate(String propertyName, List<String> 
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return propertyName + (inverted ? "!=" : "=") + StringUtils.join(valueNames, "|");
   }
 }

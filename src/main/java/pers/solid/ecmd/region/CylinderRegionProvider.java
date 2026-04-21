@@ -22,7 +22,7 @@ public record CylinderRegionProvider(@Range(from = 0, to = Long.MAX_VALUE) doubl
   }
 
   @Override
-  public String asString() {
-    return "cylinder(" + StringUtil.nf.format(radius) + ", " + StringUtil.nf.format(height) + ", " + center.asString() + ")";
+  public String expressAsString() {
+    return "cylinder(" + StringUtil.nf.format(radius) + ", " + StringUtil.nf.format(height) + ", " + center.expressAsString() + ")";
   }
 }

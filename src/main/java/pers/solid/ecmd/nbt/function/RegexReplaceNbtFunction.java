@@ -40,8 +40,8 @@ public record RegexReplaceNbtFunction(Pattern pattern, String replacement, boole
   ).apply(i, RegexReplaceNbtFunction::new));
 
   @Override
-  public String asString() {
-    return "regex_replace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
+  public String expressAsString() {
+    return "regex_replace(" + StringTag.quoteAndEscape(pattern.pattern()) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.expressAsString()).orElse("") + ")";
   }
 
   @Override

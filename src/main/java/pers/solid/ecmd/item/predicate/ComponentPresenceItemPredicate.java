@@ -20,7 +20,7 @@ public record ComponentPresenceItemPredicate<T>(DataComponentType<T> componentTy
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "*[" + asEntryString() + "]";
   }
 

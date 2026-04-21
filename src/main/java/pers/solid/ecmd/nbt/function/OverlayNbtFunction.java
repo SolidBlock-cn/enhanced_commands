@@ -22,8 +22,8 @@ public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunc
   ).apply(i, OverlayNbtFunction::new));
 
   @Override
-  public String asString() {
-    return functions.stream().map(NbtFunction::asString).collect(Collectors.joining(", ", "overlay(", ")"));
+  public String expressAsString() {
+    return functions.stream().map(NbtFunction::expressAsString).collect(Collectors.joining(", ", "overlay(", ")"));
   }
 
   @Override

@@ -50,8 +50,8 @@ public record ConditionsBlockFunction(List<ConditionalBlockFunction> conditions)
   }
 
   @Override
-  public String asString() {
-    return conditions.stream().map(f -> f.condition().asString() + ", " + f.functionIfTrue().asString() + (f.functionIfFalse() == EmptyBlockFunction.INSTANCE ? "" : ", " + f.functionIfFalse().asString())).collect(Collectors.joining("; ", "ifs(", ")"));
+  public String expressAsString() {
+    return conditions.stream().map(f -> f.condition().expressAsString() + ", " + f.functionIfTrue().expressAsString() + (f.functionIfFalse() == EmptyBlockFunction.INSTANCE ? "" : ", " + f.functionIfFalse().expressAsString())).collect(Collectors.joining("; ", "ifs(", ")"));
   }
 
   public static class Parser implements FunctionContentParser<ConditionsBlockFunction> {

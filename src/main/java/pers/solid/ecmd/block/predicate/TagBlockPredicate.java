@@ -37,11 +37,11 @@ public record TagBlockPredicate(TagKey<Block> tag, @UnmodifiableView List<Proper
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     if (properties.isEmpty()) {
       return "#" + tag.location();
     } else {
-      return "#" + tag.location() + "[" + properties.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + "]";
+      return "#" + tag.location() + "[" + properties.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ")) + "]";
     }
   }
 

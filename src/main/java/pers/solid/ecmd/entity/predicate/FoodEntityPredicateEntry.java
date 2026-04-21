@@ -38,6 +38,6 @@ public record FoodEntityPredicateEntry(BridgeIntRange food, boolean inverted) im
 
   @Override
   public String toOptionEntry() {
-    return "food=" + (inverted ? "!" : "") + food.asString();
+    return "food=" + (inverted ? "!" : "") + food.expressAsString();
   }
 }

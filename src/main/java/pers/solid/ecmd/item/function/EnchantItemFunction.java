@@ -39,8 +39,8 @@ public record EnchantItemFunction(List<EnchantmentModification> modifications) i
   }
 
   @Override
-  public String asString() {
-    return modifications.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "enchant(", ")"));
+  public String expressAsString() {
+    return modifications.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "enchant(", ")"));
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<EnchantItemFunction> {

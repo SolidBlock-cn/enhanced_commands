@@ -29,10 +29,10 @@ public interface NbtPredicate extends ExpressionConvertible, Predicate<Tag> {
   }
 
   @Override
-  String asString();
+  String expressAsString();
 
   default String asString(boolean requirePrefix) {
-    return requirePrefix ? ": " + asString() : asString();
+    return requirePrefix ? ": " + expressAsString() : expressAsString();
   }
 
   @Override

@@ -4,5 +4,5 @@ import org.jetbrains.annotations.Contract;
 
 public interface ExpressionConvertible {
   @Contract(pure = true)
-  String asString();
+  String expressAsString();
 }

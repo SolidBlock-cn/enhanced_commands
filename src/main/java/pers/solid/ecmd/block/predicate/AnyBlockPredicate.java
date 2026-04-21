@@ -24,8 +24,8 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   }
 
   @Override
-  public String asString() {
-    return "any(" + String.join(", ", Collections2.transform(predicates, ExpressionConvertible::asString)) + ")";
+  public String expressAsString() {
+    return "any(" + String.join(", ", Collections2.transform(predicates, ExpressionConvertible::expressAsString)) + ")";
   }
 
   @Override

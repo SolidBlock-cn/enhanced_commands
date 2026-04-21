@@ -43,7 +43,7 @@ public record BoxEntityPredicate(AABB box, PositionOffsetInfo offset) implements
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "<box>";
   }
 }

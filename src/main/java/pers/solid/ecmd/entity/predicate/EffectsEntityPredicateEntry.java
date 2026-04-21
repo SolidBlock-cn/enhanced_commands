@@ -90,7 +90,7 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
   public String toOptionEntry() {
     final StringJoiner joiner = new StringJoiner(", ", "{", "}");
     for (var entry : effects) {
-      joiner.add(entry.asString());
+      joiner.add(entry.expressAsString());
     }
 
     return "effect=" + joiner;
@@ -104,7 +104,7 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
     ).apply(i, Entry::new));
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       final Holder<MobEffect> effectEntry = effect;
       final MobEffectsPredicate.MobEffectInstancePredicate effectData = data;
       final StringJoiner joiner = new StringJoiner(", ", "{", "}");

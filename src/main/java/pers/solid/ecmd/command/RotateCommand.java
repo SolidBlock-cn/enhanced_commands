@@ -202,7 +202,7 @@ public enum RotateCommand implements CommandRegistrationCallbackBridge {
 
       @Override
       public MutableComponent getIteratorTaskName(Region region) {
-        return Component.translatable("enhanced_commands.commands.rotate.task", region.asString());
+        return Component.translatable("enhanced_commands.commands.rotate.task", region.expressAsString());
       }
     };
 

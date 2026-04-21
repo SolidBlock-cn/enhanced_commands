@@ -22,7 +22,7 @@ public record IntersectRegionProvider(List<RegionProvider<?>> regions) implement
   }
 
   @Override
-  public String asString() {
-    return "intersect(" + regions.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ")) + ")";
+  public String expressAsString() {
+    return "intersect(" + regions.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ")) + ")";
   }
 }

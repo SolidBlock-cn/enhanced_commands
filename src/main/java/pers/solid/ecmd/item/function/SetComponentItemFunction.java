@@ -22,7 +22,7 @@ public record SetComponentItemFunction<T>(DataComponentType<T> component, T valu
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "set_component(" + BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component) + "," + component.codecOrThrow().encodeStart(NbtOps.INSTANCE, value).getOrThrow() + ")";
   }
 

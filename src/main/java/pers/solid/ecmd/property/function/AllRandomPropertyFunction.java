@@ -23,7 +23,7 @@ public record AllRandomPropertyFunction(Set<Property<?>> except) implements Gene
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "*";
   }
 
