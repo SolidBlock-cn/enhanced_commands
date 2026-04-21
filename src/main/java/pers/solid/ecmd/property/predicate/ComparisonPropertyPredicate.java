@@ -25,7 +25,7 @@ public record ComparisonPropertyPredicate<T extends Comparable<T>>(Property<T> p
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return property.getName() + comparator.getSerializedName() + property.getName(value);
   }
 

@@ -30,7 +30,7 @@ public record SubPredicateEntityPredicateEntry(EntityPredicate predicate, boolea
 
   @Override
   public String toOptionEntry() {
-    return (inverted ? "not=" : "is=") + predicate.asString();
+    return (inverted ? "not=" : "is=") + predicate.expressAsString();
   }
 
   @Override

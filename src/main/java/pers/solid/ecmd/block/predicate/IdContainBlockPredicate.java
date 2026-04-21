@@ -23,7 +23,7 @@ public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate
   public static final MapCodec<IdContainBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(IdContainBlockPredicate::new, ExtraCodecs.PATTERN.fieldOf("pattern").forGetter(IdContainBlockPredicate::pattern)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "idcontain(" + StringTag.quoteAndEscape(pattern.pattern()) + ")";
   }
 

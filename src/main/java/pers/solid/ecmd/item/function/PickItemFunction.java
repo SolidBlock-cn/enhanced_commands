@@ -30,8 +30,8 @@ public record PickItemFunction(WeightedList<ItemFunction> functions) implements 
   }
 
   @Override
-  public String asString() {
-    return "pick(" + functions.asString(ExpressionConvertible::asString) + ")";
+  public String expressAsString() {
+    return "pick(" + functions.asString(ExpressionConvertible::expressAsString) + ")";
   }
 
   public static class Parser implements FunctionContentParser<ItemFunction> {

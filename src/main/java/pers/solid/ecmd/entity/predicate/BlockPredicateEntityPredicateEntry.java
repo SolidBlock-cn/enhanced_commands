@@ -32,7 +32,7 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate predicate) imple
 
   @Override
   public String toOptionEntry() {
-    final String string = predicate.asString();
+    final String string = predicate.expressAsString();
     return "block=" + (string.startsWith("{") ? "(" + string + ")" : string);
   }
 

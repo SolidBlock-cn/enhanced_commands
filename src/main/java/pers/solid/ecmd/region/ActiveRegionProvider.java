@@ -32,7 +32,7 @@ public enum ActiveRegionProvider implements RegionProvider<Region> {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "$";
   }
 }

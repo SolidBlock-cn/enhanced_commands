@@ -142,7 +142,7 @@ public record EntityNbtData(EntitySelector entitySelector) implements NbtTarget<
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "entity " + EntitySelectors.express(entitySelector);
   }
 }

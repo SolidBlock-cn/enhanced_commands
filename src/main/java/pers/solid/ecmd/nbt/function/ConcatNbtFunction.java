@@ -66,8 +66,8 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
 
     @Override
-    public String asString() {
-      return "concat(" + elements.stream().map(NbtFunction::asString).collect(Collectors.joining(", ")) + ")";
+    public String expressAsString() {
+      return "concat(" + elements.stream().map(NbtFunction::expressAsString).collect(Collectors.joining(", ")) + ")";
     }
 
     @Override
@@ -92,8 +92,8 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
     }
 
     @Override
-    public String asString() {
-      return "concat(* " + element.asString() + ")";
+    public String expressAsString() {
+      return "concat(* " + element.expressAsString() + ")";
     }
 
     @Override

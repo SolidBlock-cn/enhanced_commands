@@ -57,7 +57,7 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final StringBuilder sb = new StringBuilder("checkerboard-tag(");
     final String mapped = entryList.unwrap().map(tagKey -> tagKey.location().toString(), list -> list.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ")));
     sb.append("#").append(mapped);

@@ -55,8 +55,8 @@ public record UnionRegion(List<Region> regions) implements RegionsBasedRegion<Un
   }
 
   @Override
-  public String asString() {
-    return "union(" + String.join(", ", Collections2.transform(regions, Region::asString)) + ")";
+  public String expressAsString() {
+    return "union(" + String.join(", ", Collections2.transform(regions, Region::expressAsString)) + ")";
   }
 
   @Override

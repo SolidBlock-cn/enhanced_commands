@@ -38,12 +38,12 @@ public record ProbabilityBlockPredicate(float probability, BlockPredicate predic
       CodecUtil.optionalLongFieldOf("seed").forGetter(ProbabilityBlockPredicate::seed)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final String seedParams = seed.isPresent() ? ", seed = " + seed.getAsLong() : "";
     if (predicate == ConstantBlockPredicate.ALWAYS_TRUE) {
       return "probability(" + probability + seedParams + ")";
     } else {
-      return "probability(" + probability + ", " + predicate.asString() + seedParams + ")";
+      return "probability(" + probability + ", " + predicate.expressAsString() + seedParams + ")";
     }
   }
 

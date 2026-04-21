@@ -14,7 +14,7 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
   public static final MapCodec<RandomPropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(RandomPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(RandomPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(RandomPropertyNameFunction::must)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return propertyName + (must ? "==*" : "=*");
   }
 

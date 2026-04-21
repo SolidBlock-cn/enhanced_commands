@@ -98,13 +98,13 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
   }
 
   @Override
-  public String asString() {
-    return itemType.asString() + (components.isEmpty() ? "" : components.stream().map(SimpleCombinationItemPredicate::toEntryString).collect(Collectors.joining(", ", "[", "]")));
+  public String expressAsString() {
+    return itemType.expressAsString() + (components.isEmpty() ? "" : components.stream().map(SimpleCombinationItemPredicate::toEntryString).collect(Collectors.joining(", ", "[", "]")));
   }
 
   @Override
   public String asEntryString() {
-    return "(" + asString() + ")";
+    return "(" + expressAsString() + ")";
   }
 
   private static String toEntryString(ItemPredicate predicate) {
@@ -115,7 +115,7 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
     } else if (predicate instanceof ItemPredicateEntry entry) {
       return entry.asEntryString();
     } else {
-      return "(" + predicate.asString() + ")";
+      return "(" + predicate.expressAsString() + ")";
     }
   }
 }

@@ -14,7 +14,7 @@ public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map) implemen
   public static final MapCodec<EqualsCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(EqualsCompoundNbtPredicate::new, Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC).fieldOf("predicates").forGetter(EqualsCompoundNbtPredicate::map)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(true);
   }
 

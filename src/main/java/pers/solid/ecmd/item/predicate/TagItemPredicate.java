@@ -35,7 +35,7 @@ public record TagItemPredicate(HolderSet<Item> items) implements ItemPredicateWi
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return items.unwrap().map(itemTagKey -> "#" + itemTagKey.location(), holders -> holders.stream().map(Holder::getRegisteredName).collect(Collectors.joining("|")));
   }
 }

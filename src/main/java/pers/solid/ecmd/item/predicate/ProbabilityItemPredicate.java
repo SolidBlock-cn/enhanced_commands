@@ -42,12 +42,12 @@ public record ProbabilityItemPredicate(float probability, ItemPredicate predicat
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final String seedParams = seed.isPresent() ? ", seed = " + seed.getAsLong() : "";
     if (predicate == ConstantItemPredicate.ALWAYS_TRUE) {
       return "probability(" + probability + seedParams + ")";
     } else {
-      return "probability(" + probability + ", " + predicate.asString() + seedParams + ")";
+      return "probability(" + probability + ", " + predicate.expressAsString() + seedParams + ")";
     }
   }
 

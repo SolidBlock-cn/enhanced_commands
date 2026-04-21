@@ -46,7 +46,7 @@ public record PlayerNameEntityPredicate(String name) implements SpecialEntityPre
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return name;
   }
 }

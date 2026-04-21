@@ -20,8 +20,8 @@ public record AllBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   public static final MapCodec<AllBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BlockPredicate.CODEC.listOf().fieldOf("predicates").forGetter(AllBlockPredicate::predicates)).apply(i, AllBlockPredicate::new));
 
   @Override
-  public String asString() {
-    return "all(" + String.join(", ", Collections2.transform(predicates, ExpressionConvertible::asString)) + ")";
+  public String expressAsString() {
+    return "all(" + String.join(", ", Collections2.transform(predicates, ExpressionConvertible::expressAsString)) + ")";
   }
 
   @Override

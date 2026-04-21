@@ -34,7 +34,7 @@ public record ExposeBlockPredicate(ExposureType exposureType, List<Direction> di
   public static final MapCodec<ExposeBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(ExposeBlockPredicate::new, ExposureType.CODEC.fieldOf("exposure_type").forGetter(ExposeBlockPredicate::exposureType), ExtraCodecs.nonEmptyList(Direction.CODEC.listOf()).optionalFieldOf("directions", List.of(Direction.values())).forGetter(ExposeBlockPredicate::directions)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "expose(" + exposureType.getSerializedName() + ", " + String.join(" ", Iterables.transform(directions, Direction::getSerializedName)) + ")";
   }
 

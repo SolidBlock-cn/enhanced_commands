@@ -20,8 +20,8 @@ public record PosNbtFunction(EnhancedCoordinates pos) implements NbtFunction {
   public static final MapCodec<PosNbtFunction> CODEC = EnhancedCoordinates.CODEC.fieldOf("pos").xmap(PosNbtFunction::new, PosNbtFunction::pos);
 
   @Override
-  public String asString() {
-    return "pos(" + pos.asString() + ")";
+  public String expressAsString() {
+    return "pos(" + pos.expressAsString() + ")";
   }
 
   @Override

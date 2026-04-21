@@ -35,7 +35,7 @@ public enum LocalWorldEntityPredicate implements SpecialEntityPredicate {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "<local world>";
   }
 }

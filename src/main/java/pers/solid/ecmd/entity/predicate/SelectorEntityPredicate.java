@@ -77,7 +77,7 @@ public record SelectorEntityPredicate(EntitySelector entitySelector) implements 
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return EntitySelectors.express(entitySelector);
   }
 

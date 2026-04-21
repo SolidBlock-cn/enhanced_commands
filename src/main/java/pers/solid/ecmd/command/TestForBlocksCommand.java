@@ -176,7 +176,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     final Iterable<Void> mainIterable = Iterables.concat(calculation, notifySkip, () -> conclusion);
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      final Component taskName = Component.translatable("enhanced_commands.commands.testfor.blocks.task_name", region.asString());
+      final Component taskName = Component.translatable("enhanced_commands.commands.testfor.blocks.task_name", region.expressAsString());
       ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(mainIterable.iterator(), 32768, 3));
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.large_region", Long.toString(region.numberOfBlocksAffected())).enhanced$$().withStyle(ChatFormatting.YELLOW), true);
       return 1;
@@ -192,7 +192,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/testfor block " + StringUtil.wrapVector(blockPos)))
             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.testfor_blocks.detail.description", TextUtil.wrapVector(blockPos))))),
         Component.translatable("enhanced_commands.commands.testfor.blocks.test").withStyle(style -> style
-            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/testfor block " + StringUtil.wrapVector(blockPos) + " " + blockPredicate.asString()))
+            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/testfor block " + StringUtil.wrapVector(blockPos) + " " + blockPredicate.expressAsString()))
             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("enhanced_commands.commands.testfor_blocks.test.description", TextUtil.wrapVector(blockPos))))),
         Component.translatable("enhanced_commands.commands.testfor.blocks.teleport").withStyle(style -> style
             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s " + StringUtil.wrapVector(blockPos)))

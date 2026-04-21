@@ -123,9 +123,9 @@ public interface RegionSelection extends ExpressionConvertible {
   RegionSelection clone();
 
   @Override
-  default String asString() {
+  default String expressAsString() {
     try {
-      return region().asString();
+      return region().expressAsString();
     } catch (CommandRuntimeException e) {
       return "<incomplete region>";
     }

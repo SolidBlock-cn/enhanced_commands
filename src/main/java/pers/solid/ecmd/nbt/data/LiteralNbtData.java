@@ -80,7 +80,7 @@ public record LiteralNbtData(NbtFunction nbtFunction) implements NbtTarget.Singl
   }
 
   @Override
-  public String asString() {
-    return "literal " + nbtFunction.asString();
+  public String expressAsString() {
+    return "literal " + nbtFunction.expressAsString();
   }
 }

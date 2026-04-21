@@ -43,8 +43,8 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
   ).apply(i, StringReplaceNbtFunction::new));
 
   @Override
-  public String asString() {
-    return "string_replace(" + StringTag.quoteAndEscape(target) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.asString()).orElse("") + ")";
+  public String expressAsString() {
+    return "string_replace(" + StringTag.quoteAndEscape(target) + ", " + StringTag.quoteAndEscape(replacement) + ", recursive = " + recursive + ", lenient = " + lenient + original.map(nbtFunction -> ", original = " + nbtFunction.expressAsString()).orElse("") + ")";
   }
 
   @Override

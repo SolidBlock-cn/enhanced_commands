@@ -20,7 +20,7 @@ public record OutwardsRegionProvider(EnhancedCoordinates center, int x, int y, i
   }
 
   @Override
-  public String asString() {
-    return "outwards(" + center.asString() + ", " + x + " " + y + " " + z + ")";
+  public String expressAsString() {
+    return "outwards(" + center.expressAsString() + ", " + x + " " + y + " " + z + ")";
   }
 }

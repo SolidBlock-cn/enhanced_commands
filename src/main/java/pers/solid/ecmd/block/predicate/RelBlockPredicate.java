@@ -42,8 +42,8 @@ public record RelBlockPredicate(Vec3iProvider relPos, BlockPredicate predicate) 
   }
 
   @Override
-  public String asString() {
-    return "rel(%s, %s)".formatted(relPos.asString(), predicate.asString());
+  public String expressAsString() {
+    return "rel(%s, %s)".formatted(relPos.expressAsString(), predicate.expressAsString());
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<RelBlockPredicate> {

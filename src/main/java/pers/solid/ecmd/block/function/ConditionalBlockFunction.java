@@ -31,8 +31,8 @@ public record ConditionalBlockFunction(BlockPredicate condition, BlockFunction f
   }
 
   @Override
-  public String asString() {
-    return "if(" + condition.asString() + ", " + functionIfTrue.asString() + (functionIfFalse == EmptyBlockFunction.INSTANCE ? "" : ", " + functionIfFalse.asString()) + ")";
+  public String expressAsString() {
+    return "if(" + condition.expressAsString() + ", " + functionIfTrue.expressAsString() + (functionIfFalse == EmptyBlockFunction.INSTANCE ? "" : ", " + functionIfFalse.expressAsString()) + ")";
   }
 
   @Override

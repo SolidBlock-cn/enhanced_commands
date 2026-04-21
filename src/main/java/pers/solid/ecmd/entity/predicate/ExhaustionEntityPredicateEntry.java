@@ -38,6 +38,6 @@ public record ExhaustionEntityPredicateEntry(BridgeFloatRange exhaustion, boolea
 
   @Override
   public String toOptionEntry() {
-    return "exhaustion=" + (inverted ? "!" : "") + exhaustion.asString();
+    return "exhaustion=" + (inverted ? "!" : "") + exhaustion.expressAsString();
   }
 }

@@ -24,7 +24,7 @@ public record RemoveComponentItemFunction<T>(DataComponentType<T> component) imp
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "remove_component(" + BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component) + ")";
   }
 

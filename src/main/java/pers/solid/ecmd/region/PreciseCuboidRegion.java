@@ -142,7 +142,7 @@ public record PreciseCuboidRegion(AABB box) implements CuboidRegion {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "cuboid_precise(%s %s %s, %s %s %s)".formatted(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
   }
 

@@ -40,9 +40,9 @@ public record CheckerboardBlockFunction(WeightedList<BlockFunction> functions, V
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final StringBuilder sb = new StringBuilder("checkerboard");
-    sb.append(functions.asString(ExpressionConvertible::asString));
+    sb.append(functions.asString(ExpressionConvertible::expressAsString));
     appendParameters(sb);
     return sb.append(")").toString();
   }

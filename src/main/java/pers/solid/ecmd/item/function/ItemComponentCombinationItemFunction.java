@@ -30,12 +30,12 @@ public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemF
   }
 
   @Override
-  public String asString() {
-    final String baseString = base.asString();
+  public String expressAsString() {
+    final String baseString = base.expressAsString();
     if (affiliate.isEmpty()) {
       return baseString;
     } else {
-      return baseString + affiliate.stream().map(itemFunction -> itemFunction instanceof ItemFunctionEntry entry ? entry.asEntryString() : "(" + itemFunction.asString() + ")").collect(Collectors.joining(", ", "[", "]"));
+      return baseString + affiliate.stream().map(itemFunction -> itemFunction instanceof ItemFunctionEntry entry ? entry.asEntryString() : "(" + itemFunction.expressAsString() + ")").collect(Collectors.joining(", ", "[", "]"));
     }
   }
 }

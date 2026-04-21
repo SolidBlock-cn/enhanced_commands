@@ -21,7 +21,7 @@ public record RotateBlockFunction(EnumOrRandom<Rotation> rotation) implements Bl
   public static final MapCodec<RotateBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(RotateBlockFunction::new, EnumOrRandom.getCodec(Rotation.CODEC, Rotation::values).fieldOf("rotation").forGetter(RotateBlockFunction::rotation)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "rotate(" + rotation.getSerializedName() + ")";
   }
 

@@ -19,11 +19,11 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   public static final MapCodec<NegatingBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NegatingBlockPredicate::new, BlockPredicate.CODEC.fieldOf("predicate").forGetter(NegatingBlockPredicate::predicate)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     if (predicate instanceof NegatingBlockPredicate || predicate instanceof ConstantBlockPredicate) {
-      return "!(" + predicate.asString() + ")";
+      return "!(" + predicate.expressAsString() + ")";
     } else {
-      return "!" + predicate.asString();
+      return "!" + predicate.expressAsString();
     }
   }
 

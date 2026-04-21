@@ -33,6 +33,6 @@ public record FireEntityPredicateEntry(BridgeIntRange time, boolean inverted) im
 
   @Override
   public String toOptionEntry() {
-    return "fire=" + (inverted ? "!" : "") + time.asString();
+    return "fire=" + (inverted ? "!" : "") + time.expressAsString();
   }
 }

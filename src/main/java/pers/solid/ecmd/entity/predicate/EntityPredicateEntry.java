@@ -27,7 +27,7 @@ public interface EntityPredicateEntry extends EntityPredicate {
    */
   static <E extends Entity> TestResult testInt(E entity, int actual, BridgeIntRange expected, Component criterionName, Component entityName, boolean inverted) {
     final MutableComponent actualText = TextUtil.literal(actual).withStyle(Styles.ACTUAL);
-    final MutableComponent expectedText = Component.literal(expected.asString()).withStyle(Styles.EXPECTED);
+    final MutableComponent expectedText = Component.literal(expected.expressAsString()).withStyle(Styles.EXPECTED);
     if (expected.test(actual)) {
       return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {
@@ -47,7 +47,7 @@ public interface EntityPredicateEntry extends EntityPredicate {
    */
   static <E extends Entity> TestResult testFloat(E entity, float actual, BridgeFloatRange expected, Component criterionName, Component entityName, boolean inverted) {
     final MutableComponent actualText = TextUtil.literal(actual).withStyle(Styles.ACTUAL);
-    final MutableComponent expectedText = Component.literal(expected.asString()).withStyle(Styles.EXPECTED);
+    final MutableComponent expectedText = Component.literal(expected.expressAsString()).withStyle(Styles.EXPECTED);
     if (expected.test(actual)) {
       return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {
@@ -67,7 +67,7 @@ public interface EntityPredicateEntry extends EntityPredicate {
    */
   static <E extends Entity> TestResult testDouble(E entity, double actual, BridgeDoubleRange expected, Component criterionName, Component entityName, boolean inverted) {
     final MutableComponent actualText = TextUtil.literal(actual).withStyle(Styles.ACTUAL);
-    final MutableComponent expectedText = Component.literal(expected.asString()).withStyle(Styles.EXPECTED);
+    final MutableComponent expectedText = Component.literal(expected.expressAsString()).withStyle(Styles.EXPECTED);
     if (expected.test(actual)) {
       return TestResult.of(!inverted, Component.translatable("enhanced_commands.entity_predicate.general.in_range", criterionName, entityName, actualText, expectedText));
     } else {
@@ -81,7 +81,7 @@ public interface EntityPredicateEntry extends EntityPredicate {
   @Nullable String toOptionEntry();
 
   @Override
-  default String asString() {
+  default String expressAsString() {
     return "[" + toOptionEntry() + "]";
   }
 }

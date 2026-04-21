@@ -19,8 +19,8 @@ public record UnionPosPredicate(Collection<PosPredicate> posPredicates) implemen
   }
 
   @Override
-  public String asString() {
-    return posPredicates.stream().map(PosPredicate::asString).collect(Collectors.joining("|", "(", ")"));
+  public String expressAsString() {
+    return posPredicates.stream().map(PosPredicate::expressAsString).collect(Collectors.joining("|", "(", ")"));
   }
 
   @Override

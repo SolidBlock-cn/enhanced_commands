@@ -48,7 +48,7 @@ public record RotationProvider(float x, float y, boolean xRelative, boolean yRel
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final StringBuilder sb = new StringBuilder();
     if (xRelative) sb.append('~');
     if (!xRelative || x != 0) sb.append(x);

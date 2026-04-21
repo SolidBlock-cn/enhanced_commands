@@ -94,7 +94,7 @@ public enum ActiveRegionCommand implements CommandRegistrationCallbackBridge {
   }
 
   public static int executeMoveDirection(double offset, Direction direction, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    return executeRegionModification(region -> region.moved(Vec3.atLowerCornerOf(direction.getNormal()).scale(offset)), (serverPlayerEntity, region) -> Component.translatable("enhanced_commands.commands.activeregion.move.single", TextUtil.styled(serverPlayerEntity.getName(), Styles.TARGET), Component.literal(region.asString()).withStyle(Styles.RESULT)), context);
+    return executeRegionModification(region -> region.moved(Vec3.atLowerCornerOf(direction.getNormal()).scale(offset)), (serverPlayerEntity, region) -> Component.translatable("enhanced_commands.commands.activeregion.move.single", TextUtil.styled(serverPlayerEntity.getName(), Styles.TARGET), Component.literal(region.expressAsString()).withStyle(Styles.RESULT)), context);
   }
 
   public static int executeMoveVector(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

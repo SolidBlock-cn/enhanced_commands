@@ -20,7 +20,7 @@ public record RegexNbtPredicate(Pattern pattern) implements NbtPredicate {
   ).apply(i, RegexNbtPredicate::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "~ " + StringTag.quoteAndEscape(pattern.toString());
   }
 

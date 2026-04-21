@@ -37,7 +37,7 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "$" + id.location();
   }
 

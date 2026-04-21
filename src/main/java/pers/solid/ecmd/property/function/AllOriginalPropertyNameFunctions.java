@@ -22,7 +22,7 @@ public record AllOriginalPropertyNameFunctions(Set<String> except) implements Ge
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "~";
   }
 

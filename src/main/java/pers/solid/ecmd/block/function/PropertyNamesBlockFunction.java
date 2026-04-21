@@ -29,8 +29,8 @@ public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) i
   }
 
   @Override
-  public String asString() {
-    return "[" + functions.stream().map(PropertyNameFunction::asString).collect(Collectors.joining(",")) + "]";
+  public String expressAsString() {
+    return "[" + functions.stream().map(PropertyNameFunction::expressAsString).collect(Collectors.joining(",")) + "]";
   }
 
   @Override

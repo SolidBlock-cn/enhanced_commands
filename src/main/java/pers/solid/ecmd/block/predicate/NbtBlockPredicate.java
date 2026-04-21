@@ -24,7 +24,7 @@ public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredi
   public static final MapCodec<NbtBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt").forGetter(NbtBlockPredicate::nbtPredicate)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return nbtPredicate.asString(false);
   }
 

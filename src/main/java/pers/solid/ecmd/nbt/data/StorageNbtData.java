@@ -88,7 +88,7 @@ public record StorageNbtData(ResourceLocation identifier) implements NbtTarget.S
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "storage " + identifier;
   }
 }

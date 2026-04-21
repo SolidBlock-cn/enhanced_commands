@@ -38,6 +38,6 @@ public record SaturationEntityPredicateEntry(BridgeFloatRange saturation, boolea
 
   @Override
   public String toOptionEntry() {
-    return "saturation=" + (inverted ? "!" : "") + saturation.asString();
+    return "saturation=" + (inverted ? "!" : "") + saturation.expressAsString();
   }
 }

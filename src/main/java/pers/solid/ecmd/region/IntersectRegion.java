@@ -66,8 +66,8 @@ public record IntersectRegion(List<Region> regions) implements RegionsBasedRegio
   }
 
   @Override
-  public String asString() {
-    return "intersect(" + String.join(", ", Collections2.transform(regions, Region::asString)) + ")";
+  public String expressAsString() {
+    return "intersect(" + String.join(", ", Collections2.transform(regions, Region::expressAsString)) + ")";
   }
 
   @Override

@@ -21,7 +21,7 @@ public record AllRandomPropertyNameFunction(Set<String> except) implements Gener
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "*";
   }
 

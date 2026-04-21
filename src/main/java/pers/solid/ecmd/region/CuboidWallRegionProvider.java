@@ -19,7 +19,7 @@ public record CuboidWallRegionProvider(BlockCuboidRegionProvider region, int thi
   }
 
   @Override
-  public String asString() {
-    return "cuboid_wall(" + region.from().asString() + ", " + region.to().asString() + ", " + thickness + ")";
+  public String expressAsString() {
+    return "cuboid_wall(" + region.from().expressAsString() + ", " + region.to().expressAsString() + ", " + thickness + ")";
   }
 }

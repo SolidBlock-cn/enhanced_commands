@@ -19,7 +19,7 @@ public record NegatingItemPredicate(ItemPredicate predicate) implements Predicat
   }
 
   @Override
-  public String asString() {
-    return "!" + predicate().asString();
+  public String expressAsString() {
+    return "!" + predicate().expressAsString();
   }
 }

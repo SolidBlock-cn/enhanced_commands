@@ -26,7 +26,7 @@ public record SimplePropertyFunction<T extends Comparable<T>>(Property<T> proper
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return property.getName() + (must ? "==" : "=") + property.getName(value);
   }
 

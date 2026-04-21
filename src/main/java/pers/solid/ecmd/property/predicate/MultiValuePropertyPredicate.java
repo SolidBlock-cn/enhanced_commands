@@ -73,7 +73,7 @@ public record MultiValuePropertyPredicate<T extends Comparable<T>>(Property<T> p
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return property.getName() + (inverted ? "!=" : "=") + values.stream().map(property::getName).collect(Collectors.joining("|"));
   }
 }

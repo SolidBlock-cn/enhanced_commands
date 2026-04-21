@@ -124,7 +124,7 @@ public enum MoveCommand implements CommandRegistrationCallbackBridge {
 
       @Override
       public MutableComponent getIteratorTaskName(Region region) {
-        return relativePos.map(pair -> Component.translatable("enhanced_commands.commands.move.task.direction", region.asString(), Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left())), vec3i -> Component.translatable("enhanced_commands.commands.move.task.vector", region.asString(), TextUtil.wrapVector(vec3i)));
+        return relativePos.map(pair -> Component.translatable("enhanced_commands.commands.move.task.direction", region.expressAsString(), Integer.toString(pair.rightInt()), TextUtil.wrapDirection(pair.left())), vec3i -> Component.translatable("enhanced_commands.commands.move.task.vector", region.expressAsString(), TextUtil.wrapVector(vec3i)));
       }
     };
 

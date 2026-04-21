@@ -52,7 +52,7 @@ public record PostProcessBlockFunction(List<Direction> directions) implements Bl
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "postprocess(" + (ALL_DIRECTIONS.equals(directions) ? "" : directions.stream().map(Direction::getSerializedName).collect(Collectors.joining(" "))) + ")";
   }
 

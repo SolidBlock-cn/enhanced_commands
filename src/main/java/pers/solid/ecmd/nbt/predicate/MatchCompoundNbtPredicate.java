@@ -38,7 +38,7 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredic
   ).apply(i, MatchCompoundNbtPredicate::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(false);
   }
 

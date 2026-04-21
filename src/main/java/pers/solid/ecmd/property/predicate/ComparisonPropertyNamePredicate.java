@@ -21,7 +21,7 @@ public record ComparisonPropertyNamePredicate(String propertyName, Comparator co
       Codec.STRING.fieldOf("value").forGetter(ComparisonPropertyNamePredicate::valueName)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return propertyName + comparator.getSerializedName() + valueName;
   }
 

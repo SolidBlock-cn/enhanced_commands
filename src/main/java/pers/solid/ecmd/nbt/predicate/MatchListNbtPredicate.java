@@ -33,13 +33,13 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
   ).apply(i, MatchListNbtPredicate::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(false);
   }
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::asString), positionalExpected.stream().map(pair -> {
+    return (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::expressAsString), positionalExpected.stream().map(pair -> {
       final String valueAsString = pair.value().asString(true);
       return pair.index() + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
     })).collect(Collectors.joining(", ")) + "]";

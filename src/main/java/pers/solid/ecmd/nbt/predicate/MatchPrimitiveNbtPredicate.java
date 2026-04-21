@@ -21,7 +21,7 @@ public record MatchPrimitiveNbtPredicate(Tag expected) implements NbtPredicate {
   ).apply(i, MatchPrimitiveNbtPredicate::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(false);
   }
 

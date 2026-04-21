@@ -34,7 +34,7 @@ public record RemoveEnchantmentModification(EnchantmentModificationTarget enchan
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "!" + enchantment.asEntryString();
   }
 }

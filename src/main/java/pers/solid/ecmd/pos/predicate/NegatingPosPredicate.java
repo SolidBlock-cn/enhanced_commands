@@ -9,11 +9,11 @@ public record NegatingPosPredicate(PosPredicate posPredicate) implements PosPred
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     if (posPredicate instanceof UnionPosPredicate || posPredicate instanceof IntersectPosPredicate) {
-      return "!(" + posPredicate.asString() + ")";
+      return "!(" + posPredicate.expressAsString() + ")";
     } else {
-      return "!" + posPredicate.asString();
+      return "!" + posPredicate.expressAsString();
     }
   }
 

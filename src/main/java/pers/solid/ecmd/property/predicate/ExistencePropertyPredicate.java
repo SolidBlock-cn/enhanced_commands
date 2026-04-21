@@ -19,7 +19,7 @@ public record ExistencePropertyPredicate<T extends Comparable<T>>(Property<T> pr
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return property.getName() + (exists ? "=*" : "!=*");
   }
 

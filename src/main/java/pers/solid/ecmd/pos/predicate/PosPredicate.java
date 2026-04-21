@@ -63,7 +63,7 @@ public interface PosPredicate extends ExpressionConvertible, PosPredicateArgumen
   PosPredicate transformed(Function<Vec3, Vec3> transformation);
 
   @Override
-  String asString();
+  String expressAsString();
 
   /**
    * 包含可能符合该位置谓词的所有坐标的最小长方体区域，用于对实体选择器进行限制。如果没有可用于限制的区域，可返回 {@code null}。

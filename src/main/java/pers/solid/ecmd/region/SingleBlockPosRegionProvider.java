@@ -19,7 +19,7 @@ public record SingleBlockPosRegionProvider(EnhancedCoordinates pos) implements C
   }
 
   @Override
-  public String asString() {
-    return "single(" + pos.asString() + ")";
+  public String expressAsString() {
+    return "single(" + pos.expressAsString() + ")";
   }
 }

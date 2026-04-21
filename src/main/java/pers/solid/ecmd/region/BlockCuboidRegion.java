@@ -210,7 +210,7 @@ public record BlockCuboidRegion(int minX, int minY, int minZ, int maxX, int maxY
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "cuboid(%s %s %s, %s %s %s)".formatted(Integer.toString(minX), Integer.toString(minY), Integer.toString(minZ), Integer.toString(maxX), Integer.toString(maxY), Integer.toString(maxZ));
   }
 

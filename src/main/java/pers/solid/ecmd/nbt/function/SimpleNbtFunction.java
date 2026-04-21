@@ -17,7 +17,7 @@ public record SimpleNbtFunction(Tag element) implements NbtFunction {
   public static final MapCodec<SimpleNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_ELEMENT.fieldOf("element").forGetter(SimpleNbtFunction::element)).apply(i, SimpleNbtFunction::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return TextUtil.toSpacedStringNbt(element);
   }
 

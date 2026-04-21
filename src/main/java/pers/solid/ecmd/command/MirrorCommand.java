@@ -117,7 +117,7 @@ public enum MirrorCommand implements CommandRegistrationCallbackBridge {
 
       @Override
       public MutableComponent getIteratorTaskName(Region region) {
-        return Component.translatable("enhanced_commands.commands.mirror.task", region.asString());
+        return Component.translatable("enhanced_commands.commands.mirror.task", region.expressAsString());
       }
     }.execute(region, keywordArgs, context);
   }

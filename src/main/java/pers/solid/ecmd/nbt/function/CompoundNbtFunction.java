@@ -46,7 +46,7 @@ public record CompoundNbtFunction(Map<String, Optional<NbtFunction>> source, boo
   ).apply(i, CompoundNbtFunction::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(false);
   }
 

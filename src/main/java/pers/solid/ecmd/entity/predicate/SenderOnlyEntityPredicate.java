@@ -35,7 +35,7 @@ public enum SenderOnlyEntityPredicate implements SpecialEntityPredicate {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "@s";
   }
 }

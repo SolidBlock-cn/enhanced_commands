@@ -36,9 +36,9 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
 
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     final String id = BuiltInRegistries.BLOCK.getKey(block).toString();
-    return properties.isEmpty() ? id : id + properties.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "[", "]"));
+    return properties.isEmpty() ? id : id + properties.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "[", "]"));
   }
 
   @Override

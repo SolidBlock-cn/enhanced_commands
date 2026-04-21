@@ -42,7 +42,7 @@ public final class RandomItemFunction implements ItemFunction {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "*";
   }
 

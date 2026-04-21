@@ -12,7 +12,7 @@ public record BypassingPropertyNameFunction(String propertyName, boolean must) i
   public static final MapCodec<BypassingPropertyNameFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(BypassingPropertyNameFunction::new, Codec.STRING.fieldOf("property").forGetter(BypassingPropertyNameFunction::propertyName), Codec.BOOL.optionalFieldOf("must", false).forGetter(BypassingPropertyNameFunction::must)));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return propertyName + (must ? "==~" : "=~");
   }
 

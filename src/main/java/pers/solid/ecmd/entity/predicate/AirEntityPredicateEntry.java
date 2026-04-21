@@ -27,7 +27,7 @@ public record AirEntityPredicateEntry(BridgeIntRange air, boolean inverted) impl
 
   @Override
   public String toOptionEntry() {
-    return "air=" + (inverted ? "!" : "") + air.asString();
+    return "air=" + (inverted ? "!" : "") + air.expressAsString();
   }
 
   @Override

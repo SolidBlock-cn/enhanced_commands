@@ -20,7 +20,7 @@ public record UnknownItemPredicate(Predicate<ItemStack> forward) implements Item
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "<unknown>";
   }
 }

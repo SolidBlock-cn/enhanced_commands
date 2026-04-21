@@ -69,7 +69,7 @@ public record CuboidWallRegion(BlockCuboidRegion region, int thickness) implemen
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return String.format("cuboid_wall(%s %s %s, %s %s %s, %s)", region.minX(), region.minY(), region.minZ(), region.maxX(), region.maxY(), region.maxZ(), thickness);
   }
 

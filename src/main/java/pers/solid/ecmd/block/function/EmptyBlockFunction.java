@@ -24,7 +24,7 @@ public enum EmptyBlockFunction implements BlockFunction {
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return "~";
   }
 }

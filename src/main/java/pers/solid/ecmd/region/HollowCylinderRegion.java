@@ -121,7 +121,7 @@ public record HollowCylinderRegion(OutlineType outlineType, CylinderRegion regio
   }
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return String.format("hcyl(%s, %s, %s, %s)", StringUtil.nf.format(region.radius()), StringUtil.nf.format(region.height()), StringUtil.wrapVector(region.center()), outlineType.getSerializedName());
   }
 

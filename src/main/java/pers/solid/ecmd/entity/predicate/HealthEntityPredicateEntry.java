@@ -38,6 +38,6 @@ public record HealthEntityPredicateEntry(BridgeFloatRange health, boolean invert
 
   @Override
   public String toOptionEntry() {
-    return "health=" + (inverted ? "!" : "") + health.asString();
+    return "health=" + (inverted ? "!" : "") + health.expressAsString();
   }
 }

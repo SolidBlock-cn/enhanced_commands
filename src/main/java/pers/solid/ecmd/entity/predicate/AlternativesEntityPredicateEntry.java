@@ -56,6 +56,6 @@ public record AlternativesEntityPredicateEntry(List<EntityPredicate> predicates,
 
   @Override
   public String toOptionEntry() {
-    return "alternatives=" + (inverted ? "!" : "") + predicates.stream().map(ExpressionConvertible::asString).collect(Collectors.joining(", ", "[", "]"));
+    return "alternatives=" + (inverted ? "!" : "") + predicates.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "[", "]"));
   }
 }

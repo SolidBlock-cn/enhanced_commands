@@ -75,7 +75,7 @@ public sealed interface Vec3iProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return StringUtil.wrapVector(value);
     }
   }
@@ -97,7 +97,7 @@ public sealed interface Vec3iProvider extends ExpressionConvertible {
     }
 
     @Override
-    public String asString() {
+    public String expressAsString() {
       return length + " " + direction.getSerializedName();
     }
   }

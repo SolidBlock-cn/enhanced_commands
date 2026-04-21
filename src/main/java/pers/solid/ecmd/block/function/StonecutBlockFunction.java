@@ -31,8 +31,8 @@ public record StonecutBlockFunction(BlockFunction function) implements BlockFunc
   public static final MapCodec<StonecutBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(StonecutBlockFunction::new, BlockFunction.CODEC.optionalFieldOf("function", EmptyBlockFunction.INSTANCE).forGetter(StonecutBlockFunction::function)));
 
   @Override
-  public String asString() {
-    return "stonecut(" + (function.isEmpty() ? "" : function.asString()) + ")";
+  public String expressAsString() {
+    return "stonecut(" + (function.isEmpty() ? "" : function.expressAsString()) + ")";
   }
 
   @Override

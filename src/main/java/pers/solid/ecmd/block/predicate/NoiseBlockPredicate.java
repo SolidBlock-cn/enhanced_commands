@@ -52,8 +52,8 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   }
 
   @Override
-  public String asString() {
-    final String listString = list.asString(ExpressionConvertible::asString);
+  public String expressAsString() {
+    final String listString = list.asString(ExpressionConvertible::expressAsString);
     final String parametersString = asParametersString();
     return "noise(" + listString + (parametersString.isEmpty() ? "" : "; " + parametersString) + ")";
   }

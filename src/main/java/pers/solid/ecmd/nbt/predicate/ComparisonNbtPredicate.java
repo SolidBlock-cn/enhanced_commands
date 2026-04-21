@@ -24,7 +24,7 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implem
   ).apply(i, ComparisonNbtPredicate::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return asString(true);
   }
 

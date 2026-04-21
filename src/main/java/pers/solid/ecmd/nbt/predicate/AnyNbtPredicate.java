@@ -17,8 +17,8 @@ public record AnyNbtPredicate(List<NbtPredicate> predicates) implements NbtPredi
   ).apply(i, AnyNbtPredicate::new));
 
   @Override
-  public String asString() {
-    return predicates.stream().map(NbtPredicate::asString).collect(Collectors.joining(", ", "any(", ")"));
+  public String expressAsString() {
+    return predicates.stream().map(NbtPredicate::expressAsString).collect(Collectors.joining(", ", "any(", ")"));
   }
 
   @Override

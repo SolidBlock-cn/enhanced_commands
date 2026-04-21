@@ -89,6 +89,6 @@ public record OwnerEntityPredicateEntry(@Nullable EntityPredicate owner, boolean
 
   @Override
   public String toOptionEntry() {
-    return "owner=" + (inverted ? "!" : "") + (owner == null ? "" : owner.asString());
+    return "owner=" + (inverted ? "!" : "") + (owner == null ? "" : owner.expressAsString());
   }
 }

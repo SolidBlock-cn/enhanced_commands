@@ -44,11 +44,11 @@ public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtF
   ).apply(i, ListInsertionNbtFunction::new));
 
   @Override
-  public String asString() {
+  public String expressAsString() {
     return Streams.concat(
-        insertBefore.stream().map(NbtFunction::asString),
+        insertBefore.stream().map(NbtFunction::expressAsString),
         Stream.of("..."),
-        insertAfter.stream().map(NbtFunction::asString)
+        insertAfter.stream().map(NbtFunction::expressAsString)
     ).collect(Collectors.joining(", ", "[", "]"));
   }
 

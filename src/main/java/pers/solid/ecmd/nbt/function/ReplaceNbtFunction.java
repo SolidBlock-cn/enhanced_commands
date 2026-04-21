@@ -22,8 +22,8 @@ public record ReplaceNbtFunction(NbtPredicate predicate, NbtFunction function) i
   ).apply(i, ReplaceNbtFunction::new));
 
   @Override
-  public String asString() {
-    return "replace(" + predicate.asString(false) + ", " + function.asString() + ")";
+  public String expressAsString() {
+    return "replace(" + predicate.asString(false) + ", " + function.expressAsString() + ")";
   }
 
   @Override
