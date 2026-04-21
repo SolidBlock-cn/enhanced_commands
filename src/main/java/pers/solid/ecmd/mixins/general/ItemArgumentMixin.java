@@ -7,8 +7,8 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.blocks.BlockInput;
-import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.commands.arguments.item.ItemInput;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -16,31 +16,28 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import pers.solid.ecmd.argument.BlockFunctionArgument;
+import pers.solid.ecmd.argument.ItemFunctionArgument;
 import pers.solid.ecmd.util.mixin.ArgumentTypeExtension;
-import pers.solid.ecmd.util.mixin.EnhancedBlockInput;
+import pers.solid.ecmd.util.mixin.EnhancedItemInput;
 
 import java.util.concurrent.CompletableFuture;
 
-/**
- * 此 mixin 用于在原版的 {@link BlockInput} 中实现模组中的 {@link BlockFunctionArgument} 功能。
- */
-@Mixin(BlockStateArgument.class)
-public abstract class BlockStateArgumentMixin implements ArgumentTypeExtension {
+@Mixin(ItemArgument.class)
+public abstract class ItemArgumentMixin implements ArgumentTypeExtension {
   @Unique
-  private @Nullable BlockFunctionArgument enhanced_commands$modArgumentType;
+  private @Nullable ItemFunctionArgument enhanced_commands$modArgumentType;
   @Unique
   private boolean enhanced_commands$extension = true;
 
   @Inject(method = "<init>", at = @At("TAIL"))
-  private void injectedInit(CommandBuildContext buildContext, CallbackInfo ci) {
-    this.enhanced_commands$modArgumentType = new BlockFunctionArgument(buildContext);
+  private void injectedInit(CommandBuildContext context, CallbackInfo ci) {
+    this.enhanced_commands$modArgumentType = new ItemFunctionArgument(context);
   }
 
-  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/blocks/BlockInput;", at = @At("HEAD"), cancellable = true)
-  private void injectedParse(StringReader reader, CallbackInfoReturnable<BlockInput> cir) throws CommandSyntaxException {
+  @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/item/ItemInput;", at = @At("HEAD"), cancellable = true)
+  private void injectedParse(StringReader reader, CallbackInfoReturnable<ItemInput> cir) throws CommandSyntaxException {
     if (enhanced_commands$modArgumentType != null && enhanced_commands$extension) {
-      cir.setReturnValue(new EnhancedBlockInput(enhanced_commands$modArgumentType.parse(reader)));
+      cir.setReturnValue(new EnhancedItemInput(enhanced_commands$modArgumentType.parse(reader)));
     }
   }
 
@@ -51,11 +48,11 @@ public abstract class BlockStateArgumentMixin implements ArgumentTypeExtension {
     }
   }
 
-  @Inject(method = "getBlock", at = @At("RETURN"))
-  private static void injectedGetBlockState(CommandContext<CommandSourceStack> context, String name, CallbackInfoReturnable<BlockInput> cir) {
-    final BlockInput returnValue = cir.getReturnValue();
-    if (returnValue instanceof EnhancedBlockInput enhancedBlockInput) {
-      enhancedBlockInput.setSource(context.getSource());
+  @Inject(method = "getItem", at = @At("RETURN"))
+  private static void injectedGetBlockState(CommandContext<CommandSourceStack> context, String name, CallbackInfoReturnable<ItemInput> cir) {
+    final ItemInput returnValue = cir.getReturnValue();
+    if (returnValue instanceof EnhancedItemInput enhancedItemInput) {
+      enhancedItemInput.setSource(context.getSource());
     }
   }
 

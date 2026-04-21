@@ -14,6 +14,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -23,10 +24,11 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.WeightedList;
-import pers.solid.ecmd.mixins.ItemParserAccessor;
+import pers.solid.ecmd.mixins.accessor.ItemParserAccessor;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -125,6 +127,7 @@ public final class ItemFunctionParser {
       if (builder.getRemaining().isEmpty()) {
         builder.suggest("*");
         builder.suggest("@");
+        builder.suggest("#");
       }
       return SharedSuggestionProvider.suggestResource(itemLookup.listElements(), builder, entry -> entry.key().location(), entry -> entry.value().getName());
     });
@@ -140,6 +143,10 @@ public final class ItemFunctionParser {
           reader.skip();
           parseContext.clearSuggestion();
           return parseUnlimitedId(parseContext);
+        }
+        case '#' -> {
+          parseContext.clearSuggestion();
+          return parseTag(parseContext);
         }
       }
     }
@@ -177,6 +184,31 @@ public final class ItemFunctionParser {
 
     parseContext.clearSuggestion();
     return new SimpleItemFunction(itemReference.get());
+  }
+
+  static final DynamicCommandExceptionType ERROR_UNKNOWN_TAG = new DynamicCommandExceptionType(tagId -> Component.translatableEscape("arguments.item.tag.unknown", tagId.toString())
+  );
+
+  private static <S> ItemFunction parseTag(ParseContext<S> parseContext) throws CommandSyntaxException {
+    final HolderLookup.RegistryLookup<Item> lookup = parseContext.registries().lookupOrThrow(Registries.ITEM);
+    parseContext.setSuggestion((context, builder) -> suggestTagIds(builder, lookup));
+    final StringReader reader = parseContext.reader();
+    final int cursorBeforeHash = reader.getCursor();
+
+    reader.expect('#');
+    final ResourceLocation tagId = ResourceLocation.read(reader);
+    final int cursorAfterId = reader.getCursor();
+
+    final HolderSet<Item> holders = lookup.get(TagKey.create(Registries.ITEM, tagId)).orElseThrow(() -> {
+      reader.setCursor(cursorBeforeHash);
+      return EnhancedCommandSyntaxException.withCursorEnd(ERROR_UNKNOWN_TAG.createWithContext(reader, tagId), cursorAfterId);
+    });
+    parseContext.clearSuggestion();
+    return new TagItemFunction(holders);
+  }
+
+  private static CompletableFuture<Suggestions> suggestTagIds(SuggestionsBuilder builder, HolderLookup.RegistryLookup<Item> lookup) {
+    return SharedSuggestionProvider.suggestResource(lookup.listTagIds().map(TagKey::location), builder, "#");
   }
 
   /**

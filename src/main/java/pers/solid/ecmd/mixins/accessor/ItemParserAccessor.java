@@ -1,4 +1,4 @@
-package pers.solid.ecmd.mixins;
+package pers.solid.ecmd.mixins.accessor;
 
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
