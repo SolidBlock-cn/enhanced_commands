@@ -9,15 +9,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.Util;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceOrTagArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -55,21 +52,21 @@ public abstract class ResourceOrTagArgumentMixin<T> {
       method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$Result;",
       at = @At("HEAD")
   )
-  public void injectedParseHead(StringReader stringReader, CallbackInfoReturnable<Holder.Reference<T>> cir, @Share("cursorBeforeId") LocalIntRef localIntRef) {
-    localIntRef.set(stringReader.getCursor());
+  public void injectedParseHead(StringReader reader, CallbackInfoReturnable<Holder.Reference<T>> cir, @Share("cursorBeforeId") LocalIntRef localIntRef) {
+    localIntRef.set(reader.getCursor());
   }
 
-  @Inject(method = "listSuggestions", at = @At(value = "RETURN"), cancellable = true)
-  public <S> void suggestWithTooltip(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
-    MixinShared.mixinSuggestWithTooltip(registryKey, registryLookup, builder, cir);
+  @Inject(method = "listSuggestions", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/HolderLookup;listElementIds()Ljava/util/stream/Stream;"), cancellable = true)
+  public <S> void suggestWithTooltip(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
+    MixinShared.mixinSuggestWithTooltip(registryKey, registryLookup, suggestionsBuilder, cir);
   }
 
   @Inject(method = "listSuggestions", at = @At("HEAD"), cancellable = true)
-  public <S> void suggestForMoreValues(CommandContext<S> context, SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
-    final StringReader stringReader = new StringReader(builder.getInput());
-    stringReader.setCursor(builder.getStart());
+  public <S> void suggestForMoreValues(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir) {
+    final StringReader stringReader = new StringReader(suggestionsBuilder.getInput());
+    stringReader.setCursor(suggestionsBuilder.getStart());
     try {
-      int newStart = builder.getStart();
+      int newStart = suggestionsBuilder.getStart();
       Set<ResourceLocation> tagIds = new HashSet<>();
       Set<ResourceLocation> entryIds = new HashSet<>();
       while (stringReader.canRead()) {
@@ -86,20 +83,17 @@ public abstract class ResourceOrTagArgumentMixin<T> {
           break;
         }
       }
-
-      if (newStart == builder.getStart()) {
+      if (newStart == suggestionsBuilder.getStart()) {
         return;
       }
 
-      final SuggestionsBuilder offset = builder.createOffset(newStart);
-      final Function<? super T, ? extends Message> nameSuggestionProvider = ParsingUtil.getNameSuggestionProvider(registryKey);
+      final SuggestionsBuilder offset = suggestionsBuilder.createOffset(newStart);
+      final Function<? super Holder.Reference<T>, ? extends Message> nameSuggestionProvider = ParsingUtil.getNameSuggestionProvider(registryKey);
 
       // 参见 MixinShared#mixinSuggestWithTooltip
       SharedSuggestionProvider.suggestResource(this.registryLookup.listTagIds().map(TagKey::location).filter(identifier -> !tagIds.contains(identifier)), offset, "#");
       if (nameSuggestionProvider != null) {
-        cir.setReturnValue(SharedSuggestionProvider.suggestResource(registryLookup.listElements().filter(r -> !entryIds.contains(r.key().location())), offset, ref -> ref.key().location(), ref -> nameSuggestionProvider.apply(ref.value())));
-      } else if (Registries.BIOME.equals(registryKey)) {
-        cir.setReturnValue(SharedSuggestionProvider.suggestResource(registryLookup.listElementIds().filter(key -> !entryIds.contains(key.location())), offset, ResourceKey::location, key -> Component.translatable(Util.makeDescriptionId("biome", key.location()))));
+        cir.setReturnValue(SharedSuggestionProvider.suggestResource(registryLookup.listElements().filter(r -> !entryIds.contains(r.key().location())), offset, ref -> ref.key().location(), nameSuggestionProvider::apply));
       } else {
         cir.setReturnValue(SharedSuggestionProvider.suggestResource(this.registryLookup.listElementIds().map(ResourceKey::location).filter(identifier -> !entryIds.contains(identifier)), offset));
       }
@@ -115,21 +109,21 @@ public abstract class ResourceOrTagArgumentMixin<T> {
           to = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/ResourceOrTagArgument$TagResult;<init>(Lnet/minecraft/core/HolderSet$Named;)V")
       )
   )
-  public Supplier<CommandSyntaxException> modifiedParseTagException(Supplier<CommandSyntaxException> exceptionSupplier, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader) {
+  public Supplier<CommandSyntaxException> modifiedParseTagException(Supplier<CommandSyntaxException> exceptionSupplier, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader reader) {
     return () -> {
       final int cursorBeforeId = localIntRef.get();
-      final int cursorAfterId = stringReader.getCursor();
-      stringReader.setCursor(cursorBeforeId);
+      final int cursorAfterId = reader.getCursor();
+      reader.setCursor(cursorBeforeId);
       final CommandSyntaxException commandSyntaxException = exceptionSupplier.get();
-      return EnhancedCommandSyntaxException.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), stringReader.getString(), stringReader.getCursor()), cursorAfterId);
+      return EnhancedCommandSyntaxException.withCursorEnd(new CommandSyntaxException(commandSyntaxException.getType(), commandSyntaxException.getRawMessage(), reader.getString(), reader.getCursor()), cursorAfterId);
     };
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$Result;", at = @At(value = "NEW", target = "(Lnet/minecraft/core/HolderSet$Named;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$TagResult;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
-  public void acceptMultipleValuesOnTag(StringReader stringReader, CallbackInfoReturnable<ResourceOrTagArgument.Result<T>> cir, int cursorBeforeValue, ResourceLocation tagId, TagKey<T> tagKey, HolderSet.Named<T> named) throws CommandSyntaxException {
-    if (stringReader.canRead() && stringReader.peek() == '|') {
+  public void acceptMultipleValuesOnTag(StringReader reader, CallbackInfoReturnable<ResourceOrTagArgument.Result<T>> cir, int cursorBeforeValue, ResourceLocation tagId, TagKey<T> tagKey, HolderSet.Named<T> named) throws CommandSyntaxException {
+    if (reader.canRead() && reader.peek() == '|') {
       final EnhancedEntryPredicate.TagBased<T> firstValue = new EnhancedEntryPredicate.TagBased<>(named);
-      cir.setReturnValue(EnhancedEntryPredicate.mixinGetCompoundPredicate(registryLookup, registryKey, stringReader, firstValue));
+      cir.setReturnValue(EnhancedEntryPredicate.mixinGetCompoundPredicate(registryLookup, registryKey, reader, firstValue));
     }
   }
 
@@ -141,15 +135,15 @@ public abstract class ResourceOrTagArgumentMixin<T> {
           to = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/ResourceOrTagArgument$ResourceResult;<init>(Lnet/minecraft/core/Holder$Reference;)V")
       )
   )
-  public Supplier<CommandSyntaxException> modifiedParseEntryException(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader stringReader, @Local ResourceLocation identifier) {
-    return MixinShared.mixinModifiedParseThrow(registryKey, original, localIntRef, stringReader, identifier);
+  public Supplier<CommandSyntaxException> modifiedParseEntryException(Supplier<CommandSyntaxException> original, @Share("cursorBeforeId") LocalIntRef localIntRef, @Local(argsOnly = true) StringReader reader, @Local ResourceLocation resourceLocation2) {
+    return MixinShared.mixinModifiedParseThrow(registryKey, original, localIntRef, reader, resourceLocation2);
   }
 
   @Inject(method = "parse(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$Result;", at = @At(value = "NEW", target = "(Lnet/minecraft/core/Holder$Reference;)Lnet/minecraft/commands/arguments/ResourceOrTagArgument$ResourceResult;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
-  public void acceptMultipleValuesOnEntry(StringReader stringReader, CallbackInfoReturnable<ResourceOrTagArgument.Result<T>> cir, ResourceLocation identifier2, ResourceKey<T> registryKey, Holder.Reference<T> reference) throws CommandSyntaxException {
-    if (stringReader.canRead() && stringReader.peek() == '|') {
+  public void acceptMultipleValuesOnEntry(StringReader reader, CallbackInfoReturnable<ResourceOrTagArgument.Result<T>> cir, ResourceLocation identifier2, ResourceKey<T> registryKey, Holder.Reference<T> reference) throws CommandSyntaxException {
+    if (reader.canRead() && reader.peek() == '|') {
       final EnhancedEntryPredicate.EntryBased<T> firstValue = new EnhancedEntryPredicate.EntryBased<>(reference);
-      cir.setReturnValue(EnhancedEntryPredicate.mixinGetCompoundPredicate(registryLookup, this.registryKey, stringReader, firstValue));
+      cir.setReturnValue(EnhancedEntryPredicate.mixinGetCompoundPredicate(registryLookup, this.registryKey, reader, firstValue));
     }
   }
 }

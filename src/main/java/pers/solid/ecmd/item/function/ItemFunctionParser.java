@@ -236,7 +236,7 @@ public final class ItemFunctionParser {
 
     if (reader.canRead() && reader.peek() == '!') {
       reader.skip();
-      DataComponentType<?> dataComponentType = parseComponentType(parseContext);
+      DataComponentType<?> dataComponentType = parseComponentType(parseContext, "");
       if (!usedComponents.add(dataComponentType)) {
         throw ItemParserAccessor.getERROR_REPEATED_COMPONENT().create(dataComponentType);
       }
@@ -245,7 +245,7 @@ public final class ItemFunctionParser {
       parseContext.clearSuggestion();
       reader.skipWhitespace();
     } else {
-      DataComponentType<?> dataComponentType = parseComponentType(parseContext);
+      DataComponentType<?> dataComponentType = parseComponentType(parseContext, "=");
       if (!usedComponents.add(dataComponentType)) {
         throw ItemParserAccessor.getERROR_REPEATED_COMPONENT().create(dataComponentType);
       }
@@ -272,9 +272,9 @@ public final class ItemFunctionParser {
   /**
    * 解析物品组件名称，即 <code>iron_sword[<u>enchantments</u>={sharpness: 1}]</code> 中画横线的部分。
    */
-  public static <S> DataComponentType<?> parseComponentType(ParseContext<S> parseContext) throws CommandSyntaxException {
+  public static <S> DataComponentType<?> parseComponentType(ParseContext<S> parseContext, String componentSuffix) throws CommandSyntaxException {
     final StringReader reader = parseContext.reader();
-    parseContext.addSuggestion((context, builder) -> suggestComponentIds(builder));
+    parseContext.addSuggestion((context, builder) -> suggestComponentIds(builder, componentSuffix));
     if (!reader.canRead()) {
       throw ItemParserAccessor.getERROR_EXPECTED_COMPONENT().createWithContext(reader);
     }
@@ -322,10 +322,6 @@ public final class ItemFunctionParser {
       builder.suggest("!", Component.translatable("enhanced_commands.argument.item_function.remove_component"));
     }
     return suggestComponentIds(builder, "=");
-  }
-
-  private static CompletableFuture<Suggestions> suggestComponentIds(SuggestionsBuilder builder) {
-    return suggestComponentIds(builder, "");
   }
 
   private static CompletableFuture<Suggestions> suggestComponentIds(SuggestionsBuilder builder, String suffix) {

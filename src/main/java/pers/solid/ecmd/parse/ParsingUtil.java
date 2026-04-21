@@ -12,10 +12,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.Codec;
 import it.unimi.dsi.fastutil.chars.CharSet;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
@@ -42,6 +43,7 @@ import pers.solid.ecmd.util.TextUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -306,13 +308,13 @@ public final class ParsingUtil {
     return parseNbt(reader, element -> codec.parse(NbtOps.INSTANCE, element).getOrThrow(exceptionSupplier));
   }
 
-  public static <T> void registerNameSuggestionProvider(ResourceKey<? extends Registry<T>> registryKey, Function<? super T, ? extends Message> function) {
+  public static <T> void registerNameSuggestionProvider(ResourceKey<? extends Registry<T>> registryKey, Function<? super Holder.Reference<T>, ? extends Message> function) {
     NameSuggestionsInitHolder.NAME_SUGGESTION_PROVIDERS.put(registryKey, function);
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Function<? super T, ? extends Message> getNameSuggestionProvider(ResourceKey<? extends Registry<T>> registryKey) {
-    return (Function<? super T, ? extends Message>) NameSuggestionsInitHolder.NAME_SUGGESTION_PROVIDERS.get(registryKey);
+  public static <T> @Nullable Function<? super Holder.Reference<T>, ? extends Message> getNameSuggestionProvider(ResourceKey<? extends Registry<T>> registryKey) {
+    return (Function<? super Holder.Reference<T>, ? extends Message>) NameSuggestionsInitHolder.NAME_SUGGESTION_PROVIDERS.get(registryKey);
   }
 
   /**
@@ -346,17 +348,18 @@ public final class ParsingUtil {
   }
 
   private static class NameSuggestionsInitHolder {
-    private static final Reference2ReferenceMap<ResourceKey<? extends Registry<?>>, Function<?, ? extends Message>> NAME_SUGGESTION_PROVIDERS = new Reference2ReferenceOpenHashMap<>();
+    private static final Map<ResourceKey<? extends Registry<?>>, Function<?, ? extends Message>> NAME_SUGGESTION_PROVIDERS = new Reference2ReferenceOpenHashMap<>();
 
     static {
       initDefaultSuggestionProviders();
     }
 
     private static void initDefaultSuggestionProviders() {
-      registerNameSuggestionProvider(Registries.BLOCK, Block::getName);
-      registerNameSuggestionProvider(Registries.ITEM, Item::getDescription);
-      registerNameSuggestionProvider(Registries.ENTITY_TYPE, EntityType::getDescription);
-      registerNameSuggestionProvider(Registries.MOB_EFFECT, MobEffect::getDisplayName);
+      registerNameSuggestionProvider(Registries.BIOME, ref -> Component.translatable(Util.makeDescriptionId("biome", ref.key().location())));
+      registerNameSuggestionProvider(Registries.BLOCK, Functions.compose(Block::getName, Holder.Reference::value));
+      registerNameSuggestionProvider(Registries.ITEM, Functions.compose(Item::getDescription, Holder.Reference::value));
+      registerNameSuggestionProvider(Registries.ENTITY_TYPE, Functions.compose(EntityType::getDescription, Holder.Reference::value));
+      registerNameSuggestionProvider(Registries.MOB_EFFECT, Functions.compose(MobEffect::getDisplayName, Holder.Reference::value));
     }
   }
 }
