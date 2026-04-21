@@ -3,6 +3,7 @@ package pers.solid.ecmd;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.api.EnhancedServerReloadableRegistries;
@@ -17,6 +18,7 @@ import pers.solid.ecmd.config.ConfigCategories;
 import pers.solid.ecmd.config.ConfigCategory;
 import pers.solid.ecmd.config.ConfigManager;
 import pers.solid.ecmd.curve.CurveTypes;
+import pers.solid.ecmd.enchantment.function.EnchantmentModification;
 import pers.solid.ecmd.enchantment.function.EnchantmentModificationTypes;
 import pers.solid.ecmd.entity.predicate.EntityPredicate;
 import pers.solid.ecmd.entity.predicate.EntityPredicateTypes;
@@ -30,6 +32,7 @@ import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.nbt.function.NbtFunctionTypes;
 import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.nbt.predicate.NbtPredicateTypes;
+import pers.solid.ecmd.number.EnhancedCommandsNumberProvider;
 import pers.solid.ecmd.number.NumberProviderParser;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
@@ -102,11 +105,13 @@ public class EnhancedCommands {
   private static void registerReloadableRegistries(InitializeContext context) {
     EnhancedServerReloadableRegistries.register(BlockFunction.REGISTRY_KEY, BlockFunction.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(EnchantmentModification.REGISTRY_KEY, EnchantmentModification.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(EntityPredicate.REGISTRY_KEY, EntityPredicate.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(ItemFunction.REGISTRY_KEY, ItemFunction.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(ItemPredicate.REGISTRY_KEY, ItemPredicate.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(NbtFunction.REGISTRY_KEY, NbtFunction.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(NbtPredicate.REGISTRY_KEY, NbtPredicate.CODEC, false, context);
+    EnhancedServerReloadableRegistries.register(EnhancedCommandsNumberProvider.REGISTRY_KEY, NumberProviders.CODEC, false, context);
     EnhancedServerReloadableRegistries.register(Region.REGISTRY_KEY, Region.CODEC, false, context);
   }
 

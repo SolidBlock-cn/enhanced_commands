@@ -5,6 +5,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -31,7 +33,7 @@ public record AddEnchantmentModification(EnchantmentModificationTarget enchantme
       if (supportedOnly && (!enchantment.value().canEnchant(stack) || !EnchantmentHelper.isEnchantmentCompatible(enchantments.keySet(), enchantment))) {
         return;
       }
-      int levelCalculated = level.get(enchantment, context);
+      int levelCalculated = level.get(enchantment, enchantments, context);
       if (clamp) {
         levelCalculated = Mth.clamp(levelCalculated, enchantment.value().getMinLevel(), enchantment.value().getMaxLevel());
       }
@@ -50,42 +52,57 @@ public record AddEnchantmentModification(EnchantmentModificationTarget enchantme
     final int cursorAfterEnchantment = reader.getCursor();
 
     reader.skipWhitespace();
+    final MutableBoolean supportedOnly = new MutableBoolean();
+    final MutableBoolean clamp = new MutableBoolean();
+    final MutableBoolean upgradeOnly = new MutableBoolean();
     if (reader.canRead()) {
       final char peek = reader.peek();
-      if (peek == ')' || peek == ',' || peek == ';') {
-        reader.setCursor(cursorAfterEnchantment);
-        return new AddEnchantmentModification(enchantment, new EnchantmentLevelProvider.Basic(ConstantValue.exactly(1)), false, false, false);
+      final boolean r = tryParseParameters(parseContext, reader, supportedOnly, clamp, upgradeOnly);
+      if (peek == ')' || peek == ',' || peek == ';' || r) {
+        if (!r) {
+          reader.setCursor(cursorAfterEnchantment);
+        }
+        return new AddEnchantmentModification(enchantment, new EnchantmentLevelProvider.Basic(ConstantValue.exactly(1)), supportedOnly.booleanValue(), clamp.booleanValue(), upgradeOnly.booleanValue());
       }
     }
-
-    parseContext.clearSuggestion();
+    reader.setCursor(cursorAfterEnchantment);
+    ParsingUtil.expectAndSkipWhitespace(reader);
     final EnchantmentLevelProvider levelProvider = EnchantmentLevelProvider.parse(parseContext);
 
+    parseContext.clearSuggestion();
+    tryParseParameters(parseContext, reader, supportedOnly, clamp, upgradeOnly);
+
+    return new AddEnchantmentModification(enchantment, levelProvider, supportedOnly.booleanValue(), clamp.booleanValue(), upgradeOnly.booleanValue());
+  }
+
+  /**
+   * 尝试读取参数，如果读取到了就进行相应的修改，否则将 cursor 退回到 whitespace 之前。
+   *
+   * @return 是否解析到了参数语法
+   */
+  private static <S> boolean tryParseParameters(ParseContext<S> parseContext, StringReader reader, MutableBoolean supportedOnly, MutableBoolean clamp, MutableBoolean upgradeOnly) throws CommandSyntaxException {
     final int cursorAfterLevel = reader.getCursor();
     reader.skipWhitespace();
-    parseContext.setSuggestion((context, builder) -> {
+    parseContext.addSuggestion((context, builder) -> {
       if (builder.getRemaining().isEmpty()) {
-        builder.suggest("-");
+        builder.suggest("-", Component.translatable("enhanced_commands.argument.enchantment_modification.add.parameters"));
       }
       return builder.buildFuture();
     });
     if (reader.canRead() && reader.peek() == '-') {
       // 进入后续参数部分的解析
       reader.skip();
-      final MutableBoolean supportedOnly = new MutableBoolean();
-      final MutableBoolean clamp = new MutableBoolean();
-      final MutableBoolean upgradeOnly = new MutableBoolean();
-
+      reader.skipWhitespace();
       parseContext.setSuggestion((context, builder) -> {
         if (builder.getRemaining().isEmpty()) {
           if (!supportedOnly.booleanValue()) {
-            builder.suggest("s");
+            builder.suggest("s", Component.translatable("enhanced_commands.argument.enchantment_modification.add.parameters.s"));
           }
           if (!clamp.booleanValue()) {
-            builder.suggest("c");
+            builder.suggest("c", Component.translatable("enhanced_commands.argument.enchantment_modification.add.parameters.c"));
           }
           if (!upgradeOnly.booleanValue()) {
-            builder.suggest("u");
+            builder.suggest("u", Component.translatable("enhanced_commands.argument.enchantment_modification.add.parameters.u"));
           }
         }
         return builder.buildFuture();
@@ -125,12 +142,14 @@ public record AddEnchantmentModification(EnchantmentModificationTarget enchantme
           default -> throw EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.UNKNOWN_KEYWORD.createWithContext(reader, String.valueOf(reader.peek())), cursor + 1);
         }
       }
-
-      return new AddEnchantmentModification(enchantment, levelProvider, supportedOnly.booleanValue(), clamp.booleanValue(), upgradeOnly.booleanValue());
+      if (reader.canRead() && !Character.isAlphabetic(reader.peek())) {
+        parseContext.clearSuggestion();
+      }
+      return true;
     } else {
       // 没有解析到参数部分，回到原来的位置，并完成解析
       reader.setCursor(cursorAfterLevel);
-      return new AddEnchantmentModification(enchantment, levelProvider, false, false, false);
+      return false;
     }
   }
 

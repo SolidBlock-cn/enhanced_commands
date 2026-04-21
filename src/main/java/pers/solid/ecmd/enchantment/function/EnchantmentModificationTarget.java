@@ -100,7 +100,7 @@ public sealed interface EnchantmentModificationTarget {
 
     @Override
     public String asEntryString() {
-      return (all ? "all_of" : "any_of") + " " + tag.unwrap().map(tagKey -> "#" + tagKey.location(), holders -> holders.stream().map(Holder::getRegisteredName).collect(Collectors.joining("|")));
+      return (all ? "all of" : "any of") + " " + tag.unwrap().map(tagKey -> "#" + tagKey.location(), holders -> holders.stream().map(Holder::getRegisteredName).collect(Collectors.joining("|")));
     }
   }
 
