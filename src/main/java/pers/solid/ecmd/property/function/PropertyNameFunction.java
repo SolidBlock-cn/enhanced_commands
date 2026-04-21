@@ -25,7 +25,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null || !blockState.hasProperty(property)) {
       if (must) {
-        throw new IllegalArgumentException("property propertyName");
+        throw new IllegalArgumentException("property name"); // 考虑是不是应该抛出 CommandSyntaxException
       } else {
         return null;
       }

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredicate> entries) implements NbtPredicate {
   public static final MapCodec<MatchCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC.listOf()).<ListMultimap<String, NbtPredicate>>xmap(map -> map.entrySet().stream().collect(ImmutableListMultimap.flatteningToImmutableListMultimap(Map.Entry::getKey, entry -> entry.getValue().stream())), map -> Maps.transformValues(map.asMap(), ImmutableList::copyOf)).fieldOf("entries").forGetter(matchCompoundNbtPredicate -> matchCompoundNbtPredicate.entries)
-  ).apply(i, MatchCompoundNbtPredicate::new));
+  ).apply(i, MatchCompoundNbtPredicate::new)); // todo 换一个更好的 codec
 
   @Override
   public String expressAsString() {
