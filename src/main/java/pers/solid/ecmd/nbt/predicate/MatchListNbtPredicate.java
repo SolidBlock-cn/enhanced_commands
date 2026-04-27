@@ -26,10 +26,10 @@ import java.util.stream.Stream;
  *   [=[2, 3], =[4, 5]] match [[2, 3, 4, 5]] -> false
  * </pre>
  */
-public record MatchListNbtPredicate(List<NbtPredicate> expected, List<PositionalListEntry<NbtPredicate>> positionalExpected) implements NbtPredicate {
+public record MatchListNbtPredicate(List<NbtPredicate> values, List<PositionalListEntry<NbtPredicate>> positionalValues) implements NbtPredicate {
   public static final MapCodec<MatchListNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      NbtPredicate.CODEC.listOf().fieldOf("expected").forGetter(MatchListNbtPredicate::expected),
-      PositionalListEntry.codec(NbtPredicate.CODEC).listOf().fieldOf("positional_expected").forGetter(MatchListNbtPredicate::positionalExpected)
+      NbtPredicate.CODEC.listOf().fieldOf("values").forGetter(MatchListNbtPredicate::values),
+      PositionalListEntry.codec(NbtPredicate.CODEC).listOf().fieldOf("positional_values").forGetter(MatchListNbtPredicate::positionalValues)
   ).apply(i, MatchListNbtPredicate::new));
 
   @Override
@@ -39,7 +39,7 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (requirePrefix ? ": " : "") + "[" + Stream.concat(expected.stream().map(NbtPredicate::expressAsString), positionalExpected.stream().map(pair -> {
+    return (requirePrefix ? ": " : "") + "[" + Stream.concat(values.stream().map(NbtPredicate::expressAsString), positionalValues.stream().map(pair -> {
       final String valueAsString = pair.value().asString(true);
       return pair.index() + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
     })).collect(Collectors.joining(", ")) + "]";
@@ -50,7 +50,7 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
     if (!(nbtElement instanceof ListTag nbtList)) {
       return false;
     }
-    for (NbtPredicate nbtPredicate : expected) {
+    for (NbtPredicate nbtPredicate : values) {
       boolean elementMatched = false;
       for (Tag actualElement : nbtList) {
         if (nbtPredicate.test(actualElement)) {
@@ -62,7 +62,7 @@ public record MatchListNbtPredicate(List<NbtPredicate> expected, List<Positional
         return false;
     }
     final int size = nbtList.size();
-    for (PositionalListEntry<NbtPredicate> pair : positionalExpected) {
+    for (PositionalListEntry<NbtPredicate> pair : positionalValues) {
       int expectedIndex = pair.index();
       if (expectedIndex < 0) {
         expectedIndex += nbtList.size();

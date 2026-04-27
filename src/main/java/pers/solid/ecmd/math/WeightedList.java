@@ -113,11 +113,11 @@ public sealed interface WeightedList<E> {
     @Override
     public E getRandom(RandomSource random) {
       final double height = random.nextDouble() * sum;
-      return getElementAt(height);
+      return getClampedElement(height);
     }
 
     @Override
-    public E getElementAt(double position) {
+    public @Nullable E getElementAt(double position) {
       position = Mth.positiveModulo(position, sum);
       double stackedHeight = 0;
 
@@ -151,7 +151,7 @@ public sealed interface WeightedList<E> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
       if (obj == this) return true;
       if (obj == null || obj.getClass() != this.getClass()) return false;
       var that = (Weighted<?>) obj;

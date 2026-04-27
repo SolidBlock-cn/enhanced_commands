@@ -15,9 +15,9 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  *   3b match 3 -> false
  * </pre>
  */
-public record MatchPrimitiveNbtPredicate(Tag expected) implements NbtPredicate {
+public record MatchPrimitiveNbtPredicate(Tag value) implements NbtPredicate {
   public static final MapCodec<MatchPrimitiveNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      CodecUtil.NBT_ELEMENT.fieldOf("expected").forGetter(MatchPrimitiveNbtPredicate::expected)
+      CodecUtil.NBT_ELEMENT.fieldOf("value").forGetter(MatchPrimitiveNbtPredicate::value)
   ).apply(i, MatchPrimitiveNbtPredicate::new));
 
   @Override
@@ -27,12 +27,12 @@ public record MatchPrimitiveNbtPredicate(Tag expected) implements NbtPredicate {
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(expected);
+    return (requirePrefix ? ": " : "") + TextUtil.toSpacedStringNbt(value);
   }
 
   @Override
   public boolean test(Tag nbtElement) {
-    return NbtUtils.compareNbt(nbtElement, expected, true);
+    return NbtUtils.compareNbt(nbtElement, value, true);
   }
 
   @Override

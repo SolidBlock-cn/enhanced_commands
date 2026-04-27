@@ -19,7 +19,7 @@ Multiple block functions can be compounded to produce a more complex block funct
 
 The order of the two block functions above is, first `*` then `|`. For example, `a|b*c` is identical to `a|(b*c)`.
 
-The syntaxes above cannot have space, but if they are in a parentheses, space is allowed. For example, `a | b` is invalid, but `(a | b)` and `dry(a | b)` are valid.
+These two syntaxes cannot be space-separated, but if they are in a parentheses, space is allowed. For example, `a | b` is invalid, but `(a | b)` and `dry(a | b)` are valid.
 
 For example (all the examples below omitted namespace):
 

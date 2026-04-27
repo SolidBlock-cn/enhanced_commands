@@ -205,28 +205,28 @@ NBT 谓词支持一些函数语法。函数语法前可以像常规值那样加�
 - `type`：字符串，NBT 谓词类型 ID。可用函数表示的谓词，其具体语法于各个页面单独显示。默认为 `enhanced_commands` 命名空间，以下均省略命名空间（例如下文的 `comparison` 表示 `enhanced_commands:comparison`）。
 - （当 `type` 为 `comparison`：）
 - `comparator`：字符串，符号名称，与其符号本身的显示形式一致，如 `"="`、`">"`。
-- `expected`：NBT 元素。
+- `value`：NBT 元素。
 - （当 `type` 为 `constant`：）
 - `value`：布尔值。无论被测试的 NBT 为何值，谓词永远返回此布尔值。
 - （当 `type` 为 `equals_compound`：）
-- `predicates`：映射。
+- `values`：映射。
     - 键为 NBT 复合标签谓词中对应的键，值为 NBT 谓词。
 - （当 `type` 为 `equals_list`：）
-- `expected`：NBT 谓词的列表。
+- `values`：NBT 谓词的列表。
 - （当 `type` 为 `match_compound`：）
 - `entries`：映射。
     - 键为 NBT 复合标签谓词中对应的键，值为 NBT 谓词。
 - （当 `type` 为 `match_list`：）
-- `expected`：NBT 谓词的列表。
-- `positional_expected`：列表。
+- `values`：NBT 谓词的列表。
+- `positional_values`：列表。
     - 一个元素。映射。
         - `index`：整数。
         - `value`：NBT 谓词。
 - （当 `type` 为 `match_primitive`：）
-    - `expected`：NBT 谓词。
+- `value`：NBT 谓词。
 - （当 `type` 为 `negating`：）
-    - `predicate`：NBT 谓词。
+- `value`：NBT 谓词。
 - （当 `type` 为 `range`：）
-    - `number_range`：表示数字范围的映射。
+- `range_number_type`：字符串。
 - （当 `type` 为 `regex`：）
-    - `pattern`：字符串，表示正则表达式。
+- `pattern`：字符串，表示正则表达式。

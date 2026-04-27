@@ -1,6 +1,6 @@
 # `substring()` function: get a substring
 
-This [NBT function](../en.md) is used to get a substring.
+This [NBT function](../en.md) is used to get a substring. If the parameters is not a string, an error will be thrown.
 
 ## Syntax
 

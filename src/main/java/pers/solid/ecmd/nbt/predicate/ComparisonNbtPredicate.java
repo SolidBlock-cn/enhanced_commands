@@ -17,10 +17,10 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  *   8s match 8L -> true
  * </pre>
  */
-public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implements NbtPredicate {
+public record ComparisonNbtPredicate(Comparator comparator, Tag value) implements NbtPredicate {
   public static final MapCodec<ComparisonNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Comparator.CODEC.fieldOf("comparator").forGetter(ComparisonNbtPredicate::comparator),
-      CodecUtil.NBT_ELEMENT.fieldOf("expected").forGetter(ComparisonNbtPredicate::expected)
+      CodecUtil.NBT_ELEMENT.fieldOf("value").forGetter(ComparisonNbtPredicate::value)
   ).apply(i, ComparisonNbtPredicate::new));
 
   @Override
@@ -30,12 +30,12 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implem
 
   @Override
   public String asString(boolean requirePrefix) {
-    return comparator.getSerializedName() + " " + TextUtil.toSpacedStringNbt(expected);
+    return comparator.getSerializedName() + " " + TextUtil.toSpacedStringNbt(value);
   }
 
   @Override
   public boolean test(Tag nbtElement) {
-    if (nbtElement instanceof NumericTag actualNumber && expected instanceof NumericTag expectedNumber) {
+    if (nbtElement instanceof NumericTag actualNumber && value instanceof NumericTag expectedNumber) {
       final byte actualType = actualNumber.getId();
       final byte expectedType = expectedNumber.getId();
       if (actualType == Tag.TAG_DOUBLE || expectedType == Tag.TAG_DOUBLE) {
@@ -53,7 +53,7 @@ public record ComparisonNbtPredicate(Comparator comparator, Tag expected) implem
       } else {
         return false;
       }
-    } else if (nbtElement instanceof StringTag actualString && expected instanceof StringTag expectedString) {
+    } else if (nbtElement instanceof StringTag actualString && value instanceof StringTag expectedString) {
       return comparator.test(actualString.getAsString(), expectedString.getAsString());
     } else {
       return false;

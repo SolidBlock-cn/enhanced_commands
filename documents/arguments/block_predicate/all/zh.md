@@ -4,7 +4,7 @@
 
 ## 语法
 
-`all(<方块谓词>, ...)`
+`all([方块谓词], ...)`
 
 方块谓词的数量不限。
 
@@ -20,4 +20,6 @@
 
 ## 参见
 
-- [`any()`](../union/zh.md)
+- [`any()`](../any/zh.md)
+- [`all()` 物品谓词](../../item_predicate/all/zh.md)
+- [`all()` NBT 谓词](../../nbt_predicate/all/zh.md)
