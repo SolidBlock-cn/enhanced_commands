@@ -4,7 +4,7 @@
 
 ## 语法
 
-`any(<方块谓词>, ...)`
+`any([方块谓词], ...)`
 
 方块谓词的数量不限。
 
@@ -13,10 +13,12 @@
 ## 示例
 
 - `any(dirt, grass_block)`：当方块是泥土或者草方块时通过。
-- `any(dirt, grass_block, mycelium`：当方块是泥土、草方块或者菌丝时通过。
+- `any(dirt, grass_block, mycelium)`：当方块是泥土、草方块或者菌丝体时通过。
 - `any(dirt)`：当方块是泥土时通过。等效于 `dirt`。
 - `any()`：始终不通过。等效于 `!*`。
 
 ## 参见
 
-- [`all()`](../intersect/zh.md)
+- [`all()`](../all/zh.md)
+- [`any()` 物品谓词](../../item_predicate/any/zh.md)
+- [`any()` NBT 谓词](../../nbt_predicate/nbt/zh.md)

@@ -29,3 +29,8 @@
 - `pick(white_wool 3, blue_wool)`：随机生成白色羊毛和蓝色羊毛，其白色羊毛的概率为 75%，蓝色羊毛的概率为 25%。
 - `pick(white_wool, blue_wool 0)`：只会生成白色羊毛，因为蓝色羊毛的概率为 0。
 - `pick(white_wool 0, blue_wool 0)`：无效的方块函数，因为各项的权重之和为 0。
+
+## 参见
+
+- [`pick()` 物品函数](../../item_function/pick/zh.md)
+- [`pick()` NBT 函数](../../nbt_function/pick/zh.md)

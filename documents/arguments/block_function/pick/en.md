@@ -29,3 +29,8 @@ Long integer. The seed to determine the block function to be used for each posit
 - `pick(white_wool 3, blue_wool)`: Generates white wool and blue wool randomly; probability for white wool is 75%, and for blue wool is 25%.
 - `pick(white_wool, blue_wool 0)`: Generates white wool only, as the probability for blue wool is 0.
 - `pick(white_wool 0, blue_wool 0)`: Invalid block function, as the sum of weights is 0.
+
+## See also
+
+- [`pick()` item function](../../item_function/pick/en.md)
+- [`pick()` NBT function](../../nbt_function/pick/en.md)

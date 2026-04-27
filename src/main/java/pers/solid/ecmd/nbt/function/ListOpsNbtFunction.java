@@ -43,11 +43,11 @@ public record ListOpsNbtFunction(List<NbtFunction> valueReplacements, List<Posit
 
   @Override
   public String expressAsString() {
-    return asString(false);
+    return expressAsString(false);
   }
 
   @Override
-  public String asString(boolean requirePrefix) {
+  public String expressAsString(boolean requirePrefix) {
     final Function<PositionalListEntry<NbtFunction>, String> indexValueToStringMapper = entry -> {
       final int index = entry.index();
       final String valueAsString = entry.value().expressAsString();

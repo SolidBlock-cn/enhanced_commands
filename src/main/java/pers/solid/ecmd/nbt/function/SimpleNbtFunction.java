@@ -11,14 +11,14 @@ import pers.solid.ecmd.util.codec.CodecUtil;
 /**
  * 无论原先值，直接返回固定时的 NBT 函数。
  *
- * @param element 使用时需要返回的值。
+ * @param value 使用时需要返回的值。
  */
-public record SimpleNbtFunction(Tag element) implements NbtFunction {
-  public static final MapCodec<SimpleNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_ELEMENT.fieldOf("element").forGetter(SimpleNbtFunction::element)).apply(i, SimpleNbtFunction::new));
+public record SimpleNbtFunction(Tag value) implements NbtFunction {
+  public static final MapCodec<SimpleNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_ELEMENT.fieldOf("value").forGetter(SimpleNbtFunction::value)).apply(i, SimpleNbtFunction::new));
 
   @Override
   public String expressAsString() {
-    return TextUtil.toSpacedStringNbt(element);
+    return TextUtil.toSpacedStringNbt(value);
   }
 
   @Override
@@ -28,6 +28,6 @@ public record SimpleNbtFunction(Tag element) implements NbtFunction {
 
   @Override
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) {
-    return element;
+    return value;
   }
 }

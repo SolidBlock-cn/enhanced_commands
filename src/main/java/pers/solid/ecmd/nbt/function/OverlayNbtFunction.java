@@ -20,6 +20,7 @@ public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunc
   public static final MapCodec<OverlayNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtFunction.CODEC.listOf().fieldOf("functions").forGetter(OverlayNbtFunction::functions)
   ).apply(i, OverlayNbtFunction::new));
+  private static final SimpleCommandExceptionType EMPTY_ERROR = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.overlay.empty"));
 
   @Override
   public String expressAsString() {
@@ -37,7 +38,7 @@ public record OverlayNbtFunction(List<NbtFunction> functions) implements NbtFunc
       nbtElement = function.apply(nbtElement, context);
     }
     if (nbtElement == null) {
-      throw new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.overlay.empty")).create();
+      throw EMPTY_ERROR.create();
     }
     return nbtElement;
   }

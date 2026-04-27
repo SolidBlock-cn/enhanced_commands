@@ -16,18 +16,18 @@ import pers.solid.ecmd.util.codec.CodecUtil;
  *   2s(null) = 2s
  * </pre>
  */
-public record NumberValueNbtFunction(NumericTag number) implements NbtFunction {
+public record NumberValueNbtFunction(NumericTag value) implements NbtFunction {
+  public static final MapCodec<NumberValueNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_NUMBER.fieldOf("value").forGetter(NumberValueNbtFunction::value)).apply(i, NumberValueNbtFunction::new));
+
   @Override
   public String expressAsString() {
-    return asString(true);
+    return expressAsString(true);
   }
 
   @Override
-  public String asString(boolean requirePrefix) {
-    return "= " + number;
+  public String expressAsString(boolean requirePrefix) {
+    return "= " + value;
   }
-
-  public static final MapCodec<NumberValueNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(CodecUtil.NBT_NUMBER.fieldOf("number").forGetter(NumberValueNbtFunction::number)).apply(i, NumberValueNbtFunction::new));
 
   @Override
   public NbtFunctionType<NumberValueNbtFunction> getType() {
@@ -37,17 +37,17 @@ public record NumberValueNbtFunction(NumericTag number) implements NbtFunction {
   @Override
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) {
     if (nbtElement instanceof DoubleTag) {
-      return DoubleTag.valueOf(number.getAsDouble());
+      return DoubleTag.valueOf(value.getAsDouble());
     } else if (nbtElement instanceof FloatTag) {
-      return FloatTag.valueOf(number.getAsFloat());
+      return FloatTag.valueOf(value.getAsFloat());
     } else if (nbtElement instanceof LongTag) {
-      return LongTag.valueOf(number.getAsLong());
+      return LongTag.valueOf(value.getAsLong());
     } else if (nbtElement instanceof IntTag) {
-      return IntTag.valueOf(number.getAsInt());
+      return IntTag.valueOf(value.getAsInt());
     } else if (nbtElement instanceof ShortTag) {
-      return ShortTag.valueOf(number.getAsShort());
+      return ShortTag.valueOf(value.getAsShort());
     } else {
-      return number;
+      return value;
     }
   }
 }

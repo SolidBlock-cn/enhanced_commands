@@ -15,25 +15,25 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * 在 NBT 复合标签（目标标签）中加入另一个 NBT 复合标签（源标签）的内容。相同的键会被覆盖。目标标签已有但是源标签中没有的键不会受到影响。在加入目标标签中不存在的键时，其值相当于函数对 null 的值。例如：
+ * 在 NBT 复合标签（参数）中加入另一个 NBT 复合标签（源标签）的内容。相同的键会被覆盖。目标标签已有但是源标签中没有的键不会受到影响。在加入参数中不存在的键时，其值相当于函数对 null 的值。例如：
  * <pre>
- *   {a: b, c: d}({a: B, e: F}) = {a: b, c: d, e: F}
- *   {a: b, c: {d: e}}({c: {f: g}}) = {a: b, c: {d: e, f: g}}
- *   {}({a: b, c: d}) = {a: b, c: d}
- *   {a: b, c: d}({}) = {a: b, c: d}
+ *   {a: b, c: d} 应用于 {a: B, e: F} 结果：{a: b, c: d, e: F}
+ *   {a: b, c: {d: e}} 应用于 {c: {f: g}} 结果：{a: b, c: {d: e, f: g}}
+ *   {} 应用于 {a: b, c: d} 结果：{a: b, c: d}
+ *   {a: b, c: d} 应用于 {} 结果：{a: b, c: d}
  * </pre>
- * 如果目标不是 NBT 复合标签，则直接返回源 NBT 复合标签的值。例如：
+ * 如果参数不是 NBT 复合标签，则直接返回源 NBT 复合标签的值。例如：
  * <pre>
- *   {a: b}([1, 2, 3]) = {a: b}
- *   {a: b}("string") = {a: b}
+ *   {a: b} 应用于 [1, 2, 3] 结果：{a: b}
+ *   {a: b} 应用于 "string" 结果：{a: b}
  * </pre>
- * 在键前加上 {@code -}（横线）和一个空格且不提供值，可以删除一个键。例如：
+ * 在键前加上 {@code -}（横线）和一个空格且不提供值，可以删除一个字段。例如：
  * <pre>
- *   {- a, - c}({a: b, c: d}) = {}
+ *   {- a, - c} 应用于 {a: b, c: d} 结果：{}
  * </pre>
- * 如果前面是 {@code =}（等号），则禁用合并功能：
+ * 如果前面是 {@code =}（等号），则禁用合并功能，会替换整个 NBT 复合标签：
  * <pre>
- *   ={a: b}({c: d}) = {a: b}
+ *   ={a: b} 应用于 {c: d} 结果：{a: b}
  * </pre>
  * 不允许重复键，重复键会被覆盖。
  *
@@ -47,18 +47,18 @@ public record CompoundNbtFunction(Map<String, Optional<NbtFunction>> source, boo
 
   @Override
   public String expressAsString() {
-    return asString(false);
+    return expressAsString(false);
   }
 
   @Override
-  public String asString(boolean requirePrefix) {
+  public String expressAsString(boolean requirePrefix) {
     return (allowsMerge ? (requirePrefix ? ": " : "") : "= ") + "{" + source.entrySet().stream().map(entry -> {
       final String key = entry.getKey();
       final Optional<NbtFunction> value = entry.getValue();
       if (value.isEmpty()) {
         return "- " + key;
       } else {
-        final String valueAsString = value.get().asString(true);
+        final String valueAsString = value.get().expressAsString(true);
         return key + (valueAsString.startsWith(":") ? "" : " ") + valueAsString;
       }
     }).collect(Collectors.joining(", ")) + "}";

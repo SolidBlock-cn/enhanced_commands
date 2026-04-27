@@ -4,17 +4,17 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.Tag;
 
-public record NegatingNbtPredicate(NbtPredicate predicate) implements NbtPredicate {
-  public static final MapCodec<NegatingNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(NbtPredicate.CODEC.fieldOf("predicate").forGetter(NegatingNbtPredicate::predicate)).apply(i, NegatingNbtPredicate::new));
+public record NegatingNbtPredicate(NbtPredicate value) implements NbtPredicate {
+  public static final MapCodec<NegatingNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(NbtPredicate.CODEC.fieldOf("value").forGetter(NegatingNbtPredicate::value)).apply(i, NegatingNbtPredicate::new));
 
   @Override
   public String expressAsString() {
-    return "!" + predicate.expressAsString();
+    return "!" + value.expressAsString();
   }
 
   @Override
   public boolean test(Tag nbtElement) {
-    return !predicate.test(nbtElement);
+    return !value.test(nbtElement);
   }
 
   @Override

@@ -104,7 +104,7 @@ public interface NbtFunction extends ExpressionConvertible {
    *
    * @param requirePrefix 是否强制在返回的结果前加上冒号或等于号。通常用于 NBT 复合标签的值。比如，NBT 函数“<code>:3</code>”可以写成“<code>3</code>”，但是“<code>{x: 3}</code>”显然不能写成“<code>{x 3}</code>”。
    */
-  default String asString(boolean requirePrefix) {
+  default String expressAsString(boolean requirePrefix) {
     return requirePrefix ? ": " + expressAsString() : expressAsString();
   }
 

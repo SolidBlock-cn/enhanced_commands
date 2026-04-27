@@ -13,3 +13,8 @@
 - `overlay()`：不执行任何操作。
 - `overlay(*, dry())`：随机方块，并去除其中的水。相当于 `**dry()` 或 `dry(*)`。
 - `overlay(#stairs, [*], [waterlogged=false])`：随机选择一个楼梯方块，然后添加随机的属性，并添加 `waterlogged=false` 属性。相当于 `#stairs*[*]*[waterlogged=false]`，实际上等效于 `#stairs[*, waterlogged=false]`。
+
+## 参见
+
+- [`overlay()` 物品函数](../../item_function/overlay/zh.md)
+- [`overlay()` NBT 函数](../../nbt_function/overlay/zh.md)
