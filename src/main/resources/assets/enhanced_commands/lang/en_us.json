@@ -6,6 +6,7 @@
   "enhanced_commands.argument.block_predicate.cannot_parse": "Cannot parse block predicate",
   "enhanced_commands.argument.block_predicate.unknown_comparator": "Unknown comparator: %s",
   "enhanced_commands.argument.enchantment_level_provider.degrade_randomly": "Degrade to a random level between current and min limit",
+  "enhanced_commands.argument.enchantment_level_provider.max_possible": "Max level of the storage limit",
   "enhanced_commands.argument.enchantment_level_provider.max_reasonable": "Max level of the enchantment level limit",
   "enhanced_commands.argument.enchantment_level_provider.random_possible": "Random level within storage limit (which may exceed enchantment level limit)",
   "enhanced_commands.argument.enchantment_level_provider.random_reasonable": "Random level within the enchantment level limit",
