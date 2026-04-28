@@ -22,7 +22,6 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
-import pers.solid.ecmd.util.extension.NumberProviderExtension;
 
 import java.util.Arrays;
 
@@ -35,12 +34,12 @@ public sealed interface EnchantmentLevelProvider extends ExpressionConvertible {
   Type type();
 
   record Basic(NumberProvider numberProvider) implements EnchantmentLevelProvider {
-    public static final Codec<Basic> INLINE_CODEC = Codec.FLOAT.flatComapMap(f -> new Basic(ConstantValue.exactly(f)), n -> n.numberProvider instanceof ConstantValue(float value) ? DataResult.success(value) : DataResult.error(() -> "not constant"));
+    public static final Codec<Basic> INLINE_CODEC = Codec.FLOAT.flatComapMap(f -> new Basic(ConstantValue.exactly(f)), n -> n.numberProvider instanceof ConstantValue constantValue ? DataResult.success(constantValue.value()) : DataResult.error(() -> "not constant"));
     public static final MapCodec<Basic> CODEC = NumberProviders.CODEC.fieldOf("value").xmap(Basic::new, Basic::numberProvider);
 
     @Override
     public int get(Holder<Enchantment> enchantment, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
-      return ((NumberProviderExtension) numberProvider()).getInt(context);
+      return numberProvider().getInt(context);
     }
 
     @Override
@@ -50,7 +49,7 @@ public sealed interface EnchantmentLevelProvider extends ExpressionConvertible {
 
     @Override
     public String expressAsString() {
-      return ((NumberProviderExtension) numberProvider).asString$enhancedCommands();
+      return numberProvider.asString$enhancedCommands();
     }
   }
 
@@ -60,7 +59,7 @@ public sealed interface EnchantmentLevelProvider extends ExpressionConvertible {
     @Override
     public int get(Holder<Enchantment> enchantment, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
       final int level = enchantments.getLevel(enchantment);
-      return level + ((NumberProviderExtension) numberProvider()).getInt(context);
+      return level + numberProvider().getInt(context);
     }
 
     @Override
@@ -70,7 +69,7 @@ public sealed interface EnchantmentLevelProvider extends ExpressionConvertible {
 
     @Override
     public String expressAsString() {
-      return "upgrade " + ((NumberProviderExtension) numberProvider).asString$enhancedCommands();
+      return "upgrade " + numberProvider.asString$enhancedCommands();
     }
   }
 
@@ -91,6 +90,12 @@ public sealed interface EnchantmentLevelProvider extends ExpressionConvertible {
       @Override
       public int get(Holder<Enchantment> enchantment, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
         return enchantment.value().getMaxLevel();
+      }
+    },
+    MAX_POSSIBLE("max_possible") {
+      @Override
+      public int get(Holder<Enchantment> enchantment, ItemEnchantments.Mutable enchantments, ExecutionContext context) {
+        return 255;
       }
     },
     UPGRADE_RANDOMLY("upgrade_randomly") {

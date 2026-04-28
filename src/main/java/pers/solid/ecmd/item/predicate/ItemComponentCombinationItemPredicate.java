@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPredicate> components) implements ItemPredicateEntry {
-  public static final MapCodec<SimpleCombinationItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+public record ItemComponentCombinationItemPredicate(ItemPredicate base, List<ItemPredicate> components) implements ItemPredicateEntry {
+  public static final MapCodec<ItemComponentCombinationItemPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       ItemPredicate.CODEC.comapFlatMap(predicate -> {
         try {
           checkValidityForItemType(predicate);
@@ -19,7 +19,7 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
         } catch (IllegalArgumentException e) {
           return DataResult.error(e::getMessage);
         }
-      }, Function.identity()).optionalFieldOf("item_type", ConstantItemPredicate.ALWAYS_TRUE).forGetter(SimpleCombinationItemPredicate::itemType),
+      }, Function.identity()).optionalFieldOf("base", ConstantItemPredicate.ALWAYS_TRUE).forGetter(ItemComponentCombinationItemPredicate::base),
       ItemPredicate.CODEC.comapFlatMap(predicate -> {
         try {
           checkValidityForComponents(predicate);
@@ -27,15 +27,15 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
         } catch (IllegalArgumentException e) {
           return DataResult.error(e::getMessage);
         }
-      }, Function.identity()).listOf().optionalFieldOf("components", List.of()).forGetter(SimpleCombinationItemPredicate::components)
-  ).apply(i, SimpleCombinationItemPredicate::new));
+      }, Function.identity()).listOf().optionalFieldOf("components", List.of()).forGetter(ItemComponentCombinationItemPredicate::components)
+  ).apply(i, ItemComponentCombinationItemPredicate::new));
 
-  public SimpleCombinationItemPredicate(ItemPredicate itemType) {
+  public ItemComponentCombinationItemPredicate(ItemPredicate itemType) {
     this(itemType, List.of());
   }
 
-  public SimpleCombinationItemPredicate {
-    checkValidityForItemType(itemType);
+  public ItemComponentCombinationItemPredicate {
+    checkValidityForItemType(base);
 
     for (ItemPredicate componentPredicate : components) {
       checkValidityForComponents(componentPredicate);
@@ -74,32 +74,32 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
     throw new IllegalArgumentException("components of SimpleCombinationItemPredicate does not support type of " + predicate.getClass().getSimpleName());
   }
 
-  public static SimpleCombinationItemPredicate of(List<ItemPredicate> predicates) {
+  public static ItemComponentCombinationItemPredicate of(List<ItemPredicate> predicates) {
     if (predicates.isEmpty()) {
-      return new SimpleCombinationItemPredicate(ConstantItemPredicate.ALWAYS_TRUE);
+      return new ItemComponentCombinationItemPredicate(ConstantItemPredicate.ALWAYS_TRUE);
     } else {
       final ItemPredicate first = predicates.get(0);
       if (isValidTypeForItemType(first)) {
-        return new SimpleCombinationItemPredicate(first, List.copyOf(predicates.subList(1, predicates.size())));
+        return new ItemComponentCombinationItemPredicate(first, List.copyOf(predicates.subList(1, predicates.size())));
       } else {
-        return new SimpleCombinationItemPredicate(ConstantItemPredicate.ALWAYS_TRUE, predicates);
+        return new ItemComponentCombinationItemPredicate(ConstantItemPredicate.ALWAYS_TRUE, predicates);
       }
     }
   }
 
   @Override
   public boolean test(ItemStack stack, ExecutionContext executionContext) {
-    return itemType.test(stack, executionContext) && components.stream().allMatch(p -> p.test(stack, executionContext));
+    return base.test(stack, executionContext) && components.stream().allMatch(p -> p.test(stack, executionContext));
   }
 
   @Override
-  public ItemPredicateType<SimpleCombinationItemPredicate> getType() {
+  public ItemPredicateType<ItemComponentCombinationItemPredicate> getType() {
     return ItemPredicateTypes.SIMPLE_COMBINATION;
   }
 
   @Override
   public String expressAsString() {
-    return itemType.expressAsString() + (components.isEmpty() ? "" : components.stream().map(SimpleCombinationItemPredicate::toEntryString).collect(Collectors.joining(", ", "[", "]")));
+    return base.expressAsString() + (components.isEmpty() ? "" : components.stream().map(ItemComponentCombinationItemPredicate::toEntryString).collect(Collectors.joining(", ", "[", "]")));
   }
 
   @Override
@@ -111,7 +111,7 @@ public record SimpleCombinationItemPredicate(ItemPredicate itemType, List<ItemPr
     if (predicate instanceof NegatingItemPredicate negating) {
       return "!" + toEntryString(negating.predicate());
     } else if (predicate instanceof AnyItemPredicate any) {
-      return any.predicates().stream().map(SimpleCombinationItemPredicate::toEntryString).collect(Collectors.joining(" | "));
+      return any.predicates().stream().map(ItemComponentCombinationItemPredicate::toEntryString).collect(Collectors.joining(" | "));
     } else if (predicate instanceof ItemPredicateEntry entry) {
       return entry.asEntryString();
     } else {

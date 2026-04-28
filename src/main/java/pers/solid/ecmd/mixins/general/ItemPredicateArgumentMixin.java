@@ -137,7 +137,7 @@ public abstract class ItemPredicateArgumentMixin {
       if (values.size() == 1) {
         return values.get(0);
       }
-      return ItemPredicate.asVanillaPredicate(SimpleCombinationItemPredicate.of(values.stream().map(ItemPredicate::convertOrUnknown).toList()), Util.allOf(values));
+      return ItemPredicate.asVanillaPredicate(ItemComponentCombinationItemPredicate.of(values.stream().map(ItemPredicate::convertOrUnknown).toList()), Util.allOf(values));
     }
 
     @Override

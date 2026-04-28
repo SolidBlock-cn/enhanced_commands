@@ -16,10 +16,10 @@ public final class ItemPredicateTypes {
   public static final ItemPredicateType<ComponentValueCheckItemPredicate<?>> COMPONENT_VALUE_CHECK = register("component_value_check", ComponentValueCheckItemPredicate.CODEC);
   public static final ItemPredicateType<ConstantItemPredicate> CONSTANT = register("constant", ConstantItemPredicate.CODEC);
   public static final ItemPredicateType<CountItemPredicate> COUNT = register("count", CountItemPredicate.CODEC);
+  public static final ItemPredicateType<ItemComponentCombinationItemPredicate> SIMPLE_COMBINATION = register("item_component_combination", ItemComponentCombinationItemPredicate.CODEC);
   public static final ItemPredicateType<NegatingItemPredicate> NEGATING = register("negating", NegatingItemPredicate.CODEC);
   public static final ItemPredicateType<ProbabilityItemPredicate> PROBABILITY = register("probability", ProbabilityItemPredicate.CODEC);
   public static final ItemPredicateType<SimpleItemPredicate> SIMPLE = register("simple", SimpleItemPredicate.CODEC);
-  public static final ItemPredicateType<SimpleCombinationItemPredicate> SIMPLE_COMBINATION = register("simple_combination", SimpleCombinationItemPredicate.CODEC);
   public static final ItemPredicateType<TagItemPredicate> SIMPLE_TAG = register("simple_tag", TagItemPredicate.CODEC);
   public static final ItemPredicateType<UnknownItemPredicate> UNKNOWN = register("unknown", UnknownItemPredicate.CODEC);
 

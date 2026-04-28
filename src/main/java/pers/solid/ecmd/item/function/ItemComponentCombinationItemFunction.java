@@ -9,16 +9,16 @@ import pers.solid.ecmd.util.ExecutionContext;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemFunction> affiliate) implements ItemFunction {
+public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemFunction> components) implements ItemFunction {
   public static final MapCodec<ItemComponentCombinationItemFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       ItemFunction.CODEC.fieldOf("base").forGetter(ItemComponentCombinationItemFunction::base),
-      ItemFunction.CODEC.listOf().optionalFieldOf("affiliate", ImmutableList.of()).forGetter(ItemComponentCombinationItemFunction::affiliate)
+      ItemFunction.CODEC.listOf().optionalFieldOf("components", ImmutableList.of()).forGetter(ItemComponentCombinationItemFunction::components)
   ).apply(i, ItemComponentCombinationItemFunction::new));
 
   @Override
   public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
     itemStack = base.getModifiedStack(itemStack, originalStack, context);
-    for (ItemFunction itemFunction : affiliate) {
+    for (ItemFunction itemFunction : components) {
       itemStack = itemFunction.getModifiedStack(itemStack, originalStack, context);
     }
     return itemStack;
@@ -32,10 +32,10 @@ public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemF
   @Override
   public String expressAsString() {
     final String baseString = base.expressAsString();
-    if (affiliate.isEmpty()) {
+    if (components.isEmpty()) {
       return baseString;
     } else {
-      return baseString + affiliate.stream().map(itemFunction -> itemFunction instanceof ItemFunctionEntry entry ? entry.asEntryString() : "(" + itemFunction.expressAsString() + ")").collect(Collectors.joining(", ", "[", "]"));
+      return baseString + components.stream().map(itemFunction -> itemFunction instanceof ItemFunctionEntry entry ? entry.asEntryString() : "(" + itemFunction.expressAsString() + ")").collect(Collectors.joining(", ", "[", "]"));
     }
   }
 }
