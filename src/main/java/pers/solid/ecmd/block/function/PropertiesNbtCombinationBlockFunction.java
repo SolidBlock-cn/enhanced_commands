@@ -1,5 +1,6 @@
 package pers.solid.ecmd.block.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -57,7 +58,7 @@ public record PropertiesNbtCombinationBlockFunction(BlockFunction base, @Nullabl
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     blockState = base.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     if (properties != null) {
       blockState = properties.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);

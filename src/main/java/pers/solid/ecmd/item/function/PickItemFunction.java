@@ -20,7 +20,7 @@ public record PickItemFunction(WeightedList<ItemFunction> functions) implements 
   ).apply(i, PickItemFunction::new));
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     return functions.getRandom(context.random).getModifiedStack(itemStack, originalStack, context);
   }
 

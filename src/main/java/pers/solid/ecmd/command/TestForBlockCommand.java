@@ -91,7 +91,7 @@ public enum TestForBlockCommand implements TestForCommands.Entry {
       throw TEST_FOR_BLOCK_PREDICATE_NOT_LOADED.create(TextUtil.wrapVector(blockPos));
     }
     final TestResult testResult = BlockPredicateArgument.getBlockPredicate(context, "predicate").testAndDescribe(blockInWorld, new ExecutionContext(source.getLevel().getRandom(), PositionProvider.of(blockPos.getCenter(), Vec2.ZERO, null, EntityAnchorArgument.Anchor.FEET), seed));
-    testResult.sendMessage(source);
+    testResult.makeFeedback(source);
     return BooleanUtils.toInteger(testResult.successes());
   }
 

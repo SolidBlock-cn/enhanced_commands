@@ -8,22 +8,18 @@ import org.jetbrains.annotations.Nullable;
  * 类似于 {@link CommandSyntaxException}，但是允许在运行时抛出。
  */
 public class CommandRuntimeException extends RuntimeException {
-  public final @Nullable Message rawMessage;
-
-  public CommandRuntimeException() {
-    this.rawMessage = null;
-  }
+  public final Message rawMessage;
 
   @Override
-  public String getMessage() {
+  public @Nullable String getMessage() {
     final String message = super.getMessage();
-    if (message == null && this.rawMessage != null) {
+    if (message == null) {
       return rawMessage.getString();
     }
     return message;
   }
 
-  public CommandRuntimeException(@Nullable Message message) {
+  public CommandRuntimeException(Message message) {
     super();
     this.rawMessage = message;
   }
@@ -33,17 +29,7 @@ public class CommandRuntimeException extends RuntimeException {
     this.rawMessage = cause.getRawMessage();
   }
 
-  public CommandRuntimeException(Throwable cause) {
-    super(cause);
-    this.rawMessage = null;
-  }
-
-  public CommandRuntimeException(String message, Throwable cause) {
-    super(message, cause);
-    this.rawMessage = null;
-  }
-
-  public CommandRuntimeException(@Nullable Message message, Throwable cause) {
+  public CommandRuntimeException(Message message, Throwable cause) {
     super(cause);
     this.rawMessage = message;
   }
@@ -51,10 +37,5 @@ public class CommandRuntimeException extends RuntimeException {
   public CommandRuntimeException(CommandSyntaxException cause, boolean enableSuppression, boolean writableStackTrace) {
     super(null, cause, enableSuppression, writableStackTrace);
     this.rawMessage = cause.getRawMessage();
-  }
-
-  public CommandRuntimeException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-    this.rawMessage = null;
   }
 }

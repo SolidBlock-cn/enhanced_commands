@@ -32,7 +32,7 @@ public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     try {
       final Tag applied = nbtFunction.apply(blockEntityData.getValue(), context);
       if (applied instanceof CompoundTag nbtCompound) {

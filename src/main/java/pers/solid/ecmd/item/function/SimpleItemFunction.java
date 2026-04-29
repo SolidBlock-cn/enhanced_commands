@@ -1,5 +1,6 @@
 package pers.solid.ecmd.item.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -11,7 +12,7 @@ public record SimpleItemFunction(Holder<Item> item) implements ItemFunction {
   public static final MapCodec<SimpleItemFunction> CODEC = BuiltInRegistries.ITEM.holderByNameCodec().fieldOf("item").xmap(SimpleItemFunction::new, SimpleItemFunction::item);
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     return new ItemStack(item);
   }
 

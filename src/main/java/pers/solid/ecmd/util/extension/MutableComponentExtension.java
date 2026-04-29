@@ -10,6 +10,6 @@ import pers.solid.ecmd.mixins.impl.MutableComponentExtensionImpl;
  */
 public interface MutableComponentExtension {
   default MutableComponent enhanced$$() {
-    throw new UnsupportedOperationException("Only MutableText with TranslatableTextContent can call this method.");
+    throw new UnsupportedOperationException("Only MutableComponent can call this method.");
   }
 }

@@ -27,7 +27,7 @@ public record DryBlockFunction(BlockFunction function) implements BlockFunction 
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     BlockState state = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
       state = state.setValue(BlockStateProperties.WATERLOGGED, false);

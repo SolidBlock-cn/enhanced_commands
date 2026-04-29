@@ -23,7 +23,7 @@ public record EnchantItemFunction(List<EnchantmentModification> modifications) i
   ).apply(i, EnchantItemFunction::new));
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     final ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
     final ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(enchantments);
     for (EnchantmentModification modification : modifications) {

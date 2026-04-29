@@ -20,7 +20,7 @@ public record OverlayItemFunction(List<ItemFunction> functions) implements ItemF
   ).apply(i, OverlayItemFunction::new));
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     for (ItemFunction function : functions) {
       itemStack = function.getModifiedStack(itemStack, originalStack, context);
     }

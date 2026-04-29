@@ -26,7 +26,7 @@ public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunctio
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@org.jetbrains.annotations.Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@org.jetbrains.annotations.Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     return blockState.mirror(mirror.apply((CommandSourceStack) context.positionProvider));
   }
 

@@ -62,7 +62,7 @@ public final class IdContainBlockFunction implements BlockFunction {
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final Block[] blocks = getBlocks(level);
     final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(pos);
     if (blocks.length == 0) {
