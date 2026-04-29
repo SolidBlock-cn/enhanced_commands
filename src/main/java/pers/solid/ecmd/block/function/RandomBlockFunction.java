@@ -67,7 +67,7 @@ public final class RandomBlockFunction implements BlockFunction {
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final Block[] blocks = getBlocks(level.registryAccess(), level.enabledFeatures());
     if (blocks.length == 0) {
       return blockState;

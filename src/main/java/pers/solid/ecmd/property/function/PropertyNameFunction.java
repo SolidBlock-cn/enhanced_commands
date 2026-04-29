@@ -1,7 +1,10 @@
 package pers.solid.ecmd.property.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Block;
@@ -15,17 +18,18 @@ import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 public interface PropertyNameFunction extends ExpressionConvertible {
   Codec<PropertyNameFunction> CODEC = Type.CODEC.dispatch(PropertyNameFunction::getType, type -> type.codec);
+  DynamicCommandExceptionType PROPERTY_DOES_NOT_EXIST = new DynamicCommandExceptionType(propertyName -> Component.translatable("enhanced_commands.property_function.property_does_not_exist", propertyName));
 
   /**
    * 当 must 为 true 时，返回属性或者抛出异常。当 must 为 false 时，返回属性或者 null，不抛出异常。
    */
   @Nullable
-  static Property<?> getProperty(BlockState blockState, String propertyName, boolean must) {
+  static Property<?> getProperty(BlockState blockState, String propertyName, boolean must) throws CommandSyntaxException {
     final StateDefinition<Block, BlockState> stateManager = blockState.getBlock().getStateDefinition();
     final Property<?> property = stateManager.getProperty(propertyName);
     if (property == null || !blockState.hasProperty(property)) {
       if (must) {
-        throw new IllegalArgumentException("property name"); // 考虑是不是应该抛出 CommandSyntaxException
+        throw PROPERTY_DOES_NOT_EXIST.create(propertyName);
       } else {
         return null;
       }
@@ -34,7 +38,7 @@ public interface PropertyNameFunction extends ExpressionConvertible {
   }
 
   @Contract(pure = true)
-  BlockState getModifiedState(BlockState origState, BlockState blockState, RandomSource random);
+  BlockState getModifiedState(BlockState origState, BlockState blockState, RandomSource random) throws CommandSyntaxException;
 
   @Contract(pure = true)
   String propertyName();

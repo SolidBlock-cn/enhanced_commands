@@ -1,5 +1,7 @@
 package pers.solid.ecmd.util;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -21,6 +23,8 @@ import java.util.List;
  * @param attachments  本次测试结果如果含有其他的一些测试，那么此类将包含相应的其他测试的结果。
  */
 public record TestResult(boolean successes, @Unmodifiable List<Component> descriptions, @Unmodifiable List<TestResult> attachments) {
+  private static final DynamicCommandExceptionType EXCEPTION_TYPE = new DynamicCommandExceptionType(testResult -> ((TestResult) testResult).createText());
+
   public TestResult(boolean booleanValue, Component description) {
     this(booleanValue, List.of(description), List.of());
   }
@@ -57,11 +61,20 @@ public record TestResult(boolean successes, @Unmodifiable List<Component> descri
     }
   }
 
-  public void sendMessage(CommandSourceStack serverCommandSource) {
-    serverCommandSource.sendFeedback$ecBridge(() -> {
-      final List<Component> lines = new ArrayList<>();
-      appendTexts(lines, 0);
-      return CommonComponents.joinLines(lines);
-    }, false);
+  /**
+   * 将结果转化为文本组件。
+   */
+  public Component createText() {
+    final List<Component> lines = new ArrayList<>();
+    appendTexts(lines, 0);
+    return CommonComponents.joinLines(lines);
+  }
+
+  public void makeFeedback(CommandSourceStack serverCommandSource) throws CommandSyntaxException {
+    if (successes()) {
+      serverCommandSource.sendFeedback$ecBridge(this::createText, false);
+    } else {
+      throw EXCEPTION_TYPE.create(this);
+    }
   }
 }

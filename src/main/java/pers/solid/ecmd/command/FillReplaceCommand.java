@@ -32,6 +32,7 @@ import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.AllBlockPredicate;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.config.BlockOperationConfig;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
@@ -126,7 +127,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
       }
     }
 
-    final Iterable<BlockPos> posIterable;
+    final Iterable<@Nullable BlockPos> posIterable;
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();
 
@@ -175,8 +176,12 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
     // 第二部分：放置方块
 
     final Iterable<Void> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> {
-      if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
-        numbersAffected.increment();
+      try {
+        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
+          numbersAffected.increment();
+        }
+      } catch (CommandSyntaxException e) {
+        throw new CommandRuntimeException(e);
       }
       return null;
     });
@@ -197,7 +202,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
     }
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
-      final IteratorTask<Void> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
+      final IteratorTask<@Nullable Void> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
           IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1),
           IterateUtils.batchAndSkip(setBlocks, 32768, 15),
           finalClaim

@@ -34,7 +34,7 @@ public record FilterBlockFunction(BlockFunction function, BlockPredicate predica
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final CompoundTag valueBeforeModify = blockEntityData.getValue();
     final BlockState newState = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     final BlockInWorld blockInWorld = new BlockInWorld(level, pos, false);

@@ -1,16 +1,17 @@
 package pers.solid.ecmd.item.function;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.util.ExecutionContext;
 
@@ -19,26 +20,23 @@ public record ModifyComponentItemFunction<T>(DataComponentType<T> component, Nbt
       DataComponentType.CODEC.fieldOf("component").forGetter(ModifyComponentItemFunction::component),
       NbtFunction.CODEC.fieldOf("function").forGetter(ModifyComponentItemFunction::function)
   ).apply(i, ModifyComponentItemFunction::new));
+  private static final DynamicCommandExceptionType FAIL_ORIGINAL = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.item_function.modify_component.fail_original", o));
+  private static final DynamicCommandExceptionType FAIL_MODIFIED = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.item_function.modify_component.fail_modified", o));
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     final @Nullable T original = itemStack.get(component);
     final @Nullable Tag originalSerialized;
     final RegistryOps<Tag> ops = context.registries().createSerializationContext(NbtOps.INSTANCE);
     if (original == null) {
       originalSerialized = null;
     } else {
-      originalSerialized = component.codecOrThrow().encodeStart(ops, original).getOrThrow(); // todo 考虑抛出一个不一样的异常
+      originalSerialized = component.codecOrThrow().encodeStart(ops, original).getOrThrow(FAIL_ORIGINAL::create);
     }
 
-    final Tag applied;
-    try {
-      applied = function.apply(originalSerialized, context);
-    } catch (CommandSyntaxException e) {
-      throw new CommandRuntimeException(e);
-    }
+    final Tag applied = function.apply(originalSerialized, context);
 
-    final T appliedParsed = component.codecOrThrow().parse(ops, applied).getOrThrow();// todo 考虑抛出一个不一样的异常，考虑此类接口的方法要不要都抛出 CommandSyntaxException
+    final T appliedParsed = component.codecOrThrow().parse(ops, applied).getOrThrow(FAIL_MODIFIED::create);
 
     itemStack.set(component, appliedParsed);
     return itemStack;

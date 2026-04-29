@@ -46,7 +46,7 @@ public enum TestForEntityCommand implements TestForCommands.Entry {
       final Entity entity = entities.iterator().next();
       final ExecutionContext executionContext = new ExecutionContext(context.getSource());
       final TestResult testResult = predicate.testAndDescribe(entity, executionContext);
-      testResult.sendMessage(context.getSource());
+      testResult.makeFeedback(context.getSource());
       return BooleanUtils.toInteger(testResult.successes());
     } else {
       final int passes = Iterables.size(Iterables.filter(entities, entity -> predicate.test(entity, new ExecutionContext(context.getSource()))));

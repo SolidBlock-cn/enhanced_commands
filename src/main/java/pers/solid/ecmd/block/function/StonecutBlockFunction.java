@@ -35,7 +35,7 @@ public record StonecutBlockFunction(BlockFunction function) implements BlockFunc
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     blockState = function.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     final Item item = blockState.getBlock().asItem();
     if (item == Items.AIR) {

@@ -30,6 +30,7 @@ import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.curve.Curve;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.SphereRegion;
 import pers.solid.ecmd.util.LoadUtil;
@@ -117,6 +118,9 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
       });
     } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
       posIterable = Iterables.transform(posIterable, blockPos -> {
+        if (blockPos == null) {
+          return null;
+        }
         @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
         if (!chunkLoaded) {
           hasUnloaded.setTrue();
@@ -133,12 +137,12 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
     // 第一部分：收集 oldStates
 
     final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
-    final Iterable<Void> collectPosToAffect;
+    final Iterable<@Nullable Void> collectPosToAffect;
     if (predicate == null) {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
         if (blockPos == null) return null;
         oldStates.put(blockPos.asLong(), world.getBlockState(blockPos));
-        return (Void) null;
+        return null;
       });
     } else {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
@@ -147,22 +151,26 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
         if (blockInWorld.getState() != null && predicate.test(blockInWorld, context)) {
           oldStates.put(blockPos.asLong(), blockInWorld.getState());
         }
-        return (Void) null;
+        return null;
       });
     }
 
     // 第二部分：放置方块
 
-    final Iterable<Void> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> {
-      if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
-        numbersAffected.increment();
+    final Iterable<@Nullable Void> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> {
+      try {
+        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
+          numbersAffected.increment();
+        }
+      } catch (CommandSyntaxException e) {
+        throw new CommandRuntimeException(e);
       }
       return null;
     });
 
     // 第三部分：结束时声明
 
-    final Iterable<Void> finalClaim = IterateUtils.singletonPeekingIterable(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
+    final Iterable<@Nullable Void> finalClaim = IterateUtils.singletonPeekingIterable(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> Component.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
       case BREAK -> Component.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
       default -> Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
@@ -178,9 +186,11 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
 
     if (!immediately && estimatedIterationAmount > 16384) {
       // The region is too large. Send a server task.
-      final IteratorTask<Void> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
-          IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1),
-          IterateUtils.batchAndSkip(setBlocks, 32768, 15),
+      final Iterable<@Nullable Void> a = IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1);
+      final Iterable<@Nullable Void> b = IterateUtils.batchAndSkip(setBlocks, 32768, 15);
+      final IteratorTask<@Nullable Void> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
+          a,
+          b,
           finalClaim
       ).iterator());
       if (history != null) {

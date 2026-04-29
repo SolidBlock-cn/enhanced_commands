@@ -1,5 +1,6 @@
 package pers.solid.ecmd.item.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -11,7 +12,7 @@ public record SetComponentItemFunction<T>(DataComponentType<T> component, T valu
   public static final MapCodec<SetComponentItemFunction<?>> CODEC = DataComponentType.CODEC.dispatchMap("component", SetComponentItemFunction::component, SetComponentItemFunction::codecForDataComponentType);
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     itemStack.set(component, value);
     return itemStack;
   }

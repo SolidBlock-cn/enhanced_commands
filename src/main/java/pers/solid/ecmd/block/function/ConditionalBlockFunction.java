@@ -36,7 +36,7 @@ public record ConditionalBlockFunction(BlockPredicate condition, BlockFunction f
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final BlockInWorld blockInWorld = new BlockInWorld(level, pos, false);
     if (condition.test(blockInWorld, context)) {
       return functionIfTrue.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);

@@ -26,6 +26,7 @@ import pers.solid.ecmd.block.function.SimpleBlockFunction;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.command.FillReplaceCommand;
 import pers.solid.ecmd.config.BlockOperationConfig;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.ExecutionContext;
@@ -303,8 +304,12 @@ public class BlockTransformationTask {
             });
         setRemaining = () -> affectedRemaining.longStream()
             .mapToObj(blockPos -> {
-              if (remaining.setBlock(world, mutable.set(blockPos), blockFunctionContext, null, history)) {
-                affectedBlocks++;
+              try {
+                if (remaining.setBlock(world, mutable.set(blockPos), blockFunctionContext, null, history)) {
+                  affectedBlocks++;
+                }
+              } catch (CommandSyntaxException e) {
+                throw new CommandRuntimeException(e);
               }
               return (Void) null;
             }).iterator();
@@ -313,8 +318,12 @@ public class BlockTransformationTask {
         setRemaining = Iterables.transform(
             iterable,
             blockPos -> {
-              if (blockPos != null && remaining.setBlock(world, blockPos, blockFunctionContext, null, history)) {
-                affectedBlocks++;
+              try {
+                if (blockPos != null && remaining.setBlock(world, blockPos, blockFunctionContext, null, history)) {
+                  affectedBlocks++;
+                }
+              } catch (CommandSyntaxException e) {
+                throw new CommandRuntimeException(e);
               }
               return null;
             });

@@ -1,5 +1,6 @@
 package pers.solid.ecmd.item.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -29,7 +30,7 @@ public final class RandomItemFunction implements ItemFunction {
   }
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     final Level world = context.positionProvider.getWorld$ec();
     final Item[] items = getItems(world.registryAccess(), world.enabledFeatures());
     final Item item = items[context.random.nextInt(items.length)];

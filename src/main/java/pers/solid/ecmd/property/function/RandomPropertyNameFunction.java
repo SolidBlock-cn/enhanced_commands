@@ -1,5 +1,6 @@
 package pers.solid.ecmd.property.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -19,7 +20,7 @@ public record RandomPropertyNameFunction(String propertyName, boolean must) impl
   }
 
   @Override
-  public BlockState getModifiedState(BlockState origState, BlockState blockState, RandomSource random) {
+  public BlockState getModifiedState(BlockState origState, BlockState blockState, RandomSource random) throws CommandSyntaxException {
     final Property<?> property = PropertyNameFunction.getProperty(blockState, propertyName, must);
     if (property == null) {
       return blockState;

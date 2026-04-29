@@ -34,7 +34,7 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     return sample(seed().orElseGet(() -> context.getSeed(this)), list, Vec3.atLowerCornerOf(pos)).getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
   }
 

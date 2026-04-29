@@ -49,7 +49,7 @@ public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> 
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final RandomSource random = context.getSplitter(this).at(pos);
     final Optional<Holder<Block>> randomTag = tag.getRandomElement(random);
     if (randomTag.isEmpty()) return blockState;

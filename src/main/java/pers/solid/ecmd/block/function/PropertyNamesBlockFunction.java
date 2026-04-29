@@ -34,7 +34,7 @@ public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) i
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final RandomSource random = context.getSplitter(this).at(pos);
     for (PropertyNameFunction propertyNameFunction : functions) {
       blockState = propertyNameFunction.getModifiedState(originalState, blockState, random);

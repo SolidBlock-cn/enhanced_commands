@@ -16,6 +16,8 @@ import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 
+import java.util.Objects;
+
 public record CheckerboardBlockFunction(WeightedList<BlockFunction> functions, Vec3 floor, Vec3 scale, Vec3 offset) implements BlockFunction, Checkerboard<BlockFunction> {
   public static final MapCodec<CheckerboardBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       WeightedList.createMapCodec(BlockFunction.CODEC).fieldOf("predicates").forGetter(CheckerboardBlockFunction::functions),
@@ -34,7 +36,7 @@ public record CheckerboardBlockFunction(WeightedList<BlockFunction> functions, V
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final BlockFunction entry = getEntry(functions, pos);
     return entry == null ? blockState : entry.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
   }
@@ -50,6 +52,7 @@ public record CheckerboardBlockFunction(WeightedList<BlockFunction> functions, V
   public static class Parser extends CheckerboardParser<BlockFunction> {
     @Override
     protected CheckerboardBlockFunction getParseResult(Vec3 floor, Vec3 scale, Vec3 offset) {
+      Objects.requireNonNull(weightedList, "weightedList");
       return new CheckerboardBlockFunction(weightedList.transform(blockFunctionArgument -> blockFunctionArgument), floor, scale, offset);
     }
 

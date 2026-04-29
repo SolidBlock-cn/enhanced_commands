@@ -84,6 +84,6 @@ public final class BlockFunctionTypes {
     functionsParser.register("mirror", Component.translatable("enhanced_commands.block_function.mirror"), MirrorBlockFunction.Parser::new);
     functionsParser.register("noise", Component.translatable("enhanced_commands.block_function.noise"), NoiseBlockFunction.Parser::new);
     functionsParser.register("checkerboard", Component.translatable("enhanced_commands.block_function.checkerboard"), CheckerboardBlockFunction.Parser::new);
-    functionsParser.register("checkerboard-,tag", Component.translatable("enhanced_commands.block_function.checkerboard-tag"), CheckerboardTagBlockFunction.Parser::new);
+    functionsParser.register("checkerboard-tag", Component.translatable("enhanced_commands.block_function.checkerboard-tag"), CheckerboardTagBlockFunction.Parser::new);
   }
 }

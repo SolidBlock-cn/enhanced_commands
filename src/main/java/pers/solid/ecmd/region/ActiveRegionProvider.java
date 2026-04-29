@@ -2,6 +2,7 @@ package pers.solid.ecmd.region;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.PositionProvider;
@@ -19,7 +20,7 @@ public enum ActiveRegionProvider implements RegionProvider<Region> {
       if (playerEntity instanceof ServerPlayerExtension serverPlayerEntityExtension) {
         return serverPlayerEntityExtension.getActiveRegionOrThrow$ec().region();
       } else {
-        throw new CommandRuntimeException();
+        throw new CommandRuntimeException(Component.literal("cannot get active region for non-server player")); // 考虑使用可翻译文本
       }
     } catch (CommandSyntaxException e) {
       throw new CommandRuntimeException(e);

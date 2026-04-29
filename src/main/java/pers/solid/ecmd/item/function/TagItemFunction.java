@@ -1,5 +1,6 @@
 package pers.solid.ecmd.item.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
@@ -18,7 +19,7 @@ public record TagItemFunction(HolderSet<Item> tag) implements ItemFunction {
   ).apply(i, TagItemFunction::new));
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     return tag.getRandomElement(context.random).map(ItemStack::new).orElse(ItemStack.EMPTY);
   }
 

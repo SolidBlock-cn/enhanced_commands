@@ -7,12 +7,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
 
-import java.util.Optional;
-
 /**
  * 此类包含与方块状态有关的实用方法。
  */
 public final class StateUtil {
+
   private StateUtil() {
   }
 
@@ -39,24 +38,6 @@ public final class StateUtil {
   public static BlockState getBlockWithRandomProperties(Block block, RandomSource random) {
     final ImmutableList<BlockState> states = block.getStateDefinition().getPossibleStates();
     return states.get(random.nextInt(states.size()));
-  }
-
-  /**
-   * 将方块状态的一个属性设置为由字符串决定的值。
-   *
-   * @param must 当方块状态的值不存在时，是否抛出错误。
-   * @throws IllegalArgumentException 如果方块状态的值不存在，且 {@code must} 为 {@code true}，或者方块状态没有此属性。
-   */
-  public static <T extends Comparable<T>, S extends StateHolder<?, S>> S withPropertyOfValueByName(S state, Property<T> property, String valueName, boolean must) {
-    final Optional<T> parse = property.getValue(valueName);
-    if (parse.isEmpty()) {
-      if (must) {
-        throw new IllegalArgumentException("property value");
-      } else {
-        return state;
-      }
-    }
-    return state.setValue(property, parse.get());
   }
 
   /**

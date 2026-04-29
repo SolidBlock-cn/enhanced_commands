@@ -1,5 +1,6 @@
 package pers.solid.ecmd.item.function;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponentType;
@@ -13,7 +14,7 @@ public record RemoveComponentItemFunction<T>(DataComponentType<T> component) imp
   ).apply(i, RemoveComponentItemFunction::new));
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     itemStack.remove(component);
     return itemStack;
   }

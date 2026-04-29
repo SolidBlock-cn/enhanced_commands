@@ -1,6 +1,7 @@
 package pers.solid.ecmd.util;
 
 import com.google.common.base.Preconditions;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -23,6 +24,7 @@ import java.util.Map;
  * 此模组包含的一些扩展的 {@link CommandExceptionType}。
  */
 public final class EnhancedCommandsCommandExceptionTypes {
+  public static final DynamicCommandExceptionType DIRECT = new DynamicCommandExceptionType(component -> (Message) component);
   public static final DynamicCommandExceptionType INVALID_REGEX = new DynamicCommandExceptionType(msg -> Component.translatable("enhanced_commands.argument.regex.invalid", msg));
   public static final Dynamic2CommandExceptionType BLOCK_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((blockId, blockName) -> Component.translatable("enhanced_commands.argument.block.feature_required", blockId, blockName));
   public static final Dynamic2CommandExceptionType ITEM_ID_FEATURE_FLAG_REQUIRED = new Dynamic2CommandExceptionType((itemId, itemName) -> Component.translatable("enhanced_commands.argument.item.feature_required", itemId, itemName));

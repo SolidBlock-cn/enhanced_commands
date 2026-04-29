@@ -1,6 +1,7 @@
 package pers.solid.ecmd.item.function;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.ItemStack;
@@ -16,7 +17,7 @@ public record ItemComponentCombinationItemFunction(ItemFunction base, List<ItemF
   ).apply(i, ItemComponentCombinationItemFunction::new));
 
   @Override
-  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) {
+  public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
     itemStack = base.getModifiedStack(itemStack, originalStack, context);
     for (ItemFunction itemFunction : components) {
       itemStack = itemFunction.getModifiedStack(itemStack, originalStack, context);

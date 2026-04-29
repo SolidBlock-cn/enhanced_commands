@@ -132,11 +132,11 @@ public interface BlockFunction extends ExpressionConvertible {
     throw CANNOT_PARSE.createWithContext(reader);
   }
 
-  default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context) {
+  default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context) throws CommandSyntaxException {
     return setBlock(world, pos, context, null, null);
   }
 
-  default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context, @Nullable BlockState oldState, @Nullable BlockPlacementHistory history) {
+  default boolean setBlock(Level world, BlockPos pos, BlockFunctionContext context, @Nullable BlockState oldState, @Nullable BlockPlacementHistory history) throws CommandSyntaxException {
     final BlockState origState = world.getBlockState(pos);
     MutableObject<@Nullable CompoundTag> blockEntityData = new MutableObject<>(null);
     BlockState newState = getModifiedState(origState, origState, world, pos, blockEntityData, context);
@@ -175,7 +175,7 @@ public interface BlockFunction extends ExpressionConvertible {
    * @param context         正在修改的方块修改时的 flags。
    * @return 修改后的方块状态。
    */
-  BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context);
+  BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException;
 
   BlockFunctionType<?> getType();
 

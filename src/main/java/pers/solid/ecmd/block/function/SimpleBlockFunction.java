@@ -47,7 +47,7 @@ public record SimpleBlockFunction(Block block, List<PropertyFunction<?>> propert
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     BlockState stateToPlace = block.defaultBlockState();
     final RandomSource random = context.getSplitter(this).at(pos);
     for (PropertyFunction<?> propertyFunction : properties) {
