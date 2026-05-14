@@ -1,42 +1,36 @@
 package pers.solid.ecmd.util.iterator;
 
-import com.google.common.collect.ForwardingIterator;
 import net.minecraft.network.chat.Component;
+import org.apache.commons.lang3.function.FailableRunnable;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 
 import java.util.Iterator;
 import java.util.UUID;
 
-public class IteratorTask<T extends @Nullable Object> extends ForwardingIterator<T> {
-  public final Component name;
-  public final UUID uuid;
-  private final Iterator<T> delegate;
-  private boolean started;
-  public boolean suspended = false;
+public interface IteratorTask extends Iterator<@Nullable FailableRunnable<Throwable>> {
 
-  public IteratorTask(Component name, UUID uuid, Iterator<T> delegate) {
-    this.name = name;
-    this.uuid = uuid;
-    this.delegate = delegate;
+  @Contract(pure = true)
+  Component getName();
+
+  @Contract(pure = true)
+  UUID getUuid();
+
+  @Contract(pure = true)
+  boolean suspended();
+
+  void setSuspended(boolean suspended);
+
+  default void onReceiveCancelCommand() {
   }
 
-  @Override
-  public Iterator<T> delegate() {
-    return delegate;
+  default void onReceiveSuspendCommand() {
   }
 
-  @Override
-  public T next() {
-    if (!started) {
-      BlockableEventLoopExtension.LOGGER.info("Starting iterator task {}", name.getString());
-      started = true;
-    }
-    return super.next();
+  default void onReceiveContinueCommand() {
   }
 
-  @Override
-  public String toString() {
-    return "IteratorTask[" + name.getString() + ", " + delegate + "]";
+  default void onError(Throwable throwable) throws Throwable {
+    throw throwable;
   }
 }

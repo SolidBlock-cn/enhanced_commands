@@ -11,5 +11,5 @@ public interface History {
   @Contract(pure = true)
   Component getName();
 
-  Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable History> undo(CommandSourceStack source, boolean immediately, boolean undoable);
+  Pair<? extends @Nullable IteratorTask, ? extends @Nullable History> undo(CommandSourceStack source, boolean immediately, boolean undoable);
 }

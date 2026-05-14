@@ -15,6 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -79,7 +80,8 @@ public interface BlockTransformationCommand {
     final int flags = FillReplaceCommand.getFlags(keywordArgs);
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final @Nullable Long seed = keywordArgs.getArg("seed");
-    final @Nullable BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(getIteratorTaskName(region), world, flags, modFlags) : null;
+    final MutableComponent iteratorTaskName = getIteratorTaskName(region);
+    final @Nullable BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(iteratorTaskName, world, flags, modFlags) : null;
     final BlockTransformationTask.Builder builder = BlockTransformationTask.builder(world, region)
         .setBlockPredicateContext(new ExecutionContext(world.getRandom(), source, seed))
         .setBlockFunctionContext(new BlockFunctionContext(flags, modFlags, world.getRandom(), source, seed))
@@ -119,7 +121,7 @@ public interface BlockTransformationCommand {
     }
     final RegionSelection transformedRegionSelection = oldActiveRegion != null && region.equals(oldActiveRegion.region()) ? oldActiveRegion.transformed(this::transformPos) : null;
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      final IteratorTask<@Nullable Void> iteratorTask = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(getIteratorTaskName(region), Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), IterateUtils.singletonPeekingIterator(() -> {
+      final FailableRunnable<Throwable> completionTask = () -> {
 
         if (transformedRegionSelection != null) {
           history.reverseEntities.add(Triple.of(player, Pair.of(
@@ -130,12 +132,13 @@ public interface BlockTransformationCommand {
         }
         notifyUnloadedPos(task, unloadedPosBehavior, source);
         notifyCompletion(source, task.getAffectedBlocks(), entitiesToAffect == null ? -1 : task.getAffectedEntities());
-      })));
+      };
+      final IteratorTask iteratorTask = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(iteratorTaskName, Iterators.concat(task.transformBlocks().getSpeedAdjustedTask(), Iterators.singletonIterator(completionTask)), source);
       history.task = iteratorTask;
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
-      IterateUtils.exhaust(task.transformBlocks().getImmediateTask());
+      IterateUtils.exhaustCommand(task.transformBlocks().getImmediateTask());
       notifyUnloadedPos(task, unloadedPosBehavior, source);
       final int affectedBlocks = task.getAffectedBlocks();
       final int affectedEntities = task.getAffectedEntities();

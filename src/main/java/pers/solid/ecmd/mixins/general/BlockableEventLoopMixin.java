@@ -15,23 +15,23 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Mixin(BlockableEventLoop.class)
 public class BlockableEventLoopMixin implements BlockableEventLoopExtension {
   @Unique
-  private final Map<UUID, IteratorTask<?>> enhanced_commands$uuidToTask = new MapMaker().weakValues().makeMap();
+  private final Map<UUID, IteratorTask> enhanced_commands$uuidToTask = new MapMaker().weakValues().makeMap();
   @Unique
-  private final Queue<IteratorTask<?>> enhanced_commands$iteratorTasks = new ConcurrentLinkedQueue<>();
+  private final Queue<IteratorTask> enhanced_commands$iteratorTasks = new ConcurrentLinkedQueue<>();
 
   @Override
-  public void addIteratorTask$ec(IteratorTask<?> task) {
+  public void addIteratorTask$ec(IteratorTask task) {
     enhanced_commands$iteratorTasks.add(task);
-    enhanced_commands$uuidToTask.put(task.uuid, task);
+    enhanced_commands$uuidToTask.put(task.getUuid(), task);
   }
 
   @Override
-  public Queue<IteratorTask<?>> getIteratorTasks$ec() {
+  public Queue<IteratorTask> getIteratorTasks$ec() {
     return enhanced_commands$iteratorTasks;
   }
 
   @Override
-  public Map<UUID, IteratorTask<?>> getUUIDToIteratorTasks$ec() {
+  public Map<UUID, IteratorTask> getUUIDToIteratorTasks$ec() {
     return enhanced_commands$uuidToTask;
   }
 }

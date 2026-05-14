@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,6 @@ import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.AllBlockPredicate;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.config.BlockOperationConfig;
-import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
@@ -43,6 +43,7 @@ import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.iterator.IteratorTask;
 
+import java.util.Collections;
 import java.util.List;
 
 import static net.minecraft.commands.Commands.argument;
@@ -157,38 +158,31 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
 
     final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-    final Iterable<Void> collectPosToAffect;
+    final Iterable<FailableRunnable<Throwable>> collectPosToAffect;
     if (predicate == null) {
-      collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
+      collectPosToAffect = Iterables.transform(posIterable, blockPos -> () -> {
         oldStates.put(blockPos.asLong(), world.getBlockState(blockPos));
-        return null;
       });
     } else {
-      collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
+      collectPosToAffect = Iterables.transform(posIterable, blockPos -> () -> {
         final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
         if (blockInWorld.getState() != null && predicate.test(blockInWorld, context)) {
           oldStates.put(blockPos.asLong(), blockInWorld.getState());
         }
-        return null;
       });
     }
 
     // 第二部分：放置方块
 
-    final Iterable<Void> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> {
-      try {
-        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
-          numbersAffected.increment();
-        }
-      } catch (CommandSyntaxException e) {
-        throw new CommandRuntimeException(e);
+    final Iterable<FailableRunnable<Throwable>> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
+      if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
+        numbersAffected.increment();
       }
-      return null;
     });
 
     // 第三部分：结束时声明
 
-    final Iterable<Void> finalClaim = IterateUtils.singletonPeekingIterable(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
+    final Iterable<FailableRunnable<Throwable>> finalClaim = Collections.singleton(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> Component.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
       case BREAK -> Component.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
       default -> Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
@@ -202,18 +196,19 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
     }
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
-      final IteratorTask<@Nullable Void> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
+      final Iterable<@Nullable FailableRunnable<Throwable>> combinedIterable = Iterables.concat(
           IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1),
           IterateUtils.batchAndSkip(setBlocks, 32768, 15),
           finalClaim
-      ).iterator());
+      );
+      final IteratorTask task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, combinedIterable.iterator(), source);
       if (history != null) {
         history.task = task;
       }
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
-      IterateUtils.exhaust(Iterables.concat(collectPosToAffect, setBlocks, finalClaim).iterator());
+      IterateUtils.exhaustCommand(Iterables.concat(collectPosToAffect, setBlocks, finalClaim).iterator());
       return numbersAffected.intValue();
     }
   }

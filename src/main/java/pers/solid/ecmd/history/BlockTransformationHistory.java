@@ -12,8 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.iterator.ForwardingIteratorTask;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.iterator.IteratorTask;
 
@@ -33,13 +35,13 @@ public class BlockTransformationHistory extends BlockPlacementHistory {
   }
 
   @Override
-  public Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable BlockTransformationHistory> undo(CommandSourceStack source, boolean immediately, boolean undoable) {
+  public Pair<? extends @Nullable IteratorTask, ? extends @Nullable BlockTransformationHistory> undo(CommandSourceStack source, boolean immediately, boolean undoable) {
     final var s = super.undo(source, immediately, undoable);
-    final @Nullable IteratorTask<?> superTask = s.getFirst();
+    final @Nullable IteratorTask superTask = s.getFirst();
     final @Nullable BlockPlacementHistory superHistory = s.getSecond();
     final BlockTransformationHistory redoHistory = superHistory == null ? null : new BlockTransformationHistory(superHistory.name, superHistory.world, superHistory.flag, superHistory.modFlag, superHistory.oldStates, superHistory.oldEntityData);
 
-    Iterable<Void> undoEntityTransformation = Iterables.transform(reverseEntities, entry -> {
+    Iterable<FailableRunnable<Throwable>> undoEntityTransformation = Iterables.transform(reverseEntities, entry -> () -> {
       final Entity entity = entry.getLeft();
       final var pair = entry.getMiddle();
       final Consumer<Entity> undo = pair == null ? null : pair.getFirst();
@@ -59,11 +61,14 @@ public class BlockTransformationHistory extends BlockPlacementHistory {
       if (redoHistory != null) {
         redoHistory.reverseEntities.add(Triple.of(entity, pair == null ? null : pair.swap(), oldPos));
       }
-      return null;
     });
-    final IteratorTask<?> redoTask = superTask == null ? null : new IteratorTask<>(superTask.name, superTask.uuid, Iterators.concat(superTask.delegate(), IterateUtils.batchAndSkip(undoEntityTransformation, 16384, 7).iterator()));
+    final IteratorTask redoTask = superTask == null ? null : new ForwardingIteratorTask(superTask.getName(), superTask.getUuid(), Iterators.concat(superTask, IterateUtils.batchAndSkip(undoEntityTransformation, 16384, 7).iterator()), source);
     if (superTask == null) {
-      IterateUtils.exhaust(undoEntityTransformation.iterator());
+      try {
+        IterateUtils.exhaust(undoEntityTransformation.iterator());
+      } catch (Throwable e) {
+        throw new RuntimeException(e);
+      }
     }
     return Pair.of(redoTask, redoHistory);
   }
