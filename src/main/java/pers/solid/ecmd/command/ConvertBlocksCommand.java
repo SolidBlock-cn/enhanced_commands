@@ -20,6 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +37,7 @@ import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.iterator.IteratorTask;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -89,7 +91,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
         throw FillReplaceCommand.UNLOADED_POS.create();
       }
     }
-    final Iterator<Void> mainIterator;
+    final Iterator<@Nullable FailableRunnable<Throwable>> mainIterator;
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();
     Stream<BlockPos> stream = region.stream();
@@ -112,7 +114,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final boolean affectFluid = keywordArgs.getBoolean("affect_fluid");
     final ExecutionContext executionContext = new ExecutionContext(world.getRandom(), source, seed);
-    final Function<BlockPos, Void> mapper = blockPos -> {
+    final Function<BlockPos, @Nullable FailableRunnable<Throwable>> mapper = blockPos -> () -> {
       final Entity entity = conversion.getConvertedEntity(world, blockPos, flags, modFlags, affectFluid);
       if (nbtFunction != null) {
         try {
@@ -122,7 +124,6 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
         }
       }
       numbersAffected.increment();
-      return null;
     };
     if (predicate == null || predicate instanceof ConstantBlockPredicate) {
       if (predicate == null) {
@@ -136,27 +137,25 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
           stream = stream.filter(blockPos -> !world.getBlockState(blockPos).isAir());
         }
       }
-      mainIterator = stream.map(mapper)
-          .iterator();
+      mainIterator = stream.map(mapper).iterator();
     } else {
       LongList posThatMatch = new LongArrayList();
       final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-      Iterator<Void> testPosIterator = stream.<Void>map(blockPos -> {
+      Iterator<@Nullable FailableRunnable<Throwable>> testPosIterator = stream.map(blockPos -> (FailableRunnable<Throwable>) () -> {
             final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, true);
             if (predicate.test(blockInWorld, executionContext)) {
               posThatMatch.add(blockPos.asLong());
             }
-            return null;
           })
           .iterator();
-      Iterable<Void> placingIterator = () -> posThatMatch.longStream()
+      Iterable<@Nullable FailableRunnable<Throwable>> placingIterator = () -> posThatMatch.longStream()
           .mapToObj(mutable::set)
           .map(mapper)
           .iterator();
       mainIterator = Iterables.concat(() -> testPosIterator, placingIterator).iterator();
     }
 
-    final Iterator<Void> finalClaimIterator = IterateUtils.singletonPeekingIterator(() -> {
+    final Iterator<@Nullable FailableRunnable<Throwable>> finalClaimIterator = Iterators.singletonIterator(() -> {
       if (hasUnloaded.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.broken").withStyle(Styles.ACTUAL), false);
@@ -166,14 +165,14 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
       }
       source.sendFeedback$ecBridge(() -> feedback.apply(numbersAffected.intValue()), true);
     });
-    final Iterator<Void> iterator = Iterators.concat(mainIterator, finalClaimIterator);
+    final Iterator<@Nullable FailableRunnable<Throwable>> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!keywordArgs.getBoolean("immediately") && region.numberOfBlocksAffected() > 2048) {
-      ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(Component.translatable("enhanced_commands.commands.convertblocks.task_name", region.expressAsString()), IterateUtils.batchAndSkip(iterator, 1024, 15));
+      final IteratorTask task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(Component.translatable("enhanced_commands.commands.convertblocks.task_name", region.expressAsString()), IterateUtils.batchAndSkip(iterator, 1024, 15), source);
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
-      IterateUtils.exhaust(iterator);
+      IterateUtils.exhaustCommand(iterator);
       return numbersAffected.intValue();
     }
   }

@@ -66,7 +66,7 @@ public enum UndoCommand implements CommandRegistrationCallbackBridge {
         throw NO_UNDOABLE_HISTORY.create();
       }
     } else {
-      final Pair<? extends @Nullable IteratorTask<?>, ? extends @Nullable History> reverse = poll.undo(source, immediately, undoable);
+      final Pair<? extends @Nullable IteratorTask, ? extends @Nullable History> reverse = poll.undo(source, immediately, undoable);
       if (reverse.getFirst() != null) {
         ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(reverse.getFirst());
       }

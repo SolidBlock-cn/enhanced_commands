@@ -30,7 +30,7 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     final SuggestionProvider<CommandSourceStack> taskUuidSuggestion = (context, builder) -> {
-      final Map<UUID, IteratorTask<?>> uuidToTasks = ((BlockableEventLoopExtension) context.getSource().getServer()).getUUIDToIteratorTasks$ec();
+      final Map<UUID, IteratorTask> uuidToTasks = ((BlockableEventLoopExtension) context.getSource().getServer()).getUUIDToIteratorTasks$ec();
       return SharedSuggestionProvider.suggest(uuidToTasks.keySet().stream().map(UUID::toString), builder);
     };
     dispatcher.register(EnhancedCommandsCommands.literalR2("tasks")
@@ -61,7 +61,7 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static int executeCountTasks(MinecraftServer server, CommandContext<CommandSourceStack> context) {
-    final Queue<IteratorTask<?>> iteratorTasks = ((BlockableEventLoopExtension) server).getIteratorTasks$ec();
+    final Queue<IteratorTask> iteratorTasks = ((BlockableEventLoopExtension) server).getIteratorTasks$ec();
     final int size = iteratorTasks.size();
     if (size == 0) {
       context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.count.none", size), false);
@@ -72,7 +72,7 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static int executeClearTasks(MinecraftServer server, CommandContext<CommandSourceStack> context) {
-    final Queue<IteratorTask<?>> iteratorTasks = ((BlockableEventLoopExtension) server).getIteratorTasks$ec();
+    final Queue<IteratorTask> iteratorTasks = ((BlockableEventLoopExtension) server).getIteratorTasks$ec();
     final int size = iteratorTasks.size();
     iteratorTasks.clear();
     if (size == 0) {
@@ -86,12 +86,12 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
   private static final DynamicCommandExceptionType TASK_UUID_DOES_NOT_EXIST = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.commands.tasks.not_exist", o));
 
   private static int executeRemoveTask(MinecraftServer server, CommandContext<CommandSourceStack> context, UUID uuid) throws CommandSyntaxException {
-    final Map<UUID, IteratorTask<?>> uuidToTasks = ((BlockableEventLoopExtension) server).getUUIDToIteratorTasks$ec();
+    final Map<UUID, IteratorTask> uuidToTasks = ((BlockableEventLoopExtension) server).getUUIDToIteratorTasks$ec();
     if (uuidToTasks.containsKey(uuid)) {
-      final IteratorTask<?> remove = uuidToTasks.remove(uuid);
+      final IteratorTask remove = uuidToTasks.remove(uuid);
       ((BlockableEventLoopExtension) server).getIteratorTasks$ec().remove(remove);
       if (remove != null) {
-        context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.remove.success", remove.name), true);
+        context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.remove.success", remove.getName()), true);
         return 1;
       } else {
         context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.remove.collected").withStyle(ChatFormatting.YELLOW), true);
@@ -118,25 +118,25 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static int executeSetTaskSuspension(MinecraftServer server, CommandContext<CommandSourceStack> context, UUID uuid, boolean suspension) throws CommandSyntaxException {
-    final Map<UUID, IteratorTask<?>> uuidToTasks = ((BlockableEventLoopExtension) server).getUUIDToIteratorTasks$ec();
+    final Map<UUID, IteratorTask> uuidToTasks = ((BlockableEventLoopExtension) server).getUUIDToIteratorTasks$ec();
     if (uuidToTasks.containsKey(uuid)) {
-      final IteratorTask<?> iteratorTask = uuidToTasks.get(uuid);
+      final IteratorTask iteratorTask = uuidToTasks.get(uuid);
       if (iteratorTask != null) {
         if (suspension) {
-          if (iteratorTask.suspended) {
-            throw new CommandSyntaxException(null, Component.translatable("enhanced_commands.commands.tasks.suspend.already_suspended", iteratorTask.name));
+          if (iteratorTask.suspended()) {
+            throw new CommandSyntaxException(null, Component.translatable("enhanced_commands.commands.tasks.suspend.already_suspended", iteratorTask.getName()));
           } else {
-            iteratorTask.suspended = true;
-            context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.suspend.success", iteratorTask.name).append("  ").append(Component.translatable("enhanced_commands.commands.tasks.buttons", ComponentUtils.formatList(List.of(createContinueButton(uuid), createRemoveButton(uuid)), Component.literal("|"))).withStyle(ChatFormatting.GRAY)), true);
+            iteratorTask.setSuspended(true);
+            context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.suspend.success", iteratorTask.getName()).append("  ").append(Component.translatable("enhanced_commands.commands.tasks.buttons", ComponentUtils.formatList(List.of(createContinueButton(uuid), createRemoveButton(uuid)), Component.literal("|"))).withStyle(ChatFormatting.GRAY)), true);
             return 2;
           }
         } else {
-          if (iteratorTask.suspended) {
-            iteratorTask.suspended = false;
-            context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.continue.success", iteratorTask.name).append("  ").append(Component.translatable("enhanced_commands.commands.tasks.buttons", ComponentUtils.formatList(List.of(createSuspendButton(uuid), createRemoveButton(uuid)), Component.literal("|"))).withStyle(ChatFormatting.GRAY)), true);
+          if (iteratorTask.suspended()) {
+            iteratorTask.setSuspended(false);
+            context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.continue.success", iteratorTask.getName()).append("  ").append(Component.translatable("enhanced_commands.commands.tasks.buttons", ComponentUtils.formatList(List.of(createSuspendButton(uuid), createRemoveButton(uuid)), Component.literal("|"))).withStyle(ChatFormatting.GRAY)), true);
             return 1;
           } else {
-            throw new CommandSyntaxException(null, Component.translatable("enhanced_commands.commands.tasks.continue.not_suspended", iteratorTask.name));
+            throw new CommandSyntaxException(null, Component.translatable("enhanced_commands.commands.tasks.continue.not_suspended", iteratorTask.getName()));
           }
         }
       } else {
@@ -147,21 +147,21 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static int executeSprintTask(MinecraftServer server, CommandContext<CommandSourceStack> context, UUID uuid, int limit) throws CommandSyntaxException {
-    final Map<UUID, IteratorTask<?>> uuidToTasks = ((BlockableEventLoopExtension) server).getUUIDToIteratorTasks$ec();
+    final Map<UUID, IteratorTask> uuidToTasks = ((BlockableEventLoopExtension) server).getUUIDToIteratorTasks$ec();
     if (uuidToTasks.containsKey(uuid)) {
-      final IteratorTask<?> iteratorTask = uuidToTasks.get(uuid);
+      final IteratorTask iteratorTask = uuidToTasks.get(uuid);
       if (iteratorTask != null) {
-        context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.sprint.start", iteratorTask.name), true);
+        context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.sprint.start", iteratorTask.getName()), true);
         if (limit <= 0) {
-          IterateUtils.exhaust(iteratorTask);
+          IterateUtils.exhaustCommand(iteratorTask);
         } else {
-          IterateUtils.exhaust(Iterators.limit(iteratorTask, limit));
+          IterateUtils.exhaustCommand(Iterators.limit(iteratorTask, limit));
         }
         if (!iteratorTask.hasNext()) {
-          uuidToTasks.remove(iteratorTask.uuid);
+          uuidToTasks.remove(iteratorTask.getUuid());
           ((BlockableEventLoopExtension) server).getIteratorTasks$ec().remove(iteratorTask);
         }
-        context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.sprint.success", iteratorTask.name), true);
+        context.getSource().sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.tasks.sprint.success", iteratorTask.getName()), true);
         return 1;
       } else {
         uuidToTasks.remove(uuid);
@@ -172,7 +172,7 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static int executeListTasks(MinecraftServer server, CommandContext<CommandSourceStack> context, int limit) {
-    final Queue<IteratorTask<?>> iteratorTasks = ((BlockableEventLoopExtension) server).getIteratorTasks$ec();
+    final Queue<IteratorTask> iteratorTasks = ((BlockableEventLoopExtension) server).getIteratorTasks$ec();
     final int size = iteratorTasks.size();
 
     if (size == 0) {
@@ -182,17 +182,17 @@ public enum TasksCommand implements CommandRegistrationCallbackBridge {
     @NotNull CommandSourceStack source = context.getSource();
     source.sendFeedback$ecBridge(() -> {
       final MutableComponent message = Component.translatable("enhanced_commands.commands.tasks.list.summary", Integer.toString(size)).enhanced$$();
-      for (IteratorTask<?> iteratorTask : Iterables.limit(iteratorTasks, limit)) {
+      for (IteratorTask iteratorTask : Iterables.limit(iteratorTasks, limit)) {
         final List<Component> list = new ArrayList<>();
-        if (iteratorTask.suspended) {
+        if (iteratorTask.suspended()) {
           list.add(Component.translatable("enhanced_commands.commands.tasks.buttons.suspended").withStyle(ChatFormatting.LIGHT_PURPLE));
-          list.add(createContinueButton(iteratorTask.uuid));
+          list.add(createContinueButton(iteratorTask.getUuid()));
         } else {
-          list.add(createSuspendButton(iteratorTask.uuid));
+          list.add(createSuspendButton(iteratorTask.getUuid()));
         }
-        list.add(createSprintButton(iteratorTask.uuid));
-        list.add(createRemoveButton(iteratorTask.uuid));
-        message.append(CommonComponents.NEW_LINE).append(Component.literal(" - ").withStyle(ChatFormatting.GRAY).append(Component.translatable("enhanced_commands.commands.tasks.buttons", ComponentUtils.formatList(list, Component.literal("|")))).append(CommonComponents.SPACE).append(iteratorTask.name));
+        list.add(createSprintButton(iteratorTask.getUuid()));
+        list.add(createRemoveButton(iteratorTask.getUuid()));
+        message.append(CommonComponents.NEW_LINE).append(Component.literal(" - ").withStyle(ChatFormatting.GRAY).append(Component.translatable("enhanced_commands.commands.tasks.buttons", ComponentUtils.formatList(list, Component.literal("|")))).append(CommonComponents.SPACE).append(iteratorTask.getName()));
       }
       if (size > limit) {
         message.append(CommonComponents.NEW_LINE).append(Component.translatable("enhanced_commands.commands.tasks.list.limit_note").withStyle(style -> style.withColor(0xffa960)));

@@ -1,6 +1,7 @@
 package pers.solid.ecmd.command;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -19,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -98,54 +100,49 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     MutableInt blocksSkipped = unloadedPosBehavior == UnloadedPosBehavior.SKIP ? new MutableInt() : null;
     MutableBoolean shouldBreak = new MutableBoolean();
 
-    final Iterable<Void> calculation = Iterables.transform(region.stream().takeWhile(i -> !shouldBreak.booleanValue())::iterator, blockPos -> {
+    final Iterable<FailableRunnable<Throwable>> calculation = Iterables.transform(region.stream().takeWhile(i -> !shouldBreak.booleanValue())::iterator, blockPos -> () -> {
       final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
       if (blockInWorld.getState() == null) {
         if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
           blocksSkipped.increment();
-          return null;
+          return;
         } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.broken").withStyle(ChatFormatting.YELLOW), false);
           shouldBreak.setTrue();
-          return null;
         }
       }
       blocksCounted.increment();
       final boolean test = blockPredicate.test(blockInWorld, new ExecutionContext(world.getRandom(), source, seed));
       if (test) blocksMatched.increment();
-
       if (testType == TestType.ANY && test) {
         source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.any.true", TextUtil.wrapVector(blockPos.immutable()), blockInWorld.getState().getBlock().getName()).withStyle(Styles.TRUE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
         returnValue.setValue(0);
         shouldBreak.setTrue();
-        return null;
       } else if (testType == TestType.ALL && !test) {
         source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.all.false", TextUtil.wrapVector(blockPos.immutable()), blockInWorld.getState().getBlock().getName()).withStyle(Styles.FALSE).append(" ").append(createToolbarText(blockPos, blockPredicate)), false);
         returnValue.setValue(1);
         shouldBreak.setTrue();
-        return null;
       }
-      return null;
     });
 
-    final Iterable<Void> notifySkip = () -> IterateUtils.singletonPeekingIterator(() -> {
+    final Iterable<FailableRunnable<Throwable>> notifySkip = () -> Iterators.singletonIterator(() -> {
       if (unloadedPosBehavior == UnloadedPosBehavior.SKIP && blocksSkipped.intValue() > 0)
         source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.skipped", blocksSkipped.intValue()).enhanced$$().withStyle(ChatFormatting.YELLOW), false);
     });
-    final Iterator<Void> conclusion = switch (testType) {
-      case ANY -> IterateUtils.singletonPeekingIterator(() -> {
+    final Iterator<FailableRunnable<Throwable>> conclusion = switch (testType) {
+      case ANY -> Iterators.singletonIterator(() -> {
         if (blocksMatched.intValue() == 0) {
           source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.any.false", blocksCounted.intValue()).enhanced$$().withStyle(Styles.FALSE), false);
           returnValue.setValue(0);
         }
       });
-      case ALL -> IterateUtils.singletonPeekingIterator(() -> {
+      case ALL -> Iterators.singletonIterator(() -> {
         if (blocksMatched.intValue() == blocksCounted.intValue()) {
           source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.all.true", blocksCounted.intValue()).enhanced$$().withStyle(Styles.TRUE), false);
           returnValue.setValue(1);
         }
       });
-      case COMPARE -> IterateUtils.singletonPeekingIterator(() -> {
+      case COMPARE -> Iterators.singletonIterator(() -> {
         final int counted = blocksCounted.intValue();
         final int matched = blocksMatched.intValue();
         final int mismatched = counted - matched;
@@ -157,14 +154,14 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
         }
         returnValue.setValue(matched >= mismatched ? 1 : 0);
       });
-      case COUNT -> IterateUtils.singletonPeekingIterator(() -> {
+      case COUNT -> Iterators.singletonIterator(() -> {
         final int counted = blocksCounted.intValue();
         final int matched = blocksMatched.intValue();
         final int mismatched = counted - matched;
         source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.count.result", TextUtil.literal(counted).withStyle(Styles.RESULT), TextUtil.literal(matched).withStyle(Styles.RESULT), TextUtil.literal(mismatched).withStyle(Styles.RESULT)).enhanced$$(), false);
         returnValue.setValue(matched);
       });
-      case PROPORTION -> IterateUtils.singletonPeekingIterator(() -> {
+      case PROPORTION -> Iterators.singletonIterator(() -> {
         final int counted = blocksCounted.intValue();
         final int matched = blocksMatched.intValue();
         final double proportion = 100d * matched / counted;
@@ -173,15 +170,15 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       });
     };
 
-    final Iterable<Void> mainIterable = Iterables.concat(calculation, notifySkip, () -> conclusion);
+    final Iterable<FailableRunnable<Throwable>> mainIterable = Iterables.concat(calculation, notifySkip, () -> conclusion);
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       final Component taskName = Component.translatable("enhanced_commands.commands.testfor.blocks.task_name", region.expressAsString());
-      ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(mainIterable.iterator(), 32768, 3));
+      ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, IterateUtils.batchAndSkip(mainIterable.iterator(), 32768, 3), source);
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.large_region", Long.toString(region.numberOfBlocksAffected())).enhanced$$().withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
-      IterateUtils.exhaust(mainIterable.iterator());
+      IterateUtils.exhaustCommand(mainIterable.iterator());
       return returnValue.shortValue();
     }
   }

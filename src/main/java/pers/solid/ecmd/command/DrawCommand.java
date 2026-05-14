@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.AABB;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +42,7 @@ import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.iterator.IteratorTask;
 
+import java.util.Collections;
 import java.util.stream.LongStream;
 
 import static net.minecraft.commands.Commands.argument;
@@ -137,27 +139,25 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
     // 第一部分：收集 oldStates
 
     final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
-    final Iterable<@Nullable Void> collectPosToAffect;
+    final Iterable<FailableRunnable<Throwable>> collectPosToAffect;
     if (predicate == null) {
-      collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
-        if (blockPos == null) return null;
+      collectPosToAffect = Iterables.transform(posIterable, blockPos -> () -> {
+        if (blockPos == null) return;
         oldStates.put(blockPos.asLong(), world.getBlockState(blockPos));
-        return null;
       });
     } else {
-      collectPosToAffect = Iterables.transform(posIterable, blockPos -> {
-        if (blockPos == null) return null;
+      collectPosToAffect = Iterables.transform(posIterable, blockPos -> () -> {
+        if (blockPos == null) return;
         final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
         if (blockInWorld.getState() != null && predicate.test(blockInWorld, context)) {
           oldStates.put(blockPos.asLong(), blockInWorld.getState());
         }
-        return null;
       });
     }
 
     // 第二部分：放置方块
 
-    final Iterable<@Nullable Void> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> {
+    final Iterable<FailableRunnable<Throwable>> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
       try {
         if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
           numbersAffected.increment();
@@ -165,12 +165,11 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
       } catch (CommandSyntaxException e) {
         throw new CommandRuntimeException(e);
       }
-      return null;
     });
 
     // 第三部分：结束时声明
 
-    final Iterable<@Nullable Void> finalClaim = IterateUtils.singletonPeekingIterable(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
+    final Iterable<FailableRunnable<Throwable>> finalClaim = Collections.singleton(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> Component.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
       case BREAK -> Component.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
       default -> Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
@@ -186,20 +185,20 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
 
     if (!immediately && estimatedIterationAmount > 16384) {
       // The region is too large. Send a server task.
-      final Iterable<@Nullable Void> a = IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1);
-      final Iterable<@Nullable Void> b = IterateUtils.batchAndSkip(setBlocks, 32768, 15);
-      final IteratorTask<@Nullable Void> task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
+      final Iterable<@Nullable FailableRunnable<Throwable>> a = IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1);
+      final Iterable<@Nullable FailableRunnable<Throwable>> b = IterateUtils.batchAndSkip(setBlocks, 32768, 15);
+      final IteratorTask task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
           a,
           b,
           finalClaim
-      ).iterator());
+      ).iterator(), source);
       if (history != null) {
         history.task = task;
       }
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Double.toString(estimatedIterationAmount)).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
-      IterateUtils.exhaust(Iterables.concat(collectPosToAffect, setBlocks, finalClaim).iterator());
+      IterateUtils.exhaustCommand(Iterables.concat(collectPosToAffect, setBlocks, finalClaim).iterator());
       return numbersAffected.intValue();
     }
   }

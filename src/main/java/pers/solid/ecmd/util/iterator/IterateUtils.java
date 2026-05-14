@@ -3,13 +3,17 @@ package pers.solid.ecmd.util.iterator;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.PrimitiveIterator;
 import java.util.function.LongFunction;
 import java.util.stream.Stream;
 
@@ -20,71 +24,28 @@ public final class IterateUtils {
   private IterateUtils() {
   }
 
-  private static final List<Optional<Void>> singleList = List.of(Optional.empty());
-
-  @Contract(pure = true)
-  public static <T> Stream<T> singletonNullStream() {
-    return Stream.of((T) null);
-  }
-
-  /**
-   * 返回一个仅产生一个 {@code null} 的流，这个流在运行过程中会执行一次 {@code runnable}。例如：
-   * <pre>{@code
-   *  singletonPeekingStream(() -> System.out.println("Hello world!")).toList();
-   *  // 输出 "Hello world!"，同时返回一个含有单个 null 的列表。
-   * }</pre>
-   *
-   * @param runnable 流在运行中需要运行的 {@link Runnable}。
-   * @return 仅产生一个 {@code null} 的流。
-   */
-  @Contract(pure = true)
-  public static <T> Stream<T> singletonPeekingStream(Runnable runnable) {
-    return IterateUtils.<T>singletonNullStream().peek(o -> runnable.run());
-  }
-
-  /**
-   * 返回一个仅产生一个 {@code null} 的 iterable，这个 iterable 在运行过程中会执行一次 {@code runnable}。例如：
-   * <pre>{@code
-   *  var iterable = singletonPeekingIterable(() -> System.out.println("Hello world!"));
-   *  for (var n : iterable) {
-   *    System.out.println(iterator.next());
-   *  }
-   *  // 输出 "Hello world!"，同时输出一个 null。
-   * }</pre>
-   *
-   * @param runnable 迭代器在迭代过程中需要运行的 {@link Runnable}。
-   * @return 仅产生一个 {@code null} 的流。
-   */
-  public static <T> Iterable<T> singletonPeekingIterable(Runnable runnable) {
-    return Iterables.transform(singleList, input -> {
-      runnable.run();
-      return null;
-    });
-  }
-
-  /**
-   * 返回一个仅产生一个 {@code null} 的迭代器，这个迭代器在运行过程中会执行一次 {@code runnable}。例如：
-   * <pre>{@code
-   *  var iterator = singletonPeekingIterator(() -> System.out.println("Hello world!"));
-   *  while (iterator.hasNext()) {
-   *    System.out.println(iterator.next());
-   *  }
-   *  // 输出 "Hello world!"，同时输出一个 null。
-   * }</pre>
-   *
-   * @param runnable 迭代器在迭代过程中需要运行的 {@link Runnable}。
-   * @return 仅产生一个 {@code null} 的流。
-   */
-  public static <T> Iterator<T> singletonPeekingIterator(Runnable runnable) {
-    final Iterable<T> iterable = singletonPeekingIterable(runnable);
-    return iterable.iterator();
-  }
-
   /**
    * Exhaust the iterator, causing {@code hasNext} and {@code next} called until {@code hasNext} returns {@code false}. If it is an iterator that always "has next" (such as an infinity cycling iterator), it will cause an infinite loop.
    */
-  public static void exhaust(Iterator<?> iterator) {
-    while (iterator.hasNext()) iterator.next();
+  public static <T extends Throwable> void exhaust(Iterator<@Nullable FailableRunnable<T>> iterator) throws T {
+    while (iterator.hasNext()) {
+      final FailableRunnable<T> next = iterator.next();
+      if (next != null) {
+        next.run();
+      }
+    }
+  }
+
+  public static <T extends Throwable> void exhaustCommand(Iterator<@Nullable FailableRunnable<T>> iterator) throws CommandSyntaxException {
+    try {
+      exhaust(iterator);
+    } catch (Throwable e) {
+      if (e instanceof CommandSyntaxException s) {
+        throw s;
+      } else {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   /**
@@ -114,7 +75,7 @@ public final class IterateUtils {
    * @param skipTimes 迭代器运行一次 {@code next()} 后，之后多少次的 {@code next()} 将不执行任何操作（不调用 {@code entityPredicate.next()}）并返回 {@code null}。
    */
   @Contract(pure = true)
-  public static <E> Iterator<E> batchAndSkip(Iterator<E> forward, int batchSize, int skipTimes) {
+  public static <E> Iterator<@Nullable E> batchAndSkip(Iterator<E> forward, int batchSize, int skipTimes) {
     return new SkippingIterator<>(new BatchedIterator<>(forward, batchSize), skipTimes);
   }
 
