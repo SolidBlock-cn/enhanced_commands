@@ -20,7 +20,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -100,7 +99,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
     MutableInt blocksSkipped = unloadedPosBehavior == UnloadedPosBehavior.SKIP ? new MutableInt() : null;
     MutableBoolean shouldBreak = new MutableBoolean();
 
-    final Iterable<FailableRunnable<Throwable>> calculation = Iterables.transform(region.stream().takeWhile(i -> !shouldBreak.booleanValue())::iterator, blockPos -> () -> {
+    final Iterable<Runnable> calculation = Iterables.transform(region.stream().takeWhile(i -> !shouldBreak.booleanValue())::iterator, blockPos -> () -> {
       final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
       if (blockInWorld.getState() == null) {
         if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
@@ -125,11 +124,11 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       }
     });
 
-    final Iterable<FailableRunnable<Throwable>> notifySkip = () -> Iterators.singletonIterator(() -> {
+    final Iterable<Runnable> notifySkip = () -> Iterators.singletonIterator(() -> {
       if (unloadedPosBehavior == UnloadedPosBehavior.SKIP && blocksSkipped.intValue() > 0)
         source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.skipped", blocksSkipped.intValue()).enhanced$$().withStyle(ChatFormatting.YELLOW), false);
     });
-    final Iterator<FailableRunnable<Throwable>> conclusion = switch (testType) {
+    final Iterator<Runnable> conclusion = switch (testType) {
       case ANY -> Iterators.singletonIterator(() -> {
         if (blocksMatched.intValue() == 0) {
           source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.testfor.blocks.any.false", blocksCounted.intValue()).enhanced$$().withStyle(Styles.FALSE), false);
@@ -170,7 +169,7 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
       });
     };
 
-    final Iterable<FailableRunnable<Throwable>> mainIterable = Iterables.concat(calculation, notifySkip, () -> conclusion);
+    final Iterable<Runnable> mainIterable = Iterables.concat(calculation, notifySkip, () -> conclusion);
 
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       final Component taskName = Component.translatable("enhanced_commands.commands.testfor.blocks.task_name", region.expressAsString());

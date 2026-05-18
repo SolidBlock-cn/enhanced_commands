@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -223,7 +222,7 @@ public class BlockTransformationTask {
 
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
-    final Iterable<@Nullable FailableRunnable<Throwable>> storeTransformed;
+    final Iterable<@Nullable Runnable> storeTransformed;
     {
       Iterable<@Nullable BlockPos> oldPosIterable = modifyIterableForUnloadedPos(region);
 
@@ -248,11 +247,11 @@ public class BlockTransformationTask {
       });
     }
 
-    final Iterable<@Nullable FailableRunnable<Throwable>> collectMatchingTransformed;
+    final Iterable<@Nullable Runnable> collectMatchingTransformed;
     final LongSet matchingBlockPos;
     if (affectsOnly != null) {
       matchingBlockPos = new LongOpenHashSet();
-      collectMatchingTransformed = () -> transformedStates.keySet().longStream().mapToObj(longValue -> (FailableRunnable<Throwable>) () -> {
+      collectMatchingTransformed = () -> transformedStates.keySet().longStream().mapToObj(longValue -> (Runnable) () -> {
         mutable.set(longValue);
         if (affectsOnly.test(new BlockInWorld(world, mutable, unloadedPosBehavior == UnloadedPosBehavior.FORCE), executionContext)) {
           matchingBlockPos.add(longValue);
@@ -267,7 +266,7 @@ public class BlockTransformationTask {
     if (affectsOnly != null) {
       releaseTransformedPos = Iterables.filter(releaseTransformedPos, entry -> matchingBlockPos.contains(entry.getLongKey()));
     }
-    final Iterable<@Nullable FailableRunnable<Throwable>> releaseTransformed = Iterables.transform(modifyIterableForUnloadedPos(Iterables.transform(releaseTransformedPos, input -> mutable.set(input.getLongKey()))),
+    final Iterable<@Nullable Runnable> releaseTransformed = Iterables.transform(modifyIterableForUnloadedPos(Iterables.transform(releaseTransformedPos, input -> mutable.set(input.getLongKey()))),
         transformedBlockPos -> {
           if (transformedBlockPos == null) return null;
           final BlockState transformedState = transformedStates.get(transformedBlockPos.asLong());
@@ -286,10 +285,10 @@ public class BlockTransformationTask {
           return null;
         });
 
-    final Iterable<@Nullable FailableRunnable<Throwable>> transformEntities = transformEntities();
+    final Iterable<@Nullable Runnable> transformEntities = transformEntities();
 
-    final Iterable<@Nullable FailableRunnable<Throwable>> collectMatchingRemaining;
-    final Iterable<@Nullable FailableRunnable<Throwable>> setRemaining;
+    final Iterable<@Nullable Runnable> collectMatchingRemaining;
+    final Iterable<@Nullable Runnable> setRemaining;
 
     if (remaining != null) {
       final BatchedFilterIterable<@Nullable BlockPos> iterable = new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong()));
@@ -304,7 +303,7 @@ public class BlockTransformationTask {
               return null;
             });
         setRemaining = () -> affectedRemaining.longStream()
-            .mapToObj(blockPos -> (FailableRunnable<Throwable>) () -> {
+            .mapToObj(blockPos -> (Runnable) () -> {
               try {
                 if (remaining.setBlock(world, mutable.set(blockPos), blockFunctionContext, null, history)) {
                   affectedBlocks++;
@@ -333,7 +332,7 @@ public class BlockTransformationTask {
     }
 
     final BoundingBox untransformedBox;
-    final Iterable<@Nullable FailableRunnable<Throwable>> addInterpolation;
+    final Iterable<@Nullable Runnable> addInterpolation;
     if (interpolation && posTransformer != null && invertedPosTransformer != null && (untransformedBox = region.minContainingBlockBox()) != null) {
       final List<BlockPos> transformedCorners = new ArrayList<>();
       untransformedBox.forAllCorners(blockPos -> transformedCorners.add(BlockPos.containing(posTransformer.apply(blockPos.getCenter()))));
@@ -378,10 +377,10 @@ public class BlockTransformationTask {
     return new TaskSeries(this, storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation);
   }
 
-  private Iterable<@Nullable FailableRunnable<Throwable>> transformEntities() {
-    final Iterable<@Nullable FailableRunnable<Throwable>> transformEntities;
+  private Iterable<@Nullable Runnable> transformEntities() {
+    final Iterable<@Nullable Runnable> transformEntities;
     if (entitiesToAffect != null) {
-      transformEntities = Iterables.transform(() -> entitiesToAffect, entity -> (FailableRunnable<Throwable>) () -> {
+      transformEntities = Iterables.transform(() -> entitiesToAffect, entity -> (Runnable) () -> {
         if (history != null) {
           history.reverseEntities.add(Triple.of(entity, entityTransformer == null ? null : Pair.of(reverseEntityTransformer, entityTransformer), posTransformer != null ? entity.position() : null));
         }
@@ -415,13 +414,13 @@ public class BlockTransformationTask {
     return new Builder(world, region);
   }
 
-  public record TaskSeries(BlockTransformationTask self, Iterable<@Nullable FailableRunnable<Throwable>> storeTransformed, Iterable<@Nullable FailableRunnable<Throwable>> collectMatchingTransformed, Iterable<@Nullable FailableRunnable<Throwable>> releaseTransformed, Iterable<@Nullable FailableRunnable<Throwable>> transformEntities, Iterable<@Nullable FailableRunnable<Throwable>> collectMatchingRemaining, Iterable<@Nullable FailableRunnable<Throwable>> setRemaining, Iterable<@Nullable FailableRunnable<Throwable>> addInterpolation) {
+  public record TaskSeries(BlockTransformationTask self, Iterable<@Nullable Runnable> storeTransformed, Iterable<@Nullable Runnable> collectMatchingTransformed, Iterable<@Nullable Runnable> releaseTransformed, Iterable<@Nullable Runnable> transformEntities, Iterable<@Nullable Runnable> collectMatchingRemaining, Iterable<@Nullable Runnable> setRemaining, Iterable<@Nullable Runnable> addInterpolation) {
     // 使用 iterable 而非 iterator 是为了惰性计算，有些迭代器所使用的集合是在之前的迭代器中添加的，为了避免出现错误，应该在完成了添加集合元素之后，再调用集合的 iterator() 方法。
-    private Iterable<@Nullable FailableRunnable<Throwable>> logIterable(String message) {
+    private Iterable<@Nullable Runnable> logIterable(String message) {
       return Collections.singleton(() -> LOGGER.info("Task {}: {}", self.region.expressAsString(), message));
     }
 
-    public Iterator<@Nullable FailableRunnable<Throwable>> getSpeedAdjustedTask() {
+    public Iterator<@Nullable Runnable> getSpeedAdjustedTask() {
       return Iterables.concat(
           () -> Iterators.singletonIterator(self::addUndoableHistory),
           logIterable("store_transformed"),
@@ -441,7 +440,7 @@ public class BlockTransformationTask {
       ).iterator();
     }
 
-    public Iterator<@Nullable FailableRunnable<Throwable>> getImmediateTask() {
+    public Iterator<@Nullable Runnable> getImmediateTask() {
       return UnloadedPosException.catching(Iterables.concat(() -> Iterators.singletonIterator(self::addUndoableHistory), storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation).iterator());
     }
   }

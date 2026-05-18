@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.thread.BlockableEventLoop;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,7 @@ public interface BlockableEventLoopExtension {
     getUUIDToIteratorTasks$ec().put(task.getUuid(), task);
   }
 
-  default IteratorTask addIteratorTask$ec(Component name, Iterator<@Nullable FailableRunnable<Throwable>> iterator, CommandSourceStack source) {
+  default IteratorTask addIteratorTask$ec(Component name, Iterator<@Nullable Runnable> iterator, CommandSourceStack source) {
     final IteratorTask task = new ForwardingIteratorTask(name, UUID.randomUUID(), iterator, source);
     addIteratorTask$ec(task);
     return task;
@@ -74,7 +73,7 @@ public interface BlockableEventLoopExtension {
         continue;
       }
       try {
-        final FailableRunnable<Throwable> next = task.next();
+        final Runnable next = task.next();
         if (next != null) {
           next.run();
         }

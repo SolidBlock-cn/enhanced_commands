@@ -15,7 +15,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -121,7 +120,7 @@ public interface BlockTransformationCommand {
     }
     final RegionSelection transformedRegionSelection = oldActiveRegion != null && region.equals(oldActiveRegion.region()) ? oldActiveRegion.transformed(this::transformPos) : null;
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      final FailableRunnable<Throwable> completionTask = () -> {
+      final Runnable completionTask = () -> {
 
         if (transformedRegionSelection != null) {
           history.reverseEntities.add(Triple.of(player, Pair.of(

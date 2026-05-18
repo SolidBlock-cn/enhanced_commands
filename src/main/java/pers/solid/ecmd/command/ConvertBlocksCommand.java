@@ -20,7 +20,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -91,7 +90,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
         throw FillReplaceCommand.UNLOADED_POS.create();
       }
     }
-    final Iterator<@Nullable FailableRunnable<Throwable>> mainIterator;
+    final Iterator<@Nullable Runnable> mainIterator;
     final MutableInt numbersAffected = new MutableInt();
     final MutableBoolean hasUnloaded = new MutableBoolean();
     Stream<BlockPos> stream = region.stream();
@@ -114,7 +113,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final boolean affectFluid = keywordArgs.getBoolean("affect_fluid");
     final ExecutionContext executionContext = new ExecutionContext(world.getRandom(), source, seed);
-    final Function<BlockPos, @Nullable FailableRunnable<Throwable>> mapper = blockPos -> () -> {
+    final Function<BlockPos, @Nullable Runnable> mapper = blockPos -> () -> {
       final Entity entity = conversion.getConvertedEntity(world, blockPos, flags, modFlags, affectFluid);
       if (nbtFunction != null) {
         try {
@@ -141,21 +140,21 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
     } else {
       LongList posThatMatch = new LongArrayList();
       final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-      Iterator<@Nullable FailableRunnable<Throwable>> testPosIterator = stream.map(blockPos -> (FailableRunnable<Throwable>) () -> {
+      Iterator<@Nullable Runnable> testPosIterator = stream.map(blockPos -> (Runnable) () -> {
             final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, true);
             if (predicate.test(blockInWorld, executionContext)) {
               posThatMatch.add(blockPos.asLong());
             }
           })
           .iterator();
-      Iterable<@Nullable FailableRunnable<Throwable>> placingIterator = () -> posThatMatch.longStream()
+      Iterable<@Nullable Runnable> placingIterator = () -> posThatMatch.longStream()
           .mapToObj(mutable::set)
           .map(mapper)
           .iterator();
       mainIterator = Iterables.concat(() -> testPosIterator, placingIterator).iterator();
     }
 
-    final Iterator<@Nullable FailableRunnable<Throwable>> finalClaimIterator = Iterators.singletonIterator(() -> {
+    final Iterator<@Nullable Runnable> finalClaimIterator = Iterators.singletonIterator(() -> {
       if (hasUnloaded.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.broken").withStyle(Styles.ACTUAL), false);
@@ -165,7 +164,7 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
       }
       source.sendFeedback$ecBridge(() -> feedback.apply(numbersAffected.intValue()), true);
     });
-    final Iterator<@Nullable FailableRunnable<Throwable>> iterator = Iterators.concat(mainIterator, finalClaimIterator);
+    final Iterator<@Nullable Runnable> iterator = Iterators.concat(mainIterator, finalClaimIterator);
 
     if (!keywordArgs.getBoolean("immediately") && region.numberOfBlocksAffected() > 2048) {
       final IteratorTask task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(Component.translatable("enhanced_commands.commands.convertblocks.task_name", region.expressAsString()), IterateUtils.batchAndSkip(iterator, 1024, 15), source);

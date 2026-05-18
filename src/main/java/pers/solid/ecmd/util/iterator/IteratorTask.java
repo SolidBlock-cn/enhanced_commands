@@ -1,14 +1,13 @@
 package pers.solid.ecmd.util.iterator;
 
 import net.minecraft.network.chat.Component;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.UUID;
 
-public interface IteratorTask extends Iterator<@Nullable FailableRunnable<Throwable>> {
+public interface IteratorTask extends Iterator<@Nullable Runnable> {
 
   @Contract(pure = true)
   Component getName();
