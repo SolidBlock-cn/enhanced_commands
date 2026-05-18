@@ -1,9 +1,8 @@
 package pers.solid.ecmd.nbt.predicate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ListMultimap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,7 +11,10 @@ import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParsingUtil;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -32,10 +34,15 @@ import java.util.stream.Collectors;
  *
  * @see net.minecraft.nbt.NbtUtils#compareNbt(Tag, Tag, boolean)
  */
-public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredicate> entries) implements NbtPredicate {
+public record MatchCompoundNbtPredicate(List<Entry> entries) implements NbtPredicate {
   public static final MapCodec<MatchCompoundNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC.listOf()).<ListMultimap<String, NbtPredicate>>xmap(map -> map.entrySet().stream().collect(ImmutableListMultimap.flatteningToImmutableListMultimap(Map.Entry::getKey, entry -> entry.getValue().stream())), map -> Maps.transformValues(map.asMap(), ImmutableList::copyOf)).fieldOf("entries").forGetter(matchCompoundNbtPredicate -> matchCompoundNbtPredicate.entries)
-  ).apply(i, MatchCompoundNbtPredicate::new)); // todo 换一个更好的 codec
+      Codec.either(Codec.unboundedMap(Codec.STRING, NbtPredicate.CODEC), Entry.CODEC.codec().listOf()).<List<Entry>>xmap(
+          either -> either.map(
+              (Map<@Nullable String, NbtPredicate> ordinaryMap) -> ordinaryMap.entrySet().stream().map(mapEntry -> new Entry(mapEntry.getKey(), mapEntry.getValue())).collect(ImmutableList.toImmutableList()),
+              Function.identity()
+          ), entries -> entries.stream().allMatch(entry -> entry.key() != null) && entries.stream().map(Entry::key).distinct().count() == entries.size() ? Either.left(entries.stream().collect(ImmutableMap.toImmutableMap(Entry::key, Entry::value))) : Either.right(entries)
+      ).fieldOf("entries").forGetter(MatchCompoundNbtPredicate::entries)
+  ).apply(i, MatchCompoundNbtPredicate::new));
 
   @Override
   public String expressAsString() {
@@ -44,10 +51,10 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredic
 
   @Override
   public String asString(boolean requirePrefix) {
-    return (requirePrefix ? ": " : "") + "{" + entries.entries().stream().map(pair -> {
-      final String key = pair.getKey();
+    return (requirePrefix ? ": " : "") + "{" + entries.stream().map(entry -> {
+      final String key = entry.key();
       final String keyAsString;
-      final NbtPredicate value = pair.getValue();
+      final NbtPredicate value = entry.value();
       if (key == null) {
         keyAsString = "*";
       } else {
@@ -66,9 +73,9 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredic
   public boolean test(Tag nbtElement) {
     if (!(nbtElement instanceof final CompoundTag nbtCompound))
       return false;
-    for (Map.Entry<@Nullable String, NbtPredicate> entry : entries.entries()) {
-      final String key = entry.getKey();
-      final NbtPredicate valuePredicate = entry.getValue();
+    for (Entry entry : entries) {
+      final @Nullable String key = entry.key();
+      final NbtPredicate valuePredicate = entry.value();
       if (key != null) {
         final Tag actualElement = nbtCompound.get(key);
         if (actualElement == null || !valuePredicate.test(actualElement)) {
@@ -93,5 +100,20 @@ public record MatchCompoundNbtPredicate(ListMultimap<@Nullable String, NbtPredic
   @Override
   public NbtPredicateType<MatchCompoundNbtPredicate> getType() {
     return NbtPredicateTypes.MATCH_COMPOUND;
+  }
+
+  public record Entry(@Nullable String key, NbtPredicate value) {
+    public static final MapCodec<Entry> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+        Codec.STRING.optionalFieldOf("key").forGetter(Entry::optionalKey),
+        NbtPredicate.CODEC.fieldOf("value").forGetter(Entry::value)
+    ).apply(i, Entry::new));
+
+    public Optional<String> optionalKey() {
+      return Optional.ofNullable(key);
+    }
+
+    public Entry(Optional<String> key, NbtPredicate value) {
+      this(key.orElse(null), value);
+    }
   }
 }
