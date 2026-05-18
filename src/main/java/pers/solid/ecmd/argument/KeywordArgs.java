@@ -5,6 +5,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -22,7 +23,7 @@ public class KeywordArgs {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> T getArg(String name) {
+  public <T> @Nullable T getArg(String name) {
     Preconditions.checkArgument(type.arguments().containsKey(name), "Invalid arg propertyName: %s", name);
     if (values.containsKey(name)) {
       return (T) values.get(name);
@@ -37,30 +38,39 @@ public class KeywordArgs {
     }
   }
 
+  public <T> T getRequiredArg(String name) {
+    final T nullable = getArg(name);
+    if (nullable != null) {
+      return nullable;
+    } else {
+      throw new IllegalArgumentException("Argument %s is required, but not provided".formatted(name));
+    }
+  }
+
   public int getInt(String name) {
-    return getArg(name);
+    return getRequiredArg(name);
   }
 
   public double getDouble(String name) {
-    return getArg(name);
+    return getRequiredArg(name);
   }
 
 
   public float getFloat(String name) {
-    return getArg(name);
+    return getRequiredArg(name);
   }
 
   public boolean getBoolean(String name) {
-    return getArg(name);
+    return getRequiredArg(name);
   }
 
   public BlockPos getBlockPos(String name, CommandSourceStack source) {
-    Coordinates argument = getArg(name);
+    Coordinates argument = getRequiredArg(name);
     return argument.getBlockPos(source);
   }
 
   public Vec3 getPosition(String name, CommandSourceStack source) {
-    Coordinates argument = getArg(name);
+    Coordinates argument = getRequiredArg(name);
     return argument.getPosition(source);
   }
 }

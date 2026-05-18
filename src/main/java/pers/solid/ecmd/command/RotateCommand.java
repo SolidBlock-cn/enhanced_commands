@@ -25,7 +25,6 @@ import org.joml.AxisAngle4d;
 import org.joml.Vector3d;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
-import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.GeoUtil;
 

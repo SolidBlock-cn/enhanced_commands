@@ -1,17 +1,13 @@
 package pers.solid.ecmd.util.extension;
 
 import com.google.common.collect.Iterables;
-import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.thread.BlockableEventLoop;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.command.FillReplaceCommand;
-import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.iterator.ForwardingIteratorTask;
 import pers.solid.ecmd.util.iterator.IteratorTask;
 
@@ -40,19 +36,6 @@ public interface BlockableEventLoopExtension {
   Queue<IteratorTask> getIteratorTasks$ec();
 
   Map<UUID, IteratorTask> getUUIDToIteratorTasks$ec();
-
-  default void receiveCommandRuntimeException(CommandRuntimeException commandRuntimeException) {
-    // todo 错误处理应当改由各 task 自行进行
-    final Component message = ComponentUtils.fromMessage(commandRuntimeException.rawMessage);
-    if (this instanceof MinecraftServer server) {
-      server.createCommandSourceStack().sendFailure(message);
-    } else if (this instanceof Minecraft client) {
-      client.gui.getChat().addMessage(message);
-      client.getNarrator().sayNow(message);
-    } else {
-      LOGGER.warn("Does not know how to feedback CommandRuntimeException: {}", message.getString());
-    }
-  }
 
   /**
    * The method is used to handle tasks, such as those created by {@link FillReplaceCommand} when handling quantities of blocks.
