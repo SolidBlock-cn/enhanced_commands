@@ -2,55 +2,31 @@
   "type": "enhanced_commands:conditions",
   "conditions": [
     {
-      "condition": {
-        "type": "enhanced_commands:tag",
-        "tag": "enhanced_commands:nether_fungus"
-      },
-      "then": {
-        "type": "enhanced_commands:tag",
-        "tag": "#minecraft:small_flowers"
-      }
+      "condition": "#enhanced_commands:nether_fungus",
+      "then": "#minecraft:small_flowers"
     },
     {
-      "condition": {
-        "type": "enhanced_commands:tag",
-        "tag": "enhanced_commands:nether_roots"
-      },
+      "condition": "#enhanced_commands:nether_roots",
       "then": "minecraft:short_grass"
     },
     {
-      "condition": {
-        "type": "enhanced_commands:tag",
-        "tag": "enhanced_commands:nether_natural_stem"
-      },
+      "condition": "#enhanced_commands:nether_natural_stem",
       "then": "minecraft:oak_log"
     },
     {
-      "condition": {
-        "type": "enhanced_commands:tag",
-        "tag": "enhanced_commands:nether_natural_hyphae"
-      },
+      "condition": "#enhanced_commands:nether_natural_hyphae",
       "then": "minecraft:oak_wood"
     },
     {
-      "condition": {
-        "type": "enhanced_commands:tag",
-        "tag": "enhanced_commands:nether_stripped_stem"
-      },
+      "condition": "#enhanced_commands:nether_stripped_stem",
       "then": "minecraft:stripped_oak_log"
     },
     {
-      "condition": {
-        "type": "enhanced_commands:tag",
-        "tag": "enhanced_commands:nether_stripped_hyphae"
-      },
+      "condition": "#enhanced_commands:nether_stripped_hyphae",
       "then": "minecraft:stripped_oak_wood"
     },
     {
-      "condition": {
-        "type": "enhanced_commands:tag",
-        "tag": "minecraft:wart_blocks"
-      },
+      "condition": "#minecraft:wart_blocks",
       "then": {
         "type": "enhanced_commands:simple",
         "block": "minecraft:oak_leaves",
@@ -64,10 +40,7 @@
       }
     },
     {
-      "condition": {
-        "type": "enhanced_commands:tag",
-        "tag": "enhanced_commands:nether_vines"
-      },
+      "condition": "#enhanced_commands:nether_vines",
       "then": "minecraft:vine"
     }
   ]

@@ -4,17 +4,11 @@
     "type": "enhanced_commands:pick",
     "entries": [
       {
-        "element": {
-          "type": "enhanced_commands:tag",
-          "tag": "#enhanced_commands:gray_colors"
-        },
+        "element": "#enhanced_commands:gray_colors",
         "weight": 0.75
       },
       {
-        "element": {
-          "type": "enhanced_commands:tag",
-          "tag": "#enhanced_commands:dead_coral_block"
-        },
+        "element": "#enhanced_commands:dead_coral_block",
         "weight": 0.25
       }
     ],
