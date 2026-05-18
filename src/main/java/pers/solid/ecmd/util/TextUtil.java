@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.biome.Biome;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
@@ -25,6 +26,7 @@ import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
@@ -110,6 +112,19 @@ public final class TextUtil {
    */
   public static MutableComponent wrapBoolean(boolean b) {
     return Component.literal(Boolean.toString(b)).withStyle(b ? ChatFormatting.GREEN : ChatFormatting.RED);
+  }
+
+  /**
+   * 简单地描述一个或多个实体，对于一个实体，仅返回实体名称，多个实体则返回诸如“苦力怕等32个实体”的形式。
+   */
+  public static Component wrapEntities(Collection<? extends Entity> entities) {
+    if (entities.size() == 1) {
+      return entities.iterator().next().getDisplayName();
+    } else if (entities.size() > 1) {
+      return Component.translatable("enhanced_commands.util.entities.with_example", entities.size(), entities.iterator().next().getDisplayName()).enhanced$$();
+    } else {
+      return Component.translatable("enhanced_commands.util.entities", 0).enhanced$$();
+    }
   }
 
   /**

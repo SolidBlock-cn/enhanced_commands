@@ -534,6 +534,13 @@
   "enhanced_commands.commands.undo.large_region": "Starting to undo an action of %s $plural(blocks, block), which may take some time.",
   "enhanced_commands.commands.undo.name": "Undo action: %s",
   "enhanced_commands.commands.undo.no_history": "No undoable history",
+  "enhanced_commands.commands.velocity.add.success": "Successfully added the velocity of %1$s by %2$s",
+  "enhanced_commands.commands.velocity.cross.success": "Successfully modified the velocity of %1$s by calculating its vector product with %2$s",
+  "enhanced_commands.commands.velocity.multiply.success": "Successfully multiplied the velocity of %1$s by %2$s",
+  "enhanced_commands.commands.velocity.scale.success": "Successfully scaled the velocity of %1$s by %2$s",
+  "enhanced_commands.commands.velocity.set.success": "Successfully set the velocity of %1$s to %2$s",
+  "enhanced_commands.commands.velocity.setsize.success": "Successfully set the size of velocity of %1$s to %2$s",
+  "enhanced_commands.commands.velocity.subtract.success": "Successfully added the velocity of %1$s by %2$s",
   "enhanced_commands.commands.weather.query": "The current weather is %s; clear duration: %s, rain duration: %s, thunder duration: %s",
   "enhanced_commands.commands.weather.query.clear": "clear",
   "enhanced_commands.commands.weather.query.rain": "raining",
@@ -978,5 +985,7 @@
   "enhanced_commands.region_selection.sphere.set_center": "The center of the sphere is set to %s",
   "enhanced_commands.region_selection.sphere.set_radius": "The radius of sphere is adjusted so as to fit %s",
   "enhanced_commands.region_selection.sphere.statistics": "The radius radius of the sphere is %s",
+  "enhanced_commands.util.entities": "%1$s $plural(entities, entity)",
+  "enhanced_commands.util.entities.with_example": "%1$s $plural(entities, entity) such as %2$s",
   "item.enhanced_commands.region_selection_tool": "Region selection tool"
 }

@@ -42,9 +42,9 @@ public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> 
   public String expressAsString() {
     final String tagString = tag.unwrap().map(blockTagKey -> "#" + blockTagKey.location(), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ", "[", "]")));
     if (properties.isEmpty()) {
-      return "#" + tagString;
+      return tagString;
     } else {
-      return "#" + tagString + "[" + properties.stream().map(PropertyNameFunction::expressAsString).collect(Collectors.joining(", ")) + "]";
+      return tagString + "[" + properties.stream().map(PropertyNameFunction::expressAsString).collect(Collectors.joining(", ")) + "]";
     }
   }
 
