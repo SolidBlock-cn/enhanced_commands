@@ -13,13 +13,13 @@ These commands are used to operate on blocks (sometimes including entities) with
 - [`/convertblocks`](convertblocks/en.md) and `//convertblocks`: Convert the blocks within a range to specific entities.
 - [`/draw`](draw/en.md): Draw a curve in the world.
 - [`/mirror`](mirror/en.md) and `//mirror`: Mirror (flip) the blocks and entities within a range.
-- [`/move`](move/en.md) and `//move`: Move the blocks and entities within a range.
+- [`/moveblocks`](moveblocks/en.md) and `//moveblocks`: Move the blocks and entities within a range.
 - [`/outline`](outline/en.md): Fill the blocks on the outline of a region. It can also fill the inner part within the outline meanwhile.
 - [`/postprocess`](postprocess/en.md) and `//postprocess`: Postprocess on blocks, such as fixing connection issues related to fences and walls.
 - [`/replace`](replace/en.md) and `//replace`: Replace blocks within a region that match the specified predicate.
-- [`/rotate`](rotate/en.md) and `//rotate`: Rotate blocks and entities within a region.
+- [`/rotateblocks`](rotateblocks/en.md) and `//rotateblocks`: Rotate blocks and entities within a region.
 - [`/setblocks`](setblocks/en.md), `//setblocks` and `/s`, `//s`: Set the blocks within a region.
-- [`/stack`](stack/en.md) and `//stack`: Duplicate the region in one direction.
+- [`/stackblocks`](stackblocks/en.md) and `//stackblocks`: Duplicate the region in one direction.
 - [`/wall`](wall/en.md): Fill the walls in a region. It can also fill the inner part within the wall meanwhile.
 
 ## Entity commands
@@ -52,7 +52,7 @@ Separated subcommands of `/execute` include:
     - [`blockinfo`](if_and_unless/blockinfo/en.md): Execute the command when the block info match or does not match the specified condition.
     - [`rand`](if_and_unless/rand/en.md): Execute or do not execute the command on a specified probability.
 - Attribution subcommands:
-    - `/as`, `/at`, `/positioned`, `/rotated`, `/facing`, `/align`, `/anchored`, `/in`, `/summon` etc.
+    - `/as`, `/at`, `/positioned`, `/rotateblocksd`, `/facing`, `/align`, `/anchored`, `/in`, `/summon` etc.
     - [`/inregion`](inregion/en.md) (added in the mod): Execute commands in each block coordinates within a range.
     - [`/silenced`](silenced/en.md) (added in the mod): Execute commands without leaving any feedback in the chat or console.
     - [`/for`](for/en.md) (added in the mod)

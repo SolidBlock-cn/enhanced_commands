@@ -18,7 +18,7 @@ public final class UnloadedPosException extends RuntimeException {
     this.unloadedPos = unloadedPos;
   }
 
-  public static <T> Iterable<T> catching(Iterable<T> t) {
+  public static <T extends @Nullable Object> Iterable<T> catching(Iterable<T> t) {
     return () -> new CatchingIterator<>(t.iterator(), e -> {
       if (!(e instanceof UnloadedPosException)) {
         throw e;
