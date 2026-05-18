@@ -1,14 +1,16 @@
-package pers.solid.ecmd.block;
+package pers.solid.ecmd.task;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.longs.*;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -21,6 +23,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.block.function.BlockFunction;
 import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.function.SimpleBlockFunction;
@@ -30,10 +33,13 @@ import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockTransformationHistory;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.LoadUtil;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.extension.HistoryHolder;
+import pers.solid.ecmd.util.iterator.AbstractIteratorTask;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 import pers.solid.ecmd.util.mixin.MixinShared;
@@ -45,12 +51,14 @@ import java.util.function.Function;
 /**
  * 涉及对区域内的方块（可能含有实体）进行变换的任务。此类能够处理一系列复杂的变换过程。
  */
-public class BlockTransformationTask {
+public class BlockTransformationTask extends AbstractIteratorTask {
   public static final Logger LOGGER = LoggerFactory.getLogger(BlockTransformationTask.class);
   /**
    * 对变换后的原有的方块的处理方式，默认为直接使用空气填充。
    */
   public static final BlockFunction DEFAULT_REMAINING_FUNCTION = new SimpleBlockFunction(Blocks.AIR, Collections.emptyList());
+  public final boolean shouldTransformRegion;
+  public final Consumer<BlockTransformationTask> completionNotifier;
   /**
    * 转换方块坐标的函数。每个方块的坐标都将根据此函数转换至新的坐标。
    */
@@ -93,18 +101,6 @@ public class BlockTransformationTask {
   private final @Nullable BlockFunction remaining;
   private final @Nullable Iterator<? extends Entity> entitiesToAffect;
   /**
-   * 受影响的方块数量，包括转换后的新方块以及受影响的原方块。
-   */
-  private int affectedBlocks = 0;
-  /**
-   * 受影响的实体数量。
-   */
-  private int affectedEntities = 0;
-  /**
-   * 转换过程中是否已遇到未加载的区域。
-   */
-  public boolean hasUnloadedPos = false;
-  /**
    * 转换过程中是否进行插值。
    */
   private final boolean interpolation;
@@ -115,11 +111,30 @@ public class BlockTransformationTask {
   private final boolean bypassLimit;
   private final @Nullable HistoryHolder historyHolder;
   private final @Nullable BlockTransformationHistory history;
+  private final Iterator<@Nullable Runnable> runnables;
+  /**
+   * 转换过程中是否已遇到未加载的区域。
+   */
+  public boolean hasUnloadedPos = false;
+  public @Nullable RegionSelection transformedRegionSelection;
+  protected @Nullable RegionSelection oldActiveRegion;
+  /**
+   * 受影响的方块数量，包括转换后的新方块以及受影响的原方块。
+   */
+  private int affectedBlocks = 0;
+  /**
+   * 受影响的实体数量。
+   */
+  private int affectedEntities = 0;
+  private Stage stage = Stage.PREPARATION;
 
   /**
-   * @see Builder#build()
+   * @see Builder#build
    */
-  private BlockTransformationTask(Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3, Vec3> posTransformer, @Nullable Function<Vec3, Vec3> invertedPosTransformer, Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @Nullable Consumer<Entity> reverseEntityTransformer, Level world, Region region, ExecutionContext executionContext, BlockFunctionContext blockFunctionContext, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, UnloadedPosBehavior unloadedPosBehavior, boolean bypassLimit, @Nullable HistoryHolder historyHolder, @Nullable BlockTransformationHistory history) {
+  private BlockTransformationTask(Component name, UUID uuid, CommandSourceStack source, boolean immediately, boolean shouldTransformRegion, Consumer<BlockTransformationTask> completionNotifier, Function<Vec3i, Vec3i> blockPosTransformer, @Nullable Function<Vec3, Vec3> posTransformer, @Nullable Function<Vec3, Vec3> invertedPosTransformer, Function<BlockState, BlockState> blockStateTransformer, @Nullable Consumer<Entity> entityTransformer, @Nullable Consumer<Entity> reverseEntityTransformer, Level world, Region region, ExecutionContext executionContext, BlockFunctionContext blockFunctionContext, @Nullable BlockPredicate affectsOnly, @Nullable BlockPredicate transformsOnly, @Nullable BlockFunction remaining, @Nullable Iterator<? extends Entity> entitiesToAffect, boolean interpolation, UnloadedPosBehavior unloadedPosBehavior, boolean bypassLimit, @Nullable HistoryHolder historyHolder, @Nullable BlockTransformationHistory history) {
+    super(name, uuid, source);
+    this.shouldTransformRegion = shouldTransformRegion;
+    this.completionNotifier = completionNotifier;
     this.blockPosTransformer = blockPosTransformer;
     this.posTransformer = posTransformer;
     this.invertedPosTransformer = invertedPosTransformer;
@@ -139,6 +154,31 @@ public class BlockTransformationTask {
     this.bypassLimit = bypassLimit;
     this.historyHolder = historyHolder;
     this.history = history;
+
+    if (immediately) {
+      this.runnables = taskSeries().getImmediateTask();
+    } else {
+      this.runnables = taskSeries().getSpeedAdjustedTask();
+    }
+  }
+
+  public static Builder builder(Level world, Region region, Component name, UUID uuid, CommandSourceStack source) {
+    return new Builder(world, region, name, uuid, source);
+  }
+
+  @Override
+  public Component getName() {
+    return Component.empty().append(super.getName()).append(" - ").append(Component.translatable("enhanced_commands.commands.transformation_stage", stage.ordinal(), stage.description));
+  }
+
+  @Override
+  public boolean hasNext() {
+    return runnables.hasNext();
+  }
+
+  @Override
+  public @Nullable Runnable next() {
+    return runnables.next();
   }
 
   public int getAffectedBlocks() {
@@ -205,13 +245,37 @@ public class BlockTransformationTask {
     return iterable;
   }
 
-  public TaskSeries transformBlocks() throws CommandSyntaxException {
-    if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
-      checkAndRejectUnloadedPos();
-    }
-    if (!bypassLimit) {
-      checkAndRejectLimit();
-    }
+  public TaskSeries taskSeries() {
+    final ServerPlayer player = source.getPlayer();
+    final Iterable<Runnable> preparation = List.of(() -> {
+      try {
+        if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
+          checkAndRejectUnloadedPos();
+        }
+        if (!bypassLimit) {
+          checkAndRejectLimit();
+        }
+      } catch (CommandSyntaxException e) {
+        throw new CommandRuntimeException(e);
+      }
+    }, () -> {
+      try {
+        if (shouldTransformRegion && player != null && history != null) {
+          oldActiveRegion = player.getActiveRegionOrThrow$ec();
+        } else {
+          oldActiveRegion = null;
+        }
+        if (oldActiveRegion != null && posTransformer != null && region.equals(oldActiveRegion.region())) {
+          final RegionSelection clone = oldActiveRegion.clone();
+          transformedRegionSelection = oldActiveRegion.transformed(posTransformer);
+          oldActiveRegion = clone;
+        } else {
+          transformedRegionSelection = null;
+        }
+      } catch (CommandSyntaxException e) {
+        throw new CommandRuntimeException(e);
+      }
+    });
 
     // 被转换走的方块在转换前的坐标
     final Long2ReferenceMap<@Nullable BlockState> posTransformedOut = new Long2ReferenceOpenHashMap<>();
@@ -223,29 +287,27 @@ public class BlockTransformationTask {
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
     final Iterable<@Nullable Runnable> storeTransformed;
-    {
-      Iterable<@Nullable BlockPos> oldPosIterable = modifyIterableForUnloadedPos(region);
+    Iterable<@Nullable BlockPos> oldPosIterable = modifyIterableForUnloadedPos(region);
 
-      storeTransformed = Iterables.transform(oldPosIterable, oldPos -> {
-        if (oldPos == null) return null;
-        final BlockInWorld blockInWorld = new BlockInWorld(world, oldPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-        if (transformsOnly == null || transformsOnly.test(blockInWorld, executionContext)) {
-          final BlockState blockState = blockInWorld.getState();
-          posTransformedOut.put(oldPos.asLong(), blockState);
-          final BlockPos transformedBlockPos = mutable.set(blockPosTransformer.apply(oldPos));
-          transformedStates.put(transformedBlockPos.asLong(), blockStateTransformer.apply(blockState));
-          if (blockInWorld.getEntity() != null) {
-            nbts.put(transformedBlockPos.asLong(), blockInWorld.getEntity().saveWithoutMetadata(world.registryAccess()));
-          }
-
-        } else {
-          // 充 null 值表示未匹配到值，或者是未加载的区块。
-          posTransformedOut.put(oldPos.asLong(), null);
-
+    storeTransformed = Iterables.transform(oldPosIterable, oldPos -> {
+      if (oldPos == null) return null;
+      final BlockInWorld blockInWorld = new BlockInWorld(world, oldPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
+      if (transformsOnly == null || transformsOnly.test(blockInWorld, executionContext)) {
+        final BlockState blockState = blockInWorld.getState();
+        posTransformedOut.put(oldPos.asLong(), blockState);
+        final BlockPos transformedBlockPos = mutable.set(blockPosTransformer.apply(oldPos));
+        transformedStates.put(transformedBlockPos.asLong(), blockStateTransformer.apply(blockState));
+        if (blockInWorld.getEntity() != null) {
+          nbts.put(transformedBlockPos.asLong(), blockInWorld.getEntity().saveWithoutMetadata(world.registryAccess()));
         }
-        return null;
-      });
-    }
+
+      } else {
+        // 充 null 值表示未匹配到值，或者是未加载的区块。
+        posTransformedOut.put(oldPos.asLong(), null);
+
+      }
+      return null;
+    });
 
     final Iterable<@Nullable Runnable> collectMatchingTransformed;
     final LongSet matchingBlockPos;
@@ -267,8 +329,8 @@ public class BlockTransformationTask {
       releaseTransformedPos = Iterables.filter(releaseTransformedPos, entry -> matchingBlockPos.contains(entry.getLongKey()));
     }
     final Iterable<@Nullable Runnable> releaseTransformed = Iterables.transform(modifyIterableForUnloadedPos(Iterables.transform(releaseTransformedPos, input -> mutable.set(input.getLongKey()))),
-        transformedBlockPos -> {
-          if (transformedBlockPos == null) return null;
+        transformedBlockPos -> () -> {
+          if (transformedBlockPos == null) return;
           final BlockState transformedState = transformedStates.get(transformedBlockPos.asLong());
           if (history != null) {
             history.recordBlockAndEntity(world, transformedBlockPos, transformedState);
@@ -281,103 +343,131 @@ public class BlockTransformationTask {
             affected = true;
           }
           if (affected) affectedBlocks++;
-
-          return null;
         });
 
-    final Iterable<@Nullable Runnable> transformEntities = transformEntities();
+    final Iterable<@Nullable Runnable> transformEntities = transformEntitiesEntry();
 
     final Iterable<@Nullable Runnable> collectMatchingRemaining;
     final Iterable<@Nullable Runnable> setRemaining;
 
     if (remaining != null) {
-      final BatchedFilterIterable<@Nullable BlockPos> iterable = new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong()));
+      final BatchedFilterIterable<@Nullable BlockPos> remainingPosIterable = new BatchedFilterIterable<>(region, 16, blockPos -> posTransformedOut.get(blockPos.asLong()) != null && !transformedStates.containsKey(blockPos.asLong()));
       if (affectsOnly != null) {
         final LongList affectedRemaining = new LongArrayList();
-        collectMatchingRemaining = Iterables.transform(
-            iterable,
-            blockPos -> {
-              if (blockPos != null && affectsOnly.test(new BlockInWorld(world, blockPos, false), executionContext)) {
-                affectedRemaining.add(blockPos.asLong());
-              }
-              return null;
-            });
-        setRemaining = () -> affectedRemaining.longStream()
-            .mapToObj(blockPos -> (Runnable) () -> {
-              try {
-                if (remaining.setBlock(world, mutable.set(blockPos), blockFunctionContext, null, history)) {
-                  affectedBlocks++;
-                }
-              } catch (CommandSyntaxException e) {
-                throw new CommandRuntimeException(e);
-              }
-            }).iterator();
+        collectMatchingRemaining = Iterables.transform(remainingPosIterable, blockPos -> () -> {
+          if (blockPos != null && affectsOnly.test(new BlockInWorld(world, blockPos, false), executionContext)) {
+            affectedRemaining.add(blockPos.asLong());
+          }
+        });
+        setRemaining = () -> affectedRemaining.longStream().mapToObj(blockPos -> (Runnable) () -> {
+          try {
+            if (remaining.setBlock(world, mutable.set(blockPos), blockFunctionContext, null, history)) {
+              affectedBlocks++;
+            }
+          } catch (CommandSyntaxException e) {
+            throw new CommandRuntimeException(e);
+          }
+        }).iterator();
       } else {
         collectMatchingRemaining = Collections.emptyList();
-        setRemaining = Iterables.transform(
-            iterable,
-            blockPos -> {
-              try {
-                if (blockPos != null && remaining.setBlock(world, blockPos, blockFunctionContext, null, history)) {
-                  affectedBlocks++;
-                }
-              } catch (CommandSyntaxException e) {
-                throw new CommandRuntimeException(e);
-              }
-              return null;
-            });
+        setRemaining = Iterables.transform(remainingPosIterable, blockPos -> () -> {
+          try {
+            if (blockPos != null && remaining.setBlock(world, blockPos, blockFunctionContext, null, history)) {
+              affectedBlocks++;
+            }
+          } catch (CommandSyntaxException e) {
+            throw new CommandRuntimeException(e);
+          }
+        });
       }
     } else {
       collectMatchingRemaining = setRemaining = Collections.emptyList();
     }
 
-    final BoundingBox untransformedBox;
     final Iterable<@Nullable Runnable> addInterpolation;
+    addInterpolation = addInterpolationEntry(transformedStates, posTransformedOut, nbts);
+
+
+    final Iterable<Runnable> completion = Collections.singleton(() -> {
+      if (transformedRegionSelection != null) {
+        if (player != null) {
+          if (history != null) {
+            history.reverseEntities.add(Triple.of(player, Pair.of(
+                player0 -> ((ServerPlayer) player0).setActiveRegion$ec(oldActiveRegion),
+                player0 -> ((ServerPlayer) player0).setActiveRegion$ec(transformedRegionSelection)
+            ), null));
+          }
+          player.setActiveRegion$ec(transformedRegionSelection);
+        }
+      }
+      notifyUnloadedPos(unloadedPosBehavior, source);
+      completionNotifier.accept(this);
+    });
+
+    return new TaskSeries(this, preparation, storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation, completion);
+  }
+
+  private Iterable<@Nullable Runnable> addInterpolationEntry(Long2ReferenceMap<BlockState> transformedStates, Long2ReferenceMap<@Nullable BlockState> posTransformedOut, Long2ReferenceMap<@Nullable CompoundTag> nbts) {
+    final Iterable<@Nullable Runnable> addInterpolation;
+    final BoundingBox untransformedBox;
     if (interpolation && posTransformer != null && invertedPosTransformer != null && (untransformedBox = region.minContainingBlockBox()) != null) {
       final List<BlockPos> transformedCorners = new ArrayList<>();
       untransformedBox.forAllCorners(blockPos -> transformedCorners.add(BlockPos.containing(posTransformer.apply(blockPos.getCenter()))));
       Iterable<@Nullable BlockPos> _posIterable = BlockPos.betweenClosed(transformedCorners.stream().mapToInt(Vec3i::getX).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).min().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getX).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getY).max().orElseThrow(), transformedCorners.stream().mapToInt(Vec3i::getZ).max().orElseThrow());
       _posIterable = modifyIterableForUnloadedPos(_posIterable);
-      _posIterable = new BatchedFilterIterable<>(_posIterable, 16,
-          transformedPos -> {
-            final BlockPos invertedPos = BlockPos.containing(invertedPosTransformer.apply(transformedPos.getCenter()));
-            if (region.contains(invertedPos) && !transformedStates.containsKey(transformedPos.asLong())) {
-              if (affectsOnly == null || affectsOnly.test(new BlockInWorld(world, transformedPos, false), executionContext)) {
-                final Optional<BlockPos> nearestOriginal = BlockPos.withinManhattanStream(invertedPos, 1, 1, 1).mapToLong(BlockPos::asLong).filter(posTransformedOut::containsKey).mapToObj(BlockPos::of).min(Comparator.comparingInt(o -> o.distManhattan(invertedPos)));
-                if (nearestOriginal.isPresent()) {
-                  final long nearestOriginalLong = nearestOriginal.get().asLong();
-                  if (posTransformedOut.get(nearestOriginalLong) != null) {
-                    BlockState state = posTransformedOut.get(nearestOriginalLong);
-                    if (state == null) {
-                      state = Blocks.AIR.defaultBlockState();
-                    }
-                    if (history != null && !history.oldStates.containsKey(transformedPos.asLong())) {
-                      history.recordBlockAndEntity(world, transformedPos, state);
-                    }
-                    boolean affected = MixinShared.setBlockStateWithModFlags(world, transformedPos, state, blockFunctionContext.flags, blockFunctionContext.modFlags);
-                    final @Nullable CompoundTag nbtCompound = nbts.get(transformedPos.asLong());
-                    final @Nullable BlockEntity transformedBlockEntity;
-                    if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(transformedPos)) != null) {
-                      transformedBlockEntity.loadWithComponents(nbtCompound, world.registryAccess());
-                      affected = true;
-                    }
-                    if (affected) affectedBlocks++;
-                    return true;
+
+      Iterable<@Nullable Runnable> unbatched = Iterables.transform(_posIterable, transformedPos -> {
+        if (transformedPos == null) {
+          return null;
+        }
+        final BlockPos invertedPos = BlockPos.containing(invertedPosTransformer.apply(transformedPos.getCenter()));
+        if (region.contains(invertedPos) && !transformedStates.containsKey(transformedPos.asLong())) {
+          if (affectsOnly == null || affectsOnly.test(new BlockInWorld(world, transformedPos, false), executionContext)) {
+            final Optional<BlockPos> nearestOriginal = BlockPos.withinManhattanStream(invertedPos, 1, 1, 1).mapToLong(BlockPos::asLong).filter(posTransformedOut::containsKey).mapToObj(BlockPos::of).min(Comparator.comparingInt(o -> o.distManhattan(invertedPos)));
+            if (nearestOriginal.isPresent()) {
+              final long nearestOriginalLong = nearestOriginal.get().asLong();
+              if (posTransformedOut.get(nearestOriginalLong) != null) {
+                return () -> {
+                  BlockState state = posTransformedOut.get(nearestOriginalLong);
+                  if (state == null) {
+                    state = Blocks.AIR.defaultBlockState();
                   }
-                }
+                  if (history != null && !history.oldStates.containsKey(transformedPos.asLong())) {
+                    history.recordBlockAndEntity(world, transformedPos, state);
+                  }
+                  boolean affected = MixinShared.setBlockStateWithModFlags(world, transformedPos, state, blockFunctionContext.flags, blockFunctionContext.modFlags);
+                  final @Nullable CompoundTag nbtCompound = nbts.get(transformedPos.asLong());
+                  final @Nullable BlockEntity transformedBlockEntity;
+                  if (nbtCompound != null && (transformedBlockEntity = world.getBlockEntity(transformedPos)) != null) {
+                    transformedBlockEntity.loadWithComponents(nbtCompound, world.registryAccess());
+                    affected = true;
+                  }
+                  if (affected) affectedBlocks++;
+                };
               }
             }
-            return false;
-          });
-      addInterpolation = Iterables.transform(_posIterable, blockPos -> null);
+          }
+        }
+        return null;
+      });
+      addInterpolation = new BatchedFilterIterable<@Nullable Runnable>(unbatched, 16, Objects::nonNull);
     } else {
       addInterpolation = Collections.emptyList();
     }
-
-    return new TaskSeries(this, storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation);
+    return addInterpolation;
   }
 
-  private Iterable<@Nullable Runnable> transformEntities() {
+  private void notifyUnloadedPos(UnloadedPosBehavior unloadedPosBehavior, CommandSourceStack source) {
+    if (hasUnloadedPos) {
+      if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.broken").withStyle(Styles.ACTUAL), false);
+      } else if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.skipped").withStyle(Styles.ACTUAL), false);
+      }
+    }
+  }
+
+  private Iterable<@Nullable Runnable> transformEntitiesEntry() {
     final Iterable<@Nullable Runnable> transformEntities;
     if (entitiesToAffect != null) {
       transformEntities = Iterables.transform(() -> entitiesToAffect, entity -> (Runnable) () -> {
@@ -410,38 +500,82 @@ public class BlockTransformationTask {
     }
   }
 
-  public static Builder builder(Level world, Region region) {
-    return new Builder(world, region);
+  @Override
+  public String toString() {
+    return "Task [" + getName() + "]";
   }
 
-  public record TaskSeries(BlockTransformationTask self, Iterable<@Nullable Runnable> storeTransformed, Iterable<@Nullable Runnable> collectMatchingTransformed, Iterable<@Nullable Runnable> releaseTransformed, Iterable<@Nullable Runnable> transformEntities, Iterable<@Nullable Runnable> collectMatchingRemaining, Iterable<@Nullable Runnable> setRemaining, Iterable<@Nullable Runnable> addInterpolation) {
+  public enum Stage implements StringRepresentable {
+    PREPARATION("preparation"),
+    STORE_TRANSFORMED("store_transformed"),
+    COLLECT_MATCHING_TRANSFORMED("collect_matching_transformed"),
+    RELEASE_TRANSFORMED("release_transformed"),
+    TRANSFORM_ENTITIES("transform_entities"),
+    COLLECT_MATCHING_REMAINING("collect_matching_remaining"),
+    SET_REMAINING("set_remaining"),
+    ADD_INTERPOLATION("add_interpolation"),
+    COMPLETION("completion");
+
+    private final String name;
+    public final Component description;
+
+    Stage(String name) {
+      this.name = name;
+      this.description = Component.translatable("enhanced_commands.commands.transformation_stage." + name);
+    }
+
+    @Override
+    public String getSerializedName() {
+      return name;
+    }
+  }
+
+  public record TaskSeries(BlockTransformationTask self, Iterable<Runnable> preparation, Iterable<@Nullable Runnable> storeTransformed, Iterable<@Nullable Runnable> collectMatchingTransformed, Iterable<@Nullable Runnable> releaseTransformed, Iterable<@Nullable Runnable> transformEntities, Iterable<@Nullable Runnable> collectMatchingRemaining, Iterable<@Nullable Runnable> setRemaining, Iterable<@Nullable Runnable> addInterpolation, Iterable<Runnable> completion) {
     // 使用 iterable 而非 iterator 是为了惰性计算，有些迭代器所使用的集合是在之前的迭代器中添加的，为了避免出现错误，应该在完成了添加集合元素之后，再调用集合的 iterator() 方法。
-    private Iterable<@Nullable Runnable> logIterable(String message) {
-      return Collections.singleton(() -> LOGGER.info("Task {}: {}", self.region.expressAsString(), message));
+    private Iterable<@Nullable Runnable> markStage(Stage stage) {
+      return Collections.singleton(() -> {
+        self.stage = stage;
+        LOGGER.info("Task [{}] stage {}: {}", self.getName(), stage.ordinal(), stage.getSerializedName());
+      });
     }
 
     public Iterator<@Nullable Runnable> getSpeedAdjustedTask() {
       return Iterables.concat(
-          () -> Iterators.singletonIterator(self::addUndoableHistory),
-          logIterable("store_transformed"),
+          markStage(Stage.PREPARATION),
+          preparation,
+          Collections.singleton(self::addUndoableHistory),
+          markStage(Stage.STORE_TRANSFORMED),
           IterateUtils.batchAndSkip(storeTransformed, 16384, 1),
-          logIterable("collect_matching_transformed"),
+          markStage(Stage.COLLECT_MATCHING_TRANSFORMED),
           IterateUtils.batchAndSkip(collectMatchingTransformed, 16384, 1),
-          logIterable("release_transformed"),
+          markStage(Stage.RELEASE_TRANSFORMED),
           IterateUtils.batchAndSkip(releaseTransformed, 32768, 15),
-          logIterable("transform_entities"),
+          markStage(Stage.TRANSFORM_ENTITIES),
           IterateUtils.batchAndSkip(transformEntities, 16384, 7),
-          logIterable("collect_matching_remaining"),
+          markStage(Stage.COLLECT_MATCHING_REMAINING),
           IterateUtils.batchAndSkip(collectMatchingRemaining, 16384, 1),
-          logIterable("set_remaining"),
+          markStage(Stage.SET_REMAINING),
           IterateUtils.batchAndSkip(setRemaining, 32768, 15),
-          logIterable("add_interpolation"),
-          IterateUtils.batchAndSkip(addInterpolation, 32768, 15)
+          markStage(Stage.ADD_INTERPOLATION),
+          IterateUtils.batchAndSkip(addInterpolation, 32768, 15),
+          markStage(Stage.COMPLETION),
+          completion
       ).iterator();
     }
 
     public Iterator<@Nullable Runnable> getImmediateTask() {
-      return UnloadedPosException.catching(Iterables.concat(() -> Iterators.singletonIterator(self::addUndoableHistory), storeTransformed, collectMatchingTransformed, releaseTransformed, transformEntities, collectMatchingRemaining, setRemaining, addInterpolation).iterator());
+      return UnloadedPosException.catching(Iterables.concat(
+          preparation,
+          Collections.singleton(self::addUndoableHistory),
+          storeTransformed,
+          collectMatchingTransformed,
+          releaseTransformed,
+          transformEntities,
+          collectMatchingRemaining,
+          setRemaining,
+          addInterpolation,
+          completion
+      ).iterator());
     }
   }
 
@@ -449,6 +583,9 @@ public class BlockTransformationTask {
   public static final class Builder {
     private final Level world;
     private final Region region;
+    private final Component name;
+    private final UUID uuid;
+    private final CommandSourceStack source;
     private @Nullable Function<Vec3i, Vec3i> blockPosTransformer;
     private @Nullable Function<Vec3, Vec3> posTransformer;
     private @Nullable Function<BlockState, BlockState> blockStateTransformer;
@@ -466,10 +603,16 @@ public class BlockTransformationTask {
     private boolean bypassLimit = false;
     private @Nullable BlockTransformationHistory history;
     private @Nullable HistoryHolder historyHolder;
+    private boolean shouldTransformRegion;
+    private @Nullable Consumer<BlockTransformationTask> completionNotifier;
+    private boolean immediately = false;
 
-    public Builder(Level world, Region region) {
+    public Builder(Level world, Region region, Component name, UUID uuid, CommandSourceStack source) {
       this.world = world;
       this.region = region;
+      this.name = name;
+      this.uuid = uuid;
+      this.source = source;
     }
 
     public Builder transformsBlockPos(Function<Vec3i, Vec3i> blockPosTransformer) {
@@ -495,6 +638,16 @@ public class BlockTransformationTask {
     public Builder transformsEntity(Consumer<Entity> entityTransformer, Consumer<Entity> reverseEntityTransformer) {
       this.entityTransformer = entityTransformer;
       this.reverseEntityTransformer = reverseEntityTransformer;
+      return this;
+    }
+
+    public Builder shouldTransformRegion(boolean shouldTransformRegion) {
+      this.shouldTransformRegion = shouldTransformRegion;
+      return this;
+    }
+
+    public Builder notifiesCompletion(Consumer<BlockTransformationTask> completionNotifier) {
+      this.completionNotifier = completionNotifier;
       return this;
     }
 
@@ -554,12 +707,18 @@ public class BlockTransformationTask {
       return this;
     }
 
+    public Builder immediately(boolean immediately) {
+      this.immediately = immediately;
+      return this;
+    }
+
     public BlockTransformationTask build() {
       Objects.requireNonNull(blockPosTransformer, "blockPosTransformer");
       Objects.requireNonNull(blockStateTransformer, "blockStateTransformer");
       Objects.requireNonNull(executionContext, "executionContext");
       Objects.requireNonNull(blockFunctionContext, "blockFunctionContext");
-      return new BlockTransformationTask(blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, executionContext, blockFunctionContext, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyHolder, history);
+      Objects.requireNonNull(completionNotifier, "completionNotifier");
+      return new BlockTransformationTask(name, uuid, source, immediately, shouldTransformRegion, completionNotifier, blockPosTransformer, posTransformer, invertedPosTransformer, blockStateTransformer, entityTransformer, reverseEntityTransformer, world, region, executionContext, blockFunctionContext, affectsOnly, transformsOnly, remaining, entitiesToAffect, interpolation, unloadedPosBehavior, bypassLimit, historyHolder, history);
     }
   }
 }

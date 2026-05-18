@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
-import pers.solid.ecmd.block.BlockTransformationCommand;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.TextUtil;
 

@@ -1,7 +1,7 @@
 package pers.solid.ecmd.util.iterator;
 
 import com.google.common.collect.Iterators;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Iterator;
 
@@ -13,22 +13,25 @@ import java.util.Iterator;
  * @see com.google.common.collect.Iterators
  * @see com.google.common.collect.Iterators#partition(Iterator, int)
  */
-public record BatchedIterator<T extends @Nullable Object>(Iterator<T> forward, int batchSize) implements Iterator<T> {
+public record BatchedIterator(Iterator<@Nullable Runnable> forward, int batchSize) implements Iterator<Runnable> {
   @Override
   public boolean hasNext() {
     return forward.hasNext();
   }
 
   @Override
-  public T next() {
-    T value = null;
-    for (int i = 0; i < batchSize; i++) {
-      if (forward.hasNext()) {
-        value = forward.next();
-      } else {
-        break;
+  public Runnable next() {
+    return () -> {
+      for (int i = 0; i < batchSize; i++) {
+        if (forward.hasNext()) {
+          final Runnable next = forward.next();
+          if (next != null) {
+            next.run();
+          }
+        } else {
+          break;
+        }
       }
-    }
-    return value;
+    };
   }
 }

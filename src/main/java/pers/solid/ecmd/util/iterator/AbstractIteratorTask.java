@@ -9,10 +9,10 @@ import pers.solid.ecmd.exception.CommandRuntimeException;
 import java.util.UUID;
 
 public abstract class AbstractIteratorTask implements IteratorTask {
-  private final Component name;
-  private final UUID uuid;
-  private final CommandSourceStack source;
-  private boolean suspended = false;
+  protected final Component name;
+  protected final UUID uuid;
+  protected final CommandSourceStack source;
+  protected boolean suspended = false;
 
   protected AbstractIteratorTask(Component name, UUID uuid, CommandSourceStack source) {
     this.name = name;

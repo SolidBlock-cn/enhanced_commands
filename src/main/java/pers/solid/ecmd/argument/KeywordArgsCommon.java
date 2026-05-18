@@ -11,7 +11,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.block.BlockTransformationTask;
+import pers.solid.ecmd.task.BlockTransformationTask;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 
 import java.util.function.Function;

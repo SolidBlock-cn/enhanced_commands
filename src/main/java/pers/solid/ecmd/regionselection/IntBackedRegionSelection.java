@@ -68,8 +68,7 @@ public interface IntBackedRegionSelection extends RegionSelection {
 
   @Override
   default IntBackedRegionSelection transformed(Function<Vec3, Vec3> transformation) {
-    transformedInt(vec3i -> BlockPos.containing(transformation.apply(Vec3.atCenterOf(vec3i))));
-    return this;
+    return transformedInt(vec3i -> BlockPos.containing(transformation.apply(Vec3.atCenterOf(vec3i))));
   }
 
   IntBackedRegionSelection transformedInt(Function<Vec3i, Vec3i> transformation);

@@ -1,6 +1,5 @@
 package pers.solid.ecmd.command;
 
-import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -8,42 +7,31 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.argument.*;
-import pers.solid.ecmd.block.UnloadedPosException;
 import pers.solid.ecmd.block.function.BlockFunction;
 import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.AllBlockPredicate;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.config.BlockOperationConfig;
-import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.Region;
+import pers.solid.ecmd.task.BlockPlacementTask;
 import pers.solid.ecmd.util.LoadUtil;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
-import pers.solid.ecmd.util.extension.HistoryHolder;
-import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
-import pers.solid.ecmd.util.iterator.IteratorTask;
 
-import java.util.Collections;
 import java.util.List;
 
 import static net.minecraft.commands.Commands.argument;
@@ -112,7 +100,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
   }
 
   public static int setBlocksFromKeywordArgs(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate replacingTarget, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return setBlocksInRegion(region, blockFunction, source, replacingTarget, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getLevel().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
+    return setBlocksInRegion(region, blockFunction, source, replacingTarget, kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), new BlockFunctionContext(getFlags(kwArgs), getModFlags(kwArgs), source.getLevel().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getRequiredArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
   public static int setBlocksInRegion(Region region, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
@@ -121,6 +109,8 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
       throw REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
     }
     final ServerLevel world = source.getLevel();
+    immediately = immediately || region.numberOfBlocksAffected() <= 16384;
+    // reject 操作是在创建 task 之前就进行的。
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       final BoundingBox box = region.minContainingBlockBox();
       if (box != null && !LoadUtil.isPosLoaded(world, box)) {
@@ -128,92 +118,31 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
       }
     }
 
-    final Iterable<@Nullable BlockPos> posIterable;
-    final MutableInt numbersAffected = new MutableInt();
-    final MutableBoolean hasUnloaded = new MutableBoolean();
-
-    if (unloadedPosBehavior == UnloadedPosBehavior.SKIP) {
-      posIterable = new BatchedFilterIterable<>(region, 16, blockPos -> {
-        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
-        if (!chunkLoaded) hasUnloaded.setTrue();
-        return chunkLoaded;
-      });
-    } else if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
-      posIterable = Iterables.transform(region, blockPos -> {
-        @SuppressWarnings("deprecation") final boolean chunkLoaded = world.hasChunkAt(blockPos);
-        if (!chunkLoaded) {
-          hasUnloaded.setTrue();
-          throw new UnloadedPosException(blockPos);
-        }
-        return blockPos;
-      });
-    } else {
-      posIterable = region;
-    }
-
     final Component taskName = Component.translatable("enhanced_commands.commands.setblocks.task_name", region.expressAsString());
+
     final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, context.flags, context.modFlags) : null;
 
-    // 第一部分：收集 oldStates
+    final BlockPlacementTask task = BlockPlacementTask.builder(taskName, Mth.createInsecureUUID(world.getRandom()), source)
+        .blockFunctionContext(context)
+        .blockFunction(blockFunction)
+        .blockPredicate(predicate)
+        .immediately(immediately)
+        .region(region)
+        .undoable(undoable)
+        .unloadedPosBehavior(unloadedPosBehavior)
+        .world(world)
+        .build();
 
-    final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
-    final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-    final Iterable<Runnable> collectPosToAffect;
-    if (predicate == null) {
-      collectPosToAffect = Iterables.transform(posIterable, blockPos -> () -> {
-        oldStates.put(blockPos.asLong(), world.getBlockState(blockPos));
-      });
-    } else {
-      collectPosToAffect = Iterables.transform(posIterable, blockPos -> () -> {
-        final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
-        if (blockInWorld.getState() != null && predicate.test(blockInWorld, context)) {
-          oldStates.put(blockPos.asLong(), blockInWorld.getState());
-        }
-      });
-    }
-
-    // 第二部分：放置方块
-
-    final Iterable<Runnable> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
-      try {
-        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
-          numbersAffected.increment();
-        }
-      } catch (CommandSyntaxException e) {
-        throw new CommandRuntimeException(e);
-      }
-    });
-
-    // 第三部分：结束时声明
-
-    final Iterable<Runnable> finalClaim = Collections.singleton(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
-      case SKIP -> Component.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
-      case BREAK -> Component.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
-      default -> Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
-    } : Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue()).enhanced$$(), true));
-
-    if (history != null) {
-      final HistoryHolder historyHolder = HistoryHolder.fromSource(source);
-      if (historyHolder != null) {
-        historyHolder.addUndoableHistory$ec(history);
-      }
-    }
-    if (!immediately && region.numberOfBlocksAffected() > 16384) {
-      // The region is too large. Send a server task.
-      final Iterable<@Nullable Runnable> combinedIterable = Iterables.concat(
-          IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1),
-          IterateUtils.batchAndSkip(setBlocks, 32768, 15),
-          finalClaim
-      );
-      final IteratorTask task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, combinedIterable.iterator(), source);
+    if (!immediately) {
+      ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(task);
       if (history != null) {
         history.task = task;
       }
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {
-      IterateUtils.exhaustCommand(Iterables.concat(collectPosToAffect, setBlocks, finalClaim).iterator());
-      return numbersAffected.intValue();
+      IterateUtils.exhaustCommand(task);
+      return task.numbersAffected;
     }
   }
 

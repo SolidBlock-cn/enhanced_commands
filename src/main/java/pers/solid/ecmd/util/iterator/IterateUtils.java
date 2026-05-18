@@ -62,8 +62,8 @@ public final class IterateUtils {
    * @param skipTimes 一次运行后所跳过的次数。
    */
   @Contract(pure = true)
-  public static <E extends @Nullable Object> Iterable<@Nullable E> batchAndSkip(Iterable<E> forward, int batchSize, int skipTimes) {
-    return () -> new SkippingIterator<>(new BatchedIterator<>(forward.iterator(), batchSize), skipTimes);
+  public static Iterable<@Nullable Runnable> batchAndSkip(Iterable<@Nullable Runnable> forward, int batchSize, int skipTimes) {
+    return () -> new SkippingIterator<>(new BatchedIterator(forward.iterator(), batchSize), skipTimes);
   }
 
   /**
@@ -74,8 +74,8 @@ public final class IterateUtils {
    * @param skipTimes 迭代器运行一次 {@code next()} 后，之后多少次的 {@code next()} 将不执行任何操作（不调用 {@code entityPredicate.next()}）并返回 {@code null}。
    */
   @Contract(pure = true)
-  public static <E> Iterator<@Nullable E> batchAndSkip(Iterator<E> forward, int batchSize, int skipTimes) {
-    return new SkippingIterator<>(new BatchedIterator<>(forward, batchSize), skipTimes);
+  public static Iterator<@Nullable Runnable> batchAndSkip(Iterator<@Nullable Runnable> forward, int batchSize, int skipTimes) {
+    return new SkippingIterator<>(new BatchedIterator(forward, batchSize), skipTimes);
   }
 
   /**
