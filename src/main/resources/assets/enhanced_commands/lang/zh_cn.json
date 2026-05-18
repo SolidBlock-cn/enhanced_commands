@@ -988,5 +988,7 @@
   "enhanced_commands.region_selection.sphere.statistics": "球的半径当前为%s",
   "enhanced_commands.util.entities": "%1$s个实体",
   "enhanced_commands.util.entities.with_example": "%2$s等%1$s个实体",
-  "item.enhanced_commands.region_selection_tool": "区域选择工具"
+  "item.enhanced_commands.region_selection_tool": "区域选择工具",
+  "modmenu.descriptionTranslation.enhanced_commands": "大量实用和高级的命令，可更随心且便捷地操作世界，从游戏模式简称到简短的实体选择器，从复杂方块操作到灵活的NBT修改，从改变生命值和饱食度到移动和旋转广场，这个模组的命令带来了无尽可能。",
+  "modmenu.nameTranslation.enhanced_commands": "增强命令"
 }
