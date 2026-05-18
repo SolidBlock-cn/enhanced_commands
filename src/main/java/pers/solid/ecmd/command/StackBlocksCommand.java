@@ -70,11 +70,11 @@ import static pers.solid.ecmd.argument.DirectionArgument.getDirection;
 import static pers.solid.ecmd.argument.KeywordArgsArgument.getKeywordArgs;
 import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
-public enum StackCommand implements CommandRegistrationCallbackBridge {
+public enum StackBlocksCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
 
-  public static final SimpleCommandExceptionType UNLOADED_SOURCE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.rejected_source", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
-  public static final SimpleCommandExceptionType UNLOADED_TARGET = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.rejected_target", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
+  public static final SimpleCommandExceptionType UNLOADED_SOURCE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stackblocks.rejected_source", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
+  public static final SimpleCommandExceptionType UNLOADED_TARGET = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stackblocks.rejected_target", "unloaded=" + UnloadedPosBehavior.FORCE.getSerializedName()));
 
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
@@ -127,7 +127,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
     return executeStackInDirection(RegionArgument.getRegion(context, "region"), direction, stackAmount, keywordArgs, context);
   }
 
-  public static final SimpleCommandExceptionType UNSUPPORTED_BOX = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stack.unsupported_box"));
+  public static final SimpleCommandExceptionType UNSUPPORTED_BOX = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.commands.stackblocks.unsupported_box"));
 
   public static int executeStackInDirection(Region region, Direction direction, int stackAmount, KeywordArgs keywordArgs, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     final BoundingBox blockBox = region.minContainingBlockBox();
@@ -178,7 +178,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
     final BlockPredicate transformOnly = keywordArgs.getArg("transform_only");
 
 
-    final MutableComponent taskName = Component.translatable("enhanced_commands.commands.stack.task_name", region.expressAsString(), Integer.toString(stackAmount));
+    final MutableComponent taskName = Component.translatable("enhanced_commands.commands.stackblocks.task_name", region.expressAsString(), Integer.toString(stackAmount));
     final int flags = FillReplaceCommand.getFlags(keywordArgs);
     final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
     final @Nullable BlockPlacementHistory history = keywordArgs.getBoolean("undoable") ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;
@@ -244,7 +244,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
       final Long2LongMap stackedToSourceOnThisStack = new Long2LongArrayMap();
       stackedRelativePos.set(relativeVec.multiply(stackId));
 
-      Iterable<Runnable> collectPosToAffectOnThickStack = () -> {
+      Iterable<@Nullable Runnable> collectPosToAffectOnThickStack = () -> {
         Stream<LongLongPair> posPairStream = sourceStates.keySet().longStream().mapToObj(sourcePosLong -> {
           posToPlace.set(sourcePosLong).move(stackedRelativePos);
 
@@ -283,7 +283,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
         collectPosToAffectOnThickStack = IterateUtils.batchAndSkip(collectPosToAffectOnThickStack, 16384, 1);
       }
 
-      Iterable<Runnable> setBlocksOnThisStack = Iterables.transform(stackedToSourceOnThisStack.long2LongEntrySet(), entry -> {
+      Iterable<@Nullable Runnable> setBlocksOnThisStack = Iterables.transform(stackedToSourceOnThisStack.long2LongEntrySet(), entry -> {
         final BlockState newState = sourceStates.get(entry.getLongValue());
         final BlockEntity oldEntity = world.getBlockEntity(posToPlace.set(entry.getLongKey()));
         if (history != null) {
@@ -311,7 +311,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
         setBlocksOnThisStack = IterateUtils.batchAndSkip(setBlocksOnThisStack, 16384, 7);
       }
 
-      Iterable<Runnable> stackEntitiesOnThisStack = Iterables.transform(sourceEntities, triple -> {
+      Iterable<@Nullable Runnable> stackEntitiesOnThisStack = Iterables.transform(sourceEntities, triple -> {
         final Vec3 vec3d = triple.getLeft().add(stackedRelativePos.getX(), stackedRelativePos.getY(), stackedRelativePos.getZ());
         final EntityType<?> entityType = triple.getMiddle();
         final CompoundTag nbt = triple.getRight();
@@ -342,9 +342,9 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
         }
       }
       if (affectEntities != null) {
-        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.stack.complete_including_entities", blocksAffected, entitiesAffected), true);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.stackblocks.complete_including_entities", blocksAffected, entitiesAffected), true);
       } else {
-        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.stack.complete", blocksAffected), true);
+        source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.stackblocks.complete", blocksAffected), true);
       }
       if (transformsRegion && player != null) {
         final RegionSelection activeRegion = player.getActiveRegion$ec();

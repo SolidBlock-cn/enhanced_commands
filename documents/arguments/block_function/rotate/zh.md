@@ -4,7 +4,7 @@
 
 旋转只对方块自身有效，而不是旋转一整个区域，也就是说这一函数并不会修改各个方块的位置。
 
-> 如果想旋转一个区域，可使用 [`/rotate` 命令](/documents/commands/rotate/zh.md)。
+> 如果想旋转一个区域，可使用 [`/rotateblocks` 命令](/documents/commands/rotateblocks/zh.md)。
 
 ## 语法
 

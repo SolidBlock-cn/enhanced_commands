@@ -18,7 +18,7 @@
 - 简化的 /execute 命令：`/if block ~~~ idcontain(concrete) kill @p[type=creeper]`
 - 修改实体的生命：`/health set @e[health=11..] 10`
 - 将方块转换为下落的方块：`/convertblock ~~~ falling_block`
-- 旋转一个区域内的方块，甚至还可以插值：`/rotate sphere(50) 20deg force=true interpolate=true`
+- 旋转一个区域内的方块，甚至还可以插值：`/rotateblocks sphere(50) 20deg force=true interpolate=true`
 - 想获取某个位置的方块的信息？可以：`/testfor block ~~~`
 - 检测某个地方的光照：`/if blockinfo ~~~ light 10.. tellraw @a "光照充足"`
 - 随机生成数字！！`/as @e store result score my_score rand int 0 100`

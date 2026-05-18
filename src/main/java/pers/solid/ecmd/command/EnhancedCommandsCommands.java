@@ -55,24 +55,18 @@ public enum EnhancedCommandsCommands implements CommandRegistrationCallbackBridg
     GameModeAliasCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     HealthCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     HistoryCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    if (CommandsConfig.current.enableMirrorCommand) {
-      MirrorCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    }
+    MirrorCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     MoonCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    if (CommandsConfig.current.enableMoveCommand) {
-      MoveCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    }
+    MoveBlocksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     NbtCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     OutlineCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     PileCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     PostProcessCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     RandCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     RegionSelectionCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    RotateCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    RotateBlocksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     SeparatedExecuteCommand.register(dispatcher, commandBuildContext);
-    if (CommandsConfig.current.enableStackCommand) {
-      StackCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    }
+    StackBlocksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     TameCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     TasksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     TestArgCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
