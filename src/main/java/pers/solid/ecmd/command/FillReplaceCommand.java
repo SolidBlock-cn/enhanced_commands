@@ -21,7 +21,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +32,7 @@ import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.AllBlockPredicate;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.config.BlockOperationConfig;
+import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.LoadUtil;
@@ -158,7 +158,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
 
     final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
-    final Iterable<FailableRunnable<Throwable>> collectPosToAffect;
+    final Iterable<Runnable> collectPosToAffect;
     if (predicate == null) {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> () -> {
         oldStates.put(blockPos.asLong(), world.getBlockState(blockPos));
@@ -174,15 +174,19 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
 
     // 第二部分：放置方块
 
-    final Iterable<FailableRunnable<Throwable>> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
-      if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
-        numbersAffected.increment();
+    final Iterable<Runnable> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
+      try {
+        if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
+          numbersAffected.increment();
+        }
+      } catch (CommandSyntaxException e) {
+        throw new CommandRuntimeException(e);
       }
     });
 
     // 第三部分：结束时声明
 
-    final Iterable<FailableRunnable<Throwable>> finalClaim = Collections.singleton(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
+    final Iterable<Runnable> finalClaim = Collections.singleton(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> Component.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
       case BREAK -> Component.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
       default -> Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
@@ -196,7 +200,7 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
     }
     if (!immediately && region.numberOfBlocksAffected() > 16384) {
       // The region is too large. Send a server task.
-      final Iterable<@Nullable FailableRunnable<Throwable>> combinedIterable = Iterables.concat(
+      final Iterable<@Nullable Runnable> combinedIterable = Iterables.concat(
           IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1),
           IterateUtils.batchAndSkip(setBlocks, 32768, 15),
           finalClaim

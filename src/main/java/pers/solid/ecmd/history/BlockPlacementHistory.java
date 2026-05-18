@@ -17,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.iterator.ForwardingIteratorTask;
 import pers.solid.ecmd.util.iterator.IterateUtils;
@@ -66,7 +65,7 @@ public class BlockPlacementHistory implements History {
     final BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
     final MutableComponent undoName = Component.translatable("enhanced_commands.commands.undo.name", this.name);
     final @Nullable BlockPlacementHistory reverse = undoable ? new BlockPlacementHistory(undoName, world, flag, modFlag) : null;
-    final Iterable<FailableRunnable<Throwable>> iterable = Collections2.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
+    final Iterable<Runnable> iterable = Collections2.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
       final long posLong = entry.getLongKey();
       mutable.set(posLong);
       final BlockState undoState = entry.getValue();

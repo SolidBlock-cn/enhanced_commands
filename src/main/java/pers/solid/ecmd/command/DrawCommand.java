@@ -19,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.AABB;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
@@ -139,7 +138,7 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
     // 第一部分：收集 oldStates
 
     final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
-    final Iterable<FailableRunnable<Throwable>> collectPosToAffect;
+    final Iterable<Runnable> collectPosToAffect;
     if (predicate == null) {
       collectPosToAffect = Iterables.transform(posIterable, blockPos -> () -> {
         if (blockPos == null) return;
@@ -157,7 +156,7 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
 
     // 第二部分：放置方块
 
-    final Iterable<FailableRunnable<Throwable>> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
+    final Iterable<Runnable> setBlocks = Iterables.transform(oldStates.long2ObjectEntrySet(), entry -> () -> {
       try {
         if (blockFunction.setBlock(world, mutable.set(entry.getLongKey()), context, entry.getValue(), history)) {
           numbersAffected.increment();
@@ -169,7 +168,7 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
 
     // 第三部分：结束时声明
 
-    final Iterable<FailableRunnable<Throwable>> finalClaim = Collections.singleton(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
+    final Iterable<Runnable> finalClaim = Collections.singleton(() -> source.sendFeedback$ecBridge(() -> hasUnloaded.getValue() ? switch (unloadedPosBehavior) {
       case SKIP -> Component.translatable("enhanced_commands.commands.setblocks.complete_skipped", numbersAffected.intValue());
       case BREAK -> Component.translatable("enhanced_commands.commands.setblocks.complete_broken", numbersAffected.intValue());
       default -> Component.translatable("enhanced_commands.commands.setblocks.complete", numbersAffected.intValue());
@@ -185,8 +184,8 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
 
     if (!immediately && estimatedIterationAmount > 16384) {
       // The region is too large. Send a server task.
-      final Iterable<@Nullable FailableRunnable<Throwable>> a = IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1);
-      final Iterable<@Nullable FailableRunnable<Throwable>> b = IterateUtils.batchAndSkip(setBlocks, 32768, 15);
+      final Iterable<@Nullable Runnable> a = IterateUtils.batchAndSkip(collectPosToAffect, 16384, 1);
+      final Iterable<@Nullable Runnable> b = IterateUtils.batchAndSkip(setBlocks, 32768, 15);
       final IteratorTask task = ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(taskName, Iterables.concat(
           a,
           b,

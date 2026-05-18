@@ -32,7 +32,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -204,7 +203,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
     } else {
       posIterable = region;
     }
-    final Iterable<FailableRunnable<Throwable>> collectSourceBlocks = Iterables.transform(posIterable, blockPos -> {
+    final Iterable<Runnable> collectSourceBlocks = Iterables.transform(posIterable, blockPos -> {
       if (blockPos == null) return null;
       final BlockInWorld blockInWorld = new BlockInWorld(world, blockPos, unloadedPosBehavior == UnloadedPosBehavior.FORCE);
       if (transformOnly == null || transformOnly.test(blockInWorld, executionContext)) {
@@ -218,7 +217,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
 
     // 收集需要影响的实体
     final EntitySelector affectEntities = keywordArgs.getArg("affect_entities");
-    final Iterable<FailableRunnable<Throwable>> collectSourceEntities;
+    final Iterable<Runnable> collectSourceEntities;
     if (affectEntities != null) {
       final List<? extends Entity> entities = affectEntities.findEntities(source).stream().filter(entity -> region.contains(entity.position())).toList();
       collectSourceEntities = Iterables.transform(entities, entity -> {
@@ -241,11 +240,11 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
 
     final boolean immediately = keywordArgs.getBoolean("immediately");
     final boolean useTasks = !immediately && region.numberOfBlocksAffected() * stackAmount > 16384;
-    final Iterable<FailableRunnable<Throwable>> executeStack = Iterables.concat((Iterable<Iterable<FailableRunnable<Throwable>>>) () -> IntStream.rangeClosed(1, stackAmount).mapToObj(stackId -> {
+    final Iterable<Runnable> executeStack = Iterables.concat((Iterable<Iterable<Runnable>>) () -> IntStream.rangeClosed(1, stackAmount).mapToObj(stackId -> {
       final Long2LongMap stackedToSourceOnThisStack = new Long2LongArrayMap();
       stackedRelativePos.set(relativeVec.multiply(stackId));
 
-      Iterable<FailableRunnable<Throwable>> collectPosToAffectOnThickStack = () -> {
+      Iterable<Runnable> collectPosToAffectOnThickStack = () -> {
         Stream<LongLongPair> posPairStream = sourceStates.keySet().longStream().mapToObj(sourcePosLong -> {
           posToPlace.set(sourcePosLong).move(stackedRelativePos);
 
@@ -270,7 +269,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
           });
         }
 
-        return posPairStream.map(pair -> (FailableRunnable<Throwable>) () -> {
+        return posPairStream.map(pair -> (Runnable) () -> {
           posToPlace.set(pair.firstLong());
 
           final BlockInWorld blockInWorld = new BlockInWorld(world, posToPlace, false);
@@ -284,7 +283,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
         collectPosToAffectOnThickStack = IterateUtils.batchAndSkip(collectPosToAffectOnThickStack, 16384, 1);
       }
 
-      Iterable<FailableRunnable<Throwable>> setBlocksOnThisStack = Iterables.transform(stackedToSourceOnThisStack.long2LongEntrySet(), entry -> {
+      Iterable<Runnable> setBlocksOnThisStack = Iterables.transform(stackedToSourceOnThisStack.long2LongEntrySet(), entry -> {
         final BlockState newState = sourceStates.get(entry.getLongValue());
         final BlockEntity oldEntity = world.getBlockEntity(posToPlace.set(entry.getLongKey()));
         if (history != null) {
@@ -312,7 +311,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
         setBlocksOnThisStack = IterateUtils.batchAndSkip(setBlocksOnThisStack, 16384, 7);
       }
 
-      Iterable<FailableRunnable<Throwable>> stackEntitiesOnThisStack = Iterables.transform(sourceEntities, triple -> {
+      Iterable<Runnable> stackEntitiesOnThisStack = Iterables.transform(sourceEntities, triple -> {
         final Vec3 vec3d = triple.getLeft().add(stackedRelativePos.getX(), stackedRelativePos.getY(), stackedRelativePos.getZ());
         final EntityType<?> entityType = triple.getMiddle();
         final CompoundTag nbt = triple.getRight();
@@ -334,7 +333,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
       return Iterables.concat(collectPosToAffectOnThickStack, setBlocksOnThisStack, stackEntitiesOnThisStack);
     }).iterator());
 
-    final Iterable<FailableRunnable<Throwable>> finalClaim = Collections.singleton(() -> {
+    final Iterable<Runnable> finalClaim = Collections.singleton(() -> {
       if (hasUnloadedPos.booleanValue()) {
         if (unloadedPosBehavior == UnloadedPosBehavior.BREAK) {
           source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.broken").withStyle(Styles.ACTUAL), false);
@@ -367,7 +366,7 @@ public enum StackCommand implements CommandRegistrationCallbackBridge {
     }
     if (useTasks) {
       // The region is too large. Send a server task.
-      final Iterable<@Nullable FailableRunnable<Throwable>> combinedIterable = Iterables.concat(
+      final Iterable<@Nullable Runnable> combinedIterable = Iterables.concat(
           IterateUtils.batchAndSkip(collectSourceBlocks, 16384, 3),
           IterateUtils.batchAndSkip(collectSourceEntities, 16384, 3),
           executeStack,

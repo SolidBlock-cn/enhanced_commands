@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.apache.commons.lang3.function.FailableFunction;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,23 +26,23 @@ public final class IterateUtils {
   /**
    * Exhaust the iterator, causing {@code hasNext} and {@code next} called until {@code hasNext} returns {@code false}. If it is an iterator that always "has next" (such as an infinity cycling iterator), it will cause an infinite loop.
    */
-  public static <T extends Throwable> void exhaust(Iterator<@Nullable FailableRunnable<T>> iterator) throws T {
+  public static void exhaust(Iterator<@Nullable Runnable> iterator) {
     while (iterator.hasNext()) {
-      final FailableRunnable<T> next = iterator.next();
+      final Runnable next = iterator.next();
       if (next != null) {
         next.run();
       }
     }
   }
 
-  public static <T extends Throwable> void exhaustCommand(Iterator<@Nullable FailableRunnable<T>> iterator) throws CommandSyntaxException {
+  public static void exhaustCommand(Iterator<@Nullable Runnable> iterator) throws CommandSyntaxException {
     try {
       exhaust(iterator);
-    } catch (Throwable e) {
-      if (e instanceof CommandSyntaxException s) {
+    } catch (RuntimeException e) {
+      if (e.getCause() instanceof CommandSyntaxException s) {
         throw s;
       } else {
-        throw new RuntimeException(e);
+        throw e;
       }
     }
   }

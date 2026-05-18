@@ -12,7 +12,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.iterator.ForwardingIteratorTask;
@@ -41,7 +40,7 @@ public class BlockTransformationHistory extends BlockPlacementHistory {
     final @Nullable BlockPlacementHistory superHistory = s.getSecond();
     final BlockTransformationHistory redoHistory = superHistory == null ? null : new BlockTransformationHistory(superHistory.name, superHistory.world, superHistory.flag, superHistory.modFlag, superHistory.oldStates, superHistory.oldEntityData);
 
-    Iterable<FailableRunnable<Throwable>> undoEntityTransformation = Iterables.transform(reverseEntities, entry -> () -> {
+    Iterable<Runnable> undoEntityTransformation = Iterables.transform(reverseEntities, entry -> () -> {
       final Entity entity = entry.getLeft();
       final var pair = entry.getMiddle();
       final Consumer<Entity> undo = pair == null ? null : pair.getFirst();
