@@ -1,6 +1,6 @@
 {
   "type": "enhanced_commands:overlay",
-  "predicates": [
+  "functions": [
     {
       "type": "enhanced_commands:reference",
       "id": "enhanced_commands:naturalize_vegetation"
@@ -9,10 +9,7 @@
       "type": "enhanced_commands:conditions",
       "conditions": [
         {
-          "condition": {
-            "type": "enhanced_commands:tag",
-            "tag": "enhanced_commands:natualize_ignore"
-          },
+          "condition": "#enhanced_commands:natualize_ignore",
           "then": {
             "type": "enhanced_commands:empty"
           }
@@ -20,10 +17,7 @@
         {
           "condition": {
             "type": "enhanced_commands:horizontal_offset",
-            "block_predicate": {
-              "type": "enhanced_commands:tag",
-              "tag": "enhanced_commands:natualize_ignore"
-            },
+            "block_predicate": "#enhanced_commands:natualize_ignore",
             "offset": 1
           },
           "then": "minecraft:mycelium"
@@ -34,26 +28,17 @@
             "predicates": [
               {
                 "type": "enhanced_commands:horizontal_offset",
-                "block_predicate": {
-                  "type": "enhanced_commands:tag",
-                  "tag": "enhanced_commands:natualize_ignore"
-                },
+                "block_predicate": "#enhanced_commands:natualize_ignore",
                 "offset": 2
               },
               {
                 "type": "enhanced_commands:horizontal_offset",
-                "block_predicate": {
-                  "type": "enhanced_commands:tag",
-                  "tag": "enhanced_commands:natualize_ignore"
-                },
+                "block_predicate": "#enhanced_commands:natualize_ignore",
                 "offset": 3
               },
               {
                 "type": "enhanced_commands:horizontal_offset",
-                "block_predicate": {
-                  "type": "enhanced_commands:tag",
-                  "tag": "enhanced_commands:natualize_ignore"
-                },
+                "block_predicate": "#enhanced_commands:natualize_ignore",
                 "offset": 4
               }
             ]
@@ -64,10 +49,7 @@
           "condition": {
             "type": "enhanced_commands:any",
             "predicates": [
-              {
-                "type": "enhanced_commands:tag",
-                "tag": "c:ores"
-              },
+              "#c:ores",
               "minecraft:stone"
             ]
           },
