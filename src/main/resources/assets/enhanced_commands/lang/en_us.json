@@ -987,5 +987,7 @@
   "enhanced_commands.region_selection.sphere.statistics": "The radius radius of the sphere is %s",
   "enhanced_commands.util.entities": "%1$s $plural(entities, entity)",
   "enhanced_commands.util.entities.with_example": "%1$s $plural(entities, entity) such as %2$s",
-  "item.enhanced_commands.region_selection_tool": "Region selection tool"
+  "item.enhanced_commands.region_selection_tool": "Region selection tool",
+  "modmenu.descriptionTranslation.enhanced_commands": "Amounts of useful and advanced commands that can more comfortably and conveniently operate the world. From game mode aliases to shortened entity selector, from complicated block operations to flexible NBT modifications, from changing your health and food value to moving or rotation blocks, the mod's commands bring out infinite possibilities.",
+  "modmenu.nameTranslation.enhanced_commands": "Enhanced Commands"
 }

@@ -3,8 +3,8 @@
   "id": "enhanced_commands",
   "version": "${version}",
 
-  "name": "enhanced_commands",
-  "description": "",
+  "name": "Enhanced Commands",
+  "description": "Amounts of useful and advanced commands that can more comfortably and conveniently operate the world. From game mode aliases to shortened entity selector, from complicated block operations to flexible NBT operations, from changing your health and food value to moving or rotation blocks, the mod's commands bring out infinite possibilities.",
   "authors": ["SolidBlock"],
   "contact": {},
 
