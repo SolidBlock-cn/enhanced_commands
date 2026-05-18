@@ -30,6 +30,7 @@
 - [`/pile`](pile/zh.md)：通过骑乘的方式堆叠实体。
 - [`/tame`](tame/zh.md)：驯养或取消驯养实体。
 - [`/tprel`](tprel/zh.md)：传送实体，其中坐标和旋转均是以被传送实体为基础计算的。
+- [`/velocity`](velocity/zh.md)：修改实体的速度。
 
 ## 测试命令
 

@@ -217,8 +217,10 @@ public enum TpRelCommand implements CommandRegistrationCallbackBridge {
 
   static class LookTarget {
     private final Vec3 targetPos;
-    private final Entity target;
-    private final EntityAnchorArgument.Anchor targetAnchor;
+    private @Nullable
+    final Entity target;
+    private @Nullable
+    final EntityAnchorArgument.Anchor targetAnchor;
 
     public LookTarget(Entity target, EntityAnchorArgument.Anchor targetAnchor) {
       this.target = target;

@@ -73,6 +73,7 @@ public enum EnhancedCommandsCommands implements CommandRegistrationCallbackBridg
     TestForCommands.INSTANCE.register(dispatcher, commandBuildContext, environment);
     TpRelCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     UndoCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    VelocityCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     EnhancedWeatherCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
   }
 

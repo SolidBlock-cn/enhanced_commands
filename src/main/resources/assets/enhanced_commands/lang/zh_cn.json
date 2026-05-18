@@ -534,6 +534,13 @@
   "enhanced_commands.commands.undo.large_region": "开始撤销%s个方块的操作，这可能需要一段时间。",
   "enhanced_commands.commands.undo.name": "撤销操作：%s",
   "enhanced_commands.commands.undo.no_history": "没有可撤销的历史",
+  "enhanced_commands.commands.velocity.add.success": "成功将%1$s的速度增加%2$s",
+  "enhanced_commands.commands.velocity.cross.success": "成功通过计算%1$s的速度与%2$s的向量积修改速度",
+  "enhanced_commands.commands.velocity.multiply.success": "成功将%1$s的速度乘以%2$s",
+  "enhanced_commands.commands.velocity.scale.success": "成功将%1$s的速度乘以%2$s",
+  "enhanced_commands.commands.velocity.set.success": "成功将%1$s的速度设置为%2$s",
+  "enhanced_commands.commands.velocity.setsize.success": "成功将%1$s的速度大小设置为%2$s",
+  "enhanced_commands.commands.velocity.subtract.success": "成功将%1$s的速度减去%2$s",
   "enhanced_commands.commands.weather.query": "当前的天气为 %s；晴朗时长：%s，下雨时长：%s，雷暴时长：%s",
   "enhanced_commands.commands.weather.query.clear": "晴天",
   "enhanced_commands.commands.weather.query.rain": "雨天",
@@ -979,5 +986,7 @@
   "enhanced_commands.region_selection.sphere.set_center": "球的中心点已设置为%s",
   "enhanced_commands.region_selection.sphere.set_radius": "已调整球的半径以适应%s",
   "enhanced_commands.region_selection.sphere.statistics": "球的半径当前为%s",
+  "enhanced_commands.util.entities": "%1$s个实体",
+  "enhanced_commands.util.entities.with_example": "%2$s等%1$s个实体",
   "item.enhanced_commands.region_selection_tool": "区域选择工具"
 }
