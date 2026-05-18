@@ -1,5 +1,6 @@
 package pers.solid.ecmd.nbt.predicate;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -154,7 +155,7 @@ public final class NbtPredicateParser {
         throw DUPLICATE_KEY.create("");
       }
     } else {
-      return new MatchCompoundNbtPredicate(entries);
+      return new MatchCompoundNbtPredicate(entries.entries().stream().map(entry -> new MatchCompoundNbtPredicate.Entry(entry.getKey(), entry.getValue())).collect(ImmutableList.toImmutableList()));
     }
   }
 
