@@ -1,6 +1,8 @@
 package pers.solid.ecmd.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -11,10 +13,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
+import pers.solid.ecmd.math.ConcentrationType;
+import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -26,6 +29,8 @@ import static net.minecraft.commands.arguments.EntityArgument.entities;
 import static net.minecraft.commands.arguments.EntityArgument.getEntities;
 import static net.minecraft.commands.arguments.coordinates.Vec3Argument.getVec3;
 import static net.minecraft.commands.arguments.coordinates.Vec3Argument.vec3;
+import static pers.solid.ecmd.argument.SimpleEnumArgument.concentrationType;
+import static pers.solid.ecmd.argument.SimpleEnumArgument.getConcentrationType;
 import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
 public enum VelocityCommand implements CommandRegistrationCallbackBridge {
@@ -34,6 +39,16 @@ public enum VelocityCommand implements CommandRegistrationCallbackBridge {
   @Override
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("velocity")
+        .then(literal("get")
+            .executes(context -> executeGet(context, Collections.singleton(context.getSource().getEntityOrException()), ConcentrationType.AVERAGE))
+            .then(argument("target", entities())
+                .executes(context -> executeGet(context, getEntities(context, "target"), ConcentrationType.AVERAGE))
+                .then(argument("concentration_type", concentrationType())
+                    .executes(context -> executeGet(context, getEntities(context, "target"), getConcentrationType(context, "concentration_type"))))))
+        .then(literal("set")
+            .then(argument("target", entities())
+                .then(argument("vector", vec3(false))
+                    .executes(context -> executeSet(context.getSource(), getEntities(context, "target"), getVec3(context, "vector"))))))
         .then(literal("add")
             .then(argument("target", entities())
                 .then(argument("vector", vec3(false))
@@ -58,11 +73,24 @@ public enum VelocityCommand implements CommandRegistrationCallbackBridge {
             .then(argument("target", entities())
                 .then(argument("size", doubleArg())
                     .executes(context -> executeSetSize(context.getSource(), getEntities(context, "target"), getDouble(context, "size"))))))
-        .then(literal("set")
-            .then(argument("target", entities())
-                .then(argument("vector", vec3(false))
-                    .executes(context -> executeSet(context.getSource(), getEntities(context, "target"), getVec3(context, "vector"))))))
     );
+  }
+
+  private static int executeGet(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, ConcentrationType concentrationType) throws CommandSyntaxException {
+    final CommandSourceStack source = context.getSource();
+    if (entities.size() == 1) {
+      final Entity entity = entities.iterator().next();
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.velocity.get.single", TextUtil.styled(entity.getDisplayName(), Styles.TARGET), TextUtil.wrapVector(entity.getDeltaMovement()).withStyle(Styles.RESULT)), false);
+      return 1;
+    } else {
+      final List<Vec3> list = new ArrayList<>();
+      for (Entity entity : entities) {
+        list.add(entity.getDeltaMovement());
+      }
+      final Vec3 concentrated = concentrationType.concentrateVec3(list);
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.velocity.get.multiple", TextUtil.styled(TextUtil.wrapEntities(entities), Styles.TARGET), concentrationType.getDisplayName(), TextUtil.wrapVector(concentrated).withStyle(Styles.RESULT)), false);
+      return entities.size();
+    }
   }
 
   private static int executeSet(CommandSourceStack source, Collection<? extends Entity> entities, Vec3 vec3) {

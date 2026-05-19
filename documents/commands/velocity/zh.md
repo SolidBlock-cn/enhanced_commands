@@ -4,6 +4,7 @@
 
 ## 语法
 
+- `/velocity get [目标] [聚合类型]`
 - `/velocity set <目标> <向量>`：设置实体的速度。
 - `/velocity add <目标> <向量>`：将实体的速度增加一个向量。
 - `/velocity subtract <目标> <向量>`：将实体的速度减去一个向量。
@@ -28,8 +29,15 @@
 
 双精度浮点数。
 
+### '[聚合类型]'
+
+[聚合类型](/documents/arguments/concentration_type/zh.md)，若未指定，则为 `average`。
+
 ## 示例
 
+- `/velocity get @s`
+- `/velocity get @a average`
+- `/velocity get @e max`
 - `/velocity set @s 0 1 0`
 - `/velocity add @e 0 0.5 0`
 - `/velocity subtract @e 0 -0.5 0`：与上一个例子等价。

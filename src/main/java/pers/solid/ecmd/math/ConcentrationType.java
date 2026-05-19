@@ -16,9 +16,11 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.util.codec.StringIdentifiableCodec;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * 数据的聚合类型，用于处理一组原始类型的数据。注意：必须是直接处理原始类型的数据，不对任何值进行装箱。为了提高性能，这里尽可能地避免了将可迭代的对象转换为流。
@@ -51,6 +53,13 @@ public enum ConcentrationType implements StringRepresentable {
       final var iterator = values.iterator();
       ensureHasNext(iterator);
       return iterator.nextDouble();
+    }
+
+    @Override
+    public Vec3 concentrateVec3(Iterable<Vec3> values) throws CommandSyntaxException {
+      final Iterator<Vec3> iterator = values.iterator();
+      ensureHasNext(iterator);
+      return iterator.next();
     }
   },
   LAST("last", false) {
@@ -95,6 +104,17 @@ public enum ConcentrationType implements StringRepresentable {
       while (iterator.hasNext()) value = iterator.nextDouble();
       return value;
     }
+
+    @Override
+    public Vec3 concentrateVec3(Iterable<Vec3> values) throws CommandSyntaxException {
+      if (values instanceof List<Vec3> list && !list.isEmpty())
+        return list.get(list.size() - 1);
+      final var iterator = values.iterator();
+      ensureHasNext(iterator);
+      Vec3 value = Vec3.ZERO;
+      while (iterator.hasNext()) value = iterator.next();
+      return value;
+    }
   },
 
   MIN("min", false) {
@@ -133,6 +153,24 @@ public enum ConcentrationType implements StringRepresentable {
       while (iterator.hasNext()) r = Math.min(r, iterator.nextDouble());
       return r;
     }
+
+    @Override
+    public Vec3 concentrateVec3(Iterable<Vec3> values) throws CommandSyntaxException {
+      final Iterator<Vec3> iterator = values.iterator();
+      ensureHasNext(iterator);
+      var value = iterator.next();
+      var lengthSquared = value.lengthSqr();
+      while (iterator.hasNext()) {
+        final Vec3 nextValue = iterator.next();
+        final double nextLengthSqr = nextValue.lengthSqr();
+        if (nextLengthSqr < lengthSquared) {
+          value = nextValue;
+          lengthSquared = nextLengthSqr;
+        }
+      }
+
+      return value;
+    }
   },
   MAX("max", false) {
     @Override
@@ -169,6 +207,24 @@ public enum ConcentrationType implements StringRepresentable {
       var r = iterator.nextDouble();
       while (iterator.hasNext()) r = Math.max(r, iterator.nextDouble());
       return r;
+    }
+
+    @Override
+    public Vec3 concentrateVec3(Iterable<Vec3> values) throws CommandSyntaxException {
+      final Iterator<Vec3> iterator = values.iterator();
+      ensureHasNext(iterator);
+      var value = iterator.next();
+      var lengthSquared = value.lengthSqr();
+      while (iterator.hasNext()) {
+        final Vec3 nextValue = iterator.next();
+        final double nextLengthSqr = nextValue.lengthSqr();
+        if (nextLengthSqr > lengthSquared) {
+          value = nextValue;
+          lengthSquared = nextLengthSqr;
+        }
+      }
+
+      return value;
     }
   },
 
@@ -220,6 +276,25 @@ public enum ConcentrationType implements StringRepresentable {
       }
       return sum / size;
     }
+
+    @Override
+    public Vec3 concentrateVec3(Iterable<Vec3> values) throws CommandSyntaxException {
+      double x = 0;
+      double y = 0;
+      double z = 0;
+      double n = 0;
+      final Iterator<Vec3> iterator = values.iterator();
+      ensureHasNext(iterator);
+      while (iterator.hasNext()) {
+        final Vec3 next = iterator.next();
+        x += next.x;
+        y += next.y;
+        z += next.z;
+        n++;
+      }
+
+      return new Vec3(x / n, y / n, z / n);
+    }
   },
 
   SUM("sum", false) {
@@ -254,6 +329,19 @@ public enum ConcentrationType implements StringRepresentable {
       while (iterator.hasNext()) sum += iterator.nextDouble();
       return sum;
     }
+
+    @Override
+    public Vec3 concentrateVec3(Iterable<Vec3> values) throws CommandSyntaxException {
+      double x = 0;
+      double y = 0;
+      double z = 0;
+      for (Vec3 next : values) {
+        x += next.x;
+        y += next.y;
+        z += next.z;
+      }
+      return new Vec3(x, y, z);
+    }
   };
   public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.concentration_type.no_value"));
   public static final StringIdentifiableCodec<ConcentrationType> CODEC = StringIdentifiableCodec.create(ConcentrationType.values());
@@ -277,6 +365,8 @@ public enum ConcentrationType implements StringRepresentable {
   public abstract double concentrateFloat(FloatIterable values) throws CommandSyntaxException;
 
   public abstract double concentrateDouble(DoubleIterable values) throws CommandSyntaxException;
+
+  public abstract Vec3 concentrateVec3(Iterable<Vec3> values) throws CommandSyntaxException;
 
   // 以下两个方法均用于以适当的方式将计算结果转化为字符串。尽管计算结果始终是 double，但在一些情况下，仍需要以原来的类型的方式呈现值。例如，几个整数的最大值尽管计算出来后是 double，但我们仍会尽可能以整数的方式呈现它，但考虑到最大值可能超过 Integer.MAX_VALUE，因此对于 int，仍使用 long。
 

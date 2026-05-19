@@ -49,7 +49,7 @@ public enum AirCommand implements CommandRegistrationCallbackBridge {
   public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext, Commands.CommandSelection environment) {
     dispatcher.register(literalR2("air")
         .then(literal("get")
-            .executes(context -> executeGetAir(context, Collections.singleton(context.getSource().getEntityOrException()), null))
+            .executes(context -> executeGetAir(context, Collections.singleton(context.getSource().getEntityOrException()), ConcentrationType.AVERAGE))
             .then(argument("entities", entities())
                 .executes(context -> executeGetAir(context, getEntities(context, "entities"), ConcentrationType.AVERAGE))
                 .then(argument("concentration_type", concentrationType())
