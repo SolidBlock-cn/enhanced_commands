@@ -7,17 +7,18 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.math.ConcentrationType;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TextUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
@@ -97,7 +98,8 @@ public enum VelocityCommand implements CommandRegistrationCallbackBridge {
     for (Entity entity : entities) {
       entity.setDeltaMovement(vec3);
       if (entity instanceof ServerPlayer player) {
-        player.connection.send(new ClientboundPlayerPositionPacket(entity.getId(), new PositionMoveRotation(player.position(), vec3, player.getYRot(), player.getXRot()), Set.of()));
+//        player.connection.send(new ClientboundPlayerPositionPacket(entity.getId(), new PositionMoveRotation(player.position(), vec3, player.getYRot(), player.getXRot()), Set.of()));
+        // todo 在 1.21.1 中同步 deltaMovement
       }
     }
 
@@ -110,7 +112,8 @@ public enum VelocityCommand implements CommandRegistrationCallbackBridge {
       final Vec3 applied = modifier.apply(entity.getDeltaMovement());
       entity.setDeltaMovement(applied);
       if (entity instanceof ServerPlayer player) {
-        player.connection.send(new ClientboundPlayerPositionPacket(entity.getId(), new PositionMoveRotation(player.position(), applied, player.getYRot(), player.getXRot()), Set.of()));
+//        player.connection.send(new ClientboundPlayerPositionPacket(entity.getId(), player.position(), applied, player.getYRot(), player.getXRot(), Set.of()));
+        // todo 在 1.21.1 中同步
       }
     }
 
