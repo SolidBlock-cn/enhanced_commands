@@ -62,8 +62,8 @@ public enum HealthCommand implements CommandRegistrationCallbackBridge {
                                 .executes(context -> executeGetHealth(context, getEntities(context, "entities"), getConcentrationType(context, "concentration_type"), 1, getNbtTarget(context, "target"), getPath(context, "path")))))))))
         .then(literal("set")
             .then(argument("entities", entities())
-                .then(argument("probability", floatArg())
-                    .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getFloat(context, "probability"))))
+                .then(argument("value", floatArg())
+                    .executes(context -> executeSetHealth(context, getEntities(context, "entities"), getFloat(context, "value"))))
                 .then(literal("from")
                     .then(literal("result").redirect(dispatcher.getRoot(), context -> {
                       final Collection<? extends Entity> entities = getEntities(context, "entities");
@@ -98,14 +98,14 @@ public enum HealthCommand implements CommandRegistrationCallbackBridge {
             .executes(context -> executeAddHealth(context, Collections.singleton(context.getSource().getEntityOrException())))
             .then(argument("entities", entities())
                 .executes(context -> executeAddHealth(context, getEntities(context, "entities")))
-                .then(argument("probability", floatArg())
-                    .executes(context -> executeAddHealth(context, getEntities(context, "entities"), getFloat(context, "probability"))))))
+                .then(argument("value", floatArg())
+                    .executes(context -> executeAddHealth(context, getEntities(context, "entities"), getFloat(context, "value"))))))
         .then(literal("remove")
             .executes(context -> executeRemoveHealth(context, Collections.singleton(context.getSource().getEntityOrException())))
             .then(argument("entities", entities())
                 .executes(context -> executeRemoveHealth(context, getEntities(context, "entities")))
-                .then(argument("probability", floatArg())
-                    .executes(context -> executeRemoveHealth(context, getEntities(context, "entities"), getFloat(context, "probability")))))));
+                .then(argument("value", floatArg())
+                    .executes(context -> executeRemoveHealth(context, getEntities(context, "entities"), getFloat(context, "value")))))));
   }
 
   private int executeSetHealthFromSource(CommandContext<CommandSourceStack> context, NbtPathArgument.NbtPath path, NbtConcentrationType nbtConcentrationType) throws CommandSyntaxException {
