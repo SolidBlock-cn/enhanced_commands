@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.block.SimpleBlockParser;
-import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.command.SetReplaceBlocksCommand;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.nbt.NbtParserShared;
@@ -141,7 +141,7 @@ public interface BlockFunction extends ExpressionConvertible {
     MutableObject<@Nullable CompoundTag> blockEntityData = new MutableObject<>(null);
     BlockState newState = getModifiedState(origState, origState, world, pos, blockEntityData, context);
     final int modFlags = context.modFlags;
-    if ((modFlags & FillReplaceCommand.POST_PROCESS_FLAG) != 0) {
+    if ((modFlags & SetReplaceBlocksCommand.POST_PROCESS_FLAG) != 0) {
       newState = Block.updateFromNeighbourShapes(newState, world, pos);
     }
 

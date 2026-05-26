@@ -28,7 +28,7 @@ import pers.solid.ecmd.block.function.BlockFunction;
 import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.function.SimpleBlockFunction;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
-import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.command.SetReplaceBlocksCommand;
 import pers.solid.ecmd.config.BlockOperationConfig;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockTransformationHistory;
@@ -197,13 +197,13 @@ public class BlockTransformationTask extends AbstractIteratorTask {
   public void checkAndRejectUnloadedPos() throws CommandSyntaxException {
     final BoundingBox box = region.minContainingBlockBox();
     if (box != null && !LoadUtil.isPosLoaded(world, box)) {
-      throw FillReplaceCommand.UNLOADED_POS.create();
+      throw SetReplaceBlocksCommand.UNLOADED_POS.create();
     }
 
     if (posTransformer != null) {
       final BoundingBox box2 = region.transformed(posTransformer).minContainingBlockBox();
       if (box2 != null && !LoadUtil.isPosLoaded(world, box2)) {
-        throw FillReplaceCommand.UNLOADED_POS.create();
+        throw SetReplaceBlocksCommand.UNLOADED_POS.create();
       }
     }
   }
@@ -216,7 +216,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
   public void checkAndRejectLimit() throws CommandSyntaxException {
     final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
     if (region.numberOfBlocksAffected() > regionSizeLimit) {
-      throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
+      throw SetReplaceBlocksCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
     }
   }
 

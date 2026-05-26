@@ -82,13 +82,13 @@ public enum TestForBlocksCommand implements TestForCommands.Entry {
 
     final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
     if (!bypassLimit && region.numberOfBlocksAffected() > regionSizeLimit) {
-      throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
+      throw SetReplaceBlocksCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), regionSizeLimit);
     }
     final ServerLevel world = source.getLevel();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       final BoundingBox box = region.minContainingBlockBox();
       if (box != null && !LoadUtil.isPosLoaded(world, box)) {
-        throw FillReplaceCommand.UNLOADED_POS.create();
+        throw SetReplaceBlocksCommand.UNLOADED_POS.create();
       }
     }
     final BlockPredicate blockPredicate = getBlockPredicate(context, "block_predicate");

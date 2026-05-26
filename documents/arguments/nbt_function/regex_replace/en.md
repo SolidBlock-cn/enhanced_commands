@@ -81,5 +81,5 @@ NBT function, optional. Indicating the original value before replacement.
 
 ## 参见
 
-- [`replace()` function](../replace/en.md): Replacing NBTs that match the predicate.
+- [`replace()` function](../replaceblocks/en.md): Replacing NBTs that match the predicate.
 - [`string_replace()` function](../string_replace/en.md): Replacing texts simply.

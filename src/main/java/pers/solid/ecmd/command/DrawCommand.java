@@ -74,7 +74,7 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static int setBlocksFromKeywordArgs(Curve curve, BlockFunction blockFunction, CommandSourceStack source, KeywordArgs kwArgs) throws CommandSyntaxException {
-    return execute(curve, blockFunction, source, kwArgs.getArg("affect_only"), kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), kwArgs.getArg("interval"), new BlockFunctionContext(FillReplaceCommand.getFlags(kwArgs), FillReplaceCommand.getModFlags(kwArgs), source.getLevel().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("thickness"), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
+    return execute(curve, blockFunction, source, kwArgs.getArg("affect_only"), kwArgs.getBoolean("immediately"), kwArgs.getBoolean("bypass_limit"), kwArgs.getArg("interval"), new BlockFunctionContext(SetReplaceBlocksCommand.getFlags(kwArgs), SetReplaceBlocksCommand.getModFlags(kwArgs), source.getLevel().getRandom(), source, kwArgs.getArg("seed")), kwArgs.getArg("thickness"), kwArgs.getArg("unloaded_pos"), kwArgs.getBoolean("undoable"));
   }
 
   private static int execute(Curve curve, BlockFunction blockFunction, CommandSourceStack source, @Nullable BlockPredicate predicate, boolean immediately, boolean bypassLimit, double interval, BlockFunctionContext context, double thickness, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) throws CommandSyntaxException {
@@ -85,14 +85,14 @@ public enum DrawCommand implements CommandRegistrationCallbackBridge {
     }
     final int regionSizeLimit = BlockOperationConfig.current.regionSizeLimit;
     if (!bypassLimit && estimatedIterationAmount > regionSizeLimit) {
-      throw FillReplaceCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, regionSizeLimit);
+      throw SetReplaceBlocksCommand.REGION_TOO_LARGE.create(estimatedIterationAmount, regionSizeLimit);
     }
 
     final ServerLevel world = source.getLevel();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       final @Nullable AABB box = curve.minContainingBox();
       if (box != null && !LoadUtil.isPosLoaded(world, box)) {
-        throw FillReplaceCommand.UNLOADED_POS.create();
+        throw SetReplaceBlocksCommand.UNLOADED_POS.create();
       }
     }
 

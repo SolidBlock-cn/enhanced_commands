@@ -35,11 +35,11 @@ public enum PostProcessCommand implements CommandRegistrationCallbackBridge {
 
   private int executeWithDefaultKeywordArgs(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     final RegionProvider<?> region = RegionArgument.getRegionProvider(context, "region");
-    return FillReplaceCommand.setBlocksWithDefaultKeywordArgs(region.toAbsoluteRegion(context.getSource()), new PostProcessBlockFunction(PostProcessBlockFunction.ALL_DIRECTIONS), context.getSource(), null);
+    return SetReplaceBlocksCommand.setBlocksWithDefaultKeywordArgs(region.toAbsoluteRegion(context.getSource()), new PostProcessBlockFunction(PostProcessBlockFunction.ALL_DIRECTIONS), context.getSource(), null);
   }
 
   private int execute(CommandContext<CommandSourceStack> context, KeywordArgs keywordArgs) throws CommandSyntaxException {
     final RegionProvider<?> region = RegionArgument.getRegionProvider(context, "region");
-    return FillReplaceCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion(context.getSource()), new PostProcessBlockFunction(PostProcessBlockFunction.ALL_DIRECTIONS), context.getSource(), null, keywordArgs);
+    return SetReplaceBlocksCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion(context.getSource()), new PostProcessBlockFunction(PostProcessBlockFunction.ALL_DIRECTIONS), context.getSource(), null, keywordArgs);
   }
 }

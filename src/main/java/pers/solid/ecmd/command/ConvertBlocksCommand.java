@@ -81,13 +81,13 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
     CompoundNbtFunction nbtFunction = keywordArgs.getArg("nbt");
     final @Nullable Long seed = keywordArgs.getArg("seed");
     if (!bypassLimit && region.numberOfBlocksAffected() > 16383) {
-      throw FillReplaceCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), 16383);
+      throw SetReplaceBlocksCommand.REGION_TOO_LARGE.create(region.numberOfBlocksAffected(), 16383);
     }
     final ServerLevel world = source.getLevel();
     if (unloadedPosBehavior == UnloadedPosBehavior.REJECT) {
       final BoundingBox box = region.minContainingBlockBox();
       if (box != null && !LoadUtil.isPosLoaded(world, box)) {
-        throw FillReplaceCommand.UNLOADED_POS.create();
+        throw SetReplaceBlocksCommand.UNLOADED_POS.create();
       }
     }
     final Iterator<@Nullable Runnable> mainIterator;
@@ -109,8 +109,8 @@ public enum ConvertBlocksCommand implements CommandRegistrationCallbackBridge {
     }
 
     final BlockPredicate predicate = keywordArgs.getArg("affect_only");
-    final int flags = FillReplaceCommand.getFlags(keywordArgs);
-    final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
+    final int flags = SetReplaceBlocksCommand.getFlags(keywordArgs);
+    final int modFlags = SetReplaceBlocksCommand.getModFlags(keywordArgs);
     final boolean affectFluid = keywordArgs.getBoolean("affect_fluid");
     final ExecutionContext executionContext = new ExecutionContext(world.getRandom(), source, seed);
     final Function<BlockPos, @Nullable Runnable> mapper = blockPos -> () -> {

@@ -16,7 +16,7 @@
 - [`/moveblocks`](moveblocks/zh.md) 和 `//moveblocks`：移动区域内的方块和实体。
 - [`/outline`](outline/zh.md)：填充区域边缘位置的方块，可以一并填充区域边缘以内的方块。
 - [`/postprocess`](postprocess/zh.md) 和 `//postprocess`：对方块进行后处理，例如修复栅栏与墙的连接问题。
-- [`/replace`](replace/zh.md) 和 `//replace`：替换区域内的符合指定谓词的方块。
+- [`/replaceblocks`](replace/zh.md) 和 `//replaceblocks`：替换区域内的符合指定谓词的方块。
 - [`/rotateblocks`](rotateblocks/zh.md) 和 `//rotateblocks`：旋转区域内的方块和实体。
 - [`/setblocks`](setblocks/zh.md)、`//setblocks` 和 `/s`、`//s`：设置区域内的方块。
 - [`/stackblocks`](stackblocks/zh.md) 和 `//stackblocks`：向一个方向多次复制区域。

@@ -1,4 +1,4 @@
-# `/replace` 和 `//replace`
+# `/replaceblocks` 和 `//replaceblocks`
 
 此[命令](../zh.md)用于替换方块。方块放置的原理同 [`/setblocks`](../setblocks/zh.md)。
 
@@ -6,13 +6,13 @@
 
 ## 语法
 
-`/replace <区域> <方块谓词> <方块函数> [关键字参数]`
+`/replaceblocks <区域> <方块谓词> <方块函数> [关键字参数]`
 
 关键字参数与 [`/setblocks`](../setblocks/zh.md) 相同，这里不作解释。
 
 由于对方块谓词的判断是预先进行的，此命令不等同于 `/setblock <区域> if(<方块谓词>, <方块函数>) [关键字参数]`。
 
-`//replace ...` 相当于 `/replace 玩家的活动区域 ...`。
+`//replaceblocks ...` 相当于 `/replaceblocks 玩家的活动区域 ...`。
 
 ## 参数
 
@@ -30,8 +30,8 @@
 
 ## 示例
 
-- `/replace sphere(20) water lava`：将附近 20 格范围内的水替换为熔岩。
-- `/replace sphere(20) water lava[~]`：将附近 20 格范围内的水替换为相同等级的熔岩。
-- `/replace sphere(20) water lava[~] force=true`：将附近 20 格范围内的水替换为相同等级的熔岩，并抑制相应的方块更新。
-- `/replace outwards(~~~, 10) chest air`：将各方向延伸 10 格的范围（即 21³ 的立方体）的箱子替换为空气。如果箱子内的物品，这些物品会掉落。
-- `/replace outwards(~~~, 10) chest air suppress_replaced_check=true`：将各方向延伸 10 格的范围的箱子替换为空气，不会掉落箱子内的物品。
+- `/replaceblocks sphere(20) water lava`：将附近 20 格范围内的水替换为熔岩。
+- `/replaceblocks sphere(20) water lava[~]`：将附近 20 格范围内的水替换为相同等级的熔岩。
+- `/replaceblocks sphere(20) water lava[~] force=true`：将附近 20 格范围内的水替换为相同等级的熔岩，并抑制相应的方块更新。
+- `/replaceblocks outwards(~~~, 10) chest air`：将各方向延伸 10 格的范围（即 21³ 的立方体）的箱子替换为空气。如果箱子内的物品，这些物品会掉落。
+- `/replaceblocks outwards(~~~, 10) chest air suppress_replaced_check=true`：将各方向延伸 10 格的范围的箱子替换为空气，不会掉落箱子内的物品。

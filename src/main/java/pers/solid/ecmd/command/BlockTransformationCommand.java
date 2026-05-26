@@ -70,8 +70,8 @@ public interface BlockTransformationCommand {
     final ServerLevel world = source.getLevel();
     final UnloadedPosBehavior unloadedPosBehavior = keywordArgs.getRequiredArg("unloaded_pos");
     final boolean bypassLimit = keywordArgs.getBoolean("bypass_limit");
-    final int flags = FillReplaceCommand.getFlags(keywordArgs);
-    final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
+    final int flags = SetReplaceBlocksCommand.getFlags(keywordArgs);
+    final int modFlags = SetReplaceBlocksCommand.getModFlags(keywordArgs);
     final @Nullable Long seed = keywordArgs.getArg("seed");
     final MutableComponent iteratorTaskName = getIteratorTaskName(region);
     final @Nullable BlockTransformationHistory history = keywordArgs.getBoolean("undoable") ? new BlockTransformationHistory(iteratorTaskName, world, flags, modFlags) : null;

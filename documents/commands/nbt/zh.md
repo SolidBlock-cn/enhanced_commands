@@ -52,7 +52,7 @@ NBT 路径，和原版用法一致。
 
 ## 参见
 
-- [NBT 函数 `replace()`](/documents/arguments/nbt_function/replace/zh.md)
+- [NBT 函数 `replace()`](/documents/arguments/nbt_function/replaceblocks/zh.md)
 - [NBT 函数 `string_replace()`](/documents/arguments/nbt_function/string_replace/zh.md)
 - [NBT 函数 `regex_replace()`](/documents/arguments/nbt_function/regex_replace/zh.md)
 - [NBT 函数 `substring()`](/documents/arguments/nbt_function/substring/zh.md)

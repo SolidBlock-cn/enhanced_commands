@@ -52,7 +52,7 @@ NBT path, same as vanilla usage.
 
 ## See also
 
-- [NBT function `replace()`](/documents/arguments/nbt_function/replace/en.md)
+- [NBT function `replace()`](/documents/arguments/nbt_function/replaceblocks/en.md)
 - [NBT function `string_replace()`](/documents/arguments/nbt_function/string_replace/en.md)
 - [NBT function `regex_replace()`](/documents/arguments/nbt_function/regex_replace/en.md)
 - [NBT function `substring()`](/documents/arguments/nbt_function/substring/en.md)

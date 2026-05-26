@@ -83,5 +83,5 @@ NBT 函数，可选。表示替换前的原始值。
 
 ## 参见
 
-- [`replace()` 函数](../replace/zh.md)：替换符合谓词的 NBT。
+- [`replace()` 函数](../replaceblocks/zh.md)：替换符合谓词的 NBT。
 - [`regex_replace()` 函数](../regex_replace/zh.md)：替换正则表达式。

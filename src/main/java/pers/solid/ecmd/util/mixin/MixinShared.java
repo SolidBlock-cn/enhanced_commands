@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.argument.EnhancedEntryPredicate;
-import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.command.SetReplaceBlocksCommand;
 import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.general.CommandsMixin;
 import pers.solid.ecmd.mixins.general.LevelChunkMixin;
@@ -84,8 +84,8 @@ public final class MixinShared {
   }
 
   public static void implementModFlag(int modFlags) {
-    MixinShared.suppressOnBlockAdded = (modFlags & FillReplaceCommand.SUPPRESS_INITIAL_CHECK_FLAG) != 0;
-    MixinShared.suppressOnStateReplaced = (modFlags & FillReplaceCommand.SUPPRESS_REPLACED_CHECK_FLAG) != 0;
+    MixinShared.suppressOnBlockAdded = (modFlags & SetReplaceBlocksCommand.SUPPRESS_INITIAL_CHECK_FLAG) != 0;
+    MixinShared.suppressOnStateReplaced = (modFlags & SetReplaceBlocksCommand.SUPPRESS_REPLACED_CHECK_FLAG) != 0;
   }
 
   public static void releaseModFlag() {

@@ -178,8 +178,8 @@ public enum StackBlocksCommand implements CommandRegistrationCallbackBridge {
 
 
     final MutableComponent taskName = Component.translatable("enhanced_commands.commands.stackblocks.task_name", region.expressAsString(), Integer.toString(stackAmount));
-    final int flags = FillReplaceCommand.getFlags(keywordArgs);
-    final int modFlags = FillReplaceCommand.getModFlags(keywordArgs);
+    final int flags = SetReplaceBlocksCommand.getFlags(keywordArgs);
+    final int modFlags = SetReplaceBlocksCommand.getModFlags(keywordArgs);
     final @Nullable BlockPlacementHistory history = keywordArgs.getBoolean("undoable") ? new BlockPlacementHistory(taskName, world, flags, modFlags) : null;
 
     // 收集需要影响的方块和方块实体

@@ -38,7 +38,7 @@ import static net.minecraft.commands.Commands.argument;
 import static pers.solid.ecmd.argument.RegionArgument.region;
 import static pers.solid.ecmd.command.EnhancedCommandsCommands.literalR2;
 
-public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
+public enum SetReplaceBlocksCommand implements CommandRegistrationCallbackBridge {
   INSTANCE;
   public static final int POST_PROCESS_FLAG = 1;
   public static final int SUPPRESS_INITIAL_CHECK_FLAG = 2;
@@ -60,8 +60,8 @@ public enum FillReplaceCommand implements CommandRegistrationCallbackBridge {
     dispatcher.register(literalR2("s").redirect(setBlocksNode));
 
     EnhancedCommandsCommands.registerWithRegionArgumentModification(dispatcher,
-        literalR2("replace"),
-        literalR2("/replace"),
+        literalR2("replaceblocks"),
+        literalR2("/replaceblocksblocks"),
         argument("region", region(commandBuildContext))
             .then(argument("predicate", BlockPredicateArgument.blockPredicate(commandBuildContext))
                 .then(argument("block", BlockFunctionArgument.blockFunction(commandBuildContext))
