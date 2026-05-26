@@ -30,6 +30,7 @@ These commands are used to operate on blocks (sometimes including entities) with
 - [`/pile`](pile/en.md): Pile entities by riding.
 - [`/tame`](tame/en.md): Tame or cancel taming the entity.
 - [`/tprel`](tprel/en.md) Teleporting entities, and the coordinates and rotations are calculated based on each entity to be transported.
+- [`/velocity`](velocity/en.md): Modify entity's speed.
 
 ## Test commands
 

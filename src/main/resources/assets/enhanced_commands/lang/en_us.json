@@ -536,6 +536,7 @@
   "enhanced_commands.commands.undo.no_history": "No undoable history",
   "enhanced_commands.commands.velocity.add.success": "Successfully added the velocity of %1$s by %2$s",
   "enhanced_commands.commands.velocity.cross.success": "Successfully modified the velocity of %1$s by calculating its vector product with %2$s",
+  "enhanced_commands.commands.velocity.experimental_warning": "Modifying players' velocity is an experimental feature. It may not work stably and sometimes may not work.",
   "enhanced_commands.commands.velocity.get.multiple": "The %2$s of the velocities of %1$s is %3$s",
   "enhanced_commands.commands.velocity.get.single": "The velocity of %1$s is %2$s",
   "enhanced_commands.commands.velocity.multiply.success": "Successfully multiplied the velocity of %1$s by %2$s",
