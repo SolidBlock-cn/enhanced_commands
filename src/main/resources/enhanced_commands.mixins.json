@@ -43,6 +43,7 @@
     "general.GameModeArgumentMixin",
     "general.GameTypeMixin",
     "general.GenerationChunkHolderMixin",
+    "general.GiveCommandMixin",
     "general.GrammarMixin",
     "general.IdentifierMixin",
     "general.ItemArgumentMixin",
