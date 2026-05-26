@@ -28,4 +28,4 @@ Long integer.
 - `probability(0.8, stone)`: Passes under the probability of 0.8 and the block is stone.
 - `probability(0.7, stone, seed = 5)`: Passes under the probability of 0.7 and the block is stone, with seed 5.
 
-This block predicate can make a randomized effect in practice. For example, the command `/replace sphere(20) probability(0.4, dirt) bedrock` can replace about 40% dirt blocks within 20 blocks with bedrock.
+This block predicate can make a randomized effect in practice. For example, the command `/replaceblocks sphere(20) probability(0.4, dirt) bedrock` can replace about 40% dirt blocks within 20 blocks with bedrock.

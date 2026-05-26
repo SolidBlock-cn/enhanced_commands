@@ -16,7 +16,7 @@ These commands are used to operate on blocks (sometimes including entities) with
 - [`/moveblocks`](moveblocks/en.md) and `//moveblocks`: Move the blocks and entities within a range.
 - [`/outline`](outline/en.md): Fill the blocks on the outline of a region. It can also fill the inner part within the outline meanwhile.
 - [`/postprocess`](postprocess/en.md) and `//postprocess`: Postprocess on blocks, such as fixing connection issues related to fences and walls.
-- [`/replace`](replace/en.md) and `//replace`: Replace blocks within a region that match the specified predicate.
+- [`/replaceblocks`](replace/en.md) and `//replaceblocks`: Replace blocks within a region that match the specified predicate.
 - [`/rotateblocks`](rotateblocks/en.md) and `//rotateblocks`: Rotate blocks and entities within a region.
 - [`/setblocks`](setblocks/en.md), `//setblocks` and `/s`, `//s`: Set the blocks within a region.
 - [`/stackblocks`](stackblocks/en.md) and `//stackblocks`: Duplicate the region in one direction.

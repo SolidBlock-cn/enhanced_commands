@@ -58,7 +58,7 @@ public enum OutlineCommand implements CommandRegistrationCallbackBridge {
   }
 
   public static int executeWithDefaultKeywordArgs(CommandContext<CommandSourceStack> context, OutlineType outlineType) throws CommandSyntaxException {
-    return FillReplaceCommand.setBlocksWithDefaultKeywordArgs(OutlineRegion.of(RegionArgument.getRegion(context, "region"), outlineType), BlockFunctionArgument.getBlockFunction(context, "block"), context.getSource(), null);
+    return SetReplaceBlocksCommand.setBlocksWithDefaultKeywordArgs(OutlineRegion.of(RegionArgument.getRegion(context, "region"), outlineType), BlockFunctionArgument.getBlockFunction(context, "block"), context.getSource(), null);
   }
 
   public static int executeFromKeywordArgs(CommandContext<CommandSourceStack> context, OutlineType outlineType, KeywordArgs keywordArgs) throws CommandSyntaxException {
@@ -67,9 +67,9 @@ public enum OutlineCommand implements CommandRegistrationCallbackBridge {
     final RegionProvider<?> outlineRegion = new OutlineRegionProvider(outlineType, region);
     final BlockFunction blockFunction = BlockFunctionArgument.getBlockFunction(context, "block");
     if (inner == null) {
-      return FillReplaceCommand.setBlocksFromKeywordArgs(outlineRegion.toAbsoluteRegion(context.getSource()), blockFunction, context.getSource(), null, keywordArgs);
+      return SetReplaceBlocksCommand.setBlocksFromKeywordArgs(outlineRegion.toAbsoluteRegion(context.getSource()), blockFunction, context.getSource(), null, keywordArgs);
     } else {
-      return FillReplaceCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion(context.getSource()), new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
+      return SetReplaceBlocksCommand.setBlocksFromKeywordArgs(region.toAbsoluteRegion(context.getSource()), new ConditionalBlockFunction(new RegionBlockPredicate(outlineRegion), blockFunction, inner), context.getSource(), null, keywordArgs);
     }
   }
 }

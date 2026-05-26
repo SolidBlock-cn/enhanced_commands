@@ -66,7 +66,7 @@ public enum ConvertBlockCommand implements CommandRegistrationCallbackBridge {
     final ServerLevel world = source.getLevel();
     final CompoundNbtFunction nbtFunction = keywordArgs.getArg("nbt");
 
-    final Entity entity = conversion.getConvertedEntity(world, blockPos, FillReplaceCommand.getFlags(keywordArgs), FillReplaceCommand.getModFlags(keywordArgs), keywordArgs.getBoolean("affect_fluid"));
+    final Entity entity = conversion.getConvertedEntity(world, blockPos, SetReplaceBlocksCommand.getFlags(keywordArgs), SetReplaceBlocksCommand.getModFlags(keywordArgs), keywordArgs.getBoolean("affect_fluid"));
     if (entity == null) {
       return 0;
     }

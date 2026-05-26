@@ -49,7 +49,7 @@ public enum EnhancedCommandsCommands implements CommandRegistrationCallbackBridg
     ConvertBlocksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     DrawCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     EnhancedCommandsConfigCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
-    FillReplaceCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
+    SetReplaceBlocksCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     FireCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     FoodCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);
     GameModeAliasCommand.INSTANCE.register(dispatcher, commandBuildContext, environment);

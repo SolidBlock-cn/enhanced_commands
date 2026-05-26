@@ -7,7 +7,7 @@ import net.minecraft.util.thread.BlockableEventLoop;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pers.solid.ecmd.command.FillReplaceCommand;
+import pers.solid.ecmd.command.SetReplaceBlocksCommand;
 import pers.solid.ecmd.util.iterator.ForwardingIteratorTask;
 import pers.solid.ecmd.util.iterator.IteratorTask;
 
@@ -38,7 +38,7 @@ public interface BlockableEventLoopExtension {
   Map<UUID, IteratorTask> getUUIDToIteratorTasks$ec();
 
   /**
-   * The method is used to handle tasks, such as those created by {@link FillReplaceCommand} when handling quantities of blocks.
+   * The method is used to handle tasks, such as those created by {@link SetReplaceBlocksCommand} when handling quantities of blocks.
    *
    * @see pers.solid.ecmd.command.TasksCommand
    */
