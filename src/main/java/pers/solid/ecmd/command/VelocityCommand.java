@@ -3,12 +3,13 @@ package pers.solid.ecmd.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import pers.solid.ecmd.api.CommandRegistrationCallbackBridge;
 import pers.solid.ecmd.math.ConcentrationType;
@@ -95,28 +96,36 @@ public enum VelocityCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static int executeSet(CommandSourceStack source, Collection<? extends Entity> entities, Vec3 vec3) {
+    boolean hasPlayer = false;
     for (Entity entity : entities) {
       entity.setDeltaMovement(vec3);
-      if (entity instanceof ServerPlayer player) {
-//        player.connection.send(new ClientboundPlayerPositionPacket(entity.getId(), new PositionMoveRotation(player.position(), vec3, player.getYRot(), player.getXRot()), Set.of()));
-        // todo 在 1.21.1 中同步 deltaMovement
+      if (entity instanceof Player) {
+        hasPlayer = true;
       }
     }
 
+    if (hasPlayer) {
+      // 由于玩家是实验性功能，当这些实体中有玩家时，会发出提示：
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.velocity.experimental_warning").withStyle(ChatFormatting.RED), false);
+    }
     source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.velocity.set.success", TextUtil.wrapEntities(entities), TextUtil.wrapVector(vec3)), true);
     return entities.size();
   }
 
   private static int executeModify(CommandSourceStack source, Collection<? extends Entity> entities, UnaryOperator<Vec3> modifier, Supplier<Component> notifier) {
+    boolean hasPlayer = false;
     for (Entity entity : entities) {
       final Vec3 applied = modifier.apply(entity.getDeltaMovement());
       entity.setDeltaMovement(applied);
-      if (entity instanceof ServerPlayer player) {
-//        player.connection.send(new ClientboundPlayerPositionPacket(entity.getId(), player.position(), applied, player.getYRot(), player.getXRot(), Set.of()));
-        // todo 在 1.21.1 中同步
+      if (entity instanceof Player) {
+        hasPlayer = true;
       }
     }
 
+    if (hasPlayer) {
+      // 由于玩家是实验性功能，当这些实体中有玩家时，会发出提示：
+      source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.velocity.experimental_warning").withStyle(ChatFormatting.RED), false);
+    }
     source.sendFeedback$ecBridge(notifier, true);
     return entities.size();
   }
