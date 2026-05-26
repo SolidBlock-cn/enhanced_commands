@@ -42,6 +42,7 @@
     "general.ExecuteCommandMixin",
     "general.GameModeArgumentMixin",
     "general.GameTypeMixin",
+    "general.GiveCommandMixin",
     "general.GrammarMixin",
     "general.IdentifierMixin",
     "general.ItemArgumentMixin",
