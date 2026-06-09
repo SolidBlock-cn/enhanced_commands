@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import pers.solid.ecmd.config.annotations.ConfigEntryScope;
 import pers.solid.ecmd.mixins.general.*;
 
 /**
@@ -22,13 +23,16 @@ public class DebugConfig implements Cloneable {
    * @see LevelMixin#forceValidVertically(int, CallbackInfoReturnable)
    * @see pers.solid.ecmd.mixins.general.EntityMixin#noClampWhenUpdating(double, double, double, Operation)
    */
+  @ConfigEntryScope(ConfigEntryScopeType.BOTH)
   public boolean ignoreBoundary = false;
+
   /**
    * 忽视世界边界。
    *
    * @see GuiMixin#skipBorderWarning(double)
    * @see pers.solid.ecmd.mixins.general.WorldBorderMixin
    */
+  @ConfigEntryScope(ConfigEntryScopeType.BOTH)
   public boolean ignoreBorder = false;
 
   /**
@@ -37,34 +41,46 @@ public class DebugConfig implements Cloneable {
    * @see pers.solid.ecmd.mixins.general.LivingEntityMixin#ignoreBelowWorld
    * @see pers.solid.ecmd.mixins.general.EntityMixin#ignoreBelowWorld
    */
+  @ConfigEntryScope(ConfigEntryScopeType.SERVER)
   public int immuneToVoid = 0;
+
   /**
    * 即使玩家处于较低的地方，仍正常渲染天空，包括下方的天空和雾。
    *
    * @see LevelRendererMixin#neverRenderDarkDisc
    * @see FogRendererMixin#noDarkFogColor
    */
+  @ConfigEntryScope(ConfigEntryScopeType.CLIENT)
   public boolean noDarkSky = false;
 
   /**
    * 玩家没有物理效果，不会受任何碰撞箱影响。可能有部分异常现象。
    */
+  @ConfigEntryScope(ConfigEntryScopeType.BOTH)
   public boolean ghostPlayers = false;
+
   /**
    * 玩家卡在不透明方块内部时，不会被卡视野。
    */
+  @ConfigEntryScope(ConfigEntryScopeType.CLIENT)
   public boolean clearVisionInsideBlocks = false;
+
   /**
    * 所有的玩家都没有碰撞箱，可任意穿过方块，但仍会正常受到流体的影响。此选项不影响在不透明方块内部时的卡视野，也不影响窒息伤害。注意：未飞行的玩家会坠入虚空。
    */
+  @ConfigEntryScope(ConfigEntryScopeType.BOTH)
   public boolean playersNoCollision = false;
+
   /**
    * 所有的实体都没有碰撞箱，可任意穿过方块，但仍会正常受到液体的影响。此选项不影响窒息伤害。注意：未飞行的实体会坠入虚空。
    */
+  @ConfigEntryScope(ConfigEntryScopeType.BOTH)
   public boolean entitiesNoCollision = false;
+
   /**
    * 当玩家有部分位置与方块碰撞箱有重叠时，不再自动弹至有空间的位置。
    */
+  @ConfigEntryScope(ConfigEntryScopeType.CLIENT)
   public boolean disableAutoPositionAdjustment = false;
 
   @Override

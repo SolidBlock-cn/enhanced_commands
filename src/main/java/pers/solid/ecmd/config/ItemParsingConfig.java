@@ -1,7 +1,9 @@
 package pers.solid.ecmd.config;
 
 import net.minecraft.commands.arguments.item.ItemParser;
+import pers.solid.ecmd.config.annotations.ConfigEntryScope;
 
+@ConfigEntryScope(ConfigEntryScopeType.BOTH)
 public class ItemParsingConfig implements Cloneable {
   public static final ItemParsingConfig DEFAULT = new ItemParsingConfig();
   public static ItemParsingConfig current = DEFAULT;

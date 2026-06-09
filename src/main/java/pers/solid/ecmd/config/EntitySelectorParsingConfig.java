@@ -1,10 +1,12 @@
 package pers.solid.ecmd.config;
 
 import net.minecraft.ChatFormatting;
+import pers.solid.ecmd.config.annotations.ConfigEntryScope;
 import pers.solid.ecmd.config.annotations.OverrideDescription;
 import pers.solid.ecmd.config.annotations.TextEntry;
 import pers.solid.ecmd.config.annotations.TextInfo;
 
+@ConfigEntryScope(ConfigEntryScopeType.BOTH)
 public class EntitySelectorParsingConfig implements Cloneable {
   public static final EntitySelectorParsingConfig DEFAULT = new EntitySelectorParsingConfig();
   public static EntitySelectorParsingConfig current = DEFAULT;

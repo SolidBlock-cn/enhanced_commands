@@ -5,6 +5,7 @@ import com.mojang.brigadier.StringReader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import pers.solid.ecmd.config.annotations.ConfigEntryScope;
 import pers.solid.ecmd.config.annotations.OverrideDescription;
 import pers.solid.ecmd.config.annotations.TextEntry;
 import pers.solid.ecmd.config.annotations.TextInfo;
@@ -12,6 +13,7 @@ import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.function.Supplier;
 
+@ConfigEntryScope(ConfigEntryScopeType.BOTH)
 public class GeneralParsingConfig implements Cloneable {
   public static final GeneralParsingConfig DEFAULT = new GeneralParsingConfig();
   public static GeneralParsingConfig current = DEFAULT;
