@@ -9,12 +9,13 @@ import java.util.Map;
  * 本模组所使用的所有配置项。
  */
 public final class ConfigCategories {
+  public static final ConfigCategory<BlockOperationConfig> BLOCK_OPERATION = register(BlockOperationConfig.class);
   public static final ConfigCategory<CommandsConfig> COMMANDS = register(CommandsConfig.class);
   public static final ConfigCategory<EntitySelectorParsingConfig> ENTITY_SELECTOR = register(EntitySelectorParsingConfig.class);
+  public static final ConfigCategory<GameplayConfig> GAMEPLAY = register(GameplayConfig.class);
+  public static final ConfigCategory<GeneralParsingConfig> GENERAL_PARSING = register(GeneralParsingConfig.class);
   public static final ConfigCategory<ItemParsingConfig> ITEM_PARSING = register(ItemParsingConfig.class);
-  public static final ConfigCategory<GeneralParsingConfig> GENERAL = register(GeneralParsingConfig.class);
   public static final ConfigCategory<DebugConfig> DEBUG = register(DebugConfig.class);
-  public static final ConfigCategory<BlockOperationConfig> BLOCK_OPERATION = register(BlockOperationConfig.class);
 
   private ConfigCategories() {
   }

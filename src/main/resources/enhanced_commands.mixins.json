@@ -40,6 +40,7 @@
     "general.EntitySelectorOptionsMixin",
     "general.EntitySelectorParserMixin",
     "general.ExecuteCommandMixin",
+    "general.FarmBlockMixin",
     "general.GameModeArgumentMixin",
     "general.GameTypeMixin",
     "general.GiveCommandMixin",
@@ -82,7 +83,9 @@
     "general.FogRendererMixin",
     "general.GuiMixin",
     "general.LevelRendererMixin",
-    "general.MultiPlayerGameModeMixin"
+    "general.LocalPlayerMixin",
+    "general.MultiPlayerGameModeMixin",
+    "general.ScreenEffectRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,5 +1,6 @@
 package pers.solid.ecmd.mixins.general;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -87,5 +88,10 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerExtensio
     } else {
       tag.remove("enhanced_commands:active_region");
     }
+  }
+
+  @ModifyExpressionValue(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSpectator()Z"))
+  private boolean alwaysNoPhysics(boolean original) {
+    return DebugConfig.current.ghostPlayers || original;
   }
 }
