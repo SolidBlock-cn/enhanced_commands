@@ -1,6 +1,7 @@
 package pers.solid.ecmd.config;
 
 import net.minecraft.ChatFormatting;
+import pers.solid.ecmd.config.annotations.ConfigEntryScope;
 import pers.solid.ecmd.config.annotations.OverrideDescription;
 import pers.solid.ecmd.config.annotations.TextEntry;
 import pers.solid.ecmd.config.annotations.TextInfo;
@@ -8,9 +9,11 @@ import pers.solid.ecmd.config.annotations.TextInfo;
 public class BlockOperationConfig implements Cloneable {
   public static final BlockOperationConfig DEFAULT = new BlockOperationConfig();
   public static BlockOperationConfig current = DEFAULT;
+
   /**
    * 最大的历史记录的次数。
    */
+  @ConfigEntryScope(ConfigEntryScopeType.SERVER)
   public int maxHistoryCount = 50;
 
   /**
@@ -20,6 +23,7 @@ public class BlockOperationConfig implements Cloneable {
       @TextEntry(value = "/setblocks", formatting = ChatFormatting.GRAY),
       @TextEntry(value = "bypass_limit = true", formatting = ChatFormatting.GRAY)
   }))
+  @ConfigEntryScope(ConfigEntryScopeType.SERVER)
   public int regionSizeLimit = 16777215;
 
   @Override
