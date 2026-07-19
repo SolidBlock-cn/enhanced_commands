@@ -15,6 +15,7 @@ import pers.solid.ecmd.util.StringUtil;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.StringJoiner;
 
 /**
  * 用于棋盘格相关代码的共通接口。
@@ -49,16 +50,17 @@ public interface Checkerboard<T> {
     final Vec3 floor = floor();
     final Vec3 scale = scale();
     final Vec3 offset = offset();
+    StringJoiner joiner = new StringJoiner(", ", "; ", "");
     if (!floor.equals(Vec3.ZERO)) {
-      sb.append(" floor ").append(StringUtil.wrapVector(floor));
+      joiner.add("floor = " + StringUtil.wrapVector(floor));
     }
     if (!scale.equals(UNIT)) {
-      sb.append(" scale ").append(StringUtil.wrapVector(scale));
+      joiner.add("scale = " + StringUtil.wrapVector(scale));
     }
     if (!offset.equals(Vec3.ZERO)) {
-      sb.append(" offset ").append(offset);
+      joiner.add("offset = " + StringUtil.wrapVector(offset));
     }
-    return sb;
+    return sb.append(joiner);
   }
 
   abstract class CheckerboardParser<T> implements FunctionContentParser<T>, NamedParamListParser {
