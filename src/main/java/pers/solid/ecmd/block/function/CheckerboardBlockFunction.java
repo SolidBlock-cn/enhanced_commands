@@ -20,7 +20,7 @@ import java.util.Objects;
 
 public record CheckerboardBlockFunction(WeightedList<BlockFunction> functions, Vec3 floor, Vec3 scale, Vec3 offset) implements BlockFunction, Checkerboard<BlockFunction> {
   public static final MapCodec<CheckerboardBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      WeightedList.createMapCodec(BlockFunction.CODEC).fieldOf("predicates").forGetter(CheckerboardBlockFunction::functions),
+      WeightedList.createMapCodec(BlockFunction.CODEC).fieldOf("functions").forGetter(CheckerboardBlockFunction::functions),
       Vec3.CODEC.optionalFieldOf("floor", Vec3.ZERO).forGetter(CheckerboardBlockFunction::floor),
       Vec3.CODEC.optionalFieldOf("scale", UNIT).forGetter(CheckerboardBlockFunction::scale),
       Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(CheckerboardBlockFunction::offset)

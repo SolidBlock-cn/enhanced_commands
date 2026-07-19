@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 public final class CheckerboardTagBlockFunction implements BlockFunction, Checkerboard<Block> {
   public static final MapCodec<CheckerboardTagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-      RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("tag").forGetter(CheckerboardTagBlockFunction::entryList),
+      RegistryCodecs.homogeneousList(Registries.BLOCK, true).fieldOf("tag").forGetter(CheckerboardTagBlockFunction::entryList),
       Vec3.CODEC.optionalFieldOf("floor", Vec3.ZERO).forGetter(CheckerboardTagBlockFunction::floor),
       Vec3.CODEC.optionalFieldOf("scale", UNIT).forGetter(CheckerboardTagBlockFunction::scale),
       Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(CheckerboardTagBlockFunction::offset)
@@ -59,8 +59,8 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
   @Override
   public String expressAsString() {
     final StringBuilder sb = new StringBuilder("checkerboard-tag(");
-    final String mapped = entryList.unwrap().map(tagKey -> tagKey.location().toString(), list -> list.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ")));
-    sb.append("#").append(mapped);
+    final String mapped = entryList.unwrap().map(tagKey -> "#" + tagKey.location(), list -> list.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ")));
+    sb.append(mapped);
     return appendParameters(sb).append(")").toString();
   }
 
