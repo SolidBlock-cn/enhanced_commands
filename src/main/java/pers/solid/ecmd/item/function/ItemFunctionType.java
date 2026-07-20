@@ -11,7 +11,7 @@ import pers.solid.ecmd.util.DefaultNamespace;
 public interface ItemFunctionType<T extends ItemFunction> {
   ResourceKey<Registry<ItemFunctionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("item_function_type"));
   Registry<ItemFunctionType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
-  Codec<ItemFunctionType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY);
+  Codec<ItemFunctionType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY, true);
 
   MapCodec<T> codec();
 

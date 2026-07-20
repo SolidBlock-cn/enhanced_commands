@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 public interface RegionType<R extends Region> {
   ResourceKey<Registry<RegionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("region_type"));
   Registry<RegionType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
-  Codec<RegionType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY);
+  Codec<RegionType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY, true);
 
   /**
    * 该区域类型对应的函数名称，用于解析。如果为 null，则表示此区域不是使用函数表示的。

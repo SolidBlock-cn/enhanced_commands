@@ -11,7 +11,7 @@ import pers.solid.ecmd.util.DefaultNamespace;
 public interface CurveType<T extends Curve> {
   ResourceKey<Registry<CurveType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("curve_type"));
   Registry<CurveType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
-  Codec<CurveType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY);
+  Codec<CurveType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY, true);
 
   MapCodec<T> codec();
 

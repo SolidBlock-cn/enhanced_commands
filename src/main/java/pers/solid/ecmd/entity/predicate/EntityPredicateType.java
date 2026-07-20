@@ -11,7 +11,7 @@ import pers.solid.ecmd.util.DefaultNamespace;
 public interface EntityPredicateType<T extends EntityPredicate> {
   ResourceKey<Registry<EntityPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("entity_predicate_entry_type"));
   Registry<EntityPredicateType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
-  Codec<EntityPredicateType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY);
+  Codec<EntityPredicateType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY, true);
 
   MapCodec<T> codec();
 

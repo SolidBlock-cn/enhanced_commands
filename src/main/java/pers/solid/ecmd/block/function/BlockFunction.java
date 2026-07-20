@@ -45,7 +45,7 @@ import java.util.List;
  */
 public interface BlockFunction extends ExpressionConvertible {
   ResourceKey<Registry<BlockFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_function"));
-  MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.REGISTRY.byNameCodec().dispatchMap(BlockFunction::getType, BlockFunctionType::codec);
+  MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.CODEC.dispatchMap(BlockFunction::getType, BlockFunctionType::codec);
   Codec<BlockFunction> CODEC = Codec.lazyInitialized(() -> CodecUtil.combined(
       CodecUtil.combinedIdAndTag(SimpleBlockFunction.STRING_BASED_CODEC, TagBlockFunction.STRING_BASED_CODEC),
       MAP_CODEC.codec(),
