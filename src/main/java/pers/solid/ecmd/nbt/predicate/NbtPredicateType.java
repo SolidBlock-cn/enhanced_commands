@@ -12,7 +12,7 @@ public interface NbtPredicateType<T extends NbtPredicate> {
 
   ResourceKey<Registry<NbtPredicateType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_predicate_type"));
   Registry<NbtPredicateType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
-  Codec<NbtPredicateType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY);
+  Codec<NbtPredicateType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY, true);
 
   MapCodec<T> codec();
 

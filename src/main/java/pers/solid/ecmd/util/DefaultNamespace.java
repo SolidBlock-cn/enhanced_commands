@@ -34,8 +34,9 @@ public class DefaultNamespace {
   public static final DefaultNamespace ENHANCED_COMMANDS = new DefaultNamespace(EnhancedCommands.MOD_ID);
   private final String namespace;
   private final ResourceLocation exampleId;
-  private @Nullable Codec<ResourceLocation> idCodec = null;
-  private @Nullable StreamCodec<ByteBuf, ResourceLocation> idStreamCodec = null;
+  private @Nullable Codec<ResourceLocation> standardIdCodec = null;
+  private @Nullable Codec<ResourceLocation> simpleIdCodec = null;
+  private @Nullable StreamCodec<ByteBuf, ResourceLocation> standardIdStreamCodec = null;
 
   public DefaultNamespace(String namespace) {
     this.namespace = namespace;
@@ -62,46 +63,75 @@ public class DefaultNamespace {
     return reader.getString().substring(i, reader.getCursor());
   }
 
-  private Codec<ResourceLocation> createIdCodec() {
-    return Codec.STRING.comapFlatMap(this::read, ResourceLocation::toString).stable();
-  }
-
-  private StreamCodec<ByteBuf, ResourceLocation> createIdStreamCodec() {
-    return ByteBufCodecs.STRING_UTF8.map(ResourceLocation::parse, ResourceLocation::toString);
-  }
-
-  public Codec<ResourceLocation> idCodec() {
-    if (idCodec == null) {
-      idCodec = createIdCodec();
-    }
-    return idCodec;
-  }
-
-  public StreamCodec<ByteBuf, ResourceLocation> idStreamCodec() {
-    if (idStreamCodec == null) {
-      idStreamCodec = createIdStreamCodec();
-    }
-    return idStreamCodec;
+  /**
+   * 创建一个解析 id 的 codec，在解析时，当 id 省略时，将视为本模组指定的默认命名空间。
+   *
+   * @param simpleByDefault 如为 true，当被序列化的 id 为默认命名空间时，产生的字符串不会带有命名空间前缀。
+   */
+  private Codec<ResourceLocation> createIdCodec(boolean simpleByDefault) {
+    return Codec.STRING.comapFlatMap(this::read, simpleByDefault ? this::toSimplerString : ResourceLocation::toString).stable();
   }
 
   /**
+   * 创建一个新的解析 id 的数据包 codec，在解析时，当 id 省略时，将视为本模组指定的默认命名空间。
+   *
+   * @param simpleByDefault 如为 true，当被序列化的 id 为默认命名空间时，产生的字符串不会带有命名空间前缀。
+   */
+  private StreamCodec<ByteBuf, ResourceLocation> createIdStreamCodec(boolean simpleByDefault) {
+    return ByteBufCodecs.STRING_UTF8.map(ResourceLocation::parse, simpleByDefault ? this::toSimplerString : ResourceLocation::toString);
+  }
+
+  /**
+   * 基于该默认命名空间的 id 的 codec，在解析时，当 id 省略时，将视为本模组指定的默认命名空间。
+   *
+   * @param simpleByDefault 如为 true，当被序列化的 id 为默认命名空间时，产生的字符串不会带有命名空间前缀。
+   */
+  public Codec<ResourceLocation> idCodec(boolean simpleByDefault) {
+    if (simpleByDefault) {
+      if (simpleIdCodec == null) {
+        simpleIdCodec = createIdCodec(true);
+      }
+      return simpleIdCodec;
+    } else {
+      if (standardIdCodec == null) {
+        standardIdCodec = createIdCodec(true);
+      }
+      return standardIdCodec;
+    }
+  }
+
+  public StreamCodec<ByteBuf, ResourceLocation> idStreamCodec() {
+    if (standardIdStreamCodec == null) {
+      standardIdStreamCodec = createIdStreamCodec(false);
+    }
+    return standardIdStreamCodec;
+  }
+
+  /**
+   * @param simpleByDefault 如为 true，当被序列化的 id 为默认命名空间时，产生的字符串不会带有命名空间前缀。
    * @see Registry#referenceHolderWithLifecycle()
    */
-  private <T> Codec<Holder.Reference<T>> referenceHolderWithLifecycleForRegistry(Registry<T> registry) {
-    Codec<Holder.Reference<T>> codec = idCodec().comapFlatMap((resourceLocation) -> registry.get(resourceLocation).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + registry.key() + ": " + resourceLocation)), (reference) -> reference.key().location());
+  private <T> Codec<Holder.Reference<T>> referenceHolderWithLifecycleForRegistry(Registry<T> registry, boolean simpleByDefault) {
+    Codec<Holder.Reference<T>> codec = idCodec(simpleByDefault).comapFlatMap((resourceLocation) -> registry.get(resourceLocation).map(DataResult::success).orElseGet(() -> DataResult.error(() -> "Unknown registry key in " + registry.key() + ": " + resourceLocation)), (reference) -> reference.key().location());
     return ExtraCodecs.overrideLifecycle(codec, (reference) -> registry.registrationInfo(reference.key()).map(RegistrationInfo::lifecycle).orElse(Lifecycle.experimental()));
   }
 
   /**
+   * 为注册表创建基于注册名称的 codec，其注册名称是 id，当未指定命名空间时，则使用默认命名空间。
+   *
+   * @param simpleByDefault 如为 true，当被序列化的 id 为默认命名空间时，产生的字符串不会带有命名空间前缀。
    * @see Registry#byNameCodec()
    */
-  public <T> Codec<T> byNameCodecForRegistry(Registry<T> registry) {
-    return referenceHolderWithLifecycleForRegistry(registry).flatComapMap(Holder.Reference::value, (value) -> {
+  public <T> Codec<T> byNameCodecForRegistry(Registry<T> registry, boolean simpleByDefault) {
+    return referenceHolderWithLifecycleForRegistry(registry, simpleByDefault).flatComapMap(Holder.Reference::value, (value) -> {
       final Holder<T> holder = registry.wrapAsHolder(value);
       return holder instanceof Holder.Reference<T> reference ? DataResult.success(reference) : DataResult.error(() -> "Unregistered holder in " + registry.key() + ": " + value);
     });
   }
 
+  /**
+   * 解析字符串形式的 id，当 id 未指定时，使用默认命名空间。
+   */
   public ResourceLocation parse(String id) {
     int i = id.indexOf(':');
     if (i >= 0) {
@@ -117,6 +147,9 @@ public class DefaultNamespace {
     }
   }
 
+  /**
+   * 将 id 转化为字符串，当 id 的命名空间为默认名称空间时，省略命名空间。
+   */
   public String toSimplerString(ResourceLocation id) {
     if (this.namespace.equals(id.getNamespace())) {
       return id.getPath();

@@ -12,7 +12,7 @@ public interface NbtFunctionType<T extends NbtFunction> {
 
   ResourceKey<Registry<NbtFunctionType<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("nbt_function_type"));
   Registry<NbtFunctionType<?>> REGISTRY = RegistryBridge.createRegistry(REGISTRY_KEY, true);
-  Codec<NbtFunctionType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY);
+  Codec<NbtFunctionType<?>> CODEC = DefaultNamespace.ENHANCED_COMMANDS.byNameCodecForRegistry(REGISTRY, true);
 
   MapCodec<T> codec();
 

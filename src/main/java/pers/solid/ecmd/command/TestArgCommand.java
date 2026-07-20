@@ -1,6 +1,8 @@
 package pers.solid.ecmd.command;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
@@ -28,8 +30,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -59,6 +60,7 @@ import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.extension.HistoryHolder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -364,7 +366,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
     try {
       final A second = codec.decode(ops, code).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();
       if (second instanceof Tag nbt) {
-        context.getSource().sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(nbt), false);
+        context.getSource().sendFeedback$ecBridge(() -> prettyPrintedClickableNbt(nbt), false);
       }
       final boolean b = second.equals(fetchedArg);
       context.getSource().sendFeedback$ecBridge(() -> TextUtil.wrapBoolean(b), false);
@@ -374,12 +376,23 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
     }
   }
 
+  /**
+   * 创建格式化的 NBT 文本组件，点击时可复制 NBT 文本，并有悬浮提示。
+   */
+  public static MutableComponent prettyPrintedClickableNbt(Tag nbt) {
+    return TextUtil.styled(NbtUtils.toPrettyComponent(nbt), style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, new SnbtPrinterTagVisitor("", 0, new ArrayList<>()).visit(nbt))));
+  }
+
   private static <A, T> T executeCodecShowInternal(CommandContext<CommandSourceStack> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
     final T code = codec.encodeStart(ops, fetchedArg).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create);
     if (code instanceof Tag nbt) {
-      context.getSource().sendFeedback$ecBridge(() -> NbtUtils.toPrettyComponent(nbt), false);
+      context.getSource().sendFeedback$ecBridge(() -> prettyPrintedClickableNbt(nbt), false);
     } else {
-      context.getSource().sendFeedback$ecBridge(() -> Component.literal(code.toString()).withStyle(Styles.RESULT), false);
+      final String codeString = code.toString();
+      context.getSource().sendFeedback$ecBridge(() -> {
+        final String clipboardString = code instanceof JsonElement jsonElement ? new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create().toJson(jsonElement) : codeString;
+        return Component.literal(codeString).withStyle(Styles.RESULT).withStyle(style -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardString)));
+      }, false);
     }
     return code;
   }
