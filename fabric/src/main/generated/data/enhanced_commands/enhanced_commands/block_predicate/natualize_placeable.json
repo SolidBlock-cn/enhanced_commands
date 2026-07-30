@@ -1,5 +1,5 @@
 {
-  "type": "enhanced_commands:any",
+  "type": "any",
   "predicates": [
     "#minecraft:replaceable",
     "#minecraft:leaves",

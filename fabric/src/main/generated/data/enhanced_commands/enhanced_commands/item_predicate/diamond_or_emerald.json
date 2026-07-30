@@ -1,0 +1,7 @@
+{
+  "type": "any",
+  "predicates": [
+    "minecraft:diamond",
+    "minecraft:emerald"
+  ]
+}

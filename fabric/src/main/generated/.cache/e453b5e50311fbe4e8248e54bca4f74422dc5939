@@ -1,0 +1,5 @@
+// 1.21.1	2026-07-30T22:49:49.8842795	Enhanced Commands/Item Predicates (Enhanced Commands)
+45300885b4a4ce32a67e1baf01368c06c0c1c9b9 data\enhanced_commands\enhanced_commands\item_predicate\diamonds.json
+7644d45b7ec50dc55bdaba291b59ecca534676b5 data\enhanced_commands\enhanced_commands\item_predicate\enchanted.json
+45b469ea71e5a537349567c3eae864bb9bba8cb5 data\enhanced_commands\enhanced_commands\item_predicate\diamond_or_emerald.json
+fbe5ca94f3b50529657bdade6b05aa3816efc348 data\enhanced_commands\enhanced_commands\item_predicate\fire_resistant.json

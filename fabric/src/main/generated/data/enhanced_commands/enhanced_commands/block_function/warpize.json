@@ -1,7 +1,7 @@
 {
-  "type": "enhanced_commands:properties_nbt_combination",
+  "type": "properties_nbt_combination",
   "base": {
-    "type": "enhanced_commands:conditions",
+    "type": "conditions",
     "conditions": [
       {
         "condition": "#enhanced_commands:overlaid_dirt",
@@ -17,12 +17,12 @@
       },
       {
         "condition": {
-          "type": "enhanced_commands:any",
+          "type": "any",
           "predicates": [
             "minecraft:short_grass",
             "minecraft:fern",
             {
-              "type": "enhanced_commands:simple",
+              "type": "simple",
               "block": "minecraft:tall_grass",
               "properties": [
                 {
