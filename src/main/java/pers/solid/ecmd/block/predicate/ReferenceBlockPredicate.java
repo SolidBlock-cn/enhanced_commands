@@ -8,7 +8,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.apache.commons.lang3.function.FailableSupplier;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ReferenceEntry;
@@ -37,16 +36,16 @@ public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> value) im
     return BlockPredicate.REGISTRY_KEY;
   }
 
-  public static class ReferenceParser extends PrefixedIdParser<ReferenceBlockPredicate, BlockPredicate> {
-    public static final ReferenceParser INSTANCE = new ReferenceParser();
+  public static class ReferencePrefixedParser extends PrefixedIdParser<ReferenceBlockPredicate, BlockPredicate> {
+    public static final ReferencePrefixedParser INSTANCE = new ReferencePrefixedParser();
 
-    protected ReferenceParser() {
+    protected ReferencePrefixedParser() {
       super('$', Component.translatable("enhanced_commands.block_predicate.reference"), BlockPredicate.REGISTRY_KEY);
     }
 
     @Override
-    protected ReferenceBlockPredicate getResultByEntrySupplier(FailableSupplier<Holder.Reference<BlockPredicate>, CommandSyntaxException> supplier) throws CommandSyntaxException {
-      return new ReferenceBlockPredicate(supplier.get());
+    protected ReferenceBlockPredicate getResultByHolderReference(Holder.Reference<BlockPredicate> holderReference) {
+      return new ReferenceBlockPredicate(holderReference);
     }
 
     @Override

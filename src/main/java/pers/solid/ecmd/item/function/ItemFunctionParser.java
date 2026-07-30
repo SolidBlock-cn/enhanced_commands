@@ -128,6 +128,7 @@ public final class ItemFunctionParser {
         builder.suggest("*");
         builder.suggest("@");
         builder.suggest("#");
+        builder.suggest("$", Component.translatable("enhanced_commands.block_predicate.reference"));
       }
       return SharedSuggestionProvider.suggestResource(itemLookup.listElements(), builder, entry -> entry.key().location(), entry -> entry.value().getName());
     });
@@ -147,6 +148,13 @@ public final class ItemFunctionParser {
         case '#' -> {
           parseContext.clearSuggestion();
           return parseTag(parseContext);
+        }
+        case '$' -> {
+          reader.skip();
+          parseContext.clearSuggestion();
+          final ReferenceItemFunction.ReferencePrefixedParser parser = ReferenceItemFunction.ReferencePrefixedParser.INSTANCE;
+          final Holder.Reference<ItemFunction> holderReference = parser.parseAndGetHolderReference(parseContext);
+          return parser.getResultByHolderReference(holderReference);
         }
       }
     }

@@ -7,6 +7,7 @@ import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
+import pers.solid.ecmd.util.ReferenceEntry;
 
 /**
  * 本模组的所有方块函数类型。每个类型都需要通过 {@link #register} 方法注册。只有注册了类型的方块函数才能正确编码与解码。
@@ -36,7 +37,7 @@ public final class BlockFunctionTypes {
   public static final BlockFunctionType<OverlayBlockFunction> OVERLAY = register("overlay", OverlayBlockFunction.CODEC);
   public static final BlockFunctionType<PickBlockFunction> PICK = register("pick", PickBlockFunction.CODEC);
   public static final BlockFunctionType<PostProcessBlockFunction> POST_PROCESS = register("post_process", PostProcessBlockFunction.CODEC);
-  public static final BlockFunctionType<ReferenceBlockFunction> REFERENCE = register("reference", ReferenceBlockFunction.CODEC, ReferenceBlockFunction.Parser.INSTANCE);
+  public static final BlockFunctionType<ReferenceBlockFunction> REFERENCE = register("reference", ReferenceBlockFunction.CODEC, ReferenceBlockFunction.ReferencePrefixedParser.INSTANCE);
   public static final BlockFunctionType<RotateBlockFunction> ROTATE = register("rotate", RotateBlockFunction.CODEC);
   public static final BlockFunctionType<StonecutBlockFunction> STONE_CUT = register("stonecut", StonecutBlockFunction.CODEC);
 
@@ -80,6 +81,7 @@ public final class BlockFunctionTypes {
     functionsParser.register("idreplace", Component.translatable("enhanced_commands.block_function.id_replace"), IdReplaceBlockFunction.Parser::new);
     functionsParser.register("postprocess", Component.translatable("enhanced_commands.block_function.post_process"), PostProcessBlockFunction.Parser::new);
     functionsParser.register("random", Component.translatable("enhanced_commands.block_function.random"), RandomBlockFunction.RandFuncParser::new);
+    functionsParser.register("reference", Component.translatable("enhanced_commands.block_function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceBlockFunction.ReferencePrefixedParser.INSTANCE));
     functionsParser.register("rotate", Component.translatable("enhanced_commands.block_function.rotate"), RotateBlockFunction.Parser::new);
     functionsParser.register("mirror", Component.translatable("enhanced_commands.block_function.mirror"), MirrorBlockFunction.Parser::new);
     functionsParser.register("noise", Component.translatable("enhanced_commands.block_function.noise"), NoiseBlockFunction.Parser::new);

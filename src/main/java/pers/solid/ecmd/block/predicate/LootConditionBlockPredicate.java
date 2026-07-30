@@ -77,7 +77,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
     }
 
     @Override
-    public @Nullable LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
         final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.registries().get(ResourceKey.create(Registries.PREDICATE, id));
         if (lootCondition.isEmpty()) {

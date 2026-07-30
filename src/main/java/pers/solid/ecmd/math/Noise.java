@@ -175,7 +175,7 @@ public interface Noise {
 
     @MustBeInvokedByOverriders
     @Override
-    public @Nullable T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public T getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       // 补充未设置的值。
       if (firstOctave == null) firstOctave = DEFAULT_FIRST_OCTAVE;
       if (amplitudes == null) amplitudes = DEFAULT_AMPLITUDES;

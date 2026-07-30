@@ -45,6 +45,8 @@ public final class EnhancedCommandsCommandExceptionTypes {
   public static final DynamicCommandExceptionType UNKNOWN_LOOT_TABLE_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.parsing.unknown_loot_table_predicate", reason));
   public static final DynamicCommandExceptionType UNKNOWN_BLOCK_FUNCTION_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.block_function.reference.unknown_id", reason));
   public static final DynamicCommandExceptionType UNKNOWN_BLOCK_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.block_predicate.reference.unknown_id", reason));
+  public static final DynamicCommandExceptionType UNKNOWN_ITEM_FUNCTION_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.item_function.reference.unknown_id", reason));
+  public static final DynamicCommandExceptionType UNKNOWN_ITEM_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.item_predicate.reference.unknown_id", reason));
   public static final DynamicCommandExceptionType INVALID_LOOT_TABLE = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.parsing.invalid_loot_table", reason));
   public static final SimpleCommandExceptionType EXPECTED_WHITESPACE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.parsing.expected_whitespace"));
 

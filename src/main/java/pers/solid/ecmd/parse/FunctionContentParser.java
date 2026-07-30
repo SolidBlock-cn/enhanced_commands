@@ -1,7 +1,7 @@
 package pers.solid.ecmd.parse;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 专用于解析函数式语法的函数内容的类。通常在 {@link FunctionsParser} 中，当解析到函数式语法并且读取到函数名称后，才会创建或使用此类去解析函数内容。
