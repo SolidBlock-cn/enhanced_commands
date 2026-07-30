@@ -8,6 +8,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pers.solid.ecmd.EnhancedCommandsTrackedData;
 import pers.solid.ecmd.config.DebugConfig;
+import pers.solid.ecmd.config.GameplayConfig;
 import pers.solid.ecmd.regionselection.RegionSelection;
 import pers.solid.ecmd.util.extension.PlayerExtension;
 
@@ -30,6 +32,9 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerExtensio
   @Shadow
   @Final
   private static Logger LOGGER;
+
+  @Shadow
+  public abstract Abilities getAbilities();
 
   protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
     super(entityType, level);
@@ -93,5 +98,19 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerExtensio
   @ModifyExpressionValue(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSpectator()Z"))
   private boolean alwaysNoPhysics(boolean original) {
     return DebugConfig.current.ghostPlayers || original;
+  }
+
+  /**
+   * 当玩家处于没有碰撞的模式时，不要修改 pose。
+   */
+  @ModifyExpressionValue(method = "updatePlayerPose", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSpectator()Z"))
+  private boolean notCrouchingIfNoCollision(boolean original) {
+    if (DebugConfig.current.playersNoCollision || DebugConfig.current.entitiesNoCollision || DebugConfig.current.disableAutoPositionAdjustment) {
+      return true;
+    }
+    if (GameplayConfig.current.flyThroughBlocks && this.getAbilities().flying) {
+      return true;
+    }
+    return original;
   }
 }
