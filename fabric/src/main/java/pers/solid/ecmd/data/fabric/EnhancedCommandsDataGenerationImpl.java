@@ -14,5 +14,7 @@ public class EnhancedCommandsDataGenerationImpl implements DataGeneratorEntrypoi
     pack.addProvider(BlockFunctionDataGenerationImpl::new);
     pack.addProvider(BlockPredicateDataGenerationImpl::new);
     pack.addProvider(BlockTagDataGeneratorImpl::new);
+    pack.addProvider(ItemFunctionDataGenerationImpl::new);
+    pack.addProvider(ItemPredicateDataGenerationImpl::new);
   }
 }
