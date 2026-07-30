@@ -7,7 +7,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.EnhancedCommands;
 
@@ -21,7 +20,7 @@ public class BlockTagDataGeneratorImpl extends BlockTagsProvider {
   }
 
   @Override
-  protected void addTags(HolderLookup.@NotNull Provider provider) {
+  protected void addTags(HolderLookup.Provider provider) {
     tag(RED_COLORS).add(Blocks.RED_WOOL, Blocks.RED_CONCRETE, Blocks.REDSTONE_BLOCK, Blocks.NETHER_WART_BLOCK);
     tag(ORANGE_COLORS).add(Blocks.ORANGE_WOOL, Blocks.ORANGE_CONCRETE, Blocks.PUMPKIN);
     tag(YELLOW_COLORS).add(Blocks.YELLOW_WOOL, Blocks.YELLOW_CONCRETE, Blocks.YELLOW_TERRACOTTA, Blocks.GOLD_BLOCK);

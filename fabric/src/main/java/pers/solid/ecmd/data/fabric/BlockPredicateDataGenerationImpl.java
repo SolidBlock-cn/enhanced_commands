@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
-import org.jetbrains.annotations.NotNull;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.data.BlockPredicateDataGeneration;
 
@@ -23,7 +22,7 @@ public class BlockPredicateDataGenerationImpl extends FabricDynamicRegistryProvi
   }
 
   @Override
-  public @NotNull String getName() {
+  public String getName() {
     return "Block Predicates (Enhanced Commands)";
   }
 

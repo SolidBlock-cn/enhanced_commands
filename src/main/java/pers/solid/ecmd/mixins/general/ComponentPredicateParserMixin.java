@@ -112,7 +112,7 @@ public abstract class ComponentPredicateParserMixin {
         Term.named(atomParentheses),
         Term.named(atomNegation),
         Term.named(atomReference)
-    ), scope -> Optional.ofNullable(scope.get(atomFunctionGrammar)).map(t -> List.of(contextExtension.convertFromItemPredicate$enhanced_commands(t))).orElseGet(() -> scope.getAnyOrThrow(atomVanillaGrammar, atomParentheses, atomNegation)));
+    ), scope -> Optional.ofNullable(scope.get(atomFunctionGrammar)).map(t -> List.of(contextExtension.convertFromItemPredicate$enhanced_commands(t))).orElseGet(() -> scope.getAnyOrThrow(atomVanillaGrammar, atomParentheses, atomNegation, atomReference)));
 
     dictionary.put(atomIntersect, Term.sequence(
         Term.named(atomUnit),

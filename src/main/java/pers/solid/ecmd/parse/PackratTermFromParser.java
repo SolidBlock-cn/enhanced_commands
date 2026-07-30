@@ -3,6 +3,7 @@ package pers.solid.ecmd.parse;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.util.Unit;
 import net.minecraft.util.parsing.packrat.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +24,7 @@ public record PackratTermFromParser<T>(HolderLookup.Provider registries, Atom<T>
       parseState.errorCollector().store(input.getCursor(), new EnhancedSuggestionSupplier<>(parseContext::buildSuggestions), e);
       return false;
     }
-//    parseState.errorCollector().store(mark, new EnhancedSuggestionSupplier<>(parseContext::buildSuggestions), CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().create());
+    parseState.errorCollector().store(mark, new EnhancedSuggestionSupplier<>(parseContext::buildSuggestions), Unit.INSTANCE);
     if (parse != null) {
       // 解析到了内容，并直接将其输出。
       scope.put(atom, parse);
