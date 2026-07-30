@@ -6,6 +6,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.util.ReferenceEntry;
 
 public final class ItemPredicateTypes {
   private static final RegistryBridge<ItemPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, ItemPredicateType.REGISTRY);
@@ -19,6 +20,7 @@ public final class ItemPredicateTypes {
   public static final ItemPredicateType<ItemComponentCombinationItemPredicate> SIMPLE_COMBINATION = register("item_component_combination", ItemComponentCombinationItemPredicate.CODEC);
   public static final ItemPredicateType<NegatingItemPredicate> NEGATING = register("negating", NegatingItemPredicate.CODEC);
   public static final ItemPredicateType<ProbabilityItemPredicate> PROBABILITY = register("probability", ProbabilityItemPredicate.CODEC);
+  public static final ItemPredicateType<ReferenceItemPredicate> REFERENCE = register("reference", ReferenceItemPredicate.CODEC);
   public static final ItemPredicateType<SimpleItemPredicate> SIMPLE = register("simple", SimpleItemPredicate.CODEC);
   public static final ItemPredicateType<TagItemPredicate> SIMPLE_TAG = register("simple_tag", TagItemPredicate.CODEC);
   public static final ItemPredicateType<UnknownItemPredicate> UNKNOWN = register("unknown", UnknownItemPredicate.CODEC);
@@ -46,5 +48,6 @@ public final class ItemPredicateTypes {
     functionsParser.register("any", Component.translatable("enhanced_commands.item_predicate.any"), AnyItemPredicate.Parser::new);
     functionsParser.register("count", Component.translatable("enhanced_commands.item_predicate.count"), CountItemPredicate.Parser::new);
     functionsParser.register("probability", Component.translatable("enhanced_commands.item_predicate.probability"), ProbabilityItemPredicate.Parser::new);
+    functionsParser.register("reference", Component.translatable("enhanced_commands.item_predicate.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemPredicate.ReferencePrefixedParser.INSTANCE));
   }
 }

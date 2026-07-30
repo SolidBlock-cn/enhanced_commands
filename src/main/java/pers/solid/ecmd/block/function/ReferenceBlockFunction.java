@@ -11,7 +11,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.function.FailableSupplier;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -42,16 +41,16 @@ public record ReferenceBlockFunction(Holder.Reference<BlockFunction> value) impl
     return "$" + value.getRegisteredName();
   }
 
-  public static class Parser extends PrefixedIdParser<ReferenceBlockFunction, BlockFunction> {
-    public static final Parser INSTANCE = new Parser();
+  public static class ReferencePrefixedParser extends PrefixedIdParser<ReferenceBlockFunction, BlockFunction> {
+    public static final ReferencePrefixedParser INSTANCE = new ReferencePrefixedParser();
 
-    protected Parser() {
+    protected ReferencePrefixedParser() {
       super('$', Component.translatable("enhanced_commands.block_function.reference"), BlockFunction.REGISTRY_KEY);
     }
 
     @Override
-    protected ReferenceBlockFunction getResultByEntrySupplier(FailableSupplier<Holder.Reference<BlockFunction>, CommandSyntaxException> supplier) throws CommandSyntaxException {
-      return new ReferenceBlockFunction(supplier.get());
+    protected ReferenceBlockFunction getResultByHolderReference(Holder.Reference<BlockFunction> holderReference) {
+      return new ReferenceBlockFunction(holderReference);
     }
 
     @Override

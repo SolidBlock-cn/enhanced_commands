@@ -6,6 +6,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
+import pers.solid.ecmd.util.ReferenceEntry;
 
 public final class ItemFunctionTypes {
   private static final RegistryBridge<ItemFunctionType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, ItemFunctionType.REGISTRY);
@@ -17,6 +18,7 @@ public final class ItemFunctionTypes {
   public static final ItemFunctionType<OverlayItemFunction> OVERLAY = register("overlay", OverlayItemFunction.CODEC);
   public static final ItemFunctionType<PickItemFunction> PICK = register("pick", PickItemFunction.CODEC);
   public static final ItemFunctionType<RandomItemFunction> RANDOM = register("random", RandomItemFunction.CODEC);
+  public static final ItemFunctionType<ReferenceItemFunction> REFERENCE = register("reference", ReferenceItemFunction.CODEC);
   public static final ItemFunctionType<RemoveComponentItemFunction<?>> REMOVE_COMPONENT = register("remove_component", RemoveComponentItemFunction.CODEC);
   public static final ItemFunctionType<SetComponentItemFunction<?>> SET_COMPONENT = register("set_component", SetComponentItemFunction.CODEC);
   public static final ItemFunctionType<SimpleItemFunction> SIMPLE = register("simple", SimpleItemFunction.CODEC);
@@ -44,5 +46,6 @@ public final class ItemFunctionTypes {
     functionsParser.register("enchant", Component.translatable("enhanced_commands.item_function.enchant"), EnchantItemFunction.Parser::new);
     functionsParser.register("overlay", Component.translatable("enhanced_commands.function.overlay"), OverlayItemFunction.Parser::new);
     functionsParser.register("pick", Component.translatable("enhanced_commands.function.pick"), PickItemFunction.Parser::new);
+    functionsParser.register("reference", Component.translatable("enhanced_commands.function.reference"), () -> new ReferenceEntry.ReferenceFunctionGrammarParser<>(ReferenceItemFunction.ReferencePrefixedParser.INSTANCE));
   }
 }

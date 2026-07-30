@@ -7,7 +7,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
-import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.enchantment.function.EnchantmentModification;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
@@ -47,7 +46,7 @@ public record EnchantItemFunction(List<EnchantmentModification> modifications) i
     private final ImmutableList.Builder<EnchantmentModification> modifications = new ImmutableList.Builder<>();
 
     @Override
-    public @Nullable EnchantItemFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public EnchantItemFunction getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       return new EnchantItemFunction(modifications.build());
     }
 
