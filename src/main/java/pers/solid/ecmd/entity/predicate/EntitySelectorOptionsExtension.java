@@ -853,7 +853,7 @@ public class EntitySelectorOptionsExtension {
     };
   }
 
-  public static boolean mixinReadLiteralPredicate(EntitySelectorParser reader, boolean inverted, StringReader stringReader) throws CommandSyntaxException {
+  public static boolean mixinReadInlineLootPredicate(EntitySelectorParser reader, boolean inverted, StringReader stringReader) throws CommandSyntaxException {
     reader.setSuggestions((suggestionsBuilder, suggestionsBuilderConsumer) -> {
       final CommandContext<?> context = reader.extension$ec().context;
       if (context != null && context.getSource() instanceof CommandSourceStack source) {

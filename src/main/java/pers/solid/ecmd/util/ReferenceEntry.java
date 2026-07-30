@@ -3,6 +3,8 @@ package pers.solid.ecmd.util;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.CommandSourceStack;
@@ -11,9 +13,11 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.function.FailableSupplier;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -28,23 +32,13 @@ import java.util.function.Function;
  * @param <E> 该类的 entry 的类型。
  */
 public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
-  static <T extends ReferenceEntry<T, E>, E> MapCodec<T> createCodec(ResourceKey<Registry<E>> registryKey, Function<ResourceKey<E>, T> function) {
-    return RecordCodecBuilder.mapCodec(i -> i.group(ResourceKey.codec(registryKey).fieldOf("id").forGetter(ReferenceEntry::id)).apply(i, function));
+  static <T extends ReferenceEntry<T, E>, E> MapCodec<T> createCodec(ResourceKey<Registry<E>> registryKey, Codec<E> codec, Function<Holder.Reference<E>, T> function) {
+    return RecordCodecBuilder.mapCodec(i -> i.group(RegistryFileCodec.create(registryKey, codec).comapFlatMap(holder -> holder instanceof Holder.Reference<E> reference ? DataResult.success(reference) : DataResult.error(() -> "inline not supported"), Function.identity()).fieldOf("value").forGetter(ReferenceEntry::value)).apply(i, function));
   }
 
-  ResourceKey<E> id();
+  ResourceKey<? extends Registry<E>> registryKey();
 
-  default Holder.Reference<E> getEntry(HolderGetter.Provider registryLookup) throws CommandSyntaxException {
-    final ResourceKey<E> id = id();
-    return registryLookup.lookupOrThrow(id.registryKey()).get(id).orElseThrow(() -> createExceptionForUnknownId(null, id.location().toString()));
-  }
-
-  // note: 在 1.21.4 版本，可重新加载的注册表继承 RegistryEntryLookup.RegistryLookup，不再继承 RegistryWrapper.WrapperLookup，而 RegistryWrapper.WrapperLookup 继承 RegistryEntry.RegistryLookup。故在此版本中，此方法接收的参数为 RegistryEntryLookup.RegistryLookup。
-  default E value(HolderGetter.Provider registryLookup) throws CommandSyntaxException {
-    return getEntry(registryLookup).value();
-  }
-
-  CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier);
+  Holder.Reference<E> value();
 
   abstract class PrefixedIdParser<T, E> implements Parser<T> {
     private final char prefix;
@@ -58,7 +52,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
     }
 
     @Override
-    public T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable T parse(ParseContext<?> parseContext) throws CommandSyntaxException {
       parseContext.addSuggestion((context, suggestionsBuilder) -> ParsingUtil.suggestString(Character.toString(prefix), tooltip, suggestionsBuilder).buildFuture());
       boolean suffixed = false;
       final StringReader reader = parseContext.reader();
@@ -90,18 +84,18 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
         final Optional<? extends HolderGetter<E>> registryEntryLookup = registryLookup.lookup(registryKey);
         if (registryEntryLookup.isEmpty()) {
           // 考虑到有时客户端在解析命令时，会不知道该数据包中的内容，不应在客户端判定为解析错误。
-          return entryKey;
+          return Holder.Reference.createStandAlone(null, entryKey); // todo null safe?
         }
         final Optional<Holder.Reference<E>> entry = registryEntryLookup.get().get(entryKey);
         if (entry.isEmpty()) {
           reader.setCursor(cursorBeforeId);
           throw EnhancedCommandSyntaxException.withCursorEnd(createExceptionForUnknownId(reader, id.toString()), cursorAfterId);
         }
-        return entry.get().key();
+        return entry.get();
       });
     }
 
-    protected abstract T getResultByEntrySupplier(FailableSupplier<ResourceKey<E>, CommandSyntaxException> supplier) throws CommandSyntaxException;
+    protected abstract T getResultByEntrySupplier(FailableSupplier<Holder.Reference<E>, CommandSyntaxException> supplier) throws CommandSyntaxException;
 
     protected abstract CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier);
   }
