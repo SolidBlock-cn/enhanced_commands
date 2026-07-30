@@ -2,6 +2,7 @@ package pers.solid.ecmd.data;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -98,7 +99,10 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
             new HorizontalOffsetBlockPredicate(3, naturalizeIgnore),
             new HorizontalOffsetBlockPredicate(4, naturalizeIgnore)),
         new SimpleBlockFunction(Blocks.DIRT));
-    context.add(of("overworld_plains"), new OverlayBlockFunction(new ReferenceBlockFunction(of("naturalize_vegetation")),
+
+    final HolderLookup.RegistryLookup<BlockFunction> lookup = context.registryLookup(BlockFunction.REGISTRY_KEY).orElseThrow();
+    final Holder.Reference<BlockFunction> naturalizeVegetation = Holder.Reference.createStandAlone(lookup, of("naturalize_vegetation"));
+    context.add(of("overworld_plains"), new OverlayBlockFunction(new ReferenceBlockFunction(naturalizeVegetation),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
                 naturalizeIgnore,
@@ -114,7 +118,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.STONE)
             )
         )));
-    context.add(of("overworld_mushroom"), new OverlayBlockFunction(new ReferenceBlockFunction(of("naturalize_vegetation")),
+    context.add(of("overworld_mushroom"), new OverlayBlockFunction(new ReferenceBlockFunction(naturalizeVegetation),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
                 naturalizeIgnore,

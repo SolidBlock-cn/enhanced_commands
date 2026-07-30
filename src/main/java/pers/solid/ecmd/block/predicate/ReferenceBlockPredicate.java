@@ -3,32 +3,23 @@ package pers.solid.ecmd.block.predicate;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.apache.commons.lang3.function.FailableSupplier;
-import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ReferenceEntry;
 
-public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
-  public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(BlockPredicate.REGISTRY_KEY, ReferenceBlockPredicate::new);
+public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> value) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
+  public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC, ReferenceBlockPredicate::new);
 
   @Override
   public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    try {
-      final LevelReader world = blockInWorld.getLevel();
-      if (!(world instanceof ServerLevel serverWorld)) {
-        return false;
-      }
-      final BlockPredicate value = value(serverWorld.getServer().reloadableRegistries().get());
-      return value.test(blockInWorld, executionContext);
-    } catch (CommandSyntaxException e) {
-      throw new CommandRuntimeException(e);
-    }
+    final BlockPredicate value = value().value();
+    return value.test(blockInWorld, executionContext);
   }
 
   @Override
@@ -38,12 +29,12 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
 
   @Override
   public String expressAsString() {
-    return "$" + id.location();
+    return "$" + value.getRegisteredName();
   }
 
   @Override
-  public CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-    return ReferenceParser.INSTANCE.createExceptionForUnknownId(reader, identifier);
+  public ResourceKey<? extends Registry<BlockPredicate>> registryKey() {
+    return BlockPredicate.REGISTRY_KEY;
   }
 
   public static class ReferenceParser extends PrefixedIdParser<ReferenceBlockPredicate, BlockPredicate> {
@@ -54,7 +45,7 @@ public record ReferenceBlockPredicate(ResourceKey<BlockPredicate> id) implements
     }
 
     @Override
-    protected ReferenceBlockPredicate getResultByEntrySupplier(FailableSupplier<ResourceKey<BlockPredicate>, CommandSyntaxException> supplier) throws CommandSyntaxException {
+    protected ReferenceBlockPredicate getResultByEntrySupplier(FailableSupplier<Holder.Reference<BlockPredicate>, CommandSyntaxException> supplier) throws CommandSyntaxException {
       return new ReferenceBlockPredicate(supplier.get());
     }
 

@@ -619,13 +619,18 @@ public abstract class EntitySelectorOptionsMixin {
     return fromCommandInput;
   }
 
+  /**
+   * 读取内联的以 NBT 形式指定的战利品表谓词。
+   *
+   * @see net.minecraft.commands.arguments.ResourceOrIdArgument
+   */
   @Inject(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/ResourceLocation;read(Lcom/mojang/brigadier/StringReader;)Lnet/minecraft/resources/ResourceLocation;"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
-  private static void acceptLiteralPredicateInput(EntitySelectorParser reader, CallbackInfo ci, boolean bl) throws CommandSyntaxException {
+  private static void acceptInlineLootPredicateInput(EntitySelectorParser reader, CallbackInfo ci, boolean bl) throws CommandSyntaxException {
     if (!EntitySelectorParsingConfig.current.allowLiteralPredicateJson) {
       return;
     }
     final StringReader stringReader = reader.getReader();
-    boolean cancel = EntitySelectorOptionsExtension.mixinReadLiteralPredicate(reader, bl, stringReader);
+    boolean cancel = EntitySelectorOptionsExtension.mixinReadInlineLootPredicate(reader, bl, stringReader);
     if (cancel) ci.cancel();
   }
 
