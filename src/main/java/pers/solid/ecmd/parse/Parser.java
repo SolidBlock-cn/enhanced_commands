@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 @FunctionalInterface
 public interface Parser<T> {
   /**
-   * 在特定的环境下朝廷解析。
+   * 在特定的环境下进行解析。
    *
    * @return 解析后的结果，
    * @throws CommandSyntaxException 解析时遇到的语法错误。
