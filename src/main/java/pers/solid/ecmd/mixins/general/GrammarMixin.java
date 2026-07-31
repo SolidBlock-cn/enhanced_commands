@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.util.parsing.packrat.ErrorEntry;
 import net.minecraft.util.parsing.packrat.commands.Grammar;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,21 +30,21 @@ public abstract class GrammarMixin {
   private static final String SHARE_NAME = "enhancedSuggestion";
 
   @Inject(method = "parseForSuggestions", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/parsing/packrat/ErrorCollector$LongestOnly;entries()Ljava/util/List;"))
-  private void initExtraSuggestionSupplierList(SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Share(SHARE_NAME) LocalRef<List<CompletableFuture<Suggestions>>> share) {
+  private void initExtraSuggestionSupplierList(SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Share(SHARE_NAME) LocalRef<@Nullable List<CompletableFuture<Suggestions>>> share) {
     share.set(null); // 使用 null 而非空列表，以避免每次都创建对象
   }
 
   /**
    * 用于使 Packrat 的解析器支持自定义的 {@link EnhancedSuggestionSupplier}，使其获取额外建议，并如果有值，将其与已有的建议合并。
    */
-  @Inject(method = "parseForSuggestions", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/SharedSuggestionProvider;suggest(Ljava/util/stream/Stream;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;"))
-  private void replacedSuggestCall(SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local ErrorEntry<StringReader> errorEntry, @Share(SHARE_NAME) LocalRef<List<CompletableFuture<Suggestions>>> share) {
+  @Inject(method = "parseForSuggestions", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/parsing/packrat/ErrorEntry;suggestions()Lnet/minecraft/util/parsing/packrat/SuggestionSupplier;"), slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/commands/SharedSuggestionProvider;suggestResource(Ljava/util/stream/Stream;Lcom/mojang/brigadier/suggestion/SuggestionsBuilder;)Ljava/util/concurrent/CompletableFuture;")))
+  private void replacedSuggestCall(SuggestionsBuilder builder, CallbackInfoReturnable<CompletableFuture<Suggestions>> cir, @Local ErrorEntry<StringReader> errorEntry, @Local(ordinal = 1) SuggestionsBuilder builderOffset, @Share(SHARE_NAME) LocalRef<@Nullable List<CompletableFuture<Suggestions>>> share) {
     // 不会取消原行为，因为 EnhancedSuggestionSupplier 会通过原版途径提供空建议。
-    if (errorEntry.suggestions() instanceof EnhancedSuggestionSupplier<?> enhancedSuggestionSupplier) {
+    if (errorEntry.suggestions() instanceof EnhancedSuggestionSupplier enhancedSuggestionSupplier) {
 
       CompletableFuture<Suggestions> suggestion;
       try {
-        suggestion = enhancedSuggestionSupplier.forceGetSuggestionsUnchecked(builder);
+        suggestion = enhancedSuggestionSupplier.forceGetSuggestionsUnchecked(builderOffset);
       } catch (CommandSyntaxException e) {
         suggestion = null;
       }
