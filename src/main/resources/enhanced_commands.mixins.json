@@ -63,6 +63,7 @@
     "general.RegistryDataLoaderMixin",
     "general.ReloadableServerRegistriesMixin",
     "general.ResourceArgumentMixin",
+    "general.ResourceLookupRuleMixin",
     "general.ResourceOrTagArgumentMixin",
     "general.ServerGamePacketListenerImplMixin",
     "general.ServerPlayerMixin",
