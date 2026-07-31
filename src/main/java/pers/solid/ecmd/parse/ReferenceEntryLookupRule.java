@@ -74,7 +74,7 @@ public class ReferenceEntryLookupRule<E, T, C, P> extends ResourceLookupRule<Com
   protected Holder.Reference<E> validateElement(ImmutableStringReader reader, ResourceLocation elementType) throws Exception {
     final ResourceKey<E> resourceKey = ResourceKey.create(registryKey, elementType);
 
-    return lookup == null ? Holder.Reference.createStandAlone(null, resourceKey) : lookup.get(resourceKey).orElseThrow(() -> EnhancedCommandsCommandExceptionTypes.UNKNOWN_ITEM_PREDICATE_ID.createWithContext(reader, resourceKey.location().toString()));
+    return lookup == null ? Holder.Reference.createStandAlone(null, resourceKey) : lookup.get(resourceKey).orElseThrow(() -> EnhancedCommandsCommandExceptionTypes.registryEntryException(registryKey, reader, resourceKey.location(), reader.getCursor()));
   }
 
   @Override

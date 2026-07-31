@@ -43,7 +43,7 @@ public abstract class ComponentPredicateParserMixin {
     }
     final Atom<ItemPredicate> atomFunctionGrammar = Atom.of("enhanced_commands:function_grammar");
     final Atom<List<T>> atomParentheses = Atom.of("enhanced_commands:parentheses");
-    return Term.alternative(Term.named(atomFunctionGrammar), Term.named(atomParentheses), original);
+    return Term.alternative(original, Term.named(atomFunctionGrammar), Term.named(atomParentheses));
   }
 
   /**
