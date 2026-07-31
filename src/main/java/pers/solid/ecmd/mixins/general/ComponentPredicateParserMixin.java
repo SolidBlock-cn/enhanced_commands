@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.brigadier.StringReader;
 import net.minecraft.commands.arguments.item.ComponentPredicateParser;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.parsing.packrat.*;
@@ -20,8 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.item.predicate.ItemPredicate;
 import pers.solid.ecmd.item.predicate.ItemPredicateParsing;
 import pers.solid.ecmd.item.predicate.ReferenceItemPredicate;
-import pers.solid.ecmd.item.predicate.ReferenceItemPredicateLookupRule;
+import pers.solid.ecmd.parse.IdWithDefaultNamespaceParseRule;
 import pers.solid.ecmd.parse.PackratTermFromParser;
+import pers.solid.ecmd.parse.ReferenceEntryLookupRule;
 import pers.solid.ecmd.util.extension.ComponentPredicateParserContextExtension;
 
 import java.util.List;
@@ -82,13 +84,13 @@ public abstract class ComponentPredicateParserMixin {
     final Atom<List<List<T>>> atomUnion = Atom.of("enhanced_commands:union");
     final Atom<List<T>> atomNegation = Atom.of("enhanced_commands:negation");
     final Atom<List<T>> atomReference = Atom.of("enhanced_commands:reference");
-    final Atom<ReferenceItemPredicate> atomReferenceId = Atom.of("enhanced_commands:reference_id");
+    final Atom<Holder.Reference<ItemPredicate>> atomItemPredicateId = Atom.of("enhanced_commands:reference_id");
     final Atom<List<T>> atomVanillaGrammar = Atom.of("enhanced_commands:vanilla_grammar");
     final Atom<List<T>> atomUnit = Atom.of("enhanced_commands:unit");
     final Atom<List<T>> atomTop = Atom.of("top");
     final Atom<List<T>> atomParentheses = Atom.of("enhanced_commands:parentheses");
     final Atom<ItemPredicate> atomFunctionGrammar = Atom.of("enhanced_commands:function_grammar");
-    final Atom<ResourceLocation> atomId = Atom.of("id");
+    final Atom<ResourceLocation> atomIdInMod = Atom.of("enhanced_commands:id");
 
     @SuppressWarnings("unchecked") final ComponentPredicateParserContextExtension<T> contextExtension = (ComponentPredicateParserContextExtension<T>) context;
     dictionary.put(atomFunctionGrammar, new PackratTermFromParser<>(contextExtension.registries$enhanced_commands(), atomFunctionGrammar, ItemPredicateParsing.FUNCTIONS_PARSER), scope -> scope.getOrThrow(atomFunctionGrammar));
@@ -103,9 +105,10 @@ public abstract class ComponentPredicateParserMixin {
     ), scope -> List.of(context.negate(contextExtension.combine$enhanced_commands(scope.getOrThrow(atomUnit)))));
     dictionary.put(atomReference, Term.sequence(
         StringReaderTerms.character('$'),
-        Term.named(atomReferenceId)
-    ), scope -> List.of(contextExtension.convertFromItemPredicate$enhanced_commands(scope.getOrThrow(atomReferenceId))));
-    dictionary.put(atomReferenceId, new ReferenceItemPredicateLookupRule<>(atomId, context));
+        Term.named(atomItemPredicateId)
+    ), scope -> List.of(contextExtension.convertFromItemPredicate$enhanced_commands(new ReferenceItemPredicate(scope.getOrThrow(atomItemPredicateId)))));
+    dictionary.put(atomIdInMod, IdWithDefaultNamespaceParseRule.ENHANCED_COMMANDS);
+    dictionary.put(atomItemPredicateId, new ReferenceEntryLookupRule<>(atomIdInMod, context, ItemPredicate.REGISTRY_KEY));
     dictionary.put(atomUnit, Term.alternative(
         Term.named(atomFunctionGrammar),
         Term.named(atomVanillaGrammar),

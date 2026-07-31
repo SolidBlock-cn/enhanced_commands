@@ -21,10 +21,10 @@ public record PackratTermFromParser<T>(HolderLookup.Provider registries, Atom<T>
     try {
       parse = parser.parse(parseContext);
     } catch (CommandSyntaxException e) {
-      parseState.errorCollector().store(input.getCursor(), new EnhancedSuggestionSupplier<>(parseContext::buildSuggestions), e);
+      parseState.errorCollector().store(input.getCursor(), EnhancedSuggestionSupplier.of(parseContext::buildSuggestions), e);
       return false;
     }
-    parseState.errorCollector().store(mark, new EnhancedSuggestionSupplier<>(parseContext::buildSuggestions), Unit.INSTANCE);
+    parseState.errorCollector().store(mark, EnhancedSuggestionSupplier.of(parseContext::buildSuggestions), Unit.INSTANCE);
     if (parse != null) {
       // 解析到了内容，并直接将其输出。
       scope.put(atom, parse);
