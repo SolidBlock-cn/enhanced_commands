@@ -222,7 +222,7 @@ public final class ParsingUtil {
   }
 
   /**
-   * 尝试使用不带引号的形式示字符串，如果不行，则带上引号。
+   * 尝试使用不带引号的形式表示字符串，如果不行，则带上引号。
    */
   public static String quoteStringIfNeeded(final String s) {
     if (isAllowedInUnquotedString(s)) {
@@ -233,7 +233,7 @@ public final class ParsingUtil {
   }
 
   /**
-   * 此方法可以接受更多的字符串，常用于正则表达式。但是，它仍然不接受括号。
+   * 此方法可以接受更多的字符串，常用于正则表达式。但是，仍然不接受括号。
    *
    * @see StringReader#isAllowedInUnquotedString(char)
    */
@@ -283,7 +283,7 @@ public final class ParsingUtil {
   }
 
   /**
-   * 解析并跳过空格。当没有空格时抛出错误。
+   * 解析并跳过空格。当没有空格时抛出异常。
    */
   public static void expectAndSkipWhitespace(StringReader reader) throws CommandSyntaxException {
     if (!reader.canRead() || !Character.isWhitespace(reader.peek())) {
