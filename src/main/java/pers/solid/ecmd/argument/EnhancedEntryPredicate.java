@@ -20,7 +20,6 @@ import net.minecraft.tags.TagKey;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
-import pers.solid.ecmd.util.mixin.MixinShared;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -198,7 +197,7 @@ public interface EnhancedEntryPredicate<T> extends ResourceOrTagArgument.Result<
             .get(registryKey)
             .orElseThrow(() -> {
               reader.setCursor(cursorBeforeId);
-              return MixinShared.modifiedRegistryEntryException(registryRef, reader, entryId, cursorAfterId);
+              return EnhancedCommandsCommandExceptionTypes.registryEntryException(registryRef, reader, entryId, cursorAfterId);
             });
         values.add(new EntryBased<>(reference));
       }

@@ -1,6 +1,5 @@
 package pers.solid.ecmd.block.function;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ReferenceEntry;
 
 public record ReferenceBlockFunction(Holder.Reference<BlockFunction> value) implements BlockFunction, ReferenceEntry<ReferenceBlockFunction, BlockFunction> {
@@ -51,11 +49,6 @@ public record ReferenceBlockFunction(Holder.Reference<BlockFunction> value) impl
     @Override
     protected ReferenceBlockFunction getResultByHolderReference(Holder.Reference<BlockFunction> holderReference) {
       return new ReferenceBlockFunction(holderReference);
-    }
-
-    @Override
-    protected CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-      return EnhancedCommandsCommandExceptionTypes.UNKNOWN_BLOCK_FUNCTION_ID.createWithContext(reader, identifier);
     }
   }
 }

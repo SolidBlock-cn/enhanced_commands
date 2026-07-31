@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
@@ -77,7 +77,7 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
     }
 
     @Override
-    public LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public @Nullable LootConditionBlockPredicate getParseResult(ParseContext<?> parseContext) throws CommandSyntaxException {
       if (id != null) {
         final Optional<Holder.Reference<LootItemCondition>> lootCondition = parseContext.registries().asGetterLookup().get(Registries.PREDICATE, ResourceKey.create(Registries.PREDICATE, id));
         if (lootCondition.isEmpty()) {
