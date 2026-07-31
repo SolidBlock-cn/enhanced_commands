@@ -54,9 +54,9 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
   abstract class PrefixedIdParser<T, E> implements Parser<T> {
     private final char prefix;
     private final Component tooltip;
-    private final ResourceKey<Registry<E>> registryKey;
+    private final ResourceKey<? extends Registry<E>> registryKey;
 
-    protected PrefixedIdParser(char prefix, Component tooltip, ResourceKey<Registry<E>> registryKey) {
+    protected PrefixedIdParser(char prefix, Component tooltip, ResourceKey<? extends Registry<E>> registryKey) {
       this.prefix = prefix;
       this.tooltip = tooltip;
       this.registryKey = registryKey;
@@ -99,7 +99,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final Optional<Holder.Reference<E>> entry = registryEntryLookup.get().get(entryKey);
       if (entry.isEmpty()) {
         reader.setCursor(cursorBeforeId);
-        throw EnhancedCommandSyntaxException.withCursorEnd(createExceptionForUnknownId(reader, id.toString()), cursorAfterId);
+        throw createExceptionForUnknownId(reader, id, cursorAfterId);
       }
       return entry.get();
     }
@@ -116,7 +116,9 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
 
     protected abstract T getResultByHolderReference(Holder.Reference<E> holderReference) throws CommandSyntaxException;
 
-    protected abstract CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier);
+    protected CommandSyntaxException createExceptionForUnknownId(StringReader reader, ResourceLocation identifier, int cursorEnd) {
+      return EnhancedCommandsCommandExceptionTypes.registryEntryException(registryKey, reader, identifier, cursorEnd);
+    }
   }
 
   /**

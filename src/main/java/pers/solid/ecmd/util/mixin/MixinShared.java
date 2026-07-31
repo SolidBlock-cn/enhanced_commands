@@ -18,31 +18,24 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelWriter;
-import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
-import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.command.SetReplaceBlocksCommand;
 import pers.solid.ecmd.config.GeneralParsingConfig;
 import pers.solid.ecmd.mixins.general.CommandsMixin;
 import pers.solid.ecmd.mixins.general.LevelChunkMixin;
 import pers.solid.ecmd.parse.ParsingUtil;
-import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -144,7 +137,7 @@ public final class MixinShared {
   }
 
   /**
-   * 在解析注册表项时，如果注册表项无效，反对更加详细的错误报错信息。
+   * 在解析注册表项时，如果注册表项无效，返回更加详细的错误报错信息。
    *
    * @see pers.solid.ecmd.config.GeneralParsingConfig#detailedUnknownRegistryEntry
    */
@@ -157,37 +150,8 @@ public final class MixinShared {
       final int cursorBeforeId = localIntRef.get();
       stringReader.setCursor(cursorBeforeId);
 
-      return modifiedRegistryEntryException(registryRef, stringReader, identifier, cursorAfterId);
+      return EnhancedCommandsCommandExceptionTypes.registryEntryException(registryRef, stringReader, identifier, cursorAfterId);
     };
-  }
-
-  public static <T> CommandSyntaxException modifiedRegistryEntryException(ResourceKey<? extends Registry<T>> registryRef, StringReader stringReader, ResourceLocation identifier, int cursorAfterId) {
-    if (Registries.BLOCK.equals(registryRef)) {
-      final Optional<Block> block = BuiltInRegistries.BLOCK.getOptional(identifier);
-      if (block.isPresent()) {
-        return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, block.get().getName()), cursorAfterId);
-      }
-    } else if (Registries.ITEM.equals(registryRef)) {
-      final Optional<Item> item = BuiltInRegistries.ITEM.getOptional(identifier);
-      if (item.isPresent()) {
-        return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getName()), cursorAfterId);
-      }
-    } else if (Registries.ENTITY_TYPE.equals(registryRef)) {
-      final Optional<EntityType<?>> entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(identifier);
-      if (entityType.isPresent()) {
-        return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, entityType.get().getDescription()), cursorAfterId);
-      }
-    } else if (Registries.BIOME.equals(registryRef)) {
-      if (Biomes.CHERRY_GROVE.location().equals(identifier)) {
-        return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.BIOME_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, Component.translatable("biome.minecraft.cherry_grove")), cursorAfterId);
-      }
-    }
-
-    if (EnhancedCommandsCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.containsKey(registryRef)) {
-      return EnhancedCommandSyntaxException.withCursorEnd(EnhancedCommandsCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES.get(registryRef).createWithContext(stringReader, identifier.toString()), cursorAfterId);
-    } else {
-      return EnhancedCommandSyntaxException.withCursorEnd(EnhancedEntryPredicate.NOT_FOUND_EXCEPTION.createWithContext(stringReader, identifier, registryRef.location()), cursorAfterId);
-    }
   }
 
   /**

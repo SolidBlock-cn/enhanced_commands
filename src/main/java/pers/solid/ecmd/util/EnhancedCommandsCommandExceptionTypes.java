@@ -1,6 +1,7 @@
 package pers.solid.ecmd.util;
 
 import com.google.common.base.Preconditions;
+import com.mojang.brigadier.ImmutableStringReader;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.*;
 import net.minecraft.ChatFormatting;
@@ -9,16 +10,25 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Block;
+import pers.solid.ecmd.EnhancedCommands;
+import pers.solid.ecmd.argument.EnhancedEntryPredicate;
 import pers.solid.ecmd.mixins.general.CommandsMixin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 此模组包含的一些扩展的 {@link CommandExceptionType}。
@@ -37,7 +47,7 @@ public final class EnhancedCommandsCommandExceptionTypes {
   public static final DynamicCommandExceptionType UNKNOWN_FUNCTION = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.parsing.unknown_function", o));
   public static final DynamicCommandExceptionType DUPLICATE_KEYWORD = new DynamicCommandExceptionType(o -> Component.translatable("enhanced_commands.parsing.duplicate_keyword", o));
   public static final DynamicCommandExceptionType DUPLICATE_VALUE = new DynamicCommandExceptionType(o -> Component.translatableEscape("enhanced_commands.parsing.duplicate_value", o));
-  private static final Component VALID_UNITS = Component.translatable("enhanced_commands.parsing.angle_accepted_values");
+  public static final Component VALID_UNITS = Component.translatable("enhanced_commands.parsing.angle_accepted_values");
   public static final DynamicCommandExceptionType ANGLE_UNIT_EXPECTED = new DynamicCommandExceptionType(number -> Component.translatable("enhanced_commands.parsing.angle_unit_expected", number, VALID_UNITS));
   public static final DynamicCommandExceptionType ANGLE_UNIT_UNKNOWN = new DynamicCommandExceptionType(actual -> Component.translatable("enhanced_commands.parsing.angle_unit_unknown", actual, VALID_UNITS));
   public static final DynamicCommandExceptionType CANNOT_PARSE = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.parsing.cannot_parse", reason));
@@ -49,11 +59,9 @@ public final class EnhancedCommandsCommandExceptionTypes {
   public static final DynamicCommandExceptionType UNKNOWN_ITEM_PREDICATE_ID = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.item_predicate.reference.unknown_id", reason));
   public static final DynamicCommandExceptionType INVALID_LOOT_TABLE = new DynamicCommandExceptionType(reason -> Component.translatable("enhanced_commands.parsing.invalid_loot_table", reason));
   public static final SimpleCommandExceptionType EXPECTED_WHITESPACE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.parsing.expected_whitespace"));
-
   public static final DynamicCommandExceptionType UNKNOWN_STATUS_EFFECT = new DynamicCommandExceptionType(id -> Component.translatable("enhanced_commands.parsing.unknown_registry_entry.effect", id));
   public static final DynamicCommandExceptionType UNKNOWN_BIOME = new DynamicCommandExceptionType(id -> Component.translatable("enhanced_commands.parsing.unknown_registry_entry.biome", id));
   public static final SimpleCommandExceptionType CONTAINS_UPPER_CASE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.argument.id.contains_upper_case"));
-
   /**
    * <p>用于在命令抛出异常时，像命令解析时异常一样，显示命令的原文本内容。这个 {@code cursorEnd} 对应的是 {@link EnhancedCommandSyntaxException#cursorEnd} 中的 {@code cursorEnd}，如果未指定，则为 -1，不应是 null。
    * <p>对此方法调用 {@link Dynamic4CommandExceptionType#create create} 时，4个参数分别是：<code>{@link Component}, {@link String}, int, int</code>。
@@ -70,6 +78,24 @@ public final class EnhancedCommandsCommandExceptionTypes {
     Preconditions.checkArgument(cursorEnd instanceof Integer, "cursorEnd not Integer");
     return toErrorShowingInput((Component) message, (String) input, (int) cursor, (int) cursorEnd);
   });
+
+  /**
+   * 用于存储不同注册表对应的异常类型，当从注册表中获取内容失败时，会考虑使用此 map 中的错误类型。
+   * <br>
+   * 此处仅展示原版的，对于非原版的，请见 {@link EnhancedCommands#registerModCommandExceptionTypes()}
+   *
+   * @see #registryEntryException(ResourceKey, ImmutableStringReader, ResourceLocation, int)
+   */
+  public static final Map<ResourceKey<? extends Registry<?>>, DynamicCommandExceptionType> REGISTRY_ENTRY_EXCEPTION_TYPES = Util.make(new HashMap<>(), map -> {
+    map.put(Registries.BLOCK, BlockStateParser.ERROR_UNKNOWN_BLOCK);
+    map.put(Registries.ITEM, new DynamicCommandExceptionType(id -> Component.translatable("argument.item.id.invalid", id)));
+    map.put(Registries.BIOME, UNKNOWN_BIOME);
+    map.put(Registries.ENTITY_TYPE, EntitySelectorOptions.ERROR_ENTITY_TYPE_INVALID);
+    map.put(Registries.MOB_EFFECT, UNKNOWN_STATUS_EFFECT);
+  });
+
+  private EnhancedCommandsCommandExceptionTypes() {
+  }
 
   /**
    * 将命令异常的消息增加一行，以显示原始的命令输入以及出错位置，就像原版游戏在遇到命令解析异常时那样。其处理方法综合了原版的做法以及本模组对原版做法的 mixin。
@@ -111,14 +137,35 @@ public final class EnhancedCommandsCommandExceptionTypes {
     }
   }
 
-  public static final Map<ResourceKey<? extends Registry<?>>, DynamicCommandExceptionType> REGISTRY_ENTRY_EXCEPTION_TYPES = Util.make(new HashMap<>(), map -> {
-    map.put(Registries.BLOCK, BlockStateParser.ERROR_UNKNOWN_BLOCK);
-    map.put(Registries.ITEM, new DynamicCommandExceptionType(id -> Component.translatable("argument.item.id.invalid", id)));
-    map.put(Registries.BIOME, UNKNOWN_BIOME);
-    map.put(Registries.ENTITY_TYPE, EntitySelectorOptions.ERROR_ENTITY_TYPE_INVALID);
-    map.put(Registries.MOB_EFFECT, UNKNOWN_STATUS_EFFECT);
-  });
+  /**
+   * 创建一个特定注册表项不存在的异常，会参考 {@link #REGISTRY_ENTRY_EXCEPTION_TYPES} 的异常类型。
+   */
+  public static <T> CommandSyntaxException registryEntryException(ResourceKey<? extends Registry<T>> registryRef, ImmutableStringReader stringReader, ResourceLocation identifier, int cursorAfterId) {
+    if (Registries.BLOCK.equals(registryRef)) {
+      final Optional<Block> block = BuiltInRegistries.BLOCK.getOptional(identifier);
+      if (block.isPresent()) {
+        return EnhancedCommandSyntaxException.withCursorEnd(BLOCK_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, block.get().getName()), cursorAfterId);
+      }
+    } else if (Registries.ITEM.equals(registryRef)) {
+      final Optional<Item> item = BuiltInRegistries.ITEM.getOptional(identifier);
+      if (item.isPresent()) {
+        return EnhancedCommandSyntaxException.withCursorEnd(ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getDescription()), cursorAfterId);
+      }
+    } else if (Registries.ENTITY_TYPE.equals(registryRef)) {
+      final Optional<EntityType<?>> entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(identifier);
+      if (entityType.isPresent()) {
+        return EnhancedCommandSyntaxException.withCursorEnd(ENTITY_TYPE_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, entityType.get().getDescription()), cursorAfterId);
+      }
+    } else if (Registries.BIOME.equals(registryRef)) {
+      if (Biomes.CHERRY_GROVE.location().equals(identifier)) {
+        return EnhancedCommandSyntaxException.withCursorEnd(BIOME_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, Component.translatable("biome.minecraft.cherry_grove")), cursorAfterId);
+      }
+    }
 
-  private EnhancedCommandsCommandExceptionTypes() {
+    if (REGISTRY_ENTRY_EXCEPTION_TYPES.containsKey(registryRef)) {
+      return EnhancedCommandSyntaxException.withCursorEnd(REGISTRY_ENTRY_EXCEPTION_TYPES.get(registryRef).createWithContext(stringReader, identifier.toString()), cursorAfterId);
+    } else {
+      return EnhancedCommandSyntaxException.withCursorEnd(EnhancedEntryPredicate.NOT_FOUND_EXCEPTION.createWithContext(stringReader, identifier, registryRef.location()), cursorAfterId);
+    }
   }
 }

@@ -1,6 +1,9 @@
 package pers.solid.ecmd;
 
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.profiling.Profiler;
@@ -40,10 +43,12 @@ import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.region.RegionTypes;
 import pers.solid.ecmd.regionselection.RegionSelectionTypes;
 import pers.solid.ecmd.regionselection.WandEvent;
+import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.enums.CommandEnumType;
 import pers.solid.ecmd.util.extension.BlockableEventLoopExtension;
 
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class EnhancedCommands {
@@ -84,8 +89,8 @@ public class EnhancedCommands {
     EnhancedCommandsDataAttachments.init();
     EnhancedCommandsTrackedData.init(context);
 
-    // 注册命令
     registerModCommands();
+    registerModCommandExceptionTypes();
     FlipStateCallback.registerDefaultEvent();
     WandEvent.registerEvents();
 
@@ -95,6 +100,15 @@ public class EnhancedCommands {
     registerReloadableRegistries(context);
 
     initialized = true;
+  }
+
+  private static void registerModCommandExceptionTypes() {
+    final Map<ResourceKey<? extends Registry<?>>, DynamicCommandExceptionType> registry = EnhancedCommandsCommandExceptionTypes.REGISTRY_ENTRY_EXCEPTION_TYPES;
+
+    registry.put(BlockFunction.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_BLOCK_FUNCTION_ID);
+    registry.put(BlockPredicate.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_BLOCK_PREDICATE_ID);
+    registry.put(ItemFunction.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_ITEM_FUNCTION_ID);
+    registry.put(ItemPredicate.REGISTRY_KEY, EnhancedCommandsCommandExceptionTypes.UNKNOWN_ITEM_PREDICATE_ID);
   }
 
   /**

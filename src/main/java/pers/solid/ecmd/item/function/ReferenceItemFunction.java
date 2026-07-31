@@ -1,6 +1,5 @@
 package pers.solid.ecmd.item.function;
 
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
@@ -8,7 +7,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
-import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ReferenceEntry;
 
@@ -45,11 +43,6 @@ public record ReferenceItemFunction(Holder.Reference<ItemFunction> value) implem
     @Override
     protected ReferenceItemFunction getResultByHolderReference(Holder.Reference<ItemFunction> holderReference) {
       return new ReferenceItemFunction(holderReference);
-    }
-
-    @Override
-    protected CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-      return EnhancedCommandsCommandExceptionTypes.UNKNOWN_ITEM_FUNCTION_ID.createWithContext(reader, identifier);
     }
   }
 }

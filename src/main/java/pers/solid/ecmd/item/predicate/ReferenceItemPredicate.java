@@ -1,14 +1,11 @@
 package pers.solid.ecmd.item.predicate;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
-import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ReferenceEntry;
 
@@ -45,11 +42,6 @@ public record ReferenceItemPredicate(Holder.Reference<ItemPredicate> value) impl
     @Override
     protected ReferenceItemPredicate getResultByHolderReference(Holder.Reference<ItemPredicate> holderReference) {
       return new ReferenceItemPredicate(holderReference);
-    }
-
-    @Override
-    protected CommandSyntaxException createExceptionForUnknownId(StringReader reader, String identifier) {
-      return EnhancedCommandsCommandExceptionTypes.UNKNOWN_ITEM_PREDICATE_ID.createWithContext(reader, identifier);
     }
   }
 }
