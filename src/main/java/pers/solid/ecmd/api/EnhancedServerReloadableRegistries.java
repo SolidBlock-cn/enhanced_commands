@@ -15,6 +15,8 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
 
 import java.util.Collections;
@@ -34,6 +36,7 @@ public class EnhancedServerReloadableRegistries {
   private static final Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> REGISTRY = new HashMap<>();
   private static final @UnmodifiableView Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> REGISTRY_VIEW = Collections.unmodifiableMap(REGISTRY);
   private static final Gson GSON = new Gson();
+  public static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServerReloadableRegistries.class);
 
   public static @UnmodifiableView Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> getRegistry() {
     return REGISTRY_VIEW;
@@ -60,7 +63,7 @@ public class EnhancedServerReloadableRegistries {
       final ResourceLocation registry = registryKey.location();
       String string = registry.getNamespace() + "/" + registry.getPath();
       SimpleJsonResourceReloadListener.scanDirectory(resourceManager, string, GSON, map);
-      map.forEach((id, json) -> codec.parse(ops, json).result().ifPresent((value) -> mutableRegistry.register(ResourceKey.create(registryKey, id), value, new RegistrationInfo(Optional.empty(), Lifecycle.experimental()))));
+      map.forEach((id, json) -> codec.parse(ops, json).ifSuccess((value) -> mutableRegistry.register(ResourceKey.create(registryKey, id), value, new RegistrationInfo(Optional.empty(), Lifecycle.experimental()))).ifError(error -> LOGGER.error("Failed to parse entry of registry {} with ID {}, reason: {}", registry, id, error.message())));
       return mutableRegistry;
     }, prepareExecutor);
   }

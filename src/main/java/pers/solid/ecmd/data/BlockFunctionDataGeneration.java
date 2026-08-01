@@ -2,7 +2,6 @@ package pers.solid.ecmd.data;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
-import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -30,13 +29,15 @@ import pers.solid.ecmd.property.function.SimplePropertyFunction;
 import pers.solid.ecmd.property.predicate.Comparator;
 import pers.solid.ecmd.property.predicate.ComparisonPropertyPredicate;
 import pers.solid.ecmd.tag.EnhancedCommandsBlockTags;
-import pers.solid.ecmd.util.RegistryHelper;
+import pers.solid.ecmd.util.pack.SafeReference;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.OptionalLong;
 import java.util.regex.Pattern;
+
+import static pers.solid.ecmd.data.DynamicRegistryGenerationBridge.emptyNamedSet;
 
 public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBridge<BlockFunction> {
   static ResourceKey<BlockFunction> of(String value) {
@@ -59,39 +60,39 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     context.add(of("rainbow_noise"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-1, Noise.DEFAULT_AMPLITUDES), new Vec3(0.25f, 0.25f, 0.25f), Vec3.ZERO));
     context.add(of("rainbow_noise_large"), new NoiseBlockFunction(uniformSimple(Blocks.RED_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.YELLOW_CONCRETE, Blocks.LIME_CONCRETE, Blocks.GREEN_CONCRETE, Blocks.CYAN_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.BLUE_CONCRETE, Blocks.PURPLE_CONCRETE, Blocks.MAGENTA_CONCRETE), OptionalLong.empty(), new NormalNoise.NoiseParameters(-2, Noise.DEFAULT_AMPLITUDES), new Vec3(0.125f, 0.125f, 0.125f), Vec3.ZERO));
 
-    final var naturalizeIgnore = new TagBlockPredicate(EnhancedCommandsBlockTags.NATUALIZE_IGNORE);
+    final var naturalizeIgnore = new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.NATUALIZE_IGNORE));
     final HolderLookup.RegistryLookup<Block> wrapper = context.registryLookup(Registries.BLOCK).orElseThrow();
     context.add(of("naturalize_vegetation"), new ConditionsBlockFunction(
         new ConditionalBlockFunction(
-            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_FUNGUS),
+            new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.NETHER_FUNGUS)),
             new TagBlockFunction(wrapper.getOrThrow(BlockTags.SMALL_FLOWERS))
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_ROOTS),
+            new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.NETHER_ROOTS)),
             new SimpleBlockFunction(Blocks.SHORT_GRASS)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_NATURAL_STEM),
+            new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.NETHER_NATURAL_STEM)),
             new SimpleBlockFunction(Blocks.OAK_LOG)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_NATURAL_HYPHAE),
+            new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.NETHER_NATURAL_HYPHAE)),
             new SimpleBlockFunction(Blocks.OAK_WOOD)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_STRIPPED_STEM),
+            new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.NETHER_STRIPPED_STEM)),
             new SimpleBlockFunction(Blocks.STRIPPED_OAK_LOG)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_STRIPPED_HYPHAE),
+            new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.NETHER_STRIPPED_HYPHAE)),
             new SimpleBlockFunction(Blocks.STRIPPED_OAK_WOOD)
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(BlockTags.WART_BLOCKS),
+            new TagBlockPredicate(emptyNamedSet(BlockTags.WART_BLOCKS)),
             new SimpleBlockFunction(Blocks.OAK_LEAVES, List.of(new SimplePropertyFunction<>(LeavesBlock.PERSISTENT, false, false)))
         ),
         new ConditionalBlockFunction(
-            new TagBlockPredicate(EnhancedCommandsBlockTags.NETHER_VINES),
+            new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.NETHER_VINES)),
             new SimpleBlockFunction(Blocks.VINE)
         )));
     final ConditionalBlockFunction dirtOverlayCondition = new ConditionalBlockFunction(
@@ -101,7 +102,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
             new HorizontalOffsetBlockPredicate(4, naturalizeIgnore)),
         new SimpleBlockFunction(Blocks.DIRT));
 
-    final Holder.Reference<BlockFunction> naturalizeVegetation = RegistryHelper.safeStandAloneHolderReference(of("naturalize_vegetation"));
+    final SafeReference<BlockFunction> naturalizeVegetation = new SafeReference.Lazy<>(of("naturalize_vegetation"));
     context.add(of("overworld_plains"), new OverlayBlockFunction(new ReferenceBlockFunction(naturalizeVegetation),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
@@ -113,7 +114,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.GRASS_BLOCK)),
             dirtOverlayCondition,
             new ConditionalBlockFunction(
-                new AnyBlockPredicate(new TagBlockPredicate(oresConventionalTag()), new SimpleBlockPredicate(Blocks.STONE)),
+                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
                 EmptyBlockFunction.INSTANCE,
                 new SimpleBlockFunction(Blocks.STONE)
             )
@@ -129,7 +130,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.MYCELIUM)),
             dirtOverlayCondition,
             new ConditionalBlockFunction(
-                new AnyBlockPredicate(new TagBlockPredicate(oresConventionalTag()), new SimpleBlockPredicate(Blocks.STONE)),
+                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
                 EmptyBlockFunction.INSTANCE,
                 new SimpleBlockFunction(Blocks.STONE)
             )
@@ -150,7 +151,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                     new HorizontalOffsetBlockPredicate(5, naturalizeIgnore)),
                 new SimpleBlockFunction(Blocks.SANDSTONE)),
             new ConditionalBlockFunction(
-                new AnyBlockPredicate(new TagBlockPredicate(oresConventionalTag()), new SimpleBlockPredicate(Blocks.STONE)),
+                new AnyBlockPredicate(new TagBlockPredicate(emptyNamedSet(oresConventionalTag())), new SimpleBlockPredicate(Blocks.STONE)),
                 EmptyBlockFunction.INSTANCE,
                 new SimpleBlockFunction(Blocks.STONE)
             )
@@ -180,20 +181,20 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     context.add(of("random_dried_block"), new DryBlockFunction(RandomBlockFunction.RANDOM_SEED));
 
     final ConditionalBlockFunction replaceDirtWithNetherrack = new ConditionalBlockFunction(
-        new TagBlockPredicate(BlockTags.DIRT),
+        new TagBlockPredicate(emptyNamedSet(BlockTags.DIRT)),
         new SimpleBlockFunction(Blocks.NETHERRACK)
     );
     final ConditionalBlockFunction replaceSandWithSoulSand = new ConditionalBlockFunction(
-        new TagBlockPredicate(BlockTags.SAND),
+        new TagBlockPredicate(emptyNamedSet(BlockTags.SAND)),
         new SimpleBlockFunction(Blocks.SOUL_SAND)
     );
     context.add(of("crimsonize"), new PropertiesNbtCombinationBlockFunction(
         new ConditionsBlockFunction(
-            new ConditionalBlockFunction(new TagBlockPredicate(EnhancedCommandsBlockTags.OVERLAID_DIRT),
+            new ConditionalBlockFunction(new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.OVERLAID_DIRT)),
                 new SimpleBlockFunction(Blocks.CRIMSON_NYLIUM)),
             replaceDirtWithNetherrack,
             new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.FLOWERS),
+                new TagBlockPredicate(emptyNamedSet(BlockTags.FLOWERS)),
                 new SimpleBlockFunction(Blocks.CRIMSON_FUNGUS)
             ),
             new ConditionalBlockFunction(
@@ -201,11 +202,11 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.CRIMSON_ROOTS)
             ),
             new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.OVERWORLD_NATURAL_LOGS),
+                new TagBlockPredicate(emptyNamedSet(BlockTags.OVERWORLD_NATURAL_LOGS)),
                 new SimpleBlockFunction(Blocks.CRIMSON_STEM)
             ),
             new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.LEAVES),
+                new TagBlockPredicate(emptyNamedSet(BlockTags.LEAVES)),
                 new SimpleBlockFunction(Blocks.NETHER_WART_BLOCK),
                 EmptyBlockFunction.INSTANCE
             ),
@@ -216,11 +217,11 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
     ));
     context.add(of("warpize"), new PropertiesNbtCombinationBlockFunction(
         new ConditionsBlockFunction(
-            new ConditionalBlockFunction(new TagBlockPredicate(EnhancedCommandsBlockTags.OVERLAID_DIRT),
+            new ConditionalBlockFunction(new TagBlockPredicate(emptyNamedSet(EnhancedCommandsBlockTags.OVERLAID_DIRT)),
                 new SimpleBlockFunction(Blocks.WARPED_NYLIUM)),
             replaceDirtWithNetherrack,
             new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.FLOWERS),
+                new TagBlockPredicate(emptyNamedSet(BlockTags.FLOWERS)),
                 new SimpleBlockFunction(Blocks.WARPED_FUNGUS)
             ),
             new ConditionalBlockFunction(
@@ -228,11 +229,11 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
                 new SimpleBlockFunction(Blocks.WARPED_ROOTS)
             ),
             new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.OVERWORLD_NATURAL_LOGS),
+                new TagBlockPredicate(emptyNamedSet(BlockTags.OVERWORLD_NATURAL_LOGS)),
                 new SimpleBlockFunction(Blocks.WARPED_STEM)
             ),
             new ConditionalBlockFunction(
-                new TagBlockPredicate(BlockTags.LEAVES),
+                new TagBlockPredicate(emptyNamedSet(BlockTags.LEAVES)),
                 new SimpleBlockFunction(Blocks.WARPED_WART_BLOCK),
                 EmptyBlockFunction.INSTANCE
             ),

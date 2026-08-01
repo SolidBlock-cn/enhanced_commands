@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.OptionalLong;
 import java.util.regex.Pattern;
 
+import static pers.solid.ecmd.data.DynamicRegistryGenerationBridge.emptyNamedSet;
+
 public interface BlockPredicateDataGeneration extends DynamicRegistryGenerationBridge<BlockPredicate> {
   @ExpectPlatform
   static TagKey<Block> conventionalBudsTag() {
@@ -27,11 +29,11 @@ public interface BlockPredicateDataGeneration extends DynamicRegistryGenerationB
   @Override
   default void configureBridge(ContextBridge<BlockPredicate> context) {
     context.add(of("natualize_placeable"), new AnyBlockPredicate(List.of(
-        new TagBlockPredicate(BlockTags.REPLACEABLE),
-        new TagBlockPredicate(BlockTags.LEAVES),
-        new TagBlockPredicate(BlockTags.WART_BLOCKS),
-        new TagBlockPredicate(BlockTags.LOGS),
-        new TagBlockPredicate(conventionalBudsTag()),
+        new TagBlockPredicate(emptyNamedSet(BlockTags.REPLACEABLE)),
+        new TagBlockPredicate(emptyNamedSet(BlockTags.LEAVES)),
+        new TagBlockPredicate(emptyNamedSet(BlockTags.WART_BLOCKS)),
+        new TagBlockPredicate(emptyNamedSet(BlockTags.LOGS)),
+        new TagBlockPredicate(emptyNamedSet(conventionalBudsTag())),
         new SimpleBlockPredicate(Blocks.GLOWSTONE)
     )));
     context.add(of("checkerboard"), new CheckerboardBlockPredicate(new WeightedList.Uniform<>(List.of(ConstantBlockPredicate.ALWAYS_TRUE, ConstantBlockPredicate.ALWAYS_FALSE))));

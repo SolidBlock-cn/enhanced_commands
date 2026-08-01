@@ -20,9 +20,9 @@ import net.minecraft.util.parsing.packrat.commands.ResourceLookupRule;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
-import pers.solid.ecmd.util.RegistryHelper;
 import pers.solid.ecmd.util.extension.ComponentPredicateParserContextExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
+import pers.solid.ecmd.util.pack.RegistryHelper;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

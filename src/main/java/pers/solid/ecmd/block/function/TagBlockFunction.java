@@ -9,10 +9,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryCodecs;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -23,6 +21,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
+import pers.solid.ecmd.util.DefaultNamespace;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,9 +29,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> properties) implements BlockFunction {
-  public static final Codec<TagBlockFunction> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.BLOCK).flatXmap(blockTagKey -> BuiltInRegistries.BLOCK.getTag(blockTagKey).map(holders -> DataResult.success((HolderSet<Block>) holders)).orElseGet(() -> DataResult.error(() -> "unknown tag: " + blockTagKey.location())), holders -> holders.unwrapKey().map(DataResult::success).orElseGet(() -> DataResult.error(() -> "unknown tag"))).flatComapMap(TagBlockFunction::new, tagBlockFunction -> tagBlockFunction.properties.isEmpty() ? DataResult.success(tagBlockFunction.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
+  public static final Codec<TagBlockFunction> STRING_BASED_CODEC = RegistryCodecs.homogeneousList(Registries.BLOCK, true).flatComapMap(TagBlockFunction::new, tagBlockFunction -> tagBlockFunction.properties.isEmpty() ? DataResult.success(tagBlockFunction.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
 
-  public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.homogeneousList(Registries.BLOCK).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
+  public static final MapCodec<TagBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockFunction::new, RegistryCodecs.homogeneousList(Registries.BLOCK, true).fieldOf("tag").forGetter(TagBlockFunction::tag), PropertyNameFunction.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(f -> f.properties)));
 
   public TagBlockFunction(HolderSet<Block> tag) {
     this(tag, Collections.emptyList());
@@ -40,7 +39,7 @@ public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> 
 
   @Override
   public String expressAsString() {
-    final String tagString = tag.unwrap().map(blockTagKey -> "#" + blockTagKey.location(), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ", "[", "]")));
+    final String tagString = tag.unwrap().map(blockTagKey -> "#" + DefaultNamespace.MINECRAFT.toSimplerString(blockTagKey.location()), entries -> entries.stream().map(Holder::getRegisteredName).collect(Collectors.joining(", ", "[", "]")));
     if (properties.isEmpty()) {
       return tagString;
     } else {
@@ -73,8 +72,7 @@ public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> 
       SimpleBlockFunctionParser<?> parser = new SimpleBlockFunctionParser<>(parseContext);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
-        final TagKey<Block> tagKey = parser.tagId.key();
-        return new TagBlockFunction(parseContext.registries().lookupOrThrow(Registries.BLOCK).getOrThrow(tagKey), parser.propertyNameFunctions);
+        return new TagBlockFunction(parser.tagId, parser.propertyNameFunctions);
       } else {
         return null;
       }

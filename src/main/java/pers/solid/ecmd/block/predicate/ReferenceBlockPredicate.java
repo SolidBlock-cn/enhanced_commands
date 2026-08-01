@@ -1,21 +1,23 @@
 package pers.solid.ecmd.block.predicate;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
+import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.ExecutionContext;
-import pers.solid.ecmd.util.ReferenceEntry;
+import pers.solid.ecmd.util.pack.ReferenceEntry;
+import pers.solid.ecmd.util.pack.SafeReference;
 
-public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> value) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
-  public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(BlockPredicate.REGISTRY_KEY, BlockPredicate.CODEC, ReferenceBlockPredicate::new);
+public record ReferenceBlockPredicate(SafeReference<BlockPredicate> reference) implements BlockPredicate, ReferenceEntry<ReferenceBlockPredicate, BlockPredicate> {
+  public static final MapCodec<ReferenceBlockPredicate> CODEC = ReferenceEntry.createCodec(DefaultNamespace.MINECRAFT.idCodec(true), BlockPredicate.REGISTRY_KEY, ReferenceBlockPredicate::new);
 
   @Override
   public boolean test(BlockInWorld blockInWorld, ExecutionContext executionContext) {
-    final BlockPredicate value = value().value();
-    return value.test(blockInWorld, executionContext);
+    final @Nullable BlockPredicate value = reference().value(executionContext, null);
+    return value != null && value.test(blockInWorld, executionContext);
   }
 
   @Override
@@ -25,7 +27,7 @@ public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> value) im
 
   @Override
   public String expressAsString() {
-    return "$" + value.getRegisteredName();
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.identifier());
   }
 
   @Override
@@ -41,7 +43,7 @@ public record ReferenceBlockPredicate(Holder.Reference<BlockPredicate> value) im
     }
 
     @Override
-    protected ReferenceBlockPredicate getResultByHolderReference(Holder.Reference<BlockPredicate> holderReference) {
+    protected ReferenceBlockPredicate getResultByReference(SafeReference<BlockPredicate> holderReference) {
       return new ReferenceBlockPredicate(holderReference);
     }
   }

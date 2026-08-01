@@ -7,9 +7,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -27,21 +28,22 @@ import java.util.stream.Collectors;
 /**
  * @see BlockStateParser#readTag()
  */
-public record TagBlockPredicate(TagKey<Block> tag, @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
-  public static final Codec<TagBlockPredicate> STRING_BASED_CODEC = TagKey.hashedCodec(Registries.BLOCK).flatComapMap(TagBlockPredicate::new, tagBlockPredicate -> tagBlockPredicate.properties.isEmpty() ? DataResult.success(tagBlockPredicate.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
+public record TagBlockPredicate(HolderSet<Block> tag, @UnmodifiableView List<PropertyNamePredicate> properties) implements BlockPredicate {
+  public static final Codec<TagBlockPredicate> STRING_BASED_CODEC = RegistryCodecs.homogeneousList(Registries.BLOCK, true).flatComapMap(TagBlockPredicate::new, tagBlockPredicate -> tagBlockPredicate.properties.isEmpty() ? DataResult.success(tagBlockPredicate.tag) : DataResult.error(() -> "cannot serialize predicate with properties to strings"));
 
-  public static final MapCodec<TagBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockPredicate::new, TagKey.codec(Registries.BLOCK).fieldOf("tag").forGetter(TagBlockPredicate::tag), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
+  public static final MapCodec<TagBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.apply2(TagBlockPredicate::new, RegistryCodecs.homogeneousList(Registries.BLOCK, true).fieldOf("tag").forGetter(TagBlockPredicate::tag), PropertyNamePredicate.CODEC.listOf().optionalFieldOf("properties", Collections.emptyList()).forGetter(TagBlockPredicate::properties)));
 
-  public TagBlockPredicate(TagKey<Block> tag) {
+  public TagBlockPredicate(HolderSet<Block> tag) {
     this(tag, Collections.emptyList());
   }
 
   @Override
   public String expressAsString() {
+    final String tagString = "#" + tag.unwrapKey().map(blockTagKey -> DefaultNamespace.MINECRAFT.toSimplerString(blockTagKey.location())).orElse("[unregistered]");
     if (properties.isEmpty()) {
-      return "#" + tag.location();
+      return tagString;
     } else {
-      return "#" + tag.location() + "[" + properties.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ")) + "]";
+      return tagString + "[" + properties.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ")) + "]";
     }
   }
 
@@ -65,9 +67,10 @@ public record TagBlockPredicate(TagKey<Block> tag, @UnmodifiableView List<Proper
     final boolean inTag = blockState.is(tag);
     boolean successes = true;
     ImmutableList.Builder<Component> messages = new ImmutableList.Builder<>();
+    final String tagString = tag.unwrapKey().map(blockTagKey -> "#" + DefaultNamespace.MINECRAFT.toSimplerString(blockTagKey.location())).orElse("[unknown]");
     if (!inTag) {
       successes = false;
-      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.ACTUAL), Component.literal("#" + tag.location()).withStyle(Styles.EXPECTED)).withStyle(Styles.FALSE));
+      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.not_in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.ACTUAL), Component.literal(tagString).withStyle(Styles.EXPECTED)).withStyle(Styles.FALSE));
     }
     for (PropertyNamePredicate propertyNamePredicate : properties) {
       final TestResult testResult = propertyNamePredicate.testAndDescribe(blockState, blockInWorld.getPos());
@@ -77,7 +80,7 @@ public record TagBlockPredicate(TagKey<Block> tag, @UnmodifiableView List<Proper
       }
     }
     if (successes) {
-      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.TARGET), Component.literal("#" + tag.location()).withStyle(Styles.EXPECTED)).withStyle(Styles.TRUE));
+      messages.add(Component.translatable("enhanced_commands.block_predicate.tag.in_the_tag", TextUtil.wrapVector(blockInWorld.getPos()), blockState.getBlock().getName().withStyle(Styles.TARGET), Component.literal(tagString).withStyle(Styles.EXPECTED)).withStyle(Styles.TRUE));
     }
     return new TestResult(successes, messages.build());
   }
@@ -95,7 +98,7 @@ public record TagBlockPredicate(TagKey<Block> tag, @UnmodifiableView List<Proper
       SimpleBlockPredicateParser<?> parser = new SimpleBlockPredicateParser<>(parseContext);
       parser.parseBlockTagIdAndProperties();
       if (parser.tagId != null) {
-        return new TagBlockPredicate(parser.tagId.key(), parser.propertyNamePredicates);
+        return new TagBlockPredicate(parser.tagId, parser.propertyNamePredicates);
       } else {
         return null;
       }
