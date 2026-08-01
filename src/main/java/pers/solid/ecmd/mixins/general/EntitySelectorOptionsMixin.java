@@ -26,7 +26,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -52,6 +51,7 @@ import pers.solid.ecmd.entity.predicate.*;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
+import pers.solid.ecmd.util.RegistryHelper;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
@@ -656,6 +656,6 @@ public abstract class EntitySelectorOptionsMixin {
 
   @ModifyArg(method = "method_22824", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/arguments/selector/EntitySelectorParser;addPredicate(Ljava/util/function/Predicate;)V"))
   private static Predicate<Entity> addPredicateInformation(Predicate<Entity> predicate, @Local boolean inverted, @Local ResourceKey<LootItemCondition> registryKey) {
-    return new StaticEntityPredicateWrapper(predicate, new LootTablePredicateEntityPredicateEntry(Holder.Reference.createStandAlone(null, registryKey), inverted));
+    return new StaticEntityPredicateWrapper(predicate, new LootTablePredicateEntityPredicateEntry(RegistryHelper.safeStandAloneHolderReference(registryKey), inverted));
   }
 }

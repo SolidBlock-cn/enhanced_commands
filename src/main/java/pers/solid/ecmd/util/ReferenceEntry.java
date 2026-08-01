@@ -94,7 +94,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       final Optional<HolderGetter<E>> registryEntryLookup = registryLookup.lookup(registryKey);
       if (registryEntryLookup.isEmpty()) {
         // 考虑到有时客户端在解析命令时，会不知道该数据包中的内容，不应在客户端判定为解析错误。
-        return Holder.Reference.createStandAlone(null, entryKey); // todo null safe?
+        return RegistryHelper.safeStandAloneHolderReference(entryKey);
       }
       final Optional<Holder.Reference<E>> entry = registryEntryLookup.get().get(entryKey);
       if (entry.isEmpty()) {

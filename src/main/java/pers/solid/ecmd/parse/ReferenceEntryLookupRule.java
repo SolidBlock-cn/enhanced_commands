@@ -20,6 +20,7 @@ import net.minecraft.util.parsing.packrat.commands.ResourceLookupRule;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
+import pers.solid.ecmd.util.RegistryHelper;
 import pers.solid.ecmd.util.extension.ComponentPredicateParserContextExtension;
 import pers.solid.ecmd.util.mixin.MixinShared;
 
@@ -74,7 +75,7 @@ public class ReferenceEntryLookupRule<E, T, C, P> extends ResourceLookupRule<Com
   protected Holder.Reference<E> validateElement(ImmutableStringReader reader, ResourceLocation elementType) throws Exception {
     final ResourceKey<E> resourceKey = ResourceKey.create(registryKey, elementType);
 
-    return lookup == null ? Holder.Reference.createStandAlone(null, resourceKey) : lookup.get(resourceKey).orElseThrow(() -> EnhancedCommandsCommandExceptionTypes.registryEntryException(registryKey, reader, resourceKey.location(), reader.getCursor()));
+    return lookup == null ? RegistryHelper.safeStandAloneHolderReference(resourceKey) : lookup.get(resourceKey).orElseThrow(() -> EnhancedCommandsCommandExceptionTypes.registryEntryException(registryKey, reader, resourceKey.location(), reader.getCursor()));
   }
 
   @Override
