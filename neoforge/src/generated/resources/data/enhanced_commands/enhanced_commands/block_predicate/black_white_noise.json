@@ -1,12 +1,12 @@
 {
-  "type": "enhanced_commands:noise",
+  "type": "noise",
   "list": {
     "elements": [
       {
-        "type": "enhanced_commands:constant"
+        "type": "constant"
       },
       {
-        "type": "enhanced_commands:constant",
+        "type": "constant",
         "value": false
       }
     ],

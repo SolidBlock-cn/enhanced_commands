@@ -1,5 +1,5 @@
 {
-  "type": "enhanced_commands:pick",
+  "type": "pick",
   "entries": [
     {
       "element": "minecraft:nether_bricks",

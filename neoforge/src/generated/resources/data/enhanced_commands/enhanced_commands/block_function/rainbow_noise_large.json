@@ -1,5 +1,5 @@
 {
-  "type": "enhanced_commands:noise",
+  "type": "noise",
   "list": {
     "elements": [
       "minecraft:red_concrete",

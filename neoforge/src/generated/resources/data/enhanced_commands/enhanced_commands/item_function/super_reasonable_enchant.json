@@ -1,0 +1,10 @@
+{
+  "type": "enchant",
+  "modifications": [
+    {
+      "type": "add",
+      "enchantment": "all_supported",
+      "level": "max_reasonable"
+    }
+  ]
+}

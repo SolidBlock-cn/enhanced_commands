@@ -1,7 +1,7 @@
 {
-  "type": "enhanced_commands:properties_nbt_combination",
+  "type": "properties_nbt_combination",
   "base": {
-    "type": "enhanced_commands:pick",
+    "type": "pick",
     "entries": [
       {
         "element": "#enhanced_commands:gray_colors",
