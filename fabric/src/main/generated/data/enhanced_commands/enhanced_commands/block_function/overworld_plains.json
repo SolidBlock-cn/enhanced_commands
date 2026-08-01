@@ -3,7 +3,7 @@
   "functions": [
     {
       "type": "reference",
-      "value": "enhanced_commands:naturalize_vegetation"
+      "reference": "naturalize_vegetation"
     },
     {
       "type": "conditions",
