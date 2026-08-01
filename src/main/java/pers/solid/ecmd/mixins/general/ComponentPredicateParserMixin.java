@@ -25,6 +25,7 @@ import pers.solid.ecmd.parse.IdWithDefaultNamespaceParseRule;
 import pers.solid.ecmd.parse.PackratTermFromParser;
 import pers.solid.ecmd.parse.ReferenceEntryLookupRule;
 import pers.solid.ecmd.util.extension.ComponentPredicateParserContextExtension;
+import pers.solid.ecmd.util.pack.SafeReference;
 
 import java.util.List;
 import java.util.Optional;
@@ -106,7 +107,7 @@ public abstract class ComponentPredicateParserMixin {
     dictionary.put(atomReference, Term.sequence(
         StringReaderTerms.character('$'),
         Term.named(atomItemPredicateId)
-    ), scope -> List.of(contextExtension.convertFromItemPredicate$enhanced_commands(new ReferenceItemPredicate(scope.getOrThrow(atomItemPredicateId)))));
+    ), scope -> List.of(contextExtension.convertFromItemPredicate$enhanced_commands(new ReferenceItemPredicate(new SafeReference.Loaded<>(scope.getOrThrow(atomItemPredicateId))))));
     dictionary.put(atomIdInMod, IdWithDefaultNamespaceParseRule.ENHANCED_COMMANDS);
     dictionary.put(atomItemPredicateId, new ReferenceEntryLookupRule<>(atomIdInMod, context, ItemPredicate.REGISTRY_KEY));
     dictionary.put(atomUnit, Term.alternative(

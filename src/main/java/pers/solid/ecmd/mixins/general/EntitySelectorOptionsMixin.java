@@ -51,9 +51,9 @@ import pers.solid.ecmd.entity.predicate.*;
 import pers.solid.ecmd.mixins.accessor.EntitySelectorParserAccessor;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
-import pers.solid.ecmd.util.RegistryHelper;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.mixin.MixinShared;
+import pers.solid.ecmd.util.pack.RegistryHelper;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;

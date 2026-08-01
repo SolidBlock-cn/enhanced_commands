@@ -6,7 +6,7 @@ import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
-import pers.solid.ecmd.util.ReferenceEntry;
+import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 public final class ItemPredicateTypes {
   private static final RegistryBridge<ItemPredicateType<?>> REGISTRY_BRIDGE = RegistryBridge.create(EnhancedCommands.MOD_ID, ItemPredicateType.REGISTRY);

@@ -1,4 +1,4 @@
-package pers.solid.ecmd.util;
+package pers.solid.ecmd.util.pack;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderOwner;

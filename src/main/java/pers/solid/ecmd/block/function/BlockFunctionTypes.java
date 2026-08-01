@@ -7,7 +7,7 @@ import pers.solid.ecmd.api.InitializeContext;
 import pers.solid.ecmd.api.RegistryBridge;
 import pers.solid.ecmd.parse.FunctionsParser;
 import pers.solid.ecmd.parse.Parser;
-import pers.solid.ecmd.util.ReferenceEntry;
+import pers.solid.ecmd.util.pack.ReferenceEntry;
 
 /**
  * 本模组的所有方块函数类型。每个类型都需要通过 {@link #register} 方法注册。只有注册了类型的方块函数才能正确编码与解码。
