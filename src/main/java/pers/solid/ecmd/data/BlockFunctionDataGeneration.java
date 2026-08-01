@@ -30,6 +30,7 @@ import pers.solid.ecmd.property.function.SimplePropertyFunction;
 import pers.solid.ecmd.property.predicate.Comparator;
 import pers.solid.ecmd.property.predicate.ComparisonPropertyPredicate;
 import pers.solid.ecmd.tag.EnhancedCommandsBlockTags;
+import pers.solid.ecmd.util.RegistryHelper;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -100,8 +101,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
             new HorizontalOffsetBlockPredicate(4, naturalizeIgnore)),
         new SimpleBlockFunction(Blocks.DIRT));
 
-    final HolderLookup.RegistryLookup<BlockFunction> lookup = context.registryLookup(BlockFunction.REGISTRY_KEY).orElseThrow();
-    final Holder.Reference<BlockFunction> naturalizeVegetation = Holder.Reference.createStandAlone(lookup, of("naturalize_vegetation"));
+    final Holder.Reference<BlockFunction> naturalizeVegetation = RegistryHelper.safeStandAloneHolderReference(of("naturalize_vegetation"));
     context.add(of("overworld_plains"), new OverlayBlockFunction(new ReferenceBlockFunction(naturalizeVegetation),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
