@@ -22,11 +22,9 @@ import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.OptionalLong;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -95,6 +93,11 @@ public final class IdContainBlockFunction implements BlockFunction {
 
   public Pattern pattern() {
     return pattern;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public static class Parser implements FunctionContentParser.MixedParams<IdContainBlockFunction> {

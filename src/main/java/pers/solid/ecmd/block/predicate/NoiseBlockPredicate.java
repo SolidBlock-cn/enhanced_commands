@@ -13,6 +13,7 @@ import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 import java.util.OptionalLong;
@@ -56,6 +57,11 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
     final String listString = list.asString(ExpressionConvertible::expressAsString);
     final String parametersString = asParametersString();
     return "noise(" + listString + (parametersString.isEmpty() ? "" : "; " + parametersString) + ")";
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return list;
   }
 
   public static class Parser extends Noise.Parser<BlockPredicate> {

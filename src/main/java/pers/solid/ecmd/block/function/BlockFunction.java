@@ -36,6 +36,7 @@ import pers.solid.ecmd.property.function.PropertyNameFunction;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
 import pers.solid.ecmd.util.mixin.MixinShared;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +44,7 @@ import java.util.List;
 /**
  * 方块函数，用于定义如何在世界的某个地方设置方块。它类似于原版中的 {@link BlockInput} 以及 WorldEdit 中的方块蒙版（block mask）。方块函数不止定义方块，有可能是对方块本身进行修改，也有可能对方块实体进行修改。由于它是在已有方块的基础上进行修改的，故称为方块函数。
  */
-public interface BlockFunction extends ExpressionConvertible {
+public interface BlockFunction extends ExpressionConvertible, RequiresValidation {
   ResourceKey<Registry<BlockFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("block_function"));
   MapCodec<BlockFunction> MAP_CODEC = BlockFunctionType.CODEC.dispatchMap(BlockFunction::getType, BlockFunctionType::codec);
   Codec<BlockFunction> CODEC = Codec.lazyInitialized(() -> CodecUtil.combined(

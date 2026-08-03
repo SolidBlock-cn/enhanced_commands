@@ -14,7 +14,9 @@ import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.argument.MirrorProvider;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Collections;
 import java.util.Objects;
 
 public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunction {
@@ -33,6 +35,11 @@ public record MirrorBlockFunction(MirrorProvider mirror) implements BlockFunctio
   @Override
   public BlockFunctionType<MirrorBlockFunction> getType() {
     return BlockFunctionTypes.MIRROR;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<MirrorBlockFunction> {

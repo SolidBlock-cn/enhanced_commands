@@ -18,6 +18,7 @@ import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.predicate.PropertyPredicate;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -80,6 +81,11 @@ public record SimpleBlockPredicate(Block block, List<PropertyPredicate<?>> prope
   @Override
   public BlockPredicateType<SimpleBlockPredicate> getType() {
     return BlockPredicateTypes.SIMPLE;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of();
   }
 
   public enum SimpleParser implements Parser<BlockPredicate> {

@@ -20,7 +20,9 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -106,6 +108,11 @@ public final class CheckerboardTagBlockFunction implements BlockFunction, Checke
         "floor=" + floor + ", " +
         "scale=" + scale + ", " +
         "offset=" + offset + ']';
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public static class Parser extends CheckerboardParser<BlockFunction> {

@@ -19,6 +19,7 @@ import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -58,6 +59,11 @@ public record PickBlockFunction(WeightedList<BlockFunction> functions, OptionalL
   public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final RandomSource random = context.getSplitterForOptionalSeed(this, seed).at(pos);
     return functions.getRandom(random).getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return functions;
   }
 
 

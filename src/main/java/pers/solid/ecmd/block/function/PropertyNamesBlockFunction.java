@@ -17,7 +17,9 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,11 @@ public record PropertyNamesBlockFunction(List<PropertyNameFunction> functions) i
   @Override
   public BlockFunctionType<PropertyNamesBlockFunction> getType() {
     return BlockFunctionTypes.PROPERTY_NAMES;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public enum PropertyNamesParser implements Parser<PropertyNamesBlockFunction> {

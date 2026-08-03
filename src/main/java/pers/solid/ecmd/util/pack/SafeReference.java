@@ -64,68 +64,17 @@ public interface SafeReference<T> {
 
   Holder.Reference<T> holderReference(MinecraftServer server);
 
-  static <T> Codec<SafeReference<T>> codec(Codec<ResourceLocation> idCodec, ResourceKey<? extends Registry<T>> registryKey) {
+  static <T> Codec<Holder.Reference<T>> codec(Codec<ResourceLocation> idCodec, ResourceKey<? extends Registry<T>> registryKey) {
     return new SafeReferenceCodec<>(idCodec, registryKey);
-  }
-
-  class Lazy<T> implements SafeReference<T> {
-    private @Nullable MinecraftServer cachedServer;
-    private @Nullable Holder.Reference<T> holderReference;
-    private final ResourceKey<T> key;
-
-    public Lazy(ResourceKey<T> key) {
-      this.key = key;
-    }
-
-    @Override
-    public ResourceKey<T> key() {
-      return key;
-    }
-
-    @Override
-    public T value(MinecraftServer server) {
-      return holderReference(server).value();
-    }
-
-    @Override
-    public Holder.Reference<T> holderReference(MinecraftServer server) {
-      if (holderReference == null || cachedServer != server) {
-        cachedServer = server;
-        holderReference = server.reloadableRegistries().get().lookupOrThrow(key.registryKey()).getOrThrow(key);
-      }
-      return holderReference;
-    }
-  }
-
-  record Loaded<T>(Holder.Reference<T> reference) implements SafeReference<T> {
-    @Override
-    public ResourceKey<T> key() {
-      return reference.key();
-    }
-
-    @Override
-    public T value(MinecraftServer server) {
-      return reference.value();
-    }
-
-    @Override
-    public T value(ExecutionContext executionContext, @Nullable T fallback) {
-      return reference.value();
-    }
-
-    @Override
-    public Holder.Reference<T> holderReference(MinecraftServer server) {
-      return reference;
-    }
   }
 
   /**
    * @see RegistryFileCodec
    */
-  record SafeReferenceCodec<A>(Codec<ResourceLocation> idCodec, ResourceKey<? extends Registry<A>> registryKey) implements Codec<SafeReference<A>> {
+  record SafeReferenceCodec<A>(Codec<ResourceLocation> idCodec, ResourceKey<? extends Registry<A>> registryKey) implements Codec<Holder.Reference<A>> {
 
     @Override
-    public <T> DataResult<Pair<SafeReference<A>, T>> decode(DynamicOps<T> ops, T input) {
+    public <T> DataResult<Pair<Holder.Reference<A>, T>> decode(DynamicOps<T> ops, T input) {
       final DataResult<Pair<ResourceLocation, T>> idResult = idCodec.decode(ops, input);
       final Optional<Pair<ResourceLocation, T>> idOptionalPair = idResult.result();
       final ResourceLocation id;
@@ -142,15 +91,15 @@ public interface SafeReference<T> {
           final Optional<Holder.Reference<A>> optionalHolder = optionalRegistry.get().get(resourceKey);
 
           return optionalHolder
-              .map(ref -> DataResult.success(Pair.of((SafeReference<A>) new Loaded<>(ref), idOptionalPair.get().getSecond()), Lifecycle.stable()))
+              .map(ref -> DataResult.success(Pair.of(ref, idOptionalPair.get().getSecond()), Lifecycle.stable()))
               .orElseGet(() -> DataResult.error(() -> "Cannot parse reference: registry " + registryKey.location() + " exists, but the entry with ID " + id + " does not exist"));
         }
       }
-      return DataResult.success(Pair.of(new Lazy<>(resourceKey), idOptionalPair.get().getSecond()), Lifecycle.stable());
+      return DataResult.success(Pair.of(new LazyReference<>(resourceKey), idOptionalPair.get().getSecond()), Lifecycle.stable());
     }
 
     @Override
-    public <T> DataResult<T> encode(SafeReference<A> input, DynamicOps<T> ops, T prefix) {
+    public <T> DataResult<T> encode(Holder.Reference<A> input, DynamicOps<T> ops, T prefix) {
       return idCodec.encode(input.key().location(), ops, prefix);
     }
   }

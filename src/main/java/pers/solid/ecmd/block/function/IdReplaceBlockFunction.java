@@ -21,7 +21,9 @@ import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -69,6 +71,11 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   @Override
   public BlockFunctionType<IdReplaceBlockFunction> getType() {
     return BlockFunctionTypes.ID_REPLACE;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<IdReplaceBlockFunction> {

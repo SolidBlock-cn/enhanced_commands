@@ -11,10 +11,11 @@ import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Objects;
 
-public record PickItemFunction(WeightedList<ItemFunction> functions) implements ItemFunction {
+public record PickItemFunction(WeightedList<ItemFunction> functions) implements ItemFunction, RequiresValidation {
   public static final MapCodec<PickItemFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       WeightedList.createMapCodec(ItemFunction.CODEC).fieldOf("functions").forGetter(PickItemFunction::functions)
   ).apply(i, PickItemFunction::new));
@@ -32,6 +33,11 @@ public record PickItemFunction(WeightedList<ItemFunction> functions) implements 
   @Override
   public String expressAsString() {
     return "pick(" + functions.asString(ExpressionConvertible::expressAsString) + ")";
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return functions;
   }
 
   public static class Parser implements FunctionContentParser<ItemFunction> {

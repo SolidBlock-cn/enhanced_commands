@@ -20,6 +20,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.predicate.PropertyNamePredicate;
 import pers.solid.ecmd.util.*;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.List;
@@ -88,6 +89,11 @@ public record TagBlockPredicate(HolderSet<Block> tag, @UnmodifiableView List<Pro
   @Override
   public BlockPredicateType<TagBlockPredicate> getType() {
     return BlockPredicateTypes.TAG;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of();
   }
 
   public enum TagParser implements Parser<TagBlockPredicate> {

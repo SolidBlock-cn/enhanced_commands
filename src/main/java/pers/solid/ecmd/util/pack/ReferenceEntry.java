@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
+import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
@@ -25,6 +26,7 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -36,14 +38,14 @@ import java.util.function.Function;
  * @param <T> 该 reference 类自身所代表的类型
  * @param <E> 可数据驱动对象的类型
  */
-public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
-  static <T extends ReferenceEntry<T, E>, E> MapCodec<T> createCodec(Codec<ResourceLocation> idCodec, ResourceKey<Registry<E>> registryKey, Function<SafeReference<E>, T> function) {
+public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> extends RequiresValidation {
+  static <T extends ReferenceEntry<T, E>, E> MapCodec<T> createCodec(Codec<ResourceLocation> idCodec, ResourceKey<Registry<E>> registryKey, Function<Holder.Reference<E>, T> function) {
     return RecordCodecBuilder.mapCodec(i -> i.group(SafeReference.codec(idCodec, registryKey).fieldOf("reference").forGetter(ReferenceEntry::reference)).apply(i, function));
   }
 
   ResourceKey<? extends Registry<E>> registryKey();
 
-  SafeReference<E> reference();
+  Holder.Reference<E> reference();
 
   /**
    * 用于解析“$ + ID”形式的语法，并将其转化为 ReferenceEntry 的对象，在解析过程中，能自动提供关于 ID 的建议，并为不存在的 ID 报错。
@@ -74,14 +76,14 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       if (!prefixed) return null;
       parseContext.clearSuggestion();
 
-      final SafeReference<E> holderReference = parseAndGetReference(parseContext);
+      final Holder.Reference<E> holderReference = parseAndGetReference(parseContext);
       return getResultByReference(holderReference);
     }
 
     /**
      * 解析前缀之后的 ID 的内容，并返回一个 Holder.Reference。
      */
-    public SafeReference<E> parseAndGetReference(ParseContext<?> parseContext) throws CommandSyntaxException {
+    public Holder.Reference<E> parseAndGetReference(ParseContext<?> parseContext) throws CommandSyntaxException {
       final StringReader reader = parseContext.reader();
       final int cursorBeforeId = reader.getCursor();
       parseContext.setSuggestion((context, builder) -> getIdSuggestion(parseContext, context, builder, cursorBeforeId));
@@ -94,14 +96,14 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
         final Optional<? extends HolderGetter<E>> registryEntryLookup = registryLookup.lookup(registryKey);
       if (registryEntryLookup.isEmpty()) {
         // 考虑到有时客户端在解析命令时，会不知道该数据包中的内容，不应在客户端判定为解析错误。
-        return new SafeReference.Lazy<>(entryKey);
+        return new LazyReference<>(entryKey);
       }
       final Optional<Holder.Reference<E>> entry = registryEntryLookup.get().get(entryKey);
       if (entry.isEmpty()) {
         reader.setCursor(cursorBeforeId);
         throw createExceptionForUnknownId(reader, id, cursorAfterId);
       }
-      return new SafeReference.Loaded<>(entry.get());
+      return entry.get();
     }
 
     private CompletableFuture<Suggestions> getIdSuggestion(ParseContext<?> parseContext, @UnknownNullability CommandContext<?> context, @UnknownNullability SuggestionsBuilder builder, int cursorBeforeId) {
@@ -114,7 +116,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
       }
     }
 
-    protected abstract T getResultByReference(SafeReference<E> holderReference) throws CommandSyntaxException;
+    protected abstract T getResultByReference(Holder.Reference<E> holderReference) throws CommandSyntaxException;
 
     protected CommandSyntaxException createExceptionForUnknownId(StringReader reader, ResourceLocation identifier, int cursorEnd) {
       return EnhancedCommandsCommandExceptionTypes.registryEntryException(registryKey, reader, identifier, cursorEnd);
@@ -134,7 +136,7 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
     public final PrefixedIdParser<T, E> affiliatedPrefixedIdParser;
 
 
-    private @Nullable SafeReference<E> holderReference = null;
+    private @Nullable Holder.Reference<E> holderReference = null;
 
     public ReferenceFunctionGrammarParser(PrefixedIdParser<T, E> affiliatedPrefixedIdParser) {
       this.affiliatedPrefixedIdParser = affiliatedPrefixedIdParser;
@@ -149,6 +151,45 @@ public interface ReferenceEntry<T extends ReferenceEntry<T, E>, E> {
     @Override
     public void parseWithinParenthesis(ParseContext<?> parseContext) throws CommandSyntaxException {
       holderReference = affiliatedPrefixedIdParser.parseAndGetReference(parseContext);
+    }
+  }
+
+  @Override
+  default Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  default boolean validate(Context context) {
+    final Holder.Reference<E> reference = reference();
+    if (!context.isElementReferenced(reference.key())) {
+      final Context newContext = context.withOtherReferencedElement(reference.key());
+      final Optional<HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
+      if (optionalLookup.isEmpty()) {
+        EnhancedCommands.LOGGER.warn("Validation failed: registry {} does not exist", reference.key().location());
+        return false;
+      }
+      final Optional<Holder.Reference<E>> optionalReference = optionalLookup.get().get(reference.key());
+      if (optionalReference.isEmpty()) {
+        EnhancedCommands.LOGGER.warn("Validation failed: {} does not exist in the registry {}", reference.key().location(), reference.key().location());
+        return false;
+      } else {
+        if (optionalReference.get().value() instanceof RequiresValidation r) {
+          if (!r.validate(newContext)) {
+            if (reference instanceof LazyReference<E> lazy) {
+              lazy.setInvalid(true);
+            }
+            return false;
+          }
+        }
+        if (reference instanceof LazyReference<E> lazy) {
+          lazy.bindValue(optionalReference.get().value());
+        }
+        return true;
+      }
+    } else {
+      EnhancedCommands.LOGGER.warn("Validation failed: {} in the registry {} is referenced recursively", reference.key().location(), reference.key().registry());
+      return false;
     }
   }
 }

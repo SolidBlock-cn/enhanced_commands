@@ -19,7 +19,9 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -54,6 +56,11 @@ public record PostProcessBlockFunction(List<Direction> directions) implements Bl
   @Override
   public String expressAsString() {
     return "postprocess(" + (ALL_DIRECTIONS.equals(directions) ? "" : directions.stream().map(Direction::getSerializedName).collect(Collectors.joining(" "))) + ")";
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<PostProcessBlockFunction> {

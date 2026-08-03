@@ -26,7 +26,9 @@ import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.bridge.LootBridge;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -49,6 +51,11 @@ public record LootConditionBlockPredicate(Holder<LootItemCondition> entry) imple
   @Override
   public String expressAsString() {
     return "predicate(" + entry.unwrap().map(key -> key.location().toString(), lootCondition -> LootItemCondition.CODEC.encodeStart(NbtOps.INSTANCE, entry).toString()) + ")";
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of();
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<LootConditionBlockPredicate> {

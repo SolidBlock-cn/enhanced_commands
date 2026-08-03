@@ -12,6 +12,9 @@ import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.RequiresValidation;
+
+import java.util.Collections;
 
 public enum ConstantBlockPredicate implements BlockPredicate {
   ALWAYS_TRUE(true),
@@ -54,6 +57,11 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   @Override
   public BlockPredicateType<ConstantBlockPredicate> getType() {
     return BlockPredicateTypes.CONSTANT;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public enum ConstantParser implements Parser<ConstantBlockPredicate> {

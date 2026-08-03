@@ -1,8 +1,10 @@
 package pers.solid.ecmd.math;
 
+import com.google.common.collect.Iterables;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -11,13 +13,14 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public sealed interface WeightedList<E> {
+public sealed interface WeightedList<E> extends Iterable<E> {
   E getRandom(RandomSource random);
 
   /**
@@ -93,6 +96,11 @@ public sealed interface WeightedList<E> {
     @Override
     public double size() {
       return elements.size();
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+      return elements.iterator();
     }
   }
 
@@ -171,6 +179,11 @@ public sealed interface WeightedList<E> {
     public static <E> MapCodec<Weighted<E>> createMapCodec(Codec<E> elementCodec) {
       Codec<ObjectDoublePair<E>> pairCodec = RecordCodecBuilder.create(j -> j.apply2(ObjectDoublePair::of, elementCodec.fieldOf("element").forGetter(ObjectDoublePair::left), Codec.DOUBLE.optionalFieldOf("weight", 1d).forGetter(ObjectDoublePair::rightDouble)));
       return RecordCodecBuilder.mapCodec(i -> i.group(pairCodec.listOf().fieldOf("entries").forGetter(Weighted::entries)).apply(i, Weighted::new));
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+      return Iterables.transform(entries, Pair::left).iterator();
     }
   }
 }

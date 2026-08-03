@@ -11,6 +11,7 @@ import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 import java.util.Objects;
@@ -42,6 +43,11 @@ public record BiPredicateBlockPredicate(BlockPredicate blockPredicate1, BlockPre
   @Override
   public BlockPredicateType<BiPredicateBlockPredicate> getType() {
     return BlockPredicateTypes.BI_PREDICATE;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of(blockPredicate1, blockPredicate2);
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<BiPredicateBlockPredicate> {

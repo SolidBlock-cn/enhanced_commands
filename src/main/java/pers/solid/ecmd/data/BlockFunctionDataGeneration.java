@@ -2,6 +2,7 @@ package pers.solid.ecmd.data;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.objects.ObjectDoublePair;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -29,7 +30,7 @@ import pers.solid.ecmd.property.function.SimplePropertyFunction;
 import pers.solid.ecmd.property.predicate.Comparator;
 import pers.solid.ecmd.property.predicate.ComparisonPropertyPredicate;
 import pers.solid.ecmd.tag.EnhancedCommandsBlockTags;
-import pers.solid.ecmd.util.pack.SafeReference;
+import pers.solid.ecmd.util.pack.LazyReference;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -102,7 +103,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
             new HorizontalOffsetBlockPredicate(4, naturalizeIgnore)),
         new SimpleBlockFunction(Blocks.DIRT));
 
-    final SafeReference<BlockFunction> naturalizeVegetation = new SafeReference.Lazy<>(of("naturalize_vegetation"));
+    final Holder.Reference<BlockFunction> naturalizeVegetation = new LazyReference<>(of("naturalize_vegetation"));
     context.add(of("overworld_plains"), new OverlayBlockFunction(new ReferenceBlockFunction(naturalizeVegetation),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
