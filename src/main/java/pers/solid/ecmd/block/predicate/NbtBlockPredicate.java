@@ -19,6 +19,9 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
+
+import java.util.List;
 
 public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredicate {
   public static final MapCodec<NbtBlockPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockPredicate::new, NbtPredicate.CODEC.fieldOf("nbt").forGetter(NbtBlockPredicate::nbtPredicate)));
@@ -52,6 +55,11 @@ public record NbtBlockPredicate(NbtPredicate nbtPredicate) implements BlockPredi
   @Override
   public BlockPredicateType<NbtBlockPredicate> getType() {
     return BlockPredicateTypes.NBT;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of(); // add nbtPredicate
   }
 
   public enum NbtParser implements Parser<NbtBlockPredicate> {

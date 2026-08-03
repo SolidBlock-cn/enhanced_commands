@@ -15,6 +15,7 @@ import pers.solid.ecmd.math.Checkerboard;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Objects;
 
@@ -47,6 +48,11 @@ public record CheckerboardBlockFunction(WeightedList<BlockFunction> functions, V
     sb.append(functions.asString(ExpressionConvertible::expressAsString));
     appendParameters(sb);
     return sb.append(")").toString();
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return functions;
   }
 
   public static class Parser extends CheckerboardParser<BlockFunction> {

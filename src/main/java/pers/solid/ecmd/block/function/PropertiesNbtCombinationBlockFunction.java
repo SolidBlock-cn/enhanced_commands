@@ -1,5 +1,6 @@
 package pers.solid.ecmd.block.function;
 
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -16,7 +17,9 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.nbt.function.NbtFunction;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -67,5 +70,10 @@ public record PropertiesNbtCombinationBlockFunction(BlockFunction base, @Nullabl
       blockState = nbt.getModifiedState(blockState, originalState, level, pos, blockEntityData, context);
     }
     return blockState;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Iterables.filter(Arrays.asList(base, properties, nbt), Objects::nonNull);
   }
 }

@@ -15,6 +15,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 
@@ -44,6 +45,11 @@ public record RelBlockPredicate(Vec3iProvider relPos, BlockPredicate predicate) 
   @Override
   public String expressAsString() {
     return "rel(%s, %s)".formatted(relPos.expressAsString(), predicate.expressAsString());
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of(predicate);
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<RelBlockPredicate> {

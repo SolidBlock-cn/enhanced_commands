@@ -14,6 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
+
+import java.util.Collections;
 
 /**
  * 去除方块函数中的流体，并将 waterlogged 设为 false。这不一定总是能够成功。
@@ -41,6 +44,11 @@ public record DryBlockFunction(BlockFunction function) implements BlockFunction 
   @Override
   public BlockFunctionType<DryBlockFunction> getType() {
     return BlockFunctionTypes.DRY;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.singleton(function);
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<DryBlockFunction> {

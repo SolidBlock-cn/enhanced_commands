@@ -14,6 +14,7 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -57,6 +58,11 @@ public record CheckerboardBlockPredicate(WeightedList<BlockPredicate> predicates
     sb.append(predicates.asString(ExpressionConvertible::expressAsString));
     appendParameters(sb);
     return sb.append(")").toString();
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return predicates;
   }
 
   public static class Parser extends CheckerboardParser<BlockPredicate> {

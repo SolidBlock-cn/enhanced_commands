@@ -9,8 +9,11 @@ import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
-public interface ItemFunction extends ExpressionConvertible {
+import java.util.Collections;
+
+public interface ItemFunction extends ExpressionConvertible, RequiresValidation {
   ResourceKey<Registry<ItemFunction>> REGISTRY_KEY = ResourceKey.createRegistryKey(EnhancedCommands.id("item_function"));
   MapCodec<ItemFunction> MAP_CODEC = ItemFunctionType.CODEC.dispatchMap(ItemFunction::getType, ItemFunctionType::codec);
   Codec<ItemFunction> CODEC = MAP_CODEC.codec();
@@ -18,4 +21,9 @@ public interface ItemFunction extends ExpressionConvertible {
   ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException;
 
   ItemFunctionType<?> getType();
+
+  @Override
+  default Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptySet();
+  }
 }

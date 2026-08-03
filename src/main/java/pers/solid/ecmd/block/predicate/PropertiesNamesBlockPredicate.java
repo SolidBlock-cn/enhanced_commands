@@ -18,6 +18,7 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,6 +71,11 @@ public record PropertiesNamesBlockPredicate(List<PropertyNamePredicate> predicat
   @Override
   public BlockPredicateType<ProbabilityBlockPredicate> getType() {
     return BlockPredicateTypes.PROPERTY_NAMES;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of();
   }
 
   public enum PropertyNamesParser implements Parser<PropertiesNamesBlockPredicate> {

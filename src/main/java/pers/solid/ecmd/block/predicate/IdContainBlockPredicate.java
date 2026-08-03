@@ -15,7 +15,9 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -57,6 +59,11 @@ public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate
   @Override
   public int hashCode() {
     return pattern.pattern().hashCode();
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<IdContainBlockPredicate> {

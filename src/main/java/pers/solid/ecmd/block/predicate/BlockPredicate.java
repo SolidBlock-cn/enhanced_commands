@@ -26,11 +26,12 @@ import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.List;
 
-public interface BlockPredicate extends ExpressionConvertible {
+public interface BlockPredicate extends ExpressionConvertible, RequiresValidation {
   MapCodec<BlockPredicate> MAP_CODEC = BlockPredicateType.CODEC.dispatchMap(BlockPredicate::getType, BlockPredicateType::codec);
   Codec<BlockPredicate> CODEC = Codec.lazyInitialized(() -> CodecUtil.combined(
       CodecUtil.combinedIdAndTag(SimpleBlockPredicate.STRING_BASED_CODEC, TagBlockPredicate.STRING_BASED_CODEC),

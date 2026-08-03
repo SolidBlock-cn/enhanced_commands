@@ -23,6 +23,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.StateUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 
@@ -70,6 +71,11 @@ public record StonecutBlockFunction(BlockFunction function) implements BlockFunc
   @Override
   public BlockFunctionType<StonecutBlockFunction> getType() {
     return BlockFunctionTypes.STONE_CUT;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of(function);
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<StonecutBlockFunction> {

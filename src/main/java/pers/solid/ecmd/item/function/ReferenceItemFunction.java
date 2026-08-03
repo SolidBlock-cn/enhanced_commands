@@ -2,6 +2,7 @@ package pers.solid.ecmd.item.function;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -9,14 +10,14 @@ import net.minecraft.world.item.ItemStack;
 import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.pack.ReferenceEntry;
-import pers.solid.ecmd.util.pack.SafeReference;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
-public record ReferenceItemFunction(SafeReference<ItemFunction> reference) implements ItemFunction, ReferenceEntry<ReferenceItemFunction, ItemFunction> {
+public record ReferenceItemFunction(Holder.Reference<ItemFunction> reference) implements ItemFunction, ReferenceEntry<ReferenceItemFunction, ItemFunction> {
   public static final MapCodec<ReferenceItemFunction> CODEC = ReferenceEntry.createCodec(DefaultNamespace.ENHANCED_COMMANDS.idCodec(true), ItemFunction.REGISTRY_KEY, ReferenceItemFunction::new);
 
   @Override
   public ItemStack getModifiedStack(ItemStack itemStack, ItemStack originalStack, ExecutionContext context) throws CommandSyntaxException {
-    return reference().valueOrThrow(context).getModifiedStack(itemStack, originalStack, context);
+    return reference().value().getModifiedStack(itemStack, originalStack, context);
   }
 
   @Override
@@ -25,8 +26,13 @@ public record ReferenceItemFunction(SafeReference<ItemFunction> reference) imple
   }
 
   @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return ReferenceEntry.super.membersToValidate();
+  }
+
+  @Override
   public String expressAsString() {
-    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.identifier());
+    return "$" + DefaultNamespace.ENHANCED_COMMANDS.toSimplerString(reference.key().location());
   }
 
   @Override
@@ -42,7 +48,7 @@ public record ReferenceItemFunction(SafeReference<ItemFunction> reference) imple
     }
 
     @Override
-    protected ReferenceItemFunction getResultByReference(SafeReference<ItemFunction> holderReference) {
+    protected ReferenceItemFunction getResultByReference(Holder.Reference<ItemFunction> holderReference) {
       return new ReferenceItemFunction(holderReference);
     }
   }

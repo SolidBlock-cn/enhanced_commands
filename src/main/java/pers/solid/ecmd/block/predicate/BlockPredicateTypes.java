@@ -22,7 +22,7 @@ public final class BlockPredicateTypes {
   public static final BlockPredicateType<TagBlockPredicate> TAG = register("tag", TagBlockPredicate.CODEC, TagBlockPredicate.TagParser.TAG_TYPE);
   public static final BlockPredicateType<AnyBlockPredicate> ANY = register("any", AnyBlockPredicate.CODEC);
   public static final BlockPredicateType<AllBlockPredicate> ALL = register("all", AllBlockPredicate.CODEC);
-  public static final BlockPredicateType<ProbabilityBlockPredicate> RAND = register("rand", ProbabilityBlockPredicate.CODEC);
+  public static final BlockPredicateType<ProbabilityBlockPredicate> RAND = register("probability", ProbabilityBlockPredicate.CODEC);
   public static final BlockPredicateType<BiPredicateBlockPredicate> BI_PREDICATE = register("bi_predicate", BiPredicateBlockPredicate.CODEC);
   public static final BlockPredicateType<RelBlockPredicate> REL = register("rel", RelBlockPredicate.CODEC);
   public static final BlockPredicateType<ExposeBlockPredicate> EXPOSE = register("expose", ExposeBlockPredicate.CODEC);

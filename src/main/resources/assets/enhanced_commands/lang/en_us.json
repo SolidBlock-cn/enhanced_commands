@@ -1008,6 +1008,7 @@
   "enhanced_commands.region_selection.sphere.set_center": "The center of the sphere is set to %s",
   "enhanced_commands.region_selection.sphere.set_radius": "The radius of sphere is adjusted so as to fit %s",
   "enhanced_commands.region_selection.sphere.statistics": "The radius radius of the sphere is %s",
+  "enhanced_commands.registry.invalid_entry": "The reference to %s is invalid because it has problems in the datapack",
   "enhanced_commands.util.entities": "%1$s $plural(entities, entity)",
   "enhanced_commands.util.entities.with_example": "%1$s $plural(entities, entity) such as %2$s",
   "item.enhanced_commands.region_selection_tool": "Region selection tool",

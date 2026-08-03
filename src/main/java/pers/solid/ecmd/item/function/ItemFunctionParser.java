@@ -35,7 +35,6 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.EnhancedCommandSyntaxException;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
 import pers.solid.ecmd.util.mixin.MixinShared;
-import pers.solid.ecmd.util.pack.SafeReference;
 
 import java.util.Locale;
 import java.util.Map;
@@ -154,7 +153,7 @@ public final class ItemFunctionParser {
           reader.skip();
           parseContext.clearSuggestion();
           final ReferenceItemFunction.ReferencePrefixedParser parser = ReferenceItemFunction.ReferencePrefixedParser.INSTANCE;
-          final SafeReference<ItemFunction> holderReference = parser.parseAndGetReference(parseContext);
+          final Holder.Reference<ItemFunction> holderReference = parser.parseAndGetReference(parseContext);
           return parser.getResultByReference(holderReference);
         }
       }

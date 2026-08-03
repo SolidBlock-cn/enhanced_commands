@@ -17,6 +17,7 @@ import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.OptionalLong;
 
@@ -48,6 +49,11 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
     final String listString = list.asString(ExpressionConvertible::expressAsString);
     final String parametersString = asParametersString();
     return "noise(" + listString + (parametersString.isEmpty() ? "" : "; " + parametersString) + ")";
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return list;
   }
 
   public static class Parser extends Noise.Parser<BlockFunction> {

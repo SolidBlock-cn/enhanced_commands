@@ -23,8 +23,10 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.util.StateUtil;
 import pers.solid.ecmd.util.codec.CodecUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.OptionalLong;
 import java.util.Set;
 
@@ -96,6 +98,11 @@ public final class RandomBlockFunction implements BlockFunction {
   @Override
   public String toString() {
     return "RandomBlockFunction{}";
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public enum RandomParser implements Parser<RandomBlockFunction> {

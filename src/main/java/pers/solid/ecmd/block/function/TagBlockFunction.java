@@ -22,6 +22,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.function.PropertyNameFunction;
 import pers.solid.ecmd.util.DefaultNamespace;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +63,11 @@ public record TagBlockFunction(HolderSet<Block> tag, List<PropertyNameFunction> 
   @Override
   public BlockFunctionType<TagBlockFunction> getType() {
     return BlockFunctionTypes.TAG;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public enum TagParser implements Parser<TagBlockFunction> {

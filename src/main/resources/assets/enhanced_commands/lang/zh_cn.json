@@ -4,6 +4,7 @@
   "enhanced_commands.argument.block.ignore_feature_flag": "忽略需要的功能标签",
   "enhanced_commands.argument.block_function.cannot_parse": "无法解析方块函数",
   "enhanced_commands.argument.block_predicate.cannot_parse": "无法解析方块谓词",
+  "enhanced_commands.registry.invalid_entry": "对%s的引用无效，因为其在数据包中存在问题",
   "enhanced_commands.argument.block_predicate.unknown_comparator": "未知比较：%s",
   "enhanced_commands.argument.enchantment_level_provider.degrade_randomly": "降级到当前和最低等级之间的随机等级",
   "enhanced_commands.argument.enchantment_level_provider.max_possible": "存储限制的最高等级",

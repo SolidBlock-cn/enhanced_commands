@@ -14,7 +14,9 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.math.EnumOrRandom;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.Collections;
 import java.util.Objects;
 
 public record RotateBlockFunction(EnumOrRandom<Rotation> rotation) implements BlockFunction {
@@ -33,6 +35,11 @@ public record RotateBlockFunction(EnumOrRandom<Rotation> rotation) implements Bl
   @Override
   public BlockFunctionType<RotateBlockFunction> getType() {
     return BlockFunctionTypes.ROTATE;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList();
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<RotateBlockFunction> {

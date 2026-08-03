@@ -12,6 +12,7 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,11 @@ public record AnyBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   @Override
   public BlockPredicateType<AnyBlockPredicate> getType() {
     return BlockPredicateTypes.ANY;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return predicates;
   }
 
   public record Parser(List<BlockPredicate> blockPredicates) implements FunctionContentParser.SequentialParams<AnyBlockPredicate> {

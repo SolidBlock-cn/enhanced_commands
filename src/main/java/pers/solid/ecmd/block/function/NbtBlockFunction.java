@@ -21,6 +21,9 @@ import pers.solid.ecmd.nbt.function.NbtFunctionParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
+
+import java.util.Collections;
 
 public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction {
   public static final MapCodec<NbtBlockFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.ap(NbtBlockFunction::new, NbtFunction.CODEC.fieldOf("nbt").forGetter(NbtBlockFunction::nbtFunction)));
@@ -49,6 +52,11 @@ public record NbtBlockFunction(NbtFunction nbtFunction) implements BlockFunction
   @Override
   public BlockFunctionType<NbtBlockFunction> getType() {
     return BlockFunctionTypes.NBT;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return Collections.emptyList(); // todo add nbtFunction
   }
 
   public enum NbtParser implements Parser<NbtBlockFunction> {

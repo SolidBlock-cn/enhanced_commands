@@ -14,7 +14,9 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -49,6 +51,11 @@ public record FilterBlockFunction(BlockFunction function, BlockPredicate predica
   @Override
   public BlockFunctionType<FilterBlockFunction> getType() {
     return BlockFunctionTypes.FILTER;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of(function, predicate, elseFunction);
   }
 
   public static final class Parser implements FunctionContentParser.SequentialParams<FilterBlockFunction> {

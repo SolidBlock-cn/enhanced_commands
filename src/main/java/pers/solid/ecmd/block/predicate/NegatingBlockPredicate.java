@@ -12,6 +12,7 @@ import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 
@@ -45,6 +46,11 @@ public record NegatingBlockPredicate(BlockPredicate predicate) implements BlockP
   @Override
   public BlockPredicateType<NegatingBlockPredicate> getType() {
     return BlockPredicateTypes.NEGATING;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of(predicate);
   }
 
   public enum NegationParser implements Parser<BlockPredicate> {

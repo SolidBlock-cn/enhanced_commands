@@ -16,6 +16,7 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.TextUtil;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 
@@ -59,6 +60,11 @@ public record HorizontalOffsetBlockPredicate(int offset, BlockPredicate blockPre
   @Override
   public BlockPredicateType<HorizontalOffsetBlockPredicate> getType() {
     return BlockPredicateTypes.HORIZONTAL_OFFSET;
+  }
+
+  @Override
+  public Iterable<? extends RequiresValidation> membersToValidate() {
+    return List.of(blockPredicate);
   }
 
   public enum HorizontalOffsetParser implements Parser<BlockPredicate> {
