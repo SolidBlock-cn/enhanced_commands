@@ -19,14 +19,12 @@ import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.util.enums.UnloadedPosBehavior;
+import pers.solid.ecmd.util.extension.HistoryHolder;
 import pers.solid.ecmd.util.iterator.AbstractIteratorTask;
 import pers.solid.ecmd.util.iterator.BatchedFilterIterable;
 import pers.solid.ecmd.util.iterator.IterateUtils;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * 执行方块放置（包括替换）操作的任务，不包括诸如移动等方块变换操作。
@@ -50,6 +48,7 @@ public class BlockPlacementTask extends AbstractIteratorTask {
   public final Iterable<@Nullable BlockPos> posIterable;
   protected final @Nullable BlockPlacementHistory history;
   protected Iterator<@Nullable Runnable> runnables;
+  protected final @Nullable HistoryHolder historyHolder;
 
   protected BlockPlacementTask(Component name, UUID uuid, CommandSourceStack source, ServerLevel world, Region region, BlockFunction blockFunction, @Nullable BlockPredicate predicate, boolean immediately, BlockFunctionContext context, UnloadedPosBehavior unloadedPosBehavior, boolean undoable) {
     super(name, uuid, source);
@@ -61,6 +60,7 @@ public class BlockPlacementTask extends AbstractIteratorTask {
     this.unloadedPosBehavior = unloadedPosBehavior;
     this.posIterable = prepareActualPosIterable(region, unloadedPosBehavior);
     this.history = undoable ? new BlockPlacementHistory(name, world, context.flags, context.modFlags) : null;
+    this.historyHolder = HistoryHolder.fromSource(source);
     this.runnables = getCombinedRunnables().iterator();
   }
 
@@ -96,6 +96,14 @@ public class BlockPlacementTask extends AbstractIteratorTask {
   }
 
   protected final Long2ObjectMap<BlockState> oldStates = new Long2ObjectLinkedOpenHashMap<>();
+
+
+  public void addUndoableHistory() {
+    if (history == null) return;
+    if (historyHolder != null) {
+      historyHolder.addUndoableHistory$ec(history);
+    }
+  }
 
   public Iterable<@Nullable Runnable> step1CollectOldStates() {
     if (predicate == null) {
@@ -141,13 +149,15 @@ public class BlockPlacementTask extends AbstractIteratorTask {
   }
 
   public Iterable<@Nullable Runnable> getCombinedRunnables() {
+    final Iterable<Runnable> addUndoableHistory = List.of(this::addUndoableHistory);
     final Iterable<@Nullable Runnable> step1CollectOldStates = step1CollectOldStates();
     final Iterable<@Nullable Runnable> step2PlaceBlocks = step2PlaceBlocks();
     final Iterable<@Nullable Runnable> step3FinalClaim = step3FinalClaim();
     if (immediately) {
-      return Iterables.concat(step1CollectOldStates, step2PlaceBlocks, step3FinalClaim);
+      return Iterables.concat(addUndoableHistory, step1CollectOldStates, step2PlaceBlocks, step3FinalClaim);
     } else {
       return Iterables.concat(
+          addUndoableHistory,
           IterateUtils.batchAndSkip(step1CollectOldStates, 16384, 1),
           IterateUtils.batchAndSkip(step2PlaceBlocks, 32768, 15),
           step3FinalClaim
