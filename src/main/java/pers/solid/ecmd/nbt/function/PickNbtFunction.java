@@ -12,6 +12,7 @@ import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
  * <p>
  * 允许零值，但总和不能为零。
  */
-public record PickNbtFunction(WeightedList<NbtFunction> functions) implements NbtFunction {
+public record PickNbtFunction(WeightedList<NbtFunction> functions) implements NbtFunction, RequiresValidation {
   public static final MapCodec<PickNbtFunction> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(WeightedList.createMapCodec(NbtFunction.CODEC).forGetter(PickNbtFunction::functions)).apply(instance, PickNbtFunction::new));
 
   @Override
@@ -43,6 +44,11 @@ public record PickNbtFunction(WeightedList<NbtFunction> functions) implements Nb
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     final RandomSource random = context.random;
     return functions.getRandom(random).apply(nbtElement, context);
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return functions;
   }
 
   public static class Parser implements FunctionContentParser<NbtFunction> {

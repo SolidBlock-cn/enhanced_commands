@@ -15,11 +15,9 @@ import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 对字符串进行替换的 NBT 函数。
@@ -30,7 +28,7 @@ import java.util.Set;
  * @param lenient     如果为 true，那么当被替换的内容不是字符串且 recursive 不为 true 时。
  * @param original    指定被替换前的 NBT 数据。如果未指定，则默认使用 NBT 函数运行时的参数。
  */
-public record StringReplaceNbtFunction(String target, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction {
+public record StringReplaceNbtFunction(String target, String replacement, boolean recursive, boolean lenient, Optional<NbtFunction> original) implements NbtFunction, RequiresValidation {
   public static final DynamicCommandExceptionType NOT_A_STRING = new DynamicCommandExceptionType(s -> Component.translatable("enhanced_commands.nbt_function.string_replace.not_a_string", s));
   public static final SimpleCommandExceptionType NO_VALUE = new SimpleCommandExceptionType(Component.translatable("enhanced_commands.nbt_function.string_replace.not_value"));
 
@@ -73,6 +71,11 @@ public record StringReplaceNbtFunction(String target, String replacement, boolea
       }
       throw NOT_A_STRING.create(nbtElement.getType().getPrettyName());
     }
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Collections.singleton(original.orElse(null));
   }
 
   public static class Parser implements FunctionContentParser.MixedParams<StringReplaceNbtFunction> {

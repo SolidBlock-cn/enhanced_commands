@@ -7,12 +7,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public record AllBlockPredicate(List<BlockPredicate> predicates) implements Bloc
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return predicates;
   }
 

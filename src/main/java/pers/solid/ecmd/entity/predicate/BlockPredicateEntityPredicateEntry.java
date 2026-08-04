@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.PositionProvider;
@@ -39,5 +40,10 @@ public record BlockPredicateEntityPredicateEntry(BlockPredicate predicate) imple
   @Override
   public EntityPredicateType<BlockPredicateEntityPredicateEntry> getType() {
     return EntityPredicateTypes.BLOCK_PREDICATE;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(predicate);
   }
 }

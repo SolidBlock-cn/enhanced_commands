@@ -1,5 +1,6 @@
 package pers.solid.ecmd.block.function;
 
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -17,8 +18,8 @@ import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.List;
 import java.util.OptionalLong;
 
 public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties properties) implements BlockFunction, Noise {
@@ -52,8 +53,8 @@ public record NoiseBlockFunction(WeightedList<BlockFunction> list, Properties pr
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
-    return list;
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Iterables.concat(list, List.of(properties));
   }
 
   public static class Parser extends Noise.Parser<BlockFunction> {

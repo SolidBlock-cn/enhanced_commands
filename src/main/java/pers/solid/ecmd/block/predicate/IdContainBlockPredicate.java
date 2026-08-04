@@ -15,7 +15,6 @@ import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -62,7 +61,7 @@ public record IdContainBlockPredicate(Pattern pattern) implements BlockPredicate
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 

@@ -6,13 +6,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 
@@ -60,7 +59,7 @@ public enum ConstantBlockPredicate implements BlockPredicate {
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 

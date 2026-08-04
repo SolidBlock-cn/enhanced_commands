@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 
@@ -29,6 +30,11 @@ public record AllNbtPredicate(List<NbtPredicate> predicates) implements NbtPredi
   @Override
   public NbtPredicateType<AllNbtPredicate> getType() {
     return NbtPredicateTypes.ALL;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return predicates;
   }
 
   public record Parser(List<NbtPredicate> nbtPredicates) implements FunctionContentParser.SequentialParams<AllNbtPredicate> {

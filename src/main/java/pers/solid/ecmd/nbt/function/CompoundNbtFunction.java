@@ -1,5 +1,6 @@
 package pers.solid.ecmd.nbt.function;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
@@ -9,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Map;
 import java.util.Optional;
@@ -39,7 +41,7 @@ import java.util.stream.Collectors;
  *
  * @param allowsMerge 是否允许对 NBT 复合标签进行合并
  */
-public record CompoundNbtFunction(Map<String, Optional<NbtFunction>> source, boolean allowsMerge) implements NbtFunction {
+public record CompoundNbtFunction(Map<String, Optional<NbtFunction>> source, boolean allowsMerge) implements NbtFunction, RequiresValidation {
   public static final MapCodec<CompoundNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       Codec.unboundedMap(Codec.STRING, Codec.optionalField("value", NbtFunction.CODEC, false).codec()).optionalFieldOf("source", ImmutableMap.of()).forGetter(CompoundNbtFunction::source),
       Codec.BOOL.optionalFieldOf("allows_merge", true).forGetter(CompoundNbtFunction::allowsMerge)
@@ -82,5 +84,10 @@ public record CompoundNbtFunction(Map<String, Optional<NbtFunction>> source, boo
       }
     }
     return targetCompound;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Collections2.transform(source.values(), input -> input.orElse(null));
   }
 }

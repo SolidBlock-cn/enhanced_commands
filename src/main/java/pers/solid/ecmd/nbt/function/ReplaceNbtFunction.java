@@ -9,13 +9,15 @@ import pers.solid.ecmd.nbt.predicate.NbtPredicate;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * 在 NBT 中进行替换，将符合谓词的值都应用指定的函数。
  */
-public record ReplaceNbtFunction(NbtPredicate predicate, NbtFunction function) implements NbtFunction {
+public record ReplaceNbtFunction(NbtPredicate predicate, NbtFunction function) implements NbtFunction, RequiresValidation {
   public static final MapCodec<ReplaceNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtPredicate.CODEC.fieldOf("predicate").forGetter(ReplaceNbtFunction::predicate),
       NbtFunction.CODEC.fieldOf("function").forGetter(ReplaceNbtFunction::function)
@@ -34,6 +36,11 @@ public record ReplaceNbtFunction(NbtPredicate predicate, NbtFunction function) i
   @Override
   public Tag apply(@Nullable Tag nbtElement, ExecutionContext context) throws CommandSyntaxException {
     return function.recursivelyApply(nbtElement, predicate, context);
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of(predicate, function);
   }
 
   public static class Parser implements FunctionContentParser.SequentialParams<ReplaceNbtFunction> {

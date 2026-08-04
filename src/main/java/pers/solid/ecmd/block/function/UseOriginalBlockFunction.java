@@ -14,7 +14,6 @@ import org.jetbrains.annotations.UnknownNullability;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 
@@ -39,7 +38,7 @@ public enum UseOriginalBlockFunction implements BlockFunction {
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 

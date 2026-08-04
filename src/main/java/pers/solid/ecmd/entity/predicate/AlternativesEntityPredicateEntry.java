@@ -7,6 +7,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
@@ -57,5 +58,10 @@ public record AlternativesEntityPredicateEntry(List<EntityPredicate> predicates,
   @Override
   public String toOptionEntry() {
     return "alternatives=" + (inverted ? "!" : "") + predicates.stream().map(ExpressionConvertible::expressAsString).collect(Collectors.joining(", ", "[", "]"));
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return predicates;
   }
 }

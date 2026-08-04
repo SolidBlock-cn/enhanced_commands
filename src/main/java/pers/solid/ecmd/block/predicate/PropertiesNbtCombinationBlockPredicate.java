@@ -1,6 +1,5 @@
 package pers.solid.ecmd.block.predicate;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -16,7 +15,6 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -90,7 +88,7 @@ public record PropertiesNbtCombinationBlockPredicate(BlockPredicate base, @Nulla
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
-    return Iterables.filter(Arrays.asList(base, properties, nbt), Predicates.notNull());
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Arrays.asList(base, properties, nbt);
   }
 }

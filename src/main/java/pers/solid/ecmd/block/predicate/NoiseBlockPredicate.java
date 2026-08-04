@@ -1,5 +1,6 @@
 package pers.solid.ecmd.block.predicate;
 
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -8,12 +9,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.math.Noise;
 import pers.solid.ecmd.math.WeightedList;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.*;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 import java.util.OptionalLong;
@@ -60,8 +61,8 @@ public record NoiseBlockPredicate(WeightedList<BlockPredicate> list, Properties 
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
-    return list;
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Iterables.concat(list, List.of(properties));
   }
 
   public static class Parser extends Noise.Parser<BlockPredicate> {

@@ -4,10 +4,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.bridge.BridgeDoubleRange;
 import pers.solid.ecmd.util.bridge.BridgeFloatRange;
 import pers.solid.ecmd.util.bridge.BridgeIntRange;
 import pers.solid.ecmd.util.bridge.BridgeRange;
+
+import java.util.List;
 
 public record RangeNbtPredicate(BridgeRange<?> value) implements NbtPredicate {
   public static final MapCodec<RangeNbtPredicate> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(BridgeRange.CODEC.forGetter(RangeNbtPredicate::value)).apply(i, RangeNbtPredicate::new));
@@ -40,5 +43,10 @@ public record RangeNbtPredicate(BridgeRange<?> value) implements NbtPredicate {
   @Override
   public NbtPredicateType<RangeNbtPredicate> getType() {
     return NbtPredicateTypes.RANGE;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return List.of();
   }
 }

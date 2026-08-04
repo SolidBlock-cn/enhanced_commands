@@ -1,6 +1,7 @@
 package pers.solid.ecmd.nbt.function;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
@@ -18,11 +19,12 @@ import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.NamedParamListParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.ExecutionContext;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public sealed interface ConcatNbtFunction extends NbtFunction {
+public sealed interface ConcatNbtFunction extends NbtFunction, RequiresValidation {
   DynamicCommandExceptionType CONCAT_ELEMENT_INVALID = new DynamicCommandExceptionType(t -> Component.translatable("enhanced_commands.nbt_function.concat.concat_element_invalid", t));
   DynamicCommandExceptionType CONCAT_NOT_LIST = new DynamicCommandExceptionType(t -> Component.translatable("enhanced_commands.nbt_function.concat.concat_not_list", t));
   MapCodec<ConcatNbtFunction> CODEC = Codec.BOOL.dispatchMap("flatten", ConcatNbtFunction::flatten, flatten -> flatten ? Flattened.CODEC : Direct.CODEC);
@@ -78,6 +80,11 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
       }
       return StringTag.valueOf(joiner.toString());
     }
+
+    @Override
+    public Iterable<? extends @Nullable Object> membersToValidate() {
+      return Iterables.concat(elements, delimiter.stream().toList());
+    }
   }
 
   record Flattened(NbtFunction element, Optional<NbtFunction> delimiter) implements ConcatNbtFunction {
@@ -114,6 +121,11 @@ public sealed interface ConcatNbtFunction extends NbtFunction {
       } else {
         throw CONCAT_NOT_LIST.create(applied.getType().getPrettyName());
       }
+    }
+
+    @Override
+    public Iterable<? extends @Nullable Object> membersToValidate() {
+      return Arrays.asList(element, delimiter.orElse(null));
     }
   }
 

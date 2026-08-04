@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -90,5 +91,10 @@ public record OwnerEntityPredicateEntry(@Nullable EntityPredicate owner, boolean
   @Override
   public String toOptionEntry() {
     return "owner=" + (inverted ? "!" : "") + (owner == null ? "" : owner.expressAsString());
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Collections.singletonList(owner);
   }
 }

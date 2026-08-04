@@ -17,7 +17,6 @@ import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +55,7 @@ public record ConditionsBlockFunction(List<ConditionalBlockFunction> conditions)
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return conditions;
   }
 

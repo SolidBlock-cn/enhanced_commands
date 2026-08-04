@@ -20,7 +20,6 @@ import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.property.predicate.PropertyNamePredicate;
 import pers.solid.ecmd.util.*;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.List;
@@ -92,7 +91,7 @@ public record TagBlockPredicate(HolderSet<Block> tag, @UnmodifiableView List<Pro
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return List.of();
   }
 

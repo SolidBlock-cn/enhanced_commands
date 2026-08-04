@@ -10,6 +10,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.exception.CommandRuntimeException;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.TestResult;
@@ -91,5 +92,10 @@ public record SelectorEntityPredicate(EntitySelector entitySelector) implements 
   @Override
   public int hashCode() {
     return EntitySelectors.hashCode(entitySelector);
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Iterables.concat(entitySelector.extension$ec().getStandardPredicates(), entitySelector.extension$ec().getSpecialEntries());
   }
 }

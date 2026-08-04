@@ -18,7 +18,6 @@ import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.Styles;
 import pers.solid.ecmd.util.TestResult;
 import pers.solid.ecmd.util.codec.CodecUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collection;
 import java.util.List;
@@ -77,7 +76,7 @@ public record ProbabilityBlockPredicate(float probability, BlockPredicate predic
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return List.of(predicate);
   }
 

@@ -1,5 +1,6 @@
 package pers.solid.ecmd.entity.predicate;
 
+import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,6 +13,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.ExpressionConvertible;
 import pers.solid.ecmd.util.StringUtil;
@@ -137,5 +139,10 @@ public record EffectsEntityPredicateEntry(List<Entry> effects) implements Entity
         return effectId + "=" + (expected ? "!" : "") + joiner;
       }
     }
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Lists.transform(effects, Entry::effect);
   }
 }

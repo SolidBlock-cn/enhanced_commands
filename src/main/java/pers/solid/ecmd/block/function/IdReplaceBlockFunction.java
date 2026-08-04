@@ -16,12 +16,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.mutable.MutableObject;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import org.jspecify.annotations.Nullable;
 import pers.solid.ecmd.parse.FunctionContentParser;
 import pers.solid.ecmd.parse.ParseContext;
 import pers.solid.ecmd.parse.ParsingUtil;
-import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -59,7 +58,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@org.jetbrains.annotations.Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
+  public BlockState getModifiedState(BlockState blockState, BlockState originalState, Level level, BlockPos pos, @UnknownNullability MutableObject<@Nullable CompoundTag> blockEntityData, BlockFunctionContext context) throws CommandSyntaxException {
     final Block block = blockState.getBlock();
     final String old = BuiltInRegistries.BLOCK.getKey(block).toString();
     final String replaced = pattern.matcher(old).replaceAll(replacement);
@@ -74,7 +73,7 @@ public record IdReplaceBlockFunction(Pattern pattern, String replacement) implem
   }
 
   @Override
-  public Iterable<? extends RequiresValidation> membersToValidate() {
+  public Iterable<? extends @Nullable Object> membersToValidate() {
     return Collections.emptyList();
   }
 

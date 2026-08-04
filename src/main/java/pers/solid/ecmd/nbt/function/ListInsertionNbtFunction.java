@@ -1,13 +1,17 @@
 package pers.solid.ecmd.nbt.function;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.ListTag;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.util.ExecutionContext;
 import pers.solid.ecmd.util.iterator.IterateUtils;
+import pers.solid.ecmd.util.pack.RequiresValidation;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +40,7 @@ import java.util.stream.Stream;
  * @param insertAfter      需要插入在列表后面的元素。
  * @param insertPositional 需要插入在指定位置的元素。
  */
-public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtFunction> insertAfter, List<PositionalListEntry<NbtFunction>> insertPositional) implements ListNbtFunction {
+public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtFunction> insertAfter, List<PositionalListEntry<NbtFunction>> insertPositional) implements ListNbtFunction, RequiresValidation {
   public static final MapCodec<ListInsertionNbtFunction> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
       NbtFunction.CODEC.listOf().optionalFieldOf("insert_before", ImmutableList.of()).forGetter(ListInsertionNbtFunction::insertBefore),
       NbtFunction.CODEC.listOf().optionalFieldOf("insert_after", ImmutableList.of()).forGetter(ListInsertionNbtFunction::insertAfter),
@@ -74,5 +78,10 @@ public record ListInsertionNbtFunction(List<NbtFunction> insertBefore, List<NbtF
       }
     }
     return listTag;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return Iterables.concat(insertBefore, insertAfter, Lists.transform(insertPositional, PositionalListEntry::value));
   }
 }

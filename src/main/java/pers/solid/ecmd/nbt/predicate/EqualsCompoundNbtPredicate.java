@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 import pers.solid.ecmd.parse.ParsingUtil;
 
 import java.util.Map;
@@ -54,5 +55,10 @@ public record EqualsCompoundNbtPredicate(Map<String, NbtPredicate> map) implemen
   @Override
   public NbtPredicateType<EqualsCompoundNbtPredicate> getType() {
     return NbtPredicateTypes.EQUALS_COMPOUND;
+  }
+
+  @Override
+  public Iterable<? extends @Nullable Object> membersToValidate() {
+    return map.values();
   }
 }
