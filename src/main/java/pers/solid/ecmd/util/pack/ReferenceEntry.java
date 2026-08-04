@@ -24,9 +24,7 @@ import pers.solid.ecmd.parse.Parser;
 import pers.solid.ecmd.parse.ParsingUtil;
 import pers.solid.ecmd.util.DefaultNamespace;
 import pers.solid.ecmd.util.EnhancedCommandsCommandExceptionTypes;
-import pers.solid.ecmd.util.pack.problems.EntryAbsentValidationProblem;
 import pers.solid.ecmd.util.pack.problems.RecursiveReferenceProblem;
-import pers.solid.ecmd.util.pack.problems.RegistryAbsentValidationProblem;
 import pers.solid.ecmd.util.pack.problems.ValidationProblem;
 
 import java.util.Collections;
@@ -38,12 +36,11 @@ import java.util.function.Function;
 /**
  * 此类所有通过数据包访问可数据驱动对象的共用接口，例如方块谓词、方块函数等的“reference”类型，其通常是存储一个 Holder.Reference。
  *
- * @param <T> 该 reference 类自身所代表的类型
  * @param <E> 可数据驱动对象的类型
  */
 public interface ReferenceEntry<E> extends RequiresValidation {
   static <T extends ReferenceEntry<E>, E> MapCodec<T> createCodec(Codec<ResourceLocation> idCodec, ResourceKey<Registry<E>> registryKey, Function<Holder.Reference<E>, T> function) {
-    return RecordCodecBuilder.mapCodec(i -> i.group(SafeReference.codec(idCodec, registryKey).fieldOf("reference").forGetter(ReferenceEntry::reference)).apply(i, function));
+    return RecordCodecBuilder.mapCodec(i -> i.group(new SafeReferenceCodec<>(idCodec, registryKey).fieldOf("reference").forGetter(ReferenceEntry::reference)).apply(i, function));
   }
 
   Holder.Reference<E> reference();
@@ -101,7 +98,7 @@ public interface ReferenceEntry<E> extends RequiresValidation {
         final Optional<? extends HolderGetter<E>> registryEntryLookup = registryLookup.lookup(registryKey);
       if (registryEntryLookup.isEmpty()) {
         // 考虑到有时客户端在解析命令时，会不知道该数据包中的内容，不应在客户端判定为解析错误。
-        return new LazyReference<>(entryKey);
+        return LazyReference.of(entryKey);
       }
       final Optional<Holder.Reference<E>> entry = registryEntryLookup.get().get(entryKey);
       if (entry.isEmpty()) {
@@ -171,13 +168,10 @@ public interface ReferenceEntry<E> extends RequiresValidation {
       final ValidationContext newContext = context.forReferencedElement(reference.key());
       final Optional<HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
       if (optionalLookup.isEmpty()) {
-        context.recordProblem(new RegistryAbsentValidationProblem<>(reference.key().registryKey()));
         return;
       }
       final Optional<Holder.Reference<E>> optionalReference = optionalLookup.get().get(reference.key());
-      if (optionalReference.isEmpty()) {
-        context.recordProblem(new EntryAbsentValidationProblem<>(reference.key()));
-      } else {
+      if (optionalReference.isPresent()) {
         if (optionalReference.get().value() instanceof RequiresValidation r) {
           r.validate(newContext);
           if (newContext.hasProblems()) {
@@ -185,9 +179,6 @@ public interface ReferenceEntry<E> extends RequiresValidation {
               lazy.setProblem(ValidationProblem.concentrateMultiple(newContext.problems()));
             }
           }
-        }
-        if (reference instanceof LazyReference<E> lazy) {
-          lazy.bindValue(optionalReference.get().value());
         }
       }
     } else {

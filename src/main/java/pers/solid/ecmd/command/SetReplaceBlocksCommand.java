@@ -132,7 +132,7 @@ public enum SetReplaceBlocksCommand implements CommandRegistrationCallbackBridge
         .unloadedPosBehavior(unloadedPosBehavior)
         .world(world)
         .build();
-
+    
     if (!immediately) {
       ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(task);
       if (history != null) {
