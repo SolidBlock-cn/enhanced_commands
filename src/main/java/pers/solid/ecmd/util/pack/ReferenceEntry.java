@@ -95,7 +95,7 @@ public interface ReferenceEntry<E> extends RequiresValidation {
       final int cursorAfterId = reader.getCursor();
       final HolderGetter.Provider registryLookup = parseContext.registries();
       final ResourceKey<E> entryKey = ResourceKey.create(registryKey, id);
-        final Optional<? extends HolderGetter<E>> registryEntryLookup = registryLookup.lookup(registryKey);
+      final Optional<? extends HolderGetter<E>> registryEntryLookup = registryLookup.lookup(registryKey);
       if (registryEntryLookup.isEmpty()) {
         // 考虑到有时客户端在解析命令时，会不知道该数据包中的内容，不应在客户端判定为解析错误。
         return LazyReference.of(entryKey);
@@ -166,7 +166,7 @@ public interface ReferenceEntry<E> extends RequiresValidation {
     final Holder.Reference<E> reference = reference();
     if (!context.isElementReferenced(reference.key())) {
       final ValidationContext newContext = context.forReferencedElement(reference.key());
-      final Optional<HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
+      final Optional<? extends HolderGetter<E>> optionalLookup = context.resolver().lookup(reference.key().registryKey());
       if (optionalLookup.isEmpty()) {
         return;
       }

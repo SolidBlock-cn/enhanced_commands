@@ -34,7 +34,6 @@ public class EnhancedServerReloadableRegistries {
   @ApiStatus.Internal
   private static final Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> REGISTRY = new HashMap<>();
   private static final @UnmodifiableView Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> REGISTRY_VIEW = Collections.unmodifiableMap(REGISTRY);
-  private static final Gson GSON = new Gson();
   public static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServerReloadableRegistries.class);
 
   public static @UnmodifiableView Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> getRegistry() {

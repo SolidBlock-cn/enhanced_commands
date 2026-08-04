@@ -149,7 +149,7 @@ public final class EnhancedCommandsCommandExceptionTypes {
     } else if (Registries.ITEM.equals(registryRef)) {
       final Optional<Item> item = BuiltInRegistries.ITEM.getOptional(identifier);
       if (item.isPresent()) {
-        return EnhancedCommandSyntaxException.withCursorEnd(ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getDescription()), cursorAfterId);
+        return EnhancedCommandSyntaxException.withCursorEnd(ITEM_ID_FEATURE_FLAG_REQUIRED.createWithContext(stringReader, identifier, item.get().getName()), cursorAfterId);
       }
     } else if (Registries.ENTITY_TYPE.equals(registryRef)) {
       final Optional<EntityType<?>> entityType = BuiltInRegistries.ENTITY_TYPE.getOptional(identifier);

@@ -20,7 +20,7 @@ public interface ItemPredicateDataGeneration extends DynamicRegistryGenerationBr
   default void configureBridge(ContextBridge<ItemPredicate> context) {
     context.add(of("diamond_or_emerald"), new AnyItemPredicate(List.of(new SimpleItemPredicate(Items.DIAMOND), new SimpleItemPredicate(Items.EMERALD))));
     context.add(of("diamonds"), new AnyItemPredicate(List.of(new SimpleItemPredicate(Items.DIAMOND), new SimpleItemPredicate(Items.DIAMOND_BLOCK))));
-    context.add(of("fire_resistant"), new ComponentPresenceItemPredicate<>(DataComponents.FIRE_RESISTANT));
+//    context.add(of("fire_resistant"), new ComponentPresenceItemPredicate<>(DataComponents.FIRE_RESISTANT)); todo 转化为符合新版本的谓词
     context.add(of("enchanted"), new ComponentPresenceItemPredicate<>(DataComponents.ENCHANTMENTS));
   }
 }

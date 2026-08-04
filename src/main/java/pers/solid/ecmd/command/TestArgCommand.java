@@ -336,7 +336,7 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static <A extends ExpressionConvertible> int executeConvertShow(CommandContext<CommandSourceStack> context, Codec<A> codec) throws CommandSyntaxException {
-    return executeConvertShow(getNbtTag(context, "nbt"), codec, a -> context.getSource().sendFeedback$ecBridge(() -> Component.literal(a.expressAsString()).withStyle(Styles.RESULT), false), context.getSource().getServer().reloadableRegistries().get());
+    return executeConvertShow(getNbtTag(context, "nbt"), codec, a -> context.getSource().sendFeedback$ecBridge(() -> Component.literal(a.expressAsString()).withStyle(Styles.RESULT), false), ((HolderLookup.Provider) context.getSource().getServer().reloadableRegistries().lookup()));
   }
 
   private static <A> int executeStringShow(CommandContext<CommandSourceStack> context, A fetchedArg, FailableFunction<A, String, CommandSyntaxException> toString) throws CommandSyntaxException {
@@ -355,13 +355,13 @@ public enum TestArgCommand implements CommandRegistrationCallbackBridge {
   }
 
   private static <A, T> int executeCodecShow(CommandContext<CommandSourceStack> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
-    ops = context.getSource().getServer().reloadableRegistries().get().createSerializationContext(ops);
+    ops = ((HolderLookup.Provider) context.getSource().getServer().reloadableRegistries().lookup()).createSerializationContext(ops);
     executeCodecShowInternal(context, fetchedArg, codec, ops);
     return 1;
   }
 
   private static <A, T> int executeCodecTest(CommandContext<CommandSourceStack> context, A fetchedArg, Codec<A> codec, DynamicOps<T> ops) throws CommandSyntaxException {
-    ops = context.getSource().getServer().reloadableRegistries().get().createSerializationContext(ops);
+    ops = ((HolderLookup.Provider) context.getSource().getServer().reloadableRegistries().lookup()).createSerializationContext(ops);
     final T code = executeCodecShowInternal(context, fetchedArg, codec, ops);
     try {
       final A second = codec.decode(ops, code).getOrThrow(CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()::create).getFirst();

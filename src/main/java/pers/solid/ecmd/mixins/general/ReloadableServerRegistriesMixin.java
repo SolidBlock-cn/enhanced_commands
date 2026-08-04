@@ -3,7 +3,10 @@ package pers.solid.ecmd.mixins.general;
 import com.google.gson.JsonElement;
 import com.llamalad7.mixinextras.injector.ModifyReceiver;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.core.*;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.RegistryLayer;
@@ -41,14 +44,14 @@ public class ReloadableServerRegistriesMixin {
     return Stream.concat(instance, EnhancedServerReloadableRegistries.getEnhancedMutableRegistries(ops, resourceManager, prepareExecutor));
   }
 
-  @Inject(method = "apply", at = @At("RETURN"))
-  private static void appendMoreValidation(LayeredRegistryAccess<RegistryLayer> registryAccess, List<WritableRegistry<?>> registries, CallbackInfoReturnable<LayeredRegistryAccess<RegistryLayer>> cir, @Local RegistryAccess.Frozen frozen) {
+  @Inject(method = "createAndValidateFullContext", at = @At("RETURN"))
+  private static void appendMoreValidation(LayeredRegistryAccess<RegistryLayer> registryAccess, HolderLookup.Provider provider, List<WritableRegistry<?>> registries, CallbackInfoReturnable<ReloadableServerRegistries.LoadResult> cir, @Local(ordinal = 1) HolderLookup.Provider concacenatedLookups) {
     final Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> map = EnhancedServerReloadableRegistries.getRegistry();
-    ValidationContext context = new ValidationContext(RootValidationName.INSTANCE, frozen.asGetterLookup());
-    LazyReference.bindCachedValues(frozen);
+    ValidationContext context = new ValidationContext(RootValidationName.INSTANCE, concacenatedLookups);
+    LazyReference.bindCachedValues(concacenatedLookups);
 
     map.forEach((resourceKey, info) -> {
-      final HolderLookup.RegistryLookup<?> registryLookup = frozen.lookupOrThrow(resourceKey);
+      final HolderLookup.RegistryLookup<?> registryLookup = concacenatedLookups.lookupOrThrow(resourceKey);
       registryLookup.listElements().forEach(entry -> {
         if (entry.value() instanceof RequiresValidation r && !context.isElementReferenced(entry.key())) {
           EnhancedCommands.LOGGER.debug("Validating {} of registry {}", entry.key().location(), entry.key().registry());

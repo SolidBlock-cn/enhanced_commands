@@ -69,7 +69,7 @@ public class LazyReference<T> extends Holder.Reference<T> {
   }
 
   private void bindValueFromProvider(HolderLookup.Provider provider) {
-    final Optional<HolderLookup.RegistryLookup<T>> or = provider.lookup(key().registryKey());
+    final Optional<? extends HolderLookup.RegistryLookup<T>> or = provider.lookup(key().registryKey());
     if (or.isEmpty()) {
       setProblem(new RegistryAbsentValidationProblem<>(key().registryKey()));
       return;
