@@ -24,7 +24,6 @@ import pers.solid.ecmd.block.function.BlockFunctionContext;
 import pers.solid.ecmd.block.predicate.AllBlockPredicate;
 import pers.solid.ecmd.block.predicate.BlockPredicate;
 import pers.solid.ecmd.config.BlockOperationConfig;
-import pers.solid.ecmd.history.BlockPlacementHistory;
 import pers.solid.ecmd.region.Region;
 import pers.solid.ecmd.task.BlockPlacementTask;
 import pers.solid.ecmd.util.LoadUtil;
@@ -120,8 +119,6 @@ public enum SetReplaceBlocksCommand implements CommandRegistrationCallbackBridge
 
     final Component taskName = Component.translatable("enhanced_commands.commands.setblocks.task_name", region.expressAsString());
 
-    final @Nullable BlockPlacementHistory history = undoable ? new BlockPlacementHistory(taskName, world, context.flags, context.modFlags) : null;
-
     final BlockPlacementTask task = BlockPlacementTask.builder(taskName, Mth.createInsecureUUID(world.getRandom()), source)
         .blockFunctionContext(context)
         .blockFunction(blockFunction)
@@ -132,12 +129,9 @@ public enum SetReplaceBlocksCommand implements CommandRegistrationCallbackBridge
         .unloadedPosBehavior(unloadedPosBehavior)
         .world(world)
         .build();
-    
+
     if (!immediately) {
       ((BlockableEventLoopExtension) source.getServer()).addIteratorTask$ec(task);
-      if (history != null) {
-        history.task = task;
-      }
       source.sendFeedback$ecBridge(() -> Component.translatable("enhanced_commands.commands.setblocks.large_region", Long.toString(region.numberOfBlocksAffected())).withStyle(ChatFormatting.YELLOW), true);
       return 1;
     } else {

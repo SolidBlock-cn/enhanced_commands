@@ -156,9 +156,9 @@ public class BlockTransformationTask extends AbstractIteratorTask {
     this.history = history;
 
     if (immediately) {
-      this.runnables = taskSeries().getImmediateTask();
+      this.runnables = taskSeries().getImmediateRunnables();
     } else {
-      this.runnables = taskSeries().getSpeedAdjustedTask();
+      this.runnables = taskSeries().getSpeedAdjustedRunnables();
     }
   }
 
@@ -539,7 +539,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
       });
     }
 
-    public Iterator<@Nullable Runnable> getSpeedAdjustedTask() {
+    public Iterator<@Nullable Runnable> getSpeedAdjustedRunnables() {
       return Iterables.concat(
           markStage(Stage.PREPARATION),
           preparation,
@@ -563,7 +563,7 @@ public class BlockTransformationTask extends AbstractIteratorTask {
       ).iterator();
     }
 
-    public Iterator<@Nullable Runnable> getImmediateTask() {
+    public Iterator<@Nullable Runnable> getImmediateRunnables() {
       return UnloadedPosException.catching(Iterables.concat(
           preparation,
           Collections.singleton(self::addUndoableHistory),
