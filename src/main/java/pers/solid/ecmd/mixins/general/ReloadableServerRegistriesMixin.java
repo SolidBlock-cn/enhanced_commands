@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pers.solid.ecmd.EnhancedCommands;
 import pers.solid.ecmd.api.EnhancedServerReloadableRegistries;
 import pers.solid.ecmd.registry.EnhancedDynamicRegistryInfo;
+import pers.solid.ecmd.util.pack.LazyReference;
 import pers.solid.ecmd.util.pack.RequiresValidation;
 import pers.solid.ecmd.util.pack.ValidationContext;
 import pers.solid.ecmd.util.pack.names.RootValidationName;
@@ -36,6 +37,7 @@ public class ReloadableServerRegistriesMixin {
    */
   @ModifyReceiver(method = "reload", at = @At(value = "INVOKE", target = "Ljava/util/stream/Stream;toList()Ljava/util/List;"))
   private static Stream<CompletableFuture<WritableRegistry<?>>> appendMoreCompletableFutures(Stream<CompletableFuture<WritableRegistry<?>>> instance, @Local RegistryOps<JsonElement> ops, @Local(argsOnly = true) ResourceManager resourceManager, @Local(argsOnly = true) Executor prepareExecutor) {
+    LazyReference.resetCache();
     return Stream.concat(instance, EnhancedServerReloadableRegistries.getEnhancedMutableRegistries(ops, resourceManager, prepareExecutor));
   }
 
@@ -43,6 +45,7 @@ public class ReloadableServerRegistriesMixin {
   private static void appendMoreValidation(LayeredRegistryAccess<RegistryLayer> registryAccess, List<WritableRegistry<?>> registries, CallbackInfoReturnable<LayeredRegistryAccess<RegistryLayer>> cir, @Local RegistryAccess.Frozen frozen) {
     final Map<ResourceKey<? extends Registry<?>>, EnhancedDynamicRegistryInfo<?>> map = EnhancedServerReloadableRegistries.getRegistry();
     ValidationContext context = new ValidationContext(RootValidationName.INSTANCE, frozen.asGetterLookup());
+    LazyReference.bindCachedValues(frozen);
 
     map.forEach((resourceKey, info) -> {
       final HolderLookup.RegistryLookup<?> registryLookup = frozen.lookupOrThrow(resourceKey);

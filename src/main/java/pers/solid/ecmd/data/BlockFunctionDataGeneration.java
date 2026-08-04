@@ -103,7 +103,7 @@ public interface BlockFunctionDataGeneration extends DynamicRegistryGenerationBr
             new HorizontalOffsetBlockPredicate(4, naturalizeIgnore)),
         new SimpleBlockFunction(Blocks.DIRT));
 
-    final Holder.Reference<BlockFunction> naturalizeVegetation = new LazyReference<>(of("naturalize_vegetation"));
+    final Holder.Reference<BlockFunction> naturalizeVegetation = LazyReference.of(of("naturalize_vegetation"));
     context.add(of("overworld_plains"), new OverlayBlockFunction(new ReferenceBlockFunction(naturalizeVegetation),
         new ConditionsBlockFunction(
             new ConditionalBlockFunction(
